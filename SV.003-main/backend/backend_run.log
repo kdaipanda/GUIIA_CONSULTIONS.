@@ -1,0 +1,5 @@
+Iniciando Savant Vet API - Modo Local
+Base de datos: MongoDB
+Servidor: http://localhost:8000
+Docs: http://localhost:8000/docs
+INFO:     127.0.0.1:53593 - "GET /docs HTTP/1.1" 200 OK

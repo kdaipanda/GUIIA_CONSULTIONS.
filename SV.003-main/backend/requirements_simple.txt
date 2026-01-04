@@ -1,0 +1,36 @@
+# FastAPI y servidor
+fastapi==0.110.1
+uvicorn[standard]==0.25.0
+python-multipart==0.0.20
+
+# Base de datos (Supabase)
+supabase>=2.0.0
+
+# Autenticación y seguridad
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.1.1
+email-validator==2.3.0
+
+# Pagos (opcional - solo si usas Stripe)
+stripe==13.0.1
+
+# Utilidades
+pydantic==2.11.9
+pydantic-core==2.33.2
+typing-extensions==4.15.0
+
+# HTTP client (requerido por server_simple.py)
+httpx==0.27.2
+
+# Claude (Anthropic) - requerido para /api/consultations/*/analyze y /api/medical-images/interpret
+anthropic>=0.75.0
+
+# Dependencias adicionales
+anyio==4.11.0
+starlette==0.37.2
+click==8.3.0
+h11==0.16.0
+idna==3.10
+dnspython==2.8.0
+certifi==2025.8.3
