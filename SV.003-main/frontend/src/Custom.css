@@ -1,0 +1,692 @@
+/* Custom styles that override Tailwind - Load AFTER App.css */
+
+/* Memberships Section - IMPROVED SPACING */
+.memberships {
+  padding: 120px 0 !important;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%) !important;
+}
+
+.memberships-header {
+  text-align: center !important;
+  margin-bottom: 80px !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.memberships-header .services-badge {
+  margin-bottom: 32px !important;
+  padding: 10px 20px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+.memberships-header h2 {
+  font-size: 48px !important;
+  font-weight: 800 !important;
+  color: #1e293b !important;
+  margin-bottom: 28px !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.5px !important;
+  margin-top: 0 !important;
+}
+
+.memberships-header p {
+  font-size: 19px !important;
+  color: #64748b !important;
+  max-width: 700px !important;
+  margin: 0 auto !important;
+  line-height: 1.9 !important;
+  font-weight: 400 !important;
+  padding-top: 8px !important;
+}
+
+.membership-cards {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 50px !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  padding: 0 40px !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.membership-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(25px) !important;
+  border-radius: 28px !important;
+  padding: 48px 36px !important;
+  border: 3px solid rgba(59, 130, 246, 0.3) !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 
+              0 8px 16px rgba(59, 130, 246, 0.12) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 550px !important;
+}
+
+.membership-card::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%) !important;
+  pointer-events: none !important;
+  border-radius: 28px !important;
+  opacity: 0 !important;
+  transition: opacity 0.4s !important;
+}
+
+.membership-card:hover::before {
+  opacity: 1 !important;
+}
+
+.membership-card:hover {
+  transform: translateY(-12px) !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12), 
+              0 12px 24px rgba(59, 130, 246, 0.2) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+.membership-card.featured {
+  border-color: rgba(59, 130, 246, 0.6) !important;
+  transform: scale(1.05) translateY(-8px) !important;
+  box-shadow: 0 30px 80px rgba(59, 130, 246, 0.25), 
+              0 12px 32px rgba(59, 130, 246, 0.2) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(249, 250, 251, 0.98) 100%) !important;
+  border-width: 4px !important;
+}
+
+.membership-card.featured:hover {
+  transform: scale(1.05) translateY(-16px) !important;
+}
+
+.membership-header {
+  margin-bottom: 28px !important;
+  padding-bottom: 24px !important;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+.membership-header h3 {
+  font-size: 28px !important;
+  font-weight: 800 !important;
+  color: #1e293b !important;
+  margin-bottom: 16px !important;
+}
+
+.price {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 4px !important;
+}
+
+.price .currency {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: #3b82f6 !important;
+}
+
+.price .amount {
+  font-size: 48px !important;
+  font-weight: 900 !important;
+  color: #1e293b !important;
+  line-height: 1 !important;
+}
+
+.price .period {
+  font-size: 16px !important;
+  color: #64748b !important;
+  font-weight: 600 !important;
+}
+
+.membership-features {
+  margin-bottom: 32px !important;
+  flex-grow: 1 !important;
+}
+
+.membership-features .feature {
+  padding: 14px 0 !important;
+  font-size: 15px !important;
+  color: #475569 !important;
+  line-height: 1.6 !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+}
+
+.membership-features .feature:last-child {
+  border-bottom: none !important;
+}
+
+.popular-badge {
+  position: absolute !important;
+  top: -16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  color: white !important;
+  padding: 8px 24px !important;
+  border-radius: 50px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Footer - BEAUTIFUL DESIGN */
+.footer {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%) !important;
+  color: white !important;
+  padding: 100px 0 0 0 !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.footer::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.6), transparent) !important;
+}
+
+.footer::after {
+  content: '' !important;
+  position: absolute !important;
+  top: -200px !important;
+  right: -200px !important;
+  width: 500px !important;
+  height: 500px !important;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%) !important;
+  pointer-events: none !important;
+}
+
+.footer-content {
+  display: grid !important;
+  grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr !important;
+  gap: 70px !important;
+  margin-bottom: 60px !important;
+  align-items: start !important;
+  padding: 0 40px !important;
+  max-width: 1500px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.footer-section h4 {
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  margin-bottom: 24px !important;
+  color: white !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  position: relative !important;
+  padding-bottom: 12px !important;
+}
+
+.footer-section h4::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 40px !important;
+  height: 3px !important;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6) !important;
+  border-radius: 2px !important;
+}
+
+.footer-section p {
+  color: #cbd5e1 !important;
+  line-height: 1.8 !important;
+  font-size: 15px !important;
+  margin-bottom: 20px !important;
+}
+
+.footer-section ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.footer-section ul li {
+  margin-bottom: 14px !important;
+}
+
+.footer-section ul li a {
+  color: #cbd5e1 !important;
+  text-decoration: none !important;
+  font-size: 15px !important;
+  transition: all 0.3s !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.footer-section ul li a::before {
+  content: '→' !important;
+  opacity: 0 !important;
+  transform: translateX(-10px) !important;
+  transition: all 0.3s !important;
+  color: #3b82f6 !important;
+}
+
+.footer-section ul li a:hover {
+  color: #3b82f6 !important;
+  transform: translateX(5px) !important;
+}
+
+.footer-section ul li a:hover::before {
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+}
+
+.footer-brand h2 {
+  font-size: 32px !important;
+  font-weight: 900 !important;
+  margin-bottom: 16px !important;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.contact-box {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border: 2px solid rgba(59, 130, 246, 0.3) !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  margin-top: 24px !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.contact-box p {
+  margin-bottom: 12px !important;
+  font-size: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.contact-box p strong {
+  color: #3b82f6 !important;
+  font-weight: 700 !important;
+  min-width: 80px !important;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 32px 40px !important;
+  text-align: center !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.social-links {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 20px !important;
+  margin-bottom: 20px !important;
+}
+
+.social-links a {
+  width: 48px !important;
+  height: 48px !important;
+  background: rgba(59, 130, 246, 0.15) !important;
+  border: 2px solid rgba(59, 130, 246, 0.3) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #3b82f6 !important;
+  font-size: 20px !important;
+  transition: all 0.3s !important;
+  text-decoration: none !important;
+}
+
+.social-links a:hover {
+  background: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: white !important;
+  transform: translateY(-4px) rotate(5deg) !important;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4) !important;
+}
+
+.footer-bottom p {
+  color: #94a3b8 !important;
+  font-size: 14px !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 1024px) {
+  .membership-cards {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 40px !important;
+  }
+  
+  .footer-content {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 50px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Memberships Mobile */
+  .memberships {
+    padding: 80px 0 !important;
+  }
+  
+  .memberships-header h2 {
+    font-size: 36px !important;
+    line-height: 1.2 !important;
+  }
+  
+  .memberships-header p {
+    font-size: 16px !important;
+    padding: 0 10px !important;
+  }
+  
+  .membership-cards {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+    padding: 0 20px !important;
+  }
+  
+  .membership-card {
+    padding: 36px 24px !important;
+    min-height: auto !important;
+  }
+  
+  .membership-card.featured {
+    transform: none !important;
+  }
+  
+  .membership-card:hover {
+    transform: translateY(-4px) !important;
+  }
+  
+  .membership-header h3 {
+    font-size: 24px !important;
+  }
+  
+  .price .amount {
+    font-size: 40px !important;
+  }
+  
+  .price .currency {
+    font-size: 20px !important;
+  }
+  
+  .membership-features .feature {
+    font-size: 14px !important;
+    padding: 12px 0 !important;
+  }
+  
+  .popular-badge {
+    font-size: 12px !important;
+    padding: 6px 20px !important;
+  }
+  
+  /* Footer Mobile */
+  .footer {
+    padding: 60px 0 0 0 !important;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+    padding: 0 20px !important;
+  }
+  
+  .footer-section h4 {
+    font-size: 16px !important;
+    margin-bottom: 20px !important;
+  }
+  
+  .footer-brand h2 {
+    font-size: 28px !important;
+  }
+  
+  .footer-section p,
+  .footer-section ul li a {
+    font-size: 14px !important;
+  }
+  
+  .contact-box {
+    padding: 20px !important;
+  }
+  
+  .footer-bottom {
+    padding: 24px 20px !important;
+  }
+  
+  .social-links a {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 18px !important;
+  }
+}
+
+/* Extra Small Mobile - iPhone SE and similar */
+@media (max-width: 375px) {
+  .memberships-header h2 {
+    font-size: 30px !important;
+  }
+  
+  .membership-card {
+    padding: 28px 20px !important;
+  }
+  
+  .price .amount {
+    font-size: 36px !important;
+  }
+  
+  .membership-features .feature {
+    font-size: 13px !important;
+  }
+}
+
+/* ========================================
+   Modal Base Styles
+   ======================================== */
+
+.modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 99999 !important;
+}
+
+.modal-content {
+  position: relative !important;
+  z-index: 100000 !important;
+}
+
+/* ========================================
+   Terms and Conditions Modal Styles
+   ======================================== */
+
+.terms-modal {
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.terms-modal .modal-header {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+  color: white !important;
+  padding: 24px 30px !important;
+  border-radius: 16px 16px 0 0 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.terms-modal .modal-header h2 {
+  color: white !important;
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+}
+
+.terms-modal .modal-close {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 24px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+
+.terms-modal .modal-close:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  transform: rotate(90deg) !important;
+}
+
+.terms-content {
+  background: #ffffff !important;
+  color: #1e293b !important;
+}
+
+.terms-content h3 {
+  color: #1d4ed8 !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  margin-top: 28px !important;
+  margin-bottom: 14px !important;
+  padding-bottom: 10px !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.terms-content h3:first-child {
+  margin-top: 0 !important;
+}
+
+.terms-content h4 {
+  color: #334155 !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  margin-top: 20px !important;
+  margin-bottom: 10px !important;
+}
+
+.terms-content p {
+  margin-bottom: 14px !important;
+  color: #475569 !important;
+  line-height: 1.7 !important;
+}
+
+.terms-content ul {
+  margin: 12px 0 !important;
+  padding-left: 24px !important;
+  list-style-type: disc !important;
+}
+
+.terms-content ul li {
+  margin-bottom: 10px !important;
+  color: #475569 !important;
+  line-height: 1.6 !important;
+}
+
+.terms-content strong {
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+
+.terms-modal .modal-footer {
+  background: #f8fafc !important;
+  border-top: 1px solid #e2e8f0 !important;
+  border-radius: 0 0 16px 16px !important;
+  padding: 20px 30px !important;
+}
+
+/* Scrollbar styling for terms modal */
+.terms-content::-webkit-scrollbar {
+  width: 10px !important;
+}
+
+.terms-content::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-radius: 5px !important;
+}
+
+.terms-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #3b82f6, #1d4ed8) !important;
+  border-radius: 5px !important;
+}
+
+.terms-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #2563eb, #1e40af) !important;
+}
+
+/* Consent box at the end */
+.terms-content > div[style*="border: 2px solid"] {
+  background: #f0f9ff !important;
+  border-color: #3b82f6 !important;
+}
+
+/* Mobile responsiveness for terms modal */
+@media (max-width: 768px) {
+  .terms-modal {
+    margin: 10px !important;
+    max-height: calc(100vh - 20px) !important;
+  }
+  
+  .terms-modal .modal-header {
+    padding: 18px 20px !important;
+  }
+  
+  .terms-modal .modal-header h2 {
+    font-size: 1.1rem !important;
+  }
+  
+  .terms-content {
+    padding: 15px !important;
+    font-size: 13px !important;
+  }
+  
+  .terms-content h3 {
+    font-size: 1rem !important;
+  }
+  
+  .terms-content h4 {
+    font-size: 0.95rem !important;
+  }
+  
+  .terms-modal .modal-footer {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .terms-modal .modal-footer > div {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  .terms-modal .modal-footer button {
+    width: 100% !important;
+  }
+}

@@ -1,0 +1,113 @@
+====================================================
+CONFIGURACIÓN DE PRODUCCIÓN - guiaa.vet
+====================================================
+
+1. FRONTEND (.env en frontend/)
+----------------------------------------------------
+Crea el archivo: frontend/.env
+
+REACT_APP_BACKEND_URL=https://api.guiaa.vet
+REACT_APP_SUPABASE_URL=https://tu-proyecto.supabase.co
+REACT_APP_SUPABASE_ANON_KEY=tu-anon-key-aqui
+
+
+2. BACKEND (.env en backend/)
+----------------------------------------------------
+Actualiza el archivo: backend/.env
+
+# CORS - Dominios permitidos
+CORS_ALLOW_ORIGINS=https://guiaa.vet,https://www.guiaa.vet
+
+# Supabase
+SUPABASE_URL=https://tu-proyecto.supabase.co
+SUPABASE_KEY=tu-service-role-key-aqui
+
+# Anthropic (Claude AI)
+ANTHROPIC_API_KEY=tu-anthropic-api-key
+
+# Stripe (Pagos)
+STRIPE_API_KEY=sk_live_xxxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxxx
+
+
+3. DNS EN GOOGLE DOMAINS
+----------------------------------------------------
+Ve a: https://domains.google.com → guiaa.vet → DNS
+
+Agrega estos records:
+
+| Tipo   | Nombre | Datos                    |
+|--------|--------|--------------------------|
+| A      | @      | 76.76.21.21              |
+| CNAME  | www    | cname.vercel-dns.com     |
+| CNAME  | api    | [tu-app].railway.app     |
+
+Nota: El valor de "api" lo obtienes después de deployar
+el backend en Railway o Render.
+
+
+4. VARIABLES EN VERCEL (Dashboard)
+----------------------------------------------------
+Settings → Environment Variables:
+
+REACT_APP_BACKEND_URL = https://api.guiaa.vet
+REACT_APP_SUPABASE_URL = [tu URL de Supabase]
+REACT_APP_SUPABASE_ANON_KEY = [tu anon key]
+
+
+5. VARIABLES EN RAILWAY (Dashboard)
+----------------------------------------------------
+Variables:
+
+CORS_ALLOW_ORIGINS = https://guiaa.vet,https://www.guiaa.vet
+SUPABASE_URL = [tu URL de Supabase]
+SUPABASE_KEY = [tu service role key]
+ANTHROPIC_API_KEY = [tu API key de Anthropic]
+STRIPE_API_KEY = [tu API key de Stripe]
+STRIPE_WEBHOOK_SECRET = [tu webhook secret]
+
+
+====================================================
+PASOS DE DEPLOY
+====================================================
+
+PASO 1: Subir código a GitHub
+-----------------------------
+git add .
+git commit -m "Configuración para producción"
+git push origin main
+
+
+PASO 2: Deploy Frontend (Vercel)
+--------------------------------
+1. Ve a https://vercel.com/new
+2. Importa tu repositorio de GitHub
+3. Configura:
+   - Root Directory: SV.003-main/frontend
+   - Build Command: npm run build
+   - Output Directory: build
+4. Agrega las variables de entorno
+5. Deploy!
+6. En Settings → Domains, agrega: guiaa.vet
+
+
+PASO 3: Deploy Backend (Railway)
+--------------------------------
+1. Ve a https://railway.app
+2. New Project → Deploy from GitHub
+3. Selecciona la carpeta: SV.003-main/backend
+4. Agrega las variables de entorno
+5. En Settings → Domains → Add Custom Domain: api.guiaa.vet
+6. Copia el CNAME target y agrégalo en Google Domains
+
+
+PASO 4: Verificar
+-----------------
+- https://guiaa.vet → Frontend
+- https://api.guiaa.vet/docs → Backend API Docs
+- Prueba login, registro, consultas
+
+
+====================================================
+
+

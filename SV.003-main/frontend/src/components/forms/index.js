@@ -1,0 +1,12 @@
+// Index file para exportar todos los formularios
+export { default as PerrosForm } from './PerrosForm';
+export { default as GatosForm } from './GatosForm';
+export { default as TortugasForm } from './TortugasForm';
+export { default as ErizosForm } from './ErizosForm';
+export { default as HuronesForm } from './HuronesForm';
+export { default as IguanasForm } from './IguanasForm';
+export { default as HamstersForm } from './HamstersForm';
+export { default as PatosPollosForm } from './PatosPollosForm';
+export { default as AvesForm } from './AvesForm';
+export { default as ConejosForm } from './ConejosForm';
+export { default as CuyosForm } from './CuyosForm';
