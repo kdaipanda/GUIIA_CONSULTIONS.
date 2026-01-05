@@ -728,6 +728,13 @@ async def health_check():
     return {"status": "healthy"}
 
 
+# Manejar OPTIONS para todas las rutas (CORS preflight)
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str):
+    """Maneja peticiones OPTIONS para CORS preflight"""
+    return {"status": "ok"}
+
+
 @app.get("/api/test/claude")
 async def test_claude_connection():
     """Endpoint de prueba para verificar conexión con Claude/Anthropic"""
