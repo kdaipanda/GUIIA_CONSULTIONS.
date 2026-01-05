@@ -85,8 +85,9 @@ app.add_middleware(
     allow_origins=cors_allow_origins,
     allow_origin_regex=r"https?://.*\.(trycloudflare\.com|vercel\.app)",
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Database setup - usando Supabase
