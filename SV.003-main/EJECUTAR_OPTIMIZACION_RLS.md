@@ -12,9 +12,10 @@
 
 ## 📋 Paso 2: Leer el Script
 
-1. Abre el archivo: `backend/supabase_migrations/optimize_rls_policies.sql`
+1. Abre el archivo: `SV.003-main/backend/supabase_migrations/optimize_rls_policies.sql`
 2. **Lee todo el contenido** para entender qué hace
-3. El script es seguro: usa `IF NOT EXISTS` y `IF EXISTS` para evitar errores
+3. El script es seguro: usa `IF NOT EXISTS` para evitar errores
+4. **Optimización clave**: Usa comparaciones directas de UUID (`user_id = auth.uid()`) que aprovechan los índices mejor que las conversiones a texto
 
 ---
 
