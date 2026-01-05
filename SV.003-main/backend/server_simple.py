@@ -34,6 +34,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
+from fastapi import Request
+from starlette.responses import Response
 from pydantic import BaseModel, Field
 from supabase_client import (
     SupabaseConfigError,
@@ -712,6 +714,13 @@ async def count_documents_db(collection_name: str, query: dict):
 # ENDPOINTS
 # ============================================
 
+# Manejar OPTIONS para todas las rutas (CORS preflight) - DEBE ESTAR PRIMERO
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str, request: Request):
+    """Maneja peticiones OPTIONS para CORS preflight"""
+    # El middleware CORS ya maneja los headers, solo necesitamos responder 200
+    return Response(status_code=200)
+
 
 @app.get("/")
 async def root():
@@ -726,13 +735,6 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
-
-
-# Manejar OPTIONS para todas las rutas (CORS preflight)
-@app.options("/{full_path:path}")
-async def options_handler(full_path: str):
-    """Maneja peticiones OPTIONS para CORS preflight"""
-    return {"status": "ok"}
 
 
 @app.get("/api/test/claude")
