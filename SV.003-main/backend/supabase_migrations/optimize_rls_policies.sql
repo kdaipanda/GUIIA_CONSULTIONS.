@@ -38,15 +38,14 @@ CREATE INDEX IF NOT EXISTS idx_medical_images_user_consultation ON public.medica
 -- DROP POLICY IF EXISTS "consultations_update_policy" ON public.consultations;
 -- DROP POLICY IF EXISTS "consultations_delete_policy" ON public.consultations;
 
--- Política optimizada para SELECT (usar índices)
+-- Política optimizada para SELECT (usar índices - comparación directa UUID)
 CREATE POLICY IF NOT EXISTS "consultations_select_optimized"
 ON public.consultations
 FOR SELECT
 TO authenticated
 USING (
-    -- Usar comparación directa con índice en user_id
-    user_id::text = auth.uid()::text
-    OR user_id = auth.uid()::text
+    -- Comparación directa UUID (más eficiente, usa índices)
+    user_id = auth.uid()
 );
 
 -- Política optimizada para INSERT
@@ -55,9 +54,8 @@ ON public.consultations
 FOR INSERT
 TO authenticated
 WITH CHECK (
-    -- Verificar que el user_id coincida
-    user_id::text = auth.uid()::text
-    OR user_id = auth.uid()::text
+    -- Verificar que el user_id coincida (comparación directa UUID)
+    user_id = auth.uid()
 );
 
 -- Política optimizada para UPDATE
@@ -66,13 +64,12 @@ ON public.consultations
 FOR UPDATE
 TO authenticated
 USING (
-    -- Usar índice en user_id
-    user_id::text = auth.uid()::text
-    OR user_id = auth.uid()::text
+    -- Usar índice en user_id (comparación directa UUID)
+    user_id = auth.uid()
 )
 WITH CHECK (
-    user_id::text = auth.uid()::text
-    OR user_id = auth.uid()::text
+    -- Mantener user_id correcto después del update
+    user_id = auth.uid()
 );
 
 -- Política optimizada para DELETE (si es necesario)
@@ -81,8 +78,8 @@ ON public.consultations
 FOR DELETE
 TO authenticated
 USING (
-    user_id::text = auth.uid()::text
-    OR user_id = auth.uid()::text
+    -- Comparación directa UUID
+    user_id = auth.uid()
 );
 
 -- ============================================
@@ -95,15 +92,14 @@ USING (
 -- DROP POLICY IF EXISTS "medical_images_update_policy" ON public.medical_images;
 -- DROP POLICY IF EXISTS "medical_images_delete_policy" ON public.medical_images;
 
--- Política optimizada para SELECT
+-- Política optimizada para SELECT (comparación directa UUID)
 CREATE POLICY IF NOT EXISTS "medical_images_select_optimized"
 ON public.medical_images
 FOR SELECT
 TO authenticated
 USING (
-    -- Usar índice en user_id
-    user_id::text = auth.uid()::text
-    OR user_id = auth.uid()::text
+    -- Comparación directa UUID (más eficiente, usa índices)
+    user_id = auth.uid()
 );
 
 -- Política optimizada para INSERT
@@ -112,8 +108,8 @@ ON public.medical_images
 FOR INSERT
 TO authenticated
 WITH CHECK (
-    user_id::text = auth.uid()::text
-    OR user_id = auth.uid()::text
+    -- Comparación directa UUID
+    user_id = auth.uid()
 );
 
 -- Política optimizada para UPDATE
@@ -122,12 +118,12 @@ ON public.medical_images
 FOR UPDATE
 TO authenticated
 USING (
-    user_id::text = auth.uid()::text
-    OR user_id = auth.uid()::text
+    -- Comparación directa UUID
+    user_id = auth.uid()
 )
 WITH CHECK (
-    user_id::text = auth.uid()::text
-    OR user_id = auth.uid()::text
+    -- Mantener user_id correcto después del update
+    user_id = auth.uid()
 );
 
 -- Política optimizada para DELETE
@@ -136,8 +132,8 @@ ON public.medical_images
 FOR DELETE
 TO authenticated
 USING (
-    user_id::text = auth.uid()::text
-    OR user_id = auth.uid()::text
+    -- Comparación directa UUID
+    user_id = auth.uid()
 );
 
 -- ============================================
@@ -182,6 +178,7 @@ ORDER BY tablename, policyname;
 
 -- 1. Si tus políticas actuales tienen nombres diferentes, ajusta los nombres arriba
 -- 2. Si usas service_role desde el backend, las políticas RLS no se aplican
--- 3. Las políticas optimizadas usan comparaciones directas que aprovechan los índices
--- 4. Si user_id es UUID, usa auth.uid() directamente sin conversión a texto
+-- 3. Las políticas optimizadas usan comparaciones directas de UUID que aprovechan los índices
+-- 4. user_id debe ser de tipo UUID para que estas políticas funcionen correctamente
+-- 5. Si user_id es TEXT en lugar de UUID, cambia las políticas para usar: user_id = auth.uid()::text
 
