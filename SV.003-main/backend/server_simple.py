@@ -31,10 +31,9 @@ except Exception:  # noqa: BLE001
     Anthropic = None  # type: ignore[assignment]
     APIStatusError = Exception  # type: ignore[assignment]
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
-from fastapi import Request
 from starlette.responses import Response
 from pydantic import BaseModel, Field
 from supabase_client import (
