@@ -720,6 +720,27 @@ async def options_handler(full_path: str, request: Request):
     # El middleware CORS ya maneja los headers, solo necesitamos responder 200
     return Response(status_code=200)
 
+# Handlers OPTIONS específicos para rutas principales (asegurar que funcionen)
+@app.options("/api/auth/login")
+async def options_login():
+    """Handler OPTIONS específico para login"""
+    return Response(status_code=200)
+
+@app.options("/api/auth/register")
+async def options_register():
+    """Handler OPTIONS específico para register"""
+    return Response(status_code=200)
+
+@app.options("/api/consultations")
+async def options_consultations():
+    """Handler OPTIONS para consultations"""
+    return Response(status_code=200)
+
+@app.options("/api/medical-images")
+async def options_medical_images():
+    """Handler OPTIONS para medical-images"""
+    return Response(status_code=200)
+
 
 @app.get("/")
 async def root():
