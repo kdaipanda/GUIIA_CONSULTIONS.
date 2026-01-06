@@ -9,6 +9,7 @@ import React, {
 import { BarChart3, CalendarDays, Gem, Sun, Cloud, CloudRain, CloudSun, Thermometer, Plus, ClipboardList, FlaskConical, Crown, Bell, Moon } from "lucide-react";
 import * as Tabs from "@radix-ui/react-tabs";
 import Lenis from "lenis";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import "./App.css";
 import "./Custom.css";
 import "./ThemeEnhancements.css";
@@ -507,6 +508,7 @@ function App() {
       <div className="App">
         <Router showToast={showToast} />
         <ToastContainer toasts={toasts} onClose={closeToast} />
+        <SpeedInsights />
       </div>
     </VetProvider>
   );
@@ -1738,7 +1740,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
     institucion: "",
   });
   const [cedulaFile, setCedulaFile] = useState(null);
-  const [loading, setLoading] = useState(false);
+                const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
