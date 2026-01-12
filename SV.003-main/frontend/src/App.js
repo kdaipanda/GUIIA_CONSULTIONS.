@@ -4239,7 +4239,7 @@ const NewConsultation = ({ setView, existingConsultationId }) => {
                         Análisis Avanzado - Solo Premium
                       </h4>
                       <p style={{ marginBottom: "15px", color: "#856404" }}>
-                        Los análisis clínicos avanzados con IA solo están disponibles para miembros Premium.
+                        Los análisis clínicos avanzados solo están disponibles para miembros Premium.
                         Actualiza tu plan para acceder a esta función exclusiva.
                       </p>
                       <button
