@@ -241,6 +241,28 @@ const VetProvider = ({ children }) => {
     return data;
   };
 
+  const refreshProfile = async () => {
+    if (!veterinarian?.id) return;
+    
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
+      const response = await fetch(`${backendUrl}/api/auth/profile`, {
+        headers: {
+          "x-veterinarian-id": veterinarian.id,
+        },
+      });
+      
+      if (response.ok) {
+        const updatedProfile = await response.json();
+        setVeterinarian(updatedProfile);
+        localStorage.setItem("veterinarian", JSON.stringify(updatedProfile));
+      }
+    } catch (error) {
+      console.error("Error refrescando perfil:", error);
+      // Silenciar errores para no interrumpir la experiencia del usuario
+    }
+  };
+
   return (
     <VetContext.Provider
       value={{
@@ -251,6 +273,7 @@ const VetProvider = ({ children }) => {
         authUser,
         loginWithEmailPassword,
         loginWithMagicLink,
+        refreshProfile,
       }}
     >
       {children}
@@ -551,6 +574,13 @@ const Router = ({ showToast }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Redirigir a landing cuando se cierre sesión
+  useEffect(() => {
+    if (!veterinarian && !loading) {
+      setCurrentView("landing");
+    }
+  }, [veterinarian, loading]);
+
   // URL parameter handling for payment success
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -558,7 +588,17 @@ const Router = ({ showToast }) => {
     const view = urlParams.get("view");
 
     if (sessionId) {
-      setCurrentView("payment-success");
+      // Solo redirigir a payment-success si el usuario está autenticado
+      if (veterinarian) {
+        setCurrentView("payment-success");
+      } else {
+        // Si no está autenticado pero hay session_id, limpiar la URL y redirigir al login
+        urlParams.delete("session_id");
+        const query = urlParams.toString();
+        const newUrl = `${window.location.pathname}${query ? `?${query}` : ""}`;
+        window.history.replaceState(null, "", newUrl);
+        setCurrentView("login");
+      }
     } else if (view && view !== "profile") {
       setCurrentView(view);
     } else if (view === "profile") {
@@ -775,6 +815,7 @@ const Header = ({ setView, showAuth = true }) => {
                         <button
                           onClick={() => {
                             logout();
+                            setView("landing");
                             setIsUserMenuOpen(false);
                             setIsMenuOpen(false);
                           }}
@@ -1307,30 +1348,30 @@ const LandingPage = ({ setView }) => {
             <div className="footer-column">
               <h4>Producto</h4>
               <ul>
-                <li><a href="#" onClick={() => setView("register")}>Características</a></li>
-                <li><a href="#" onClick={() => setView("membership")}>Precios</a></li>
-                <li><a href="#" onClick={() => setView("register")}>Demo</a></li>
-                <li><a href="#" onClick={() => setView("register")}>API</a></li>
+                <li><a href="#" onClick={() => setView("register")}>Consultas Veterinarias</a></li>
+                <li><a href="#" onClick={() => setView("membership")}>Planes y Membresías</a></li>
+                <li><a href="#" onClick={() => setView("register")}>Recursos Clínicos</a></li>
+                <li><a href="#" onClick={() => setView("register")}>Centro de Ayuda</a></li>
               </ul>
             </div>
             
             <div className="footer-column">
               <h4>Empresa</h4>
               <ul>
-                <li><a href="#">Sobre Nosotros</a></li>
-                <li><a href="#">Blog</a></li>
-                <li><a href="#">Carreras</a></li>
-                <li><a href="#">Contacto</a></li>
+                <li><a href="#" onClick={() => setView("landing")}>Quiénes Somos</a></li>
+                <li><a href="#" onClick={() => setView("landing")}>Noticias y Actualizaciones</a></li>
+                <li><a href="#" onClick={() => setView("landing")}>Nuestro Equipo</a></li>
+                <li><a href="https://wa.me/5215512345678?text=Hola,%20me%20interesa%20GUIAA" target="_blank" rel="noopener noreferrer">Contacto</a></li>
               </ul>
             </div>
             
             <div className="footer-column">
               <h4>Legal</h4>
               <ul>
-                <li><a href="#">Privacidad</a></li>
-                <li><a href="#">Términos</a></li>
-                <li><a href="#">Cookies</a></li>
-                <li><a href="#">Licencias</a></li>
+                <li><a href="#" onClick={() => setView("landing")}>Política de Privacidad</a></li>
+                <li><a href="#" onClick={() => setView("landing")}>Términos de Uso</a></li>
+                <li><a href="#" onClick={() => setView("landing")}>Política de Cookies</a></li>
+                <li><a href="#" onClick={() => setView("landing")}>Aviso Legal</a></li>
               </ul>
             </div>
           </div>
@@ -2322,6 +2363,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("");
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
 
   useEffect(() => {
     setError("");
@@ -2352,6 +2394,9 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
   const email = cedulaFlow.email;
   const cedula_profesional = cedulaFlow.cedula_profesional;
   const needsUpload = !!cedulaFlow.needs_upload;
+  const canSkip = cedulaFlow?.can_skip !== false; // Por defecto true si no se especifica
+  const skipCount = cedulaFlow?.cedula_skip_count || 0;
+  const remainingSkips = 3 - skipCount;
 
   const handleUploadAndVerify = async () => {
     setError("");
@@ -2488,6 +2533,74 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
               <div style={{ marginTop: "10px", color: "var(--text-secondary)" }}>
                 Estado actual: <strong>{verificationStatus}</strong>
               </div>
+            )}
+
+            {canSkip && remainingSkips > 0 && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-full"
+                style={{ marginTop: "10px" }}
+                onClick={async () => {
+                  setLoading(true);
+                  setError("");
+                  try {
+                    const response = await fetch(`${BACKEND_URL}/api/cedula/skip`, {
+                      method: "POST",
+                      headers: {
+                        "x-veterinarian-id": vetId,
+                      },
+                    });
+                    
+                    if (!response.ok) {
+                      const errorData = await response.json().catch(() => ({}));
+                      throw new Error(errorData.detail || "Error al posponer verificación");
+                    }
+                    
+                    const skipData = await response.json();
+                    
+                    // Hacer login para entrar al dashboard
+                    const resp = await fetch(`${BACKEND_URL}/api/auth/login`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ email, cedula_profesional }),
+                    });
+                    
+                    if (!resp.ok) {
+                      throw new Error("Error iniciando sesión");
+                    }
+                    
+                    const vetData = await resp.json();
+                    if (vetData?.status === "requires_cedula_flow") {
+                      // Si aún requiere verificación pero ya usó los 3 skips, mostrar error
+                      if (skipData.remaining_skips === 0) {
+                        setError("Has alcanzado el límite de 3 posposiciones. Debes verificar tu cédula ahora.");
+                        setLoading(false);
+                        return;
+                      }
+                      // Actualizar el flow con el nuevo skip count
+                      setCedulaFlow({
+                        ...cedulaFlow,
+                        cedula_skip_count: skipData.cedula_skip_count,
+                        can_skip: skipData.remaining_skips > 0,
+                      });
+                      setInfo(skipData.message);
+                      setLoading(false);
+                      return;
+                    }
+                    
+                    login(vetData);
+                    setCedulaFlow?.(null);
+                    setView("dashboard");
+                  } catch (e) {
+                    setError(e?.message || "Error al posponer verificación");
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+              >
+                {loading ? "Procesando..." : `Ir al Dashboard y verificar después (${remainingSkips} restantes)`}
+              </button>
             )}
 
             <button
@@ -3730,7 +3843,15 @@ const NewConsultation = ({ setView, existingConsultationId }) => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Error del servidor: ${response.status}`);
+        const errorDetail = errorData.detail || `Error del servidor: ${response.status}`;
+        
+        // Si se agotaron las consultas de prueba, redirigir directamente a planes
+        if (errorDetail === "TRIAL_EXHAUSTED" || errorDetail.includes("consultas gratuitas")) {
+          setView("membership");
+          return;
+        }
+        
+        throw new Error(errorDetail);
       }
 
       const data = await response.json();
@@ -5345,10 +5466,26 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
 
 // Membership Page
 const MembershipPage = ({ setView }) => {
-  const { veterinarian } = useVet();
+  const { veterinarian, refreshProfile } = useVet();
   const [packages, setPackages] = useState({});
   const [loading, setLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState("monthly"); // 'monthly' or 'annual'
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
+
+  // Redirigir al login si no está autenticado
+  useEffect(() => {
+    if (!veterinarian) {
+      setView("login");
+    } else {
+      // Refrescar perfil al cargar la página de membresía para tener datos actualizados
+      refreshProfile();
+    }
+  }, [veterinarian, setView, refreshProfile]);
+
+  // No renderizar nada si no está autenticado (evita flash de contenido)
+  if (!veterinarian) {
+    return null;
+  }
 
   const defaultPackages = {
     basic: {
@@ -5397,32 +5534,61 @@ const MembershipPage = ({ setView }) => {
   };
 
   const handlePurchase = async (packageId) => {
+    // Validar que el usuario esté autenticado antes de intentar comprar
+    if (!veterinarian || !veterinarian.id) {
+      alert("Debes estar registrado e iniciar sesión para contratar una membresía");
+      setView("login");
+      return;
+    }
+
     setLoading(true);
 
     try {
+      console.log("Iniciando checkout para paquete:", packageId);
       const response = await fetch(
         `${BACKEND_URL}/api/payments/checkout/session`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-veterinarian-id": veterinarian.id, // Incluir header de autenticación
+          },
           body: JSON.stringify({
             package_id: packageId,
             origin_url: window.location.origin,
             billing_cycle: billingCycle,
-            veterinarian_id: veterinarian?.id,
+            veterinarian_id: veterinarian.id,
           }),
         },
       );
 
       if (!response.ok) {
-        throw new Error("Error creando sesión de pago");
+        const errorText = await response.text();
+        console.error("Error del servidor:", response.status, errorText);
+        let errorMessage = "Error creando sesión de pago";
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.detail || errorData.message || errorMessage;
+        } catch (e) {
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      console.log("Respuesta del servidor:", data);
+      
+      if (!data.checkout_url) {
+        console.error("No se recibió checkout_url en la respuesta:", data);
+        throw new Error("No se recibió la URL de checkout. Por favor, intenta de nuevo.");
+      }
+
+      console.log("Redirigiendo a:", data.checkout_url);
       window.location.href = data.checkout_url;
     } catch (error) {
-      console.error("Error:", error);
-      alert("Error procesando el pago. Inténtalo de nuevo.");
+      console.error("Error en handlePurchase:", error);
+      const errorMessage = error.message || "Error procesando el pago. Inténtalo de nuevo.";
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

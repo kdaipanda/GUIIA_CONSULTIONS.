@@ -65,7 +65,20 @@ except ImportError:
     print("[WARNING] Stripe SDK no disponible. Los pagos funcionarán en modo simulado.")
 
 # Load environment variables
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"), override=False)
+# En producción (Railway, Render, etc.), las variables se cargan desde el sistema
+# En desarrollo local, se cargan desde el archivo .env
+# IMPORTANTE: En producción, las variables del sistema tienen prioridad sobre .env
+env_file_path = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(env_file_path):
+    # override=False significa que las variables del sistema tienen prioridad
+    load_dotenv(dotenv_path=env_file_path, override=False)
+else:
+    # Si no existe .env, intentar cargar desde el directorio actual
+    load_dotenv(override=False)
+
+# Log para debugging (solo en desarrollo)
+if os.getenv("RAILWAY_ENVIRONMENT") is None and os.getenv("RENDER") is None:
+    print(f"[DEBUG] Variables cargadas desde: {env_file_path if os.path.exists(env_file_path) else 'sistema'}")
 
 app = FastAPI(title="Savant Vet API - Local Version")
 
@@ -93,6 +106,7 @@ app.add_middleware(
 
 # Database setup - usando Supabase
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY", "").strip()
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "").strip()
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "").strip()
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "").strip()
 # Por defecto usar Sonnet 4 (puedes sobrescribir con ANTHROPIC_MODEL en backend/.env)
@@ -203,9 +217,27 @@ async def send_llm_message(content: List[Dict[str, Any]]) -> str:
     SOLO usa el system prompt desde instrucciones_veterinarias.txt (sin otros prompts).
     """
     if not ANTHROPIC_API_KEY:
-        raise ValueError(
-            "ANTHROPIC_API_KEY no está configurada. Añádela en backend/.env para habilitar los análisis."
-        )
+        # Verificar si está en el sistema pero no se cargó
+        system_key = os.getenv("ANTHROPIC_API_KEY", "")
+        is_production = os.getenv("RAILWAY_ENVIRONMENT") is not None or os.getenv("RENDER") is not None
+        
+        if system_key and not ANTHROPIC_API_KEY:
+            # La variable está en el sistema pero no se cargó correctamente
+            raise ValueError(
+                "ANTHROPIC_API_KEY está en el sistema pero no se cargó. "
+                "Reinicia el servicio en Railway/Render."
+            )
+        elif is_production:
+            raise ValueError(
+                "ANTHROPIC_API_KEY no está configurada en Railway/Render. "
+                "Ve a Variables en tu servicio y agrega: ANTHROPIC_API_KEY=sk-ant-api-..."
+            )
+        else:
+            raise ValueError(
+                "ANTHROPIC_API_KEY no está configurada. "
+                "En desarrollo: añádela en backend/.env. "
+                "En producción: configúrala como variable de entorno en Railway/Render."
+            )
 
     # Si la librería no está instalada, evita el crash "'NoneType' object is not callable"
     if Anthropic is None:
@@ -611,6 +643,7 @@ class ConsultationRatingUpdate(BaseModel):
 # Usuarios de desarrollo (pasan verificación de cédula automáticamente)
 DEV_EMAILS = {
     "carlos.hernandez@vetmed.com",
+    "mariana.lopez@vetmed.com",
     # Usuarios de prueba por membresía
     "basico@guiaa.vet",
     "profesional@guiaa.vet", 
@@ -760,12 +793,18 @@ async def health_check():
 @app.get("/api/test/claude")
 async def test_claude_connection():
     """Endpoint de prueba para verificar conexión con Claude/Anthropic"""
+    # Verificar si la variable está en el sistema (producción) o en .env (desarrollo)
+    env_key_from_system = os.getenv("ANTHROPIC_API_KEY", "")
+    env_file_exists = os.path.exists(os.path.join(os.path.dirname(__file__), ".env"))
+    
     result = {
         "api_key_configured": bool(ANTHROPIC_API_KEY),
         "api_key_length": len(ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else 0,
         "model": ANTHROPIC_MODEL,
         "client_initialized": anthropic_client is not None,
         "instructions_file_exists": os.path.exists(ANTHROPIC_INSTRUCTIONS_FILE) if ANTHROPIC_INSTRUCTIONS_FILE else False,
+        "env_file_exists": env_file_exists,
+        "env_key_in_system": bool(env_key_from_system),
         "test_status": "pending",
         "test_response": None,
         "error": None,
@@ -773,7 +812,12 @@ async def test_claude_connection():
     
     if not ANTHROPIC_API_KEY:
         result["test_status"] = "error"
-        result["error"] = "ANTHROPIC_API_KEY no configurada en backend/.env"
+        if env_key_from_system:
+            result["error"] = "ANTHROPIC_API_KEY está en el sistema pero no se cargó correctamente"
+        elif env_file_exists:
+            result["error"] = "ANTHROPIC_API_KEY no configurada en backend/.env. Agrega: ANTHROPIC_API_KEY=sk-ant-api-..."
+        else:
+            result["error"] = "ANTHROPIC_API_KEY no configurada. En producción, configúrala en Railway/Render como variable de entorno. En desarrollo, crea backend/.env con: ANTHROPIC_API_KEY=sk-ant-api-..."
         return result
     
     try:
@@ -871,6 +915,7 @@ async def register_veterinarian(vet: VeterinarianRegister):
     initial_status = CEDULA_STATUS_VERIFIED if is_dev else CEDULA_STATUS_UNSUBMITTED
     
     # Crear veterinario
+    # Nuevos usuarios reciben 3 consultas gratuitas (tipo premium) antes de verificar cuenta
     vet_data = {
         "id": str(uuid.uuid4()),
         "nombre": vet.nombre,
@@ -880,11 +925,9 @@ async def register_veterinarian(vet: VeterinarianRegister):
         "especialidad": vet.especialidad,
         "años_experiencia": vet.años_experiencia,
         "institucion": vet.institucion,
-        "membership_type": "basic",
-        "consultations_remaining": 30,  # Plan básico: 30 consultas
-        "membership_expires": (
-            datetime.now(timezone.utc) + timedelta(days=30)
-        ).isoformat(),
+        "membership_type": None,  # Sin membresía hasta verificar cuenta
+        "consultations_remaining": 3,  # 3 consultas gratuitas de prueba (tipo premium)
+        "membership_expires": None,  # Sin expiración para consultas de prueba
         "created_at": datetime.now(timezone.utc).isoformat(),
         "two_factor_enabled": False,
         # Verificación de cédula (flujo obligatorio, excepto dev)
@@ -895,6 +938,7 @@ async def register_veterinarian(vet: VeterinarianRegister):
         "cedula_verification_error": None,
         "cedula_sep_nombre": vet.nombre if is_dev else None,
         "cedula_sep_profesion": "Médico Veterinario Zootecnista" if is_dev else None,
+        "cedula_skip_count": 0,  # Contador de veces que ha pospuesto la verificación
     }
 
     # Guardar en Supabase
@@ -941,6 +985,7 @@ async def login_veterinarian(credentials: VeterinarianLogin):
     # Gating: manejar estados de verificación de cédula
     if ced_status != CEDULA_STATUS_VERIFIED:
         needs_upload = not bool(veterinarian.get("cedula_document_url"))
+        skip_count = veterinarian.get("cedula_skip_count", 0)
 
         # Si falta el documento, siempre bloquear y mandar al flujo
         if needs_upload or ced_status == CEDULA_STATUS_UNSUBMITTED:
@@ -951,6 +996,8 @@ async def login_veterinarian(credentials: VeterinarianLogin):
                 "needs_upload": True,
                 "verification_status": ced_status,
                 "message": msg,
+                "cedula_skip_count": skip_count,
+                "can_skip": skip_count < 3,  # Permite saltarse hasta 3 veces
             }
 
         # Si fue rechazada, bloquear y pedir reintento (corregir nombre/cedula o re-subir)
@@ -962,6 +1009,8 @@ async def login_veterinarian(credentials: VeterinarianLogin):
                 "needs_upload": False,
                 "verification_status": ced_status,
                 "message": msg,
+                "cedula_skip_count": skip_count,
+                "can_skip": skip_count < 3,  # Permite saltarse hasta 3 veces
             }
 
         # Si está PENDING pero ya hay documento, permitir login y dejar la cuenta en revisión.
@@ -972,14 +1021,23 @@ async def login_veterinarian(credentials: VeterinarianLogin):
                 "Tu cédula está en verificación. Puedes continuar mientras se procesa."
             )
         else:
-            # Fallback conservador: si es algún estado raro, mandar al flujo.
-            return {
-                "status": "requires_cedula_flow",
-                "veterinarian_id": veterinarian.get("id"),
-                "needs_upload": needs_upload,
-                "verification_status": ced_status,
-                "message": "Necesitamos completar la verificación de cédula para continuar.",
-            }
+            # Si el usuario tiene menos de 3 skips, permitir acceso temporal
+            if skip_count < 3:
+                # Permitir acceso temporal sin verificación
+                veterinarian["cedula_verification_status"] = ced_status
+                veterinarian["cedula_skip_count"] = skip_count
+                # Continuar con el login normal (sin bloquear)
+            else:
+                # Fallback conservador: si es algún estado raro, mandar al flujo.
+                return {
+                    "status": "requires_cedula_flow",
+                    "veterinarian_id": veterinarian.get("id"),
+                    "needs_upload": needs_upload,
+                    "verification_status": ced_status,
+                    "message": "Necesitamos completar la verificación de cédula para continuar.",
+                    "cedula_skip_count": skip_count,
+                    "can_skip": False,  # Ya no puede saltarse
+                }
 
     # Si tiene 2FA habilitado, generar código
     if veterinarian.get("two_factor_enabled", False):
@@ -1039,6 +1097,26 @@ async def verify_2fa(verification: TwoFactorVerify):
         raise HTTPException(status_code=404, detail="Veterinario no encontrado")
 
     return veterinarian
+
+
+@app.get("/api/auth/profile")
+async def get_current_profile(x_veterinarian_id: str = Header(None)):
+    """Obtiene el perfil actualizado del veterinario autenticado"""
+    if not x_veterinarian_id:
+        raise HTTPException(status_code=401, detail="No autenticado")
+    
+    profile, err = get_profile(x_veterinarian_id)
+    if err:
+        raise HTTPException(status_code=500, detail=f"Error obteniendo perfil: {err}")
+    
+    if not profile:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+    
+    # Remover _id si existe
+    if isinstance(profile, dict):
+        profile.pop("_id", None)
+    
+    return profile
 
 
 # ============================================
@@ -1242,6 +1320,49 @@ async def verify_cedula(
     )
 
 
+@app.post("/api/cedula/skip")
+async def skip_cedula_verification(
+    x_veterinarian_id: str = Header(None),
+):
+    """Permite al usuario posponer la verificación de cédula (máximo 3 veces)"""
+    if not x_veterinarian_id:
+        raise HTTPException(status_code=401, detail="No autenticado")
+    
+    profile, err = get_profile(x_veterinarian_id)
+    if err:
+        raise HTTPException(status_code=500, detail=f"Error perfil: {err}")
+    if not profile:
+        raise HTTPException(status_code=404, detail="Veterinario no encontrado")
+    
+    skip_count = profile.get("cedula_skip_count", 0)
+    
+    # Verificar que no haya excedido el límite
+    if skip_count >= 3:
+        raise HTTPException(
+            status_code=403,
+            detail="Has alcanzado el límite de 3 posposiciones. Debes verificar tu cédula para continuar."
+        )
+    
+    # Incrementar contador
+    new_skip_count = skip_count + 1
+    err_upd = update_profile(
+        x_veterinarian_id,
+        {
+            "cedula_skip_count": new_skip_count,
+        },
+    )
+    
+    if err_upd:
+        raise HTTPException(status_code=500, detail=f"Error actualizando perfil: {err_upd}")
+    
+    return {
+        "status": "ok",
+        "cedula_skip_count": new_skip_count,
+        "remaining_skips": 3 - new_skip_count,
+        "message": f"Puedes verificar tu cédula después. Te quedan {3 - new_skip_count} posposiciones restantes." if new_skip_count < 3 else "Esta fue tu última posposición. Debes verificar tu cédula la próxima vez.",
+    }
+
+
 # ============================================
 # ANIMAL CATEGORIES
 # ============================================
@@ -1267,7 +1388,16 @@ async def get_animal_categories(x_veterinarian_id: str = Header(None)):
         # Si no se puede obtener el perfil, retornar todas (fallback)
         return {"categories": all_categories}
 
-    membership_type = (profile.get("membership_type") or "basic").lower()
+    membership_type = profile.get("membership_type")
+    remaining = profile.get("consultations_remaining", 0)
+    
+    # Si tiene consultas de prueba (sin membership_type pero con consultas), dar acceso premium
+    has_trial_consultations = not membership_type and remaining > 0
+    
+    if membership_type:
+        membership_type = membership_type.lower()
+    else:
+        membership_type = "trial" if has_trial_consultations else "basic"
 
     # Filtrar categorías según membresía
     if membership_type == "basic":
@@ -1276,8 +1406,8 @@ async def get_animal_categories(x_veterinarian_id: str = Header(None)):
             cat for cat in all_categories
             if cat.get("id") in ["perros", "gatos"]
         ]
-    elif membership_type in ["professional", "premium"]:
-        # Profesional y Premium: todas las categorías
+    elif membership_type in ["professional", "premium", "trial"]:
+        # Profesional, Premium y Trial (consultas de prueba): todas las categorías
         filtered_categories = all_categories
     else:
         # Por defecto, solo básicas
@@ -1346,18 +1476,67 @@ async def create_consultation(payload: ConsultationStageOne):
                 "nombre": "Desarrollador",
                 "membership_type": "premium",
                 "consultations_remaining": 150,
+                "membership_expires": (datetime.now(timezone.utc) + timedelta(days=365)).isoformat(),
             }
             _, err_up = upsert_profile(seed_profile)
             if err_up:
                 raise HTTPException(status_code=500, detail=f"Error creando perfil: {err_up}")
             profile = seed_profile
         else:
-            raise HTTPException(status_code=404, detail="Veterinario no encontrado")
+            # Usuario sin cuenta - redirigir al registro
+            raise HTTPException(
+                status_code=401,
+                detail="No tienes una cuenta. Por favor, regístrate primero para usar el servicio."
+            )
 
+    # Verificar membresía o consultas de prueba
+    membership_type = profile.get("membership_type")
     remaining = profile.get("consultations_remaining", 0)
-    membership_type = (profile.get("membership_type") or "basic").lower()
-    if membership_type != "premium" and remaining <= 0:
-        raise HTTPException(status_code=403, detail="No tienes consultas disponibles")
+    
+    # Si tiene consultas de prueba (remaining > 0 pero sin membership_type), permitir como premium
+    has_trial_consultations = not membership_type and remaining > 0
+    
+    if not membership_type and not has_trial_consultations:
+        raise HTTPException(
+            status_code=403,
+            detail="No tienes una membresía activa. Por favor, suscríbete a un plan para crear consultas."
+        )
+
+    # Si tiene membresía, verificar que no esté expirada
+    if membership_type:
+        membership_type = membership_type.lower()
+        membership_expires = profile.get("membership_expires")
+        if membership_expires:
+            try:
+                if isinstance(membership_expires, str):
+                    expiry = datetime.fromisoformat(membership_expires.replace('Z', '+00:00'))
+                else:
+                    expiry = membership_expires
+                if expiry < datetime.now(timezone.utc):
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Tu membresía ha expirado. Por favor, renueva tu suscripción para continuar."
+                    )
+            except (ValueError, TypeError) as e:
+                # Si hay error parseando la fecha, continuar pero loguear
+                print(f"[WARN] Error parseando membership_expires para {vet_id}: {e}")
+
+    # Verificar consultas disponibles
+    # Si tiene consultas de prueba, tratarlas como premium (sin restricciones)
+    if has_trial_consultations:
+        # Usuario con consultas de prueba: permitir como premium
+        if remaining <= 0:
+            raise HTTPException(
+                status_code=403,
+                detail="TRIAL_EXHAUSTED"  # Código especial para redirigir a planes
+            )
+    elif membership_type != "premium":
+        # Usuario con membresía pero no premium: verificar consultas
+        if remaining <= 0:
+            raise HTTPException(
+                status_code=403,
+                detail="No tienes consultas disponibles. Por favor, renueva tu membresía o compra créditos adicionales."
+            )
 
     consultation_id = str(uuid.uuid4())
     created_at = datetime.now(timezone.utc).isoformat()
@@ -1378,8 +1557,9 @@ async def create_consultation(payload: ConsultationStageOne):
     if err_ins:
         raise HTTPException(status_code=500, detail=f"Error guardando consulta: {err_ins}")
 
-    # Descontar crédito si no es premium
-    if membership_type != "premium":
+    # Descontar crédito si no es premium (las consultas de prueba también se descuentan)
+    # Si tiene consultas de prueba (sin membership_type), tratarlas como premium pero descontar
+    if has_trial_consultations or (membership_type and membership_type != "premium"):
         new_remaining = max(0, remaining - 1)
         _, err_prof = upsert_profile(
             {
@@ -1392,6 +1572,56 @@ async def create_consultation(payload: ConsultationStageOne):
             print(f"[WARN] No se pudo actualizar remaining: {err_prof}")
 
     return _serialize_consultation(inserted or new_row)
+
+
+@app.get("/api/stripe/config")
+async def get_stripe_config():
+    """Obtiene la configuración de Stripe (clave pública)"""
+    return {
+        "publishable_key": STRIPE_PUBLISHABLE_KEY if STRIPE_PUBLISHABLE_KEY else None,
+        "publishable_key_configured": bool(STRIPE_PUBLISHABLE_KEY),
+        "secret_key_configured": bool(STRIPE_API_KEY),
+        "webhook_secret_configured": bool(STRIPE_WEBHOOK_SECRET),
+        "stripe_sdk_available": stripe is not None,
+        "mode": "test" if STRIPE_API_KEY and "sk_test" in STRIPE_API_KEY else ("live" if STRIPE_API_KEY and "sk_live" in STRIPE_API_KEY else None),
+    }
+
+
+@app.get("/api/config/diagnostics")
+async def get_config_diagnostics():
+    """Endpoint de diagnóstico para verificar todas las configuraciones"""
+    env_file_path = os.path.join(os.path.dirname(__file__), ".env")
+    env_file_exists = os.path.exists(env_file_path)
+    
+    # Verificar variables directamente del sistema
+    anthropic_from_system = os.getenv("ANTHROPIC_API_KEY", "")
+    stripe_secret_from_system = os.getenv("STRIPE_API_KEY", "")
+    stripe_public_from_system = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+    
+    return {
+        "environment": {
+            "is_production": os.getenv("RAILWAY_ENVIRONMENT") is not None or os.getenv("RENDER") is not None,
+            "env_file_exists": env_file_exists,
+            "env_file_path": env_file_path if env_file_exists else None,
+        },
+        "anthropic": {
+            "configured": bool(ANTHROPIC_API_KEY),
+            "length": len(ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else 0,
+            "in_system_env": bool(anthropic_from_system),
+            "in_loaded_env": bool(ANTHROPIC_API_KEY),
+            "client_initialized": anthropic_client is not None,
+            "model": ANTHROPIC_MODEL,
+        },
+        "stripe": {
+            "secret_configured": bool(STRIPE_API_KEY),
+            "secret_in_system": bool(stripe_secret_from_system),
+            "public_configured": bool(STRIPE_PUBLISHABLE_KEY),
+            "public_in_system": bool(stripe_public_from_system),
+            "webhook_configured": bool(STRIPE_WEBHOOK_SECRET),
+            "sdk_available": stripe is not None,
+        },
+        "recommendations": []
+    }
 
 
 @app.get("/api/consultations")
@@ -1517,7 +1747,7 @@ async def analyze_consultation(consultation_id: str, x_veterinarian_id: str = He
     if not consultation:
         raise HTTPException(status_code=404, detail="Consulta no encontrada")
 
-    # Verificar que el usuario tenga membresía Premium
+    # Verificar que el usuario tenga membresía Premium o consultas de prueba
     if x_veterinarian_id:
         profile, err = get_profile(x_veterinarian_id)
         if err or not profile:
@@ -1526,8 +1756,18 @@ async def analyze_consultation(consultation_id: str, x_veterinarian_id: str = He
                 detail="No se pudo verificar tu membresía. Los análisis avanzados solo están disponibles para miembros Premium."
             )
         
-        membership_type = (profile.get("membership_type") or "basic").lower()
-        if membership_type != "premium":
+        membership_type = profile.get("membership_type")
+        remaining = profile.get("consultations_remaining", 0)
+        
+        # Si tiene consultas de prueba (sin membership_type pero con consultas), permitir como premium
+        has_trial_consultations = not membership_type and remaining > 0
+        
+        if membership_type:
+            membership_type = membership_type.lower()
+        else:
+            membership_type = "trial" if has_trial_consultations else "basic"
+        
+        if membership_type not in ["premium", "trial"]:
             raise HTTPException(
                 status_code=403,
                 detail=f"Los análisis avanzados solo están disponibles para miembros Premium. Tu plan actual es: {membership_type.capitalize()}. Por favor, actualiza tu membresía para acceder a esta función."
@@ -1669,8 +1909,28 @@ async def get_consultation_credit_packages():
 
 
 @app.post("/api/payments/checkout/session")
-async def create_checkout_session(payment_request: PaymentRequest):
-    """Crea sesión de pago (simulada)"""
+async def create_checkout_session(
+    payment_request: PaymentRequest,
+    x_veterinarian_id: str = Header(None),
+):
+    """Crea sesión de pago (simulada) - Requiere autenticación"""
+
+    # Validar que el usuario esté autenticado
+    if not x_veterinarian_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Debes estar registrado e iniciar sesión para contratar una membresía"
+        )
+    
+    # Verificar que el usuario exista
+    profile, err = get_profile(x_veterinarian_id)
+    if err:
+        raise HTTPException(status_code=500, detail=f"Error verificando perfil: {err}")
+    if not profile:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuario no encontrado. Por favor, regístrate primero."
+        )
 
     package_key = payment_request.package or payment_request.package_id
     if not package_key:
