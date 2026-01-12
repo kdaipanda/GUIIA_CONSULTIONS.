@@ -624,7 +624,8 @@ const Router = ({ showToast }) => {
       setCurrentView("landing");
       setIsInitialized(true);
     }
-  }, [veterinarian, isInitialized]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo ejecutar una vez al montar, no cuando cambia veterinarian
 
   if (loading) {
     return <LoadingScreen />;
@@ -5508,10 +5509,14 @@ const MembershipPage = ({ setView }) => {
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
 
   // Refrescar perfil al cargar la página de membresía para tener datos actualizados
-  // Solo refrescar una vez al montar el componente, no cada vez que cambia veterinarian
+  // Usar un timeout para evitar que el refresh cause redirecciones inmediatas
   useEffect(() => {
     if (veterinarian?.id) {
-      refreshProfile();
+      // Usar setTimeout para que el refresh ocurra después de que la vista esté establecida
+      const timeoutId = setTimeout(() => {
+        refreshProfile();
+      }, 100);
+      return () => clearTimeout(timeoutId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar al montar, no cuando cambia veterinarian
