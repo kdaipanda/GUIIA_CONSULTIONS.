@@ -1911,9 +1911,19 @@ async def get_consultation_credit_packages():
 @app.post("/api/payments/checkout/session")
 async def create_checkout_session(
     payment_request: PaymentRequest,
-    x_veterinarian_id: str = Header(None),
+    request: Request,
+    x_veterinarian_id: str = Header(None, alias="x-veterinarian-id"),
 ):
     """Crea sesión de pago (simulada) - Requiere autenticación"""
+
+    # Debug: Ver todos los headers recibidos
+    print(f"[DEBUG] Headers recibidos: {dict(request.headers)}")
+    print(f"[DEBUG] x-veterinarian-id desde Header(): {x_veterinarian_id}")
+    
+    # Intentar obtener el header directamente si no viene por Header()
+    if not x_veterinarian_id:
+        x_veterinarian_id = request.headers.get("x-veterinarian-id") or request.headers.get("X-Veterinarian-Id")
+        print(f"[DEBUG] x-veterinarian-id desde request.headers: {x_veterinarian_id}")
 
     # Validar que el usuario esté autenticado
     if not x_veterinarian_id:
@@ -1957,14 +1967,32 @@ async def create_checkout_session(
         "veterinarian_id": payment_request.veterinarian_id,
     }
 
-    if stripe and STRIPE_API_KEY:
-        stripe.api_key = STRIPE_API_KEY
-        try:
-            success_url = (
-                f"{payment_request.origin_url}/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
-            )
-            cancel_url = f"{payment_request.origin_url}/membership"
-            session = stripe.checkout.Session.create(
+    # Verificar si Stripe está disponible
+    if not stripe:
+        raise HTTPException(
+            status_code=500,
+            detail="Stripe SDK no está disponible. Por favor, contacta al administrador."
+        )
+    
+    if not STRIPE_API_KEY:
+        raise HTTPException(
+            status_code=500,
+            detail="STRIPE_API_KEY no está configurada. Por favor, contacta al administrador."
+        )
+    
+    stripe.api_key = STRIPE_API_KEY
+    print(f"[DEBUG] Creando sesión Stripe para paquete: {package_key}, precio: {price}, ciclo: {payment_request.billing_cycle}")
+    print(f"[DEBUG] Veterinarian ID: {x_veterinarian_id}")
+    print(f"[DEBUG] Stripe API Key configurada: {STRIPE_API_KEY[:20]}...")
+    
+    try:
+        success_url = (
+            f"{payment_request.origin_url}/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
+        )
+        cancel_url = f"{payment_request.origin_url}/membership"
+        print(f"[DEBUG] Success URL: {success_url}")
+        print(f"[DEBUG] Cancel URL: {cancel_url}")
+        session = stripe.checkout.Session.create(
                 mode="payment",
                 success_url=success_url,
                 cancel_url=cancel_url,

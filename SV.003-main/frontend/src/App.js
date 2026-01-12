@@ -5545,14 +5545,20 @@ const MembershipPage = ({ setView }) => {
 
     try {
       console.log("Iniciando checkout para paquete:", packageId);
+      console.log("Veterinarian ID:", veterinarian.id);
+      console.log("Veterinarian completo:", veterinarian);
+      
+      const headers = {
+        "Content-Type": "application/json",
+        "x-veterinarian-id": veterinarian.id, // Incluir header de autenticación
+      };
+      console.log("Headers enviados:", headers);
+      
       const response = await fetch(
         `${BACKEND_URL}/api/payments/checkout/session`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-veterinarian-id": veterinarian.id, // Incluir header de autenticación
-          },
+          headers: headers,
           body: JSON.stringify({
             package_id: packageId,
             origin_url: window.location.origin,
@@ -5587,6 +5593,11 @@ const MembershipPage = ({ setView }) => {
       window.location.href = data.checkout_url;
     } catch (error) {
       console.error("Error en handlePurchase:", error);
+      console.error("Error completo:", error);
+      // Mostrar mensaje más detallado en consola para debugging
+      if (error.message) {
+        console.error("Mensaje de error:", error.message);
+      }
       const errorMessage = error.message || "Error procesando el pago. Inténtalo de nuevo.";
       alert(errorMessage);
     } finally {
