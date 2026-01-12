@@ -624,7 +624,6 @@ const Router = ({ showToast }) => {
       setCurrentView("landing");
       setIsInitialized(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar una vez al montar, no cuando cambia veterinarian
 
   if (loading) {
@@ -5518,7 +5517,6 @@ const MembershipPage = ({ setView }) => {
       }, 100);
       return () => clearTimeout(timeoutId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar al montar, no cuando cambia veterinarian
 
   // Si no está autenticado, mostrar mensaje y opción de login
