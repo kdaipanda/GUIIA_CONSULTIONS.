@@ -5472,19 +5472,51 @@ const MembershipPage = ({ setView }) => {
   const [billingCycle, setBillingCycle] = useState("monthly"); // 'monthly' or 'annual'
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
 
-  // Redirigir al login si no está autenticado
+  // Refrescar perfil al cargar la página de membresía para tener datos actualizados
   useEffect(() => {
-    if (!veterinarian) {
-      setView("login");
-    } else {
-      // Refrescar perfil al cargar la página de membresía para tener datos actualizados
+    if (veterinarian?.id) {
       refreshProfile();
     }
-  }, [veterinarian, setView, refreshProfile]);
+  }, [veterinarian?.id, refreshProfile]);
 
-  // No renderizar nada si no está autenticado (evita flash de contenido)
+  // Si no está autenticado, mostrar mensaje y opción de login
   if (!veterinarian) {
-    return null;
+    return (
+      <div className="membership-page">
+        <Header setView={setView} />
+        <div className="container">
+          <div className="auth-required-message" style={{
+            padding: "40px",
+            textAlign: "center",
+            backgroundColor: "#fff3cd",
+            border: "2px solid #ffc107",
+            borderRadius: "8px",
+            marginTop: "40px"
+          }}>
+            <div style={{ fontSize: "48px", marginBottom: "20px" }}>🔒</div>
+            <h2 style={{ marginBottom: "15px", color: "#856404" }}>
+              Inicia sesión para ver y comprar membresías
+            </h2>
+            <p style={{ marginBottom: "20px", color: "#856404" }}>
+              Necesitas tener una cuenta para acceder a nuestros planes de membresía.
+            </p>
+            <button
+              onClick={() => setView("login")}
+              className="btn btn-primary"
+              style={{ marginRight: "10px" }}
+            >
+              Iniciar Sesión
+            </button>
+            <button
+              onClick={() => setView("register")}
+              className="btn btn-secondary"
+            >
+              Registrarse
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const defaultPackages = {
