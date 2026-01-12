@@ -3296,8 +3296,14 @@ const Dashboard = ({ setView, openConsultation }) => {
               )}
 
               <button
-                onClick={() => setView("membership")}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log("Botón Membresía clickeado, redirigiendo a membership");
+                  setView("membership");
+                }}
                 className="action-card"
+                type="button"
               >
                 <div className="action-icon"><Crown /></div>
                 <h3>Membresía</h3>
