@@ -1497,6 +1497,23 @@ async def create_consultation(payload: ConsultationStageOne):
     # Si tiene consultas de prueba (remaining > 0 pero sin membership_type), permitir como premium
     has_trial_consultations = not membership_type and remaining > 0
     
+    # Si no tiene membresía ni consultas, darle 3 consultas premium automáticamente
+    if not membership_type and remaining <= 0:
+        # Dar 3 consultas premium automáticamente a todos los usuarios
+        _, err_upd = upsert_profile({
+            "id": vet_id,
+            "consultations_remaining": 3,
+            "membership_type": None,  # Mantener None para indicar que son consultas de prueba
+        })
+        if err_upd:
+            print(f"[WARN] Error dando consultas de prueba a {vet_id}: {err_upd}")
+        else:
+            # Actualizar el perfil local para continuar
+            profile["consultations_remaining"] = 3
+            remaining = 3
+            has_trial_consultations = True
+            print(f"[INFO] Se dieron 3 consultas premium automáticamente a {vet_id}")
+    
     if not membership_type and not has_trial_consultations:
         raise HTTPException(
             status_code=403,
@@ -2047,6 +2064,52 @@ async def create_checkout_session(
         "session_id": session_id,
         "message": "Pago simulado - En producción, esto usaría Stripe",
     }
+
+
+@app.post("/api/admin/give-trial-consultations")
+async def give_trial_consultations_to_all(
+    x_veterinarian_id: str = Header(None),
+):
+    """
+    Endpoint administrativo para dar 3 consultas premium a todos los usuarios que no las tengan.
+    Requiere autenticación (puedes agregar validación de admin si lo deseas).
+    """
+    try:
+        from supabase_client import get_supabase_client
+        client = get_supabase_client()
+        
+        # Obtener todos los perfiles
+        response = client.table("profiles").select("id, consultations_remaining, membership_type").execute()
+        
+        if not response.data:
+            return {"message": "No se encontraron usuarios", "updated": 0}
+        
+        updated_count = 0
+        for profile in response.data:
+            profile_id = profile.get("id")
+            membership_type = profile.get("membership_type")
+            remaining = profile.get("consultations_remaining", 0)
+            
+            # Solo actualizar usuarios que no tengan membresía y tengan 0 o menos consultas
+            if not membership_type and remaining <= 0:
+                try:
+                    update_response = client.table("profiles").update({
+                        "consultations_remaining": 3
+                    }).eq("id", profile_id).execute()
+                    
+                    if update_response.data:
+                        updated_count += 1
+                        print(f"[INFO] Se dieron 3 consultas premium a {profile_id}")
+                except Exception as e:
+                    print(f"[ERROR] Error actualizando {profile_id}: {e}")
+        
+        return {
+            "message": f"Se dieron 3 consultas premium a {updated_count} usuarios",
+            "updated": updated_count,
+            "total_users": len(response.data)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error procesando usuarios: {str(e)}")
 
 
 @app.post("/api/payments/stripe/webhook")
