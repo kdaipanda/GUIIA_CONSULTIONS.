@@ -546,6 +546,7 @@ const Router = ({ showToast }) => {
   const [isCmdkOpen, setCmdkOpen] = useState(false);
   const [selectedConsultationId, setSelectedConsultationId] = useState(null);
   const [cedulaFlow, setCedulaFlow] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Helper to navigate to consultation with ID
   const openConsultation = (consultationId) => {
@@ -559,6 +560,7 @@ const Router = ({ showToast }) => {
       setSelectedConsultationId(null);
     }
     setCurrentView(view);
+    setIsInitialized(true); // Marcar como inicializado cuando el usuario navega manualmente
   };
 
   // Command Palette (Ctrl/Cmd+K)
@@ -578,11 +580,14 @@ const Router = ({ showToast }) => {
   useEffect(() => {
     if (!veterinarian && !loading) {
       setCurrentView("landing");
+      setIsInitialized(false); // Resetear cuando se cierra sesión
     }
   }, [veterinarian, loading]);
 
-  // URL parameter handling for payment success
+  // URL parameter handling for payment success - Solo ejecutar una vez al montar
   useEffect(() => {
+    if (isInitialized) return; // No ejecutar si ya se inicializó la vista
+    
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get("session_id");
     const view = urlParams.get("view");
@@ -591,6 +596,7 @@ const Router = ({ showToast }) => {
       // Solo redirigir a payment-success si el usuario está autenticado
       if (veterinarian) {
         setCurrentView("payment-success");
+        setIsInitialized(true);
       } else {
         // Si no está autenticado pero hay session_id, limpiar la URL y redirigir al login
         urlParams.delete("session_id");
@@ -598,20 +604,27 @@ const Router = ({ showToast }) => {
         const newUrl = `${window.location.pathname}${query ? `?${query}` : ""}`;
         window.history.replaceState(null, "", newUrl);
         setCurrentView("login");
+        setIsInitialized(true);
       }
     } else if (view && view !== "profile") {
       setCurrentView(view);
+      setIsInitialized(true);
     } else if (view === "profile") {
       urlParams.delete("view");
       const query = urlParams.toString();
       const newUrl = `${window.location.pathname}${query ? `?${query}` : ""}`;
       window.history.replaceState(null, "", newUrl);
-    } else if (veterinarian && !currentView) {
-      // Solo redirigir al dashboard si no hay vista actual establecida
-      // Esto evita redirigir cuando el usuario está navegando manualmente
+      setIsInitialized(true);
+    } else if (veterinarian && !isInitialized) {
+      // Solo redirigir al dashboard si no se ha inicializado y hay un veterinarian
+      // Esto solo ocurre al cargar la página inicialmente
       setCurrentView("dashboard");
+      setIsInitialized(true);
+    } else if (!veterinarian && !isInitialized) {
+      setCurrentView("landing");
+      setIsInitialized(true);
     }
-  }, [veterinarian, currentView]);
+  }, [veterinarian, isInitialized]);
 
   if (loading) {
     return <LoadingScreen />;
