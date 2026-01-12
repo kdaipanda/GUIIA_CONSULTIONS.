@@ -31,7 +31,8 @@ except Exception:  # noqa: BLE001
     Anthropic = None  # type: ignore[assignment]
     APIStatusError = Exception  # type: ignore[assignment]
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile, Request
+from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
+from starlette.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import Response
@@ -1993,40 +1994,47 @@ async def create_checkout_session(
         print(f"[DEBUG] Success URL: {success_url}")
         print(f"[DEBUG] Cancel URL: {cancel_url}")
         session = stripe.checkout.Session.create(
-                mode="payment",
-                success_url=success_url,
-                cancel_url=cancel_url,
-                line_items=[
-                    {
-                        "price_data": {
-                            "currency": package["currency"],
-                            "product_data": {
-                                "name": f"Membresía {package['name']}",
-                            },
-                            "unit_amount": int(round(price * 100)),
+            mode="payment",
+            success_url=success_url,
+            cancel_url=cancel_url,
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": package["currency"],
+                        "product_data": {
+                            "name": f"Membresía {package['name']}",
                         },
-                        "quantity": 1,
-                    }
-                ],
-                metadata={
-                    "type": "membership",
-                    "package": package_key,
-                    "billing_cycle": payment_request.billing_cycle,
-                    "veterinarian_id": payment_request.veterinarian_id or "",
-                    "consultations": str(package.get("consultations", 0)),
-                },
-            )
+                        "unit_amount": int(round(price * 100)),
+                    },
+                    "quantity": 1,
+                }
+            ],
+            metadata={
+                "type": "membership",
+                "package": package_key,
+                "billing_cycle": payment_request.billing_cycle,
+                "veterinarian_id": payment_request.veterinarian_id or "",
+                "consultations": str(package.get("consultations", 0)),
+            },
+        )
 
-            session_id = session.id
-            transaction_data["session_id"] = session_id
-            transaction_data["stripe"] = True
-            transaction, err = insert_payment_transaction(transaction_data)
-            if err:
-                raise HTTPException(status_code=500, detail=f"Error guardando transacción: {err}")
+        session_id = session.id
+        transaction_data["session_id"] = session_id
+        transaction_data["stripe"] = True
+        transaction, err = insert_payment_transaction(transaction_data)
+        if err:
+            raise HTTPException(status_code=500, detail=f"Error guardando transacción: {err}")
 
-            return {"checkout_url": session.url, "session_id": session_id}
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error creando sesión Stripe: {str(e)}")
+        return {"checkout_url": session.url, "session_id": session_id}
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"[ERROR] Error creando sesión Stripe: {str(e)}")
+        print(f"[ERROR] Traceback completo:\n{error_trace}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error creando sesión de pago: {str(e)}"
+        )
 
     transaction, err = insert_payment_transaction(transaction_data)
     if err:
