@@ -606,10 +606,12 @@ const Router = ({ showToast }) => {
       const query = urlParams.toString();
       const newUrl = `${window.location.pathname}${query ? `?${query}` : ""}`;
       window.history.replaceState(null, "", newUrl);
-    } else if (veterinarian) {
+    } else if (veterinarian && !currentView) {
+      // Solo redirigir al dashboard si no hay vista actual establecida
+      // Esto evita redirigir cuando el usuario está navegando manualmente
       setCurrentView("dashboard");
     }
-  }, [veterinarian]);
+  }, [veterinarian, currentView]);
 
   if (loading) {
     return <LoadingScreen />;
@@ -5479,11 +5481,13 @@ const MembershipPage = ({ setView }) => {
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
 
   // Refrescar perfil al cargar la página de membresía para tener datos actualizados
+  // Solo refrescar una vez al montar el componente, no cada vez que cambia veterinarian
   useEffect(() => {
     if (veterinarian?.id) {
       refreshProfile();
     }
-  }, [veterinarian?.id, refreshProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo ejecutar al montar, no cuando cambia veterinarian
 
   // Si no está autenticado, mostrar mensaje y opción de login
   if (!veterinarian) {
