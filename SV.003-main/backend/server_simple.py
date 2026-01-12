@@ -51,6 +51,7 @@ from supabase_client import (
     insert_payment_transaction,
     list_consultations,
     list_medical_images,
+    list_profiles,
     update_consultation,
     update_payment_transaction,
     update_profile,
@@ -2664,6 +2665,60 @@ async def get_image_history(x_veterinarian_id: str = Header(None), limit: int = 
     if err:
         raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
     return {"images": rows}
+
+
+# ============================================
+# ADMIN ENDPOINTS
+# ============================================
+
+@app.post("/api/admin/give-trial-consultations")
+async def give_trial_consultations_to_all_users():
+    """
+    Endpoint administrativo para dar 3 consultas premium a todos los usuarios
+    que no tienen membresía activa y tienen 0 o menos consultas restantes.
+    """
+    print("[INFO] Iniciando proceso para dar 3 consultas premium a todos los usuarios sin membresía.")
+    
+    # Obtener todos los perfiles
+    profiles, err = list_profiles()
+    if err:
+        raise HTTPException(status_code=500, detail=f"Error listando perfiles: {err}")
+    
+    updated_count = 0
+    skipped_count = 0
+    
+    for profile in profiles:
+        profile_id = profile.get("id")
+        if not profile_id:
+            continue
+            
+        membership_type = profile.get("membership_type")
+        consultations_remaining = profile.get("consultations_remaining", 0)
+        
+        # Si no tiene membresía activa y tiene 0 o menos consultas, darle 3 consultas premium
+        if not membership_type and consultations_remaining <= 0:
+            update_fields = {
+                "consultations_remaining": 3,
+                "membership_type": None,  # Asegurar que no tenga membresía activa
+                "membership_expires": None,
+            }
+            err_upd = update_profile(profile_id, update_fields)
+            if err_upd:
+                print(f"[WARN] Error actualizando perfil {profile_id}: {err_upd}")
+            else:
+                updated_count += 1
+                email = profile.get("email", "sin email")
+                print(f"[INFO] Usuario {email} (ID: {profile_id}) actualizado con 3 consultas premium.")
+        else:
+            skipped_count += 1
+    
+    return {
+        "status": "ok",
+        "message": f"Se asignaron 3 consultas premium a {updated_count} usuarios.",
+        "updated_count": updated_count,
+        "skipped_count": skipped_count,
+        "total_profiles": len(profiles)
+    }
 
 
 # ============================================

@@ -265,3 +265,21 @@ def update_payment_transaction(session_id: str, fields: Dict[str, Any]) -> Optio
         return None
     except Exception as exc:  # noqa: BLE001
         return str(exc)
+
+
+def list_profiles(limit: int = 1000) -> Tuple[List[Dict[str, Any]], Optional[str]]:
+    """
+    Obtiene todos los perfiles (para uso administrativo).
+    """
+    client = get_supabase_client()
+    try:
+        resp = (
+            client.table("profiles")
+            .select("*")
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        return (resp.data or [], None)
+    except Exception as exc:  # noqa: BLE001
+        return ([], str(exc))
