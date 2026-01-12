@@ -4243,7 +4243,7 @@ const NewConsultation = ({ setView, existingConsultationId }) => {
                         Actualiza tu plan para acceder a esta función exclusiva.
                       </p>
                       <button
-                        onClick={() => setView("pricing")}
+                        onClick={() => setView("membership")}
                         className="btn btn-primary"
                         style={{ marginTop: "10px" }}
                       >
