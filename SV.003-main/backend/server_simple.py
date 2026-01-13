@@ -2721,6 +2721,30 @@ async def give_trial_consultations_to_all_users():
     }
 
 
+@app.post("/api/admin/delete-user")
+async def delete_user_by_email(email: str):
+    """
+    Endpoint administrativo para eliminar un usuario por email.
+    """
+    print(f"[INFO] Intentando eliminar usuario con email: {email}")
+    
+    from supabase_client import delete_profile_by_email
+    
+    success, error = delete_profile_by_email(email)
+    
+    if not success:
+        raise HTTPException(
+            status_code=404 if "no encontrado" in (error or "").lower() else 500,
+            detail=error or "Error eliminando usuario"
+        )
+    
+    return {
+        "status": "ok",
+        "message": f"Usuario {email} eliminado correctamente",
+        "email": email,
+    }
+
+
 # ============================================
 # RUN SERVER
 # ============================================
