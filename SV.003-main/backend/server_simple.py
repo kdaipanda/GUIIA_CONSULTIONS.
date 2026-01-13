@@ -1498,27 +1498,12 @@ async def create_consultation(payload: ConsultationStageOne):
     # Si tiene consultas de prueba (remaining > 0 pero sin membership_type), permitir como premium
     has_trial_consultations = not membership_type and remaining > 0
     
-    # Si no tiene membresía ni consultas, darle 3 consultas premium automáticamente
-    if not membership_type and remaining <= 0:
-        # Dar 3 consultas premium automáticamente a todos los usuarios
-        _, err_upd = upsert_profile({
-            "id": vet_id,
-            "consultations_remaining": 3,
-            "membership_type": None,  # Mantener None para indicar que son consultas de prueba
-        })
-        if err_upd:
-            print(f"[WARN] Error dando consultas de prueba a {vet_id}: {err_upd}")
-        else:
-            # Actualizar el perfil local para continuar
-            profile["consultations_remaining"] = 3
-            remaining = 3
-            has_trial_consultations = True
-            print(f"[INFO] Se dieron 3 consultas premium automáticamente a {vet_id}")
-    
+    # NO dar consultas automáticamente - solo se dan al registrarse
+    # Si no tiene membresía ni consultas, redirigir a comprar membresía
     if not membership_type and not has_trial_consultations:
         raise HTTPException(
             status_code=403,
-            detail="No tienes una membresía activa. Por favor, suscríbete a un plan para crear consultas."
+            detail="Has agotado tus 3 consultas de prueba. Por favor, suscríbete a un plan de membresía para continuar usando el servicio."
         )
 
     # Si tiene membresía, verificar que no esté expirada
