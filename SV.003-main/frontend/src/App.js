@@ -3964,9 +3964,13 @@ const NewConsultation = ({ setView, existingConsultationId }) => {
       return;
     }
 
-    // Verificar membresía Premium
+    // Verificar membresía Premium o consultas restantes
     const membershipType = veterinarian?.membership_type?.toLowerCase();
-    if (membershipType !== "premium") {
+    const consultationsRemaining = veterinarian?.consultations_remaining || 0;
+    const hasPremium = membershipType === "premium";
+    const hasTrialConsultations = !membershipType && consultationsRemaining > 0;
+
+    if (!hasPremium && !hasTrialConsultations) {
       setError(
         `Los análisis avanzados solo están disponibles para miembros Premium. Tu plan actual es: ${membershipType?.charAt(0).toUpperCase() + membershipType?.slice(1) || "Básica"}. Por favor, actualiza tu membresía para acceder a esta función.`
       );
@@ -4251,15 +4255,29 @@ const NewConsultation = ({ setView, existingConsultationId }) => {
                     <li>Referencias bibliográficas</li>
                   </ul>
 
-                  {veterinarian?.membership_type?.toLowerCase() === "premium" ? (
-                    <button
-                      onClick={handleAIAnalysis}
-                      disabled={loading}
-                      className="btn-generate-diagnosis"
-                    >
-                      {loading ? "Procesando..." : "Obtener Análisis"}
-                      {!loading && <span className="sparkle">✨</span>}
-                    </button>
+                  {(veterinarian?.membership_type?.toLowerCase() === "premium" || 
+                    (veterinarian?.consultations_remaining || 0) > 0) ? (
+                    <div>
+                      <button
+                        onClick={handleAIAnalysis}
+                        disabled={loading}
+                        className="btn-generate-diagnosis"
+                      >
+                        {loading ? "Procesando..." : "Obtener Análisis"}
+                        {!loading && <span className="sparkle">✨</span>}
+                      </button>
+                      {veterinarian?.membership_type?.toLowerCase() !== "premium" && 
+                       (veterinarian?.consultations_remaining || 0) > 0 && (
+                        <p style={{ 
+                          marginTop: "12px", 
+                          fontSize: "14px", 
+                          color: "#64748b",
+                          textAlign: "center" 
+                        }}>
+                          Consultas restantes: {veterinarian.consultations_remaining}
+                        </p>
+                      )}
+                    </div>
                   ) : (
                     <div className="premium-required-message" style={{
                       padding: "20px",
