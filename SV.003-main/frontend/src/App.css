@@ -11333,3 +11333,541 @@ html {
   opacity: 0.5;
   pointer-events: none;
 }
+
+/* ============================================
+   MEJORAS RESPONSIVE PARA MÓVILES
+   ============================================ */
+
+/* 1. Dashboard Mobile Improvements */
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: 24px 0 16px 0;
+    margin-bottom: 24px;
+  }
+  
+  .hero-greeting h1 {
+    font-size: 24px;
+  }
+  
+  .hero-greeting .greeting-icon {
+    font-size: 20px;
+  }
+  
+  .hero-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .hero-summary-divider {
+    display: none;
+  }
+  
+  .stats-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .action-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .quick-actions {
+    margin-top: 32px;
+  }
+  
+  .quick-actions h2 {
+    font-size: 20px;
+  }
+  
+  .quick-actions .btn {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .consultations-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+  
+  .consultations-table {
+    min-width: 600px;
+  }
+}
+
+/* 2. Consultation Forms Mobile */
+@media (max-width: 768px) {
+  .consultation-page {
+    padding: 16px;
+    margin-top: 0;
+  }
+  
+  .consultation-form-container {
+    flex-direction: column;
+  }
+  
+  .consultation-sidebar {
+    position: static;
+    margin-top: 24px;
+    width: 100%;
+    order: 2;
+  }
+  
+  .sidebar-section {
+    margin-bottom: 20px;
+  }
+  
+  .consultation-form {
+    width: 100%;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .form-actions .btn {
+    width: 100%;
+  }
+  
+  .analysis-prompt {
+    padding: 20px 16px;
+  }
+  
+  .analysis-prompt h3 {
+    font-size: 20px;
+  }
+  
+  .analysis-icon {
+    font-size: 48px;
+  }
+  
+  .analysis-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .analysis-actions .btn {
+    width: 100%;
+  }
+  
+  .form-section {
+    padding: 20px 16px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .category-card {
+    padding: 16px 12px;
+  }
+  
+  .category-card .category-icon {
+    font-size: 32px;
+  }
+  
+  .category-card h4 {
+    font-size: 14px;
+  }
+  
+  .stepper {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .stepper-step {
+    flex: 1;
+    min-width: 80px;
+  }
+  
+  .stepper-step-number {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+  
+  .stepper-step-label {
+    font-size: 11px;
+  }
+}
+
+/* 3. Tables and Lists Mobile */
+@media (max-width: 768px) {
+  .consultations-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .consultations-table {
+    min-width: 600px;
+  }
+  
+  .history-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .consultation-card {
+    padding: 16px;
+  }
+  
+  .consultation-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .consultation-card-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .consultation-card-actions .btn {
+    width: 100%;
+  }
+  
+  .consultation-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .consultation-info {
+    width: 100%;
+  }
+  
+  .consultations-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .consultation-header {
+    padding: 16px;
+  }
+}
+
+/* 4. Modals and Dialogs Mobile */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    max-height: 100vh;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+  
+  .modal-header {
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .modal-body {
+    padding: 16px;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    position: sticky;
+    bottom: 0;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+  }
+  
+  .modal-close {
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+  }
+}
+
+/* 5. Specific Components Mobile */
+@media (max-width: 768px) {
+  .page-title-header {
+    padding: 24px 0;
+  }
+  
+  .page-title-text h1 {
+    font-size: 24px;
+  }
+  
+  .page-title-text p {
+    font-size: 14px;
+  }
+  
+  .page-title-icon {
+    font-size: 32px;
+  }
+  
+  .weather-widget {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  .weather-info {
+    text-align: center;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="password"],
+  textarea,
+  select {
+    font-size: 16px; /* Previene zoom en iOS */
+  }
+  
+  .btn {
+    padding: 12px 24px;
+    min-height: 44px;
+  }
+  
+  .btn-sm {
+    padding: 10px 20px;
+    min-height: 40px;
+  }
+}
+
+/* 6. Navigation and Tabs Mobile */
+@media (max-width: 768px) {
+  .tabs-list {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .tabs-list::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .tabs-trigger {
+    white-space: nowrap;
+    padding: 12px 20px;
+  }
+  
+  .breadcrumbs {
+    font-size: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 0;
+  }
+  
+  .breadcrumb-item {
+    white-space: nowrap;
+  }
+}
+
+/* 7. Extra Small Mobile (320px - 480px) */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+  
+  .hero-greeting h1 {
+    font-size: 20px;
+  }
+  
+  .hero-greeting .greeting-icon {
+    font-size: 18px;
+  }
+  
+  .category-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .category-card {
+    padding: 14px 10px;
+  }
+  
+  .page-title-text h1 {
+    font-size: 20px;
+  }
+  
+  .quick-actions h2 {
+    font-size: 18px;
+  }
+  
+  .dashboard-header {
+    padding: 20px 0 12px 0;
+  }
+  
+  .form-section {
+    padding: 16px 12px;
+  }
+  
+  .consultation-page {
+    padding: 12px;
+  }
+}
+
+/* 8. Tablet Portrait (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .action-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .category-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .consultation-form-container {
+    gap: 24px;
+  }
+  
+  .consultation-sidebar {
+    width: 300px;
+  }
+}
+
+/* 9. Mobile UX Improvements */
+@media (max-width: 768px) {
+  /* Touch targets mínimo 44x44px */
+  button,
+  a.btn,
+  .clickable,
+  .icon-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Espaciado entre elementos clickeables */
+  .btn + .btn {
+    margin-top: 12px;
+  }
+  
+  .action-card {
+    padding: 20px 16px;
+  }
+  
+  .action-card .action-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+  
+  .action-card h3 {
+    font-size: 18px;
+  }
+  
+  .action-card p {
+    font-size: 13px;
+  }
+  
+  .stat-card {
+    padding: 20px 16px;
+  }
+  
+  .stat-card .stat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+  
+  .stat-label {
+    font-size: 13px;
+  }
+  
+  /* Mejorar legibilidad en móviles */
+  body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Scroll suave mejorado */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevenir selección accidental en botones */
+  button,
+  .btn {
+    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.2);
+    user-select: none;
+  }
+  
+  /* Mejorar inputs en móviles */
+  input,
+  textarea,
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 8px;
+  }
+  
+  /* Ajustar textareas */
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+  
+  /* Mejorar select en móviles */
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
+  }
+}
+
+/* 10. Landscape Mobile (480px - 768px height) */
+@media (max-width: 768px) and (orientation: landscape) {
+  .dashboard-header {
+    padding: 16px 0 12px 0;
+  }
+  
+  .hero-greeting h1 {
+    font-size: 22px;
+  }
+  
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .action-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .modal-content {
+    max-height: 90vh;
+  }
+}
