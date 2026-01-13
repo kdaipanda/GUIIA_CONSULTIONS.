@@ -1532,7 +1532,7 @@ async def create_consultation(payload: ConsultationStageOne):
         if remaining <= 0:
             raise HTTPException(
                 status_code=403,
-                detail="TRIAL_EXHAUSTED"  # Código especial para redirigir a planes
+                detail="Has agotado tus 3 consultas de prueba. Por favor, suscríbete a un plan de membresía para continuar usando el servicio."
             )
     elif membership_type != "premium":
         # Usuario con membresía pero no premium: verificar consultas
