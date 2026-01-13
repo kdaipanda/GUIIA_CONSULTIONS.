@@ -4968,6 +4968,8 @@ const MedicalImageInterpretation = ({ setView }) => {
   const [additionalContext, setAdditionalContext] = useState("");
   const [consultationId, setConsultationId] = useState("");
   const [pastedStudyData, setPastedStudyData] = useState("");  // Datos de estudio pegados
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
