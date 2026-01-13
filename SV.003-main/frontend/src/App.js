@@ -4059,7 +4059,27 @@ const NewConsultation = ({ setView, existingConsultationId }) => {
         </div>
 
         <div className="container">
-          {error && <div className="error-message">{error}</div>}
+          {error && (
+            <div className="error-message" style={{ 
+              padding: "20px", 
+              borderRadius: "8px",
+              marginBottom: "20px"
+            }}>
+              {error}
+              {(error.includes("agotado") || error.includes("consultas de prueba") || error.includes("membresía activa")) && (
+                <div style={{ marginTop: "15px" }}>
+                  <button
+                    type="button"
+                    onClick={() => setView("membership")}
+                    className="btn btn-primary"
+                    style={{ marginTop: "10px" }}
+                  >
+                    Ver Planes de Membresía
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="consultation-layout">
             <div className="consultation-main">
