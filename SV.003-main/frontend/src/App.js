@@ -3971,8 +3971,14 @@ const NewConsultation = ({ setView, existingConsultationId }) => {
     const hasTrialConsultations = !membershipType && consultationsRemaining > 0;
 
     if (!hasPremium && !hasTrialConsultations) {
+      // Determinar el nombre del plan actual
+      let planName = "Sin membresía";
+      if (membershipType) {
+        planName = membershipType.charAt(0).toUpperCase() + membershipType.slice(1);
+      }
+      
       setError(
-        `Los análisis avanzados solo están disponibles para miembros Premium. Tu plan actual es: ${membershipType?.charAt(0).toUpperCase() + membershipType?.slice(1) || "Básica"}. Por favor, actualiza tu membresía para acceder a esta función.`
+        `Los análisis avanzados solo están disponibles para miembros Premium. Tu plan actual es: ${planName}. Por favor, actualiza tu membresía para acceder a esta función.`
       );
       return;
     }
