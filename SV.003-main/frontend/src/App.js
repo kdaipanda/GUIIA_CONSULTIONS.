@@ -3880,8 +3880,14 @@ const NewConsultation = ({ setView, existingConsultationId }) => {
         const errorData = await response.json().catch(() => ({}));
         const errorDetail = errorData.detail || `Error del servidor: ${response.status}`;
         
-        // Si se agotaron las consultas de prueba, redirigir directamente a planes
-        if (errorDetail === "TRIAL_EXHAUSTED" || errorDetail.includes("consultas gratuitas")) {
+        // Si se agotaron las consultas de prueba o no tiene membresía, redirigir a planes
+        if (response.status === 403 && (
+          errorDetail.includes("agotado") || 
+          errorDetail.includes("consultas de prueba") ||
+          errorDetail.includes("consultas gratuitas") ||
+          errorDetail.includes("membresía activa") ||
+          errorDetail.includes("TRIAL_EXHAUSTED")
+        )) {
           setView("membership");
           return;
         }
