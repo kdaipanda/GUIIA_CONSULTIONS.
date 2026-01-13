@@ -658,6 +658,19 @@ def is_dev_user(email: str) -> bool:
     return email.lower().strip() in DEV_EMAILS
 
 
+def validate_trial_consultations_limit(membership_type: Optional[str], consultations_remaining: int) -> bool:
+    """
+    Valida que usuarios sin membresía no tengan más de 3 consultas de prueba.
+    Retorna True si es válido, lanza HTTPException si no.
+    """
+    if not membership_type and consultations_remaining > 3:
+        raise HTTPException(
+            status_code=400,
+            detail="Los usuarios sin membresía solo pueden tener máximo 3 consultas de prueba."
+        )
+    return True
+
+
 def generate_2fa_code():
     """Genera un código de 6 dígitos"""
     return "".join(secrets.choice(string.digits) for _ in range(6))
@@ -1495,6 +1508,9 @@ async def create_consultation(payload: ConsultationStageOne):
     membership_type = profile.get("membership_type")
     remaining = profile.get("consultations_remaining", 0)
     
+    # Validar que usuarios sin membresía no tengan más de 3 consultas
+    validate_trial_consultations_limit(membership_type, remaining)
+    
     # Si tiene consultas de prueba (remaining > 0 pero sin membership_type), permitir como premium
     has_trial_consultations = not membership_type and remaining > 0
     
@@ -2186,8 +2202,20 @@ async def stripe_webhook(request: Request):
             credits = int(transaction.get("credits") or metadata.get("credits") or 0)
             veterinarian, err = get_profile(veterinarian_id)
             if veterinarian and not err:
+                membership_type = veterinarian.get("membership_type")
                 current = int(veterinarian.get("consultations_remaining") or 0)
-                new_remaining = current + credits
+                
+                # Validar límite para usuarios sin membresía
+                if not membership_type:
+                    if current + credits > 3:
+                        # Limitar a 3 máximo
+                        new_remaining = 3
+                        print(f"[WARN] Usuario sin membresía limitado a 3 consultas. Tenía {current}, intentó agregar {credits}")
+                    else:
+                        new_remaining = current + credits
+                else:
+                    new_remaining = current + credits
+                
                 err_upd = update_profile(
                     veterinarian_id,
                     {"consultations_remaining": new_remaining},
@@ -2680,20 +2708,31 @@ async def give_trial_consultations_to_all_users():
         membership_type = profile.get("membership_type")
         consultations_remaining = profile.get("consultations_remaining", 0)
         
-        # Si no tiene membresía activa y tiene 0 o menos consultas, darle 3 consultas premium
-        if not membership_type and consultations_remaining <= 0:
-            update_fields = {
-                "consultations_remaining": 3,
-                "membership_type": None,  # Asegurar que no tenga membresía activa
-                "membership_expires": None,
-            }
-            err_upd = update_profile(profile_id, update_fields)
-            if err_upd:
-                print(f"[WARN] Error actualizando perfil {profile_id}: {err_upd}")
-            else:
-                updated_count += 1
+        # Si no tiene membresía activa, validar y asignar consultas
+        if not membership_type:
+            # Asegurar que no tenga más de 3 consultas
+            if consultations_remaining > 3:
+                # No actualizar, solo loguear
                 email = profile.get("email", "sin email")
-                print(f"[INFO] Usuario {email} (ID: {profile_id}) actualizado con 3 consultas premium.")
+                print(f"[WARN] Usuario {email} (ID: {profile_id}) ya tiene {consultations_remaining} consultas, omitiendo...")
+                skipped_count += 1
+                continue
+            # Solo asignar si tiene 0 o menos
+            if consultations_remaining <= 0:
+                update_fields = {
+                    "consultations_remaining": 3,
+                    "membership_type": None,  # Asegurar que no tenga membresía activa
+                    "membership_expires": None,
+                }
+                err_upd = update_profile(profile_id, update_fields)
+                if err_upd:
+                    print(f"[WARN] Error actualizando perfil {profile_id}: {err_upd}")
+                else:
+                    updated_count += 1
+                    email = profile.get("email", "sin email")
+                    print(f"[INFO] Usuario {email} (ID: {profile_id}) actualizado con 3 consultas premium.")
+            else:
+                skipped_count += 1
         else:
             skipped_count += 1
     
