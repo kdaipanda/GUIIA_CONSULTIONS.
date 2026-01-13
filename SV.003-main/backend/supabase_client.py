@@ -135,6 +135,28 @@ def update_profile(profile_id: str, fields: Dict[str, Any]) -> Optional[str]:
         return str(exc)
 
 
+def delete_profile_by_email(email: str) -> Tuple[bool, Optional[str]]:
+    """Elimina un perfil por email. Retorna (success, error_message)."""
+    client = get_supabase_client()
+    try:
+        # Primero buscar el perfil por email
+        profile, err = get_profile_by_email(email)
+        if err:
+            return (False, f"Error buscando perfil: {err}")
+        if not profile:
+            return (False, f"Usuario con email {email} no encontrado")
+        
+        # Eliminar el perfil
+        profile_id = profile.get("id")
+        if not profile_id:
+            return (False, "Perfil no tiene ID")
+        
+        client.table("profiles").delete().eq("id", profile_id).execute()
+        return (True, None)
+    except Exception as exc:  # noqa: BLE001
+        return (False, str(exc))
+
+
 def get_consultation_by_id(consultation_id: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     client = get_supabase_client()
     try:
