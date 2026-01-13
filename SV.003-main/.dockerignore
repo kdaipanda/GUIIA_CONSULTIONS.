@@ -1,0 +1,107 @@
+# Node modules (no necesario para backend)
+node_modules/
+frontend/node_modules/
+**/node_modules/
+
+# Frontend build files (no necesario para backend)
+frontend/
+frontend/build/
+frontend/dist/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (no necesario para build)
+*.md
+!README.md
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+tests/
+
+# Railway/Vercel
+.vercel/
+.railway/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.pyc
+*.pyo
+*.pyd
+
+# Large files
+*.zip
+*.tar.gz
+*.tar
+*.tgz
+*.deb
+*.dylib
+
+# Scripts no necesarios para producción
+*.bat
+*.ps1
+*.sh
+!start.sh
+
+# Backups
+*.backup
+*.bak
+*.tmp
+
+# Cache
+.cache/
+.pytest_cache/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Migration files (ya están en git, pero no necesarios en runtime)
+migrations/*.sql.backup
+
+# Video files (si hay alguno)
+*.mp4
+*.mov
+*.avi
+
