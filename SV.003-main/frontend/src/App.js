@@ -5061,6 +5061,7 @@ const MedicalImageInterpretation = ({ setView }) => {
   const [error, setError] = useState("");
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   const typeMeta = {
     blood_test: {
@@ -5310,6 +5311,115 @@ const MedicalImageInterpretation = ({ setView }) => {
 
               <div className="form-section">
                 <h3>Cargar Estudio</h3>
+                
+                {/* Alerta de ayuda para copiar PDFs */}
+                <div style={{
+                  marginBottom: '16px',
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px',
+                  overflow: 'hidden'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowHelp(!showHelp)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      textAlign: 'left',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: 'var(--text-primary)'
+                    }}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>ℹ️</span>
+                      <span>¿Cómo copiar texto de un PDF?</span>
+                    </span>
+                    <span style={{ fontSize: '18px' }}>{showHelp ? '▼' : '▶'}</span>
+                  </button>
+                  
+                  {showHelp && (
+                    <div style={{
+                      padding: '16px',
+                      borderTop: '1px solid var(--border-color)',
+                      backgroundColor: 'var(--bg-primary)',
+                      fontSize: '13px',
+                      lineHeight: '1.6',
+                      color: 'var(--text-primary)'
+                    }}>
+                      <div style={{ marginBottom: '16px' }}>
+                        <strong style={{ color: 'var(--accent-color)', display: 'block', marginBottom: '8px' }}>
+                          Caso 1: PDF normal (no escaneado ni bloqueado)
+                        </strong>
+                        <div style={{ marginLeft: '12px', marginBottom: '12px' }}>
+                          <strong>En un lector como Adobe Acrobat Reader:</strong>
+                          <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+                            <li>Abre el PDF.</li>
+                            <li>Haz clic con el botón derecho y elige la herramienta de selección (o simplemente intenta arrastrar sobre el texto).</li>
+                            <li>Arrastra el cursor sobre el texto que quieras copiar.</li>
+                            <li>Clic derecho → Copiar, o usa Ctrl+C y luego Ctrl+V donde lo quieras pegar.</li>
+                          </ul>
+                        </div>
+                        <div style={{ marginLeft: '12px' }}>
+                          <strong>En el navegador (Chrome, Edge, etc.):</strong>
+                          <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+                            <li>Abre el PDF en una pestaña.</li>
+                            <li>Selecciona el texto con el mouse.</li>
+                            <li>Ctrl+C y luego Ctrl+V en tu editor (Word, Bloc de notas, etc.).</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: '16px' }}>
+                        <strong style={{ color: 'var(--accent-color)', display: 'block', marginBottom: '8px' }}>
+                          Caso 2: PDF escaneado (es una imagen)
+                        </strong>
+                        <div style={{ marginLeft: '12px' }}>
+                          <p style={{ marginBottom: '8px' }}>
+                            Si al arrastrar el mouse no se selecciona texto, el PDF probablemente es una imagen y necesitas OCR.
+                          </p>
+                          <strong>Opciones fáciles y gratis:</strong>
+                          <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+                            <li>Usar una web de OCR (por ejemplo iLovePDF "OCR PDF", PDF Candy "Extraer texto" o similares). Entra al sitio, sube tu PDF, descarga el TXT/Word resultante y copia el texto.</li>
+                            <li>Convertir el PDF a Word/TXT en webs tipo Smallpdf, PDFgear, etc., y luego copiar el texto desde el archivo convertido.</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: '16px' }}>
+                        <strong style={{ color: 'var(--accent-color)', display: 'block', marginBottom: '8px' }}>
+                          Caso 3: PDF protegido contra copia
+                        </strong>
+                        <div style={{ marginLeft: '12px' }}>
+                          <p style={{ marginBottom: '8px' }}>
+                            Si sí se ve el texto pero no te deja copiarlo, está protegido:
+                          </p>
+                          <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+                            <li>Si conoces la contraseña, ábrelo en Adobe Acrobat y usa la opción de eliminar seguridad para quitar las restricciones, luego copia normalmente.</li>
+                            <li>Si no tienes la contraseña, algunas herramientas online ("desbloquear PDF") convierten el archivo a Word o lo dejan sin protección, y de ahí ya puedes copiar, siempre respetando derechos de autor.</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div>
+                        <strong style={{ color: 'var(--accent-color)', display: 'block', marginBottom: '8px' }}>
+                          Alternativa rápida: abrir en Word o Google Docs
+                        </strong>
+                        <ul style={{ marginTop: '4px', paddingLeft: '20px', marginLeft: '12px' }}>
+                          <li>Abrir PDF en Microsoft Word: Word lo convierte a documento editable y ya puedes copiar el texto.</li>
+                          <li>Subir el PDF a Google Drive, clic derecho → "Abrir con" → Documentos de Google, y luego copiar desde ahí.</li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 
                 {/* Área para pegar datos del estudio */}
                 <div className="form-group">
