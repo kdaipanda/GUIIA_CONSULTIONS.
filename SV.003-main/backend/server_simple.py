@@ -1768,34 +1768,44 @@ async def analyze_consultation(consultation_id: str, x_veterinarian_id: str = He
         raise HTTPException(status_code=404, detail="Consulta no encontrada")
 
     # Verificar que el usuario tenga membresía Premium o consultas de prueba
-    if x_veterinarian_id:
-        profile, err = get_profile(x_veterinarian_id)
-        if err or not profile:
-            raise HTTPException(
-                status_code=403,
-                detail="No se pudo verificar tu membresía. Los análisis avanzados solo están disponibles para miembros Premium."
-            )
-        
-        membership_type = profile.get("membership_type")
-        remaining = profile.get("consultations_remaining", 0)
-        
-        # Si tiene consultas de prueba (sin membership_type pero con consultas), permitir como premium
-        has_trial_consultations = not membership_type and remaining > 0
-        
-        if membership_type:
-            membership_type = membership_type.lower()
-        else:
-            membership_type = "trial" if has_trial_consultations else "basic"
-        
-        if membership_type not in ["premium", "trial"]:
-            raise HTTPException(
-                status_code=403,
-                detail=f"Los análisis avanzados solo están disponibles para miembros Premium. Tu plan actual es: {membership_type.capitalize()}. Por favor, actualiza tu membresía para acceder a esta función."
-            )
-    else:
+    if not x_veterinarian_id:
         raise HTTPException(
             status_code=401,
             detail="Se requiere autenticación para usar análisis avanzados."
+        )
+    
+    profile, err = get_profile(x_veterinarian_id)
+    if err or not profile:
+        raise HTTPException(
+            status_code=403,
+            detail="No se pudo verificar tu membresía. Los análisis avanzados solo están disponibles para miembros Premium."
+        )
+    
+    membership_type = profile.get("membership_type")
+    remaining = profile.get("consultations_remaining", 0)
+    
+    # Si tiene consultas de prueba (sin membership_type pero con consultas), permitir como premium
+    has_trial_consultations = not membership_type and remaining > 0
+    
+    # Guardar el tipo de membresía original para usar después
+    original_membership_type = membership_type.lower() if membership_type else None
+    
+    if membership_type:
+        membership_type = membership_type.lower()
+    else:
+        membership_type = "trial" if has_trial_consultations else "basic"
+    
+    if membership_type not in ["premium", "trial"]:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Los análisis avanzados solo están disponibles para miembros Premium. Tu plan actual es: {membership_type.capitalize()}. Por favor, actualiza tu membresía para acceder a esta función."
+        )
+    
+    # Validar que tenga consultas restantes (solo para usuarios no premium)
+    if membership_type != "premium" and remaining <= 0:
+        raise HTTPException(
+            status_code=403,
+            detail="No tienes consultas disponibles. Por favor, suscríbete a un plan de membresía para continuar."
         )
 
     # Obtener datos de la consulta
@@ -1843,6 +1853,18 @@ Por favor, genera un análisis clínico completo."""
         )
         if err_upd:
             raise HTTPException(status_code=500, detail=f"Error guardando análisis: {err_upd}")
+
+        # Decrementar consultations_remaining solo para usuarios no premium
+        # (usuarios premium tienen consultas ilimitadas)
+        if original_membership_type != "premium":
+            new_remaining = max(0, remaining - 1)
+            err_profile = update_profile(
+                x_veterinarian_id,
+                {"consultations_remaining": new_remaining}
+            )
+            if err_profile:
+                # Log el error pero no fallar la respuesta ya que el análisis ya se guardó
+                print(f"[WARN] Error actualizando consultations_remaining para {x_veterinarian_id}: {err_profile}")
 
         return {"analysis": analysis_text}
 
