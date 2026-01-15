@@ -359,7 +359,7 @@ const CommandPalette = ({ isOpen, onClose, setView, veterinarian }) => {
     commands.splice(3, 0, {
       id: "medical-images",
       title: "Interpretación de Análisis",
-      description: "Interpretación de análisis (Premium)",
+      description: "Interpretación de análisis de sangre y estudios clínicos (Premium)",
       icon: "🔬",
       shortcut: "I",
       action: () => setView("medical-images"),
@@ -3319,7 +3319,7 @@ const Dashboard = ({ setView, openConsultation }) => {
                 >
                   <div className="action-icon"><FlaskConical /></div>
                   <h3>Interpretación de Análisis</h3>
-                  <p>Interpretación de análisis</p>
+                  <p>Interpretación de análisis de sangre y estudios clínicos</p>
                   <span className="premium-badge">PREMIUM</span>
                 </button>
               )}
