@@ -628,6 +628,11 @@ class ConsultationPayloadUpdate(BaseModel):
     category: Optional[str] = None
     form_data: Optional[Dict[str, Any]] = None
     detalle_paciente: Optional[str] = None
+    parametros_vitales: Optional[str] = None
+    imagenes_videos: Optional[List[str]] = None
+    laboratorio_estudios: Optional[str] = None
+    ambiente_manejo: Optional[str] = None
+    notas_adicionales: Optional[str] = None
 
 class ObservationUpdate(BaseModel):
     detalle_paciente: str
@@ -652,10 +657,20 @@ DEV_EMAILS = {
     "premium@guiaa.vet",
 }
 
+# Usuarios con consultas ilimitadas
+UNLIMITED_CONSULTATIONS_EMAILS = {
+    "carlos.hernandez@vetmed.com",
+}
+
 
 def is_dev_user(email: str) -> bool:
     """Verifica si un email pertenece a un usuario de desarrollo"""
     return email.lower().strip() in DEV_EMAILS
+
+
+def has_unlimited_consultations(email: str) -> bool:
+    """Verifica si un email tiene consultas ilimitadas"""
+    return email.lower().strip() in UNLIMITED_CONSULTATIONS_EMAILS
 
 
 def validate_trial_consultations_limit(membership_type: Optional[str], consultations_remaining: int) -> bool:
@@ -1507,6 +1522,14 @@ async def create_consultation(payload: ConsultationStageOne):
     # Verificar membresía o consultas de prueba
     membership_type = profile.get("membership_type")
     remaining = profile.get("consultations_remaining", 0)
+    user_email = profile.get("email", "")
+    
+    # Verificar si el usuario tiene consultas ilimitadas
+    has_unlimited = has_unlimited_consultations(user_email) if user_email else False
+    
+    # Si tiene consultas ilimitadas, tratarlo como premium
+    if has_unlimited:
+        membership_type = "premium"
     
     # Validar que usuarios sin membresía no tengan más de 3 consultas
     validate_trial_consultations_limit(membership_type, remaining)
@@ -1542,15 +1565,18 @@ async def create_consultation(payload: ConsultationStageOne):
                 print(f"[WARN] Error parseando membership_expires para {vet_id}: {e}")
 
     # Verificar consultas disponibles
-    # Si tiene consultas de prueba, tratarlas como premium (sin restricciones)
-    if has_trial_consultations:
+    # Si tiene consultas ilimitadas o es premium, no verificar límites
+    if has_unlimited or membership_type == "premium":
+        # Usuario con consultas ilimitadas o premium: no verificar límites
+        pass
+    elif has_trial_consultations:
         # Usuario con consultas de prueba: permitir como premium
         if remaining <= 0:
             raise HTTPException(
                 status_code=403,
                 detail="Has agotado tus 3 consultas de prueba. Por favor, suscríbete a un plan de membresía para continuar usando el servicio."
             )
-    elif membership_type != "premium":
+    else:
         # Usuario con membresía pero no premium: verificar consultas
         if remaining <= 0:
             raise HTTPException(
@@ -1577,9 +1603,9 @@ async def create_consultation(payload: ConsultationStageOne):
     if err_ins:
         raise HTTPException(status_code=500, detail=f"Error guardando consulta: {err_ins}")
 
-    # Descontar crédito si no es premium (las consultas de prueba también se descuentan)
-    # Si tiene consultas de prueba (sin membership_type), tratarlas como premium pero descontar
-    if has_trial_consultations or (membership_type and membership_type != "premium"):
+    # Descontar crédito si no es premium y no tiene consultas ilimitadas (las consultas de prueba también se descuentan)
+    # Si tiene consultas ilimitadas, no descontar
+    if not has_unlimited and (has_trial_consultations or (membership_type and membership_type != "premium")):
         new_remaining = max(0, remaining - 1)
         _, err_prof = upsert_profile(
             {
@@ -1694,11 +1720,43 @@ async def update_consultation_payload(
         if payload.detalle_paciente is not None
         else current_payload.get("detalle_paciente")
     )
+    
+    # Campos adicionales del paso 2 (observaciones clínicas)
+    parametros_vitales = (
+        payload.parametros_vitales
+        if payload.parametros_vitales is not None
+        else current_payload.get("parametros_vitales")
+    )
+    imagenes_videos = (
+        payload.imagenes_videos
+        if payload.imagenes_videos is not None
+        else current_payload.get("imagenes_videos")
+    )
+    laboratorio_estudios = (
+        payload.laboratorio_estudios
+        if payload.laboratorio_estudios is not None
+        else current_payload.get("laboratorio_estudios")
+    )
+    ambiente_manejo = (
+        payload.ambiente_manejo
+        if payload.ambiente_manejo is not None
+        else current_payload.get("ambiente_manejo")
+    )
+    notas_adicionales = (
+        payload.notas_adicionales
+        if payload.notas_adicionales is not None
+        else current_payload.get("notas_adicionales")
+    )
 
     updated_payload = {
         "category": category,
         "form_data": form_data or {},
         "detalle_paciente": detalle,
+        "parametros_vitales": parametros_vitales,
+        "imagenes_videos": imagenes_videos,
+        "laboratorio_estudios": laboratorio_estudios,
+        "ambiente_manejo": ambiente_manejo,
+        "notas_adicionales": notas_adicionales,
     }
 
     err_upd = update_consultation(
@@ -1783,6 +1841,14 @@ async def analyze_consultation(consultation_id: str, x_veterinarian_id: str = He
     
     membership_type = profile.get("membership_type")
     remaining = profile.get("consultations_remaining", 0)
+    user_email = profile.get("email", "")
+    
+    # Verificar si el usuario tiene consultas ilimitadas
+    has_unlimited = has_unlimited_consultations(user_email) if user_email else False
+    
+    # Si tiene consultas ilimitadas, tratarlo como premium
+    if has_unlimited:
+        membership_type = "premium"
     
     # Si tiene consultas de prueba (sin membership_type pero con consultas), permitir como premium
     has_trial_consultations = not membership_type and remaining > 0
@@ -1801,8 +1867,8 @@ async def analyze_consultation(consultation_id: str, x_veterinarian_id: str = He
             detail=f"Los análisis avanzados solo están disponibles para miembros Premium. Tu plan actual es: {membership_type.capitalize()}. Por favor, actualiza tu membresía para acceder a esta función."
         )
     
-    # Validar que tenga consultas restantes (solo para usuarios no premium)
-    if membership_type != "premium" and remaining <= 0:
+    # Validar que tenga consultas restantes (solo para usuarios no premium y sin consultas ilimitadas)
+    if not has_unlimited and membership_type != "premium" and remaining <= 0:
         raise HTTPException(
             status_code=403,
             detail="No tienes consultas disponibles. Por favor, suscríbete a un plan de membresía para continuar."
@@ -1854,9 +1920,9 @@ Por favor, genera un análisis clínico completo."""
         if err_upd:
             raise HTTPException(status_code=500, detail=f"Error guardando análisis: {err_upd}")
 
-        # Decrementar consultations_remaining solo para usuarios no premium
-        # (usuarios premium tienen consultas ilimitadas)
-        if original_membership_type != "premium":
+        # Decrementar consultations_remaining solo para usuarios no premium y sin consultas ilimitadas
+        # (usuarios premium y con consultas ilimitadas no se descuentan)
+        if not has_unlimited and original_membership_type != "premium":
             new_remaining = max(0, remaining - 1)
             err_profile = update_profile(
                 x_veterinarian_id,
@@ -2515,7 +2581,16 @@ async def interpret_medical_image(request: ImageInterpretRequest):
         else:
             raise HTTPException(status_code=404, detail="Veterinario no encontrado")
 
-    if (vet_profile.get("membership_type") or "basic").lower() != "premium":
+    # Verificar si el usuario tiene consultas ilimitadas
+    user_email = vet_profile.get("email", "")
+    has_unlimited = has_unlimited_consultations(user_email) if user_email else False
+    membership_type = (vet_profile.get("membership_type") or "basic").lower()
+    
+    # Si tiene consultas ilimitadas, tratarlo como premium
+    if has_unlimited:
+        membership_type = "premium"
+    
+    if membership_type != "premium":
         raise HTTPException(status_code=403, detail="Función exclusiva para miembros Premium")
 
     image_id = str(uuid.uuid4())
