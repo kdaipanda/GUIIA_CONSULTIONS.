@@ -358,8 +358,8 @@ const CommandPalette = ({ isOpen, onClose, setView, veterinarian }) => {
   if (veterinarian?.membership_type?.toLowerCase() === "premium") {
     commands.splice(3, 0, {
       id: "medical-images",
-      title: "Interpretar Imágenes",
-      description: "Análisis de laboratorio (Premium)",
+      title: "Interpretación de Análisis",
+      description: "Interpretación de análisis (Premium)",
       icon: "🔬",
       shortcut: "I",
       action: () => setView("medical-images"),
@@ -595,7 +595,7 @@ const Router = ({ showToast }) => {
     if (sessionId) {
       // Solo redirigir a payment-success si el usuario está autenticado
       if (veterinarian) {
-        setCurrentView("payment-success");
+      setCurrentView("payment-success");
         setIsInitialized(true);
       } else {
         // Si no está autenticado pero hay session_id, limpiar la URL y redirigir al login
@@ -3318,8 +3318,8 @@ const Dashboard = ({ setView, openConsultation }) => {
                   className="action-card premium-feature"
                 >
                   <div className="action-icon"><FlaskConical /></div>
-                  <h3>Interpretar Imágenes</h3>
-                  <p>Análisis de laboratorio</p>
+                  <h3>Interpretación de Análisis</h3>
+                  <p>Interpretación de análisis</p>
                   <span className="premium-badge">PREMIUM</span>
                 </button>
               )}
@@ -3631,29 +3631,39 @@ const NewConsultation = ({ setView, existingConsultationId }) => {
         setConsultationId(consultation.id);
         setSelectedCategory(consultation.category);
         
+        // Extraer datos del payload si existe
+        const payload = consultation.payload || {};
+        const formDataFromPayload = payload.form_data || {};
+        
         // Populate form data
         setFormData(prev => ({
           ...prev,
-          fecha: consultation.fecha || prev.fecha,
-          nombre_mascota: consultation.nombre_mascota || "",
-          nombre_dueño: consultation.nombre_dueño || "",
-          raza: consultation.raza || "",
-          mix: consultation.mix || "",
-          edad: consultation.edad || "",
-          peso: consultation.peso || "",
-          condicion_corporal: consultation.condicion_corporal || "3",
-          sexo: consultation.sexo || "",
-          estado_reproductivo: consultation.estado_reproductivo || "",
-          vacunas_vigentes: consultation.vacunas_vigentes || "",
-          vacunas_cual: consultation.vacunas_cual || "",
-          desparasitacion_interna: consultation.desparasitacion_interna || "",
-          desparasitacion_interna_cual: consultation.desparasitacion_interna_cual || "",
-          desparasitacion_externa: consultation.desparasitacion_externa || "",
-          desparasitacion_externa_producto: consultation.desparasitacion_externa_producto || "",
-          desparasitacion_externa_fecha: consultation.desparasitacion_externa_fecha || "",
-          habitat: consultation.habitat || "",
-          zona_geografica: consultation.zona_geografica || "",
-          detalle_paciente: consultation.detalle_paciente || "",
+          fecha: consultation.fecha || formDataFromPayload.fecha || prev.fecha,
+          nombre_mascota: consultation.nombre_mascota || formDataFromPayload.nombre_mascota || "",
+          nombre_dueño: consultation.nombre_dueño || formDataFromPayload.nombre_dueño || "",
+          raza: consultation.raza || formDataFromPayload.raza || "",
+          mix: consultation.mix || formDataFromPayload.mix || "",
+          edad: consultation.edad || formDataFromPayload.edad || "",
+          peso: consultation.peso || formDataFromPayload.peso || "",
+          condicion_corporal: consultation.condicion_corporal || formDataFromPayload.condicion_corporal || "3",
+          sexo: consultation.sexo || formDataFromPayload.sexo || "",
+          estado_reproductivo: consultation.estado_reproductivo || formDataFromPayload.estado_reproductivo || "",
+          vacunas_vigentes: consultation.vacunas_vigentes || formDataFromPayload.vacunas_vigentes || "",
+          vacunas_cual: consultation.vacunas_cual || formDataFromPayload.vacunas_cual || "",
+          desparasitacion_interna: consultation.desparasitacion_interna || formDataFromPayload.desparasitacion_interna || "",
+          desparasitacion_interna_cual: consultation.desparasitacion_interna_cual || formDataFromPayload.desparasitacion_interna_cual || "",
+          desparasitacion_externa: consultation.desparasitacion_externa || formDataFromPayload.desparasitacion_externa || "",
+          desparasitacion_externa_producto: consultation.desparasitacion_externa_producto || formDataFromPayload.desparasitacion_externa_producto || "",
+          desparasitacion_externa_fecha: consultation.desparasitacion_externa_fecha || formDataFromPayload.desparasitacion_externa_fecha || "",
+          habitat: consultation.habitat || formDataFromPayload.habitat || "",
+          zona_geografica: consultation.zona_geografica || formDataFromPayload.zona_geografica || "",
+          detalle_paciente: consultation.detalle_paciente || payload.detalle_paciente || "",
+          // Campos adicionales del paso 2 (observaciones clínicas)
+          parametros_vitales: consultation.parametros_vitales || payload.parametros_vitales || "",
+          imagenes_videos: consultation.imagenes_videos || payload.imagenes_videos || [],
+          laboratorio_estudios: consultation.laboratorio_estudios || payload.laboratorio_estudios || "",
+          ambiente_manejo: consultation.ambiente_manejo || payload.ambiente_manejo || "",
+          notas_adicionales: consultation.notas_adicionales || payload.notas_adicionales || "",
         }));
         
         // Set AI analysis if exists
@@ -3915,6 +3925,12 @@ const NewConsultation = ({ setView, existingConsultationId }) => {
         category: selectedCategory,
         form_data: formData,
         detalle_paciente: formData.detalle_paciente,
+        // Campos adicionales del paso 2 (observaciones clínicas)
+        parametros_vitales: formData.parametros_vitales || null,
+        imagenes_videos: formData.imagenes_videos || null,
+        laboratorio_estudios: formData.laboratorio_estudios || null,
+        ambiente_manejo: formData.ambiente_manejo || null,
+        notas_adicionales: formData.notas_adicionales || null,
       };
       // Actualizar vía backend (evita errores "Failed to fetch" por Supabase directo)
       const resp = await fetch(`${BACKEND_URL}/api/consultations/${consultationId}/payload`, {
@@ -4310,14 +4326,14 @@ const NewConsultation = ({ setView, existingConsultationId }) => {
                   {(veterinarian?.membership_type?.toLowerCase() === "premium" || 
                     (veterinarian?.consultations_remaining || 0) > 0) ? (
                     <div>
-                      <button
-                        onClick={handleAIAnalysis}
-                        disabled={loading}
-                        className="btn-generate-diagnosis"
-                      >
-                        {loading ? "Procesando..." : "Obtener Análisis"}
-                        {!loading && <span className="sparkle">✨</span>}
-                      </button>
+                    <button
+                      onClick={handleAIAnalysis}
+                      disabled={loading}
+                      className="btn-generate-diagnosis"
+                    >
+                      {loading ? "Procesando..." : "Obtener Análisis"}
+                      {!loading && <span className="sparkle">✨</span>}
+                    </button>
                       {veterinarian?.membership_type?.toLowerCase() !== "premium" && 
                        (veterinarian?.consultations_remaining || 0) > 0 && (
                         <p style={{ 
