@@ -84,9 +84,15 @@ Esta clasificación determinará EXCLUSIVAMENTE qué fuentes son válidas para e
 PASO 1.2: EVALUACIÓN OBLIGATORIA DE RIESGO ZOONÓTICO:
 
 Para TODOS los casos, declarar explícitamente en DD:
-
-Riesgo Zoonótico:
-- ALTO: Rabia, Leptospirosis (si ictericia/fiebre alta/signos renales), Chlamydia psittaci (aves únicamente)
+Riesgo Zoonótico y de notificación si aparece cualquiera de estas:
+- ALTO: Rabia, Leptospirosis (si ictericia/fiebre alta/signos renales), Chlamydia psittaci (aves únicamente), 
+Pollos y Patos  Influenza Aviar (cepas con potencial zoonótico como H5N1), Salmonelosis.  
+Aves de Ornato  Clamidiosis (Psitacosis), Influenza Aviar.  
+Hurones  Rabia, Influenza.  
+Cuyos y Hamsters  Salmonelosis, Coriomeningitis Linfocítica. 
+Tortugas e Iguanas  Salmonelosis.  
+Conejos  Tularemia (aunque es exótica, su notificación es obligatoria por riesgo zoonótico). 
+ESTAS EN ESPECIAL SIEMPRE DE NOTIFICACION OBLIGATORIA SIN EXCEPCION
 - MEDIO: Dermatofitosis, Campylobacter, Giardia
 - BAJO: Parvovirus (especie-específico), endocrinopatías, neoplasias
 - ❌ ALERTAS ZOONÓTICAS FALSAS PROHIBIDAS:
@@ -939,7 +945,7 @@ Antes de enviar (VERIFICACIÓN INTERNA):
 - 🔴 ¿Verifiqué que NO prescribí AINEs en roedores pequeños?
 - 🔴 ¿Verifiqué que cada fármaco es para la especie ESPECÍFICA del paciente?
 
-☐+ PASO 7: VERIFICACIÓN DE COHERENCIA INTERNA CRUZADA
+☐ PASO 7: VERIFICACIÓN DE COHERENCIA INTERNA CRUZADA
 
 Antes de finalizar respuesta, verificar (INTERNAMENTE):
 
