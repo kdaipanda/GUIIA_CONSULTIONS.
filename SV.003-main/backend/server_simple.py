@@ -1545,8 +1545,8 @@ async def create_consultation(payload: ConsultationStageOne):
             detail="Has agotado tus 3 consultas de prueba. Por favor, suscríbete a un plan de membresía para continuar usando el servicio."
         )
 
-    # Si tiene membresía, verificar que no esté expirada
-    if membership_type:
+    # Si tiene membresía, verificar que no esté expirada (excepto si tiene consultas ilimitadas)
+    if membership_type and not has_unlimited:
         membership_type = membership_type.lower()
         membership_expires = profile.get("membership_expires")
         if membership_expires:
@@ -1563,6 +1563,9 @@ async def create_consultation(payload: ConsultationStageOne):
             except (ValueError, TypeError) as e:
                 # Si hay error parseando la fecha, continuar pero loguear
                 print(f"[WARN] Error parseando membership_expires para {vet_id}: {e}")
+    elif membership_type:
+        # Si tiene consultas ilimitadas, asegurar que membership_type esté en minúsculas
+        membership_type = membership_type.lower()
 
     # Verificar consultas disponibles
     # Si tiene consultas ilimitadas o es premium, no verificar límites
