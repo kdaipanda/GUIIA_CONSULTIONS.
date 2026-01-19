@@ -10,6 +10,7 @@ import { BarChart3, CalendarDays, Gem, Sun, Cloud, CloudRain, CloudSun, Thermome
 import * as Tabs from "@radix-ui/react-tabs";
 import Lenis from "lenis";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 import "./App.css";
 import "./Custom.css";
 import "./ThemeEnhancements.css";
@@ -532,6 +533,7 @@ function App() {
         <Router showToast={showToast} />
         <ToastContainer toasts={toasts} onClose={closeToast} />
         <SpeedInsights />
+        <Analytics />
       </div>
     </VetProvider>
   );
