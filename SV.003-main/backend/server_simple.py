@@ -984,17 +984,23 @@ async def register_veterinarian(vet: VeterinarianRegister):
 async def login_veterinarian(credentials: VeterinarianLogin):
     """Login de veterinario"""
 
+    email = (credentials.email or "").strip().lower()
+    cedula = (credentials.cedula_profesional or "").strip()
+    if not email or not cedula:
+        raise HTTPException(status_code=400, detail="Email y cédula son requeridos")
+
     # Buscar en Supabase
-    veterinarian, err = get_profile_by_credentials(credentials.email, credentials.cedula_profesional)
+    veterinarian, err = get_profile_by_credentials(email, cedula)
     
     if err:
         print(f"Error buscando usuario: {err}")
+        raise HTTPException(status_code=500, detail="Error de conexión con la base de datos")
     
     if not veterinarian:
         raise HTTPException(status_code=401, detail="Credenciales inválidas")
 
     # Usuario de desarrollo: auto-verificar si no está verificado
-    is_dev = is_dev_user(credentials.email)
+    is_dev = is_dev_user(email)
     ced_status = (veterinarian.get("cedula_verification_status") or "").strip() or CEDULA_STATUS_UNSUBMITTED
     
     if is_dev and ced_status != CEDULA_STATUS_VERIFIED:
@@ -1011,7 +1017,7 @@ async def login_veterinarian(credentials: VeterinarianLogin):
         if not err_upd:
             veterinarian.update(update_fields)
             ced_status = CEDULA_STATUS_VERIFIED  # Forzar status verificado
-            print(f"[DEV] Auto-verificación aplicada para {credentials.email}")
+            print(f"[DEV] Auto-verificación aplicada para {email}")
 
     # Gating: manejar estados de verificación de cédula
     if ced_status != CEDULA_STATUS_VERIFIED:

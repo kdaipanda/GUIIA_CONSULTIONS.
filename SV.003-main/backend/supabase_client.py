@@ -95,8 +95,12 @@ def get_profile(profile_id: str) -> Tuple[Optional[Dict[str, Any]], Optional[str
 def get_profile_by_email(email: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     """Busca perfil por email."""
     client = get_supabase_client()
+    normalized_email = (email or "").strip().lower()
+    if not normalized_email:
+        return (None, "Email requerido")
     try:
-        resp = client.table("profiles").select("*").eq("email", email).limit(1).execute()
+        # Usar ilike para tolerar diferencias de mayúsculas/minúsculas.
+        resp = client.table("profiles").select("*").ilike("email", normalized_email).limit(1).execute()
         return (resp.data[0] if resp.data else None, None)
     except Exception as exc:  # noqa: BLE001
         return (None, str(exc))
@@ -115,12 +119,16 @@ def get_profile_by_cedula(cedula: str) -> Tuple[Optional[Dict[str, Any]], Option
 def get_profile_by_credentials(email: str, cedula: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     """Busca perfil por email Y cédula (para login)."""
     client = get_supabase_client()
+    normalized_email = (email or "").strip().lower()
+    normalized_cedula = (cedula or "").strip()
+    if not normalized_email or not normalized_cedula:
+        return (None, "Email y cédula requeridos")
     try:
         resp = (
             client.table("profiles")
             .select("*")
-            .eq("email", email)
-            .eq("cedula_profesional", cedula)
+            .ilike("email", normalized_email)
+            .eq("cedula_profesional", normalized_cedula)
             .limit(1)
             .execute()
         )
