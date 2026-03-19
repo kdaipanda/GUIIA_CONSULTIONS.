@@ -22,7 +22,8 @@ def get_supabase_client() -> Client:
 
     Env vars required:
     - SUPABASE_URL
-    - SUPABASE_SERVICE_ROLE_KEY
+    - SUPABASE_SERVICE_ROLE_KEY (preferred)
+    - SUPABASE_KEY (legacy fallback)
     """
     if create_client is None:
         raise SupabaseConfigError(
@@ -30,9 +31,12 @@ def get_supabase_client() -> Client:
             "o configura el modo local sin Supabase."
         )
     url = os.getenv("SUPABASE_URL")
-    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    # Compatibilidad: en algunos despliegues antiguos se usa SUPABASE_KEY.
+    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
     if not url or not key:
-        raise SupabaseConfigError("SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY no configurados")
+        raise SupabaseConfigError(
+            "SUPABASE_URL y (SUPABASE_SERVICE_ROLE_KEY o SUPABASE_KEY) deben estar configurados"
+        )
     return create_client(url, key)
 
 

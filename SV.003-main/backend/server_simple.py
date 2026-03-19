@@ -6,6 +6,7 @@ import secrets
 import string
 import sys
 import io
+import socket
 import unicodedata
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -1646,6 +1647,17 @@ async def get_config_diagnostics():
     anthropic_from_system = os.getenv("ANTHROPIC_API_KEY", "")
     stripe_secret_from_system = os.getenv("STRIPE_API_KEY", "")
     stripe_public_from_system = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+    supabase_url = os.getenv("SUPABASE_URL", "").strip()
+    supabase_service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+    supabase_legacy_key = os.getenv("SUPABASE_KEY", "").strip()
+    supabase_host = urlparse(supabase_url).hostname if supabase_url else None
+    supabase_dns_resolves = False
+    if supabase_host:
+        try:
+            socket.getaddrinfo(supabase_host, 443)
+            supabase_dns_resolves = True
+        except OSError:
+            supabase_dns_resolves = False
     
     return {
         "environment": {
@@ -1668,6 +1680,14 @@ async def get_config_diagnostics():
             "public_in_system": bool(stripe_public_from_system),
             "webhook_configured": bool(STRIPE_WEBHOOK_SECRET),
             "sdk_available": stripe is not None,
+        },
+        "supabase": {
+            "url_configured": bool(supabase_url),
+            "service_role_key_configured": bool(supabase_service_role_key),
+            "legacy_key_configured": bool(supabase_legacy_key),
+            "effective_key_configured": bool(supabase_service_role_key or supabase_legacy_key),
+            "url_host": supabase_host,
+            "dns_resolves": supabase_dns_resolves,
         },
         "recommendations": []
     }
