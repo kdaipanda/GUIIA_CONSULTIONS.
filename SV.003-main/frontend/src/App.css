@@ -9,6 +9,12 @@ html, body {
   margin: 0;
   padding: 0;
   width: 100%;
+  overflow-x: hidden;
+}
+
+#root {
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* Lenis Smooth Scroll */
@@ -5372,6 +5378,17 @@ h1, h2, h3, h4, h5, h6 {
   
   .nav-brand {
     flex: 1;
+    min-width: 0;
+  }
+
+  .nav-brand-text {
+    min-width: 0;
+  }
+
+  .nav-brand-subtitle,
+  .nav-brand-subsubtitle {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   
   .nav-brand h1 {
@@ -7180,13 +7197,17 @@ h1, h2, h3, h4, h5, h6 {
 
 .landing-page {
   background: #ffffff;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* Hero Section - Full Width */
 .hero-ivet {
   min-height: calc(100vh - 64px);
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
   background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0c4a6e 100%);
   position: relative;
   overflow: hidden;
@@ -7212,6 +7233,11 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   position: relative;
   z-index: 1;
+  width: 100%;
+  max-width: min(1200px, 100%);
+  min-width: 0;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .hero-content {
