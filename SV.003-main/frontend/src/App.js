@@ -1440,14 +1440,6 @@ const LandingPage = ({ setView }) => {
         </div>
       </section>
 
-      {/* Back to Top Button */}
-      <button 
-        className="back-to-top visible"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      >
-        ↑
-      </button>
-
       {/* Footer */}
       <footer className="footer-modern">
         <div className="container">
