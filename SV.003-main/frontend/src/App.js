@@ -1440,17 +1440,6 @@ const LandingPage = ({ setView }) => {
         </div>
       </section>
 
-      {/* WhatsApp Float Button */}
-      <a 
-        href="https://wa.me/5215512345678?text=Hola,%20me%20interesa%20GUIAA" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="whatsapp-float"
-      >
-        💬
-        <span className="whatsapp-tooltip">¿Necesitas ayuda?</span>
-      </a>
-      
       {/* Back to Top Button */}
       <button 
         className="back-to-top visible"
