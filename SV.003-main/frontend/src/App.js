@@ -653,6 +653,7 @@ const Router = ({ showToast }) => {
   return (
     <>
       {views[currentView] || <LandingPage setView={handleSetView} />}
+      <SupportChatWidget currentView={currentView} />
       <CommandPalette
         isOpen={isCmdkOpen}
         onClose={() => setCmdkOpen(false)}
@@ -660,6 +661,122 @@ const Router = ({ showToast }) => {
         veterinarian={veterinarian}
       />
     </>
+  );
+};
+
+const SupportChatWidget = ({ currentView }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      role: "assistant",
+      content:
+        "Hola, soy tu asistente de soporte GUIAA. Te ayudo con dudas de login, pagos, membresía, cédula y uso de la plataforma.",
+    },
+  ]);
+  const listRef = useRef(null);
+
+  useEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight;
+    }
+  }, [messages, isOpen]);
+
+  const handleSend = async () => {
+    const text = input.trim();
+    if (!text || isSending) return;
+
+    const nextMessages = [...messages, { role: "user", content: text }];
+    setMessages(nextMessages);
+    setInput("");
+    setIsSending(true);
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/support/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          context_view: currentView,
+          history: messages.map((m) => ({ role: m.role, content: m.content })),
+        }),
+      });
+
+      const raw = await response.text().catch(() => "");
+      let data = {};
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch (e) {}
+
+      if (!response.ok) {
+        const detail = data?.detail || "No pude responder en este momento.";
+        throw new Error(typeof detail === "string" ? detail : "Error de soporte");
+      }
+
+      const answer =
+        (data?.answer || "").toString().trim() ||
+        "No pude generar una respuesta por ahora.";
+      setMessages((prev) => [...prev, { role: "assistant", content: answer }]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            err?.message ||
+            "No pude conectar con soporte. Inténtalo de nuevo en unos segundos.",
+        },
+      ]);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <div className="support-chat-root">
+      {isOpen && (
+        <div className="support-chat-panel">
+          <div className="support-chat-header">
+            <strong>Soporte GUIAA</strong>
+            <button onClick={() => setIsOpen(false)} aria-label="Cerrar chat">✕</button>
+          </div>
+          <div className="support-chat-messages" ref={listRef}>
+            {messages.map((msg, idx) => (
+              <div
+                key={`${msg.role}-${idx}`}
+                className={`support-chat-bubble ${msg.role === "user" ? "user" : "assistant"}`}
+              >
+                {msg.content}
+              </div>
+            ))}
+            {isSending && <div className="support-chat-typing">Escribiendo...</div>}
+          </div>
+          <div className="support-chat-input-row">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSend();
+              }}
+              placeholder="Escribe tu duda..."
+              maxLength={500}
+            />
+            <button onClick={handleSend} disabled={isSending || !input.trim()}>
+              Enviar
+            </button>
+          </div>
+        </div>
+      )}
+      <button
+        className="support-chat-toggle"
+        onClick={() => setIsOpen((v) => !v)}
+        aria-label="Abrir soporte"
+      >
+        {isOpen ? "–" : "💬"}
+      </button>
+    </div>
   );
 };
 

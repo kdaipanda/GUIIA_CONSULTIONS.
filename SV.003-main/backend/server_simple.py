@@ -595,6 +595,16 @@ class TwoFactorVerify(BaseModel):
     code: str
 
 
+class SupportChatRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=2000)
+    history: List[Dict[str, str]] = Field(default_factory=list)
+    context_view: Optional[str] = None
+
+
+class SupportChatResponse(BaseModel):
+    answer: str
+
+
 class ConsultationCreate(BaseModel):
     animal_id: str
     category: str
@@ -867,6 +877,96 @@ async def test_claude_connection():
         result["traceback"] = traceback.format_exc()[:500]
     
     return result
+
+
+async def send_support_chat_message(
+    message: str,
+    history: Optional[List[Dict[str, str]]] = None,
+    context_view: Optional[str] = None,
+) -> str:
+    """
+    Asistente de soporte para dudas de uso de la plataforma.
+    Limita el contexto a preguntas operativas de la app (no análisis clínico).
+    """
+    if not ANTHROPIC_API_KEY:
+        raise ValueError("ANTHROPIC_API_KEY no configurada")
+    if Anthropic is None:
+        raise ValueError("El paquete 'anthropic' no está instalado en el backend")
+
+    global anthropic_client
+    if anthropic_client is None:
+        anthropic_client = Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    safe_history = history or []
+    normalized_history: List[Dict[str, Any]] = []
+    for item in safe_history[-6:]:
+        role = (item.get("role") or "").strip().lower()
+        content = (item.get("content") or "").strip()
+        if role not in ("user", "assistant") or not content:
+            continue
+        normalized_history.append(
+            {
+                "role": role,
+                "content": [{"type": "text", "text": content[:1200]}],
+            }
+        )
+
+    context_line = f"Vista actual: {context_view}" if context_view else "Vista actual: no especificada"
+    system_prompt = (
+        "Eres el asistente de soporte de GUIAA. "
+        "Responde en español, de forma breve, clara y accionable. "
+        "Ayuda únicamente con uso de la aplicación: login, registro, cédula, membresías, pagos, "
+        "consultas, historial, configuración y errores de la plataforma. "
+        "Si te piden análisis clínico veterinario o tratamiento médico, rechaza de forma breve y "
+        "redirige a usar el flujo de consulta clínica dentro de la app. "
+        "No inventes funciones inexistentes."
+    )
+
+    user_text = f"{context_line}\n\nPregunta del usuario:\n{message.strip()[:2000]}"
+    messages_payload = normalized_history + [
+        {"role": "user", "content": [{"type": "text", "text": user_text}]}
+    ]
+
+    def _call_support() -> str:
+        response = anthropic_client.messages.create(
+            model=ANTHROPIC_MODEL or "claude-3-5-sonnet-20241022",
+            max_tokens=min(ANTHROPIC_MAX_TOKENS, 900),
+            temperature=0.2,
+            top_p=ANTHROPIC_TOP_P,
+            top_k=ANTHROPIC_TOP_K,
+            system=system_prompt,
+            messages=messages_payload,
+        )
+        text_blocks = [
+            block.text for block in response.content if getattr(block, "type", "") == "text"
+        ]
+        return ("".join(text_blocks).strip() or "No se pudo generar respuesta por el momento.")[:4000]
+
+    try:
+        return await asyncio.to_thread(_call_support)
+    except APIStatusError as exc:
+        msg = exc.message or "Error de API Anthropic"
+        raise RuntimeError(f"Error Anthropic {exc.status_code}: {msg}") from exc
+    except Exception as exc:  # noqa: BLE001
+        raise RuntimeError(f"Error en soporte IA: {exc}") from exc
+
+
+@app.post("/api/support/chat", response_model=SupportChatResponse)
+async def support_chat(payload: SupportChatRequest):
+    """Chatbot de soporte para dudas de la aplicación."""
+    try:
+        answer = await send_support_chat_message(
+            message=payload.message,
+            history=payload.history,
+            context_view=payload.context_view,
+        )
+        return SupportChatResponse(answer=answer)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=f"Error en chat de soporte: {exc}")
 
 
 @app.post("/api/test/analysis")
