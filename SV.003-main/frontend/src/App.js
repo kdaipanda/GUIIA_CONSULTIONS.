@@ -1039,12 +1039,12 @@ const LandingPage = ({ setView }) => {
             </h1>
             
             <p className="hero-subtitle">
-              Plataforma de soporte a la decisión clínica que integra anamnesis, hallazgos clínicos 
-              y antecedentes para proponer planes diagnósticos y terapéuticos basados en evidencia.
+              Integra anamnesis, hallazgos clínicos y antecedentes para proponer
+              planes diagnósticos y terapéuticos basados en evidencia.
               Diseñada exclusivamente para médicos veterinarios certificados.
             </p>
             <p className="hero-subtitle hero-subtitle-secondary">
-              Única plataforma en el mundo de diagnóstico médico veterinario con soporte CDS avanzado
+              Plataforma de diagnóstico veterinario con soporte CDS avanzado
               de nivel L4 y L5.
             </p>
             
@@ -1166,7 +1166,10 @@ const LandingPage = ({ setView }) => {
           <div className="section-header">
             <span className="section-badge">Características</span>
             <h2>Herramientas clínicas integradas para tu práctica</h2>
-            <p>Suite de soporte clínico diseñada para estructurar la anamnesis, el razonamiento diagnóstico y el plan terapéutico en cada consulta.</p>
+            <p>
+              Suite de soporte clínico para estructurar anamnesis, razonamiento
+              diagnóstico y plan terapéutico en cada consulta.
+            </p>
           </div>
           
           <div className="features-grid">
