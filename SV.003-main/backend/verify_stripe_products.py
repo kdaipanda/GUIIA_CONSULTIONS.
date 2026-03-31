@@ -72,3 +72,7 @@ print("   - Configurar price_ids en el backend")
 print("   - Modificar el código para usar price_id en lugar de price_data")
 print("   - Mapear productos de Stripe a packages del backend")
 
+
+
+
+

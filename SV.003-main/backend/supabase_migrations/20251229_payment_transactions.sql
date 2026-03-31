@@ -43,3 +43,7 @@ comment on column public.payment_transactions.payment_status is 'Estado del pago
 
 
 
+
+
+
+

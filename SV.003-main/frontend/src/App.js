@@ -3175,7 +3175,7 @@ const Dashboard = ({ setView, openConsultation }) => {
 
       <div className="container">
         <div className="dashboard-header">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div className="dashboard-header-row">
             <div className="hero-welcome">
               <div className="hero-greeting">
                 <h1>
@@ -3215,21 +3215,37 @@ const Dashboard = ({ setView, openConsultation }) => {
                 )}
               </div>
             </div>
-            <div className="hero-actions">
+            <div
+              className="hero-actions dashboard-header-toolbar"
+              role="toolbar"
+              aria-label="Acciones del panel"
+            >
               <button
+                type="button"
                 ref={notificationToggleRef}
                 onClick={() => setNotificationPanelOpen(!isNotificationPanelOpen)}
                 className="icon-btn"
+                aria-label={
+                  isNotificationPanelOpen
+                    ? "Cerrar notificaciones"
+                    : "Abrir notificaciones"
+                }
+                aria-expanded={isNotificationPanelOpen}
               >
-                <Bell size={18} />
+                <Bell size={18} aria-hidden />
                 {notifications.filter((n) => !n.read).length > 0 && (
                   <span className="notification-badge">
                     {notifications.filter((n) => !n.read).length}
                   </span>
                 )}
               </button>
-              <button onClick={toggleTheme} className="icon-btn">
-                {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="icon-btn"
+                aria-label={theme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
+              >
+                {theme === "dark" ? <Sun size={18} aria-hidden /> : <Moon size={18} aria-hidden />}
               </button>
             </div>
           </div>
@@ -3392,6 +3408,7 @@ const Dashboard = ({ setView, openConsultation }) => {
           </div>
           )}
 
+          <section className="dashboard-block dashboard-block-actions">
           <div className="quick-actions">
             <h2>Acciones Rápidas</h2>
             <div className="action-cards">
@@ -3441,7 +3458,13 @@ const Dashboard = ({ setView, openConsultation }) => {
               </button>
             </div>
           </div>
+          </section>
 
+          <section className="dashboard-block dashboard-block-activity">
+          <div className="dashboard-block-head">
+            <h2>Actividad clínica</h2>
+            <p>Seguimiento de consultas, accesos rápidos y casos recientes.</p>
+          </div>
           <Tabs.Root className="tabs-root" defaultValue="activity">
             <Tabs.List className="tabs-list" aria-label="Secciones del dashboard">
               <Tabs.Trigger className="tabs-trigger" value="activity">Actividad</Tabs.Trigger>
@@ -3594,6 +3617,7 @@ const Dashboard = ({ setView, openConsultation }) => {
               </div>
             </Tabs.Content>
           </Tabs.Root>
+          </section>
         </div>
       </div>
     </div>

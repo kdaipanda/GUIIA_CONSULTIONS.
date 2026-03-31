@@ -49,3 +49,7 @@ https://tu-dominio-railway.app/api/stripe/config
 4. Revisa los logs en Railway para ver errores específicos
 
 
+
+
+
+

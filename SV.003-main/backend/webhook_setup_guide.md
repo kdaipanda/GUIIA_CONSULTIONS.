@@ -46,3 +46,7 @@ GET http://localhost:8000/api/stripe/config
 - El endpoint del webhook es: `/api/payments/stripe/webhook`
 
 
+
+
+
+

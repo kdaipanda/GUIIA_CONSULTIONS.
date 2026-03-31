@@ -768,6 +768,15 @@ kbd {
     min-width: 38px;
     min-height: 38px;
   }
+
+  /* Dashboard: mantener objetivos táctiles cómodos en el header */
+  .dashboard-page .dashboard-header-toolbar .icon-btn {
+    padding: 0;
+    min-width: 46px;
+    min-height: 46px;
+    width: 46px;
+    height: 46px;
+  }
 }
 
 /* ============================================

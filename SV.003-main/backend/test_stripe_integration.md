@@ -93,3 +93,7 @@ El código actual **funciona correctamente** usando productos dinámicos. Si qui
 1. **Mantenga el sistema actual** (productos dinámicos) - Funciona bien
 2. **Modifique para usar tus productos** - Requiere cambios en el código
 
+
+
+
+

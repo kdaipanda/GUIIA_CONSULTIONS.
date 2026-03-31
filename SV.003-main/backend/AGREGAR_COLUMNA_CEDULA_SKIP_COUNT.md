@@ -79,3 +79,6 @@ Deberías ver:
 - El valor por defecto es 0 (sin posposiciones)
 - Todos los usuarios existentes se actualizarán automáticamente a 0
 
+
+
+

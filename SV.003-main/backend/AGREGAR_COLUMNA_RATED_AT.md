@@ -105,3 +105,6 @@ Deberías ver:
 - Se agregó un índice en `rated_at` para mejorar las consultas por fecha de calificación
 - Se agregó un constraint para asegurar que `rating` esté entre 1 y 5
 
+
+
+
