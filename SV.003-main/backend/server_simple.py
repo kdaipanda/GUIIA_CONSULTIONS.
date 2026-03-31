@@ -2855,9 +2855,10 @@ async def interpret_medical_image(request: ImageInterpretRequest):
         "analysis": analysis_text,
         "findings": findings,
         "recommendations": recommendations,
-        "additional_context": request.additional_context,
         "created_at": created_at,
     }
+    if request.additional_context and str(request.additional_context).strip():
+        analysis_row["additional_context"] = str(request.additional_context).strip()
 
     inserted, err_ins = insert_medical_image(analysis_row)
     if err_ins:

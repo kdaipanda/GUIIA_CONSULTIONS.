@@ -61,9 +61,10 @@ export async function uploadMedicalImageSupabase({ userId, file, imageType = "ge
     image_type: imageType,
     patient_name: patientName || null,
     image_url: publicUrl,
-    additional_context: additionalContext || null,
     created_at: new Date().toISOString(),
   };
+  const ctx = additionalContext && String(additionalContext).trim();
+  if (ctx) row.additional_context = ctx;
 
   const { data, error } = await supabase.from("medical_images").insert(row).select().single();
   if (error) throw error;
