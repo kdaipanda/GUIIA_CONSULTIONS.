@@ -19,7 +19,6 @@ import {
   listConsultationsSupabase,
   updateConsultationPayloadSupabase,
   uploadMedicalImageSupabase,
-  listMedicalImagesSupabase,
 } from "./lib/supabaseApi";
 
 // Lenis Smooth Scroll Hook - Fast & Responsive
@@ -5215,7 +5214,22 @@ const MedicalImageInterpretation = ({ setView }) => {
   const loadHistory = async () => {
     try {
       console.log("Cargando historial para veterinario:", veterinarian.id);
-      const rows = await listMedicalImagesSupabase(veterinarian.id, 50);
+      const response = await fetch(
+        `${BACKEND_URL}/api/medical-images/history?limit=50`,
+        {
+          headers: {
+            "X-Veterinarian-Id": veterinarian.id,
+          },
+        },
+      );
+      if (!response.ok) {
+        const errText = await response.text().catch(() => "");
+        throw new Error(
+          errText ? errText.slice(0, 200) : `Error del servidor: ${response.status}`,
+        );
+      }
+      const json = await response.json();
+      const rows = Array.isArray(json.images) ? json.images : [];
       console.log("Historial cargado:", rows);
       console.log("Número de registros:", rows?.length || 0);
       setHistory(rows || []);

@@ -1,4 +1,6 @@
+import json
 import os
+import re
 from functools import lru_cache
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -207,13 +209,60 @@ def count_consultations_by_user(user_id: str) -> Tuple[int, Optional[str]]:
         return (0, str(exc))
 
 
+def _merge_medical_image_stripped(current: Dict[str, Any], removed_col: str, val: Any) -> None:
+    """Si una columna no existe en BD, fusiona su contenido en analysis o findings."""
+    if removed_col in ("findings", "recommendations", "additional_context"):
+        if removed_col == "findings" and isinstance(val, list):
+            extra = "\n\n## Hallazgos\n" + "\n".join(f"- {x}" for x in val)
+        elif removed_col == "recommendations" and isinstance(val, list):
+            extra = "\n\n## Recomendaciones\n" + "\n".join(f"- {x}" for x in val)
+        elif removed_col == "additional_context" and val:
+            extra = "\n\n## Contexto adicional\n" + str(val)
+        else:
+            extra = f"\n\n## {removed_col}\n{json.dumps(val) if isinstance(val, (list, dict)) else val}"
+        current["analysis"] = (current.get("analysis") or "") + extra
+    elif removed_col in ("image_type", "patient_name") and val:
+        label = "Tipo de estudio" if removed_col == "image_type" else "Paciente"
+        current["analysis"] = f"[{label}: {val}]\n\n" + (current.get("analysis") or "")
+    elif removed_col == "consultation_id" and val:
+        current["analysis"] = (current.get("analysis") or "") + f"\n\n[ID consulta ligada: {val}]\n"
+    elif removed_col == "analysis" and val is not None:
+        prev = current.get("findings")
+        block = [str(val)]
+        if isinstance(prev, list):
+            current["findings"] = block + prev
+        else:
+            current["findings"] = block
+
+
 def insert_medical_image(row: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    """
+    Inserta en medical_images. Si PostgREST indica columna inexistente (PGRST204),
+    reintenta quitando esa columna y fusionando datos en analysis/findings.
+    """
     client = get_supabase_client()
-    try:
-        resp = client.table("medical_images").insert(row, returning="representation").execute()
-        return (resp.data[0] if resp.data else None, None)
-    except Exception as exc:  # noqa: BLE001
-        return (None, str(exc))
+    current = dict(row)
+    last_err = ""
+    for _ in range(14):
+        try:
+            resp = client.table("medical_images").insert(current, returning="representation").execute()
+            return (resp.data[0] if resp.data else None, None)
+        except Exception as exc:  # noqa: BLE001
+            last_err = str(exc)
+            if "PGRST204" not in last_err and "schema cache" not in last_err.lower():
+                return (None, last_err)
+            m = re.search(r"the '([^']+)' column", last_err, re.I)
+            if not m:
+                return (None, last_err)
+            bad = m.group(1)
+            if bad in ("id", "user_id", "created_at"):
+                return (None, last_err)
+            if bad not in current:
+                return (None, last_err)
+            val = current.pop(bad)
+            _merge_medical_image_stripped(current, bad, val)
+            continue
+    return (None, last_err or "insert_medical_image: demasiados reintentos")
 
 
 def list_medical_images(user_id: str, limit: int = 20) -> Tuple[List[Dict[str, Any]], Optional[str]]:
