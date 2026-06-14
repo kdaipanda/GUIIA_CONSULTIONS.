@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { BACKEND_URL } from '../lib/backendUrl';
 
 // Importar formularios específicos por especie
 import DogForm from './species/DogForm';
@@ -19,8 +20,6 @@ const AnimalConsultForm = ({ veterinarianId, onSuccess }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  const backendURL = process.env.REACT_APP_BACKEND_URL || '';
 
   // Lista por defecto de especies
   const defaultSpecies = [
@@ -42,7 +41,7 @@ const AnimalConsultForm = ({ veterinarianId, onSuccess }) => {
 
   const loadSpecies = async () => {
     try {
-      const response = await axios.get(`${backendURL}/api/species`);
+      const response = await axios.get(`${BACKEND_URL}/api/species`);
       setSpeciesList(response.data || defaultSpecies);
     } catch (err) {
       console.warn('No se pudo cargar la lista de especies desde el API, usando lista por defecto');
@@ -63,7 +62,7 @@ const AnimalConsultForm = ({ veterinarianId, onSuccess }) => {
         consultation_data: consultationData
       };
 
-      const response = await axios.post(`${backendURL}/api/animal-consults`, payload);
+      const response = await axios.post(`${BACKEND_URL}/api/animal-consults`, payload);
       
       setSuccess('¡Consulta guardada exitosamente!');
       

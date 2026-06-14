@@ -1,0 +1,23 @@
+{
+  "short_name": "GUIAA",
+  "name": "GUIAA - Diagnósticos Profesionales para Veterinarios",
+  "icons": [
+    {
+      "src": "GuiaLogo-mark.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1e40af",
+  "background_color": "#0f172a",
+  "lang": "es"
+}

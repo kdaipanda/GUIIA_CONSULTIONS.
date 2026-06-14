@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="GUIAA">
+  <defs>
+    <linearGradient id="guiaa-bg" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1e40af"/>
+      <stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7" fill="url(#guiaa-bg)"/>
+  <circle cx="12" cy="13" r="4.25" fill="none" stroke="#fff" stroke-width="2"/>
+  <path
+    d="M16.2 13h4.3c3.1 0 5.5 2.4 5.5 5.5v5.2c0 2.2-1.8 4-4 4s-4-1.8-4-4"
+    fill="none"
+    stroke="#fff"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <circle cx="22" cy="22.7" r="2.2" fill="#fff"/>
+</svg>

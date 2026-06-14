@@ -879,6 +879,51 @@ async def test_claude_connection():
     return result
 
 
+@app.get("/api/test/supabase")
+async def test_supabase_connection():
+    """Verifica variables de Supabase y una consulta mínima a profiles."""
+    url = os.getenv("SUPABASE_URL", "")
+    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY") or ""
+    result = {
+        "supabase_url_configured": bool(url),
+        "supabase_url_length": len(url),
+        "supabase_url_host": url.replace("https://", "").split("/")[0] if url else None,
+        "service_role_configured": bool(key),
+        "service_role_length": len(key),
+        "service_role_starts_with_eyJ": key.startswith("eyJ") if key else False,
+        "test_status": "pending",
+        "profiles_count": None,
+        "error": None,
+    }
+    if not url or not key:
+        result["test_status"] = "error"
+        missing = []
+        if not url:
+            missing.append("SUPABASE_URL")
+        if not key:
+            missing.append("SUPABASE_SERVICE_ROLE_KEY")
+        result["error"] = f"Faltan variables en Railway: {', '.join(missing)}"
+        return result
+    if not key.startswith("eyJ"):
+        result["test_status"] = "error"
+        result["error"] = (
+            "SUPABASE_SERVICE_ROLE_KEY no parece válida (debe empezar con eyJ). "
+            "¿Pegaste la anon key por error?"
+        )
+        return result
+    try:
+        from supabase_client import get_supabase_client
+
+        client = get_supabase_client()
+        resp = client.table("profiles").select("id", count="exact").limit(1).execute()
+        result["test_status"] = "success"
+        result["profiles_count"] = resp.count
+    except Exception as exc:
+        result["test_status"] = "error"
+        result["error"] = str(exc)[:300]
+    return result
+
+
 async def send_support_chat_message(
     message: str,
     history: Optional[List[Dict[str, str]]] = None,
@@ -1591,6 +1636,11 @@ def _serialize_consultation(row: Dict[str, Any]) -> Dict[str, Any]:
         "condicion_corporal": form_data.get("condicion_corporal"),
         "alimentacion": form_data.get("alimentacion") or form_data.get("dieta"),
         "vacunas_vigentes": form_data.get("vacunas_vigentes"),
+        "parametros_vitales": payload.get("parametros_vitales"),
+        "imagenes_videos": payload.get("imagenes_videos"),
+        "laboratorio_estudios": payload.get("laboratorio_estudios"),
+        "ambiente_manejo": payload.get("ambiente_manejo"),
+        "notas_adicionales": payload.get("notas_adicionales"),
     }
     return result
 
