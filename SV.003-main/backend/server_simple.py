@@ -111,6 +111,7 @@ app.add_middleware(
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY", "").strip()
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "").strip()
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "").strip()
+ADMIN_API_TOKEN = os.getenv("ADMIN_API_TOKEN", "").strip()
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "").strip()
 # Por defecto usar Sonnet 4 (puedes sobrescribir con ANTHROPIC_MODEL en backend/.env)
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514").strip()
@@ -132,6 +133,13 @@ def _get_float_env(key: str, default: float) -> float:
         except ValueError:
             pass
     return default
+
+
+def _require_admin_token(x_admin_token: Optional[str]) -> None:
+    if not ADMIN_API_TOKEN:
+        raise HTTPException(status_code=503, detail="ADMIN_API_TOKEN no configurado")
+    if not x_admin_token or not secrets.compare_digest(x_admin_token, ADMIN_API_TOKEN):
+        raise HTTPException(status_code=403, detail="No autorizado")
 
 
 # Claude Sonnet 4 soporta hasta 200,000 tokens de salida
@@ -2338,11 +2346,13 @@ async def create_checkout_session(
 @app.post("/api/admin/give-trial-consultations")
 async def give_trial_consultations_to_all(
     x_veterinarian_id: str = Header(None),
+    x_admin_token: str = Header(None, alias="x-admin-token"),
 ):
     """
     Endpoint administrativo para dar 3 consultas premium a todos los usuarios que no las tengan.
     Requiere autenticación (puedes agregar validación de admin si lo deseas).
     """
+    _require_admin_token(x_admin_token)
     try:
         from supabase_client import get_supabase_client
         client = get_supabase_client()
@@ -2510,23 +2520,26 @@ async def stripe_webhook(request: Request):
                 consultations = package["consultations"]
                 days = 30 if billing_cycle == "monthly" else 365
                 expires = datetime.now(timezone.utc) + timedelta(days=days)
-                await update_one_db(
-                    "veterinarians",
-                    {"id": veterinarian_id},
+                err_upd = update_profile(
+                    veterinarian_id,
                     {
                         "membership_type": package_key,
                         "consultations_remaining": consultations,
                         "membership_expires": expires.isoformat(),
                     },
                 )
-                await update_one_db(
-                    "payment_transactions",
-                    {"session_id": session_id},
-                    {
-                        "membership_activated": True,
-                        "membership_activated_at": datetime.now(timezone.utc).isoformat(),
-                    },
-                )
+                if err_upd:
+                    print(f"[ERROR] Error activando membresía por webhook: {err_upd}")
+                else:
+                    err_tx = update_payment_transaction(
+                        session_id,
+                        {
+                            "membership_activated": True,
+                            "membership_activated_at": datetime.now(timezone.utc).isoformat(),
+                        },
+                    )
+                    if err_tx:
+                        print(f"[ERROR] Error marcando membresía activada: {err_tx}")
 
     return {"received": True}
 
@@ -2962,11 +2975,14 @@ async def get_image_history(x_veterinarian_id: str = Header(None), limit: int = 
 # ============================================
 
 @app.post("/api/admin/give-trial-consultations")
-async def give_trial_consultations_to_all_users():
+async def give_trial_consultations_to_all_users(
+    x_admin_token: str = Header(None, alias="x-admin-token"),
+):
     """
     Endpoint administrativo para dar 3 consultas premium a todos los usuarios
     que no tienen membresía activa y tienen 0 o menos consultas restantes.
     """
+    _require_admin_token(x_admin_token)
     print("[INFO] Iniciando proceso para dar 3 consultas premium a todos los usuarios sin membresía.")
     
     # Obtener todos los perfiles
@@ -3023,10 +3039,14 @@ async def give_trial_consultations_to_all_users():
 
 
 @app.post("/api/admin/delete-user")
-async def delete_user_by_email(email: str):
+async def delete_user_by_email(
+    email: str,
+    x_admin_token: str = Header(None, alias="x-admin-token"),
+):
     """
     Endpoint administrativo para eliminar un usuario por email.
     """
+    _require_admin_token(x_admin_token)
     print(f"[INFO] Intentando eliminar usuario con email: {email}")
     
     from supabase_client import delete_profile_by_email
