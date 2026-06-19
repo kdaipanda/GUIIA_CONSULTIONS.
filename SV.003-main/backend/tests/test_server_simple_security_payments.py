@@ -34,7 +34,10 @@ class ServerSimpleSecurityPaymentsTest(unittest.IsolatedAsyncioTestCase):
     async def test_delete_user_rejects_requests_without_admin_token(self):
         with patch("supabase_client.delete_profile_by_email") as delete_profile:
             with self.assertRaises(HTTPException) as exc:
-                await self.server_simple.delete_user_by_email("victim@example.com")
+                await self.server_simple.delete_user_by_email(
+                    "victim@example.com",
+                    x_admin_token=None,
+                )
 
         self.assertEqual(exc.exception.status_code, 403)
         delete_profile.assert_not_called()
