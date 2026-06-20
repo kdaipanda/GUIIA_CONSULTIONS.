@@ -28,14 +28,14 @@ export const PLATFORM_ONBOARDING_STEPS = [
     icon: "👋",
     title: "Bienvenido a GUIAA",
     body:
-      "Tu consultorio veterinario con soporte a la decisión clínica (CDS) e inteligencia artificial. Este recorrido te muestra lo esencial en un minuto.",
+      "Tu consultorio veterinario con soporte a la decisión clínica (CDS). Este recorrido te muestra lo esencial en un minuto.",
   },
   {
     id: "diagnosis",
     icon: "🩺",
     title: "GUIAA Diagnóstico",
     body:
-      "Aquí inicias consultas clínicas con IA: captura signos, motivo y datos de la mascota. El sistema genera análisis CDS de apoyo (no sustituye tu criterio profesional).",
+      "Aquí inicias consultas clínicas: captura signos, motivo y datos de la mascota. El sistema genera análisis CDS de apoyo (no sustituye tu criterio profesional).",
     hint: "N",
     actionView: "new-consultation",
     actionLabel: "Ir a GUIAA Diagnóstico",
