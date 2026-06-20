@@ -20,7 +20,7 @@ const TurtleForm = ({ onSubmit, onCancel }) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del paciente *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de la mascota *</label>
             <input
               type="text"
               {...register('nombre_paciente', { required: true })}

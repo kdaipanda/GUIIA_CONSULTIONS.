@@ -1354,6 +1354,7 @@ async def admin_list_users(
                 "consultations_remaining": profile.get("consultations_remaining"),
                 "created_at": profile.get("created_at"),
                 "cedula_profesional": profile.get("cedula_profesional"),
+                "profesional_pais": profile.get("profesional_pais"),
                 "cedula_verification_status": profile.get("cedula_verification_status"),
                 "cedula_document_url": profile.get("cedula_document_url"),
                 "cedula_sep_nombre": profile.get("cedula_sep_nombre"),

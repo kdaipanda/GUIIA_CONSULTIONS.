@@ -74,7 +74,7 @@ const CuyosForm = ({ formData, setFormData }) => {
 
   return (
     <div className="species-form">
-      <h2>Datos del Paciente - Cuyo</h2>
+      <h2>Datos de la mascota - Cuyo</h2>
 
       {/* Barra de Progreso */}
       <div className="species-form-progress">
@@ -120,7 +120,7 @@ const CuyosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Nombre del Paciente *</label>
+            <label>Nombre de la mascota *</label>
             <input
               type="text"
               required

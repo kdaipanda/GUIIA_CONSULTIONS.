@@ -109,33 +109,70 @@ def get_profile_by_email(email: str) -> Tuple[Optional[Dict[str, Any]], Optional
         return (None, str(exc))
 
 
+def normalize_professional_id(value: str) -> str:
+    return re.sub(r"\s+", " ", (value or "").strip())
+
+
+def professional_id_key(value: str) -> str:
+    return re.sub(r"[\s.\-/_]", "", (value or "").strip().upper())
+
+
 def get_profile_by_cedula(cedula: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
-    """Busca perfil por cédula profesional."""
+    """Busca perfil por registro profesional (clave normalizada o valor exacto)."""
     client = get_supabase_client()
+    normalized = normalize_professional_id(cedula)
+    key = professional_id_key(cedula)
+    if not normalized:
+        return (None, "Registro profesional requerido")
     try:
-        resp = client.table("profiles").select("*").eq("cedula_profesional", cedula).limit(1).execute()
+        if key:
+            resp = (
+                client.table("profiles")
+                .select("*")
+                .eq("cedula_profesional_key", key)
+                .limit(1)
+                .execute()
+            )
+            if resp.data:
+                return (resp.data[0], None)
+        resp = (
+            client.table("profiles")
+            .select("*")
+            .eq("cedula_profesional", normalized)
+            .limit(1)
+            .execute()
+        )
         return (resp.data[0] if resp.data else None, None)
     except Exception as exc:  # noqa: BLE001
         return (None, str(exc))
 
 
 def get_profile_by_credentials(email: str, cedula: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
-    """Busca perfil por email Y cédula (para login)."""
+    """Busca perfil por email Y registro profesional (para login)."""
     client = get_supabase_client()
     normalized_email = (email or "").strip().lower()
-    normalized_cedula = (cedula or "").strip()
+    normalized_cedula = normalize_professional_id(cedula)
+    key = professional_id_key(cedula)
     if not normalized_email or not normalized_cedula:
-        return (None, "Email y cédula requeridos")
+        return (None, "Email y registro profesional requeridos")
     try:
         resp = (
             client.table("profiles")
             .select("*")
             .ilike("email", normalized_email)
-            .eq("cedula_profesional", normalized_cedula)
-            .limit(1)
+            .limit(5)
             .execute()
         )
-        return (resp.data[0] if resp.data else None, None)
+        rows = resp.data or []
+        for row in rows:
+            stored_key = row.get("cedula_profesional_key") or professional_id_key(
+                row.get("cedula_profesional") or ""
+            )
+            if stored_key and key and stored_key == key:
+                return (row, None)
+            if normalize_professional_id(row.get("cedula_profesional") or "") == normalized_cedula:
+                return (row, None)
+        return (None, None)
     except Exception as exc:  # noqa: BLE001
         return (None, str(exc))
 

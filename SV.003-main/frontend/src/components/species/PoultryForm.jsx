@@ -20,7 +20,7 @@ const PoultryForm = ({ onSubmit, onCancel }) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del paciente *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de la mascota *</label>
             <input type="text" {...register('nombre_paciente', { required: true })} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500" />
             {errors.nombre_paciente && <span className="text-red-500 text-xs">Este campo es requerido</span>}
           </div>

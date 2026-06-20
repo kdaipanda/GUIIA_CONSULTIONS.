@@ -390,7 +390,7 @@ export function LandingPage({ setView }) {
                 <span className="faq-icon">+</span>
               </button>
               <div className="faq-answer">
-                <p>GUIAA está diseñado exclusivamente para médicos veterinarios titulados y con cédula profesional vigente, que realizan práctica clínica de pequeños animales y exóticos.</p>
+                <p>GUIAA está diseñado para médicos veterinarios titulados de Latinoamérica con registro o licencia profesional vigente, que realizan práctica clínica de pequeños animales y exóticos.</p>
               </div>
             </div>
             

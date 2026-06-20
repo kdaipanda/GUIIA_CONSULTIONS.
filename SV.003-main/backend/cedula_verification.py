@@ -1,4 +1,4 @@
-"""Verificación de cédula profesional (SEP/DGP) — uso compartido admin y auth."""
+"""Verificación de registro profesional veterinario (Latinoamérica + SEP opcional MX)."""
 from __future__ import annotations
 
 import asyncio
@@ -18,6 +18,14 @@ CEDULA_STATUS_PENDING = "pending"
 CEDULA_STATUS_VERIFIED = "verified"
 CEDULA_STATUS_REJECTED = "rejected"
 
+DEV_EMAILS = {
+    "carlos.hernandez@vetmed.com",
+    "mariana.lopez@vetmed.com",
+    "basico@guiaa.vet",
+    "profesional@guiaa.vet",
+    "premium@guiaa.vet",
+}
+
 ALLOWED_VET_PROFESSIONS = {
     "MEDICO VETERINARIO ZOOTECNISTA",
     "MÉDICO VETERINARIO ZOOTECNISTA",
@@ -26,6 +34,28 @@ ALLOWED_VET_PROFESSIONS = {
     "VETERINARIA",
     "VETERINARIO",
 }
+
+PENDING_REVIEW_MESSAGE = (
+    "Documento recibido. Nuestro equipo revisará tu registro profesional en 24–48 h. "
+    "Puedes usar la plataforma mientras tanto."
+)
+
+
+def is_dev_user(email: str) -> bool:
+    return (email or "").strip().lower() in DEV_EMAILS
+
+
+def normalize_professional_id(value: str) -> str:
+    return re.sub(r"\s+", " ", (value or "").strip())
+
+
+def professional_id_key(value: str) -> str:
+    return re.sub(r"[\s.\-/_]", "", (value or "").strip().upper())
+
+
+def is_mexico_country(country: Optional[str]) -> bool:
+    code = (country or "").strip().upper()
+    return code in {"MX", "MEX", "MEXICO", "MÉXICO"}
 
 
 def _norm_text(s: str) -> str:
@@ -62,7 +92,7 @@ def _profession_is_vet(prof: str) -> bool:
 async def _sep_dgp_lookup(cedula: str) -> Dict[str, Optional[str]]:
     cedula = (cedula or "").strip()
     if not cedula or not cedula.isdigit():
-        raise ValueError("Cédula inválida (debe ser numérica)")
+        raise ValueError("Registro inválido para consulta SEP (solo dígitos, México)")
 
     base = os.getenv("SEP_DGP_BASE_URL", "").strip() or "https://cedulaprofesional.sep.gob.mx"
     candidates = [
@@ -72,7 +102,7 @@ async def _sep_dgp_lookup(cedula: str) -> Dict[str, Optional[str]]:
         f"{base}/cedula/buscaCedulaProfesional?cedula={cedula}",
     ]
 
-    timeout = httpx.Timeout(15.0, connect=10.0)
+    timeout = httpx.Timeout(12.0, connect=8.0)
     headers = {
         "User-Agent": "GUIAA/1.0 (cedula-verifier)",
         "Accept": "text/html,application/json",
@@ -157,15 +187,77 @@ async def _sep_dgp_lookup(cedula: str) -> Dict[str, Optional[str]]:
         return {"nombre": None, "profesion": None}
 
 
-async def _sep_dgp_lookup_with_retries(cedula: str, attempts: int = 3) -> Dict[str, Optional[str]]:
+async def _sep_dgp_lookup_with_retries(cedula: str, attempts: int = 2) -> Dict[str, Optional[str]]:
     last_exc: Optional[Exception] = None
     for i in range(max(1, attempts)):
         try:
             return await _sep_dgp_lookup(cedula)
         except Exception as exc:
             last_exc = exc
-            await asyncio.sleep(0.7 * (2**i))
+            await asyncio.sleep(0.5 * (2**i))
     raise RuntimeError(str(last_exc or "Error desconocido consultando SEP/DGP"))
+
+
+async def _try_mexico_sep_verify(
+    profile_id: str,
+    cedula: str,
+    expected_name: str,
+) -> Optional[Dict[str, Any]]:
+    """Intento opcional de auto-verificación vía SEP (solo México, numérico)."""
+    try:
+        sep = await _sep_dgp_lookup_with_retries(cedula, attempts=2)
+    except Exception:
+        return None
+
+    sep_nombre = (sep.get("nombre") or "").strip()
+    sep_profesion = (sep.get("profesion") or "").strip()
+    if not sep_nombre and not sep_profesion:
+        return None
+
+    name_ok = _name_matches(expected_name, sep_nombre) if sep_nombre else False
+    prof_ok = _profession_is_vet(sep_profesion) if sep_profesion else False
+    now = datetime.now(timezone.utc).isoformat()
+
+    if name_ok and prof_ok:
+        err_upd = update_profile(
+            profile_id,
+            {
+                "cedula_sep_nombre": sep_nombre or None,
+                "cedula_sep_profesion": sep_profesion or None,
+                "cedula_verification_status": CEDULA_STATUS_VERIFIED,
+                "cedula_verification_checked_at": now,
+                "cedula_verification_error": None,
+            },
+        )
+        if err_upd:
+            return {"ok": False, "error": err_upd}
+        return {
+            "ok": True,
+            "verification_status": CEDULA_STATUS_VERIFIED,
+            "sep_nombre": sep_nombre or None,
+            "sep_profesion": sep_profesion or None,
+            "message": "Registro verificado automáticamente con SEP (México).",
+        }
+    return None
+
+
+def _submit_for_manual_review(profile_id: str) -> Dict[str, Any]:
+    now = datetime.now(timezone.utc).isoformat()
+    err_upd = update_profile(
+        profile_id,
+        {
+            "cedula_verification_status": CEDULA_STATUS_PENDING,
+            "cedula_verification_checked_at": now,
+            "cedula_verification_error": None,
+        },
+    )
+    if err_upd:
+        return {"ok": False, "error": err_upd}
+    return {
+        "ok": True,
+        "verification_status": CEDULA_STATUS_PENDING,
+        "message": PENDING_REVIEW_MESSAGE,
+    }
 
 
 async def verify_profile_cedula(profile_id: str) -> Dict[str, Any]:
@@ -175,88 +267,50 @@ async def verify_profile_cedula(profile_id: str) -> Dict[str, Any]:
     if not profile:
         return {"ok": False, "error": "Perfil no encontrado"}
 
-    cedula = (profile.get("cedula_profesional") or "").strip()
+    cedula = normalize_professional_id(profile.get("cedula_profesional") or "")
     if not cedula:
-        return {"ok": False, "error": "El usuario no tiene cédula registrada"}
+        return {"ok": False, "error": "El usuario no tiene registro profesional"}
 
     expected_name = (profile.get("nombre") or "").strip()
     if not expected_name:
         return {"ok": False, "error": "El perfil no tiene nombre para validar"}
 
-    try:
-        sep = await _sep_dgp_lookup_with_retries(cedula, attempts=3)
-    except Exception as exc:
+    if not profile.get("cedula_document_url"):
+        return {
+            "ok": False,
+            "error": "Debes subir el documento de tu registro profesional (título, matrícula o licencia).",
+        }
+
+    email = profile.get("email") or ""
+    if is_dev_user(email):
         now = datetime.now(timezone.utc).isoformat()
-        update_profile(
+        err_upd = update_profile(
             profile_id,
             {
-                "cedula_verification_status": CEDULA_STATUS_PENDING,
+                "cedula_sep_nombre": expected_name,
+                "cedula_sep_profesion": "Médico Veterinario Zootecnista",
+                "cedula_verification_status": CEDULA_STATUS_VERIFIED,
                 "cedula_verification_checked_at": now,
-                "cedula_verification_error": str(exc),
+                "cedula_verification_error": None,
             },
         )
+        if err_upd:
+            return {"ok": False, "error": err_upd}
         return {
             "ok": True,
-            "verification_status": CEDULA_STATUS_PENDING,
-            "message": "No se pudo validar con SEP en este momento.",
+            "verification_status": CEDULA_STATUS_VERIFIED,
+            "sep_nombre": expected_name,
+            "sep_profesion": "Médico Veterinario Zootecnista",
+            "message": "Registro verificado (cuenta de desarrollo).",
         }
 
-    sep_nombre = (sep.get("nombre") or "").strip()
-    sep_profesion = (sep.get("profesion") or "").strip()
-    now = datetime.now(timezone.utc).isoformat()
+    country = profile.get("profesional_pais") or "MX"
+    if is_mexico_country(country) and cedula.isdigit():
+        sep_result = await _try_mexico_sep_verify(profile_id, cedula, expected_name)
+        if sep_result:
+            return sep_result
 
-    if not sep_nombre and not sep_profesion:
-        update_profile(
-            profile_id,
-            {
-                "cedula_verification_status": CEDULA_STATUS_PENDING,
-                "cedula_verification_checked_at": now,
-                "cedula_verification_error": "Sin datos en respuesta de SEP/DGP",
-            },
-        )
-        return {
-            "ok": True,
-            "verification_status": CEDULA_STATUS_PENDING,
-            "message": "SEP no devolvió datos para esta cédula.",
-        }
-
-    name_ok = _name_matches(expected_name, sep_nombre) if sep_nombre else False
-    prof_ok = _profession_is_vet(sep_profesion) if sep_profesion else False
-
-    if name_ok and prof_ok:
-        verification_status = CEDULA_STATUS_VERIFIED
-        msg = "Cédula verificada correctamente con SEP."
-        err_txt = None
-    else:
-        verification_status = CEDULA_STATUS_REJECTED
-        reasons = []
-        if not name_ok:
-            reasons.append("el nombre no coincide")
-        if not prof_ok:
-            reasons.append("la profesión no corresponde a MVZ/Veterinaria")
-        msg = "Validación rechazada: " + ", ".join(reasons) + "."
-        err_txt = msg
-
-    err_upd = update_profile(
-        profile_id,
-        {
-            "cedula_sep_nombre": sep_nombre or None,
-            "cedula_sep_profesion": sep_profesion or None,
-            "cedula_verification_status": verification_status,
-            "cedula_verification_checked_at": now,
-            "cedula_verification_error": err_txt,
-        },
-    )
-    if err_upd:
-        return {"ok": False, "error": err_upd}
-
-    return {
-        "ok": True,
-        "verification_status": verification_status,
-        "sep_nombre": sep_nombre or None,
-        "sep_profesion": sep_profesion or None,
-        "message": msg,
-    }
+    return _submit_for_manual_review(profile_id)
 
 
 def manual_review_cedula(profile_id: str, action: str, note: Optional[str] = None) -> Dict[str, Any]:
@@ -275,14 +329,14 @@ def manual_review_cedula(profile_id: str, action: str, note: Optional[str] = Non
             "cedula_verification_checked_at": now,
             "cedula_verification_error": None,
         }
-        msg = "Cédula aprobada manualmente por administrador."
+        msg = "Registro profesional aprobado manualmente."
     elif action == "reject":
         fields = {
             "cedula_verification_status": CEDULA_STATUS_REJECTED,
             "cedula_verification_checked_at": now,
-            "cedula_verification_error": note or "Rechazada manualmente por administrador.",
+            "cedula_verification_error": note or "Rechazado manualmente por administrador.",
         }
-        msg = "Cédula rechazada manualmente."
+        msg = "Registro profesional rechazado."
     else:
         return {"ok": False, "error": "Acción inválida (approve o reject)"}
 

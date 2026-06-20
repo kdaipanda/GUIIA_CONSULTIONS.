@@ -64,7 +64,7 @@ const ConejosForm = ({ formData, setFormData }) => {
 
   return (
     <div className="species-form">
-      <h2>Datos del Paciente - Conejo</h2>
+      <h2>Datos de la mascota - Conejo</h2>
 
       <div className="species-form-progress">
         <div className="species-form-progress-header">
@@ -105,7 +105,7 @@ const ConejosForm = ({ formData, setFormData }) => {
         <h3>Información Básica</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Nombre del Paciente *</label>
+            <label>Nombre de la mascota *</label>
             <input type="text" required value={formData.nombre_mascota || ''} onChange={(e) => handleChange('nombre_mascota', e.target.value)} />
           </div>
           <div className="form-group">

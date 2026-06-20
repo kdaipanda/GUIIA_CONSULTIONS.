@@ -63,7 +63,7 @@ const AvesForm = ({ formData, setFormData }) => {
 
   return (
     <div className="species-form">
-      <h2>Datos del Paciente - Aves (Psitácidos, Passeriformes y Ornamentales)</h2>
+      <h2>Datos de la mascota - Aves (Psitácidos, Passeriformes y Ornamentales)</h2>
 
       <div className="species-form-progress">
         <div className="species-form-progress-header">
@@ -104,7 +104,7 @@ const AvesForm = ({ formData, setFormData }) => {
         <h3>Información Básica</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Nombre del Paciente *</label>
+            <label>Nombre de la mascota *</label>
             <input type="text" required value={formData.nombre_mascota || ''} onChange={(e) => handleChange('nombre_mascota', e.target.value)} />
           </div>
           <div className="form-group">

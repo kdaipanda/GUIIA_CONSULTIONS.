@@ -26,14 +26,14 @@ export function PrivacyModal({ isOpen, onAccept }) {
             <div className="text-left text-sm text-muted-foreground">
               <p className="mb-3">
                 GUIAA se compromete a proteger tu privacidad y la de tus
-                pacientes. Al usar esta plataforma:
+                mascotas. Al usar esta plataforma:
               </p>
               <ul className="list-disc space-y-1 pl-4">
                 <li>
                   Los datos de las consultas se almacenan de forma segura y
                   encriptada
                 </li>
-                <li>Solo tú tienes acceso a la información de tus pacientes</li>
+                <li>Solo tú tienes acceso a la información de tus mascotas</li>
                 <li>
                   No compartimos información con terceros sin tu consentimiento
                 </li>

@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from "../../components/ui/dialog";
 import { cleanClinicalDisplayText, downloadUserConsultationsHistoryPdf } from "../../lib/consultationPdf";
+import { countryLabel } from "../../lib/latamCountries";
 
 const PLAN_FILTERS = [
   { id: "all", label: "Todos" },
@@ -58,7 +59,7 @@ const PLAN_LABELS = {
 
 const CEDULA_STATUS_LABELS = {
   unsubmitted: "Sin enviar",
-  pending: "Pendiente",
+  pending: "En revisión",
   verified: "Verificada",
   rejected: "Rechazada",
 };
@@ -248,7 +249,7 @@ export function AdminPage() {
   };
 
   const handleVerifyCedula = async (user) => {
-    if (!window.confirm(`¿Validar cédula ${user.cedula_profesional} de ${user.nombre} con SEP?`)) return;
+    if (!window.confirm(`¿Intentar validación SEP para ${user.nombre} (México)?`)) return;
     setCedulaActingId(user.id);
     setError("");
     setMessage("");
@@ -264,7 +265,7 @@ export function AdminPage() {
   };
 
   const handleApproveCedula = async (user) => {
-    if (!window.confirm(`¿Aprobar manualmente la cédula de ${user.nombre}?`)) return;
+    if (!window.confirm(`¿Aprobar el registro profesional de ${user.nombre}?`)) return;
     setCedulaActingId(user.id);
     setError("");
     setMessage("");
@@ -607,8 +608,9 @@ export function AdminPage() {
                 <th>Nombre</th>
                 <th>Email</th>
                 <th>Registro</th>
-                <th>Cédula</th>
-                <th>Estado cédula</th>
+                <th>País</th>
+                <th>Nº profesional</th>
+                <th>Estado</th>
                 <th>Plan</th>
                 <th>Consultas</th>
                 <th>Acciones</th>
@@ -617,7 +619,7 @@ export function AdminPage() {
             <tbody>
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="clinic-muted" style={{ textAlign: "center" }}>
+                  <td colSpan={9} className="clinic-muted" style={{ textAlign: "center" }}>
                     No hay usuarios con este filtro.
                   </td>
                 </tr>
@@ -630,6 +632,7 @@ export function AdminPage() {
                       <td>{u.nombre || "—"}</td>
                       <td>{u.email || "—"}</td>
                       <td>{formatRegisteredAt(u.created_at)}</td>
+                      <td>{countryLabel(u.profesional_pais || "MX")}</td>
                       <td className="clinic-mono">{u.cedula_profesional || "—"}</td>
                       <td>
                         <span className={`clinic-cedula-badge ${cedulaStatusClass(cedulaStatus)}`}>
@@ -674,23 +677,25 @@ export function AdminPage() {
                               size="sm"
                               variant="secondary"
                               onClick={() => openCedulaPreview(u)}
-                              title="Ver documento de cédula"
+                              title="Ver documento profesional"
                             >
                               <Eye size={14} aria-hidden />
                               Ver
                             </Button>
                           )}
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            disabled={busy || !u.cedula_profesional}
-                            onClick={() => handleVerifyCedula(u)}
-                            title="Validar con SEP"
-                          >
-                            <RefreshCw size={14} aria-hidden />
-                            SEP
-                          </Button>
+                          {(u.profesional_pais || "MX").toUpperCase() === "MX" && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              disabled={busy || !u.cedula_profesional}
+                              onClick={() => handleVerifyCedula(u)}
+                              title="Intentar validación automática SEP (México)"
+                            >
+                              <RefreshCw size={14} aria-hidden />
+                              SEP
+                            </Button>
+                          )}
                           {cedulaStatus !== "verified" && (
                             <Button
                               type="button"
@@ -760,11 +765,14 @@ export function AdminPage() {
           {cedulaPreview && (
             <>
               <DialogHeader>
-                <DialogTitle>Documento de cédula</DialogTitle>
+                <DialogTitle>Documento de registro profesional</DialogTitle>
                 <DialogDescription>
                   {cedulaPreview.nombre || cedulaPreview.email}
                   {cedulaPreview.cedula_profesional
-                    ? ` · Cédula ${cedulaPreview.cedula_profesional}`
+                    ? ` · Registro ${cedulaPreview.cedula_profesional}`
+                    : ""}
+                  {cedulaPreview.profesional_pais
+                    ? ` · ${countryLabel(cedulaPreview.profesional_pais)}`
                     : ""}
                 </DialogDescription>
               </DialogHeader>

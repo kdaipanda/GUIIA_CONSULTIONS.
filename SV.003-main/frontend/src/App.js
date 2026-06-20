@@ -22,6 +22,7 @@ import { friendlyFetchError } from "./lib/friendlyFetchError";
 import { getAuthHeaders, storeAccessToken } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
 import { applyDocumentTheme, readStoredTheme } from "./lib/themeSync";
+import { LATAM_COUNTRIES, countryLabel } from "./lib/latamCountries";
 import { SupportChatWidget } from "./components/SupportChatWidget";
 import { VetProvider, useVet } from "./context/VetContext";
 import { LoadingScreen } from "./components/LoadingScreen";
@@ -264,7 +265,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     commands.splice(insertAt, 0, {
       id: "expert-consultation",
       title: "Manejo Experto",
-      description: "Ir directo al motivo de consulta; completa los datos del paciente después (Premium)",
+      description: "Ir directo al motivo de consulta; completa los datos de la mascota después (Premium)",
       icon: "🧠",
       shortcut: "E",
       action: () => openExpertConsultation?.(),
@@ -812,17 +813,17 @@ const TermsAndConditionsModal = ({ isOpen, onClose, onAccept }) => {
           <h3>2. DEFINICIONES</h3>
           <ul>
             <li><strong>Plataforma GUIAA:</strong> Sistema de Soporte a la Decisión Clínica (CDS) de grado avanzado L4 y L5 para profesionales veterinarios.</li>
-            <li><strong>Usuario:</strong> Médico veterinario zootecnista con cédula profesional válida y vigente.</li>
+            <li><strong>Usuario:</strong> Médico veterinario titulado con registro o licencia profesional vigente en su país.</li>
             <li><strong>CDS L4-L5:</strong> Sistema de soporte a la decisión clínica de nivel 4 y 5, que proporciona recomendaciones basadas en análisis de datos clínicos.</li>
-            <li><strong>Datos Clínicos:</strong> Información relacionada con pacientes animales ingresada en la Plataforma.</li>
+            <li><strong>Datos Clínicos:</strong> Información relacionada con mascotas ingresada en la Plataforma.</li>
           </ul>
 
           <h3>3. ELEGIBILIDAD Y REGISTRO</h3>
           <h4>3.1 Requisitos de Elegibilidad</h4>
           <p>Para utilizar la Plataforma, usted debe:</p>
           <ul>
-            <li>Ser médico veterinario zootecnista titulado</li>
-            <li>Poseer cédula profesional válida y vigente emitida por la autoridad competente</li>
+            <li>Ser médico veterinario titulado en Latinoamérica</li>
+            <li>Poseer matrícula, licencia o registro profesional válido emitido por la autoridad competente de su país</li>
             <li>Estar legalmente autorizado para ejercer la medicina veterinaria en su jurisdicción</li>
             <li>Ser mayor de edad según las leyes aplicables</li>
             <li>Tener capacidad legal para celebrar contratos vinculantes</li>
@@ -830,8 +831,9 @@ const TermsAndConditionsModal = ({ isOpen, onClose, onAccept }) => {
 
           <h4>3.2 Proceso de Verificación</h4>
           <ul>
-            <li>Durante el registro, deberá proporcionar su número de cédula profesional</li>
-            <li>La Plataforma verificará la autenticidad de su cédula profesional</li>
+            <li>Durante el registro, deberá indicar su país y número de registro profesional</li>
+            <li>Deberá subir un documento que acredite su titulación (título, matrícula o licencia)</li>
+            <li>Nuestro equipo revisará la documentación; en México también se intenta validación automática con SEP</li>
             <li>Nos reservamos el derecho de solicitar documentación adicional</li>
             <li>El acceso será otorgado únicamente tras la verificación exitosa</li>
             <li>La verificación puede tardar hasta 72 horas hábiles</li>
@@ -860,7 +862,7 @@ const TermsAndConditionsModal = ({ isOpen, onClose, onAccept }) => {
           <ul>
             <li>Las recomendaciones son orientativas, no prescriptivas</li>
             <li>El veterinario usuario es el único responsable de las decisiones clínicas finales</li>
-            <li>La Plataforma no establece relación veterinario-paciente</li>
+            <li>La Plataforma no establece relación veterinario–mascota</li>
             <li>No proporciona diagnósticos definitivos ni tratamientos específicos sin evaluación profesional</li>
           </ul>
 
@@ -886,7 +888,7 @@ const TermsAndConditionsModal = ({ isOpen, onClose, onAccept }) => {
           <h4>5.2 Datos Recopilados</h4>
           <p>Recopilamos:</p>
           <ul>
-            <li>Datos de identificación profesional (nombre, cédula, institución)</li>
+            <li>Datos de identificación profesional (nombre, país, registro, institución)</li>
             <li>Datos de contacto (correo electrónico, teléfono)</li>
             <li>Datos de uso de la Plataforma</li>
             <li>Datos clínicos anonimizados con fines de mejora del sistema</li>
@@ -1035,7 +1037,7 @@ const TermsAndConditionsModal = ({ isOpen, onClose, onAccept }) => {
             <p>Al marcar la casilla de aceptación y/o utilizar la Plataforma GUIAA, usted declara que:</p>
             <ul style={{ listStyle: "none", padding: 0 }}>
               <li>✓ Ha leído y comprendido estos Términos y Condiciones</li>
-              <li>✓ Es un veterinario con cédula profesional válida</li>
+              <li>✓ Es veterinario titulado con registro profesional válido</li>
               <li>✓ Acepta estar legalmente vinculado por estos términos</li>
               <li>✓ Utilizará la Plataforma de manera responsable y ética</li>
               <li>✓ Comprende que es el único responsable de sus decisiones clínicas</li>
@@ -1086,6 +1088,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
     nombre: "",
     email: "",
     telefono: "",
+    profesional_pais: "MX",
     cedula_profesional: "",
     especialidad: "",
     años_experiencia: "",
@@ -1112,7 +1115,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
       return;
     }
     if (!cedulaFile) {
-      setError("Debes subir el documento de tu cédula profesional (PDF/JPG/PNG).");
+      setError("Debes subir el documento de tu registro profesional (PDF/JPG/PNG).");
       return;
     }
     if (!formData.especialidad?.trim()) {
@@ -1204,6 +1207,49 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
 
             <div className="form-row">
               <div className="form-group">
+                <Label htmlFor="reg-pais">País de ejercicio *</Label>
+                <Select
+                  value={formData.profesional_pais}
+                  onValueChange={(v) =>
+                    setFormData({ ...formData, profesional_pais: v })
+                  }
+                >
+                  <SelectTrigger
+                    id="reg-pais"
+                    className="auth-select-trigger mt-1.5 h-11 w-full bg-background"
+                  >
+                    <SelectValue placeholder="Selecciona tu país" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LATAM_COUNTRIES.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="form-group">
+                <Label htmlFor="reg-cedula">Nº matrícula / licencia / registro *</Label>
+                <Input
+                  id="reg-cedula"
+                  type="text"
+                  required
+                  value={formData.cedula_profesional}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      cedula_profesional: e.target.value,
+                    })
+                  }
+                  placeholder="Ej. 12345678, MVZ-2024-001"
+                  className="mt-1.5 h-11 min-h-11 bg-background"
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
                 <Label htmlFor="reg-telefono">Teléfono *</Label>
                 <Input
                   id="reg-telefono"
@@ -1218,27 +1264,10 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   className="mt-1.5 h-11 min-h-11 bg-background"
                 />
               </div>
-              <div className="form-group">
-                <Label htmlFor="reg-cedula">Cédula Profesional *</Label>
-                <Input
-                  id="reg-cedula"
-                  type="text"
-                  required
-                  value={formData.cedula_profesional}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      cedula_profesional: e.target.value,
-                    })
-                  }
-                  placeholder="12345678"
-                  className="mt-1.5 h-11 min-h-11 bg-background"
-                />
-              </div>
             </div>
 
             <div className="form-group">
-              <Label htmlFor="reg-cedula-file">Documento de Cédula (PDF/JPG/PNG) *</Label>
+              <Label htmlFor="reg-cedula-file">Documento profesional (PDF/JPG/PNG) *</Label>
               <Input
                 id="reg-cedula-file"
                 type="file"
@@ -1248,7 +1277,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                 onChange={(e) => setCedulaFile(e.target.files?.[0] || null)}
               />
               <p className="mt-2 text-xs text-muted-foreground">
-                Sube una foto o PDF legible. Máx. 10MB (configurable en backend).
+                Título universitario, matrícula colegiada o licencia de ejercicio. Máx. 10MB.
               </p>
             </div>
 
@@ -1606,7 +1635,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
             </div>
           </div>
           <h2>Iniciar Sesión</h2>
-          <p>Ingresa con tu email y cédula profesional</p>
+          <p>Ingresa con tu email y tu número de registro profesional</p>
 
           {error && <div className="error-message">{error}</div>}
 
@@ -1629,7 +1658,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
               </div>
 
               <div className="form-group">
-                <Label htmlFor="login-cedula">Cédula Profesional</Label>
+                <Label htmlFor="login-cedula">Matrícula / licencia / registro</Label>
                 <Input
                   id="login-cedula"
                   type="text"
@@ -1642,7 +1671,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
                       cedula_profesional: e.target.value,
                     })
                   }
-                  placeholder="12345678"
+                  placeholder="Ej. 12345678 o MVZ-2024-001"
                   className="mt-1.5 h-11 min-h-11 bg-background"
                 />
               </div>
@@ -1708,7 +1737,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
   );
 };
 
-// Cédula Verification Page (bloquea acceso hasta status=verified)
+// Verificación de registro profesional (documento + revisión; SEP opcional MX)
 const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
   const { login } = useVet();
   const [nombre, setNombre] = useState("");
@@ -1756,15 +1785,15 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
     setInfo("");
 
     if (!cedula_profesional) {
-      setError("Falta la cédula profesional. Regresa al login/registro.");
+      setError("Falta el número de registro profesional. Regresa al login o registro.");
       return;
     }
     if (!nombre?.trim()) {
-      setError("Ingresa tu nombre completo tal como aparece en SEP/DGP.");
+      setError("Ingresa tu nombre completo tal como aparece en tu documento profesional.");
       return;
     }
     if (needsUpload && !file) {
-      setError("Debes subir el documento de tu cédula (PDF/JPG/PNG).");
+      setError("Debes subir tu documento profesional (PDF/JPG/PNG).");
       return;
     }
 
@@ -1785,7 +1814,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
         }
       }
 
-      // 2) Verify (SEP/DGP)
+      // 2) Enviar a revisión (SEP automático solo México; resto LATAM manual)
       const vr = await fetch(`${BACKEND_URL}/api/cedula/verify`, {
         method: "POST",
         headers: getAuthHeaders(vetId),
@@ -1797,7 +1826,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
       });
       if (!vr.ok) {
         const raw = await vr.text().catch(() => "");
-        throw new Error(raw || "Error verificando cédula");
+        throw new Error(raw || "Error al enviar tu registro para revisión");
       }
       const verifyData = await vr.json().catch(() => ({}));
       const status = verifyData?.verification_status || "";
@@ -1817,7 +1846,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
         }
         const vetData = await resp.json();
         if (vetData?.status === "requires_cedula_flow") {
-          throw new Error(vetData?.message || "La cédula aún no está verificada.");
+          throw new Error(vetData?.message || "Tu registro aún no está verificado.");
         }
         login(vetData);
         setCedulaFlow?.(null);
@@ -1835,9 +1864,10 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
       <Header setView={setView} showAuth={false} />
       <div className="auth-container">
         <div className="auth-card">
-          <h2>Verificación de Cédula Profesional</h2>
+          <h2>Verificación de registro profesional</h2>
           <p>
-            Para continuar, necesitamos validar tu cédula contra el registro público SEP/DGP.
+            Sube tu título, matrícula o licencia. Validamos veterinarios de Latinoamérica;
+            en México también intentamos verificación automática con SEP cuando está disponible.
           </p>
 
           {cedulaFlow?.message && (
@@ -1851,7 +1881,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
           <div className="auth-form">
             <div className="form-group">
               <Label htmlFor="cedula-nombre">
-                Nombre completo (como aparece en SEP/DGP) *
+                Nombre completo (como en tu documento) *
               </Label>
               <Input
                 id="cedula-nombre"
@@ -1866,7 +1896,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
 
             <div className="form-group">
               <Label htmlFor="cedula-archivo">
-                Documento de cédula (PDF/JPG/PNG)
+                Documento profesional (PDF/JPG/PNG)
                 {needsUpload ? " *" : ""}
               </Label>
               <Input
@@ -1886,7 +1916,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
               onClick={handleUploadAndVerify}
               disabled={loading}
             >
-              {loading ? "Verificando..." : "Subir y verificar"}
+              {loading ? "Enviando..." : "Subir y enviar a revisión"}
             </Button>
 
             {verificationStatus && (
@@ -1931,7 +1961,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
                     if (vetData?.status === "requires_cedula_flow") {
                       // Si aún requiere verificación pero ya usó los 3 skips, mostrar error
                       if (skipData.remaining_skips === 0) {
-                        setError("Has alcanzado el límite de 3 posposiciones. Debes verificar tu cédula ahora.");
+                        setError("Has alcanzado el límite de 3 posposiciones. Debes completar la verificación ahora.");
                         setLoading(false);
                         return;
                       }
@@ -2741,7 +2771,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                           <div className="consultation-info">
                             <div className="consultation-species-icon">{icon}</div>
                             <div className="consultation-details">
-                              <h4>{consultation.nombre_mascota || consultation.especie || 'Paciente'} - {consultation.raza || consultation.category}</h4>
+                              <h4>{consultation.nombre_mascota || consultation.especie || 'Mascota'} - {consultation.raza || consultation.category}</h4>
                               <p>{consultation.motivo_consulta || consultation.detalle_paciente?.substring(0, 50) || 'Sin descripción'}</p>
                               <span className="consultation-date">
                                 <CalendarDays size={14} style={{marginRight:4}} /> {new Date(consultation.created_at).toLocaleDateString('es-ES', { 
@@ -2942,7 +2972,7 @@ const NewConsultation = ({
   const [error, setError] = useState("");
   const [info, setInfo] = useState(
     isExpertMode && !existingConsultationId
-      ? "Modo Manejo Experto: describe el caso clínico ahora. Podrás completar los datos del paciente (paso 1) después."
+      ? "Modo Manejo Experto: describe el caso clínico ahora. Podrás completar los datos de la mascota (paso 1) después."
       : "",
   );
   const [pending2FA, setPending2FA] = useState(false);
@@ -3334,7 +3364,7 @@ const NewConsultation = ({
         setStep(2);
         if (isExpertMode) {
           setInfo(
-            "Datos del paciente guardados. Puedes continuar con el motivo de consulta o volver más tarde para completar campos faltantes.",
+            "Datos de la mascota guardados. Puedes continuar con el motivo de consulta o volver más tarde para completar campos faltantes.",
           );
         }
         return;
@@ -3361,7 +3391,7 @@ const NewConsultation = ({
       let activeConsultationId = consultationId;
       if (!activeConsultationId) {
         if (!selectedCategory) {
-          throw new Error("Selecciona la especie del paciente para continuar.");
+          throw new Error("Selecciona la especie de la mascota para continuar.");
         }
         const created = await createStageOneConsultation();
         if (!created) return;
@@ -3394,7 +3424,7 @@ const NewConsultation = ({
       setStep(3);
       setInfo(
         isExpertMode
-          ? "Motivo de consulta guardado. Recuerda completar los datos del paciente (paso 1) cuando puedas."
+          ? "Motivo de consulta guardado. Recuerda completar los datos de la mascota (paso 1) cuando puedas."
           : "Observaciones guardadas",
       );
     } catch (err) {
@@ -3528,12 +3558,12 @@ const NewConsultation = ({
               <div className="page-title-icon">🩺</div>
               <div className="page-title-text">
                 <h1>
-                  {isExpertMode ? "Completar Datos del Paciente" : "Nueva Consulta Veterinaria"}
+                  {isExpertMode ? "Completar datos de la mascota" : "Nueva Consulta Veterinaria"}
                 </h1>
                 <p>
                   {isExpertMode
-                    ? "Completa los campos faltantes del paciente. Puedes volver al motivo de consulta cuando termines."
-                    : "Complete la información del paciente para iniciar el diagnóstico clínico"}
+                    ? "Completa los campos faltantes de la mascota. Puedes volver al motivo de consulta cuando termines."
+                    : "Complete la información de la mascota para iniciar el diagnóstico clínico"}
                 </p>
               </div>
             </div>
@@ -3622,7 +3652,7 @@ const NewConsultation = ({
 
             <aside className="consultation-sidebar">
               <div className="sidebar-section">
-                <div className="sidebar-label">Paciente</div>
+                <div className="sidebar-label">Mascota</div>
                 <div className="sidebar-value">
                   {formData.nombre_mascota || "Sin nombre"}
                 </div>
@@ -3671,8 +3701,8 @@ const NewConsultation = ({
                 <h1>{isExpertMode ? "Manejo Experto" : "Motivo de Consulta"}</h1>
                 <p>
                   {isExpertMode
-                    ? "Describe el caso clínico ahora. Los datos estructurados del paciente pueden completarse después."
-                    : "Describa detalladamente los síntomas y observaciones del paciente"}
+                    ? "Describe el caso clínico ahora. Los datos estructurados de la mascota pueden completarse después."
+                    : "Describa detalladamente los síntomas y observaciones de la mascota"}
                 </p>
               </div>
             </div>
@@ -3710,12 +3740,12 @@ const NewConsultation = ({
             {renderStepper(2)}
 
             <form onSubmit={handleSubmitStep2} className="consultation-form">
-              {isExpertMode && renderCategorySelector("Especie del paciente")}
+              {isExpertMode && renderCategorySelector("Especie de la mascota")}
               <div className="form-section">
-                <h3>Detalle del Paciente</h3>
+                <h3>Detalle de la mascota</h3>
                 <div className="form-group">
                   <label>
-                    ANOTA CON EL MAYOR DETALLE LOS DATOS SOBRE EL PACIENTE.
+                    ANOTA CON EL MAYOR DETALLE LOS DATOS SOBRE LA MASCOTA.
                   </label>
                   <Textarea
                     required
@@ -3727,7 +3757,7 @@ const NewConsultation = ({
                         detalle_paciente: e.target.value,
                       })
                     }
-                    placeholder="Escriba aquí todos los detalles sobre el paciente, motivo de consulta, síntomas, observaciones clínicas, signos vitales, tratamientos previos, historia clínica, estudios realizados, comportamiento, y cualquier otra información relevante para el diagnóstico..."
+                    placeholder="Escriba aquí todos los detalles sobre la mascota, motivo de consulta, síntomas, observaciones clínicas, signos vitales, tratamientos previos, historia clínica, estudios realizados, comportamiento, y cualquier otra información relevante para el diagnóstico..."
                     className="min-h-[400px] resize-y p-5 text-base leading-relaxed"
                   />
                 </div>
@@ -3741,7 +3771,7 @@ const NewConsultation = ({
                   className="mr-auto min-w-[140px]"
                   onClick={() => setStep(1)}
                 >
-                  {isExpertMode ? "← Completar datos del paciente" : "← Volver"}
+                  {isExpertMode ? "← Completar datos de la mascota" : "← Volver"}
                 </Button>
                 <Button
                   type="submit"
@@ -3789,7 +3819,7 @@ const NewConsultation = ({
                     size="sm"
                     onClick={() => setStep(1)}
                   >
-                    Completar datos del paciente
+                    Completar datos de la mascota
                   </Button>
                 </div>
               )}
@@ -4150,7 +4180,7 @@ const ConsultationHistory = ({ setView, openConsultation }) => {
                   {speciesIcon}
                 </div>
                 <div className="clinical-file-info">
-                  <h1>{formData.nombre_mascota || 'Paciente'}</h1>
+                  <h1>{formData.nombre_mascota || 'Mascota'}</h1>
                   <div className="clinical-file-meta">
                     <span className="meta-pill species">{selectedConsultation.category || 'Especie'}</span>
                     <span className="meta-pill breed">{formData.raza || 'Raza'}</span>
@@ -4185,7 +4215,7 @@ const ConsultationHistory = ({ setView, openConsultation }) => {
 
           {/* Contenido de la ficha */}
           <div className="clinical-file-content">
-            {/* Datos del paciente */}
+            {/* Datos de la mascota */}
             <div className="clinical-section">
               <div className="clinical-section-header">
                 <span className="clinical-section-icon">🩺</span>
@@ -5052,7 +5082,7 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
               <div className="form-row">
                 {!imageClinicalContext?.patientId && (
                   <div className="form-group">
-                    <label>Nombre del Paciente (Opcional)</label>
+                    <label>Nombre de la mascota (Opcional)</label>
                     <input
                       type="text"
                       value={patientName}
@@ -5068,7 +5098,7 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
                     type="text"
                     value={consultationId}
                     onChange={(e) => setConsultationId(e.target.value)}
-                    placeholder="Para incluir historial del paciente"
+                    placeholder="Para incluir historial de la mascota"
                   />
                 </div>
               </div>
@@ -5190,7 +5220,7 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
             </div>
 
             <div className="side-panel-section">
-              <div className="side-panel-label">Paciente</div>
+              <div className="side-panel-label">Mascota</div>
               <div className="side-panel-chip">
                 {patientName || "Sin nombre asignado"}
               </div>
@@ -5239,7 +5269,7 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
                     </div>
                     {item.patient_name && (
                       <div className="history-patient">
-                        <strong>Paciente:</strong> {item.patient_name}
+                        <strong>Mascota:</strong> {item.patient_name}
                       </div>
                     )}
                     <div className="history-preview">
@@ -5892,9 +5922,14 @@ const Profile = ({ setView }) => {
               <div className="detail-row">
                 <div className="detail-label">
                   <span className="detail-icon">🆔</span>
-                  <strong>Cédula Profesional</strong>
+                  <strong>Registro profesional</strong>
                 </div>
-                <span className="detail-value">{veterinarian.cedula_profesional || "No registrada"}</span>
+                <span className="detail-value">
+                  {veterinarian.cedula_profesional || "No registrado"}
+                  {veterinarian.profesional_pais
+                    ? ` · ${countryLabel(veterinarian.profesional_pais)}`
+                    : ""}
+                </span>
               </div>
               <div className="detail-row">
                 <div className="detail-label">

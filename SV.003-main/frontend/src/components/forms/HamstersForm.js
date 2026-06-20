@@ -62,7 +62,7 @@ const HamstersForm = ({ formData, setFormData }) => {
 
   return (
     <div className="species-form">
-      <h2>Datos del Paciente - Hámster</h2>
+      <h2>Datos de la mascota - Hámster</h2>
 
       <div className="species-form-progress">
         <div className="species-form-progress-header">
@@ -103,7 +103,7 @@ const HamstersForm = ({ formData, setFormData }) => {
         
         <div className="form-row">
           <div className="form-group">
-            <label>Nombre del Paciente *</label>
+            <label>Nombre de la mascota *</label>
             <input type="text" required value={formData.nombre_mascota || ''} onChange={(e) => handleChange('nombre_mascota', e.target.value)} />
           </div>
           <div className="form-group">

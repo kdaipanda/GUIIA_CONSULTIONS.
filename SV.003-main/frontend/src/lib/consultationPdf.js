@@ -5,7 +5,7 @@ const MARGIN = 50;
 const CONTENT_WIDTH = PAGE.width - MARGIN * 2;
 
 const CLINICAL_FIELD_LABELS = {
-  nombre_mascota: "Nombre del paciente",
+  nombre_mascota: "Nombre de la mascota",
   nombre_dueño: "Propietario",
   nombre_dueno: "Propietario",
   raza: "Raza",
@@ -388,7 +388,7 @@ function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
   }
 
   writer.y -= 8;
-  writer.drawSectionTitle("Datos clínicos del paciente");
+  writer.drawSectionTitle("Datos clínicos de la mascota");
   const clinicalRows = collectClinicalFields(consultation);
   if (clinicalRows.length) {
     clinicalRows.forEach(({ label, value }) => writer.drawKeyValue(label, value));
@@ -562,7 +562,7 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
   );
 
   writer.drawBrandHeader(logoImage);
-  writer.drawLine("Historia clínica del paciente", { size: 14, font: "bold" });
+  writer.drawLine("Historia clínica de la mascota", { size: 14, font: "bold" });
   writer.drawLine(`Mascota: ${patient.name}`, { size: 11 });
   writer.drawLine(`Especie: ${patient.species || "—"}`, { size: 11 });
   writer.drawLine(`Raza: ${patient.breed || "—"}`, { size: 11 });
@@ -584,7 +584,7 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
   writer.drawSectionTitle("Timeline de consultas CDS");
 
   if (!sorted.length) {
-    writer.drawLine("No hay consultas vinculadas a este paciente.", {
+    writer.drawLine("No hay consultas vinculadas a esta mascota.", {
       size: 10.5,
       color: rgb(0.45, 0.5, 0.58),
     });

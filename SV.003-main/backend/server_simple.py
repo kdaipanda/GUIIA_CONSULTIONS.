@@ -36,6 +36,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 import auth_security
+import cedula_verification
 import email_notifications
 from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from starlette.requests import Request
@@ -52,6 +53,8 @@ from supabase_client import (
     get_profile_by_email,
     get_profile_by_cedula,
     get_profile_by_credentials,
+    normalize_professional_id,
+    professional_id_key,
     insert_consultation,
     insert_medical_image,
     insert_payment_transaction,
@@ -651,6 +654,7 @@ class VeterinarianRegister(BaseModel):
     email: str
     telefono: str
     cedula_profesional: str
+    profesional_pais: str = "MX"
     especialidad: str
     años_experiencia: int
     institucion: str
@@ -1188,10 +1192,19 @@ async def register_veterinarian(vet: VeterinarianRegister):
     if existing:
         raise HTTPException(status_code=400, detail="Email ya registrado")
 
-    # Verificar si ya existe por cédula
-    existing_cedula, _ = get_profile_by_cedula(vet.cedula_profesional)
+    cedula_norm = normalize_professional_id(vet.cedula_profesional)
+    if len(cedula_norm) < 3:
+        raise HTTPException(
+            status_code=400,
+            detail="Ingresa un número de matrícula, licencia o registro profesional válido.",
+        )
+
+    # Verificar si ya existe por registro profesional
+    existing_cedula, _ = get_profile_by_cedula(cedula_norm)
     if existing_cedula:
-        raise HTTPException(status_code=400, detail="Cédula profesional ya registrada")
+        raise HTTPException(status_code=400, detail="Este registro profesional ya está registrado")
+
+    pais = (vet.profesional_pais or "MX").strip().upper()[:2]
 
     # Verificar si es usuario de desarrollo (pasa verificación automáticamente)
     is_dev = is_dev_user(vet.email)
@@ -1204,7 +1217,9 @@ async def register_veterinarian(vet: VeterinarianRegister):
         "nombre": vet.nombre,
         "email": vet.email,
         "telefono": vet.telefono,
-        "cedula_profesional": vet.cedula_profesional,
+        "cedula_profesional": cedula_norm,
+        "cedula_profesional_key": professional_id_key(cedula_norm),
+        "profesional_pais": pais,
         "especialidad": vet.especialidad,
         "años_experiencia": vet.años_experiencia,
         "institucion": vet.institucion,
@@ -1237,9 +1252,9 @@ async def login_veterinarian(credentials: VeterinarianLogin):
     """Login de veterinario"""
 
     email = (credentials.email or "").strip().lower()
-    cedula = (credentials.cedula_profesional or "").strip()
+    cedula = normalize_professional_id(credentials.cedula_profesional or "")
     if not email or not cedula:
-        raise HTTPException(status_code=400, detail="Email y cédula son requeridos")
+        raise HTTPException(status_code=400, detail="Email y registro profesional son requeridos")
 
     # Buscar en Supabase
     veterinarian, err = get_profile_by_credentials(email, cedula)
@@ -1278,7 +1293,7 @@ async def login_veterinarian(credentials: VeterinarianLogin):
 
         # Si falta el documento, siempre bloquear y mandar al flujo
         if needs_upload or ced_status == CEDULA_STATUS_UNSUBMITTED:
-            msg = "Debes subir y verificar tu cédula profesional para continuar."
+            msg = "Debes subir tu documento de registro profesional para continuar."
             return {
                 "status": "requires_cedula_flow",
                 "veterinarian_id": veterinarian.get("id"),
@@ -1292,7 +1307,7 @@ async def login_veterinarian(credentials: VeterinarianLogin):
 
         # Si fue rechazada, bloquear y pedir reintento (corregir nombre/cedula o re-subir)
         if ced_status == CEDULA_STATUS_REJECTED:
-            msg = "Tu verificación de cédula fue rechazada. Revisa tus datos y vuelve a intentar."
+            msg = "Tu registro profesional fue rechazado. Revisa tus datos y vuelve a intentar."
             return {
                 "status": "requires_cedula_flow",
                 "veterinarian_id": veterinarian.get("id"),
@@ -1309,7 +1324,7 @@ async def login_veterinarian(credentials: VeterinarianLogin):
         if ced_status == CEDULA_STATUS_PENDING and veterinarian.get("cedula_document_url"):
             veterinarian["cedula_verification_status"] = CEDULA_STATUS_PENDING
             veterinarian["cedula_verification_message"] = (
-                "Tu cédula está en verificación. Puedes continuar mientras se procesa."
+                "Tu registro profesional está en revisión. Puedes continuar mientras lo validamos."
             )
         else:
             # Si el usuario tiene menos de 3 skips, permitir acceso temporal
@@ -1325,7 +1340,7 @@ async def login_veterinarian(credentials: VeterinarianLogin):
                     "veterinarian_id": veterinarian.get("id"),
                     "needs_upload": needs_upload,
                     "verification_status": ced_status,
-                    "message": "Necesitamos completar la verificación de cédula para continuar.",
+                    "message": "Necesitamos completar la verificación de tu registro profesional.",
                     "cedula_skip_count": skip_count,
                     "can_skip": False,
                     **_flow_auth_fields(veterinarian.get("id"), email),
@@ -1481,7 +1496,7 @@ async def upload_cedula_document(
     return CedulaUploadResponse(
         status="ok",
         cedula_document_url=public_url,
-        message="Documento recibido. Procede a verificar la cédula.",
+        message="Documento recibido. Continúa con la verificación de tu registro profesional.",
     )
 
 
@@ -1500,115 +1515,32 @@ async def verify_cedula(
     if not profile:
         raise HTTPException(status_code=404, detail="Veterinario no encontrado")
 
-    cedula = (payload.cedula_profesional or "").strip()
+    cedula = normalize_professional_id(payload.cedula_profesional or "")
     if not cedula:
-        raise HTTPException(status_code=400, detail="Cédula requerida")
+        raise HTTPException(status_code=400, detail="Registro profesional requerido")
 
-    if (profile.get("cedula_profesional") or "").strip() != cedula:
-        raise HTTPException(status_code=400, detail="La cédula no coincide con el perfil")
+    stored_key = profile.get("cedula_profesional_key") or professional_id_key(
+        profile.get("cedula_profesional") or ""
+    )
+    if stored_key != professional_id_key(cedula):
+        raise HTTPException(status_code=400, detail="El registro no coincide con el perfil")
 
     expected_name = (payload.expected_nombre or profile.get("nombre") or "").strip()
     if not expected_name:
         raise HTTPException(status_code=400, detail="Nombre requerido para validar")
+    if expected_name != (profile.get("nombre") or "").strip():
+        update_profile(vet_id, {"nombre": expected_name})
 
-    # Usuario de desarrollo: auto-verificar sin scraping
-    is_dev = is_dev_user(profile.get("email") or "")
-    if is_dev:
-        now = datetime.now(timezone.utc).isoformat()
-        err_upd = update_profile(
-            vet_id,
-            {
-                "cedula_sep_nombre": expected_name,
-                "cedula_sep_profesion": "Médico Veterinario Zootecnista",
-                "cedula_verification_status": CEDULA_STATUS_VERIFIED,
-                "cedula_verification_checked_at": now,
-                "cedula_verification_error": None,
-            },
-        )
-        if err_upd:
-            raise HTTPException(status_code=500, detail=f"Error actualizando perfil: {err_upd}")
-        return CedulaVerifyResponse(
-            status="ok",
-            verification_status=CEDULA_STATUS_VERIFIED,
-            sep_nombre=expected_name,
-            sep_profesion="Médico Veterinario Zootecnista",
-            message="Cédula verificada automáticamente (usuario de desarrollo).",
-        )
-
-    # Consultar SEP/DGP (con reintentos)
-    try:
-        sep = await _sep_dgp_lookup_with_retries(cedula, attempts=3)
-    except Exception as exc:
-        now = datetime.now(timezone.utc).isoformat()
-        update_profile(
-            vet_id,
-            {
-                "cedula_verification_status": CEDULA_STATUS_PENDING,
-                "cedula_verification_checked_at": now,
-                "cedula_verification_error": str(exc),
-            },
-        )
-        return CedulaVerifyResponse(
-            status="ok",
-            verification_status=CEDULA_STATUS_PENDING,
-            message="No se pudo validar automáticamente en este momento. Intenta más tarde.",
-        )
-
-    sep_nombre = (sep.get("nombre") or "").strip()
-    sep_profesion = (sep.get("profesion") or "").strip()
-    now = datetime.now(timezone.utc).isoformat()
-
-    if not sep_nombre and not sep_profesion:
-        update_profile(
-            vet_id,
-            {
-                "cedula_verification_status": CEDULA_STATUS_PENDING,
-                "cedula_verification_checked_at": now,
-                "cedula_verification_error": "Sin datos en respuesta de SEP/DGP",
-            },
-        )
-        return CedulaVerifyResponse(
-            status="ok",
-            verification_status=CEDULA_STATUS_PENDING,
-            message="No fue posible obtener datos de SEP/DGP. Intenta más tarde.",
-        )
-
-    name_ok = _name_matches(expected_name, sep_nombre) if sep_nombre else False
-    prof_ok = _profession_is_vet(sep_profesion) if sep_profesion else False
-
-    if name_ok and prof_ok:
-        verification_status = CEDULA_STATUS_VERIFIED
-        msg = "Cédula verificada correctamente."
-        err_txt = None
-    else:
-        verification_status = CEDULA_STATUS_REJECTED
-        reasons = []
-        if not name_ok:
-            reasons.append("el nombre no coincide")
-        if not prof_ok:
-            reasons.append("la profesión no corresponde a MVZ/Veterinaria")
-        msg = "Validación rechazada: " + ", ".join(reasons) + "."
-        err_txt = msg
-
-    err_upd = update_profile(
-        vet_id,
-        {
-            "cedula_sep_nombre": sep_nombre or None,
-            "cedula_sep_profesion": sep_profesion or None,
-            "cedula_verification_status": verification_status,
-            "cedula_verification_checked_at": now,
-            "cedula_verification_error": err_txt,
-        },
-    )
-    if err_upd:
-        raise HTTPException(status_code=500, detail=f"Error actualizando perfil: {err_upd}")
+    result = await cedula_verification.verify_profile_cedula(vet_id)
+    if not result.get("ok"):
+        raise HTTPException(status_code=400, detail=result.get("error") or "Error de verificación")
 
     return CedulaVerifyResponse(
         status="ok",
-        verification_status=verification_status,
-        sep_nombre=sep_nombre or None,
-        sep_profesion=sep_profesion or None,
-        message=msg,
+        verification_status=result.get("verification_status") or CEDULA_STATUS_PENDING,
+        sep_nombre=result.get("sep_nombre"),
+        sep_profesion=result.get("sep_profesion"),
+        message=result.get("message") or "Verificación procesada.",
     )
 
 
@@ -1616,7 +1548,7 @@ async def verify_cedula(
 async def skip_cedula_verification(
     x_veterinarian_id: str = Header(None),
 ):
-    """Permite al usuario posponer la verificación de cédula (máximo 3 veces)"""
+    """Permite al usuario posponer la verificación de registro profesional (máximo 3 veces)"""
     if not x_veterinarian_id:
         raise HTTPException(status_code=401, detail="No autenticado")
     
@@ -1632,7 +1564,7 @@ async def skip_cedula_verification(
     if skip_count >= 3:
         raise HTTPException(
             status_code=403,
-            detail="Has alcanzado el límite de 3 posposiciones. Debes verificar tu cédula para continuar."
+            detail="Has alcanzado el límite de 3 posposiciones. Debes completar la verificación de tu registro profesional.",
         )
     
     # Incrementar contador
@@ -1651,7 +1583,7 @@ async def skip_cedula_verification(
         "status": "ok",
         "cedula_skip_count": new_skip_count,
         "remaining_skips": 3 - new_skip_count,
-        "message": f"Puedes verificar tu cédula después. Te quedan {3 - new_skip_count} posposiciones restantes." if new_skip_count < 3 else "Esta fue tu última posposición. Debes verificar tu cédula la próxima vez.",
+        "message": f"Puedes verificar tu registro después. Te quedan {3 - new_skip_count} posposiciones restantes." if new_skip_count < 3 else "Esta fue tu última posposición. Debes completar la verificación la próxima vez.",
     }
 
 

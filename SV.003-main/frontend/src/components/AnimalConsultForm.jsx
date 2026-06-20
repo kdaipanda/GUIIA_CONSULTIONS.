@@ -147,7 +147,7 @@ const AnimalConsultForm = ({ veterinarianId, onSuccess }) => {
         {!species && (
           <div className="space-y-4">
             <label className="block text-sm font-medium text-gray-700">
-              Selecciona la especie del paciente:
+              Selecciona la especie de la mascota:
             </label>
             <select
               value={species}
