@@ -211,7 +211,7 @@ export function BillingPage() {
           <p>Recibos y cobros clínicos (sin CFDI). Vinculado al inventario.</p>
         </div>
         <Button type="button" onClick={openCreate}>
-          <Plus size={16} className="mr-1" /> Nuevo recibo
+          <Plus size={16} className="mr-1" /> Nueva Venta
         </Button>
       </div>
 
@@ -257,7 +257,7 @@ export function BillingPage() {
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Nuevo recibo</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Nueva Venta</DialogTitle></DialogHeader>
           <form onSubmit={handleSave} className="clinic-form">
             <div className="form-group">
               <Label>Receptor</Label>

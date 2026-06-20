@@ -28,21 +28,24 @@
 
 [data-theme="dark"] {
   /* Dark Theme */
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #2d2d2d;
-  --bg-tertiary: #3a3a3a;
-  --text-primary: #e8e8ec;
-  --text-secondary: #c4c4d4;
-  --text-tertiary: #9a9aaa;
-  --border-color: #404040;
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.6);
+  --bg-primary: #0c0e14;
+  --bg-secondary: #161922;
+  --bg-tertiary: #22262f;
+  --text-primary: #eef0f4;
+  --text-secondary: #b8bcc8;
+  --text-tertiary: #8b919e;
+  --border-color: #343946;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55);
   --accent-primary: #66bb6a;
   --accent-secondary: #42a5f5;
   --accent-danger: #ef5350;
   --accent-warning: #ffa726;
   --accent-info: #26c6da;
+  --clinic-surface: #161922;
+  --clinic-surface-elevated: #1e222c;
+  --clinic-surface-muted: #252932;
 }
 
 .info-message {
