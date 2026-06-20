@@ -24,6 +24,8 @@ import { fetchAdminSupportTickets, fetchAppointmentRequests, fetchInventorySumma
 import { useClinic } from "../context/ClinicContext";
 import { useVet } from "../context/VetContext";
 import { clinicNavIsHero, clinicNavThemeStyle } from "../lib/clinicNavTheme";
+import { PlatformOnboarding } from "../components/PlatformOnboarding";
+import { hasCompletedPlatformOnboarding } from "../lib/platformOnboarding";
 
 const BASE_NAV_ITEMS = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard, view: "dashboard" },
@@ -53,6 +55,7 @@ export function ClinicShell({ children, setView }) {
   const [pendingAgendaRequests, setPendingAgendaRequests] = useState(0);
   const [lowStockCount, setLowStockCount] = useState(0);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const loadAdminSupportCount = useCallback(async () => {
     if (!platformAdmin || !veterinarian?.id) {
@@ -104,6 +107,17 @@ export function ClinicShell({ children, setView }) {
     }, 60 * 1000);
     return () => clearInterval(interval);
   }, [loadAdminSupportCount, loadPendingAgendaRequests, loadLowStockCount]);
+
+  useEffect(() => {
+    if (!veterinarian?.id || orgLoading) return undefined;
+    if (hasCompletedPlatformOnboarding(veterinarian.id)) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setShowOnboarding(true);
+    }, 600);
+
+    return () => window.clearTimeout(timer);
+  }, [veterinarian?.id, orgLoading]);
 
   const spacerRef = useRef(null);
 
@@ -267,6 +281,12 @@ export function ClinicShell({ children, setView }) {
         </aside>
         <main className="clinic-shell-main">{children}</main>
       </div>
+      <PlatformOnboarding
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        veterinarianId={veterinarian?.id}
+        setView={setView}
+      />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import "./App.css";
 import "./Custom.css";
 import "./ThemeEnhancements.css";
 import "./darkModeOverrides.css";
+import "./PlatformOnboarding.css";
 import {
   createConsultationSupabase,
   listConsultationsSupabase,
