@@ -15,6 +15,7 @@ import {
   Wrench,
   Settings,
   Shield,
+  Menu,
 } from "lucide-react";
 import { Header } from "../components/Header";
 import { NotificationBell } from "../components/clinic/NotificationBell";
@@ -45,6 +46,7 @@ export function ClinicShell({ children, setView }) {
   const [adminSupportOpen, setAdminSupportOpen] = useState(0);
   const [pendingAgendaRequests, setPendingAgendaRequests] = useState(0);
   const [lowStockCount, setLowStockCount] = useState(0);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const loadAdminSupportCount = useCallback(async () => {
     if (!platformAdmin || !veterinarian?.id) {
@@ -96,6 +98,17 @@ export function ClinicShell({ children, setView }) {
     }, 60 * 1000);
     return () => clearInterval(interval);
   }, [loadAdminSupportCount, loadPendingAgendaRequests, loadLowStockCount]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileNavOpen]);
+
+  const closeMobileNav = () => setMobileNavOpen(false);
 
   const navItems = useMemo(() => {
     const items = [...BASE_NAV_ITEMS];
@@ -151,14 +164,43 @@ export function ClinicShell({ children, setView }) {
         }
       />
       <div className="clinic-shell-body">
-        <aside className="clinic-sidebar">
+        <div className="clinic-mobile-toolbar">
+          <button
+            type="button"
+            className="clinic-mobile-nav-toggle"
+            onClick={() => setMobileNavOpen((open) => !open)}
+            aria-expanded={mobileNavOpen}
+            aria-controls="clinic-sidebar-nav"
+          >
+            <Menu size={20} aria-hidden />
+            <span>{mobileNavOpen ? "Cerrar menú" : "Menú clínica"}</span>
+          </button>
+          {!orgLoading && organization?.name && (
+            <span className="clinic-mobile-org">{organization.name}</span>
+          )}
+        </div>
+
+        {mobileNavOpen && (
+          <button
+            type="button"
+            className="clinic-sidebar-backdrop"
+            aria-label="Cerrar menú"
+            onClick={closeMobileNav}
+          />
+        )}
+
+        <aside className={`clinic-sidebar${mobileNavOpen ? " mobile-open" : ""}`}>
           <div className="clinic-sidebar-head">
             <span className="clinic-sidebar-title">Clínica</span>
             {!orgLoading && organization?.name && (
               <span className="clinic-sidebar-org">{organization.name}</span>
             )}
           </div>
-          <nav className="clinic-sidebar-nav" aria-label="Módulos clínicos">
+          <nav
+            id="clinic-sidebar-nav"
+            className="clinic-sidebar-nav"
+            aria-label="Módulos clínicos"
+          >
             {navItems.map(({ to, label, icon: Icon, view }) => (
               <NavLink
                 key={to}
@@ -166,7 +208,10 @@ export function ClinicShell({ children, setView }) {
                 className={({ isActive }) =>
                   `clinic-sidebar-link${isActive ? " active" : ""}`
                 }
-                onClick={() => setView?.(view)}
+                onClick={() => {
+                  setView?.(view);
+                  closeMobileNav();
+                }}
               >
                 <Icon size={18} aria-hidden />
                 <span>{label}</span>
