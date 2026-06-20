@@ -1149,6 +1149,9 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
       }
 
       const vetData = await response.json();
+      if (vetData?.access_token) {
+        storeAccessToken(vetData.access_token);
+      }
       // Redirigir a flujo obligatorio de cédula (upload + verificación)
       setCedulaFlow?.({
         source: "register",
@@ -3455,15 +3458,19 @@ const NewConsultation = ({
     setError("");
 
     try {
-      const { error } = await supabase
-        .from("consultations")
-        .update({ rating: value, rated_at: new Date().toISOString() })
-        .eq("id", consultationId);
-      if (error) throw error;
+      const response = await fetch(`${BACKEND_URL}/api/consultations/${consultationId}/rating`, {
+        method: "PUT",
+        headers: getAuthHeaders(veterinarian.id, { "Content-Type": "application/json" }),
+        body: JSON.stringify({ rating: value }),
+      });
+      if (!response.ok) {
+        const raw = await response.text().catch(() => "");
+        throw new Error(raw || `Error guardando calificación: ${response.status}`);
+      }
 
       setRatingSaved(true);
     } catch (err) {
-      setError(err.message);
+      setError(err?.message || "Error guardando calificación");
       setRatingSaved(false);
     } finally {
       setSavingRating(false);

@@ -12,6 +12,13 @@ const DEV_AUTO_LOGIN = false;
 
 const VetContext = createContext();
 
+const supabaseUserToVet = (user) => ({
+  id: user.id,
+  nombre: user.email?.split("@")[0] || "usuario",
+  email: user.email,
+  membership_type: "basic",
+});
+
 export const useVet = () => {
   const context = useContext(VetContext);
   if (!context) {
@@ -67,15 +74,13 @@ export const VetProvider = ({ children }) => {
       if (!mounted) return;
       const sessionUser = data.session?.user;
       if (sessionUser) {
-        const vetFromSupabase = {
-          id: sessionUser.id,
-          nombre: sessionUser.email?.split("@")[0] || "usuario",
-          email: sessionUser.email,
-          membership_type: "basic",
-        };
+        const vetFromSupabase = supabaseUserToVet(sessionUser);
         setAuthUser(sessionUser);
-        setVeterinarian((prev) => prev || vetFromSupabase);
-        localStorage.setItem("veterinarian", JSON.stringify(vetFromSupabase));
+        setVeterinarian((prev) => {
+          const nextVet = prev?.id ? prev : vetFromSupabase;
+          localStorage.setItem("veterinarian", JSON.stringify(nextVet));
+          return nextVet;
+        });
       }
       setLoading(false);
     });
@@ -85,15 +90,13 @@ export const VetProvider = ({ children }) => {
         const user = session?.user || null;
         setAuthUser(user);
         if (user) {
-          const vetFromSupabase = {
-            id: user.id,
-            nombre: user.email?.split("@")[0] || "usuario",
-            email: user.email,
-            membership_type: "basic",
-          };
-          setVeterinarian(vetFromSupabase);
-          localStorage.setItem("veterinarian", JSON.stringify(vetFromSupabase));
-        } else {
+          const vetFromSupabase = supabaseUserToVet(user);
+          setVeterinarian((prev) => {
+            const nextVet = prev?.id ? prev : vetFromSupabase;
+            localStorage.setItem("veterinarian", JSON.stringify(nextVet));
+            return nextVet;
+          });
+        } else if (event === "SIGNED_OUT" || event === "USER_DELETED") {
           setVeterinarian(null);
           localStorage.removeItem("veterinarian");
           clearAccessToken();
