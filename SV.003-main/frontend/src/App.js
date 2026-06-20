@@ -202,7 +202,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "tools",
       title: "Herramientas",
       description: "Calculadoras clínicas",
-      icon: "🔧",
+      icon: "🔧",image.png
       shortcut: "",
       action: () => setView("tools"),
     },
@@ -2083,15 +2083,18 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
     try {
       console.log("Loading consultations for veterinarian ID:", veterinarian.id);
       // Cargar desde MongoDB directamente
-      const response = await fetch(`${BACKEND_URL}/api/consultations/${veterinarian.id}/history`);
+      const response = await fetch(
+        `${BACKEND_URL}/api/consultations/${veterinarian.id}/history`,
+        { headers: getAuthHeaders(veterinarian.id) },
+      );
       let consultations = [];
       
       if (response.ok) {
         const data = await response.json();
         consultations = data.consultations || [];
-        console.log("Consultations loaded from MongoDB:", consultations);
+        console.log("Consultations loaded:", consultations.length);
       } else {
-        console.warn("Error loading consultations from MongoDB");
+        console.warn("Error loading consultations:", response.status);
       }
       const now = new Date();
 
@@ -3154,7 +3157,9 @@ const NewConsultation = ({
     setError("");
     console.log('Loading existing consultation:', id);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/consultation/${id}`);
+      const response = await fetch(`${BACKEND_URL}/api/consultation/${id}`, {
+        headers: getAuthHeaders(veterinarian?.id),
+      });
       console.log('Response status:', response.status);
       if (response.ok) {
         const { data: consultation, text } = await safeReadJson(response);
@@ -4044,6 +4049,7 @@ const ConsultationHistory = ({ setView, openConsultation }) => {
     try {
       const response = await fetch(
         `${BACKEND_URL}/api/consultation/${consultationId}`,
+        { headers: getAuthHeaders(veterinarian.id) },
       );
       if (!response.ok) {
         throw new Error("No se pudo cargar la consulta para exportar");
@@ -4110,6 +4116,7 @@ const ConsultationHistory = ({ setView, openConsultation }) => {
     try {
       const response = await fetch(
         `${BACKEND_URL}/api/consultations/${veterinarian.id}/history`,
+        { headers: getAuthHeaders(veterinarian.id) },
       );
       if (response.ok) {
         const data = await response.json();
@@ -4127,6 +4134,7 @@ const ConsultationHistory = ({ setView, openConsultation }) => {
     try {
       const response = await fetch(
         `${BACKEND_URL}/api/consultation/${consultationId}`,
+        { headers: getAuthHeaders(veterinarian.id) },
       );
       if (response.ok) {
         const consultation = await response.json();
@@ -4692,11 +4700,7 @@ const MedicalImageInterpretation = ({ setView }) => {
       console.log("Cargando historial para veterinario:", veterinarian.id);
       const response = await fetch(
         `${BACKEND_URL}/api/medical-images/history?limit=50`,
-        {
-          headers: {
-            "X-Veterinarian-Id": veterinarian.id,
-          },
-        },
+        { headers: getAuthHeaders(veterinarian.id) },
       );
       if (!response.ok) {
         const errText = await response.text().catch(() => "");
@@ -4765,7 +4769,9 @@ const MedicalImageInterpretation = ({ setView }) => {
         `${BACKEND_URL}/api/medical-images/interpret`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(veterinarian.id, {
+            "Content-Type": "application/json",
+          }),
           body: JSON.stringify(requestData),
         },
       );
