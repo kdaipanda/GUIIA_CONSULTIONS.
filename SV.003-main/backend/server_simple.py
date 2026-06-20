@@ -196,6 +196,28 @@ ANTHROPIC_INSTRUCTIONS_FILE = os.getenv(
     os.path.join(os.path.dirname(__file__), "instrucciones_veterinarias.txt"),
 ).strip()
 
+
+def _anthropic_use_top_p() -> bool:
+    return os.getenv("ANTHROPIC_USE_TOP_P", "").strip().lower() in ("1", "true", "yes")
+
+
+def _anthropic_sampling_params(*, temperature: Optional[float] = None) -> Dict[str, Any]:
+    """
+    Modelos recientes de Anthropic no aceptan temperature y top_p simultáneamente.
+    Por defecto usa temperature; ANTHROPIC_USE_TOP_P=1 para usar solo top_p.
+    """
+    params: Dict[str, Any] = {}
+    if _anthropic_use_top_p():
+        params["top_p"] = ANTHROPIC_TOP_P
+    else:
+        params["temperature"] = (
+            ANTHROPIC_TEMPERATURE if temperature is None else temperature
+        )
+    if ANTHROPIC_TOP_K:
+        params["top_k"] = ANTHROPIC_TOP_K
+    return params
+
+
 anthropic_client: Optional[Anthropic] = (
     Anthropic(api_key=ANTHROPIC_API_KEY) if (Anthropic and ANTHROPIC_API_KEY) else None
 )
@@ -318,9 +340,7 @@ async def send_llm_message(content: List[Dict[str, Any]]) -> str:
         response = anthropic_client.messages.create(
             model=ANTHROPIC_MODEL or "claude-3-5-sonnet-20241022",
             max_tokens=ANTHROPIC_MAX_TOKENS,
-            temperature=ANTHROPIC_TEMPERATURE,
-            top_p=ANTHROPIC_TOP_P,
-            top_k=ANTHROPIC_TOP_K,
+            **_anthropic_sampling_params(),
             system=system_prompt,
             messages=[
                 {
@@ -1055,9 +1075,7 @@ async def send_support_chat_message(
         response = anthropic_client.messages.create(
             model=ANTHROPIC_MODEL or "claude-3-5-sonnet-20241022",
             max_tokens=min(ANTHROPIC_MAX_TOKENS, 900),
-            temperature=0.2,
-            top_p=ANTHROPIC_TOP_P,
-            top_k=ANTHROPIC_TOP_K,
+            **_anthropic_sampling_params(temperature=0.2),
             system=system_prompt,
             messages=messages_payload,
         )
@@ -1069,8 +1087,10 @@ async def send_support_chat_message(
     try:
         return await asyncio.to_thread(_call_support)
     except APIStatusError as exc:
-        msg = exc.message or "Error de API Anthropic"
-        raise RuntimeError(f"Error Anthropic {exc.status_code}: {msg}") from exc
+        print(f"[WARN] Soporte chat Anthropic: {exc}")
+        raise RuntimeError(
+            "No pude responder en este momento. Intenta de nuevo o crea un ticket de soporte."
+        ) from exc
     except Exception as exc:  # noqa: BLE001
         raise RuntimeError(f"Error en el asistente de soporte: {exc}") from exc
 
