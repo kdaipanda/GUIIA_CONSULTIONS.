@@ -95,12 +95,20 @@ export function Header({ setView, showAuth = true, actions }) {
         </div>
 
         {showAuth && (
-          <>
-            <button className="menu-toggle" onClick={toggleMenu}>
+          <div className="header-end">
+            {actions && (
+              <div className="header-actions-slot">{actions}</div>
+            )}
+            <button
+              type="button"
+              className="menu-toggle"
+              onClick={toggleMenu}
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? "Cerrar menú de usuario" : "Abrir menú de usuario"}
+            >
               {isMenuOpen ? "✕" : "☰"}
             </button>
             <nav className={`nav-menu ${isMenuOpen ? "mobile-open" : ""}`}>
-              {actions && <div className="header-actions-slot">{actions}</div>}
               {veterinarian ? (
                 <>
                   <div className="user-menu-container">
@@ -205,7 +213,7 @@ export function Header({ setView, showAuth = true, actions }) {
                 </>
               )}
             </nav>
-          </>
+          </div>
         )}
       </div>
     </header>

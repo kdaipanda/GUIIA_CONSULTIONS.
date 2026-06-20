@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState, useCallback } from "react";
+import React, { useMemo, useEffect, useState, useCallback, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -99,6 +99,8 @@ export function ClinicShell({ children, setView }) {
     return () => clearInterval(interval);
   }, [loadAdminSupportCount, loadPendingAgendaRequests, loadLowStockCount]);
 
+  const spacerRef = useRef(null);
+
   useEffect(() => {
     if (!mobileNavOpen) return undefined;
     const prev = document.body.style.overflow;
@@ -107,6 +109,33 @@ export function ClinicShell({ children, setView }) {
       document.body.style.overflow = prev;
     };
   }, [mobileNavOpen]);
+
+  useEffect(() => {
+    const shell = document.querySelector(".clinic-shell");
+    const header = shell?.querySelector(":scope > .header");
+    if (!shell || !header) return undefined;
+
+    const syncHeaderHeight = () => {
+      const height = Math.ceil(header.getBoundingClientRect().height) + 6;
+      shell.style.setProperty("--clinic-header-h", `${height}px`);
+      document.documentElement.style.setProperty("--clinic-header-h", `${height}px`);
+      if (spacerRef.current) {
+        spacerRef.current.style.height = `${height}px`;
+      }
+    };
+
+    syncHeaderHeight();
+    const observer = new ResizeObserver(syncHeaderHeight);
+    observer.observe(header);
+    window.addEventListener("resize", syncHeaderHeight);
+    window.addEventListener("scroll", syncHeaderHeight, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", syncHeaderHeight);
+      window.removeEventListener("scroll", syncHeaderHeight);
+    };
+  }, []);
 
   const closeMobileNav = () => setMobileNavOpen(false);
 
@@ -163,6 +192,7 @@ export function ClinicShell({ children, setView }) {
           />
         }
       />
+      <div ref={spacerRef} className="clinic-header-spacer" aria-hidden="true" />
       <div className="clinic-shell-body">
         <div className="clinic-mobile-toolbar">
           <button
@@ -175,9 +205,6 @@ export function ClinicShell({ children, setView }) {
             <Menu size={20} aria-hidden />
             <span>{mobileNavOpen ? "Cerrar menú" : "Menú clínica"}</span>
           </button>
-          {!orgLoading && organization?.name && (
-            <span className="clinic-mobile-org">{organization.name}</span>
-          )}
         </div>
 
         {mobileNavOpen && (
