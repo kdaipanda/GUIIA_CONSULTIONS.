@@ -4,9 +4,10 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import { BarChart3, CalendarDays, Gem, Sun, Cloud, CloudRain, CloudSun, Thermometer, Plus, ClipboardList, FlaskConical, Crown, Bell, Moon, Brain, FileDown } from "lucide-react";
+import { BarChart3, CalendarDays, Gem, Sun, Cloud, CloudRain, CloudSun, Thermometer, Plus, ClipboardList, FlaskConical, Crown, Moon, Brain, FileDown } from "lucide-react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
 import "./Custom.css";
 import "./ThemeEnhancements.css";
@@ -18,14 +19,31 @@ import {
 } from "./lib/supabaseApi";
 import { BACKEND_URL } from "./lib/backendUrl";
 import { friendlyFetchError } from "./lib/friendlyFetchError";
-import { downloadConsultationPdf } from "./lib/consultationPdf";
+import { getAuthHeaders, storeAccessToken } from "./lib/authHeaders";
+import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
 import { applyDocumentTheme, readStoredTheme } from "./lib/themeSync";
+import { SupportChatWidget } from "./components/SupportChatWidget";
 import { VetProvider, useVet } from "./context/VetContext";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { PrivacyModal } from "./components/PrivacyModal";
 import { LandingPage } from "./pages/LandingPage";
 import { Header } from "./components/Header";
 import { AppShell } from "./layout/AppShell";
+import { ClinicShell } from "./layout/ClinicShell";
+import { ClinicProvider } from "./context/ClinicContext";
+import { ClientsPage } from "./pages/clinic/ClientsPage";
+import { PatientsPage } from "./pages/clinic/PatientsPage";
+import { AgendaPage } from "./pages/clinic/AgendaPage";
+import { InventoryPage } from "./pages/clinic/InventoryPage";
+import { BillingPage } from "./pages/clinic/BillingPage";
+import { ReportsPage } from "./pages/clinic/ReportsPage";
+import { ToolsPage } from "./pages/clinic/ToolsPage";
+import { SettingsPage } from "./pages/clinic/SettingsPage";
+import { AdminPage } from "./pages/clinic/AdminPage";
+import { ClinicDashboardPage } from "./pages/clinic/ClinicDashboardPage";
+import { AppointmentRequestPortal } from "./pages/clinic/AppointmentRequestPortal";
+import { PatientSelector } from "./components/clinic/PatientSelector";
+import { PatientAntecedents } from "./components/clinic/PatientAntecedents";
 import { Button } from "./components/ui/button";
 import { Card } from "./components/ui/card";
 import { Input } from "./components/ui/input";
@@ -41,6 +59,31 @@ import {
 } from "./components/ui/select";
 
 console.log("Backend URL being used:", BACKEND_URL);
+
+const isPremiumMember = (vet) =>
+  vet?.membership_type?.toLowerCase() === "premium";
+
+const VIEW_TO_PATH = {
+  dashboard: "/app/dashboard",
+  clients: "/app/clientes",
+  patients: "/app/pacientes",
+  agenda: "/app/agenda",
+  inventory: "/app/inventario",
+  billing: "/app/facturacion",
+  reports: "/app/reportes",
+  tools: "/app/herramientas",
+  settings: "/app/configuracion",
+  admin: "/app/admin",
+  "new-consultation": "/app/consultas/nueva",
+  "consultation-history": "/app/historial",
+  "medical-images": "/app/imagenes",
+  membership: "/app/membresia",
+  profile: "/app/perfil",
+};
+
+const PATH_TO_VIEW = Object.fromEntries(
+  Object.entries(VIEW_TO_PATH).map(([view, path]) => [path, view]),
+);
 
 // Importar formularios de especies
 import {
@@ -92,11 +135,84 @@ const ToastContainer = ({ toasts, onClose }) => {
 
 // Command Palette Component
 const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, veterinarian }) => {
+  const { platformAdmin } = useVet();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef(null);
 
   const commands = [
+    {
+      id: "dashboard",
+      title: "Dashboard",
+      description: "Resumen operativo del consultorio",
+      icon: "📊",
+      shortcut: "",
+      action: () => setView("dashboard"),
+    },
+    {
+      id: "clients",
+      title: "Dueño",
+      description: "Dueño y contactos",
+      icon: "👥",
+      shortcut: "",
+      action: () => setView("clients"),
+    },
+    {
+      id: "patients",
+      title: "Mascotas",
+      description: "Mascotas registradas",
+      icon: "🐾",
+      shortcut: "",
+      action: () => setView("patients"),
+    },
+    {
+      id: "agenda",
+      title: "Agenda",
+      description: "Citas y solicitudes",
+      icon: "📅",
+      shortcut: "",
+      action: () => setView("agenda"),
+    },
+    {
+      id: "inventory",
+      title: "Inventario",
+      description: "Productos y stock",
+      icon: "📦",
+      shortcut: "",
+      action: () => setView("inventory"),
+    },
+    {
+      id: "billing",
+      title: "Facturación",
+      description: "Recibos clínicos",
+      icon: "🧾",
+      shortcut: "",
+      action: () => setView("billing"),
+    },
+    {
+      id: "reports",
+      title: "Reportes",
+      description: "KPIs e indicadores",
+      icon: "📈",
+      shortcut: "",
+      action: () => setView("reports"),
+    },
+    {
+      id: "tools",
+      title: "Herramientas",
+      description: "Calculadoras clínicas",
+      icon: "🔧",
+      shortcut: "",
+      action: () => setView("tools"),
+    },
+    {
+      id: "settings",
+      title: "Configuración",
+      description: "Consultorio y equipo",
+      icon: "⚙️",
+      shortcut: "",
+      action: () => setView("settings"),
+    },
     {
       id: "new-consultation",
       title: "Nueva Consulta",
@@ -104,14 +220,6 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       icon: "➕",
       shortcut: "N",
       action: () => setView("new-consultation"),
-    },
-    {
-      id: "expert-consultation",
-      title: "Manejo Experto",
-      description: "Ir directo al motivo de consulta; completa los datos del paciente después",
-      icon: "🧠",
-      shortcut: "E",
-      action: () => openExpertConsultation?.(),
     },
     {
       id: "consultation-history",
@@ -139,8 +247,29 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     },
   ];
 
-  if (veterinarian?.membership_type?.toLowerCase() === "premium") {
-    commands.splice(3, 0, {
+  if (platformAdmin) {
+    commands.splice(9, 0, {
+      id: "admin",
+      title: "Admin GUIAA",
+      description: "Administración de plataforma",
+      icon: "🛡️",
+      shortcut: "",
+      action: () => setView("admin"),
+    });
+  }
+
+  if (isPremiumMember(veterinarian)) {
+    const consultIdx = commands.findIndex((c) => c.id === "new-consultation");
+    const insertAt = consultIdx >= 0 ? consultIdx + 1 : commands.length;
+    commands.splice(insertAt, 0, {
+      id: "expert-consultation",
+      title: "Manejo Experto",
+      description: "Ir directo al motivo de consulta; completa los datos del paciente después (Premium)",
+      icon: "🧠",
+      shortcut: "E",
+      action: () => openExpertConsultation?.(),
+    });
+    commands.splice(insertAt + 1, 0, {
       id: "medical-images",
       title: "Interpretación de Análisis",
       description: "Interpretación de análisis de sangre y estudios clínicos (Premium)",
@@ -265,11 +394,13 @@ function App() {
 
   return (
     <VetProvider>
-      <div className="App">
-        <Router showToast={showToast} />
-        <ToastContainer toasts={toasts} onClose={closeToast} />
-        <SpeedInsights />
-      </div>
+      <ClinicProvider>
+        <div className="App">
+          <Router showToast={showToast} />
+          <ToastContainer toasts={toasts} onClose={closeToast} />
+          <SpeedInsights />
+        </div>
+      </ClinicProvider>
     </VetProvider>
   );
 }
@@ -277,26 +408,68 @@ function App() {
 // Router Component
 const Router = ({ showToast }) => {
   const { veterinarian, loading } = useVet();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [currentView, setCurrentView] = useState(
     veterinarian ? "dashboard" : "landing",
   );
   const [isCmdkOpen, setCmdkOpen] = useState(false);
   const [selectedConsultationId, setSelectedConsultationId] = useState(null);
   const [consultationEntryMode, setConsultationEntryMode] = useState("standard");
+  const [clinicalContext, setClinicalContext] = useState(null);
   const [cedulaFlow, setCedulaFlow] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  const portalOrganizationId = (() => {
+    const match = location.pathname.match(/^\/solicitar-cita\/([^/]+)/);
+    return match ? match[1] : null;
+  })();
+
+  const navigateSetView = (view) => {
+    handleSetView(view);
+    const path = VIEW_TO_PATH[view];
+    if (path) {
+      navigate(path);
+    } else if (view === "landing") {
+      navigate("/");
+    } else if (view === "login") {
+      navigate("/login");
+    } else if (view === "register") {
+      navigate("/registro");
+    }
+  };
+
+  const openConsultationWithPatient = (ctx) => {
+    setClinicalContext(ctx);
+    setSelectedConsultationId(null);
+    setConsultationEntryMode("standard");
+    setCurrentView("new-consultation");
+    setIsInitialized(true);
+    navigate(VIEW_TO_PATH["new-consultation"]);
+  };
+
   // Helper to navigate to consultation with ID
   const openConsultation = (consultationId) => {
+    setClinicalContext(null);
     setSelectedConsultationId(consultationId);
     setConsultationEntryMode("standard");
     setCurrentView("new-consultation");
+    navigate(VIEW_TO_PATH["new-consultation"]);
   };
 
   const openExpertConsultation = () => {
+    if (!isPremiumMember(veterinarian)) {
+      setSelectedConsultationId(null);
+      setConsultationEntryMode("standard");
+      setCurrentView("membership");
+      navigate(VIEW_TO_PATH.membership);
+      return;
+    }
+    setClinicalContext(null);
     setSelectedConsultationId(null);
     setConsultationEntryMode("expert");
     setCurrentView("new-consultation");
+    navigate(VIEW_TO_PATH["new-consultation"]);
   };
 
   // Clear consultation ID when leaving new-consultation view
@@ -304,12 +477,28 @@ const Router = ({ showToast }) => {
     if (view !== "new-consultation") {
       setSelectedConsultationId(null);
       setConsultationEntryMode("standard");
-    } else {
-      setConsultationEntryMode("standard");
+      setClinicalContext(null);
     }
     setCurrentView(view);
-    setIsInitialized(true); // Marcar como inicializado cuando el usuario navega manualmente
+    setIsInitialized(true);
   };
+
+  useEffect(() => {
+    if (portalOrganizationId) {
+      setCurrentView("appointment-request");
+      return;
+    }
+    const view = PATH_TO_VIEW[location.pathname];
+    if (view && veterinarian) {
+      setCurrentView(view);
+    }
+    if (location.pathname === "/" && veterinarian) {
+      setCurrentView("dashboard");
+      navigate(VIEW_TO_PATH.dashboard, { replace: true });
+    }
+    if (location.pathname === "/login") setCurrentView("login");
+    if (location.pathname === "/registro") setCurrentView("register");
+  }, [location.pathname, veterinarian, navigate, portalOrganizationId]);
 
   // Command Palette (Ctrl/Cmd+K)
   useEffect(() => {
@@ -400,40 +589,97 @@ const Router = ({ showToast }) => {
       </AppShell>
     ),
     dashboard: (
-      <AppShell fullBleed>
-        <Dashboard
-          setView={handleSetView}
-          openConsultation={openConsultation}
-          openExpertConsultation={openExpertConsultation}
+      <ClinicShell setView={navigateSetView}>
+        <div className="clinic-page clinic-dashboard-unified">
+          <ClinicDashboardPage
+            setView={navigateSetView}
+            onStartConsultation={openConsultationWithPatient}
+          />
+          <Dashboard
+            embedded
+            setView={navigateSetView}
+            openConsultation={openConsultation}
+            openExpertConsultation={openExpertConsultation}
+          />
+        </div>
+      </ClinicShell>
+    ),
+    clients: (
+      <ClinicShell setView={navigateSetView}>
+        <ClientsPage />
+      </ClinicShell>
+    ),
+    patients: (
+      <ClinicShell setView={navigateSetView}>
+        <PatientsPage
+          onStartConsultation={openConsultationWithPatient}
+          onViewConsultation={openConsultation}
         />
-      </AppShell>
+      </ClinicShell>
+    ),
+    agenda: (
+      <ClinicShell setView={navigateSetView}>
+        <AgendaPage onStartConsultation={openConsultationWithPatient} />
+      </ClinicShell>
+    ),
+    inventory: (
+      <ClinicShell setView={navigateSetView}>
+        <InventoryPage />
+      </ClinicShell>
+    ),
+    billing: (
+      <ClinicShell setView={navigateSetView}>
+        <BillingPage />
+      </ClinicShell>
+    ),
+    reports: (
+      <ClinicShell setView={navigateSetView}>
+        <ReportsPage />
+      </ClinicShell>
+    ),
+    tools: (
+      <ClinicShell setView={navigateSetView}>
+        <ToolsPage />
+      </ClinicShell>
+    ),
+    settings: (
+      <ClinicShell setView={navigateSetView}>
+        <SettingsPage />
+      </ClinicShell>
+    ),
+    admin: (
+      <ClinicShell setView={navigateSetView}>
+        <AdminPage />
+      </ClinicShell>
     ),
     "new-consultation": (
-      <AppShell>
+      <ClinicShell setView={navigateSetView}>
         <NewConsultation
-          setView={handleSetView}
+          setView={navigateSetView}
           existingConsultationId={selectedConsultationId}
           entryMode={consultationEntryMode}
+          clinicalContext={clinicalContext}
+          onClinicalContextChange={setClinicalContext}
         />
-      </AppShell>
+      </ClinicShell>
     ),
     "consultation-history": (
-      <AppShell>
+      <ClinicShell setView={navigateSetView}>
         <ConsultationHistory
-          setView={handleSetView}
+          setView={navigateSetView}
           openConsultation={openConsultation}
         />
-      </AppShell>
+      </ClinicShell>
     ),
     "medical-images": (
-      <AppShell>
-        <MedicalImageInterpretation setView={handleSetView} />
-      </AppShell>
+      <ClinicShell setView={navigateSetView}>
+        <MedicalImageInterpretation setView={navigateSetView} />
+      </ClinicShell>
     ),
     membership: (
-      <AppShell>
-        <MembershipPage setView={handleSetView} />
-      </AppShell>
+      <ClinicShell setView={navigateSetView}>
+        <MembershipPage setView={navigateSetView} />
+      </ClinicShell>
     ),
     "payment-success": (
       <AppShell>
@@ -441,142 +687,32 @@ const Router = ({ showToast }) => {
       </AppShell>
     ),
     profile: (
-      <AppShell>
-        <Profile setView={handleSetView} />
-      </AppShell>
+      <ClinicShell setView={navigateSetView}>
+        <Profile setView={navigateSetView} />
+      </ClinicShell>
     ),
   };
 
   return (
     <>
       <main id="main-content" className="app-main">
-        {views[currentView] || <LandingPage setView={handleSetView} />}
+        {portalOrganizationId ? (
+          <AppShell>
+            <AppointmentRequestPortal organizationId={portalOrganizationId} />
+          </AppShell>
+        ) : (
+          views[currentView] || <LandingPage setView={handleSetView} />
+        )}
       </main>
       <SupportChatWidget currentView={currentView} />
       <CommandPalette
         isOpen={isCmdkOpen}
         onClose={() => setCmdkOpen(false)}
-        setView={handleSetView}
+        setView={navigateSetView}
         openExpertConsultation={openExpertConsultation}
         veterinarian={veterinarian}
       />
     </>
-  );
-};
-
-const SupportChatWidget = ({ currentView }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [input, setInput] = useState("");
-  const [isSending, setIsSending] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content:
-        "Hola, soy tu asistente de soporte GUIAA. Te ayudo con dudas de login, pagos, membresía, cédula y uso de la plataforma.",
-    },
-  ]);
-  const listRef = useRef(null);
-
-  useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTop = listRef.current.scrollHeight;
-    }
-  }, [messages, isOpen]);
-
-  const handleSend = async () => {
-    const text = input.trim();
-    if (!text || isSending) return;
-
-    const nextMessages = [...messages, { role: "user", content: text }];
-    setMessages(nextMessages);
-    setInput("");
-    setIsSending(true);
-
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/support/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: text,
-          context_view: currentView,
-          history: messages.map((m) => ({ role: m.role, content: m.content })),
-        }),
-      });
-
-      const raw = await response.text().catch(() => "");
-      let data = {};
-      try {
-        data = raw ? JSON.parse(raw) : {};
-      } catch (e) {}
-
-      if (!response.ok) {
-        const detail = data?.detail || "No pude responder en este momento.";
-        throw new Error(typeof detail === "string" ? detail : "Error de soporte");
-      }
-
-      const answer =
-        (data?.answer || "").toString().trim() ||
-        "No pude generar una respuesta por ahora.";
-      setMessages((prev) => [...prev, { role: "assistant", content: answer }]);
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            err?.message ||
-            "No pude conectar con soporte. Inténtalo de nuevo en unos segundos.",
-        },
-      ]);
-    } finally {
-      setIsSending(false);
-    }
-  };
-
-  return (
-    <div className="support-chat-root">
-      {isOpen && (
-        <div className="support-chat-panel">
-          <div className="support-chat-header">
-            <strong>Soporte GUIAA</strong>
-            <button onClick={() => setIsOpen(false)} aria-label="Cerrar chat">✕</button>
-          </div>
-          <div className="support-chat-messages" ref={listRef}>
-            {messages.map((msg, idx) => (
-              <div
-                key={`${msg.role}-${idx}`}
-                className={`support-chat-bubble ${msg.role === "user" ? "user" : "assistant"}`}
-              >
-                {msg.content}
-              </div>
-            ))}
-            {isSending && <div className="support-chat-typing">Escribiendo...</div>}
-          </div>
-          <div className="support-chat-input-row">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSend();
-              }}
-              placeholder="Escribe tu duda..."
-              maxLength={500}
-            />
-            <button onClick={handleSend} disabled={isSending || !input.trim()}>
-              Enviar
-            </button>
-          </div>
-        </div>
-      )}
-      <button
-        className="support-chat-toggle"
-        onClick={() => setIsOpen((v) => !v)}
-        aria-label="Abrir soporte"
-      >
-        {isOpen ? "–" : "💬"}
-      </button>
-    </div>
   );
 };
 
@@ -1328,6 +1464,9 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
 
       // Gating: requiere flujo de cédula
       if (vetData.status === "requires_cedula_flow") {
+        if (vetData.access_token) {
+          storeAccessToken(vetData.access_token);
+        }
         setCedulaFlow?.({
           source: "login",
           veterinarian_id: vetData?.veterinarian_id,
@@ -1637,7 +1776,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
         fd.append("file", file);
         const up = await fetch(`${BACKEND_URL}/api/cedula/upload`, {
           method: "POST",
-          headers: { "x-veterinarian-id": vetId },
+          headers: getAuthHeaders(vetId),
           body: fd,
         });
         if (!up.ok) {
@@ -1649,10 +1788,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
       // 2) Verify (SEP/DGP)
       const vr = await fetch(`${BACKEND_URL}/api/cedula/verify`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-veterinarian-id": vetId,
-        },
+        headers: getAuthHeaders(vetId),
         body: JSON.stringify({
           veterinarian_id: vetId,
           cedula_profesional,
@@ -1770,9 +1906,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
                   try {
                     const response = await fetch(`${BACKEND_URL}/api/cedula/skip`, {
                       method: "POST",
-                      headers: {
-                        "x-veterinarian-id": vetId,
-                      },
+                      headers: getAuthHeaders(vetId),
                     });
                     
                     if (!response.ok) {
@@ -1846,7 +1980,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
 };
 
 // Dashboard
-const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
+const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded = false }) => {
   const { veterinarian } = useVet();
   const [stats, setStats] = useState({ consultations: 0, thisMonth: 0, lastMonth: 0, today: 0 });
   const [recentConsultations, setRecentConsultations] = useState([]);
@@ -1855,19 +1989,14 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
   const [weatherData, setWeatherData] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [theme, setTheme] = useState("light");
-  const [notifications, setNotifications] = useState([]);
-  const [isNotificationPanelOpen, setNotificationPanelOpen] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [buyingConsultations, setBuyingConsultations] = useState(false);
-  const notificationPanelRef = useRef(null);
-  const notificationToggleRef = useRef(null);
 
   useEffect(() => {
     if (veterinarian) {
       loadDashboardData();
       loadWeatherData();
-      loadNotifications();
 
       // Check privacy acceptance
       const privacyAccepted = localStorage.getItem("sv_privacy_accepted");
@@ -1898,24 +2027,6 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
     setTheme((t) => (t === "dark" ? "light" : "dark"));
   };
 
-  // Close notifications panel on outside click
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!isNotificationPanelOpen) return;
-      if (
-        notificationPanelRef.current &&
-        notificationToggleRef.current &&
-        !notificationPanelRef.current.contains(event.target) &&
-        !notificationToggleRef.current.contains(event.target)
-      ) {
-        setNotificationPanelOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isNotificationPanelOpen]);
-
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1926,12 +2037,10 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
 
       const key = e.key.toLowerCase();
       if (key === "n") setView("new-consultation");
-      else if (key === "e") openExpertConsultation?.();
-      else if (key === "h") setView("consultation-history");
-      else if (
-        key === "i" &&
-        veterinarian?.membership_type?.toLowerCase() === "premium"
-      ) {
+      else if (key === "e" && isPremiumMember(veterinarian)) {
+        openExpertConsultation?.();
+      } else if (key === "h") setView("consultation-history");
+      else if (key === "i" && isPremiumMember(veterinarian)) {
         setView("medical-images");
       } else if (key === "m") setView("membership");
     };
@@ -2076,33 +2185,6 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
     }
   };
 
-  const loadNotifications = () => {
-    // Mock notifications
-    setNotifications([
-      {
-        id: "1",
-        title: "Consulta pendiente",
-        description: "Tienes una consulta esperando revisión",
-        timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-        type: "reminder",
-        read: false,
-      },
-      {
-        id: "2",
-        title: "Membresía activa",
-        description: "Tu plan Premium está activo",
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-        type: "info",
-        read: true,
-      },
-    ]);
-  };
-
-  const markNotificationAsRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
-  };
   const getMembershipStatus = () => {
     if (!veterinarian || !veterinarian.membership_type) {
       return {
@@ -2273,10 +2355,21 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
   };
 
   return (
-    <div className={`dashboard-page dashboard-${timeOfDay}`}>
-      <Header setView={setView} />
-
+    <div className={`dashboard-page dashboard-${timeOfDay}${embedded ? " dashboard-embedded" : ""}`}>
       <div className="container">
+        {embedded ? (
+          <div className="clinic-dashboard-section-head clinic-dashboard-cds-head">
+            <h2>Panel CDS y membresía</h2>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="clinic-dashboard-theme-btn"
+              aria-label={theme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
+            >
+              {theme === "dark" ? <Sun size={18} aria-hidden /> : <Moon size={18} aria-hidden />}
+            </button>
+          </div>
+        ) : (
         <div className="dashboard-header">
           <div className="dashboard-header-row">
             <div className="hero-welcome">
@@ -2325,25 +2418,6 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
             >
               <button
                 type="button"
-                ref={notificationToggleRef}
-                onClick={() => setNotificationPanelOpen(!isNotificationPanelOpen)}
-                className="icon-btn"
-                aria-label={
-                  isNotificationPanelOpen
-                    ? "Cerrar notificaciones"
-                    : "Abrir notificaciones"
-                }
-                aria-expanded={isNotificationPanelOpen}
-              >
-                <Bell size={18} aria-hidden />
-                {notifications.filter((n) => !n.read).length > 0 && (
-                  <span className="notification-badge">
-                    {notifications.filter((n) => !n.read).length}
-                  </span>
-                )}
-              </button>
-              <button
-                type="button"
                 onClick={toggleTheme}
                 className="icon-btn"
                 aria-label={theme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
@@ -2352,36 +2426,10 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
               </button>
             </div>
           </div>
-
-          {isNotificationPanelOpen && (
-            <div ref={notificationPanelRef} className="notification-panel">
-              <div className="notification-panel-header">
-                <h3>Notificaciones</h3>
-              </div>
-              {notifications.length === 0 ? (
-                <div className="notification-empty">No hay notificaciones</div>
-              ) : (
-                <div className="notification-panel-body">
-                  {notifications.map((notif) => (
-                    <div
-                      key={notif.id}
-                      onClick={() => markNotificationAsRead(notif.id)}
-                      className={`notification-item ${notif.read ? "" : "unread"}`}
-                    >
-                      <div className="notification-title">{notif.title}</div>
-                      <div className="notification-description">{notif.description}</div>
-                      <div className="notification-timestamp">
-                        {new Date(notif.timestamp).toLocaleString("es-MX")}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
+        )}
 
-        <div className="today-summary-panel">
+        <div className={`today-summary-panel${embedded ? " clinic-settings-card clinic-dashboard-summary" : ""}`}>
           <div className="today-summary-left">
             <div className="today-title">Hoy en tu consulta</div>
             <div className="today-subtitle">
@@ -2406,16 +2454,16 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
           </div>
         </div>
 
-        <div className="dashboard-grid">
+        <div className={`dashboard-grid${embedded ? " clinic-dashboard-cds-grid" : ""}`}>
           {dashboardLoading ? (
-            <div className="stats-cards">
+            <div className={`stats-cards${embedded ? " clinic-report-kpi-grid" : ""}`}>
               <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
               <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
               <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
             </div>
           ) : (
-          <div className="stats-cards">
-            <Card className="stat-card border-0 shadow-none" data-tooltip="Total de consultas realizadas">
+          <div className={`stats-cards${embedded ? " clinic-report-kpi-grid" : ""}`}>
+            <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip="Total de consultas realizadas">
               <div className="stat-icon"><BarChart3 /></div>
               <div className="stat-content">
                 <h3>
@@ -2437,7 +2485,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
               </div>
             </Card>
 
-            <Card className="stat-card border-0 shadow-none" data-tooltip="Consultas de este mes">
+            <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip="Consultas de este mes">
               <div className="stat-icon"><CalendarDays /></div>
               <div className="stat-content">
                 <h3>
@@ -2463,7 +2511,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
               </div>
             </Card>
 
-            <Card className="stat-card border-0 shadow-none" data-tooltip="Tu plan de membresía actual">
+            <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip="Tu plan de membresía actual">
               <div className="stat-icon"><Gem /></div>
               <div className="stat-content">
                 <h3>{membershipStatus.consultations}</h3>
@@ -2492,10 +2540,10 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
             </Card>
 
             {weatherLoading && (
-              <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-card" style={{width:'100%'}}></div></Card>
+              <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`}><div className="skeleton skeleton-card" style={{width:'100%'}}></div></Card>
             )}
             {weatherData && !weatherLoading && (
-              <Card className="stat-card border-0 shadow-none" data-tooltip="Clima actual en tu zona">
+              <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip="Clima actual en tu zona">
                 <div className="stat-icon">
                   {weatherData.weather[0].main === 'Clear' ? <Sun /> :
                    weatherData.weather[0].main === 'Clouds' ? <Cloud /> :
@@ -2510,14 +2558,14 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
           </div>
           )}
 
-          <section className="dashboard-block dashboard-block-actions">
-          <div className="quick-actions">
+          <section className={`dashboard-block dashboard-block-actions${embedded ? " clinic-settings-card" : ""}`}>
+          <div className={`quick-actions${embedded ? " clinic-dashboard-quick-section" : ""}`}>
             <h2>Acciones Rápidas</h2>
-            <div className="action-cards">
+            <div className={`action-cards${embedded ? " clinic-dashboard-quick-grid" : ""}`}>
               <Card
                 role="button"
                 tabIndex={0}
-                className="action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className={`action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${embedded ? " clinic-dashboard-quick-btn" : ""}`}
                 onClick={() => setView("new-consultation")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -2534,25 +2582,41 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
               <Card
                 role="button"
                 tabIndex={0}
-                className="action-card expert-feature cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                onClick={() => openExpertConsultation?.()}
+                className={`action-card expert-feature cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${membershipType !== "premium" ? " premium-locked" : ""}${embedded ? " clinic-dashboard-quick-btn" : ""}`}
+                onClick={() => {
+                  if (membershipType !== "premium") {
+                    setView("membership");
+                    return;
+                  }
+                  openExpertConsultation?.();
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
+                    if (membershipType !== "premium") {
+                      setView("membership");
+                      return;
+                    }
                     openExpertConsultation?.();
                   }
                 }}
               >
                 <div className="action-icon"><Brain /></div>
                 <h3>Manejo Experto</h3>
-                <p>Ir al motivo de consulta y completar datos después</p>
-                <span className="expert-badge">RÁPIDO</span>
+                <p>
+                  {membershipType === "premium"
+                    ? "Ir al motivo de consulta y completar datos después"
+                    : "Disponible con membresía Premium"}
+                </p>
+                <span className={membershipType === "premium" ? "expert-badge" : "premium-badge"}>
+                  {membershipType === "premium" ? "RÁPIDO" : "PREMIUM"}
+                </span>
               </Card>
 
               <Card
                 role="button"
                 tabIndex={0}
-                className="action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className={`action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${embedded ? " clinic-dashboard-quick-btn" : ""}`}
                 onClick={() => setView("consultation-history")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -2570,7 +2634,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
                 <Card
                   role="button"
                   tabIndex={0}
-                  className="action-card premium-feature cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className={`action-card premium-feature cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${embedded ? " clinic-dashboard-quick-btn" : ""}`}
                   onClick={() => setView("medical-images")}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -2589,7 +2653,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
               <Card
                 role="button"
                 tabIndex={0}
-                className="action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className={`action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${embedded ? " clinic-dashboard-quick-btn" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
                   setView("membership");
@@ -2609,7 +2673,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
           </div>
           </section>
 
-          <section className="dashboard-block dashboard-block-activity">
+          <section className={`dashboard-block dashboard-block-activity${embedded ? " clinic-settings-card" : ""}`}>
           <div className="dashboard-block-head">
             <h2>Actividad clínica</h2>
             <p>Seguimiento de consultas, accesos rápidos y casos recientes.</p>
@@ -2639,7 +2703,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
                   )}
                 </div>
                 {dashboardLoading ? (
-                  <div className="consultation-list">
+                  <div className={`consultation-list${embedded ? " clinic-dashboard-list" : ""}`}>
                     {[...Array(3)].map((_, idx) => (
                       <div key={idx} className="consultation-item">
                         <div className="skeleton skeleton-text" style={{width:'30%'}}></div>
@@ -2648,7 +2712,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
                     ))}
                   </div>
                 ) : recentConsultations.length > 0 ? (
-                  <div className="consultation-list">
+                  <div className={`consultation-list${embedded ? " clinic-dashboard-list" : ""}`}>
                     {recentConsultations.map((consultation) => {
                       const speciesIcons = {
                         perro: '🐕', perros: '🐕',
@@ -2667,7 +2731,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
                       return (
                         <div 
                           key={consultation.id} 
-                          className="consultation-item"
+                          className={`consultation-item${embedded ? " clinic-dashboard-list-item" : ""}`}
                           onClick={() => {
                             console.log('Opening consultation:', consultation.id);
                             openConsultation && openConsultation(consultation.id);
@@ -2769,7 +2833,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation }) => {
             <Tabs.Content className="tabs-content" value="shortcuts">
               <div className="keyboard-hints">
                 <strong>Atajos del Teclado</strong>
-                <div><kbd>N</kbd> Nueva Consulta • <kbd>E</kbd> Manejo Experto • <kbd>H</kbd> Historial • <kbd>I</kbd> Imágenes (Premium) • <kbd>M</kbd> Membresía</div>
+                <div><kbd>N</kbd> Nueva Consulta • <kbd>E</kbd> Manejo Experto (Premium) • <kbd>H</kbd> Historial • <kbd>I</kbd> Imágenes (Premium) • <kbd>M</kbd> Membresía</div>
               </div>
             </Tabs.Content>
           </Tabs.Root>
@@ -2856,7 +2920,13 @@ const buildConsultationDataFromForm = (formData) => ({
 });
 
 // New Consultation Component
-const NewConsultation = ({ setView, existingConsultationId, entryMode = "standard" }) => {
+const NewConsultation = ({
+  setView,
+  existingConsultationId,
+  entryMode = "standard",
+  clinicalContext = null,
+  onClinicalContextChange,
+}) => {
   const { veterinarian } = useVet();
   const isExpertMode = entryMode === "expert";
   const [step, setStep] = useState(isExpertMode && !existingConsultationId ? 2 : 1);
@@ -2969,6 +3039,23 @@ const NewConsultation = ({ setView, existingConsultationId, entryMode = "standar
     loadCategories();
   }, [veterinarian?.id, veterinarian?.membership_type]);
 
+  useEffect(() => {
+    if (!clinicalContext?.patient || existingConsultationId) return;
+    const p = clinicalContext.patient;
+    const owner = p.clients || {};
+    setFormData((prev) => ({
+      ...prev,
+      nombre_mascota: p.name || prev.nombre_mascota,
+      nombre_dueño: owner.name || prev.nombre_dueño,
+      raza: p.breed || prev.raza,
+      sexo: p.sex || prev.sexo,
+      peso: p.weight_kg != null ? String(p.weight_kg) : prev.peso,
+    }));
+    if (p.species) {
+      setSelectedCategory(p.species);
+    }
+  }, [clinicalContext, existingConsultationId]);
+
   // Load existing consultation if ID is provided
   useEffect(() => {
     if (existingConsultationId) {
@@ -2987,14 +3074,14 @@ const NewConsultation = ({ setView, existingConsultationId, entryMode = "standar
   const createStageOneConsultation = async () => {
     const response = await fetch(`${BACKEND_URL}/api/consultations`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-veterinarian-id": veterinarian.id,
-      },
+      headers: getAuthHeaders(veterinarian.id),
       body: JSON.stringify({
         veterinarian_id: veterinarian.id,
         category: selectedCategory,
         consultation_data: buildConsultationDataFromForm(formData),
+        patient_id: clinicalContext?.patientId || null,
+        client_id: clinicalContext?.clientId || null,
+        appointment_id: clinicalContext?.appointmentId || null,
       }),
     });
 
@@ -3086,7 +3173,7 @@ const NewConsultation = ({ setView, existingConsultationId, entryMode = "standar
         
         // Set AI analysis if exists
         if (consultation.analysis || consultation.ai_analysis) {
-          setAiAnalysis(consultation.analysis || consultation.ai_analysis);
+          setAiAnalysis(cleanClinicalDisplayText(consultation.analysis || consultation.ai_analysis));
         }
 
         if (consultation.rating) {
@@ -3129,12 +3216,8 @@ const NewConsultation = ({ setView, existingConsultationId, entryMode = "standar
 
     try {
       console.log("Loading categories from:", BACKEND_URL);
-      const headers = {};
-      if (veterinarian?.id) {
-        headers["x-veterinarian-id"] = veterinarian.id;
-      }
       const response = await fetch(`${BACKEND_URL}/api/animal-categories`, {
-        headers,
+        headers: getAuthHeaders(veterinarian?.id),
       });
       console.log("Categories response status:", response.status);
       if (response.ok) {
@@ -3237,10 +3320,7 @@ const NewConsultation = ({ setView, existingConsultationId, entryMode = "standar
           `${BACKEND_URL}/api/consultations/${consultationId}/payload`,
           {
             method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "x-veterinarian-id": veterinarian.id,
-            },
+            headers: getAuthHeaders(veterinarian.id),
             body: JSON.stringify({
               category: selectedCategory,
               form_data: formData,
@@ -3303,10 +3383,7 @@ const NewConsultation = ({ setView, existingConsultationId, entryMode = "standar
       // Actualizar vía backend (evita errores "Failed to fetch" por Supabase directo)
       const resp = await fetch(`${BACKEND_URL}/api/consultations/${activeConsultationId}/payload`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "x-veterinarian-id": veterinarian.id,
-        },
+        headers: getAuthHeaders(veterinarian.id),
         body: JSON.stringify(payloadUpdates),
       });
       if (!resp.ok) {
@@ -3380,18 +3457,11 @@ const NewConsultation = ({ setView, existingConsultationId, entryMode = "standar
     setError("");
 
     try {
-      const headers = {
-        "Content-Type": "application/json",
-      };
-      if (veterinarian?.id) {
-        headers["x-veterinarian-id"] = veterinarian.id;
-      }
-
       const response = await fetch(
         `${BACKEND_URL}/api/consultations/${consultationId}/analyze`,
         {
           method: "POST",
-          headers,
+          headers: getAuthHeaders(veterinarian?.id),
         }
       );
 
@@ -3401,7 +3471,7 @@ const NewConsultation = ({ setView, existingConsultationId, entryMode = "standar
       }
 
       const result = await response.json();
-      setAiAnalysis(result.analysis);
+      setAiAnalysis(cleanClinicalDisplayText(result.analysis));
     } catch (err) {
       setError(err.message || "Error generando análisis");
     } finally {
@@ -3429,9 +3499,28 @@ const NewConsultation = ({ setView, existingConsultationId, entryMode = "standar
     </div>
   );
 
+  if (isExpertMode && !isPremiumMember(veterinarian)) {
+    return (
+      <div className="consultation-page">
+        <div className="container">
+          <div className="premium-required">
+            <div className="premium-icon">🔒</div>
+            <h2>Manejo Experto — Premium</h2>
+            <p>
+              El modo Manejo Experto está disponible exclusivamente para miembros Premium.
+            </p>
+            <Button type="button" onClick={() => setView("membership")}>
+              Ver Planes Premium
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (step === 1) {
     return (
-      <div className="consultation-page" style={{ marginTop: "-64px", paddingTop: "20px" }}>
+      <div className="consultation-page">
         
         <div className="page-title-header">
           <div className="container">
@@ -3484,6 +3573,19 @@ const NewConsultation = ({ setView, existingConsultationId, entryMode = "standar
                 {renderStepper(1)}
 
                 <form onSubmit={handleSubmitStep1} className="consultation-form">
+                  {!existingConsultationId && onClinicalContextChange && (
+                    <PatientSelector
+                      value={clinicalContext?.patientId}
+                      onChange={(ctx) => onClinicalContextChange(ctx)}
+                    />
+                  )}
+                  {clinicalContext?.patientId && !existingConsultationId && (
+                    <PatientAntecedents
+                      veterinarianId={veterinarian?.id}
+                      patientId={clinicalContext.patientId}
+                      patient={clinicalContext.patient}
+                    />
+                  )}
                   {renderCategorySelector()}
 
                   {/* Renderizar el formulario específico según la categoría seleccionada */}
@@ -3559,7 +3661,7 @@ const NewConsultation = ({ setView, existingConsultationId, entryMode = "standar
 
   if (step === 2) {
     return (
-      <div className="consultation-page" style={{ marginTop: "-64px", paddingTop: "20px" }}>
+      <div className="consultation-page">
         
         <div className="page-title-header">
           <div className="container">
@@ -3661,7 +3763,7 @@ const NewConsultation = ({ setView, existingConsultationId, entryMode = "standar
 
   if (step === 3) {
     return (
-      <div className="consultation-page" style={{ marginTop: "-64px", paddingTop: "20px" }}>
+      <div className="consultation-page">
         
         <div className="page-title-header">
           <div className="container">
@@ -4027,8 +4129,6 @@ const ConsultationHistory = ({ setView, openConsultation }) => {
 
     return (
       <div className="consultation-detail-page">
-        <Header setView={setView} />
-
         <div className="container">
           {/* Header tipo ficha clínica */}
           <div className="clinical-file-header">
@@ -4139,10 +4239,7 @@ const ConsultationHistory = ({ setView, openConsultation }) => {
                 </div>
                 <div className="clinical-analysis-content">
                   <pre className="clinical-analysis-text">
-                    {String(selectedConsultation.analysis || "").replace(
-                      /AN[ÁA]LISIS\s+CL[ÍI]NICO\s+IA/gi,
-                      "ANÁLISIS CLÍNICO",
-                    )}
+                    {cleanClinicalDisplayText(selectedConsultation.analysis || "")}
                   </pre>
                 </div>
               </div>
@@ -4191,8 +4288,6 @@ const ConsultationHistory = ({ setView, openConsultation }) => {
 
   return (
     <div className="history-page">
-      <Header setView={setView} />
-
       <div className="container">
         <div className="page-header">
           <h1>Historial de Consultas</h1>
@@ -4443,9 +4538,7 @@ const ConsultationHistory = ({ setView, openConsultation }) => {
                             <span className="history-extra-label">Análisis clínico</span>
                             <p>
                               {(() => {
-                                const txt = String(consultation.analysis || "");
-                                // Quitar encabezados tipo "ANÁLISIS CLÍNICO IA" dentro del texto
-                                const cleaned = txt.replace(/AN[ÁA]LISIS\\s+CL[ÍI]NICO\\s+IA/gi, "ANÁLISIS CLÍNICO");
+                                const cleaned = cleanClinicalDisplayText(consultation.analysis || "");
                                 return cleaned.length > 220 ? `${cleaned.slice(0, 220)}…` : cleaned;
                               })()}
                             </p>
@@ -4527,6 +4620,7 @@ const MedicalImageInterpretation = ({ setView }) => {
   const { veterinarian } = useVet();
   const [imageType, setImageType] = useState("blood_test");
   const [patientName, setPatientName] = useState("");
+  const [imageClinicalContext, setImageClinicalContext] = useState(null);
   const [additionalContext, setAdditionalContext] = useState("");
   const [consultationId, setConsultationId] = useState("");
   const [pastedStudyData, setPastedStudyData] = useState("");  // Datos de estudio pegados
@@ -4630,7 +4724,8 @@ const MedicalImageInterpretation = ({ setView }) => {
         veterinarian_id: veterinarian.id,
         image_base64: null,  // Enviar explícitamente como null (campo opcional en backend)
         image_type: imageType,
-        patient_name: patientName || null,
+        patient_name: imageClinicalContext?.patient?.name || patientName || null,
+        patient_id: imageClinicalContext?.patientId || null,
         consultation_id: consultationId || null,
         additional_context: additionalContext || null,
         pasted_study_data: pastedStudyData || null,  // Datos de estudio pegados
@@ -4693,6 +4788,7 @@ const MedicalImageInterpretation = ({ setView }) => {
       // Clear form
       setPastedStudyData("");
       setPatientName("");
+      setImageClinicalContext(null);
       setAdditionalContext("");
       setConsultationId("");
     } catch (err) {
@@ -4721,7 +4817,6 @@ const MedicalImageInterpretation = ({ setView }) => {
   if (veterinarian.membership_type?.toLowerCase() !== "premium") {
     return (
       <div className="medical-images-page">
-        <Header setView={setView} />
         <div className="container">
           <div className="premium-required">
             <div className="premium-icon">🔒</div>
@@ -4744,8 +4839,6 @@ const MedicalImageInterpretation = ({ setView }) => {
 
   return (
     <div className="medical-images-page">
-      <Header setView={setView} />
-
       <div className="container">
         <div className="page-header">
           <div>
@@ -4946,16 +5039,28 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
                 </div>
               </div>
 
+              <PatientSelector
+                value={imageClinicalContext?.patientId}
+                onChange={(ctx) => {
+                  setImageClinicalContext(ctx);
+                  if (ctx?.patient?.name) {
+                    setPatientName(ctx.patient.name);
+                  }
+                }}
+              />
+
               <div className="form-row">
-                <div className="form-group">
-                  <label>Nombre del Paciente (Opcional)</label>
-                  <input
-                    type="text"
-                    value={patientName}
-                    onChange={(e) => setPatientName(e.target.value)}
-                    placeholder="Ej: Max, Luna, Rocky"
-                  />
-                </div>
+                {!imageClinicalContext?.patientId && (
+                  <div className="form-group">
+                    <label>Nombre del Paciente (Opcional)</label>
+                    <input
+                      type="text"
+                      value={patientName}
+                      onChange={(e) => setPatientName(e.target.value)}
+                      placeholder="Ej: Max, Luna, Rocky"
+                    />
+                  </div>
+                )}
 
                 <div className="form-group">
                   <label>ID de Consulta Previa (Opcional)</label>
@@ -5040,9 +5145,9 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
                   <h3>📊 Análisis Detallado</h3>
                   <div className="result-content detailed-analysis" style={{whiteSpace: "pre-wrap", wordWrap: "break-word", maxHeight: "600px", overflowY: "auto", padding: "16px", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0"}}>
                     {result.analysis ? (
-                      <pre style={{margin: 0, fontFamily: "inherit", fontSize: "14px", lineHeight: "1.6", color: "#1e293b"}}>{result.analysis}</pre>
+                      <pre style={{margin: 0, fontFamily: "inherit", fontSize: "14px", lineHeight: "1.6", color: "#1e293b"}}>{cleanClinicalDisplayText(result.analysis)}</pre>
                     ) : result.detailed_analysis ? (
-                      <pre style={{margin: 0, fontFamily: "inherit", fontSize: "14px", lineHeight: "1.6", color: "#1e293b"}}>{result.detailed_analysis}</pre>
+                      <pre style={{margin: 0, fontFamily: "inherit", fontSize: "14px", lineHeight: "1.6", color: "#1e293b"}}>{cleanClinicalDisplayText(result.detailed_analysis)}</pre>
                     ) : (
                       <div style={{color: "#64748b", fontStyle: "italic"}}>No hay análisis disponible</div>
                     )}
@@ -5138,15 +5243,18 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
                       </div>
                     )}
                     <div className="history-preview">
-                      {item.analysis
-                        ? item.analysis.substring(0, 150) + "..."
-                        : item.findings && Array.isArray(item.findings)
-                          ? item.findings.join(", ").substring(0, 150) + "..."
-                          : item.findings
-                            ? String(item.findings).substring(0, 150) + "..."
-                            : item.detailed_analysis
-                              ? item.detailed_analysis.substring(0, 150) + "..."
-                              : "Sin análisis disponible"}
+                      {(() => {
+                        const preview = item.analysis
+                          ? cleanClinicalDisplayText(item.analysis)
+                          : item.findings && Array.isArray(item.findings)
+                            ? item.findings.join(", ")
+                            : item.findings
+                              ? String(item.findings)
+                              : item.detailed_analysis
+                                ? cleanClinicalDisplayText(item.detailed_analysis)
+                                : "Sin análisis disponible";
+                        return preview.length > 150 ? `${preview.substring(0, 150)}...` : preview;
+                      })()}
                     </div>
                     <Button
                       type="button"
@@ -5202,7 +5310,6 @@ const MembershipPage = ({ setView }) => {
   if (!veterinarian) {
     return (
       <div className="membership-page">
-        <Header setView={setView} />
         <div className="container">
           <div className="auth-required-message" style={{
             padding: "40px",
@@ -5300,10 +5407,7 @@ const MembershipPage = ({ setView }) => {
       console.log("Veterinarian ID:", veterinarian.id);
       console.log("Veterinarian completo:", veterinarian);
       
-      const headers = {
-        "Content-Type": "application/json",
-        "x-veterinarian-id": veterinarian.id, // Incluir header de autenticación
-      };
+      const headers = getAuthHeaders(veterinarian.id);
       console.log("Headers enviados:", headers);
       
       const response = await fetch(
@@ -5390,8 +5494,6 @@ const MembershipPage = ({ setView }) => {
 
   return (
     <div className="membership-page">
-      <Header setView={setView} />
-
       <div className="container">
         <div className="membership-hero">
           <h1>Elige tu Plan</h1>
@@ -5737,8 +5839,6 @@ const Profile = ({ setView }) => {
 
   return (
     <div className="profile-page">
-      <Header setView={setView} />
-
       <div className="container">
         <div className="page-header">
           <h1>Perfil Profesional</h1>

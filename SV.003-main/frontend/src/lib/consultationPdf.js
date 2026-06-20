@@ -79,10 +79,20 @@ function formatDate(value) {
   }
 }
 
-function cleanAnalysisText(text) {
+export function cleanClinicalDisplayText(text) {
   return String(text || "")
     .replace(/AN[ÁA]LISIS\s+CL[ÍI]NICO\s+IA/gi, "ANÁLISIS CLÍNICO")
+    .replace(/Análisis con IA/gi, "Análisis clínico")
+    .replace(/interpretaci[óo]n.*\scon IA/gi, (match) => match.replace(/\scon IA/i, ""))
+    .replace(/\(\s*IA\s*\)/gi, "")
+    .replace(/\bIA\b/gi, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
+}
+
+function cleanAnalysisText(text) {
+  return cleanClinicalDisplayText(text);
 }
 
 function collectClinicalFields(consultation) {
@@ -354,27 +364,16 @@ class PdfWriter {
   }
 }
 
-export async function downloadConsultationPdf(consultation, { veterinarian } = {}) {
-  if (!consultation?.id) {
-    throw new Error("Consulta inválida para generar PDF");
-  }
-
-  const pdfDoc = await PDFDocument.create();
-  const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const writer = new PdfWriter(pdfDoc, { regular, bold });
-  const logoImage = await embedGuiaaLogo(pdfDoc);
-
-  const formData = consultation.form_data || {};
+function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
+  const formData = consultation?.form_data || {};
   const patientName =
-    formData.nombre_mascota || consultation.nombre_mascota || "Paciente";
+    formData.nombre_mascota || consultation.nombre_mascota || "Mascota";
   const consultationId = formatConsultationId(consultation);
   const statusLabel =
     STATUS_LABELS[consultation.status] || consultation.status || "Registrada";
 
-  writer.drawBrandHeader(logoImage);
   writer.drawLine(`Folio: ${consultationId}`, { size: 11, font: "bold" });
-  writer.drawLine(`Paciente: ${patientName}`, { size: 11 });
+  writer.drawLine(`Mascota: ${patientName}`, { size: 11 });
   writer.drawLine(`Especie: ${consultation.category || consultation.especie || "—"}`, {
     size: 11,
   });
@@ -436,25 +435,231 @@ export async function downloadConsultationPdf(consultation, { veterinarian } = {
       color: rgb(0.35, 0.42, 0.52),
     });
   }
+}
+
+function appendPdfFooter(writer) {
+  writer.ensureSpace(24);
+  writer.drawLine(`Documento generado el ${formatDate(new Date().toISOString())}`, {
+    size: 9,
+    color: rgb(0.5, 0.55, 0.62),
+  });
+  writer.drawLine("Plataforma GUIAA — Uso exclusivo del profesional veterinario.", {
+    size: 9,
+    color: rgb(0.5, 0.55, 0.62),
+  });
+}
+
+function triggerPdfDownload(pdfBytes, filename) {
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+export async function downloadConsultationPdf(consultation, { veterinarian } = {}) {
+  if (!consultation?.id) {
+    throw new Error("Consulta inválida para generar PDF");
+  }
+
+  const pdfDoc = await PDFDocument.create();
+  const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const writer = new PdfWriter(pdfDoc, { regular, bold });
+  const logoImage = await embedGuiaaLogo(pdfDoc);
+
+  const formData = consultation.form_data || {};
+  const patientName =
+    formData.nombre_mascota || consultation.nombre_mascota || "Mascota";
+  const consultationId = formatConsultationId(consultation);
+
+  writer.drawBrandHeader(logoImage);
+  appendConsultationDetail(writer, consultation, { veterinarian });
+  appendPdfFooter(writer);
+
+  const pdfBytes = await pdfDoc.save();
+  triggerPdfDownload(
+    pdfBytes,
+    `ficha-clinica-${sanitizeFilename(consultationId)}-${sanitizeFilename(patientName)}.pdf`,
+  );
+}
+
+export async function downloadUserConsultationsHistoryPdf(
+  user,
+  consultations,
+  { generatedBy } = {},
+) {
+  if (!user?.id && !user?.email) {
+    throw new Error("Usuario inválido para generar PDF");
+  }
+
+  const sorted = [...(consultations || [])].sort(
+    (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0),
+  );
+
+  const pdfDoc = await PDFDocument.create();
+  const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const writer = new PdfWriter(pdfDoc, { regular, bold });
+  const logoImage = await embedGuiaaLogo(pdfDoc);
+
+  writer.drawBrandHeader(logoImage);
+  writer.drawLine("Historial completo de consultas", { size: 14, font: "bold" });
+  writer.drawLine(`Veterinario: ${user.nombre || "—"}`, { size: 11 });
+  writer.drawLine(`Email: ${user.email || "—"}`, { size: 11 });
+  writer.drawLine(`Consultas registradas: ${sorted.length}`, {
+    size: 10.5,
+    color: rgb(0.35, 0.42, 0.52),
+  });
+  if (generatedBy?.nombre || generatedBy?.email) {
+    writer.drawLine(
+      `Exportado por: ${generatedBy.nombre || "—"}${generatedBy.email ? ` (${generatedBy.email})` : ""}`,
+      { size: 10, color: rgb(0.35, 0.42, 0.52) },
+    );
+  }
+
+  writer.y -= 8;
+
+  if (!sorted.length) {
+    writer.drawSectionTitle("Consultas");
+    writer.drawLine("Este usuario no tiene consultas registradas.", {
+      size: 10.5,
+      color: rgb(0.45, 0.5, 0.58),
+    });
+  } else {
+    sorted.forEach((consultation, index) => {
+      writer.drawSectionTitle(`Consulta ${index + 1} de ${sorted.length}`);
+      appendConsultationDetail(writer, consultation, { veterinarian: user });
+      if (index < sorted.length - 1) {
+        writer.y -= 10;
+      }
+    });
+  }
+
+  appendPdfFooter(writer);
+
+  const pdfBytes = await pdfDoc.save();
+  const userLabel = sanitizeFilename(user.nombre || user.email || "usuario");
+  triggerPdfDownload(pdfBytes, `historial-consultas-${userLabel}.pdf`);
+}
+
+export async function downloadPatientHistoryPdf(patient, consultations, { veterinarian, medicalImages = [] } = {}) {
+  if (!patient?.name) {
+    throw new Error("Mascota inválida para generar PDF");
+  }
+
+  const pdfDoc = await PDFDocument.create();
+  const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const writer = new PdfWriter(pdfDoc, { regular, bold });
+  const logoImage = await embedGuiaaLogo(pdfDoc);
+  const sorted = [...(consultations || [])].sort(
+    (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0),
+  );
+
+  writer.drawBrandHeader(logoImage);
+  writer.drawLine("Historia clínica del paciente", { size: 14, font: "bold" });
+  writer.drawLine(`Mascota: ${patient.name}`, { size: 11 });
+  writer.drawLine(`Especie: ${patient.species || "—"}`, { size: 11 });
+  writer.drawLine(`Raza: ${patient.breed || "—"}`, { size: 11 });
+  if (patient.clients?.name) {
+    writer.drawLine(`Propietario: ${patient.clients.name}`, { size: 11 });
+  }
+  writer.drawLine(`Consultas registradas: ${sorted.length}`, {
+    size: 10.5,
+    color: rgb(0.35, 0.42, 0.52),
+  });
+  if (medicalImages.length) {
+    writer.drawLine(`Estudios / interpretaciones: ${medicalImages.length}`, {
+      size: 10.5,
+      color: rgb(0.35, 0.42, 0.52),
+    });
+  }
+
+  writer.y -= 8;
+  writer.drawSectionTitle("Timeline de consultas CDS");
+
+  if (!sorted.length) {
+    writer.drawLine("No hay consultas vinculadas a este paciente.", {
+      size: 10.5,
+      color: rgb(0.45, 0.5, 0.58),
+    });
+  } else {
+    sorted.forEach((consultation, index) => {
+      const folio = formatConsultationId(consultation);
+      const statusLabel = STATUS_LABELS[consultation.status] || consultation.status || "Registrada";
+      const motivo =
+        consultation.detalle_paciente ||
+        consultation.motivo_consulta ||
+        consultation.form_data?.motivo_consulta ||
+        "Sin motivo registrado";
+      const analysisPreview = cleanAnalysisText(consultation.analysis).slice(0, 280);
+
+      writer.drawLine(`${index + 1}. ${folio} — ${formatDate(consultation.created_at)}`, {
+        size: 11,
+        font: "bold",
+      });
+      writer.drawLine(`Estado: ${statusLabel}`, { size: 10.5 });
+      writer.drawLine(`Motivo: ${toPdfSafeText(motivo).slice(0, 200)}`, {
+        size: 10.5,
+        lineHeight: 13,
+      });
+      if (analysisPreview) {
+        writer.drawLine(`Análisis: ${toPdfSafeText(analysisPreview)}${consultation.analysis?.length > 280 ? "…" : ""}`, {
+          size: 10,
+          lineHeight: 12.5,
+          color: rgb(0.35, 0.42, 0.52),
+        });
+      }
+      writer.y -= 6;
+    });
+  }
+
+  if (medicalImages.length) {
+    writer.y -= 4;
+    writer.drawSectionTitle("Estudios e interpretaciones");
+    const sortedImages = [...medicalImages].sort(
+      (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0),
+    );
+    sortedImages.forEach((img, index) => {
+      const typeLabel = img.image_type || "Estudio";
+      writer.drawLine(`${index + 1}. ${typeLabel} — ${formatDate(img.created_at)}`, {
+        size: 10.5,
+        font: "bold",
+      });
+      if (img.analysis) {
+        writer.drawLine(toPdfSafeText(String(img.analysis).slice(0, 240)), {
+          size: 10,
+          lineHeight: 12.5,
+          color: rgb(0.35, 0.42, 0.52),
+        });
+      }
+      writer.y -= 4;
+    });
+  }
+
+  if (veterinarian?.nombre || veterinarian?.email) {
+    writer.y -= 4;
+    writer.drawLine(
+      `Veterinario: ${veterinarian.nombre || "—"}${veterinarian.email ? ` (${veterinarian.email})` : ""}`,
+      { size: 10, color: rgb(0.35, 0.42, 0.52) },
+    );
+  }
 
   writer.ensureSpace(24);
-  writer.drawLine(
-    `Documento generado el ${formatDate(new Date().toISOString())}`,
-    { size: 9, color: rgb(0.5, 0.55, 0.62) },
-  );
+  writer.drawLine(`Documento generado el ${formatDate(new Date().toISOString())}`, {
+    size: 9,
+    color: rgb(0.5, 0.55, 0.62),
+  });
   writer.drawLine("Plataforma GUIAA — Uso exclusivo del profesional veterinario.", {
     size: 9,
     color: rgb(0.5, 0.55, 0.62),
   });
 
   const pdfBytes = await pdfDoc.save();
-  const blob = new Blob([pdfBytes], { type: "application/pdf" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `ficha-clinica-${sanitizeFilename(consultationId)}-${sanitizeFilename(patientName)}.pdf`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  triggerPdfDownload(pdfBytes, `historia-clinica-${sanitizeFilename(patient.name)}.pdf`);
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useVet } from "../context/VetContext";
 
-export function Header({ setView, showAuth = true }) {
+export function Header({ setView, showAuth = true, actions }) {
   const { veterinarian, logout } = useVet();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -22,7 +22,11 @@ export function Header({ setView, showAuth = true }) {
 
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    document.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -96,6 +100,7 @@ export function Header({ setView, showAuth = true }) {
               {isMenuOpen ? "✕" : "☰"}
             </button>
             <nav className={`nav-menu ${isMenuOpen ? "mobile-open" : ""}`}>
+              {actions && <div className="header-actions-slot">{actions}</div>}
               {veterinarian ? (
                 <>
                   <div className="user-menu-container">

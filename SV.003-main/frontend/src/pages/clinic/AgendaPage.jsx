@@ -1,0 +1,511 @@
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, Plus, Stethoscope, Link2, Check, X } from "lucide-react";
+import { useVet } from "../../context/VetContext";
+import { useClinic } from "../../context/ClinicContext";
+import {
+  fetchAppointments,
+  createAppointment,
+  updateAppointment,
+  deleteAppointment,
+  fetchPatients,
+  fetchClients,
+  fetchAppointmentRequests,
+  updateAppointmentRequest,
+} from "../../lib/clinicApi";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Textarea } from "../../components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../components/ui/dialog";
+
+const STATUS_LABELS = {
+  scheduled: "Programada",
+  confirmed: "Confirmada",
+  completed: "Completada",
+  cancelled: "Cancelada",
+  no_show: "No asistió",
+};
+
+const HOURS = Array.from({ length: 12 }, (_, i) => i + 8);
+
+function startOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function toLocalInputValue(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+export function AgendaPage({ onStartConsultation }) {
+  const { veterinarian } = useVet();
+  const { organization } = useClinic();
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
+  const [appointments, setAppointments] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({
+    patient_id: "",
+    client_id: "",
+    starts_at: "",
+    ends_at: "",
+    status: "scheduled",
+    reason: "",
+    notes: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [approveOpen, setApproveOpen] = useState(false);
+  const [approvingRequest, setApprovingRequest] = useState(null);
+  const [approveForm, setApproveForm] = useState({ starts_at: "", ends_at: "" });
+  const [approving, setApproving] = useState(false);
+
+  const weekDays = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
+    [weekStart],
+  );
+
+  const range = useMemo(() => {
+    const from = weekStart.toISOString();
+    const to = addDays(weekStart, 7).toISOString();
+    return { from, to };
+  }, [weekStart]);
+
+  const load = useCallback(async () => {
+    if (!veterinarian?.id) return;
+    setLoading(true);
+    setError("");
+    try {
+      const [apptData, patientsData, clientsData] = await Promise.all([
+        fetchAppointments(veterinarian.id, range.from, range.to),
+        fetchPatients(veterinarian.id),
+        fetchClients(veterinarian.id),
+      ]);
+      setAppointments(apptData.appointments || []);
+      setPatients(patientsData.patients || []);
+      setClients(clientsData.clients || []);
+
+      try {
+        const requestsData = await fetchAppointmentRequests(veterinarian.id, "pending");
+        setRequests(requestsData.requests || []);
+      } catch {
+        setRequests([]);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [veterinarian?.id, range.from, range.to]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const apptsByDay = useMemo(() => {
+    const map = {};
+    weekDays.forEach((d) => {
+      map[d.toDateString()] = [];
+    });
+    appointments.forEach((a) => {
+      const key = new Date(a.starts_at).toDateString();
+      if (map[key]) map[key].push(a);
+    });
+    Object.values(map).forEach((list) =>
+      list.sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at)),
+    );
+    return map;
+  }, [appointments, weekDays]);
+
+  const openCreate = (day, hour = 9) => {
+    const start = new Date(day);
+    start.setHours(hour, 0, 0, 0);
+    const end = new Date(start);
+    end.setMinutes(30);
+    const firstPatient = patients[0];
+    setEditing(null);
+    setForm({
+      patient_id: firstPatient?.id || "",
+      client_id: firstPatient?.client_id || "",
+      starts_at: toLocalInputValue(start.toISOString()),
+      ends_at: toLocalInputValue(end.toISOString()),
+      status: "scheduled",
+      reason: "",
+      notes: "",
+    });
+    setDialogOpen(true);
+  };
+
+  const openEdit = (appt) => {
+    setEditing(appt);
+    setForm({
+      patient_id: appt.patient_id,
+      client_id: appt.client_id,
+      starts_at: toLocalInputValue(appt.starts_at),
+      ends_at: toLocalInputValue(appt.ends_at),
+      status: appt.status,
+      reason: appt.reason || "",
+      notes: appt.notes || "",
+    });
+    setDialogOpen(true);
+  };
+
+  const onPatientChange = (patientId) => {
+    const p = patients.find((x) => x.id === patientId);
+    setForm((f) => ({
+      ...f,
+      patient_id: patientId,
+      client_id: p?.client_id || f.client_id,
+    }));
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    const payload = {
+      ...form,
+      starts_at: new Date(form.starts_at).toISOString(),
+      ends_at: new Date(form.ends_at).toISOString(),
+    };
+    try {
+      if (editing) {
+        await updateAppointment(veterinarian.id, editing.id, payload);
+      } else {
+        await createAppointment(veterinarian.id, payload);
+      }
+      setDialogOpen(false);
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!editing || !window.confirm("¿Eliminar esta cita?")) return;
+    try {
+      await deleteAppointment(veterinarian.id, editing.id);
+      setDialogOpen(false);
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleRequestAction = async (requestId, status, extra = {}) => {
+    try {
+      await updateAppointmentRequest(veterinarian.id, requestId, { status, ...extra });
+      setApproveOpen(false);
+      setApprovingRequest(null);
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const openApproveDialog = (req) => {
+    let start = new Date();
+    if (req.preferred_starts_at) {
+      start = new Date(req.preferred_starts_at);
+    } else {
+      start.setDate(start.getDate() + 1);
+      start.setHours(10, 0, 0, 0);
+    }
+    const end = new Date(start);
+    end.setMinutes(end.getMinutes() + 30);
+    setApprovingRequest(req);
+    setApproveForm({
+      starts_at: toLocalInputValue(start.toISOString()),
+      ends_at: toLocalInputValue(end.toISOString()),
+    });
+    setApproveOpen(true);
+  };
+
+  const confirmApprove = async (e) => {
+    e.preventDefault();
+    if (!approvingRequest) return;
+    setApproving(true);
+    try {
+      await handleRequestAction(approvingRequest.id, "approved", {
+        starts_at: new Date(approveForm.starts_at).toISOString(),
+        ends_at: new Date(approveForm.ends_at).toISOString(),
+      });
+    } finally {
+      setApproving(false);
+    }
+  };
+
+  const copyPortalLink = async () => {
+    if (!organization?.id) return;
+    const url = `${window.location.origin}/solicitar-cita/${organization.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2500);
+    } catch {
+      window.prompt("Copia este enlace para los dueños:", url);
+    }
+  };
+
+  return (
+    <div className="clinic-page">
+      <div className="clinic-page-header">
+        <div>
+          <h1>Agenda</h1>
+          <p>Citas y organización semanal</p>
+        </div>
+        <div className="clinic-agenda-nav">
+          <Button type="button" variant="outline" size="sm" onClick={() => setWeekStart(startOfWeek(new Date()))}>
+            Hoy
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => setWeekStart(addDays(weekStart, -7))}>
+            <ChevronLeft size={16} />
+          </Button>
+          <span className="clinic-agenda-range">
+            {weekDays[0].toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
+            {" – "}
+            {weekDays[6].toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" })}
+          </span>
+          <Button type="button" variant="outline" size="sm" onClick={() => setWeekStart(addDays(weekStart, 7))}>
+            <ChevronRight size={16} />
+          </Button>
+          <Button type="button" size="sm" onClick={() => openCreate(new Date())}>
+            <Plus size={16} className="mr-1" /> Nueva cita
+          </Button>
+          {organization?.id && (
+            <Button type="button" variant="secondary" size="sm" onClick={copyPortalLink}>
+              <Link2 size={14} className="mr-1" /> {linkCopied ? "Enlace copiado" : "Enlace portal"}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {requests.length > 0 && (
+        <div className="clinic-requests-panel">
+          <h3>Solicitudes pendientes ({requests.length})</h3>
+          <ul className="clinic-requests-list">
+            {requests.map((req) => (
+              <li key={req.id} className="clinic-requests-item">
+                <div>
+                  <strong>{req.client_name}</strong> — {req.patient_name}
+                  {req.reason && <p className="clinic-muted">{req.reason}</p>}
+                  {req.preferred_starts_at && (
+                    <p className="clinic-muted">
+                      Preferida: {new Date(req.preferred_starts_at).toLocaleString("es-MX")}
+                    </p>
+                  )}
+                </div>
+                <div className="clinic-requests-actions">
+                  <Button type="button" size="sm" onClick={() => openApproveDialog(req)}>
+                    <Check size={14} className="mr-1" /> Aprobar
+                  </Button>
+                  <Button type="button" variant="secondary" size="sm" onClick={() => handleRequestAction(req.id, "rejected")}>
+                    <X size={14} className="mr-1" /> Rechazar
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {error && <div className="error-message">{error}</div>}
+      {loading && <p className="clinic-muted">Cargando agenda...</p>}
+
+      <div className="clinic-agenda-grid">
+        {weekDays.map((day) => {
+          const key = day.toDateString();
+          const dayAppts = apptsByDay[key] || [];
+          const isToday = key === new Date().toDateString();
+          return (
+            <div key={key} className={`clinic-agenda-day${isToday ? " today" : ""}`}>
+              <div className="clinic-agenda-day-head">
+                <span>{day.toLocaleDateString("es-MX", { weekday: "short" })}</span>
+                <strong>{day.getDate()}</strong>
+                <Button type="button" variant="ghost" size="sm" onClick={() => openCreate(day)}>
+                  +
+                </Button>
+              </div>
+              <div className="clinic-agenda-day-body">
+                {dayAppts.length === 0 ? (
+                  <p className="clinic-agenda-empty">Sin citas</p>
+                ) : (
+                  dayAppts.map((a) => (
+                    <button
+                      key={a.id}
+                      type="button"
+                      className={`clinic-agenda-card status-${a.status}`}
+                      onClick={() => openEdit(a)}
+                    >
+                      <span className="clinic-agenda-time">
+                        {new Date(a.starts_at).toLocaleTimeString("es-MX", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      <span className="clinic-agenda-patient">
+                        {a.patients?.name || "Mascota"}
+                      </span>
+                      <span className="clinic-agenda-status">{STATUS_LABELS[a.status] || a.status}</span>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editing ? "Editar cita" : "Nueva cita"}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSave} className="clinic-form">
+            <div className="form-group">
+              <Label>Mascota *</Label>
+              <Select value={form.patient_id} onValueChange={onPatientChange}>
+                <SelectTrigger><SelectValue placeholder="Mascota" /></SelectTrigger>
+                <SelectContent>
+                  {patients.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name} ({p.clients?.name || "dueño"})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="form-group">
+              <Label>Inicio *</Label>
+              <Input type="datetime-local" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} required />
+            </div>
+            <div className="form-group">
+              <Label>Fin *</Label>
+              <Input type="datetime-local" value={form.ends_at} onChange={(e) => setForm({ ...form, ends_at: e.target.value })} required />
+            </div>
+            <div className="form-group">
+              <Label>Estado</Label>
+              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(STATUS_LABELS).map(([k, label]) => (
+                    <SelectItem key={k} value={k}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="form-group">
+              <Label>Motivo</Label>
+              <Input value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} />
+            </div>
+            <div className="form-group">
+              <Label>Notas</Label>
+              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
+            </div>
+            <DialogFooter className="gap-2 flex-wrap">
+              {editing && (
+                <Button type="button" variant="destructive" onClick={handleDelete}>Eliminar</Button>
+              )}
+              {editing && onStartConsultation && form.patient_id && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    const p = patients.find((x) => x.id === form.patient_id);
+                    setDialogOpen(false);
+                    onStartConsultation({
+                      patientId: form.patient_id,
+                      clientId: form.client_id,
+                      appointmentId: editing.id,
+                      patient: p,
+                    });
+                  }}
+                >
+                  <Stethoscope size={14} className="mr-1" /> Consulta
+                </Button>
+              )}
+              <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+              <Button type="submit" disabled={saving}>{saving ? "Guardando..." : "Guardar"}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={approveOpen} onOpenChange={setApproveOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar cita</DialogTitle>
+          </DialogHeader>
+          {approvingRequest && (
+            <form onSubmit={confirmApprove} className="clinic-form">
+              <p className="clinic-muted">
+                <strong>{approvingRequest.client_name}</strong> — {approvingRequest.patient_name}
+              </p>
+              {approvingRequest.reason && (
+                <p className="clinic-muted">{approvingRequest.reason}</p>
+              )}
+              <div className="form-group">
+                <Label>Inicio de la cita *</Label>
+                <Input
+                  type="datetime-local"
+                  value={approveForm.starts_at}
+                  onChange={(e) => setApproveForm({ ...approveForm, starts_at: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <Label>Fin de la cita *</Label>
+                <Input
+                  type="datetime-local"
+                  value={approveForm.ends_at}
+                  onChange={(e) => setApproveForm({ ...approveForm, ends_at: e.target.value })}
+                  required
+                />
+              </div>
+              <DialogFooter className="gap-2">
+                <Button type="button" variant="secondary" onClick={() => setApproveOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={approving}>
+                  {approving ? "Creando cita..." : "Aprobar y crear cita"}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

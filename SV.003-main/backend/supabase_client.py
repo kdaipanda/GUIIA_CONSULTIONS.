@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -288,6 +289,7 @@ def upload_bytes_to_storage(bucket: str, path: str, data: bytes, content_type: s
     """
     Sube bytes al bucket y devuelve public URL.
     """
+    ensure_storage_bucket_public(bucket)
     client = get_supabase_client()
     try:
         client.storage.from_(bucket).upload(
@@ -304,6 +306,202 @@ def upload_bytes_to_storage(bucket: str, path: str, data: bytes, content_type: s
             return (url_resp.get("publicUrl") or url_resp.get("public_url"), None)
         # Fallback defensivo
         return (str(url_resp), None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def parse_storage_object_url(url: str) -> Optional[Tuple[str, str]]:
+    """Extrae (bucket, path) de una URL pública/firmada de Supabase Storage."""
+    if not url:
+        return None
+    for marker in ("/object/public/", "/object/sign/", "/object/authenticated/"):
+        if marker in url:
+            rest = url.split(marker, 1)[1]
+            parts = rest.split("/", 1)
+            if len(parts) == 2:
+                return parts[0], parts[1].split("?")[0]
+    return None
+
+
+def ensure_storage_bucket_public(bucket: str) -> Optional[str]:
+    """Crea el bucket si falta y lo deja público (URLs guardadas en profiles)."""
+    client = get_supabase_client()
+    try:
+        existing = client.storage.get_bucket(bucket)
+        is_public = getattr(existing, "public", False)
+        if isinstance(existing, dict):
+            is_public = existing.get("public", False)
+        if not is_public:
+            client.storage.update_bucket(bucket, options={"public": True})
+        return None
+    except Exception as exc:  # noqa: BLE001
+        err = str(exc).lower()
+        if "not found" in err or "404" in err:
+            try:
+                client.storage.create_bucket(bucket, options={"public": True})
+                return None
+            except Exception as create_exc:  # noqa: BLE001
+                return str(create_exc)
+        return str(exc)
+
+
+def get_storage_signed_url(
+    bucket: str, path: str, expires_in: int = 3600
+) -> Tuple[Optional[str], Optional[str]]:
+    client = get_supabase_client()
+    try:
+        resp = client.storage.from_(bucket).create_signed_url(path, expires_in)
+        if isinstance(resp, dict):
+            signed = resp.get("signedURL") or resp.get("signedUrl")
+            if signed:
+                return (signed, None)
+        return (None, "No se pudo generar URL firmada")
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def resolve_cedula_document_url(stored_url: str) -> Tuple[Optional[str], Optional[str]]:
+    """URL accesible para ver el documento (firmada si el bucket es privado)."""
+    if not stored_url:
+        return (None, "Sin documento")
+    parsed = parse_storage_object_url(stored_url)
+    if not parsed:
+        return (stored_url, None)
+    bucket, path = parsed
+    ensure_storage_bucket_public(bucket)
+    signed, err = get_storage_signed_url(bucket, path)
+    if signed:
+        return (signed, None)
+    return (stored_url, err)
+
+
+def is_platform_admin_in_db(profile_id: str, email: str = "") -> bool:
+    client = get_supabase_client()
+    try:
+        if profile_id:
+            resp = (
+                client.table("platform_admins")
+                .select("id")
+                .eq("active", True)
+                .eq("profile_id", profile_id)
+                .limit(1)
+                .execute()
+            )
+            if resp.data:
+                return True
+        if email:
+            resp = (
+                client.table("platform_admins")
+                .select("id")
+                .eq("active", True)
+                .ilike("email", email.strip())
+                .limit(1)
+                .execute()
+            )
+            return bool(resp.data)
+    except Exception:  # noqa: BLE001
+        return False
+    return False
+
+
+def insert_admin_audit_log(row: Dict[str, Any]) -> None:
+    client = get_supabase_client()
+    client.table("admin_audit_log").insert(row).execute()
+
+
+def create_support_ticket(row: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    client = get_supabase_client()
+    try:
+        resp = client.table("support_tickets").insert(row, returning="representation").execute()
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def insert_support_message(row: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    client = get_supabase_client()
+    try:
+        resp = client.table("support_messages").insert(row, returning="representation").execute()
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def list_support_tickets_for_user(
+    user_id: str, limit: int = 50
+) -> Tuple[List[Dict[str, Any]], Optional[str]]:
+    client = get_supabase_client()
+    try:
+        resp = (
+            client.table("support_tickets")
+            .select("*")
+            .eq("user_id", user_id)
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        return (resp.data or [], None)
+    except Exception as exc:  # noqa: BLE001
+        return ([], str(exc))
+
+
+def list_support_tickets_admin(
+    status: str = "", limit: int = 100
+) -> Tuple[List[Dict[str, Any]], Optional[str]]:
+    client = get_supabase_client()
+    try:
+        query = client.table("support_tickets").select("*").order("created_at", desc=True).limit(limit)
+        if status:
+            query = query.eq("status", status)
+        resp = query.execute()
+        return (resp.data or [], None)
+    except Exception as exc:  # noqa: BLE001
+        return ([], str(exc))
+
+
+def get_support_ticket(ticket_id: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    client = get_supabase_client()
+    try:
+        resp = (
+            client.table("support_tickets")
+            .select("*")
+            .eq("id", ticket_id)
+            .limit(1)
+            .execute()
+        )
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def list_support_messages(ticket_id: str) -> Tuple[List[Dict[str, Any]], Optional[str]]:
+    client = get_supabase_client()
+    try:
+        resp = (
+            client.table("support_messages")
+            .select("*")
+            .eq("ticket_id", ticket_id)
+            .order("created_at", desc=False)
+            .execute()
+        )
+        return (resp.data or [], None)
+    except Exception as exc:  # noqa: BLE001
+        return ([], str(exc))
+
+
+def update_support_ticket(
+    ticket_id: str, fields: Dict[str, Any]
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    client = get_supabase_client()
+    try:
+        fields = {**fields, "updated_at": datetime.now(timezone.utc).isoformat()}
+        resp = (
+            client.table("support_tickets")
+            .update(fields)
+            .eq("id", ticket_id)
+            .execute()
+        )
+        return (resp.data[0] if resp.data else None, None)
     except Exception as exc:  # noqa: BLE001
         return (None, str(exc))
 

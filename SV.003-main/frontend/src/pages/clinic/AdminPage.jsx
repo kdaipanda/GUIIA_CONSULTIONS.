@@ -1,0 +1,1050 @@
+import React, { useCallback, useEffect, useState } from "react";
+import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare } from "lucide-react";
+import { useVet } from "../../context/VetContext";
+import {
+  fetchAdminAccess,
+  fetchAdminOverview,
+  fetchAdminUsers,
+  fetchAdminOrganizations,
+  adminDeleteUser,
+  adminVerifyUserCedula,
+  adminReviewUserCedula,
+  fetchAdminUserConsultations,
+  fetchAdminUserCedulaDocument,
+  fetchAdminSupportTickets,
+  fetchAdminSupportTicket,
+  updateAdminSupportTicket,
+  replyAdminSupportTicket,
+} from "../../lib/clinicApi";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
+import { cleanClinicalDisplayText, downloadUserConsultationsHistoryPdf } from "../../lib/consultationPdf";
+
+const PLAN_FILTERS = [
+  { id: "all", label: "Todos" },
+  { id: "trial", label: "Solo prueba" },
+  { id: "paid", label: "Con plan de pago" },
+];
+
+const SUPPORT_FILTERS = [
+  { id: "", label: "Todos" },
+  { id: "open", label: "Abiertos" },
+  { id: "in_progress", label: "En progreso" },
+  { id: "resolved", label: "Resueltos" },
+  { id: "closed", label: "Cerrados" },
+];
+
+const SUPPORT_STATUS_LABELS = {
+  open: "Abierto",
+  in_progress: "En progreso",
+  resolved: "Resuelto",
+  closed: "Cerrado",
+};
+
+const PLAN_LABELS = {
+  basic: "Básica",
+  professional: "Profesional",
+  premium: "Premium",
+  trial: "Prueba",
+};
+
+const CEDULA_STATUS_LABELS = {
+  unsubmitted: "Sin enviar",
+  pending: "Pendiente",
+  verified: "Verificada",
+  rejected: "Rechazada",
+};
+
+function formatCedulaStatus(status) {
+  const key = (status || "unsubmitted").toLowerCase();
+  return CEDULA_STATUS_LABELS[key] || key;
+}
+
+function cedulaStatusClass(status) {
+  const key = (status || "unsubmitted").toLowerCase();
+  if (key === "verified") return "clinic-cedula-badge-verified";
+  if (key === "pending") return "clinic-cedula-badge-pending";
+  if (key === "rejected") return "clinic-cedula-badge-rejected";
+  return "clinic-cedula-badge-unsubmitted";
+}
+
+function formatPlanLabel(user) {
+  const type = (user.membership_type || "").toLowerCase();
+  if (type && PLAN_LABELS[type]) return PLAN_LABELS[type];
+  if (!type) {
+    const remaining = user.consultations_remaining ?? 0;
+    return remaining > 0 ? "Prueba (sin plan)" : "Sin plan";
+  }
+  return user.membership_type;
+}
+
+function formatRegisteredAt(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("es-MX", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function cedulaDocKind(url) {
+  if (!url) return null;
+  const path = url.split("?")[0].toLowerCase();
+  if (path.endsWith(".pdf")) return "pdf";
+  if (/\.(jpe?g|png|webp|gif)$/.test(path)) return "image";
+  return "unknown";
+}
+
+const CONSULTATION_STATUS_LABELS = {
+  completed: "Completada",
+  in_progress: "En progreso",
+  draft: "Borrador",
+  registered: "Registrada",
+};
+
+function formatConsultationStatus(status) {
+  const key = (status || "registered").toLowerCase();
+  return CONSULTATION_STATUS_LABELS[key] || key;
+}
+
+function consultationStatusClass(status) {
+  const key = (status || "registered").toLowerCase();
+  if (key === "completed") return "clinic-admin-consult-status-completed";
+  if (key === "in_progress") return "clinic-admin-consult-status-progress";
+  if (key === "draft") return "clinic-admin-consult-status-draft";
+  return "clinic-admin-consult-status-default";
+}
+
+function formatCategoryLabel(category) {
+  if (!category) return "—";
+  return category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatConsultationId(consultation) {
+  if (consultation.consultation_number) return consultation.consultation_number;
+  if (consultation.id) return `CONS-${consultation.id.slice(0, 8).toUpperCase()}`;
+  return "—";
+}
+
+function formatDateTime(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString("es-MX", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function consultationField(consultation, key) {
+  const value = consultation[key] ?? consultation.form_data?.[key];
+  if (value === null || value === undefined || value === "") return "";
+  return String(value);
+}
+
+export function AdminPage() {
+  const { veterinarian } = useVet();
+  const [allowed, setAllowed] = useState(null);
+  const [overview, setOverview] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [userCount, setUserCount] = useState(0);
+  const [organizations, setOrganizations] = useState([]);
+  const [search, setSearch] = useState("");
+  const [planFilter, setPlanFilter] = useState("all");
+  const [deleteEmail, setDeleteEmail] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [acting, setActing] = useState(false);
+  const [cedulaActingId, setCedulaActingId] = useState(null);
+  const [cedulaPreview, setCedulaPreview] = useState(null);
+  const [cedulaPreviewUrl, setCedulaPreviewUrl] = useState("");
+  const [cedulaPreviewLoading, setCedulaPreviewLoading] = useState(false);
+  const [cedulaPreviewError, setCedulaPreviewError] = useState("");
+  const [historyUser, setHistoryUser] = useState(null);
+  const [historyConsultations, setHistoryConsultations] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState("");
+  const [historyPdfLoading, setHistoryPdfLoading] = useState(false);
+  const [expandedConsultationId, setExpandedConsultationId] = useState(null);
+  const [supportTickets, setSupportTickets] = useState([]);
+  const [supportOpenCount, setSupportOpenCount] = useState(0);
+  const [supportFilter, setSupportFilter] = useState("");
+  const [supportLoading, setSupportLoading] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [ticketDetail, setTicketDetail] = useState(null);
+  const [ticketReply, setTicketReply] = useState("");
+  const [ticketActing, setTicketActing] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
+  const load = useCallback(async () => {
+    if (!veterinarian?.id) return;
+    setLoading(true);
+    setError("");
+    try {
+      const access = await fetchAdminAccess(veterinarian.id);
+      const allowedUser = !!access.platform_admin;
+      setAllowed(allowedUser);
+      if (!allowedUser) return;
+
+      const [ov, usersData, orgsData] = await Promise.all([
+        fetchAdminOverview(veterinarian.id),
+        fetchAdminUsers(veterinarian.id, search, planFilter),
+        fetchAdminOrganizations(veterinarian.id),
+      ]);
+      setOverview(ov.overview || null);
+      setUsers(usersData.users || []);
+      setUserCount(usersData.count ?? usersData.users?.length ?? 0);
+      setOrganizations(orgsData.organizations || []);
+
+      setSupportLoading(true);
+      try {
+        const supportData = await fetchAdminSupportTickets(veterinarian.id, supportFilter);
+        setSupportTickets(supportData.tickets || []);
+        setSupportOpenCount(supportData.open_count ?? 0);
+      } catch {
+        setSupportTickets([]);
+        setSupportOpenCount(0);
+      } finally {
+        setSupportLoading(false);
+      }
+    } catch (err) {
+      setError(err.message);
+      setAllowed(false);
+    } finally {
+      setLoading(false);
+    }
+  }, [veterinarian?.id, search, planFilter, supportFilter]);
+
+  useEffect(() => {
+    const t = setTimeout(load, search ? 300 : 0);
+    return () => clearTimeout(t);
+  }, [load, search]);
+
+  const handleDeleteUser = async (e) => {
+    e.preventDefault();
+    if (!deleteEmail.trim()) return;
+    if (!window.confirm(`¿Eliminar permanentemente a ${deleteEmail}?`)) return;
+    setActing(true);
+    setMessage("");
+    try {
+      const data = await adminDeleteUser(veterinarian.id, deleteEmail.trim());
+      setMessage(data.message);
+      setDeleteEmail("");
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActing(false);
+    }
+  };
+
+  const handleVerifyCedula = async (user) => {
+    if (!window.confirm(`¿Validar cédula ${user.cedula_profesional} de ${user.nombre} con SEP?`)) return;
+    setCedulaActingId(user.id);
+    setError("");
+    setMessage("");
+    try {
+      const data = await adminVerifyUserCedula(veterinarian.id, user.id);
+      setMessage(data.message || "Verificación completada.");
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCedulaActingId(null);
+    }
+  };
+
+  const handleApproveCedula = async (user) => {
+    if (!window.confirm(`¿Aprobar manualmente la cédula de ${user.nombre}?`)) return;
+    setCedulaActingId(user.id);
+    setError("");
+    setMessage("");
+    try {
+      const data = await adminReviewUserCedula(veterinarian.id, user.id, "approve");
+      setMessage(data.message);
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCedulaActingId(null);
+    }
+  };
+
+  const handleRejectCedula = async (user) => {
+    const note = window.prompt(`Motivo de rechazo para ${user.nombre} (opcional):`, "");
+    if (note === null) return;
+    setCedulaActingId(user.id);
+    setError("");
+    setMessage("");
+    try {
+      const data = await adminReviewUserCedula(veterinarian.id, user.id, "reject", note);
+      setMessage(data.message);
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCedulaActingId(null);
+    }
+  };
+
+  const openConsultationHistory = async (user) => {
+    setHistoryUser(user);
+    setHistoryConsultations([]);
+    setHistoryError("");
+    setHistoryLoading(true);
+    try {
+      const data = await fetchAdminUserConsultations(veterinarian.id, user.id, 50);
+      setHistoryConsultations(data.consultations || []);
+    } catch (err) {
+      setHistoryError(err.message);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const closeConsultationHistory = () => {
+    setHistoryUser(null);
+    setHistoryConsultations([]);
+    setHistoryError("");
+    setHistoryLoading(false);
+    setHistoryPdfLoading(false);
+    setExpandedConsultationId(null);
+  };
+
+  const handleDownloadHistoryPdf = async () => {
+    if (!historyUser || historyConsultations.length === 0) return;
+    setHistoryPdfLoading(true);
+    setHistoryError("");
+    try {
+      await downloadUserConsultationsHistoryPdf(historyUser, historyConsultations, {
+        generatedBy: veterinarian,
+      });
+    } catch (err) {
+      setHistoryError(err.message || "No se pudo generar el PDF");
+    } finally {
+      setHistoryPdfLoading(false);
+    }
+  };
+
+  const closeCedulaPreview = () => {
+    setCedulaPreview(null);
+    setCedulaPreviewUrl("");
+    setCedulaPreviewError("");
+    setCedulaPreviewLoading(false);
+  };
+
+  const openCedulaPreview = async (user) => {
+    setCedulaPreview(user);
+    setCedulaPreviewUrl("");
+    setCedulaPreviewError("");
+    setCedulaPreviewLoading(true);
+    try {
+      const data = await fetchAdminUserCedulaDocument(veterinarian.id, user.id);
+      setCedulaPreviewUrl(data.url || "");
+    } catch (err) {
+      setCedulaPreviewError(err.message);
+    } finally {
+      setCedulaPreviewLoading(false);
+    }
+  };
+
+  const openSupportTicket = async (ticket) => {
+    setSelectedTicket(ticket);
+    setTicketDetail(null);
+    setTicketReply("");
+    setTicketActing(true);
+    try {
+      const data = await fetchAdminSupportTicket(veterinarian.id, ticket.id);
+      setTicketDetail(data.ticket || null);
+    } catch (err) {
+      setError(err.message);
+      setSelectedTicket(null);
+    } finally {
+      setTicketActing(false);
+    }
+  };
+
+  const closeSupportTicket = () => {
+    setSelectedTicket(null);
+    setTicketDetail(null);
+    setTicketReply("");
+  };
+
+  const handleTicketStatusChange = async (status) => {
+    if (!ticketDetail?.id) return;
+    setTicketActing(true);
+    setError("");
+    try {
+      const data = await updateAdminSupportTicket(veterinarian.id, ticketDetail.id, { status });
+      setTicketDetail(data.ticket ? { ...ticketDetail, ...data.ticket } : ticketDetail);
+      const supportData = await fetchAdminSupportTickets(veterinarian.id, supportFilter);
+      setSupportTickets(supportData.tickets || []);
+      setSupportOpenCount(supportData.open_count ?? 0);
+      setMessage("Estado del ticket actualizado.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setTicketActing(false);
+    }
+  };
+
+  const handleTicketReply = async (e) => {
+    e.preventDefault();
+    if (!ticketDetail?.id || !ticketReply.trim()) return;
+    setTicketActing(true);
+    setError("");
+    try {
+      await replyAdminSupportTicket(veterinarian.id, ticketDetail.id, ticketReply.trim());
+      const data = await fetchAdminSupportTicket(veterinarian.id, ticketDetail.id);
+      setTicketDetail(data.ticket || null);
+      setTicketReply("");
+      const supportData = await fetchAdminSupportTickets(veterinarian.id, supportFilter);
+      setSupportTickets(supportData.tickets || []);
+      setSupportOpenCount(supportData.open_count ?? 0);
+      setMessage("Respuesta enviada al usuario.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setTicketActing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="clinic-page">
+        <p className="clinic-muted">Cargando panel admin...</p>
+      </div>
+    );
+  }
+
+  if (!allowed) {
+    return (
+      <div className="clinic-page">
+        <div className="clinic-page-header">
+          <div>
+            <h1>Administración GUIAA</h1>
+            <p>Acceso restringido a administradores de plataforma.</p>
+          </div>
+        </div>
+        {error && <p className="clinic-error">{error}</p>}
+      </div>
+    );
+  }
+
+  const stats = overview || {};
+
+  return (
+    <div className="clinic-page clinic-admin-page">
+      <div className="clinic-page-header">
+        <div>
+          <h1>
+            <Shield size={22} aria-hidden style={{ verticalAlign: "middle", marginRight: 8 }} />
+            Administración GUIAA
+          </h1>
+          <p>Usuarios registrados en Supabase (tabla profiles), clínicas y operaciones.</p>
+        </div>
+      </div>
+
+      {error && <p className="clinic-error">{error}</p>}
+      {message && <p className="clinic-success-msg">{message}</p>}
+
+      <div className="clinic-report-kpi-grid">
+        <div className="clinic-report-kpi">
+          <span className="clinic-report-kpi-label">Usuarios</span>
+          <div className="clinic-report-kpi-value">{stats.users_total ?? 0}</div>
+        </div>
+        <div className="clinic-report-kpi">
+          <span className="clinic-report-kpi-label">Clínicas</span>
+          <div className="clinic-report-kpi-value">{stats.organizations_total ?? 0}</div>
+        </div>
+        <div className="clinic-report-kpi">
+          <span className="clinic-report-kpi-label">Premium</span>
+          <div className="clinic-report-kpi-value">{stats.premium_users ?? 0}</div>
+        </div>
+        <div className="clinic-report-kpi">
+          <span className="clinic-report-kpi-label">Mascotas</span>
+          <div className="clinic-report-kpi-value">{stats.patients_total ?? 0}</div>
+        </div>
+        <div className="clinic-report-kpi">
+          <span className="clinic-report-kpi-label">Soporte abierto</span>
+          <div className="clinic-report-kpi-value">{supportOpenCount}</div>
+        </div>
+      </div>
+
+      <section className="clinic-settings-card">
+        <div className="clinic-admin-users-head">
+          <h2>
+            <MessageSquare size={18} aria-hidden style={{ verticalAlign: "middle", marginRight: 6 }} />
+            Soporte / tickets
+          </h2>
+          <span className="clinic-admin-users-count">{supportTickets.length} tickets</span>
+        </div>
+        <div className="clinic-admin-plan-filters">
+          {SUPPORT_FILTERS.map((f) => (
+            <Button
+              key={f.id || "all"}
+              type="button"
+              size="sm"
+              variant={supportFilter === f.id ? "default" : "secondary"}
+              onClick={() => setSupportFilter(f.id)}
+            >
+              {f.label}
+            </Button>
+          ))}
+        </div>
+        {supportLoading ? (
+          <p className="clinic-muted">Cargando tickets...</p>
+        ) : supportTickets.length === 0 ? (
+          <p className="clinic-muted">No hay tickets con este filtro.</p>
+        ) : (
+          <div className="clinic-table-wrap">
+            <table className="clinic-table clinic-admin-support-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Usuario</th>
+                  <th>Asunto</th>
+                  <th>Estado</th>
+                  <th>Prioridad</th>
+                </tr>
+              </thead>
+              <tbody>
+                {supportTickets.map((t) => (
+                  <tr
+                    key={t.id}
+                    className="clinic-admin-support-row"
+                    onClick={() => openSupportTicket(t)}
+                  >
+                    <td className="clinic-admin-history-date">
+                      {formatDateTime(t.created_at)}
+                    </td>
+                    <td>
+                      <div>{t.user_name || "—"}</div>
+                      <div className="clinic-muted clinic-admin-support-email">{t.user_email}</div>
+                    </td>
+                    <td>{t.subject}</td>
+                    <td>
+                      <span className={`clinic-admin-support-status status-${t.status}`}>
+                        {SUPPORT_STATUS_LABELS[t.status] || t.status}
+                      </span>
+                    </td>
+                    <td>{t.priority === "high" ? "Alta" : "Normal"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="clinic-settings-card">
+        <h2>Acciones</h2>
+        <p className="clinic-muted clinic-tools-desc">
+          Las 3 consultas de prueba se otorgan automáticamente al registrarse en la plataforma.
+        </p>
+        <div className="clinic-admin-actions">
+          <form onSubmit={handleDeleteUser} className="clinic-admin-delete-form">
+            <div className="form-group">
+              <Label htmlFor="delete-email">Eliminar usuario por email</Label>
+              <Input
+                id="delete-email"
+                type="email"
+                placeholder="usuario@ejemplo.com"
+                value={deleteEmail}
+                onChange={(e) => setDeleteEmail(e.target.value)}
+              />
+            </div>
+            <Button type="submit" variant="secondary" disabled={acting || !deleteEmail.trim()}>
+              <Trash2 size={16} aria-hidden />
+              Eliminar
+            </Button>
+          </form>
+        </div>
+      </section>
+
+      <section className="clinic-settings-card">
+        <div className="clinic-admin-users-head">
+          <h2>Usuarios</h2>
+          <span className="clinic-muted clinic-admin-users-count">
+            Mostrando {userCount} registro{userCount === 1 ? "" : "s"}
+          </span>
+        </div>
+        <div className="clinic-admin-users-toolbar">
+          <div className="clinic-search clinic-admin-search">
+            <Input
+              placeholder="Buscar por nombre, email o plan..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="clinic-admin-plan-filters">
+            {PLAN_FILTERS.map((opt) => (
+              <Button
+                key={opt.id}
+                type="button"
+                variant={planFilter === opt.id ? "default" : "secondary"}
+                size="sm"
+                onClick={() => setPlanFilter(opt.id)}
+              >
+                {opt.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <div className="clinic-table-wrap clinic-admin-users-table-wrap">
+          <table className="clinic-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Registro</th>
+                <th>Cédula</th>
+                <th>Estado cédula</th>
+                <th>Plan</th>
+                <th>Consultas</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="clinic-muted" style={{ textAlign: "center" }}>
+                    No hay usuarios con este filtro.
+                  </td>
+                </tr>
+              ) : (
+                users.map((u) => {
+                  const busy = cedulaActingId === u.id;
+                  const cedulaStatus = (u.cedula_verification_status || "unsubmitted").toLowerCase();
+                  return (
+                    <tr key={u.id}>
+                      <td>{u.nombre || "—"}</td>
+                      <td>{u.email || "—"}</td>
+                      <td>{formatRegisteredAt(u.created_at)}</td>
+                      <td className="clinic-mono">{u.cedula_profesional || "—"}</td>
+                      <td>
+                        <span className={`clinic-cedula-badge ${cedulaStatusClass(cedulaStatus)}`}>
+                          {formatCedulaStatus(cedulaStatus)}
+                        </span>
+                        {u.cedula_sep_nombre && (
+                          <div className="clinic-admin-cedula-sep clinic-muted">
+                            SEP: {u.cedula_sep_nombre}
+                          </div>
+                        )}
+                        {u.cedula_verification_error && cedulaStatus === "rejected" && (
+                          <div className="clinic-admin-cedula-sep clinic-muted">
+                            {u.cedula_verification_error}
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        <span
+                          className={`clinic-admin-plan-badge${
+                            !u.membership_type ? " clinic-admin-plan-badge-trial" : ""
+                          }`}
+                        >
+                          {formatPlanLabel(u)}
+                        </span>
+                      </td>
+                      <td>{u.consultations_remaining ?? "—"}</td>
+                      <td>
+                        <div className="clinic-admin-row-actions">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => openConsultationHistory(u)}
+                            title="Ver historial de consultas"
+                          >
+                            <ClipboardList size={14} aria-hidden />
+                            Historial
+                          </Button>
+                          {u.cedula_document_url && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => openCedulaPreview(u)}
+                              title="Ver documento de cédula"
+                            >
+                              <Eye size={14} aria-hidden />
+                              Ver
+                            </Button>
+                          )}
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            disabled={busy || !u.cedula_profesional}
+                            onClick={() => handleVerifyCedula(u)}
+                            title="Validar con SEP"
+                          >
+                            <RefreshCw size={14} aria-hidden />
+                            SEP
+                          </Button>
+                          {cedulaStatus !== "verified" && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              disabled={busy}
+                              onClick={() => handleApproveCedula(u)}
+                              title="Aprobar manualmente"
+                            >
+                              <CheckCircle size={14} aria-hidden />
+                            </Button>
+                          )}
+                          {cedulaStatus !== "rejected" && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              disabled={busy}
+                              onClick={() => handleRejectCedula(u)}
+                              title="Rechazar"
+                            >
+                              <XCircle size={14} aria-hidden />
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="clinic-settings-card">
+        <h2>Organizaciones / clínicas</h2>
+        <div className="clinic-table-wrap">
+          <table className="clinic-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Zona horaria</th>
+                <th>Alta</th>
+              </tr>
+            </thead>
+            <tbody>
+              {organizations.map((o) => (
+                <tr key={o.id}>
+                  <td>{o.name}</td>
+                  <td>{o.timezone || "—"}</td>
+                  <td>{formatRegisteredAt(o.created_at)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <Dialog
+        open={!!cedulaPreview}
+        onOpenChange={(open) => {
+          if (!open) closeCedulaPreview();
+        }}
+      >
+        <DialogContent className="clinic-admin-cedula-preview-dialog max-w-4xl">
+          {cedulaPreview && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Documento de cédula</DialogTitle>
+                <DialogDescription>
+                  {cedulaPreview.nombre || cedulaPreview.email}
+                  {cedulaPreview.cedula_profesional
+                    ? ` · Cédula ${cedulaPreview.cedula_profesional}`
+                    : ""}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="clinic-admin-cedula-preview-body">
+                {cedulaPreviewLoading && (
+                  <p className="clinic-muted">Cargando documento...</p>
+                )}
+                {cedulaPreviewError && (
+                  <p className="clinic-error">{cedulaPreviewError}</p>
+                )}
+                {!cedulaPreviewLoading && !cedulaPreviewError && cedulaPreviewUrl && (
+                  cedulaDocKind(cedulaPreview.cedula_document_url) === "pdf" ? (
+                    <iframe
+                      title={`Cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
+                      src={cedulaPreviewUrl}
+                      className="clinic-admin-cedula-preview-frame"
+                    />
+                  ) : (
+                    <img
+                      src={cedulaPreviewUrl}
+                      alt={`Documento de cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
+                      className="clinic-admin-cedula-preview-image"
+                    />
+                  )
+                )}
+              </div>
+              {!cedulaPreviewLoading && !cedulaPreviewError && cedulaPreviewUrl && (
+                <div className="clinic-admin-cedula-preview-footer">
+                  <a
+                    href={cedulaPreviewUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="clinic-admin-link-btn"
+                  >
+                    <ExternalLink size={14} aria-hidden />
+                    Abrir en pestaña nueva
+                  </a>
+                </div>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!historyUser}
+        onOpenChange={(open) => {
+          if (!open) closeConsultationHistory();
+        }}
+      >
+        <DialogContent className="clinic-admin-history-dialog max-w-5xl">
+          {historyUser && (
+            <>
+              <DialogHeader>
+                <div className="clinic-admin-history-dialog-head">
+                  <div>
+                    <DialogTitle>Historial de consultas</DialogTitle>
+                    <DialogDescription>
+                      {historyUser.nombre || historyUser.email}
+                      {historyUser.email && historyUser.nombre ? ` · ${historyUser.email}` : ""}
+                      {!historyLoading && !historyError
+                        ? ` · ${historyConsultations.length} consulta${historyConsultations.length === 1 ? "" : "s"}`
+                        : ""}
+                    </DialogDescription>
+                  </div>
+                  {!historyLoading && historyConsultations.length > 0 && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      disabled={historyPdfLoading}
+                      onClick={handleDownloadHistoryPdf}
+                    >
+                      <FileDown size={14} aria-hidden />
+                      {historyPdfLoading ? "Generando PDF..." : "Descargar PDF completo"}
+                    </Button>
+                  )}
+                </div>
+              </DialogHeader>
+              <div className="clinic-admin-history-body">
+                {historyLoading && (
+                  <p className="clinic-muted">Cargando historial...</p>
+                )}
+                {historyError && <p className="clinic-error">{historyError}</p>}
+                {!historyLoading && !historyError && historyConsultations.length === 0 && (
+                  <p className="clinic-muted">Este usuario aún no tiene consultas registradas.</p>
+                )}
+                {!historyLoading && !historyError && historyConsultations.length > 0 && (
+                  <div className="clinic-admin-history-list">
+                    {historyConsultations.map((c) => {
+                      const patient =
+                        consultationField(c, "nombre_mascota") || "Sin nombre";
+                      const owner =
+                        consultationField(c, "nombre_dueño") ||
+                        consultationField(c, "nombre_dueno") ||
+                        "—";
+                      const reason = consultationField(c, "motivo_consulta") || "—";
+                      const symptoms = consultationField(c, "sintomas");
+                      const status = (c.status || "registered").toLowerCase();
+                      const expanded = expandedConsultationId === c.id;
+                      const analysis = cleanClinicalDisplayText(c.analysis || "");
+                      const detailBlocks = [
+                        { label: "Raza", value: consultationField(c, "raza") },
+                        { label: "Edad", value: consultationField(c, "edad") },
+                        { label: "Sexo", value: consultationField(c, "sexo") },
+                        { label: "Peso", value: consultationField(c, "peso") },
+                        { label: "Motivo", value: reason !== "—" ? reason : "" },
+                        { label: "Síntomas", value: symptoms },
+                        {
+                          label: "Detalle de la mascota",
+                          value: c.detalle_paciente || consultationField(c, "detalle_paciente"),
+                        },
+                        { label: "Notas", value: c.notas_adicionales },
+                      ].filter((block) => block.value);
+
+                      return (
+                        <div
+                          key={c.id}
+                          className={`clinic-admin-history-item${expanded ? " is-expanded" : ""}`}
+                        >
+                          <button
+                            type="button"
+                            className="clinic-admin-history-item-head"
+                            onClick={() =>
+                              setExpandedConsultationId(expanded ? null : c.id)
+                            }
+                          >
+                            <div className="clinic-admin-history-item-main">
+                              <span className="clinic-mono clinic-admin-history-id">
+                                {formatConsultationId(c)}
+                              </span>
+                              <strong>{patient}</strong>
+                              <span className="clinic-muted">
+                                {formatCategoryLabel(c.category || c.especie)}
+                              </span>
+                            </div>
+                            <div className="clinic-admin-history-item-meta">
+                              <span className="clinic-admin-history-date">
+                                {formatDateTime(c.created_at)}
+                              </span>
+                              <span
+                                className={`clinic-admin-consult-status ${consultationStatusClass(status)}`}
+                              >
+                                {formatConsultationStatus(status)}
+                              </span>
+                              {c.rating ? (
+                                <span className="clinic-muted">{c.rating}/5</span>
+                              ) : null}
+                              {expanded ? (
+                                <ChevronUp size={16} aria-hidden />
+                              ) : (
+                                <ChevronDown size={16} aria-hidden />
+                              )}
+                            </div>
+                          </button>
+                          {expanded && (
+                            <div className="clinic-admin-history-item-detail">
+                              <div className="clinic-admin-history-detail-grid">
+                                <div>
+                                  <span className="clinic-admin-history-detail-label">
+                                    Propietario
+                                  </span>
+                                  <span>{owner}</span>
+                                </div>
+                                {detailBlocks.map((block) => (
+                                  <div key={block.label}>
+                                    <span className="clinic-admin-history-detail-label">
+                                      {block.label}
+                                    </span>
+                                    <span>{block.value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                              {analysis ? (
+                                <div className="clinic-admin-history-analysis">
+                                  <span className="clinic-admin-history-detail-label">
+                                    Análisis clínico
+                                  </span>
+                                  <pre className="clinic-admin-history-analysis-text">
+                                    {analysis}
+                                  </pre>
+                                </div>
+                              ) : (
+                                <p className="clinic-muted clinic-admin-history-no-analysis">
+                                  {status === "completed"
+                                    ? "Consulta completada sin análisis registrado."
+                                    : "Consulta sin análisis clínico todavía."}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!selectedTicket}
+        onOpenChange={(open) => {
+          if (!open) closeSupportTicket();
+        }}
+      >
+        <DialogContent className="clinic-admin-support-dialog max-w-2xl">
+          {selectedTicket && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedTicket.subject}</DialogTitle>
+                <DialogDescription>
+                  {selectedTicket.user_name || selectedTicket.user_email}
+                  {selectedTicket.user_email ? ` · ${selectedTicket.user_email}` : ""}
+                  {selectedTicket.context_view ? ` · Vista: ${selectedTicket.context_view}` : ""}
+                </DialogDescription>
+              </DialogHeader>
+              {ticketActing && !ticketDetail && (
+                <p className="clinic-muted">Cargando conversación...</p>
+              )}
+              {ticketDetail && (
+                <>
+                  <div className="clinic-admin-support-actions">
+                    <span className={`clinic-admin-support-status status-${ticketDetail.status}`}>
+                      {SUPPORT_STATUS_LABELS[ticketDetail.status] || ticketDetail.status}
+                    </span>
+                    <select
+                      className="clinic-admin-support-select"
+                      value={ticketDetail.status}
+                      disabled={ticketActing}
+                      onChange={(e) => handleTicketStatusChange(e.target.value)}
+                    >
+                      {Object.entries(SUPPORT_STATUS_LABELS).map(([k, label]) => (
+                        <option key={k} value={k}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="clinic-admin-support-thread">
+                    {(ticketDetail.messages || []).map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`clinic-admin-support-msg role-${msg.author_role}`}
+                      >
+                        <div className="clinic-admin-support-msg-meta">
+                          {msg.author_role === "admin"
+                            ? "Soporte GUIAA"
+                            : msg.author_role === "assistant"
+                              ? "Asistente"
+                              : "Usuario"}
+                          · {formatDateTime(msg.created_at)}
+                        </div>
+                        <pre className="clinic-admin-support-msg-body">{msg.body}</pre>
+                      </div>
+                    ))}
+                  </div>
+                  <form onSubmit={handleTicketReply} className="clinic-admin-support-reply">
+                    <Label htmlFor="ticket-reply">Responder al usuario</Label>
+                    <textarea
+                      id="ticket-reply"
+                      className="clinic-admin-support-textarea"
+                      rows={4}
+                      value={ticketReply}
+                      onChange={(e) => setTicketReply(e.target.value)}
+                      placeholder="Escribe tu respuesta..."
+                      maxLength={4000}
+                    />
+                    <Button type="submit" disabled={ticketActing || !ticketReply.trim()}>
+                      Enviar respuesta
+                    </Button>
+                  </form>
+                </>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

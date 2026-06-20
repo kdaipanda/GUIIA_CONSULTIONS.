@@ -32,6 +32,11 @@ except Exception:  # noqa: BLE001
     Anthropic = None  # type: ignore[assignment]
     APIStatusError = Exception  # type: ignore[assignment]
 from dotenv import load_dotenv
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+
+import auth_security
+import email_notifications
 from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from starlette.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -106,6 +111,52 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def security_middleware(request: Request, call_next):
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
+    path = request.url.path
+    if auth_security.is_blocked_debug_route(path):
+        return JSONResponse(
+            status_code=403,
+            content={"detail": "Ruta no disponible"},
+        )
+
+    vet_id = None
+    if path.startswith("/api/") and not auth_security.is_public_api_route(
+        request.method, path
+    ):
+        try:
+            vet_id = auth_security.authenticate_http_request(request)
+        except HTTPException as exc:
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={"detail": exc.detail},
+            )
+        if not vet_id and not auth_security.allow_insecure_vet_header():
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Sesión requerida. Inicia sesión de nuevo."},
+            )
+
+    auth_security.set_request_vet_id(vet_id)
+    try:
+        response = await call_next(request)
+    finally:
+        auth_security.set_request_vet_id(None)
+
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
+
+from clinic_routes import clinic_router
+
+app.include_router(clinic_router)
 
 # Database setup - usando Supabase
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY", "").strip()
@@ -633,6 +684,10 @@ class ConsultationStageOne(BaseModel):
     veterinarian_id: str
     category: str
     consultation_data: Dict[str, Any]
+    organization_id: Optional[str] = None
+    client_id: Optional[str] = None
+    patient_id: Optional[str] = None
+    appointment_id: Optional[str] = None
 
 
 class ConsultationPayloadUpdate(BaseModel):
@@ -815,6 +870,30 @@ async def options_medical_images():
     """Handler OPTIONS para medical-images"""
     return Response(status_code=200)
 
+@app.options("/api/clients")
+async def options_clinic_clients():
+    return Response(status_code=200)
+
+@app.options("/api/patients")
+async def options_clinic_patients():
+    return Response(status_code=200)
+
+@app.options("/api/appointments")
+async def options_clinic_appointments():
+    return Response(status_code=200)
+
+@app.options("/api/organization")
+async def options_clinic_organization():
+    return Response(status_code=200)
+
+@app.options("/api/reports/overview")
+async def options_clinic_reports():
+    return Response(status_code=200)
+
+@app.options("/api/dashboard/overview")
+async def options_clinic_dashboard():
+    return Response(status_code=200)
+
 
 @app.get("/")
 async def root():
@@ -993,7 +1072,7 @@ async def send_support_chat_message(
         msg = exc.message or "Error de API Anthropic"
         raise RuntimeError(f"Error Anthropic {exc.status_code}: {msg}") from exc
     except Exception as exc:  # noqa: BLE001
-        raise RuntimeError(f"Error en soporte IA: {exc}") from exc
+        raise RuntimeError(f"Error en el asistente de soporte: {exc}") from exc
 
 
 @app.post("/api/support/chat", response_model=SupportChatResponse)
@@ -1072,6 +1151,14 @@ Por favor, genera un análisis clínico completo."""
 # ============================================
 
 
+def _flow_auth_fields(vet_id: str, email: str) -> dict:
+    return {
+        "access_token": auth_security.create_access_token(vet_id, email),
+        "token_type": "bearer",
+        "expires_in": auth_security.token_expire_seconds(),
+    }
+
+
 @app.post("/api/auth/register")
 async def register_veterinarian(vet: VeterinarianRegister):
     """Registra un nuevo veterinario"""
@@ -1122,7 +1209,7 @@ async def register_veterinarian(vet: VeterinarianRegister):
     if err:
         raise HTTPException(status_code=500, detail=f"Error guardando perfil: {err}")
 
-    return result or vet_data
+    return auth_security.attach_auth_tokens(result or vet_data)
 
 
 @app.post("/api/auth/login")
@@ -1179,7 +1266,8 @@ async def login_veterinarian(credentials: VeterinarianLogin):
                 "verification_status": ced_status,
                 "message": msg,
                 "cedula_skip_count": skip_count,
-                "can_skip": skip_count < 3,  # Permite saltarse hasta 3 veces
+                "can_skip": skip_count < 3,
+                **_flow_auth_fields(veterinarian.get("id"), email),
             }
 
         # Si fue rechazada, bloquear y pedir reintento (corregir nombre/cedula o re-subir)
@@ -1192,7 +1280,8 @@ async def login_veterinarian(credentials: VeterinarianLogin):
                 "verification_status": ced_status,
                 "message": msg,
                 "cedula_skip_count": skip_count,
-                "can_skip": skip_count < 3,  # Permite saltarse hasta 3 veces
+                "can_skip": skip_count < 3,
+                **_flow_auth_fields(veterinarian.get("id"), email),
             }
 
         # Si está PENDING pero ya hay documento, permitir login y dejar la cuenta en revisión.
@@ -1218,7 +1307,8 @@ async def login_veterinarian(credentials: VeterinarianLogin):
                     "verification_status": ced_status,
                     "message": "Necesitamos completar la verificación de cédula para continuar.",
                     "cedula_skip_count": skip_count,
-                    "can_skip": False,  # Ya no puede saltarse
+                    "can_skip": False,
+                    **_flow_auth_fields(veterinarian.get("id"), email),
                 }
 
     # Si tiene 2FA habilitado, generar código
@@ -1251,7 +1341,7 @@ async def login_veterinarian(credentials: VeterinarianLogin):
     # Remover _id de MongoDB si existe
     if isinstance(veterinarian, dict):
         veterinarian.pop("_id", None)
-    return veterinarian
+    return auth_security.attach_auth_tokens(veterinarian)
 
 
 @app.post("/api/auth/verify-2fa")
@@ -1278,7 +1368,7 @@ async def verify_2fa(verification: TwoFactorVerify):
     if err or not veterinarian:
         raise HTTPException(status_code=404, detail="Veterinario no encontrado")
 
-    return veterinarian
+    return auth_security.attach_auth_tokens(veterinarian)
 
 
 @app.get("/api/auth/profile")
@@ -1759,7 +1849,31 @@ async def create_consultation(payload: ConsultationStageOne):
         "created_at": created_at,
     }
 
+    org_id = payload.organization_id
+    if not org_id:
+        try:
+            import clinic_db as _clinic_db
+            org_ctx, _org_err = _clinic_db.ensure_organization_for_profile(vet_id)
+            if org_ctx:
+                org = org_ctx.get("organization") or {}
+                org_id = org.get("id") or (org_ctx.get("membership") or {}).get("organization_id")
+        except Exception:
+            org_id = None
+
+    if org_id:
+        new_row["organization_id"] = org_id
+    if payload.client_id:
+        new_row["client_id"] = payload.client_id
+    if payload.patient_id:
+        new_row["patient_id"] = payload.patient_id
+    if payload.appointment_id:
+        new_row["appointment_id"] = payload.appointment_id
+
     inserted, err_ins = insert_consultation(new_row)
+    if err_ins and any(k in err_ins for k in ("organization_id", "client_id", "patient_id", "appointment_id")):
+        for key in ("organization_id", "client_id", "patient_id", "appointment_id"):
+            new_row.pop(key, None)
+        inserted, err_ins = insert_consultation(new_row)
     if err_ins:
         raise HTTPException(status_code=500, detail=f"Error guardando consulta: {err_ins}")
 
@@ -1845,6 +1959,7 @@ async def get_config_diagnostics():
             "url_host": supabase_host,
             "dns_resolves": supabase_dns_resolves,
         },
+        "email": email_notifications.get_email_config_status(),
         "recommendations": []
     }
 
@@ -2335,52 +2450,6 @@ async def create_checkout_session(
     }
 
 
-@app.post("/api/admin/give-trial-consultations")
-async def give_trial_consultations_to_all(
-    x_veterinarian_id: str = Header(None),
-):
-    """
-    Endpoint administrativo para dar 3 consultas premium a todos los usuarios que no las tengan.
-    Requiere autenticación (puedes agregar validación de admin si lo deseas).
-    """
-    try:
-        from supabase_client import get_supabase_client
-        client = get_supabase_client()
-        
-        # Obtener todos los perfiles
-        response = client.table("profiles").select("id, consultations_remaining, membership_type").execute()
-        
-        if not response.data:
-            return {"message": "No se encontraron usuarios", "updated": 0}
-        
-        updated_count = 0
-        for profile in response.data:
-            profile_id = profile.get("id")
-            membership_type = profile.get("membership_type")
-            remaining = profile.get("consultations_remaining", 0)
-            
-            # Solo actualizar usuarios que no tengan membresía y tengan 0 o menos consultas
-            if not membership_type and remaining <= 0:
-                try:
-                    update_response = client.table("profiles").update({
-                        "consultations_remaining": 3
-                    }).eq("id", profile_id).execute()
-                    
-                    if update_response.data:
-                        updated_count += 1
-                        print(f"[INFO] Se dieron 3 consultas premium a {profile_id}")
-                except Exception as e:
-                    print(f"[ERROR] Error actualizando {profile_id}: {e}")
-        
-        return {
-            "message": f"Se dieron 3 consultas premium a {updated_count} usuarios",
-            "updated": updated_count,
-            "total_users": len(response.data)
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error procesando usuarios: {str(e)}")
-
-
 @app.post("/api/payments/stripe/webhook")
 async def stripe_webhook(request: Request):
     """Webhook de Stripe para confirmar pagos"""
@@ -2731,6 +2800,7 @@ class ImageInterpretRequest(BaseModel):
     image_base64: Optional[str] = Field(default=None)  # Opcional: puede ser None si solo se usan datos pegados
     image_type: str = "general"
     patient_name: Optional[str] = Field(default=None)
+    patient_id: Optional[str] = Field(default=None)
     consultation_id: Optional[str] = Field(default=None)
     additional_context: Optional[str] = Field(default=None)
     pasted_study_data: Optional[str] = Field(default=None)  # Datos de estudio pegados por el usuario
@@ -2901,6 +2971,7 @@ async def interpret_medical_image(request: ImageInterpretRequest):
         "consultation_id": valid_consultation_id,
         "image_type": request.image_type,
         "patient_name": request.patient_name,
+        "patient_id": request.patient_id,
         "image_url": public_url,
         "analysis": analysis_text,
         "findings": findings,
@@ -2957,94 +3028,7 @@ async def get_image_history(x_veterinarian_id: str = Header(None), limit: int = 
     return {"images": rows}
 
 
-# ============================================
-# ADMIN ENDPOINTS
-# ============================================
-
-@app.post("/api/admin/give-trial-consultations")
-async def give_trial_consultations_to_all_users():
-    """
-    Endpoint administrativo para dar 3 consultas premium a todos los usuarios
-    que no tienen membresía activa y tienen 0 o menos consultas restantes.
-    """
-    print("[INFO] Iniciando proceso para dar 3 consultas premium a todos los usuarios sin membresía.")
-    
-    # Obtener todos los perfiles
-    profiles, err = list_profiles()
-    if err:
-        raise HTTPException(status_code=500, detail=f"Error listando perfiles: {err}")
-    
-    updated_count = 0
-    skipped_count = 0
-    
-    for profile in profiles:
-        profile_id = profile.get("id")
-        if not profile_id:
-            continue
-            
-        membership_type = profile.get("membership_type")
-        consultations_remaining = profile.get("consultations_remaining", 0)
-        
-        # Si no tiene membresía activa, validar y asignar consultas
-        if not membership_type:
-            # Asegurar que no tenga más de 3 consultas
-            if consultations_remaining > 3:
-                # No actualizar, solo loguear
-                email = profile.get("email", "sin email")
-                print(f"[WARN] Usuario {email} (ID: {profile_id}) ya tiene {consultations_remaining} consultas, omitiendo...")
-                skipped_count += 1
-                continue
-            # Solo asignar si tiene 0 o menos
-            if consultations_remaining <= 0:
-                update_fields = {
-                    "consultations_remaining": 3,
-                    "membership_type": None,  # Asegurar que no tenga membresía activa
-                    "membership_expires": None,
-                }
-                err_upd = update_profile(profile_id, update_fields)
-                if err_upd:
-                    print(f"[WARN] Error actualizando perfil {profile_id}: {err_upd}")
-                else:
-                    updated_count += 1
-                    email = profile.get("email", "sin email")
-                    print(f"[INFO] Usuario {email} (ID: {profile_id}) actualizado con 3 consultas premium.")
-            else:
-                skipped_count += 1
-        else:
-            skipped_count += 1
-    
-    return {
-        "status": "ok",
-        "message": f"Se asignaron 3 consultas premium a {updated_count} usuarios.",
-        "updated_count": updated_count,
-        "skipped_count": skipped_count,
-        "total_profiles": len(profiles)
-    }
-
-
-@app.post("/api/admin/delete-user")
-async def delete_user_by_email(email: str):
-    """
-    Endpoint administrativo para eliminar un usuario por email.
-    """
-    print(f"[INFO] Intentando eliminar usuario con email: {email}")
-    
-    from supabase_client import delete_profile_by_email
-    
-    success, error = delete_profile_by_email(email)
-    
-    if not success:
-        raise HTTPException(
-            status_code=404 if "no encontrado" in (error or "").lower() else 500,
-            detail=error or "Error eliminando usuario"
-        )
-    
-    return {
-        "status": "ok",
-        "message": f"Usuario {email} eliminado correctamente",
-        "email": email,
-    }
-
+# Admin GUIAA: usar rutas protegidas en clinic_routes (/api/admin/*)
 
 # ============================================
 # RUN SERVER
@@ -3052,6 +3036,15 @@ async def delete_user_by_email(email: str):
 
 if __name__ == "__main__":
     import uvicorn
+
+    try:
+        from supabase_client import ensure_storage_bucket_public
+
+        bucket_err = ensure_storage_bucket_public("uploads")
+        if bucket_err:
+            print(f"[WARN] Bucket uploads: {bucket_err}")
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] No se pudo verificar bucket uploads: {exc}")
 
     print("Iniciando Savant Vet API - Modo Local")
     print("Base de datos: Supabase")

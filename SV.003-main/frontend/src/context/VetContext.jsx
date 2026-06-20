@@ -6,6 +6,7 @@ import React, {
 } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { getBackendUrl } from "../lib/backendUrl";
+import { getAuthHeaders, storeAccessToken, clearAccessToken } from "../lib/authHeaders";
 
 const DEV_AUTO_LOGIN = false;
 
@@ -23,6 +24,7 @@ export const VetProvider = ({ children }) => {
   const [veterinarian, setVeterinarian] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authUser, setAuthUser] = useState(null);
+  const [platformAdmin, setPlatformAdmin] = useState(false);
 
   useEffect(() => {
     const storedVet = localStorage.getItem("veterinarian");
@@ -94,6 +96,7 @@ export const VetProvider = ({ children }) => {
         } else {
           setVeterinarian(null);
           localStorage.removeItem("veterinarian");
+          clearAccessToken();
         }
         setLoading(false);
       },
@@ -105,15 +108,35 @@ export const VetProvider = ({ children }) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!veterinarian?.id) {
+      setPlatformAdmin(false);
+      return;
+    }
+    const backendUrl = getBackendUrl();
+    fetch(`${backendUrl}/api/admin/access`, {
+      headers: getAuthHeaders(veterinarian.id),
+    })
+      .then((response) => (response.ok ? response.json() : { platform_admin: false }))
+      .then((data) => setPlatformAdmin(!!data.platform_admin))
+      .catch(() => setPlatformAdmin(false));
+  }, [veterinarian?.id]);
+
   const login = (vetData) => {
-    setVeterinarian(vetData);
-    localStorage.setItem("veterinarian", JSON.stringify(vetData));
+    const { access_token, token_type, expires_in, ...profile } = vetData || {};
+    if (access_token) {
+      storeAccessToken(access_token);
+    }
+    const nextProfile = profile.id || profile.email ? profile : vetData;
+    setVeterinarian(nextProfile);
+    localStorage.setItem("veterinarian", JSON.stringify(nextProfile));
   };
 
   const logout = async () => {
     await supabase.auth.signOut();
     setVeterinarian(null);
     localStorage.removeItem("veterinarian");
+    clearAccessToken();
   };
 
   const loginWithEmailPassword = async (email, password) => {
@@ -140,9 +163,7 @@ export const VetProvider = ({ children }) => {
     try {
       const backendUrl = getBackendUrl();
       const response = await fetch(`${backendUrl}/api/auth/profile`, {
-        headers: {
-          "x-veterinarian-id": veterinarian.id,
-        },
+        headers: getAuthHeaders(veterinarian.id),
       });
 
       if (response.ok) {
@@ -163,6 +184,7 @@ export const VetProvider = ({ children }) => {
         logout,
         loading,
         authUser,
+        platformAdmin,
         loginWithEmailPassword,
         loginWithMagicLink,
         refreshProfile,
