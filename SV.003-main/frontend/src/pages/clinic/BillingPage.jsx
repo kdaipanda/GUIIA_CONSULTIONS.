@@ -207,7 +207,7 @@ export function BillingPage() {
     <div className="clinic-page">
       <div className="clinic-page-header">
         <div>
-          <h1>Facturación</h1>
+          <h1>Ventas</h1>
           <p>Recibos y cobros clínicos (sin CFDI). Vinculado al inventario.</p>
         </div>
         <Button type="button" onClick={openCreate}>

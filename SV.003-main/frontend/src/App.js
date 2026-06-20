@@ -184,8 +184,8 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     },
     {
       id: "billing",
-      title: "Facturación",
-      description: "Recibos clínicos",
+      title: "Ventas",
+      description: "Recibos y cobros clínicos",
       icon: "🧾",
       shortcut: "",
       action: () => setView("billing"),

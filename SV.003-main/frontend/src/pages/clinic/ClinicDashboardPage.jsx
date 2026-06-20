@@ -308,7 +308,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                 </button>
                 <button type="button" className="clinic-dashboard-quick-btn" onClick={() => go("billing", "/app/facturacion")}>
                   <DollarSign size={20} aria-hidden />
-                  Facturación
+                  Ventas
                 </button>
                 <button type="button" className="clinic-dashboard-quick-btn" onClick={() => go("reports", "/app/reportes")}>
                   <CalendarDays size={20} aria-hidden />

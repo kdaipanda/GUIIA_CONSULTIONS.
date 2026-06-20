@@ -354,7 +354,7 @@ export function ReportsPage() {
                   Productos más vendidos
                 </h2>
                 <Button type="button" variant="ghost" size="sm" onClick={() => go("/app/facturacion")}>
-                  Facturación <ArrowRight size={14} />
+                  Ventas <ArrowRight size={14} />
                 </Button>
               </div>
               {(overview?.top_products || []).length === 0 ? (

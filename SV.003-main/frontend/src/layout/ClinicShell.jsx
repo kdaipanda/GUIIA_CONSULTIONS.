@@ -30,7 +30,7 @@ const BASE_NAV_ITEMS = [
   { to: "/app/pacientes", label: "Mascotas", icon: PawPrint, view: "patients" },
   { to: "/app/agenda", label: "Agenda", icon: CalendarDays, view: "agenda" },
   { to: "/app/inventario", label: "Inventario", icon: Package, view: "inventory" },
-  { to: "/app/facturacion", label: "Facturación", icon: Receipt, view: "billing" },
+  { to: "/app/facturacion", label: "Ventas", icon: Receipt, view: "billing" },
   { to: "/app/reportes", label: "Reportes", icon: BarChart3, view: "reports" },
   { to: "/app/herramientas", label: "Herramientas", icon: Wrench, view: "tools" },
   { to: "/app/consultas/nueva", label: "Consultas", icon: Stethoscope, view: "new-consultation" },
