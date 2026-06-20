@@ -166,8 +166,25 @@ STRIPE_API_KEY = os.getenv("STRIPE_API_KEY", "").strip()
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "").strip()
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "").strip()
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "").strip()
-# Por defecto usar Sonnet 4 (puedes sobrescribir con ANTHROPIC_MODEL en backend/.env)
-ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514").strip()
+ANTHROPIC_MODEL_DEFAULT = "claude-sonnet-4-6"
+# Modelos retirados por Anthropic; se remapean al default actual.
+DEPRECATED_ANTHROPIC_MODELS = {
+    "claude-sonnet-4-20250514": ANTHROPIC_MODEL_DEFAULT,
+    "claude-3-5-sonnet-20241022": ANTHROPIC_MODEL_DEFAULT,
+    "claude-3-5-sonnet-latest": ANTHROPIC_MODEL_DEFAULT,
+}
+
+
+def _resolve_anthropic_model(raw: Optional[str]) -> str:
+    model = (raw or "").strip() or ANTHROPIC_MODEL_DEFAULT
+    mapped = DEPRECATED_ANTHROPIC_MODELS.get(model)
+    if mapped:
+        print(f"[WARN] ANTHROPIC_MODEL '{model}' está obsoleto; usando '{mapped}'.")
+        return mapped
+    return model
+
+
+ANTHROPIC_MODEL = _resolve_anthropic_model(os.getenv("ANTHROPIC_MODEL"))
 def _get_int_env(key: str, default: int) -> int:
     raw = os.getenv(key, "").strip()
     if raw:
@@ -341,7 +358,7 @@ async def send_llm_message(content: List[Dict[str, Any]]) -> str:
 
     def _call_claude() -> str:
         response = anthropic_client.messages.create(
-            model=ANTHROPIC_MODEL or "claude-3-5-sonnet-20241022",
+            model=ANTHROPIC_MODEL,
             max_tokens=ANTHROPIC_MAX_TOKENS,
             **_anthropic_sampling_params(),
             system=system_prompt,
@@ -968,7 +985,6 @@ async def test_claude_connection():
         # Prueba simple: enviar un mensaje de test
         test_message = "Responde solo con 'OK' si puedes leer esto."
         response = await send_llm_message(
-            "Eres un asistente útil. Responde brevemente.",
             [{"type": "text", "text": test_message}]
         )
         result["test_status"] = "success"
@@ -1077,7 +1093,7 @@ async def send_support_chat_message(
 
     def _call_support() -> str:
         response = anthropic_client.messages.create(
-            model=ANTHROPIC_MODEL or "claude-3-5-sonnet-20241022",
+            model=ANTHROPIC_MODEL,
             max_tokens=min(ANTHROPIC_MAX_TOKENS, 900),
             **_anthropic_sampling_params(temperature=0.2),
             system=system_prompt,
@@ -2831,7 +2847,7 @@ async def interpret_medical_image(request: ImageInterpretRequest):
     try:
         print(f"[DEBUG] Iniciando análisis de {image_type_desc} tipo: {request.image_type}")
         print(f"[DEBUG] API Key presente: {bool(ANTHROPIC_API_KEY)}")
-        print(f"[DEBUG] Modelo: {ANTHROPIC_MODEL or 'claude-3-5-sonnet-20241022 (default)'}")
+        print(f"[DEBUG] Modelo: {ANTHROPIC_MODEL}")
         print(f"[DEBUG] Modo: Solo texto (datos pegados) - sin imágenes")
         print(f"[DEBUG] Tiene datos pegados: {bool(request.pasted_study_data)}")
         if request.pasted_study_data:

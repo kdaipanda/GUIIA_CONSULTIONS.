@@ -4,7 +4,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 api_key = os.getenv('ANTHROPIC_API_KEY', '')
-model = os.getenv('ANTHROPIC_MODEL', 'claude-sonnet-4-20250514')
+model = os.getenv('ANTHROPIC_MODEL', 'claude-sonnet-4-6')
+deprecated = {
+    'claude-sonnet-4-20250514': 'claude-sonnet-4-6',
+    'claude-3-5-sonnet-20241022': 'claude-sonnet-4-6',
+}
+if model in deprecated:
+    print(f"  (obsoleto: {model} -> {deprecated[model]})")
+    model = deprecated[model]
 
 print('=== Configuracion de Claude (Anthropic) ===')
 print(f'API Key (ANTHROPIC_API_KEY): {"SI" if api_key else "NO"} configurada')
