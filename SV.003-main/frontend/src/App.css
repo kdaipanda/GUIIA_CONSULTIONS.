@@ -14370,7 +14370,7 @@ html {
 .clinic-sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .clinic-sidebar-link {
@@ -14380,21 +14380,60 @@ html {
   gap: 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  color: #475569;
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
-  transition: background 0.15s, color 0.15s;
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
 }
 
-.clinic-sidebar-link:hover {
-  background: #f1f5f9;
-  color: #1e40af;
+.clinic-sidebar-link.nav-toned {
+  color: #fff;
+  background: linear-gradient(135deg, var(--nav-from) 0%, var(--nav-to) 100%);
+  box-shadow: 0 4px 16px rgba(var(--nav-glow), 0.4);
 }
 
-.clinic-sidebar-link.active {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  color: #1e40af;
+.clinic-sidebar-link.nav-toned:hover {
+  color: #fff;
+  filter: brightness(1.08);
+}
+
+.clinic-sidebar-link.nav-toned.active {
+  color: #fff;
+  filter: brightness(0.94);
+  box-shadow: 0 6px 22px rgba(var(--nav-glow), 0.55);
+}
+
+.clinic-sidebar-link.nav-toned.nav-pulse {
+  animation: clinicNavGlow 2.6s ease-in-out infinite;
+}
+
+.clinic-sidebar-link.nav-toned.nav-hero {
+  font-weight: 700;
+  animation: clinicNavGlowHero 2.2s ease-in-out infinite;
+}
+
+@keyframes clinicNavGlow {
+  0%,
+  100% {
+    box-shadow: 0 4px 16px rgba(var(--nav-glow), 0.4);
+  }
+  50% {
+    box-shadow: 0 6px 26px rgba(var(--nav-glow), 0.62);
+  }
+}
+
+@keyframes clinicNavGlowHero {
+  0%,
+  100% {
+    box-shadow:
+      0 6px 20px rgba(var(--nav-glow), 0.48),
+      0 0 0 0 rgba(var(--nav-glow), 0.15);
+  }
+  50% {
+    box-shadow:
+      0 8px 30px rgba(var(--nav-glow), 0.72),
+      0 0 14px 3px rgba(var(--nav-glow), 0.28);
+  }
 }
 
 .clinic-sidebar-badge {

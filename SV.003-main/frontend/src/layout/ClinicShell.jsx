@@ -23,9 +23,16 @@ import { dispatchOpenSupport } from "../lib/supportReadState";
 import { fetchAdminSupportTickets, fetchAppointmentRequests, fetchInventorySummary } from "../lib/clinicApi";
 import { useClinic } from "../context/ClinicContext";
 import { useVet } from "../context/VetContext";
+import { clinicNavIsHero, clinicNavThemeStyle } from "../lib/clinicNavTheme";
 
 const BASE_NAV_ITEMS = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard, view: "dashboard" },
+  {
+    to: "/app/consultas/nueva",
+    label: "GUIAA Diagnóstico",
+    icon: Stethoscope,
+    view: "new-consultation",
+  },
   { to: "/app/clientes", label: "Dueño", icon: Users, view: "clients" },
   { to: "/app/pacientes", label: "Mascotas", icon: PawPrint, view: "patients" },
   { to: "/app/agenda", label: "Agenda", icon: CalendarDays, view: "agenda" },
@@ -33,7 +40,6 @@ const BASE_NAV_ITEMS = [
   { to: "/app/facturacion", label: "Ventas", icon: Receipt, view: "billing" },
   { to: "/app/reportes", label: "Reportes", icon: BarChart3, view: "reports" },
   { to: "/app/herramientas", label: "Herramientas", icon: Wrench, view: "tools" },
-  { to: "/app/consultas/nueva", label: "Consultas", icon: Stethoscope, view: "new-consultation" },
   { to: "/app/historial", label: "Historial", icon: ClipboardList, view: "consultation-history" },
   { to: "/app/membresia", label: "Membresía", icon: Crown, view: "membership" },
   { to: "/app/perfil", label: "Perfil", icon: User, view: "profile" },
@@ -228,12 +234,16 @@ export function ClinicShell({ children, setView }) {
             className="clinic-sidebar-nav"
             aria-label="Módulos clínicos"
           >
-            {navItems.map(({ to, label, icon: Icon, view }) => (
+            {navItems.map(({ to, label, icon: Icon, view }, index) => (
               <NavLink
                 key={to}
                 to={to}
+                style={{
+                  ...clinicNavThemeStyle(view),
+                  animationDelay: `${index * 0.12}s`,
+                }}
                 className={({ isActive }) =>
-                  `clinic-sidebar-link${isActive ? " active" : ""}`
+                  `clinic-sidebar-link nav-toned nav-pulse${clinicNavIsHero(view) ? " nav-hero" : ""}${isActive ? " active" : ""}`
                 }
                 onClick={() => {
                   setView?.(view);

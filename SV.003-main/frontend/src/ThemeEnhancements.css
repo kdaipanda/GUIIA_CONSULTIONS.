@@ -442,12 +442,72 @@ kbd {
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   border-left: 3px solid transparent;
+  border-radius: 10px;
+  margin: 2px 8px;
 }
 
-.command-palette-item:hover,
-.command-palette-item.active {
+.command-palette-item.nav-toned {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--nav-glow), 0.2) 0%,
+    rgba(var(--nav-glow), 0.1) 100%
+  );
+  border-left-color: var(--nav-to);
+  box-shadow: 0 2px 12px rgba(var(--nav-glow), 0.24);
+}
+
+.command-palette-item.nav-toned:hover,
+.command-palette-item.nav-toned.active {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--nav-glow), 0.3) 0%,
+    rgba(var(--nav-glow), 0.14) 100%
+  );
+  border-left-color: var(--nav-from);
+  box-shadow: 0 3px 16px rgba(var(--nav-glow), 0.34);
+}
+
+.command-palette-item.nav-toned .command-palette-item-title {
+  color: var(--nav-to);
+  font-weight: 700;
+}
+
+.command-palette-item.nav-toned.nav-pulse {
+  animation: commandNavGlow 2.6s ease-in-out infinite;
+}
+
+.command-palette-item.nav-toned.nav-hero .command-palette-item-title {
+  font-weight: 800;
+}
+
+.command-palette-item.nav-toned.nav-hero {
+  animation: commandNavGlowHero 2.2s ease-in-out infinite;
+}
+
+@keyframes commandNavGlow {
+  0%,
+  100% {
+    box-shadow: 0 2px 12px rgba(var(--nav-glow), 0.24);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(var(--nav-glow), 0.4);
+  }
+}
+
+@keyframes commandNavGlowHero {
+  0%,
+  100% {
+    box-shadow: 0 3px 14px rgba(var(--nav-glow), 0.3);
+  }
+  50% {
+    box-shadow: 0 5px 24px rgba(var(--nav-glow), 0.48);
+  }
+}
+
+.command-palette-item:not(.nav-toned):hover,
+.command-palette-item:not(.nav-toned).active {
   background: var(--bg-secondary);
   border-left-color: var(--accent-primary);
 }

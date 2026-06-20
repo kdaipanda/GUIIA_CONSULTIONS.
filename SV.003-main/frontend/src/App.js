@@ -22,6 +22,7 @@ import { friendlyFetchError } from "./lib/friendlyFetchError";
 import { getAuthHeaders, storeAccessToken } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
 import { applyDocumentTheme, readStoredTheme } from "./lib/themeSync";
+import { clinicNavIsHero, clinicNavThemeStyle } from "./lib/clinicNavTheme";
 import { LATAM_COUNTRIES, countryLabel } from "./lib/latamCountries";
 import { SupportChatWidget } from "./components/SupportChatWidget";
 import { VetProvider, useVet } from "./context/VetContext";
@@ -216,9 +217,9 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     },
     {
       id: "new-consultation",
-      title: "Nueva Consulta",
-      description: "Iniciar una nueva consulta veterinaria",
-      icon: "➕",
+      title: "GUIAA Diagnóstico",
+      description: "Soporte a la decisión clínica con IA",
+      icon: "🩺",
       shortcut: "N",
       action: () => setView("new-consultation"),
     },
@@ -342,7 +343,11 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
             filteredCommands.map((cmd, index) => (
               <div
                 key={cmd.id}
-                className={`command-palette-item ${index === activeIndex ? "active" : ""}`}
+                style={{
+                  ...clinicNavThemeStyle(cmd.id),
+                  animationDelay: `${index * 0.08}s`,
+                }}
+                className={`command-palette-item nav-toned nav-pulse${clinicNavIsHero(cmd.id) ? " nav-hero" : ""}${index === activeIndex ? " active" : ""}`}
                 onClick={() => {
                   cmd.action();
                   onClose();
