@@ -202,7 +202,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "tools",
       title: "Herramientas",
       description: "Calculadoras clínicas",
-      icon: "🔧",image.png
+      icon: "🔧",
       shortcut: "",
       action: () => setView("tools"),
     },
