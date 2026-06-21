@@ -229,7 +229,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
         </>
       ) : (
         <>
-          <div className="clinic-report-kpi-grid">
+          <div className="clinic-report-kpi-grid premium-stagger">
             <button
               type="button"
               className="clinic-report-kpi clinic-dashboard-kpi-btn"

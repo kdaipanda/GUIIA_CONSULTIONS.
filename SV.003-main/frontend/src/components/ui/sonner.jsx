@@ -26,6 +26,9 @@ const Toaster = ({ ...props }) => {
       position="top-right"
       closeButton
       richColors
+      expand
+      visibleToasts={4}
+      gap={10}
       className="guiaa-toaster"
       toastOptions={{
         classNames: {

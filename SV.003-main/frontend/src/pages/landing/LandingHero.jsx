@@ -54,7 +54,7 @@ export function LandingHero({ setView }) {
             <button
               type="button"
               onClick={() => setView("register")}
-              className="w-full rounded-xl bg-guiaa-brand-green px-7 py-3.5 text-sm font-bold text-white transition hover:bg-guiaa-brand-green-dark sm:w-auto"
+              className="landing-hero-cta-primary w-full rounded-xl bg-guiaa-brand-green px-7 py-3.5 text-sm font-bold text-white transition hover:bg-guiaa-brand-green-dark sm:w-auto"
             >
               Comenzar registro
             </button>
@@ -68,7 +68,7 @@ export function LandingHero({ setView }) {
             </button>
           </div>
 
-          <dl className="mt-8 grid grid-cols-3 gap-3 border-t border-guiaa-brand-navy/10 pt-6 sm:mt-10 sm:flex sm:flex-wrap sm:gap-6 sm:pt-8">
+          <dl className="premium-stagger mt-8 grid grid-cols-3 gap-3 border-t border-guiaa-brand-navy/10 pt-6 sm:mt-10 sm:flex sm:flex-wrap sm:gap-6 sm:pt-8">
             {HERO_STATS.map(({ value, label }) => (
               <div key={label} className="min-w-0">
                 <dt className="text-base font-bold text-guiaa-brand-navy sm:text-xl">{value}</dt>

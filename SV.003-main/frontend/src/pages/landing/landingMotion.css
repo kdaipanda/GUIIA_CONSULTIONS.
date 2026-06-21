@@ -1,4 +1,5 @@
-.landing-reveal {
+.landing-reveal,
+.premium-reveal {
   opacity: 0;
   transform: translateY(20px);
   transition:
@@ -7,13 +8,15 @@
   will-change: opacity, transform;
 }
 
-.landing-reveal.is-visible {
+.landing-reveal.is-visible,
+.premium-reveal.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .landing-reveal {
+  .landing-reveal,
+  .premium-reveal {
     opacity: 1;
     transform: none;
     transition: none;

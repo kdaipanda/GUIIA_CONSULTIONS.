@@ -27,6 +27,7 @@ import { clinicNavIsHero, clinicNavThemeStyle } from "../lib/clinicNavTheme";
 import { PlatformOnboarding } from "../components/PlatformOnboarding";
 import { hasCompletedPlatformOnboarding } from "../lib/platformOnboarding";
 import { ClinicMobileNavDrawer } from "./ClinicMobileNavDrawer";
+import { PageEnter } from "../components/motion/PageEnter";
 
 const BASE_NAV_ITEMS = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard, view: "dashboard" },
@@ -280,7 +281,9 @@ export function ClinicShell({ children, setView }) {
             ))}
           </nav>
         </aside>
-        <main className="clinic-shell-main">{children}</main>
+        <main className="clinic-shell-main">
+          <PageEnter>{children}</PageEnter>
+        </main>
       </div>
       <PlatformOnboarding
         isOpen={showOnboarding}

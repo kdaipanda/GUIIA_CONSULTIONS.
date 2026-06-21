@@ -20,7 +20,7 @@ export function ClinicTableSkeleton({ rows = 5, cols = 4 }) {
 
 export function ClinicEmptyState({ icon: Icon, title, description, actionLabel, onAction }) {
   return (
-    <div className="clinic-empty-guiaa">
+    <div className="clinic-empty-guiaa premium-card-lift">
       {Icon && (
         <div className="clinic-empty-guiaa-icon">
           <Icon size={28} aria-hidden />
@@ -39,7 +39,7 @@ export function ClinicEmptyState({ icon: Icon, title, description, actionLabel, 
 
 export function ClinicStatPill({ value, label, warn }) {
   return (
-    <div className={`clinic-stat-pill${warn ? " clinic-stat-pill--warn" : ""}`}>
+    <div className={`clinic-stat-pill premium-card-lift${warn ? " clinic-stat-pill--warn" : ""}`}>
       <span className="clinic-stat-value">{value}</span>
       <span className="clinic-stat-label">{label}</span>
     </div>
