@@ -39,7 +39,6 @@ import { MembershipPage } from "./pages/MembershipPage";
 import { PaymentSuccessPage } from "./pages/PaymentSuccessPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ConsultationHistoryPage } from "./pages/ConsultationHistoryPage";
-import { MedicalImagesPage } from "./pages/MedicalImagesPage";
 import { DashboardActivitySection } from "./components/dashboard/DashboardActivitySection";
 import {
   DEFAULT_PACKAGES,
@@ -209,7 +208,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     {
       id: "new-consultation",
       title: "GUIAA Diagnóstico",
-      description: "Soporte a la decisión clínica con IA",
+      description: "Soporte a la decisión clínica CDS L4 · L5",
       icon: "🩺",
       shortcut: "N",
       action: () => setView("new-consultation"),
@@ -261,14 +260,6 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       icon: "🧠",
       shortcut: "E",
       action: () => openExpertConsultation?.(),
-    });
-    commands.splice(insertAt + 1, 0, {
-      id: "medical-images",
-      title: "Interpretación de Análisis",
-      description: "Interpretación de análisis de sangre y estudios clínicos (Premium)",
-      icon: "🔬",
-      shortcut: "I",
-      action: () => setView("medical-images"),
     });
   }
 
@@ -476,6 +467,11 @@ const Router = () => {
       setCurrentView("appointment-request");
       return;
     }
+    if (location.pathname === "/app/imagenes") {
+      navigate(VIEW_TO_PATH.dashboard, { replace: true });
+      setCurrentView("dashboard");
+      return;
+    }
     const view = PATH_TO_VIEW[location.pathname];
     if (view && veterinarian) {
       setCurrentView(view);
@@ -665,11 +661,6 @@ const Router = () => {
           setView={navigateSetView}
           openConsultation={openConsultation}
         />
-      </ClinicShell>
-    ),
-    "medical-images": (
-      <ClinicShell setView={navigateSetView}>
-        <MedicalImagesPage setView={navigateSetView} />
       </ClinicShell>
     ),
     membership: veterinarian ? (
@@ -2061,10 +2052,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       if (key === "n") setView("new-consultation");
       else if (key === "e" && isPremiumMember(veterinarian)) {
         openExpertConsultation?.();
-      } else if (key === "h") setView("consultation-history");
-      else if (key === "i" && isPremiumMember(veterinarian)) {
-        setView("medical-images");
-      } else if (key === "m") setView("membership");
+      }       else if (key === "h") setView("consultation-history"); else if (key === "m") setView("membership");
       else if (key === "p") setView("profile");
     };
 
@@ -2640,26 +2628,6 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 <h3>Ver Historial</h3>
                 <p>Consultas previas y resultados</p>
               </Card>
-
-              {membershipType === "premium" && (
-                <Card
-                  role="button"
-                  tabIndex={0}
-                  className={`action-card premium-feature cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${embedded ? " clinic-dashboard-quick-btn" : ""}`}
-                  onClick={() => setView("medical-images")}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setView("medical-images");
-                    }
-                  }}
-                >
-                  <div className="action-icon"><FlaskConical /></div>
-                  <h3>Interpretación de Análisis</h3>
-                  <p>Interpretación de análisis de sangre y estudios clínicos</p>
-                  <span className="premium-badge">PREMIUM</span>
-                </Card>
-              )}
 
               <Card
                 role="button"
@@ -3322,7 +3290,7 @@ const NewConsultation = ({
       }
       
       notifyQuotaError(
-        `Los análisis avanzados solo están disponibles para miembros Premium. Tu plan actual es: ${planName}. Por favor, actualiza tu membresía para acceder a esta función.`,
+        `La síntesis clínica CDS L5 solo está disponible para miembros Premium. Tu plan actual es: ${planName}. Por favor, actualiza tu membresía para acceder a esta función.`,
         () => setView("membership"),
       );
       return;
@@ -3694,10 +3662,7 @@ const NewConsultation = ({
                       disabled={loading}
                       className="group gap-2.5"
                     >
-                      {loading ? "Procesando..." : "Obtener Análisis"}
-                      {!loading && (
-                        <span className="text-lg transition-transform group-hover:scale-110">✨</span>
-                      )}
+                      {loading ? "Procesando..." : "Generar síntesis CDS"}
                     </Button>
                       {veterinarian?.membership_type?.toLowerCase() !== "premium" && 
                        (veterinarian?.consultations_remaining || 0) > 0 && (
@@ -3722,11 +3687,11 @@ const NewConsultation = ({
                     }}>
                       <div style={{ fontSize: "48px", marginBottom: "10px" }}>⭐</div>
                       <h4 style={{ marginBottom: "10px", color: "#856404" }}>
-                        Análisis Avanzado - Solo Premium
+                        Síntesis CDS L5 - Solo Premium
                       </h4>
                       <p style={{ marginBottom: "15px", color: "#856404" }}>
-                        Los análisis clínicos avanzados solo están disponibles para miembros Premium.
-                        Actualiza tu plan para acceder a esta función exclusiva.
+                        La síntesis clínica estructurada (CDS L5) solo está disponible para miembros Premium.
+                        Actualiza tu plan para acceder a esta función.
                       </p>
                       <Button
                         type="button"

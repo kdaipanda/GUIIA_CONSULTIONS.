@@ -62,8 +62,6 @@ export const PLAN_FEATURES = {
     ...SHARED_CORE,
     "Inventario, ventas y reportes",
     "Manejo Experto (consulta acelerada)",
-    "Interpretación de análisis clínicos",
-    "Análisis diagnóstico avanzado con IA",
     "Onboarding guiado prioritario",
   ],
 };
@@ -89,8 +87,6 @@ export const PLAN_ANNUAL_FEATURES = {
     ...SHARED_CORE,
     "Inventario, ventas y reportes",
     "Manejo Experto (consulta acelerada)",
-    "Interpretación de análisis clínicos",
-    "Análisis diagnóstico avanzado con IA",
     "Onboarding guiado prioritario",
   ],
 };

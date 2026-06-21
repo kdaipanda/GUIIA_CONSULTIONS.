@@ -2049,7 +2049,7 @@ async def update_consultation_observations(
 
 @app.post("/api/consultations/{consultation_id}/analyze")
 async def analyze_consultation(consultation_id: str, x_veterinarian_id: str = Header(None)):
-    """Genera un análisis clínico usando IA (Claude) - Solo disponible para Premium"""
+    """Genera síntesis clínica CDS L5 — solo disponible para Premium"""
 
     consultation, err = get_consultation_by_id(consultation_id)
     if err:
@@ -2061,14 +2061,14 @@ async def analyze_consultation(consultation_id: str, x_veterinarian_id: str = He
     if not x_veterinarian_id:
         raise HTTPException(
             status_code=401,
-            detail="Se requiere autenticación para usar análisis avanzados."
+            detail="Se requiere autenticación para generar la síntesis clínica CDS.",
         )
     
     profile, err = get_profile(x_veterinarian_id)
     if err or not profile:
         raise HTTPException(
             status_code=403,
-            detail="No se pudo verificar tu membresía. Los análisis avanzados solo están disponibles para miembros Premium."
+            detail="No se pudo verificar tu membresía. La síntesis clínica CDS L5 solo está disponible para miembros Premium.",
         )
     
     membership_type = profile.get("membership_type")
@@ -2096,7 +2096,7 @@ async def analyze_consultation(consultation_id: str, x_veterinarian_id: str = He
     if membership_type not in ["premium", "trial"]:
         raise HTTPException(
             status_code=403,
-            detail=f"Los análisis avanzados solo están disponibles para miembros Premium. Tu plan actual es: {membership_type.capitalize()}. Por favor, actualiza tu membresía para acceder a esta función."
+            detail=f"La síntesis clínica CDS L5 solo está disponible para miembros Premium. Tu plan actual es: {membership_type.capitalize()}. Por favor, actualiza tu membresía para acceder a esta función."
         )
     
     # Validar que tenga consultas restantes (solo para usuarios no premium y sin consultas ilimitadas)

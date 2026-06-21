@@ -17,7 +17,7 @@ const PLAN_DESCRIPTIONS = {
   professional:
     "Práctica multiespecie activa con inventario, ventas y reportes clínicos integrados.",
   premium:
-    "Alto volumen de consultas con Manejo Experto e interpretación de análisis clínicos.",
+    "Alto volumen de consultas con Manejo Experto y onboarding guiado prioritario.",
 };
 
 function formatMxPrice(amount, suffix = "") {

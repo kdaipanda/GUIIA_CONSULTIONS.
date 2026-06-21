@@ -298,7 +298,7 @@ export function MembershipPage({ setView }) {
         <ul className="membership-auth-features">
           <li>CDS L4 · L5 en consulta clínica</li>
           <li>Expediente, agenda e inventario</li>
-          <li>Funciones Premium: Manejo Experto e interpretación de análisis</li>
+          <li>Funciones Premium: Manejo Experto y onboarding guiado</li>
         </ul>
         <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
           <Button type="button" onClick={() => setView("login")} className="w-full sm:flex-1">
@@ -324,8 +324,8 @@ export function MembershipPage({ setView }) {
           <p className="membership-eyebrow">Plataforma clínica GUIAA</p>
           <h1>Membresías por módulo y consulta</h1>
           <p>
-            Diagnóstico CDS, expediente, inventario, ventas y multiespecie — con funciones
-            avanzadas en Premium.
+            Diagnóstico CDS, expediente, inventario, ventas y multiespecie — con Manejo
+            Experto y mayor volumen de consultas en Premium.
           </p>
           {status.tone && (
             <div className={`membership-status-badge membership-status-badge--${status.tone}`}>

@@ -35,7 +35,7 @@ export const PLATFORM_ONBOARDING_STEPS = [
     icon: "🩺",
     title: "GUIAA Diagnóstico",
     body:
-      "Aquí inicias consultas clínicas: captura signos, motivo y datos de la mascota. El sistema genera análisis CDS de apoyo (no sustituye tu criterio profesional).",
+      "Aquí inicias consultas clínicas: captura signos, motivo y datos de la mascota. El flujo CDS estructura tu razonamiento clínico (no sustituye tu criterio profesional).",
     hint: "N",
     actionView: "new-consultation",
     actionLabel: "Ir a GUIAA Diagnóstico",
