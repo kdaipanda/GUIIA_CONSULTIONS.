@@ -9824,12 +9824,23 @@ html {
 
 /* 9. Mobile UX Improvements */
 @media (max-width: 768px) {
-  /* Touch targets mínimo 44x44px */
-  button,
+  /* Touch targets en controles principales (no todos los botones inline) */
+  .menu-toggle,
+  .clinic-mobile-nav-toggle,
+  .icon-btn,
+  .user-menu-trigger,
   a.btn,
-  .clickable,
-  .icon-btn {
+  .btn-primary,
+  .btn-secondary,
+  .clinic-dashboard-quick-btn,
+  .clinic-page-header > .btn,
+  .clinic-page-header > button {
     min-height: 44px;
+  }
+
+  .menu-toggle,
+  .clinic-mobile-nav-toggle,
+  .icon-btn {
     min-width: 44px;
   }
   
@@ -12188,6 +12199,9 @@ html {
   .clinic-shell > .header .nav-brand h1 {
     font-size: 17px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: min(42vw, 220px);
   }
 
   .clinic-shell > .header .logo-image {
@@ -12273,51 +12287,17 @@ html {
     display: none;
   }
 
+  /* Sidebar legacy desactivado: navegación vía Vaul drawer */
   .clinic-sidebar-backdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
-    top: var(--clinic-header-h);
-    z-index: 800;
-    border: none;
-    padding: 0;
-    margin: 0;
-    background: rgba(15, 23, 42, 0.45);
-    cursor: pointer;
+    display: none !important;
   }
 
-  .clinic-shell:has(> .header.scrolled) .clinic-sidebar-backdrop,
-  .clinic-shell:has(> .header.scrolled) .clinic-mobile-toolbar {
-    top: var(--clinic-header-h);
+  .clinic-sidebar--desktop {
+    display: none !important;
   }
 
   .clinic-sidebar {
-    position: fixed;
-    top: var(--clinic-header-h);
-    left: 0;
-    bottom: 0;
-    width: min(288px, 86vw);
-    z-index: 900;
-    transform: translateX(-105%);
-    transition: transform 0.22s ease, visibility 0.22s ease;
-    max-height: none;
-    border-right: 1px solid #e2e8f0;
-    box-shadow: none;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .clinic-shell:has(> .header.scrolled) .clinic-sidebar {
-    top: var(--clinic-header-h);
-  }
-
-  .clinic-sidebar.mobile-open {
-    transform: translateX(0);
-    box-shadow: 8px 0 32px rgba(15, 23, 42, 0.18);
-    visibility: visible;
-    pointer-events: auto;
+    display: none !important;
   }
 
   .clinic-sidebar-nav {

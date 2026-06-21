@@ -1,0 +1,71 @@
+/* Correcciones móvil / tablet clínica (≤1023px) */
+
+@media (max-width: 1023px) {
+  .clinic-shell-main .premium-page-enter {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .clinic-shell > .header .nav-brand h1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: min(42vw, 220px);
+  }
+
+  /* Subtítulos del brand ocultos también al hacer scroll */
+  .clinic-shell > .header.scrolled .nav-brand-subtitle,
+  .clinic-shell > .header.scrolled .nav-brand-subsubtitle {
+    display: none !important;
+    max-height: 0 !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .clinic-dashboard-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .clinic-dashboard-actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .clinic-mobile-toolbar {
+    padding-left: max(12px, env(safe-area-inset-left, 0px));
+    padding-right: max(12px, env(safe-area-inset-right, 0px));
+  }
+
+  .clinic-shell-main {
+    padding-left: max(12px, env(safe-area-inset-left, 0px));
+    padding-right: max(12px, env(safe-area-inset-right, 0px));
+  }
+
+  .clinic-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  .clinic-page-guiaa .clinic-invite-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .clinic-dashboard-quick-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .clinic-report-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .clinic-shell > .header .nav-brand h1 {
+    max-width: min(38vw, 160px);
+    font-size: 15px !important;
+  }
+}

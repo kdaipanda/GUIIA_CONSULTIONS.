@@ -8,6 +8,7 @@ import {
   DrawerDescription,
 } from "../components/ui/drawer";
 import { clinicNavIsHero, clinicNavThemeStyle } from "../lib/clinicNavTheme";
+import { CLINIC_COMPACT_MEDIA_QUERY } from "../lib/clinicBreakpoints";
 import "./clinicMobileDrawer.css";
 
 export function ClinicMobileNavDrawer({
@@ -24,7 +25,7 @@ export function ClinicMobileNavDrawer({
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 768px)");
+    const mq = window.matchMedia(CLINIC_COMPACT_MEDIA_QUERY);
     const update = () => setIsMobile(mq.matches);
     update();
     mq.addEventListener("change", update);
@@ -36,7 +37,7 @@ export function ClinicMobileNavDrawer({
   const close = () => onOpenChange(false);
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} shouldScaleBackground>
+    <Drawer open={open} onOpenChange={onOpenChange} shouldScaleBackground={false}>
       <DrawerContent className="clinic-mobile-drawer">
         <DrawerHeader className="clinic-mobile-drawer-head">
           <DrawerTitle className="clinic-mobile-drawer-title">Clínica</DrawerTitle>

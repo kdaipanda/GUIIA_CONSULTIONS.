@@ -68,7 +68,7 @@ export function LandingHero({ setView }) {
             </button>
           </div>
 
-          <dl className="premium-stagger mt-8 grid grid-cols-3 gap-3 border-t border-guiaa-brand-navy/10 pt-6 sm:mt-10 sm:flex sm:flex-wrap sm:gap-6 sm:pt-8">
+          <dl className="premium-stagger mt-8 grid grid-cols-1 gap-3 border-t border-guiaa-brand-navy/10 pt-6 sm:grid-cols-3 sm:mt-10 sm:pt-8">
             {HERO_STATS.map(({ value, label }) => (
               <div key={label} className="min-w-0">
                 <dt className="text-base font-bold text-guiaa-brand-navy sm:text-xl">{value}</dt>
