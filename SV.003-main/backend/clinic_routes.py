@@ -12,6 +12,7 @@ import clinic_db
 import cedula_verification
 import auth_security
 import email_notifications
+from membership_access import require_feature_for_profile
 from supabase_client import (
     get_profile,
     get_profile_by_email,
@@ -231,6 +232,10 @@ async def _resolve_org_context(vet_id: str):
 def _check_write(role: str) -> None:
     if role not in WRITE_ROLES:
         raise HTTPException(status_code=403, detail="Permiso denegado")
+
+
+def _require_membership_feature(ctx: dict, feature: str) -> None:
+    require_feature_for_profile(ctx.get("profile"), feature)
 
 
 def _serialize_consultation_row(row: dict) -> dict:
@@ -1073,6 +1078,7 @@ class InvoiceUpdate(BaseModel):
 async def api_inventory_summary(x_veterinarian_id: str = Header(None)):
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
+    _require_membership_feature(ctx, "inventory")
     org_id = ctx["organization_id"]
     products, err = clinic_db.list_products(org_id, limit=500)
     if err:
@@ -1095,6 +1101,7 @@ async def api_inventory_summary(x_veterinarian_id: str = Header(None)):
 async def api_list_products(search: str = "", x_veterinarian_id: str = Header(None)):
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
+    _require_membership_feature(ctx, "inventory")
     products, err = clinic_db.list_products(ctx["organization_id"], search=search)
     if err:
         raise HTTPException(status_code=500, detail=err)
@@ -1105,6 +1112,7 @@ async def api_list_products(search: str = "", x_veterinarian_id: str = Header(No
 async def api_create_product(body: ProductCreate, x_veterinarian_id: str = Header(None)):
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
+    _require_membership_feature(ctx, "inventory")
     _check_write(ctx["role"])
     row = {"organization_id": ctx["organization_id"], **body.model_dump()}
     product, err = clinic_db.insert_product(row)
@@ -1117,6 +1125,7 @@ async def api_create_product(body: ProductCreate, x_veterinarian_id: str = Heade
 async def api_update_product(product_id: str, body: ProductUpdate, x_veterinarian_id: str = Header(None)):
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
+    _require_membership_feature(ctx, "inventory")
     _check_write(ctx["role"])
     product, err = clinic_db.update_product(product_id, ctx["organization_id"], body.model_dump(exclude_none=True))
     if err:
@@ -1130,6 +1139,7 @@ async def api_update_product(product_id: str, body: ProductUpdate, x_veterinaria
 async def api_delete_product(product_id: str, x_veterinarian_id: str = Header(None)):
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
+    _require_membership_feature(ctx, "inventory")
     if ctx["role"] not in ADMIN_ROLES:
         raise HTTPException(status_code=403, detail="Solo administradores pueden eliminar productos")
     err = clinic_db.delete_product(product_id, ctx["organization_id"])
@@ -1142,6 +1152,7 @@ async def api_delete_product(product_id: str, x_veterinarian_id: str = Header(No
 async def api_stock_movement(product_id: str, body: StockMovementCreate, x_veterinarian_id: str = Header(None)):
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
+    _require_membership_feature(ctx, "inventory")
     _check_write(ctx["role"])
     movement, err = clinic_db.insert_stock_movement(
         ctx["organization_id"],
@@ -1161,6 +1172,7 @@ async def api_stock_movement(product_id: str, body: StockMovementCreate, x_veter
 async def api_product_movements(product_id: str, x_veterinarian_id: str = Header(None), limit: int = 50):
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
+    _require_membership_feature(ctx, "inventory")
     product, err = clinic_db.get_product(product_id, ctx["organization_id"])
     if err:
         raise HTTPException(status_code=500, detail=err)
@@ -1178,6 +1190,7 @@ async def api_product_movements(product_id: str, x_veterinarian_id: str = Header
 async def api_list_invoices(status: Optional[str] = None, x_veterinarian_id: str = Header(None)):
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
+    _require_membership_feature(ctx, "billing")
     invoices, err = clinic_db.list_invoices(ctx["organization_id"], status=status)
     if err:
         raise HTTPException(status_code=500, detail=err)
@@ -1188,6 +1201,7 @@ async def api_list_invoices(status: Optional[str] = None, x_veterinarian_id: str
 async def api_create_invoice(body: InvoiceCreate, x_veterinarian_id: str = Header(None)):
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
+    _require_membership_feature(ctx, "billing")
     _check_write(ctx["role"])
     if body.client_id:
         client, err = clinic_db.get_client(body.client_id, ctx["organization_id"])
@@ -1211,6 +1225,7 @@ async def api_create_invoice(body: InvoiceCreate, x_veterinarian_id: str = Heade
 async def api_get_invoice(invoice_id: str, x_veterinarian_id: str = Header(None)):
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
+    _require_membership_feature(ctx, "billing")
     invoice, err = clinic_db.get_invoice(invoice_id, ctx["organization_id"])
     if err:
         raise HTTPException(status_code=500, detail=err)
@@ -1223,6 +1238,7 @@ async def api_get_invoice(invoice_id: str, x_veterinarian_id: str = Header(None)
 async def api_update_invoice(invoice_id: str, body: InvoiceUpdate, x_veterinarian_id: str = Header(None)):
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
+    _require_membership_feature(ctx, "billing")
     _check_write(ctx["role"])
     invoice, err = clinic_db.update_invoice(invoice_id, ctx["organization_id"], body.model_dump(exclude_none=True))
     if err:
@@ -1255,6 +1271,7 @@ async def api_reports_overview(
 ):
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
+    _require_membership_feature(ctx, "reports")
     org_id = ctx["organization_id"]
 
     try:

@@ -24,6 +24,7 @@ import {
   getMembershipQuota,
   parseMembershipCatalogResponse,
 } from "../../lib/membershipPlans";
+import { canAccessFeature, MEMBERSHIP_FEATURES } from "../../lib/membershipAccess";
 import { Button } from "../../components/ui/button";
 import "./clinicDashboardPage.css";
 import "./clinicPageShared.css";
@@ -102,7 +103,7 @@ function SectionSkeleton() {
 
 export function ClinicDashboardPage({ setView, onStartConsultation }) {
   const navigate = useNavigate();
-  const { veterinarian } = useVet();
+  const { veterinarian, platformAdmin } = useVet();
   const { organization } = useClinic();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -149,6 +150,23 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
   const membershipQuota = useMemo(
     () => getMembershipQuota(veterinarian, membershipPackages),
     [veterinarian, membershipPackages],
+  );
+
+  const accessOptions = useMemo(() => ({ platformAdmin }), [platformAdmin]);
+  const canUseInventory = canAccessFeature(
+    veterinarian,
+    MEMBERSHIP_FEATURES.inventory,
+    accessOptions,
+  );
+  const canUseBilling = canAccessFeature(
+    veterinarian,
+    MEMBERSHIP_FEATURES.billing,
+    accessOptions,
+  );
+  const canUseReports = canAccessFeature(
+    veterinarian,
+    MEMBERSHIP_FEATURES.reports,
+    accessOptions,
   );
 
   const go = (view, path) => {
@@ -248,6 +266,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
               </div>
             </button>
 
+            {canUseBilling && (
             <button
               type="button"
               className="clinic-report-kpi clinic-dashboard-kpi-btn"
@@ -265,6 +284,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                 {formatMoney(week.revenue_paid)} en 7 días
               </div>
             </button>
+            )}
 
             <button
               type="button"
@@ -285,16 +305,19 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
               </div>
             </button>
 
+            {(canUseInventory || canUseReports) && (
             <button
               type="button"
               className="clinic-report-kpi clinic-dashboard-kpi-btn"
               onClick={() => {
                 if ((today.pending_requests ?? 0) > 0) {
                   go("agenda", "/app/agenda");
-                } else if ((today.low_stock_count ?? 0) > 0) {
+                } else if (canUseInventory && (today.low_stock_count ?? 0) > 0) {
                   go("inventory", "/app/inventario");
-                } else {
+                } else if (canUseReports) {
                   go("reports", "/app/reportes");
+                } else {
+                  go("agenda", "/app/agenda");
                 }
               }}
             >
@@ -305,12 +328,14 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                 <span className="clinic-report-kpi-label">Pendientes</span>
               </div>
               <div className="clinic-report-kpi-value">
-                {(today.pending_requests ?? 0) + (today.low_stock_count ?? 0)}
+                {(today.pending_requests ?? 0) + (canUseInventory ? (today.low_stock_count ?? 0) : 0)}
               </div>
               <div className="clinic-report-kpi-hint">
-                {today.pending_requests ?? 0} solicitudes · {today.low_stock_count ?? 0} stock bajo
+                {today.pending_requests ?? 0} solicitudes
+                {canUseInventory ? ` · ${today.low_stock_count ?? 0} stock bajo` : ""}
               </div>
             </button>
+            )}
           </div>
 
           <div className="clinic-dashboard-grid">
@@ -407,6 +432,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
               )}
             </section>
 
+            {canUseInventory && (
             <section className="clinic-settings-card">
               <div className="clinic-dashboard-section-head">
                 <h2>
@@ -440,6 +466,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                 </ul>
               )}
             </section>
+            )}
 
             <section className="clinic-settings-card clinic-dashboard-quick">
               <h2>Accesos rápidos</h2>
@@ -468,6 +495,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   <CalendarDays size={20} aria-hidden />
                   Agenda
                 </button>
+                {canUseBilling && (
                 <button
                   type="button"
                   className="clinic-dashboard-quick-btn"
@@ -476,6 +504,8 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   <DollarSign size={20} aria-hidden />
                   Ventas
                 </button>
+                )}
+                {canUseReports && (
                 <button
                   type="button"
                   className="clinic-dashboard-quick-btn"
@@ -484,6 +514,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   <BarChart3 size={20} aria-hidden />
                   Reportes
                 </button>
+                )}
                 <button
                   type="button"
                   className="clinic-dashboard-quick-btn"

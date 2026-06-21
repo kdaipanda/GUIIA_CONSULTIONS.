@@ -44,6 +44,7 @@ from membership_catalog import (
     MEMBERSHIP_INFO_ITEMS,
     MEMBERSHIP_PACKAGES,
 )
+from membership_access import filter_categories_for_plan, validate_consultation_category
 from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from starlette.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -1600,33 +1601,14 @@ async def get_animal_categories(x_veterinarian_id: str = Header(None)):
         # Si no se puede obtener el perfil, retornar todas (fallback)
         return {"categories": all_categories}
 
-    membership_type = profile.get("membership_type")
-    remaining = profile.get("consultations_remaining", 0)
-    
-    # Si tiene consultas de prueba (sin membership_type pero con consultas), dar acceso premium
-    has_trial_consultations = not membership_type and remaining > 0
-    
-    if membership_type:
-        membership_type = membership_type.lower()
-    else:
-        membership_type = "trial" if has_trial_consultations else "basic"
-
-    # Filtrar categorías según membresía
-    if membership_type == "basic":
-        # Básica: solo perros y gatos
-        filtered_categories = [
-            cat for cat in all_categories
-            if cat.get("id") in ["perros", "gatos"]
-        ]
-    elif membership_type in ["professional", "premium", "trial"]:
-        # Profesional, Premium y Trial (consultas de prueba): todas las categorías
-        filtered_categories = all_categories
-    else:
-        # Por defecto, solo básicas
-        filtered_categories = [
-            cat for cat in all_categories
-            if cat.get("id") in ["perros", "gatos"]
-        ]
+    user_email = profile.get("email", "")
+    has_unlimited = has_unlimited_consultations(user_email) if user_email else False
+    filtered_categories = filter_categories_for_plan(
+        all_categories,
+        profile,
+        has_unlimited=has_unlimited,
+        is_platform_admin=auth_security.is_platform_admin_profile(profile),
+    )
 
     return {"categories": filtered_categories}
 
@@ -1753,6 +1735,13 @@ async def create_consultation(payload: ConsultationStageOne):
     elif membership_type:
         # Si tiene consultas ilimitadas, asegurar que membership_type esté en minúsculas
         membership_type = membership_type.lower()
+
+    validate_consultation_category(
+        profile,
+        payload.category,
+        has_unlimited=has_unlimited,
+        is_platform_admin=auth_security.is_platform_admin_profile(profile),
+    )
 
     # Verificar consultas disponibles
     # Si tiene consultas ilimitadas o es premium, no verificar límites

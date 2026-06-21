@@ -1,29 +1,49 @@
 import React, { useEffect, useState } from "react";
-import { Check, ShieldCheck } from "lucide-react";
+import { Check, Coins, ShieldCheck } from "lucide-react";
 import { BACKEND_URL } from "../../lib/backendUrl";
 import { buildLandingPricingPlans } from "../../lib/landingPricingPlans";
-import { parseMembershipCatalogResponse } from "../../lib/membershipPlans";
+import {
+  DEFAULT_CREDIT_PACKAGES,
+  parseMembershipCatalogResponse,
+} from "../../lib/membershipPlans";
 
-const FALLBACK_PLANS = buildLandingPricingPlans(null);
+const FALLBACK = buildLandingPricingPlans(null);
 
 export function LandingPricing({ setView }) {
-  const [plans, setPlans] = useState(FALLBACK_PLANS);
+  const [plans, setPlans] = useState(FALLBACK.plans);
+  const [creditAddon, setCreditAddon] = useState(FALLBACK.creditAddon);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadCatalog() {
       try {
-        const response = await fetch(`${BACKEND_URL}/api/membership/packages`);
-        if (!response.ok || cancelled) return;
-        const data = await response.json();
-        const catalog = parseMembershipCatalogResponse(data);
-        setPlans(
-          buildLandingPricingPlans({
-            packages: catalog.packages,
-            featuredPlan: catalog.featuredPlan,
-          }),
-        );
+        const [membershipRes, creditsRes] = await Promise.all([
+          fetch(`${BACKEND_URL}/api/membership/packages`),
+          fetch(`${BACKEND_URL}/api/consultations/credit-packages`).catch(() => null),
+        ]);
+
+        if (cancelled || !membershipRes.ok) return;
+
+        const membershipData = await membershipRes.json();
+        const catalog = parseMembershipCatalogResponse(membershipData);
+
+        let creditPackages = DEFAULT_CREDIT_PACKAGES;
+        if (creditsRes?.ok) {
+          const creditsData = await creditsRes.json();
+          if (creditsData?.packages && Object.keys(creditsData.packages).length > 0) {
+            creditPackages = creditsData.packages;
+          }
+        }
+
+        const built = buildLandingPricingPlans({
+          packages: catalog.packages,
+          featuredPlan: catalog.featuredPlan,
+          creditPackages,
+        });
+
+        setPlans(built.plans);
+        setCreditAddon(built.creditAddon);
       } catch {
         /* fallback estático */
       }
@@ -44,29 +64,41 @@ export function LandingPricing({ setView }) {
             Planes para tu consultorio veterinario
           </h2>
           <p className="landing-lead mt-4">
-            Registro exclusivo para médicos veterinarios. Verificamos cédula profesional
-            antes de activar tu entorno clínico multiespecie.
+            Básica, Profesional y Premium — elige el volumen de consultas CDS y el alcance
+            multiespecie que necesitas. Verificación de cédula incluida.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-5 lg:grid-cols-[1.12fr_0.88fr] lg:items-stretch">
+        <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3 lg:items-stretch">
           {plans.map(
-            ({ name, price, priceNote, description, highlighted, features, cta, action }) => (
+            ({ key, name, price, priceNote, description, highlighted, badge, features, cta, action }) => (
               <article
-                key={name}
-                className={`landing-card relative flex flex-col rounded-2xl p-6 sm:p-8 ${
-                  highlighted ? "landing-pricing-featured landing-card-accent-top" : ""
+                key={key}
+                className={`landing-card relative flex flex-col rounded-2xl p-6 sm:p-7 ${
+                  highlighted
+                    ? "landing-pricing-featured landing-card-accent-top md:col-span-2 lg:col-span-1 lg:-mt-2 lg:mb-2 lg:py-8"
+                    : ""
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-xl font-bold text-guiaa-brand-navy">{name}</h3>
-                    <p className="mt-1 text-2xl font-bold text-guiaa-brand-green-dark">{price}</p>
-                    <p className="mt-0.5 text-xs text-guiaa-brand-ink-muted">{priceNote}</p>
+                    <p className="landing-stat-value mt-1 text-2xl text-guiaa-brand-green-dark">
+                      {price}
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-guiaa-brand-ink-muted">
+                      {priceNote}
+                    </p>
                   </div>
-                  {highlighted && (
-                    <span className="rounded-md bg-guiaa-brand-blue/10 px-2 py-1 text-[11px] font-semibold text-guiaa-brand-blue">
-                      Más usado
+                  {badge && (
+                    <span
+                      className={`shrink-0 rounded-md px-2 py-1 text-[11px] font-semibold ${
+                        highlighted
+                          ? "bg-guiaa-brand-blue/10 text-guiaa-brand-blue"
+                          : "bg-guiaa-sky-soft text-guiaa-brand-navy/70"
+                      }`}
+                    >
+                      {badge}
                     </span>
                   )}
                 </div>
@@ -107,7 +139,26 @@ export function LandingPricing({ setView }) {
           )}
         </div>
 
-        <div className="landing-trust-banner mt-8 flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        {creditAddon && (
+          <div className="landing-trust-banner mt-6 flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="landing-trust-icon shrink-0">
+                <Coins size={17} className="text-guiaa-brand-blue" aria-hidden />
+              </span>
+              <div>
+                <p className="text-sm font-bold text-guiaa-brand-navy">{creditAddon.name}</p>
+                <p className="mt-0.5 text-sm text-guiaa-brand-ink-muted">
+                  {creditAddon.description}
+                </p>
+              </div>
+            </div>
+            <p className="shrink-0 text-lg font-bold text-guiaa-brand-green-dark">
+              {creditAddon.price}
+            </p>
+          </div>
+        )}
+
+        <div className="landing-trust-banner mt-4 flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <ShieldCheck size={20} className="mt-0.5 shrink-0 text-guiaa-brand-blue" aria-hidden />
             <p className="text-sm text-guiaa-brand-ink-muted">
@@ -117,10 +168,10 @@ export function LandingPricing({ setView }) {
           </div>
           <button
             type="button"
-            onClick={() => setView("register")}
+            onClick={() => setView("membership")}
             className="landing-link-arrow shrink-0"
           >
-            Iniciar verificación →
+            Comparar planes en detalle →
           </button>
         </div>
       </div>

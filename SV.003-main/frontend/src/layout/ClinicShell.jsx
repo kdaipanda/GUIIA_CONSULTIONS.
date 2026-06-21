@@ -28,6 +28,7 @@ import { PlatformOnboarding } from "../components/PlatformOnboarding";
 import { hasCompletedPlatformOnboarding } from "../lib/platformOnboarding";
 import { ClinicMobileNavDrawer } from "./ClinicMobileNavDrawer";
 import { PageEnter } from "../components/motion/PageEnter";
+import { canAccessFeature, MEMBERSHIP_FEATURES } from "../lib/membershipAccess";
 
 const BASE_NAV_ITEMS = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard, view: "dashboard" },
@@ -40,9 +41,27 @@ const BASE_NAV_ITEMS = [
   { to: "/app/clientes", label: "Dueño", icon: Users, view: "clients" },
   { to: "/app/pacientes", label: "Mascotas", icon: PawPrint, view: "patients" },
   { to: "/app/agenda", label: "Agenda", icon: CalendarDays, view: "agenda" },
-  { to: "/app/inventario", label: "Inventario", icon: Package, view: "inventory" },
-  { to: "/app/facturacion", label: "Ventas", icon: Receipt, view: "billing" },
-  { to: "/app/reportes", label: "Reportes", icon: BarChart3, view: "reports" },
+  {
+    to: "/app/inventario",
+    label: "Inventario",
+    icon: Package,
+    view: "inventory",
+    feature: MEMBERSHIP_FEATURES.inventory,
+  },
+  {
+    to: "/app/facturacion",
+    label: "Ventas",
+    icon: Receipt,
+    view: "billing",
+    feature: MEMBERSHIP_FEATURES.billing,
+  },
+  {
+    to: "/app/reportes",
+    label: "Reportes",
+    icon: BarChart3,
+    view: "reports",
+    feature: MEMBERSHIP_FEATURES.reports,
+  },
   { to: "/app/herramientas", label: "Herramientas", icon: Wrench, view: "tools" },
   { to: "/app/historial", label: "Historial", icon: ClipboardList, view: "consultation-history" },
   { to: "/app/membresia", label: "Membresía", icon: Crown, view: "membership" },
@@ -90,13 +109,17 @@ export function ClinicShell({ children, setView }) {
       setLowStockCount(0);
       return;
     }
+    if (!canAccessFeature(veterinarian, MEMBERSHIP_FEATURES.inventory, { platformAdmin })) {
+      setLowStockCount(0);
+      return;
+    }
     try {
       const data = await fetchInventorySummary(veterinarian.id);
       setLowStockCount(data.low_stock_count ?? 0);
     } catch {
       setLowStockCount(0);
     }
-  }, [veterinarian?.id]);
+  }, [veterinarian?.id, platformAdmin]);
 
   useEffect(() => {
     loadAdminSupportCount();
@@ -160,7 +183,10 @@ export function ClinicShell({ children, setView }) {
   }, []);
 
   const navItems = useMemo(() => {
-    const items = [...BASE_NAV_ITEMS];
+    const items = BASE_NAV_ITEMS.filter((item) => {
+      if (!item.feature) return true;
+      return canAccessFeature(veterinarian, item.feature, { platformAdmin });
+    });
     if (role === "owner" || role === "admin") {
       items.splice(items.length - 2, 0, {
         to: "/app/configuracion",
@@ -178,7 +204,7 @@ export function ClinicShell({ children, setView }) {
       });
     }
     return items;
-  }, [role, platformAdmin]);
+  }, [role, platformAdmin, veterinarian]);
 
   const handleBrandNav = (view) => {
     if (setView) setView(view);

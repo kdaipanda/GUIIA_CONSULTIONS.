@@ -46,6 +46,8 @@ import {
   getMembershipQuota,
   parseMembershipCatalogResponse,
 } from "./lib/membershipPlans";
+import { canAccessFeature, MEMBERSHIP_FEATURES } from "./lib/membershipAccess";
+import { MembershipFeatureGate } from "./components/MembershipFeatureGate";
 import { GuiaaBrandLockup } from "./components/GuiaaBrandLockup";
 import { Header } from "./components/Header";
 import { AppShell } from "./layout/AppShell";
@@ -82,7 +84,7 @@ import {
 console.log("Backend URL being used:", BACKEND_URL);
 
 const isPremiumMember = (vet) =>
-  vet?.membership_type?.toLowerCase() === "premium";
+  canAccessFeature(vet, MEMBERSHIP_FEATURES.expertMode);
 
 const VIEW_TO_PATH = {
   dashboard: "/app/dashboard",
@@ -167,6 +169,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       description: "Productos y stock",
       icon: "📦",
       shortcut: "",
+      feature: MEMBERSHIP_FEATURES.inventory,
       action: () => setView("inventory"),
     },
     {
@@ -175,6 +178,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       description: "Recibos y cobros clínicos",
       icon: "🧾",
       shortcut: "",
+      feature: MEMBERSHIP_FEATURES.billing,
       action: () => setView("billing"),
     },
     {
@@ -183,6 +187,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       description: "KPIs e indicadores",
       icon: "📈",
       shortcut: "",
+      feature: MEMBERSHIP_FEATURES.reports,
       action: () => setView("reports"),
     },
     {
@@ -267,7 +272,12 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     });
   }
 
-  const filteredCommands = commands.filter(
+  const accessibleCommands = commands.filter((cmd) => {
+    if (!cmd.feature) return true;
+    return canAccessFeature(veterinarian, cmd.feature, { platformAdmin });
+  });
+
+  const filteredCommands = accessibleCommands.filter(
     (cmd) =>
       cmd.title.toLowerCase().includes(query.toLowerCase()) ||
       cmd.description.toLowerCase().includes(query.toLowerCase()),
@@ -604,17 +614,23 @@ const Router = () => {
     ),
     inventory: (
       <ClinicShell setView={navigateSetView}>
-        <InventoryPage />
+        <MembershipFeatureGate feature={MEMBERSHIP_FEATURES.inventory} setView={navigateSetView}>
+          <InventoryPage />
+        </MembershipFeatureGate>
       </ClinicShell>
     ),
     billing: (
       <ClinicShell setView={navigateSetView}>
-        <BillingPage />
+        <MembershipFeatureGate feature={MEMBERSHIP_FEATURES.billing} setView={navigateSetView}>
+          <BillingPage />
+        </MembershipFeatureGate>
       </ClinicShell>
     ),
     reports: (
       <ClinicShell setView={navigateSetView}>
-        <ReportsPage />
+        <MembershipFeatureGate feature={MEMBERSHIP_FEATURES.reports} setView={navigateSetView}>
+          <ReportsPage />
+        </MembershipFeatureGate>
       </ClinicShell>
     ),
     tools: (

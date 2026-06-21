@@ -1,66 +1,88 @@
 /**
- * Construye las tarjetas de precios de la landing desde el catálogo del backend.
+ * Tarjetas de precios de la landing — una por cada membresía del catálogo.
  */
-export function buildLandingPricingPlans(catalog) {
-  const packages = catalog?.packages || {};
-  const featuredKey = catalog?.featuredPlan || "professional";
-  const featured = packages[featuredKey] || packages.professional;
-  const basic = packages.basic;
-  const premium = packages.premium;
+import {
+  DEFAULT_CREDIT_PACKAGES,
+  DEFAULT_PACKAGES,
+  FEATURED_PLAN_KEY,
+  getPlanFeatureList,
+} from "./membershipPlans";
 
-  const featuredFeatures = featured?.features?.slice(0, 5) || [
-    "GUIAA Diagnóstico CDS L4 · L5",
-    "Expediente, clientes, pacientes y agenda",
-    "Inventario, ventas y reportes clínicos",
-    "Multiespecie según plan contratado",
-    "Export PDF de consultas",
-  ];
+/** Orden comercial en la landing */
+export const LANDING_PLAN_ORDER = ["basic", "professional", "premium"];
 
-  const tierNames = [basic, packages[featuredKey], premium]
+const PLAN_DESCRIPTIONS = {
+  basic:
+    "Consultorio de pequeñas especies: CDS estructurado, expediente y agenda para perros y gatos.",
+  professional:
+    "Práctica multiespecie activa con inventario, ventas y reportes clínicos integrados.",
+  premium:
+    "Alto volumen de consultas con Manejo Experto e interpretación de análisis clínicos.",
+};
+
+function formatMxPrice(amount, suffix = "") {
+  if (amount == null || Number.isNaN(Number(amount))) return "Consultar";
+  return `$${Number(amount).toLocaleString("es-MX")}${suffix}`;
+}
+
+function buildPlanCard(planKey, pkg, featuredKey) {
+  if (!pkg) return null;
+
+  const features = getPlanFeatureList(planKey, "monthly", pkg).slice(0, 6);
+  const isFeatured = planKey === featuredKey;
+
+  const speciesNote = pkg.species_scope ? `${pkg.species_scope}` : "";
+  const annualHint = pkg.price_annual
+    ? `Anual ${formatMxPrice(pkg.price_annual)}`
+    : null;
+  const priceNote = [speciesNote, annualHint, "facturación mensual o anual"]
     .filter(Boolean)
-    .map((pkg) => pkg.name)
     .join(" · ");
 
-  const creditPrice = catalog?.creditPackages?.credits_10?.price;
+  return {
+    key: planKey,
+    name: pkg.name,
+    price: formatMxPrice(pkg.price_monthly, "/mes"),
+    priceNote,
+    description: PLAN_DESCRIPTIONS[planKey] || pkg.description || "",
+    highlighted: isFeatured,
+    badge: isFeatured ? "Más usado" : pkg.consultations ? `${pkg.consultations} consultas/mes` : null,
+    features,
+    cta: isFeatured ? "Comenzar registro" : "Contratar plan",
+    action: isFeatured ? "register" : "membership",
+  };
+}
 
-  return [
-    {
-      name: featured?.name || "Profesional",
-      price: featured?.price_monthly
-        ? `$${Number(featured.price_monthly).toLocaleString("es-MX")}/mes`
-        : "Consultar",
-      priceNote: featured?.species_scope
-        ? `${featured.species_scope} · facturación mensual o anual`
-        : "Tarifa según volumen de consulta",
-      description:
-        "Diagnóstico CDS, expediente, inventario, ventas y multiespecie para consultorios activos.",
-      highlighted: true,
-      features: featuredFeatures,
-      cta: "Comenzar registro",
-      action: "register",
-    },
-    {
-      name: "Membresía",
-      price: basic?.price_monthly
-        ? `Desde $${Number(basic.price_monthly).toLocaleString("es-MX")}/mes`
-        : "Desde $950/mes",
-      priceNote: tierNames || "Básica · Profesional · Premium",
-      description:
-        "Consultas mensuales o anuales con funciones Premium: Manejo Experto e interpretación de análisis.",
-      highlighted: false,
-      features: [
-        tierNames ? `Planes ${tierNames}` : "Planes Básica, Profesional y Premium",
-        creditPrice
-          ? `Recarga de 10 consultas extra ($${Number(creditPrice).toLocaleString("es-MX")})`
-          : "Recarga de 10 consultas extra",
-        premium?.features?.includes("Manejo Experto (consulta acelerada)")
-          ? "Premium: Manejo Experto e interpretación de análisis"
-          : "Premium: IA avanzada y estudios clínicos",
-        "Facturación mensual o anual",
-        "Verificación MVZ incluida",
-      ],
-      cta: "Ver membresía",
-      action: "membership",
-    },
-  ];
+/**
+ * @param {object|null} catalog
+ * @param {Record<string, object>} [catalog.packages]
+ * @param {string} [catalog.featuredPlan]
+ * @param {Record<string, object>} [catalog.creditPackages]
+ */
+export function buildLandingPricingPlans(catalog) {
+  const packages =
+    catalog?.packages && Object.keys(catalog.packages).length > 0
+      ? catalog.packages
+      : DEFAULT_PACKAGES;
+  const featuredKey = catalog?.featuredPlan || FEATURED_PLAN_KEY;
+
+  const plans = LANDING_PLAN_ORDER.map((key) =>
+    buildPlanCard(key, packages[key] || DEFAULT_PACKAGES[key], featuredKey),
+  ).filter(Boolean);
+
+  const creditSource = catalog?.creditPackages || DEFAULT_CREDIT_PACKAGES;
+  const credits10 = creditSource.credits_10;
+
+  const creditAddon = credits10
+    ? {
+        name: credits10.name || "Recarga de consultas",
+        price: formatMxPrice(credits10.price),
+        description:
+          credits10.description ||
+          "Consultas CDS adicionales sin cambiar de plan. Se suman a tu saldo actual.",
+        credits: credits10.credits,
+      }
+    : null;
+
+  return { plans, creditAddon };
 }
