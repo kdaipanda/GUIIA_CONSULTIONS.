@@ -1,0 +1,87 @@
+.medical-images-page-guiaa {
+  min-height: 100%;
+  background: linear-gradient(180deg, #e8f4fc 0%, #f8fafc 40%, #fff 100%);
+  padding-bottom: 2rem;
+}
+
+.medical-images-page-guiaa .medical-images-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-top: 8px;
+}
+
+.medical-images-eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #265b93;
+}
+
+.medical-images-page-guiaa .medical-images-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 1.85rem);
+  font-weight: 800;
+  color: #0c2d4d;
+  letter-spacing: -0.02em;
+}
+
+.medical-images-page-guiaa .medical-images-header p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: rgba(12, 45, 77, 0.55);
+  max-width: 36rem;
+}
+
+.medical-images-premium-gate {
+  text-align: center;
+  max-width: 28rem;
+  margin: 48px auto;
+  padding: 32px 24px;
+  border-radius: 16px;
+  border: 1px dashed rgba(38, 91, 147, 0.25);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.medical-images-premium-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  background: rgba(38, 91, 147, 0.08);
+  color: #265b93;
+}
+
+.medical-images-premium-gate h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: #0c2d4d;
+}
+
+.medical-images-premium-gate p {
+  margin: 0 0 20px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .medical-images-page-guiaa .medical-images-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .medical-images-page-guiaa .medical-images-header button {
+    width: 100%;
+  }
+}

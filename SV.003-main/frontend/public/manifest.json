@@ -1,7 +1,14 @@
 {
   "short_name": "GUIAA",
-  "name": "GUIAA - Diagnósticos Profesionales para Veterinarios",
+  "name": "GUIAA — Plataforma clínica CDS para MVZ",
+  "description": "Soporte a la decisión clínica CDS L4 y L5 para médicos veterinarios certificados.",
   "icons": [
+    {
+      "src": "GuiaaLogo-full.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "GuiaLogo-mark.png",
       "sizes": "512x512",
@@ -17,7 +24,7 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#1e40af",
-  "background_color": "#0f172a",
+  "theme_color": "#265B93",
+  "background_color": "#265B93",
   "lang": "es"
 }

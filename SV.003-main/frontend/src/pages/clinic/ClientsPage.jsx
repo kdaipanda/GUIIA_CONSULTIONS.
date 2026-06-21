@@ -1,5 +1,12 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Plus, Search, Pencil, Trash2, Users } from "lucide-react";
+import "./clinicPageShared.css";
+import {
+  ClinicTableSkeleton,
+  ClinicEmptyState,
+  ClinicStatPill,
+  clinicDialogClass,
+} from "../../components/clinic/ClinicPageUi";
 import { useVet } from "../../context/VetContext";
 import {
   fetchClients,
@@ -88,6 +95,12 @@ export function ClientsPage() {
     }
   };
 
+  const stats = useMemo(() => {
+    const withPhone = clients.filter((c) => c.phone?.trim()).length;
+    const withEmail = clients.filter((c) => c.email?.trim()).length;
+    return { total: clients.length, withPhone, withEmail };
+  }, [clients]);
+
   const handleDelete = async (client) => {
     if (!window.confirm(`¿Eliminar dueño "${client.name}"?`)) return;
     try {
@@ -99,11 +112,12 @@ export function ClientsPage() {
   };
 
   return (
-    <div className="clinic-page">
+    <div className="clinic-page clinic-page-guiaa">
       <div className="clinic-page-header">
         <div>
-          <h1>Dueño</h1>
-          <p>Dueño y contactos del consultorio</p>
+          <p className="clinic-page-eyebrow">Consultorio</p>
+          <h1>Dueños</h1>
+          <p>Contactos y datos de tutores registrados en tu consultorio.</p>
         </div>
         <Button type="button" onClick={openCreate}>
           <Plus size={16} className="mr-1" /> Nuevo dueño
@@ -123,15 +137,24 @@ export function ClientsPage() {
 
       {error && <div className="error-message">{error}</div>}
 
-      {loading ? (
-        <p className="clinic-muted">Cargando dueños...</p>
-      ) : clients.length === 0 ? (
-        <div className="clinic-empty">
-          <p>No hay dueños registrados.</p>
-          <Button type="button" variant="secondary" onClick={openCreate}>
-            Registrar primer dueño
-          </Button>
+      {!loading && clients.length > 0 && (
+        <div className="clinic-stats-row">
+          <ClinicStatPill value={stats.total} label="Registrados" />
+          <ClinicStatPill value={stats.withPhone} label="Con teléfono" />
+          <ClinicStatPill value={stats.withEmail} label="Con email" />
         </div>
+      )}
+
+      {loading ? (
+        <ClinicTableSkeleton rows={6} cols={4} />
+      ) : clients.length === 0 ? (
+        <ClinicEmptyState
+          icon={Users}
+          title="Sin dueños registrados"
+          description="Agrega tutores para vincular mascotas, consultas y ventas."
+          actionLabel="Registrar primer dueño"
+          onAction={openCreate}
+        />
       ) : (
         <div className="clinic-table-wrap">
           <table className="clinic-table">
@@ -167,7 +190,7 @@ export function ClientsPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className={clinicDialogClass("max-w-lg")}>
           <DialogHeader>
             <DialogTitle>{editing ? "Editar dueño" : "Nuevo dueño"}</DialogTitle>
           </DialogHeader>

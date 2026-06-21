@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useVet } from "../context/VetContext";
+import { GuiaaBrandLockup } from "./GuiaaBrandLockup";
 
 export function Header({ setView, showAuth = true, actions }) {
   const { veterinarian, logout } = useVet();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
-  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     const getScrollY = () =>
@@ -40,39 +40,12 @@ export function Header({ setView, showAuth = true, actions }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isUserMenuOpen]);
 
-  useEffect(() => {
-    // Update time every second
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   const toggleUserMenu = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
-  };
-
-  const formatTime = (date) => {
-    return date.toLocaleTimeString("es-MX", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    });
-  };
-
-  const formatDate = (date) => {
-    return date.toLocaleDateString("es-MX", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
   };
 
   return (
@@ -82,16 +55,7 @@ export function Header({ setView, showAuth = true, actions }) {
           className="nav-brand"
           onClick={() => setView(veterinarian ? "dashboard" : "landing")}
         >
-          <img src="/GuiaLogo-mark.png" alt="GUIAA" className="logo-image" />
-          <div className="nav-brand-text">
-            <h1>GUIAA</h1>
-            <span className="nav-brand-subtitle">
-              Gran universo de inteligencia animal.
-            </span>
-            <span className="nav-brand-subsubtitle">
-              Soporte a la decisión clínica CDS avanzado grado L4 y L5.
-            </span>
-          </div>
+          <GuiaaBrandLockup variant="header" />
         </div>
 
         {showAuth && (

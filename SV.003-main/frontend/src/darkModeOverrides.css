@@ -664,6 +664,217 @@ html.dark .clinic-row-warning .clinic-table-actions button {
   color: #fde68a;
 }
 
+/* GUIAA — componentes compartidos clínicos */
+[data-theme="dark"] .clinic-page-eyebrow,
+[data-theme="dark"] .agenda-page-eyebrow,
+html.dark .clinic-page-eyebrow,
+html.dark .agenda-page-eyebrow {
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .clinic-stat-pill,
+[data-theme="dark"] .agenda-stat-pill,
+html.dark .clinic-stat-pill,
+html.dark .agenda-stat-pill {
+  background: var(--clinic-surface-elevated);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .clinic-stat-pill--warn,
+html.dark .clinic-stat-pill--warn {
+  background: rgba(146, 64, 14, 0.22);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+[data-theme="dark"] .clinic-stat-value,
+[data-theme="dark"] .agenda-stat-value,
+html.dark .clinic-stat-value,
+html.dark .agenda-stat-value {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .clinic-stat-label,
+[data-theme="dark"] .agenda-stat-label,
+html.dark .clinic-stat-label,
+html.dark .agenda-stat-label {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .clinic-empty-guiaa,
+html.dark .clinic-empty-guiaa {
+  background: var(--clinic-surface-elevated);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+[data-theme="dark"] .clinic-empty-guiaa h3,
+html.dark .clinic-empty-guiaa h3 {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .clinic-empty-guiaa-icon,
+html.dark .clinic-empty-guiaa-icon {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .clinic-table-skeleton,
+[data-theme="dark"] .clinic-report-kpi-skeleton,
+[data-theme="dark"] .clinic-report-panel-skeleton,
+[data-theme="dark"] .clinic-settings-card-skeleton,
+[data-theme="dark"] .agenda-skeleton-day,
+html.dark .clinic-table-skeleton,
+html.dark .clinic-report-kpi-skeleton,
+html.dark .clinic-report-panel-skeleton,
+html.dark .clinic-settings-card-skeleton,
+html.dark .agenda-skeleton-day {
+  background: var(--clinic-surface-elevated);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .clinic-table-skeleton-row,
+html.dark .clinic-table-skeleton-row {
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .clinic-dialog-guiaa,
+html.dark .clinic-dialog-guiaa {
+  background: var(--clinic-surface);
+  border-color: var(--border-color);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-table thead th,
+html.dark .clinic-page-guiaa .clinic-table thead th {
+  background: var(--clinic-surface-muted);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-report-kpi-icon,
+html.dark .clinic-page-guiaa .clinic-report-kpi-icon {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-report-kpi-value,
+[data-theme="dark"] .clinic-page-guiaa .clinic-report-panel h2,
+html.dark .clinic-page-guiaa .clinic-report-kpi-value,
+html.dark .clinic-page-guiaa .clinic-report-panel h2 {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .clinic-report-empty,
+html.dark .clinic-report-empty {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .agenda-list-section,
+html.dark .agenda-list-section {
+  background: var(--clinic-surface-elevated);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .agenda-list-section-head,
+html.dark .agenda-list-section-head {
+  background: var(--clinic-surface-muted);
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .agenda-list-section.is-today,
+html.dark .agenda-list-section.is-today {
+  border-color: rgba(61, 155, 143, 0.45);
+}
+
+[data-theme="dark"] .agenda-list-section.is-today .agenda-list-section-head,
+html.dark .agenda-list-section.is-today .agenda-list-section-head {
+  background: rgba(61, 155, 143, 0.12);
+}
+
+[data-theme="dark"] .agenda-list-section-head strong,
+html.dark .agenda-list-section-head strong {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .agenda-view-toggle,
+html.dark .agenda-view-toggle {
+  background: var(--clinic-surface-elevated);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .agenda-view-btn,
+html.dark .agenda-view-btn {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .agenda-view-btn.is-active,
+html.dark .agenda-view-btn.is-active {
+  background: #265b93;
+  color: #fff;
+}
+
+[data-theme="dark"] .clinic-tools-page-guiaa .clinic-tools-card,
+html.dark .clinic-tools-page-guiaa .clinic-tools-card {
+  background: var(--clinic-surface-elevated);
+  border-color: var(--border-color);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .clinic-tools-page-guiaa .clinic-tools-card-head h2,
+html.dark .clinic-tools-page-guiaa .clinic-tools-card-head h2 {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .clinic-tools-page-guiaa .clinic-tools-result,
+html.dark .clinic-tools-page-guiaa .clinic-tools-result {
+  background: rgba(61, 155, 143, 0.12);
+  border-color: rgba(61, 155, 143, 0.35);
+}
+
+[data-theme="dark"] .clinic-tools-page-guiaa .clinic-tools-result-row,
+html.dark .clinic-tools-page-guiaa .clinic-tools-result-row {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .clinic-tools-page-guiaa .clinic-tools-result-row strong,
+html.dark .clinic-tools-page-guiaa .clinic-tools-result-row strong {
+  color: #6ee7b7;
+}
+
+[data-theme="dark"] .clinic-tools-page-guiaa .clinic-tools-links a,
+html.dark .clinic-tools-page-guiaa .clinic-tools-links a {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--border-color);
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .clinic-tools-page-guiaa .clinic-tools-links a:hover,
+html.dark .clinic-tools-page-guiaa .clinic-tools-links a:hover {
+  background: rgba(59, 130, 246, 0.18);
+}
+
+[data-theme="dark"] .clinic-tools-placeholder,
+html.dark .clinic-tools-placeholder {
+  border-color: rgba(148, 163, 184, 0.25);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .clinic-dashboard-empty,
+html.dark .clinic-dashboard-empty {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .clinic-dashboard-page.clinic-page-guiaa .clinic-dashboard-quick-btn,
+html.dark .clinic-dashboard-page.clinic-page-guiaa .clinic-dashboard-quick-btn {
+  background: var(--clinic-surface-elevated);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .clinic-admin-page-guiaa .clinic-admin-support-status.status-open,
+html.dark .clinic-admin-page-guiaa .clinic-admin-support-status.status-open {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-theme="dark"] .clinic-sidebar-link.nav-toned.nav-pulse,
   [data-theme="dark"] .command-palette-item.nav-toned.nav-pulse,

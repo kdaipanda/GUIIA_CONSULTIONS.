@@ -70,7 +70,7 @@ export function AppointmentRequestPortal({ organizationId }) {
     <div className="portal-page">
       <div className="portal-card">
         <div className="portal-brand">
-          <img src="/GuiaLogo-mark.png" alt="GUIAA" className="portal-logo" />
+          <img src="/GuiaaLogo-full.png" alt="GUIAA" className="portal-logo-full" />
           <div>
             <h1>Solicitar cita</h1>
             <p>{loading ? "Cargando..." : orgName}</p>

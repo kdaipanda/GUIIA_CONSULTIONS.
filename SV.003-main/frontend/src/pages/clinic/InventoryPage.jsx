@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Search, Pencil, Trash2, PackageMinus, History, AlertTriangle, Package, DollarSign } from "lucide-react";
+import "./clinicPageShared.css";
+import {
+  ClinicTableSkeleton,
+  ClinicEmptyState,
+  clinicDialogClass,
+} from "../../components/clinic/ClinicPageUi";
 import { useVet } from "../../context/VetContext";
 import {
   fetchProducts,
@@ -246,11 +252,12 @@ export function InventoryPage() {
     : UNITS;
 
   return (
-    <div className="clinic-page">
+    <div className="clinic-page clinic-page-guiaa">
       <div className="clinic-page-header">
         <div>
+          <p className="clinic-page-eyebrow">Consultorio</p>
           <h1>Inventario</h1>
-          <p>Productos, insumos y control de stock</p>
+          <p>Productos, insumos y control de stock vinculado a ventas.</p>
         </div>
         <Button type="button" onClick={openCreate}>
           <Plus size={16} className="mr-1" /> Nuevo producto
@@ -316,11 +323,19 @@ export function InventoryPage() {
       {error && <div className="error-message">{error}</div>}
 
       {loading ? (
-        <p className="clinic-muted">Cargando inventario...</p>
+        <ClinicTableSkeleton rows={6} cols={5} />
       ) : displayedProducts.length === 0 ? (
-        <div className="clinic-empty">
-          <p>{lowStockOnly ? "No hay productos con stock bajo." : "No hay productos registrados."}</p>
-        </div>
+        <ClinicEmptyState
+          icon={Package}
+          title={lowStockOnly ? "Sin alertas de stock" : "Sin productos registrados"}
+          description={
+            lowStockOnly
+              ? "Todos los productos están por encima del mínimo configurado."
+              : "Agrega medicamentos, insumos o servicios para vincularlos a ventas."
+          }
+          actionLabel={lowStockOnly ? undefined : "Nuevo producto"}
+          onAction={lowStockOnly ? undefined : openCreate}
+        />
       ) : (
         <div className="clinic-table-wrap">
           <table className="clinic-table">
@@ -370,7 +385,7 @@ export function InventoryPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="clinic-dialog max-w-xl">
+        <DialogContent className={clinicDialogClass("max-w-xl")}>
           <DialogHeader className="clinic-dialog-header">
             <DialogTitle>{editing ? "Editar producto" : "Nuevo producto"}</DialogTitle>
             <p className="clinic-dialog-subtitle">
@@ -507,7 +522,7 @@ export function InventoryPage() {
       </Dialog>
 
       <Dialog open={stockOpen} onOpenChange={setStockOpen}>
-        <DialogContent className="clinic-dialog max-w-md">
+        <DialogContent className={clinicDialogClass("max-w-md")}>
           <DialogHeader className="clinic-dialog-header">
             <DialogTitle>Movimiento de stock</DialogTitle>
             <p className="clinic-dialog-subtitle">{stockProduct?.name}</p>
@@ -543,7 +558,7 @@ export function InventoryPage() {
       </Dialog>
 
       <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
-        <DialogContent className="clinic-dialog max-w-lg">
+        <DialogContent className={clinicDialogClass("max-w-lg")}>
           <DialogHeader className="clinic-dialog-header">
             <DialogTitle>Historial de movimientos</DialogTitle>
             <p className="clinic-dialog-subtitle">

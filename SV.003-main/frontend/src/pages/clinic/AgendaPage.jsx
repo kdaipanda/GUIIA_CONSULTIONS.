@@ -1,5 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Stethoscope, Link2, Check, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  Link2,
+  List,
+  Plus,
+  Stethoscope,
+  Check,
+  X,
+} from "lucide-react";
 import { useVet } from "../../context/VetContext";
 import { useClinic } from "../../context/ClinicContext";
 import {
@@ -30,6 +40,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from "../../components/ui/dialog";
+import "./agendaPage.css";
+import "./clinicPageShared.css";
+import { clinicDialogClass } from "../../components/clinic/ClinicPageUi";
 
 const STATUS_LABELS = {
   scheduled: "Programada",
@@ -39,7 +52,48 @@ const STATUS_LABELS = {
   no_show: "No asistió",
 };
 
-const HOURS = Array.from({ length: 12 }, (_, i) => i + 8);
+function AgendaAppointmentCard({ appointment, onEdit }) {
+  return (
+    <button
+      type="button"
+      className={`clinic-agenda-card status-${appointment.status}`}
+      onClick={() => onEdit(appointment)}
+    >
+      <span className="clinic-agenda-time">
+        {new Date(appointment.starts_at).toLocaleTimeString("es-MX", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </span>
+      <span className="clinic-agenda-patient">
+        {appointment.patients?.name || "Mascota"}
+      </span>
+      {appointment.clients?.name && (
+        <span className="clinic-agenda-client">{appointment.clients.name}</span>
+      )}
+      {appointment.reason && (
+        <span className="clinic-agenda-reason">{appointment.reason}</span>
+      )}
+      <span className="clinic-agenda-status">
+        {STATUS_LABELS[appointment.status] || appointment.status}
+      </span>
+    </button>
+  );
+}
+
+function AgendaSkeleton() {
+  return (
+    <div className="agenda-skeleton-grid">
+      {Array.from({ length: 7 }).map((_, i) => (
+        <div key={i} className="agenda-skeleton-day">
+          <div className="skeleton skeleton-text short" />
+          <div className="skeleton skeleton-text medium" />
+          <div className="skeleton skeleton-card" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function startOfWeek(date) {
   const d = new Date(date);
@@ -90,6 +144,15 @@ export function AgendaPage({ onStartConsultation }) {
   const [approvingRequest, setApprovingRequest] = useState(null);
   const [approveForm, setApproveForm] = useState({ starts_at: "", ends_at: "" });
   const [approving, setApproving] = useState(false);
+  const [viewMode, setViewMode] = useState("week");
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const apply = () => setViewMode(mq.matches ? "list" : "week");
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
   const weekDays = useMemo(
     () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
@@ -267,6 +330,15 @@ export function AgendaPage({ onStartConsultation }) {
     }
   };
 
+  const stats = useMemo(() => {
+    const todayKey = new Date().toDateString();
+    return {
+      weekTotal: appointments.length,
+      todayTotal: (apptsByDay[todayKey] || []).length,
+      pendingRequests: requests.length,
+    };
+  }, [appointments.length, apptsByDay, requests.length]);
+
   const copyPortalLink = async () => {
     if (!organization?.id) return;
     const url = `${window.location.origin}/solicitar-cita/${organization.id}`;
@@ -280,11 +352,12 @@ export function AgendaPage({ onStartConsultation }) {
   };
 
   return (
-    <div className="clinic-page">
+    <div className="clinic-page clinic-page-guiaa agenda-page-guiaa">
       <div className="clinic-page-header">
         <div>
+          <p className="clinic-page-eyebrow">Consultorio</p>
           <h1>Agenda</h1>
-          <p>Citas y organización semanal</p>
+          <p>Citas semanales, solicitudes de dueños y acceso al portal público.</p>
         </div>
         <div className="clinic-agenda-nav">
           <Button type="button" variant="outline" size="sm" onClick={() => setWeekStart(startOfWeek(new Date()))}>
@@ -306,9 +379,45 @@ export function AgendaPage({ onStartConsultation }) {
           </Button>
           {organization?.id && (
             <Button type="button" variant="secondary" size="sm" onClick={copyPortalLink}>
-              <Link2 size={14} className="mr-1" /> {linkCopied ? "Enlace copiado" : "Enlace portal"}
+              <Link2 size={14} className="mr-1" /> {linkCopied ? "Enlace copiado" : "Portal dueños"}
             </Button>
           )}
+        </div>
+      </div>
+
+      <div className="agenda-stats-row">
+        <div className="agenda-stat-pill">
+          <span className="agenda-stat-value">{stats.weekTotal}</span>
+          <span className="agenda-stat-label">Citas esta semana</span>
+        </div>
+        <div className="agenda-stat-pill">
+          <span className="agenda-stat-value">{stats.todayTotal}</span>
+          <span className="agenda-stat-label">Citas hoy</span>
+        </div>
+        <div className="agenda-stat-pill">
+          <span className="agenda-stat-value">{stats.pendingRequests}</span>
+          <span className="agenda-stat-label">Solicitudes pendientes</span>
+        </div>
+      </div>
+
+      <div className="agenda-toolbar">
+        <div className="agenda-view-toggle">
+          <button
+            type="button"
+            className={`agenda-view-btn${viewMode === "week" ? " is-active" : ""}`}
+            onClick={() => setViewMode("week")}
+          >
+            <LayoutGrid size={15} aria-hidden />
+            Semana
+          </button>
+          <button
+            type="button"
+            className={`agenda-view-btn${viewMode === "list" ? " is-active" : ""}`}
+            onClick={() => setViewMode("list")}
+          >
+            <List size={15} aria-hidden />
+            Lista
+          </button>
         </div>
       </div>
 
@@ -342,8 +451,44 @@ export function AgendaPage({ onStartConsultation }) {
       )}
 
       {error && <div className="error-message">{error}</div>}
-      {loading && <p className="clinic-muted">Cargando agenda...</p>}
-
+      {loading ? (
+        <AgendaSkeleton />
+      ) : viewMode === "list" ? (
+        <div className="agenda-list-view">
+          {weekDays.map((day) => {
+            const key = day.toDateString();
+            const dayAppts = apptsByDay[key] || [];
+            const isToday = key === new Date().toDateString();
+            return (
+              <section
+                key={key}
+                className={`agenda-list-section${isToday ? " is-today" : ""}`}
+              >
+                <div className="agenda-list-section-head">
+                  <div>
+                    <strong>
+                      {day.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "short" })}
+                    </strong>
+                    {isToday && <span> · Hoy</span>}
+                  </div>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => openCreate(day)}>
+                    <Plus size={14} /> Añadir
+                  </Button>
+                </div>
+                <div className="agenda-list-section-body">
+                  {dayAppts.length === 0 ? (
+                    <p className="clinic-agenda-empty">Sin citas programadas</p>
+                  ) : (
+                    dayAppts.map((a) => (
+                      <AgendaAppointmentCard key={a.id} appointment={a} onEdit={openEdit} />
+                    ))
+                  )}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      ) : (
       <div className="clinic-agenda-grid">
         {weekDays.map((day) => {
           const key = day.toDateString();
@@ -363,23 +508,7 @@ export function AgendaPage({ onStartConsultation }) {
                   <p className="clinic-agenda-empty">Sin citas</p>
                 ) : (
                   dayAppts.map((a) => (
-                    <button
-                      key={a.id}
-                      type="button"
-                      className={`clinic-agenda-card status-${a.status}`}
-                      onClick={() => openEdit(a)}
-                    >
-                      <span className="clinic-agenda-time">
-                        {new Date(a.starts_at).toLocaleTimeString("es-MX", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                      <span className="clinic-agenda-patient">
-                        {a.patients?.name || "Mascota"}
-                      </span>
-                      <span className="clinic-agenda-status">{STATUS_LABELS[a.status] || a.status}</span>
-                    </button>
+                    <AgendaAppointmentCard key={a.id} appointment={a} onEdit={openEdit} />
                   ))
                 )}
               </div>
@@ -387,9 +516,10 @@ export function AgendaPage({ onStartConsultation }) {
           );
         })}
       </div>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className={clinicDialogClass("max-w-lg")}>
           <DialogHeader>
             <DialogTitle>{editing ? "Editar cita" : "Nueva cita"}</DialogTitle>
           </DialogHeader>
@@ -464,7 +594,7 @@ export function AgendaPage({ onStartConsultation }) {
       </Dialog>
 
       <Dialog open={approveOpen} onOpenChange={setApproveOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className={clinicDialogClass("max-w-md")}>
           <DialogHeader>
             <DialogTitle>Confirmar cita</DialogTitle>
           </DialogHeader>

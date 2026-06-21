@@ -38,6 +38,12 @@ from starlette.responses import JSONResponse
 import auth_security
 import cedula_verification
 import email_notifications
+from membership_catalog import (
+    CONSULTATION_CREDIT_PACKAGES,
+    FEATURED_PLAN_KEY,
+    MEMBERSHIP_INFO_ITEMS,
+    MEMBERSHIP_PACKAGES,
+)
 from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from starlette.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -578,40 +584,6 @@ async def _sep_dgp_lookup_with_retries(cedula: str, attempts: int = 3) -> Dict[s
             await asyncio.sleep(0.7 * (2**i))
     raise RuntimeError(str(last_exc or "Error desconocido consultando SEP/DGP"))
 
-
-# Membership packages
-MEMBERSHIP_PACKAGES = {
-    "basic": {
-        "name": "Básica",
-        "price_monthly": 950.00,
-        "price_annual": 9500.00,
-        "consultations": 30,  # 30 consultas mensuales
-        "currency": "mxn",
-    },
-    "professional": {
-        "name": "Profesional",
-        "price_monthly": 1250.00,
-        "price_annual": 12500.00,
-        "consultations": 35,  # 35 consultas mensuales
-        "currency": "mxn",
-    },
-    "premium": {
-        "name": "Premium",
-        "price_monthly": 2200.00,
-        "price_annual": 22000.00,
-        "consultations": 150,  # 150 consultas mensuales
-        "currency": "mxn",
-    },
-}
-
-CONSULTATION_CREDIT_PACKAGES = {
-    "credits_10": {
-        "name": "10 consultas",
-        "price": 350.00,
-        "credits": 10,
-        "currency": "mxn",
-    },
-}
 
 # Animal categories
 ANIMAL_CATEGORIES = {
@@ -2268,8 +2240,12 @@ async def get_consultation_stats(x_veterinarian_id: str = Header(None)):
 
 @app.get("/api/membership/packages")
 async def get_membership_packages():
-    """Obtiene paquetes de membresía"""
-    return {"packages": MEMBERSHIP_PACKAGES}
+    """Catálogo de membresías (editar en membership_catalog.py)"""
+    return {
+        "packages": MEMBERSHIP_PACKAGES,
+        "featured_plan": FEATURED_PLAN_KEY,
+        "info_items": MEMBERSHIP_INFO_ITEMS,
+    }
 
 
 @app.get("/api/consultations/credit-packages")

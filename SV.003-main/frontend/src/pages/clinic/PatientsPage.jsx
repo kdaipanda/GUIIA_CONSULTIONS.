@@ -1,5 +1,17 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Plus, Search, Pencil, Trash2, Stethoscope, FileDown, ExternalLink } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Plus, Search, Pencil, Trash2, Stethoscope, FileDown, ExternalLink, PawPrint } from "lucide-react";
+import "./clinicPageShared.css";
+import {
+  ClinicTableSkeleton,
+  ClinicEmptyState,
+  ClinicStatPill,
+  clinicDialogClass,
+} from "../../components/clinic/ClinicPageUi";
+import {
+  formatConsultationFolio,
+  formatConsultationDateShort,
+  getConsultationStatusLabel,
+} from "../../lib/consultationDisplay";
 import { useVet } from "../../context/VetContext";
 import {
   fetchPatients,
@@ -30,32 +42,6 @@ import {
 } from "../../components/ui/dialog";
 
 const SPECIES = ["perros", "gatos", "conejos", "aves", "hamsters", "cuyos", "hurones", "erizos", "tortugas", "iguanas", "patos_pollos", "otros"];
-
-const STATUS_LABELS = {
-  completed: "Completada",
-  in_progress: "En progreso",
-  draft: "Borrador",
-};
-
-function formatConsultationId(consultation) {
-  if (!consultation?.id) return "N/A";
-  return `CONS-${consultation.id.slice(0, 8).toUpperCase()}`;
-}
-
-function formatConsultationDate(value) {
-  if (!value) return "—";
-  try {
-    return new Date(value).toLocaleDateString("es-MX", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return String(value);
-  }
-}
 
 function consultationMotivo(consultation) {
   return (
@@ -219,12 +205,18 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
 
   const clientName = (p) => p.clients?.name || "—";
 
+  const stats = useMemo(() => {
+    const species = new Set(patients.map((p) => p.species).filter(Boolean));
+    return { total: patients.length, species: species.size };
+  }, [patients]);
+
   return (
-    <div className="clinic-page">
+    <div className="clinic-page clinic-page-guiaa">
       <div className="clinic-page-header">
         <div>
+          <p className="clinic-page-eyebrow">Consultorio</p>
           <h1>Mascotas</h1>
-          <p>Mascotas registradas en el consultorio</p>
+          <p>Fichas clínicas, historial y acceso rápido a consultas.</p>
         </div>
         <Button type="button" onClick={openCreate} disabled={clients.length === 0}>
           <Plus size={16} className="mr-1" /> Nueva mascota
@@ -248,12 +240,27 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
 
       {error && <div className="error-message">{error}</div>}
 
-      {loading ? (
-        <p className="clinic-muted">Cargando mascotas...</p>
-      ) : patients.length === 0 ? (
-        <div className="clinic-empty">
-          <p>No hay mascotas registradas.</p>
+      {!loading && patients.length > 0 && (
+        <div className="clinic-stats-row">
+          <ClinicStatPill value={stats.total} label="Registradas" />
+          <ClinicStatPill value={stats.species} label="Especies" />
         </div>
+      )}
+
+      {loading ? (
+        <ClinicTableSkeleton rows={6} cols={5} />
+      ) : patients.length === 0 ? (
+        <ClinicEmptyState
+          icon={PawPrint}
+          title="Sin mascotas registradas"
+          description={
+            clients.length === 0
+              ? "Primero registra un dueño para poder agregar mascotas."
+              : "Agrega la primera mascota para iniciar consultas y seguimiento clínico."
+          }
+          actionLabel={clients.length > 0 ? "Registrar mascota" : undefined}
+          onAction={clients.length > 0 ? openCreate : undefined}
+        />
       ) : (
         <div className="clinic-table-wrap">
           <table className="clinic-table">
@@ -308,7 +315,7 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className={clinicDialogClass("max-w-lg")}>
           <DialogHeader>
             <DialogTitle>{editing ? "Editar mascota" : "Nueva mascota"}</DialogTitle>
           </DialogHeader>
@@ -356,7 +363,7 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
       </Dialog>
 
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className={clinicDialogClass("max-w-2xl", "max-h-[90vh]", "overflow-y-auto")}>
           <DialogHeader>
             <DialogTitle>{detail?.patient?.name}</DialogTitle>
           </DialogHeader>
@@ -406,16 +413,16 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
                 ) : (
                   <ul className="clinic-timeline-list">
                     {detail.consultations.map((consultation) => {
-                      const status = STATUS_LABELS[consultation.status] || consultation.status || "Registrada";
+                      const status = getConsultationStatusLabel(consultation.status);
                       return (
                         <li key={consultation.id} className="clinic-timeline-item">
                           <div className="clinic-timeline-head">
-                            <span className="clinic-timeline-folio">{formatConsultationId(consultation)}</span>
+                            <span className="clinic-timeline-folio">{formatConsultationFolio(consultation)}</span>
                             <span className={`clinic-timeline-status status-${consultation.status || "draft"}`}>
                               {status}
                             </span>
                           </div>
-                          <p className="clinic-timeline-date">{formatConsultationDate(consultation.created_at)}</p>
+                          <p className="clinic-timeline-date">{formatConsultationDateShort(consultation.created_at)}</p>
                           <p className="clinic-timeline-motivo">{consultationMotivo(consultation)}</p>
                           {consultation.analysis && (
                             <p className="clinic-timeline-analysis">
@@ -468,7 +475,7 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
                             {IMAGE_TYPE_LABELS[img.image_type] || img.image_type || "Estudio"}
                           </span>
                         </div>
-                        <p className="clinic-timeline-date">{formatConsultationDate(img.created_at)}</p>
+                        <p className="clinic-timeline-date">{formatConsultationDateShort(img.created_at)}</p>
                         {img.analysis && (
                           <p className="clinic-timeline-analysis">
                             {(() => {

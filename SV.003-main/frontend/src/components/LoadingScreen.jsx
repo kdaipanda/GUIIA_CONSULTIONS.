@@ -1,11 +1,13 @@
 import React from "react";
+import { GuiaaBrandLockup } from "./GuiaaBrandLockup";
+import "../layout/authShell.css";
 
 export function LoadingScreen() {
   return (
-    <div className="loading-screen">
-      <img src="/GuiaLogo-mark.png" alt="GUIAA" className="loading-logo" />
-      <div className="loading-spinner"></div>
-      <p>Cargando GUIAA...</p>
+    <div className="loading-screen-shell">
+      <GuiaaBrandLockup variant="loading" className="mb-8" />
+      <div className="loading-spinner" aria-hidden />
+      <p>Cargando GUIAA…</p>
     </div>
   );
 }

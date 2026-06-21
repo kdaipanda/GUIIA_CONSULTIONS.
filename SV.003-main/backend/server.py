@@ -10,6 +10,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field
 
+from membership_catalog import (
+    CONSULTATION_CREDIT_PACKAGES,
+    FEATURED_PLAN_KEY,
+    MEMBERSHIP_INFO_ITEMS,
+    MEMBERSHIP_PACKAGES,
+)
+
 # Load environment variables
 load_dotenv()
 
@@ -151,30 +158,7 @@ db = client[os.getenv("DB_NAME", "vetmed_platform")]
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
 
-# Membership packages (server-side only for security)
-MEMBERSHIP_PACKAGES = {
-    "basic": {
-        "name": "Básica", 
-        "price_monthly": 950.00, 
-        "price_annual": 9500.00,  # 10 meses (2 meses gratis)
-        "consultations": 10, 
-        "currency": "mxn"
-    },
-    "professional": {
-        "name": "Profesional", 
-        "price_monthly": 1250.00, 
-        "price_annual": 12500.00,  # 10 meses (2 meses gratis)
-        "consultations": 25, 
-        "currency": "mxn"
-    },
-    "premium": {
-        "name": "Premium", 
-        "price_monthly": 2200.00, 
-        "price_annual": 22000.00,  # 10 meses (2 meses gratis)
-        "consultations": "unlimited", 
-        "currency": "mxn"
-    }
-}
+# Membership packages — membership_catalog.py (precios y features)
 
 # Animal categories with specialized prompts
 ANIMAL_CATEGORIES = {
@@ -906,7 +890,11 @@ async def get_interpretation_history(vet_id: str):
 @app.get("/api/membership/packages")
 async def get_membership_packages():
     """Get available membership packages"""
-    return {"packages": MEMBERSHIP_PACKAGES}
+    return {
+        "packages": MEMBERSHIP_PACKAGES,
+        "featured_plan": FEATURED_PLAN_KEY,
+        "info_items": MEMBERSHIP_INFO_ITEMS,
+    }
 
 @app.post("/api/payments/checkout/session")
 async def create_checkout_session(payment_request: PaymentRequest, request: Request):

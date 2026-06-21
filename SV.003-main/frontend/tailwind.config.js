@@ -13,6 +13,21 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			guiaa: {
+  				navy: '#0a0e1a',
+  				deep: '#0f172a',
+  				slate: '#1e293b',
+  				teal: '#14b8a6',
+  				'teal-neon': '#2dd4bf',
+  				purple: '#8b5cf6',
+  				violet: '#a78bfa',
+  				'brand-navy': '#0c2d4d',
+  				'brand-green': '#3d9b8f',
+  				'brand-green-dark': '#2f857a',
+  				'brand-blue': '#265B93',
+  				'sky-soft': '#e8f4fc',
+  				'sky-mist': '#d4ebf7',
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

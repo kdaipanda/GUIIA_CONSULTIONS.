@@ -1,0 +1,135 @@
+.clinic-tools-page-guiaa {
+  --tools-navy: #0c2d4d;
+  --tools-blue: #265b93;
+  --tools-green: #3d9b8f;
+}
+
+.clinic-tools-page-guiaa .clinic-page-header h1 {
+  color: var(--tools-navy);
+  letter-spacing: -0.02em;
+}
+
+.clinic-tools-page-guiaa .clinic-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.clinic-tools-page-guiaa .clinic-tools-card {
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(38, 91, 147, 0.1);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 2px 12px -6px rgba(12, 45, 77, 0.08);
+}
+
+.clinic-tools-page-guiaa .clinic-tools-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  color: var(--tools-blue);
+}
+
+.clinic-tools-page-guiaa .clinic-tools-card-head h2 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--tools-navy);
+}
+
+.clinic-tools-page-guiaa .clinic-tools-desc {
+  margin-bottom: 14px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.clinic-tools-page-guiaa .clinic-tools-result {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(61, 155, 143, 0.25);
+  background: rgba(61, 155, 143, 0.08);
+}
+
+.clinic-tools-page-guiaa .clinic-tools-result-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--tools-navy);
+}
+
+.clinic-tools-page-guiaa .clinic-tools-result-row + .clinic-tools-result-row {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(61, 155, 143, 0.15);
+}
+
+.clinic-tools-page-guiaa .clinic-tools-result-row strong {
+  margin-left: auto;
+  font-size: 15px;
+  color: #2a7a70;
+}
+
+.clinic-tools-page-guiaa .clinic-tools-links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clinic-tools-page-guiaa .clinic-tools-links li + li {
+  margin-top: 8px;
+}
+
+.clinic-tools-page-guiaa .clinic-tools-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(38, 91, 147, 0.12);
+  background: rgba(38, 91, 147, 0.04);
+  color: var(--tools-blue);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.clinic-tools-page-guiaa .clinic-tools-links a:hover {
+  background: rgba(38, 91, 147, 0.1);
+  border-color: rgba(38, 91, 147, 0.22);
+}
+
+.clinic-tools-link-icon {
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+
+.clinic-tools-page-guiaa .clinic-report-note {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(12, 45, 77, 0.04);
+  font-size: 12px;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.clinic-tools-placeholder {
+  margin: 0;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px dashed rgba(38, 91, 147, 0.18);
+  font-size: 14px;
+  color: #64748b;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .clinic-tools-page-guiaa .clinic-tools-grid {
+    grid-template-columns: 1fr;
+  }
+}

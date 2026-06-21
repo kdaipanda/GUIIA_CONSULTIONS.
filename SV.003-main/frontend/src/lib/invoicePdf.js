@@ -1,4 +1,9 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import {
+  drawPdfBrandHeader,
+  embedGuiaaLogo,
+  PDF_MUTED_COLOR,
+} from "./pdfLogo";
 
 const PAGE = { width: 595.28, height: 841.89 };
 const MARGIN = 50;
@@ -62,23 +67,6 @@ function wrapText(text, font, fontSize, maxWidth) {
   return lines;
 }
 
-async function fetchAsBytes(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`No se pudo cargar ${url}`);
-  return new Uint8Array(await response.arrayBuffer());
-}
-
-async function embedGuiaaLogo(pdfDoc) {
-  for (const url of ["/GuiaLogo-mark.png", "/GuiaLogo.png"]) {
-    try {
-      return pdfDoc.embedPng(await fetchAsBytes(url));
-    } catch {
-      /* try next */
-    }
-  }
-  return null;
-}
-
 function sanitizeFilename(value) {
   return (value || "recibo")
     .normalize("NFD")
@@ -97,35 +85,22 @@ export async function downloadInvoicePdf(invoice, options = {}) {
   const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const logo = await embedGuiaaLogo(pdfDoc);
   const page = pdfDoc.addPage([PAGE.width, PAGE.height]);
-  let y = PAGE.height - MARGIN;
+  let y = drawPdfBrandHeader(
+    page,
+    { regular, bold },
+    PAGE.height - MARGIN,
+    logo,
+    {
+      pageWidth: PAGE.width,
+      margin: MARGIN,
+      subtitle: options.organizationName
+        ? `Recibo clinico · ${options.organizationName}`
+        : "Recibo clinico",
+    },
+  );
 
-  const brandBlue = rgb(0.08, 0.25, 0.55);
-  const muted = rgb(0.35, 0.42, 0.52);
+  const muted = PDF_MUTED_COLOR;
   const text = rgb(0.12, 0.16, 0.22);
-
-  const LOGO_SIZE = 40;
-  if (logo) {
-    page.drawImage(logo, { x: MARGIN, y: y - LOGO_SIZE, width: LOGO_SIZE, height: LOGO_SIZE });
-  }
-  const textX = MARGIN + (logo ? LOGO_SIZE + 10 : 0);
-  page.drawText("GUIAA", { x: textX, y: y - 14, size: 15, font: bold, color: brandBlue });
-  page.drawText(toPdfSafeText("Recibo clínico"), {
-    x: textX,
-    y: y - 28,
-    size: 10,
-    font: regular,
-    color: muted,
-  });
-  if (options.organizationName) {
-    page.drawText(toPdfSafeText(options.organizationName), {
-      x: textX,
-      y: y - 42,
-      size: 9,
-      font: regular,
-      color: muted,
-    });
-  }
-  y -= LOGO_SIZE + 20;
 
   const folio = invoice.invoice_number || invoice.id?.slice(0, 8).toUpperCase() || "—";
   page.drawText(toPdfSafeText(`Folio: ${folio}`), {
@@ -143,13 +118,7 @@ export async function downloadInvoicePdf(invoice, options = {}) {
     color: muted,
   });
 
-  page.drawLine({
-    start: { x: MARGIN, y },
-    end: { x: PAGE.width - MARGIN, y },
-    thickness: 1,
-    color: rgb(0.82, 0.88, 0.96),
-  });
-  y -= 24;
+  y -= 10;
 
   const drawRow = (label, value) => {
     page.drawText(toPdfSafeText(`${label}:`), {

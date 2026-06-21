@@ -1,4 +1,10 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import {
+  drawPdfBrandHeader,
+  embedGuiaaLogo,
+  PDF_BRAND_COLOR,
+  PDF_LINE_COLOR,
+} from "./pdfLogo";
 
 const PAGE = { width: 595.28, height: 841.89 };
 const MARGIN = 50;
@@ -154,69 +160,6 @@ function wrapText(text, font, fontSize, maxWidth) {
   return lines.length ? lines : [""];
 }
 
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
-}
-
-async function fetchAsBytes(url) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`No se pudo cargar ${url}`);
-  }
-  return new Uint8Array(await response.arrayBuffer());
-}
-
-async function svgToPngBytes(url, size = 128) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`No se pudo cargar ${url}`);
-  }
-  const svgText = await response.text();
-  const blob = new Blob([svgText], { type: "image/svg+xml;charset=utf-8" });
-  const objectUrl = URL.createObjectURL(blob);
-  try {
-    const img = await loadImage(objectUrl);
-    const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0, size, size);
-    const pngBlob = await new Promise((resolve, reject) => {
-      canvas.toBlob((result) => {
-        if (result) resolve(result);
-        else reject(new Error("No se pudo convertir el logo"));
-      }, "image/png");
-    });
-    return new Uint8Array(await pngBlob.arrayBuffer());
-  } finally {
-    URL.revokeObjectURL(objectUrl);
-  }
-}
-
-async function embedGuiaaLogo(pdfDoc) {
-  const pngSources = ["/GuiaLogo-mark.png", "/GuiaLogo.png"];
-  for (const url of pngSources) {
-    try {
-      const bytes = await fetchAsBytes(url);
-      return pdfDoc.embedPng(bytes);
-    } catch {
-      /* try next */
-    }
-  }
-
-  try {
-    const bytes = await svgToPngBytes("/guiaa-logo.svg");
-    return pdfDoc.embedPng(bytes);
-  } catch {
-    return null;
-  }
-}
-
 class PdfWriter {
   constructor(pdfDoc, fonts) {
     this.pdfDoc = pdfDoc;
@@ -262,14 +205,14 @@ class PdfWriter {
       y: this.y,
       size: 13,
       font: this.fonts.bold,
-      color: rgb(0.08, 0.25, 0.55),
+      color: PDF_BRAND_COLOR,
     });
     this.y -= 10;
     this.page.drawLine({
       start: { x: MARGIN, y: this.y },
       end: { x: PAGE.width - MARGIN, y: this.y },
       thickness: 1,
-      color: rgb(0.82, 0.88, 0.96),
+      color: PDF_LINE_COLOR,
     });
     this.y -= 16;
   }
@@ -304,63 +247,18 @@ class PdfWriter {
   }
 
   drawBrandHeader(logoImage) {
-    const LOGO_SIZE = 44;
-    const textX = MARGIN + (logoImage ? LOGO_SIZE + 12 : 0);
-    const blockHeight = logoImage ? LOGO_SIZE + 8 : 52;
-    const brandBlue = rgb(0.08, 0.25, 0.55);
-    const subtitleColor = rgb(0.35, 0.42, 0.52);
-    const taglineColor = rgb(0.45, 0.5, 0.58);
-
-    this.ensureSpace(blockHeight + 28);
-
-    if (logoImage) {
-      this.page.drawImage(logoImage, {
-        x: MARGIN,
-        y: this.y - LOGO_SIZE,
-        width: LOGO_SIZE,
-        height: LOGO_SIZE,
-      });
-    }
-
-    const titleY = this.y - 12;
-    this.page.drawText("GUIAA", {
-      x: textX,
-      y: titleY,
-      size: 16,
-      font: this.fonts.bold,
-      color: brandBlue,
-    });
-    this.page.drawText(toPdfSafeText("Gran universo de inteligencia animal."), {
-      x: textX,
-      y: titleY - 15,
-      size: 9,
-      font: this.fonts.regular,
-      color: subtitleColor,
-    });
-    this.page.drawText(
-      toPdfSafeText("Soporte a la decision clinica CDS avanzado grado L4 y L5."),
+    this.ensureSpace(96);
+    this.y = drawPdfBrandHeader(
+      this.page,
+      this.fonts,
+      this.y,
+      logoImage,
       {
-        x: textX,
-        y: titleY - 27,
-        size: 8,
-        font: this.fonts.regular,
-        color: taglineColor,
+        pageWidth: PAGE.width,
+        margin: MARGIN,
+        subtitle: "Ficha clinica veterinaria",
       },
     );
-
-    this.y -= blockHeight;
-    this.drawLine("Ficha clinica veterinaria", {
-      size: 11,
-      color: subtitleColor,
-    });
-    this.y -= 4;
-    this.page.drawLine({
-      start: { x: MARGIN, y: this.y },
-      end: { x: PAGE.width - MARGIN, y: this.y },
-      thickness: 1,
-      color: rgb(0.82, 0.88, 0.96),
-    });
-    this.y -= 14;
   }
 }
 

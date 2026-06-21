@@ -1,0 +1,325 @@
+.clinic-page-guiaa {
+  --clinic-navy: #0c2d4d;
+  --clinic-blue: #265b93;
+  --clinic-green: #3d9b8f;
+}
+
+.clinic-page-guiaa .clinic-page-header h1 {
+  color: var(--clinic-navy);
+  letter-spacing: -0.02em;
+}
+
+.clinic-page-eyebrow {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--clinic-blue);
+}
+
+.clinic-page-guiaa .clinic-page-header p {
+  max-width: 32rem;
+  color: rgba(12, 45, 77, 0.55);
+}
+
+.clinic-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.clinic-stat-pill {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(38, 91, 147, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.clinic-stat-pill--warn {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(255, 251, 235, 0.7);
+}
+
+.clinic-stat-value {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--clinic-navy);
+  line-height: 1.1;
+}
+
+.clinic-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(12, 45, 77, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.clinic-table-skeleton {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.clinic-table-skeleton-row {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.clinic-table-skeleton-row:last-child {
+  border-bottom: none;
+}
+
+.clinic-empty-guiaa {
+  text-align: center;
+  padding: 36px 20px;
+  border: 1px dashed rgba(38, 91, 147, 0.2);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.clinic-empty-guiaa-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  background: rgba(38, 91, 147, 0.08);
+  color: var(--clinic-blue);
+}
+
+.clinic-empty-guiaa h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  color: var(--clinic-navy);
+}
+
+.clinic-empty-guiaa p {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.clinic-page-guiaa .clinic-table-wrap {
+  border-radius: 12px;
+  border: 1px solid rgba(38, 91, 147, 0.1);
+  box-shadow: 0 2px 12px -4px rgba(12, 45, 77, 0.08);
+}
+
+.clinic-page-guiaa .clinic-table thead th {
+  background: rgba(232, 244, 252, 0.6);
+  color: var(--clinic-navy);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.clinic-status-pill {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.clinic-status-pill--paid,
+.clinic-status-pill--completed,
+.clinic-status-pill--confirmed {
+  background: rgba(61, 155, 143, 0.12);
+  color: #2a7a70;
+}
+
+.clinic-status-pill--issued,
+.clinic-status-pill--scheduled {
+  background: rgba(38, 91, 147, 0.1);
+  color: var(--clinic-blue);
+}
+
+.clinic-status-pill--draft {
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569;
+}
+
+.clinic-status-pill--cancelled {
+  background: rgba(239, 68, 68, 0.1);
+  color: #b91c1c;
+}
+
+@media (max-width: 768px) {
+  .clinic-page-guiaa .clinic-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .clinic-page-guiaa .clinic-page-header > button,
+  .clinic-page-guiaa .clinic-page-header .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Modales y formularios clínicos */
+.clinic-dialog-guiaa {
+  border-radius: 16px;
+  border: 1px solid rgba(38, 91, 147, 0.14);
+  box-shadow: 0 20px 48px -16px rgba(12, 45, 77, 0.22);
+}
+
+.clinic-dialog-guiaa h2,
+.clinic-dialog-guiaa [class*="DialogTitle"] {
+  color: var(--clinic-navy, #0c2d4d);
+  letter-spacing: -0.01em;
+}
+
+.clinic-dialog-guiaa form.clinic-form .form-group:last-of-type {
+  margin-bottom: 0;
+}
+
+.clinic-dialog-guiaa .clinic-form-section-label {
+  margin: 4px 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--clinic-blue, #265b93);
+}
+
+/* Tarjetas de configuración */
+.clinic-page-guiaa .clinic-settings-card {
+  margin-bottom: 16px;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(38, 91, 147, 0.1);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 2px 12px -6px rgba(12, 45, 77, 0.08);
+}
+
+.clinic-page-guiaa .clinic-settings-card h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: var(--clinic-navy);
+}
+
+.clinic-page-guiaa .clinic-settings-portal {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.clinic-page-guiaa .clinic-invite-form {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .clinic-page-guiaa .clinic-invite-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+.clinic-settings-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.clinic-settings-card-skeleton {
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Skeletons de reportes */
+.clinic-report-kpi-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.clinic-report-kpi-skeleton {
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.clinic-skeleton-chart {
+  height: 48px;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.clinic-report-panels-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.clinic-report-panel-skeleton {
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.clinic-page-guiaa .clinic-report-kpi {
+  border-color: rgba(38, 91, 147, 0.12);
+  box-shadow: 0 2px 10px -4px rgba(12, 45, 77, 0.06);
+}
+
+.clinic-page-guiaa .clinic-report-kpi-icon {
+  background: rgba(38, 91, 147, 0.08);
+  color: var(--clinic-blue);
+}
+
+.clinic-page-guiaa .clinic-report-kpi-value {
+  color: var(--clinic-navy);
+}
+
+.clinic-page-guiaa .clinic-report-panel {
+  border-color: rgba(38, 91, 147, 0.1);
+  box-shadow: 0 2px 10px -4px rgba(12, 45, 77, 0.06);
+}
+
+.clinic-page-guiaa .clinic-report-panel h2 {
+  color: var(--clinic-navy);
+}
+
+.clinic-report-empty {
+  margin: 0;
+  padding: 12px 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.clinic-page-guiaa .clinic-report-period {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}

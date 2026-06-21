@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Calculator, FlaskConical, Scale } from "lucide-react";
+import { Calculator, FlaskConical, Scale, ExternalLink } from "lucide-react";
+import "./clinicPageShared.css";
+import "./toolsPage.css";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import {
@@ -35,11 +37,7 @@ export function ToolsPage() {
     let volumeOrUnits = null;
 
     if (conc > 0) {
-      if (unitType === "mg_ml") {
-        volumeOrUnits = totalMg / conc;
-      } else {
-        volumeOrUnits = totalMg / conc;
-      }
+      volumeOrUnits = totalMg / conc;
     }
 
     return {
@@ -50,9 +48,10 @@ export function ToolsPage() {
   }, [weight, dosePerKg, concentration, unitType]);
 
   return (
-    <div className="clinic-page clinic-tools-page">
+    <div className="clinic-page clinic-page-guiaa clinic-tools-page clinic-tools-page-guiaa">
       <div className="clinic-page-header">
         <div>
+          <p className="clinic-page-eyebrow">Consultorio</p>
           <h1>Herramientas clínicas</h1>
           <p>Calculadoras y referencias rápidas para apoyo en consulta.</p>
         </div>
@@ -141,7 +140,9 @@ export function ToolsPage() {
               )}
             </div>
           ) : (
-            <p className="clinic-muted">Ingresa peso y dosis mg/kg para ver el resultado.</p>
+            <p className="clinic-tools-placeholder">
+              Ingresa peso y dosis mg/kg para ver el resultado.
+            </p>
           )}
         </section>
 
@@ -157,7 +158,8 @@ export function ToolsPage() {
             {REFERENCE_LINKS.map((link) => (
               <li key={link.url}>
                 <a href={link.url} target="_blank" rel="noopener noreferrer">
-                  {link.label}
+                  <span>{link.label}</span>
+                  <ExternalLink size={14} aria-hidden className="clinic-tools-link-icon" />
                 </a>
               </li>
             ))}

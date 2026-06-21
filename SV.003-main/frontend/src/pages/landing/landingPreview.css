@@ -1,0 +1,138 @@
+/* Vista previa del producto en landing — usa clases reales de App.css */
+
+.landing-app-preview-page {
+  pointer-events: none;
+  user-select: none;
+}
+
+.landing-app-preview-page input,
+.landing-app-preview-page textarea {
+  pointer-events: none;
+}
+
+.landing-preview-panel {
+  height: min(420px, 62vw);
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.landing-preview-viewport {
+  height: 100%;
+  overflow: hidden;
+}
+
+.landing-preview-scaler {
+  width: 920px;
+  transform: scale(0.68);
+  transform-origin: top left;
+}
+
+@media (min-width: 640px) {
+  .landing-preview-panel {
+    height: 440px;
+  }
+
+  .landing-preview-scaler {
+    transform: scale(0.74);
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-preview-panel {
+    height: 460px;
+  }
+
+  .landing-preview-scaler {
+    transform: scale(0.78);
+  }
+}
+
+.landing-app-preview-page .consultation-layout {
+  grid-template-columns: 1fr 220px;
+}
+
+.landing-app-preview-page .category-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: none;
+}
+
+.landing-app-preview-page .category-card {
+  padding: 16px 10px;
+}
+
+.landing-app-preview-page .category-card .category-icon {
+  font-size: 32px;
+}
+
+.landing-app-preview-page .category-card h4 {
+  font-size: 12px;
+}
+
+.landing-app-preview-page .page-title-header {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.landing-app-preview-page .page-title-text h1 {
+  font-size: 1.35rem;
+}
+
+.landing-app-preview-page .page-title-text p {
+  font-size: 0.85rem;
+}
+
+.landing-screenshot-capture-page .landing-capture-frame {
+  width: 1280px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+}
+
+.landing-screenshot-capture-page .landing-app-preview-page {
+  pointer-events: auto;
+}
+
+.landing-screenshot-capture-page .consultation-layout {
+  grid-template-columns: 1fr 260px;
+}
+
+.landing-screenshot-capture-page .category-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.landing-hero-screenshot {
+  transform: rotate(2deg);
+}
+
+.landing-hero-screenshot:hover {
+  transform: rotate(0deg);
+}
+
+.landing-hero-visual {
+  padding-bottom: 2rem;
+}
+
+.landing-hero-badge {
+  max-width: calc(100% - 11rem);
+  white-space: nowrap;
+}
+
+.landing-mobile-bar {
+  padding-bottom: max(0.625rem, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 639px) {
+  .landing-hero-screenshot {
+    transform: none;
+  }
+
+  .landing-hero-badge {
+    display: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .landing-hero-visual {
+    padding-bottom: 2.5rem;
+  }
+}

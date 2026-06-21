@@ -1,5 +1,13 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Search, Receipt, FileDown } from "lucide-react";
+import "./clinicPageShared.css";
+import {
+  ClinicTableSkeleton,
+  ClinicEmptyState,
+  ClinicStatPill,
+  ClinicStatusPill,
+  clinicDialogClass,
+} from "../../components/clinic/ClinicPageUi";
 import { useVet } from "../../context/VetContext";
 import { useClinic } from "../../context/ClinicContext";
 import {
@@ -104,6 +112,12 @@ export function BillingPage() {
     );
   });
 
+  const stats = useMemo(() => {
+    const paid = invoices.filter((inv) => inv.status === "paid");
+    const revenue = paid.reduce((sum, inv) => sum + Number(inv.total || 0), 0);
+    return { total: invoices.length, paid: paid.length, revenue };
+  }, [invoices]);
+
   const openCreate = () => {
     setForm({
       client_id: GENERAL_PUBLIC_ID,
@@ -204,11 +218,12 @@ export function BillingPage() {
   };
 
   return (
-    <div className="clinic-page">
+    <div className="clinic-page clinic-page-guiaa">
       <div className="clinic-page-header">
         <div>
+          <p className="clinic-page-eyebrow">Consultorio</p>
           <h1>Ventas</h1>
-          <p>Recibos y cobros clínicos (sin CFDI). Vinculado al inventario.</p>
+          <p>Recibos y cobros clínicos (sin CFDI), vinculados al inventario.</p>
         </div>
         <Button type="button" onClick={openCreate}>
           <Plus size={16} className="mr-1" /> Nueva Venta
@@ -224,10 +239,28 @@ export function BillingPage() {
 
       {error && <div className="error-message">{error}</div>}
 
+      {!loading && invoices.length > 0 && (
+        <div className="clinic-stats-row">
+          <ClinicStatPill value={stats.total} label="Recibos" />
+          <ClinicStatPill value={stats.paid} label="Pagados" />
+          <ClinicStatPill value={formatMoney(stats.revenue)} label="Cobrado" />
+        </div>
+      )}
+
       {loading ? (
-        <p className="clinic-muted">Cargando recibos...</p>
+        <ClinicTableSkeleton rows={6} cols={5} />
       ) : filtered.length === 0 ? (
-        <div className="clinic-empty"><p>No hay recibos registrados.</p></div>
+        <ClinicEmptyState
+          icon={Receipt}
+          title={search.trim() ? "Sin resultados" : "Sin recibos registrados"}
+          description={
+            search.trim()
+              ? "Prueba con otro folio o nombre de receptor."
+              : "Registra la primera venta para generar recibos y descontar stock."
+          }
+          actionLabel={search.trim() ? undefined : "Nueva venta"}
+          onAction={search.trim() ? undefined : openCreate}
+        />
       ) : (
         <div className="clinic-table-wrap">
           <table className="clinic-table">
@@ -246,7 +279,12 @@ export function BillingPage() {
                   <td><strong>{inv.invoice_number || inv.id.slice(0, 8)}</strong></td>
                   <td>{invoiceClientLabel(inv)}</td>
                   <td>{formatMoney(inv.total)}</td>
-                  <td>{STATUS_LABELS[inv.status] || inv.status}</td>
+                  <td>
+                    <ClinicStatusPill
+                      status={inv.status}
+                      label={STATUS_LABELS[inv.status] || inv.status}
+                    />
+                  </td>
                   <td>{inv.created_at ? new Date(inv.created_at).toLocaleDateString("es-MX") : "—"}</td>
                 </tr>
               ))}
@@ -256,7 +294,7 @@ export function BillingPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className={clinicDialogClass("max-w-2xl", "max-h-[90vh]", "overflow-y-auto")}>
           <DialogHeader><DialogTitle>Nueva Venta</DialogTitle></DialogHeader>
           <form onSubmit={handleSave} className="clinic-form">
             <div className="form-group">
@@ -338,7 +376,7 @@ export function BillingPage() {
       </Dialog>
 
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className={clinicDialogClass("max-w-lg")}>
           <DialogHeader>
             <DialogTitle>{detail?.invoice_number || "Recibo"}</DialogTitle>
           </DialogHeader>

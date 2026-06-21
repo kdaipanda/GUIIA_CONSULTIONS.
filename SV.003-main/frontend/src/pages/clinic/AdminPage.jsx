@@ -1,5 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare } from "lucide-react";
+import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint } from "lucide-react";
+import "./clinicPageShared.css";
+import "./adminPage.css";
+import {
+  ClinicReportsSkeleton,
+  ClinicTableSkeleton,
+  ClinicEmptyState,
+  clinicDialogClass,
+} from "../../components/clinic/ClinicPageUi";
 import { useVet } from "../../context/VetContext";
 import {
   fetchAdminAccess,
@@ -421,22 +429,44 @@ export function AdminPage() {
 
   if (loading) {
     return (
-      <div className="clinic-page">
-        <p className="clinic-muted">Cargando panel admin...</p>
+      <div className="clinic-page clinic-page-guiaa clinic-admin-page clinic-admin-page-guiaa">
+        <div className="clinic-page-header">
+          <div>
+            <p className="clinic-page-eyebrow">Plataforma</p>
+            <h1>
+              <Shield size={22} aria-hidden />
+              Administración GUIAA
+            </h1>
+            <p>Usuarios, clínicas y operaciones de la plataforma.</p>
+          </div>
+        </div>
+        <ClinicReportsSkeleton />
+        <div className="clinic-admin-skeleton-block">
+          <ClinicTableSkeleton rows={8} cols={5} />
+        </div>
       </div>
     );
   }
 
   if (!allowed) {
     return (
-      <div className="clinic-page">
+      <div className="clinic-page clinic-page-guiaa clinic-admin-page clinic-admin-page-guiaa">
         <div className="clinic-page-header">
           <div>
-            <h1>Administración GUIAA</h1>
+            <p className="clinic-page-eyebrow">Plataforma</p>
+            <h1>
+              <Shield size={22} aria-hidden />
+              Administración GUIAA
+            </h1>
             <p>Acceso restringido a administradores de plataforma.</p>
           </div>
         </div>
         {error && <p className="clinic-error">{error}</p>}
+        <ClinicEmptyState
+          icon={Shield}
+          title="Sin acceso de administrador"
+          description="Tu cuenta no tiene permisos para gestionar la plataforma GUIAA."
+        />
       </div>
     );
   }
@@ -444,11 +474,12 @@ export function AdminPage() {
   const stats = overview || {};
 
   return (
-    <div className="clinic-page clinic-admin-page">
+    <div className="clinic-page clinic-page-guiaa clinic-admin-page clinic-admin-page-guiaa">
       <div className="clinic-page-header">
         <div>
+          <p className="clinic-page-eyebrow">Plataforma</p>
           <h1>
-            <Shield size={22} aria-hidden style={{ verticalAlign: "middle", marginRight: 8 }} />
+            <Shield size={22} aria-hidden />
             Administración GUIAA
           </h1>
           <p>Usuarios registrados en Supabase (tabla profiles), clínicas y operaciones.</p>
@@ -460,23 +491,38 @@ export function AdminPage() {
 
       <div className="clinic-report-kpi-grid">
         <div className="clinic-report-kpi">
-          <span className="clinic-report-kpi-label">Usuarios</span>
+          <div className="clinic-report-kpi-head">
+            <span className="clinic-report-kpi-icon"><Users size={18} aria-hidden /></span>
+            <span className="clinic-report-kpi-label">Usuarios</span>
+          </div>
           <div className="clinic-report-kpi-value">{stats.users_total ?? 0}</div>
         </div>
         <div className="clinic-report-kpi">
-          <span className="clinic-report-kpi-label">Clínicas</span>
+          <div className="clinic-report-kpi-head">
+            <span className="clinic-report-kpi-icon"><Building2 size={18} aria-hidden /></span>
+            <span className="clinic-report-kpi-label">Clínicas</span>
+          </div>
           <div className="clinic-report-kpi-value">{stats.organizations_total ?? 0}</div>
         </div>
         <div className="clinic-report-kpi">
-          <span className="clinic-report-kpi-label">Premium</span>
+          <div className="clinic-report-kpi-head">
+            <span className="clinic-report-kpi-icon"><Gem size={18} aria-hidden /></span>
+            <span className="clinic-report-kpi-label">Premium</span>
+          </div>
           <div className="clinic-report-kpi-value">{stats.premium_users ?? 0}</div>
         </div>
         <div className="clinic-report-kpi">
-          <span className="clinic-report-kpi-label">Mascotas</span>
+          <div className="clinic-report-kpi-head">
+            <span className="clinic-report-kpi-icon"><PawPrint size={18} aria-hidden /></span>
+            <span className="clinic-report-kpi-label">Mascotas</span>
+          </div>
           <div className="clinic-report-kpi-value">{stats.patients_total ?? 0}</div>
         </div>
         <div className="clinic-report-kpi">
-          <span className="clinic-report-kpi-label">Soporte abierto</span>
+          <div className="clinic-report-kpi-head">
+            <span className="clinic-report-kpi-icon"><MessageSquare size={18} aria-hidden /></span>
+            <span className="clinic-report-kpi-label">Soporte abierto</span>
+          </div>
           <div className="clinic-report-kpi-value">{supportOpenCount}</div>
         </div>
       </div>
@@ -484,7 +530,7 @@ export function AdminPage() {
       <section className="clinic-settings-card">
         <div className="clinic-admin-users-head">
           <h2>
-            <MessageSquare size={18} aria-hidden style={{ verticalAlign: "middle", marginRight: 6 }} />
+            <MessageSquare size={18} aria-hidden />
             Soporte / tickets
           </h2>
           <span className="clinic-admin-users-count">{supportTickets.length} tickets</span>
@@ -503,9 +549,13 @@ export function AdminPage() {
           ))}
         </div>
         {supportLoading ? (
-          <p className="clinic-muted">Cargando tickets...</p>
+          <ClinicTableSkeleton rows={5} cols={5} />
         ) : supportTickets.length === 0 ? (
-          <p className="clinic-muted">No hay tickets con este filtro.</p>
+          <ClinicEmptyState
+            icon={MessageSquare}
+            title="Sin tickets"
+            description="No hay tickets de soporte con el filtro seleccionado."
+          />
         ) : (
           <div className="clinic-table-wrap">
             <table className="clinic-table clinic-admin-support-table">
@@ -761,7 +811,7 @@ export function AdminPage() {
           if (!open) closeCedulaPreview();
         }}
       >
-        <DialogContent className="clinic-admin-cedula-preview-dialog max-w-4xl">
+        <DialogContent className={clinicDialogClass("clinic-admin-cedula-preview-dialog", "max-w-4xl")}>
           {cedulaPreview && (
             <>
               <DialogHeader>
@@ -823,7 +873,7 @@ export function AdminPage() {
           if (!open) closeConsultationHistory();
         }}
       >
-        <DialogContent className="clinic-admin-history-dialog max-w-5xl">
+        <DialogContent className={clinicDialogClass("clinic-admin-history-dialog", "max-w-5xl")}>
           {historyUser && (
             <>
               <DialogHeader>
@@ -981,7 +1031,7 @@ export function AdminPage() {
           if (!open) closeSupportTicket();
         }}
       >
-        <DialogContent className="clinic-admin-support-dialog max-w-2xl">
+        <DialogContent className={clinicDialogClass("clinic-admin-support-dialog", "max-w-2xl")}>
           {selectedTicket && (
             <>
               <DialogHeader>

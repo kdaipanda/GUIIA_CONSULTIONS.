@@ -1,35 +1,90 @@
-/** Colores del menú clínico (sidebar + paleta de comandos). */
+/**
+ * Paleta del menú clínico alineada con GUIAA:
+ * azul #265B93, teal #3d9b8f, navy #0c2d4d y variaciones suaves.
+ */
 const CLINIC_NAV_THEMES = {
-  dashboard: { from: "#3b82f6", to: "#2563eb", glow: "59, 130, 246" },
+  dashboard: {
+    from: "#265B93",
+    to: "#1e4a78",
+    glow: "38, 91, 147",
+  },
   "new-consultation": {
-    from: "#10b981",
-    to: "#059669",
-    glow: "16, 185, 129",
+    from: "#3d9b8f",
+    to: "#2f857a",
+    glow: "61, 155, 143",
     hero: true,
   },
-  clients: { from: "#8b5cf6", to: "#7c3aed", glow: "139, 92, 246" },
-  patients: { from: "#f59e0b", to: "#d97706", glow: "245, 158, 11" },
-  agenda: { from: "#0ea5e9", to: "#0284c7", glow: "14, 165, 233" },
-  inventory: { from: "#6366f1", to: "#4f46e5", glow: "99, 102, 241" },
-  billing: { from: "#14b8a6", to: "#0d9488", glow: "20, 184, 166" },
-  reports: { from: "#ec4899", to: "#db2777", glow: "236, 72, 153" },
-  tools: { from: "#f97316", to: "#ea580c", glow: "249, 115, 22" },
-  settings: { from: "#64748b", to: "#475569", glow: "100, 116, 139" },
+  clients: {
+    from: "#3d7bb3",
+    to: "#265B93",
+    glow: "61, 123, 179",
+  },
+  patients: {
+    from: "#358f87",
+    to: "#2a736d",
+    glow: "53, 143, 135",
+  },
+  agenda: {
+    from: "#4a8fc4",
+    to: "#3578a8",
+    glow: "74, 143, 196",
+  },
+  inventory: {
+    from: "#2a5f8f",
+    to: "#1e4a78",
+    glow: "42, 95, 143",
+  },
+  billing: {
+    from: "#3d9b8f",
+    to: "#328278",
+    glow: "61, 155, 143",
+  },
+  reports: {
+    from: "#5b7fa8",
+    to: "#466789",
+    glow: "91, 127, 168",
+  },
+  tools: {
+    from: "#6b8eae",
+    to: "#547892",
+    glow: "107, 142, 174",
+  },
+  settings: {
+    from: "#64748b",
+    to: "#475569",
+    glow: "100, 116, 139",
+  },
   "consultation-history": {
-    from: "#a855f7",
-    to: "#9333ea",
-    glow: "168, 85, 247",
+    from: "#4a6fa0",
+    to: "#365a85",
+    glow: "74, 111, 160",
   },
-  membership: { from: "#eab308", to: "#ca8a04", glow: "234, 179, 8" },
-  profile: { from: "#06b6d4", to: "#0891b2", glow: "6, 182, 212" },
-  admin: { from: "#ef4444", to: "#dc2626", glow: "239, 68, 68" },
+  membership: {
+    from: "#5a8f7e",
+    to: "#467564",
+    glow: "90, 143, 126",
+  },
+  profile: {
+    from: "#3d7bb3",
+    to: "#2f6a9e",
+    glow: "61, 123, 179",
+  },
+  admin: {
+    from: "#b85454",
+    to: "#943f3f",
+    glow: "184, 84, 84",
+  },
   "expert-consultation": {
-    from: "#7c3aed",
-    to: "#6d28d9",
-    glow: "124, 58, 237",
+    from: "#2f857a",
+    to: "#267068",
+    glow: "47, 133, 122",
     hero: true,
   },
-  "medical-images": { from: "#2563eb", to: "#1d4ed8", glow: "37, 99, 235" },
+  "medical-images": {
+    from: "#265B93",
+    to: "#1a4066",
+    glow: "38, 91, 147",
+  },
 };
 
 export function getClinicNavTheme(viewOrId) {

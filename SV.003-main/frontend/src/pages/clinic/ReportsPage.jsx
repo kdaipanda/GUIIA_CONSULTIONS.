@@ -12,6 +12,8 @@ import {
   FileDown,
   ArrowRight,
 } from "lucide-react";
+import "./clinicPageShared.css";
+import { ClinicReportsSkeleton } from "../../components/clinic/ClinicPageUi";
 import { useVet } from "../../context/VetContext";
 import { fetchReportsOverview } from "../../lib/clinicApi";
 import { Button } from "../../components/ui/button";
@@ -215,9 +217,10 @@ export function ReportsPage() {
   const go = (path) => navigate(path);
 
   return (
-    <div className="clinic-page clinic-reports-page">
+    <div className="clinic-page clinic-page-guiaa clinic-reports-page">
       <div className="clinic-page-header">
         <div>
+          <p className="clinic-page-eyebrow">Consultorio</p>
           <h1>Reportes</h1>
           <p>Indicadores de operación clínica, ingresos y actividad CDS.</p>
         </div>
@@ -249,7 +252,7 @@ export function ReportsPage() {
       {error && <p className="clinic-error">{error}</p>}
 
       {loading ? (
-        <p className="clinic-muted">Cargando reportes...</p>
+        <ClinicReportsSkeleton />
       ) : (
         <>
           <div className="clinic-report-kpi-grid">
@@ -260,8 +263,8 @@ export function ReportsPage() {
               hint={`${totals.occupancy_rate ?? 0}% completadas`}
               chart={apptSeries}
               chartId="report-appts"
-              colorFrom="#2563eb"
-              colorTo="#93c5fd"
+              colorFrom="#265b93"
+              colorTo="#93c5e8"
             />
             <KpiCard
               icon={DollarSign}
@@ -270,8 +273,8 @@ export function ReportsPage() {
               hint={`${totals.invoices ?? 0} recibos en periodo`}
               chart={revenueSeries}
               chartId="report-revenue"
-              colorFrom="#059669"
-              colorTo="#6ee7b7"
+              colorFrom="#3d9b8f"
+              colorTo="#a7e0d8"
             />
             <KpiCard
               icon={Stethoscope}
@@ -279,12 +282,12 @@ export function ReportsPage() {
               value={totals.consultations_ai ?? 0}
               chart={consSeries}
               chartId="report-cons"
-              colorFrom="#7c3aed"
-              colorTo="#c4b5fd"
+              colorFrom="#0c2d4d"
+              colorTo="#7ba3c4"
             />
             <KpiCard
               icon={Users}
-              label="Dueño registrado"
+              label="Dueños registrados"
               value={totals.clients ?? 0}
               hint={`${totals.patients ?? 0} mascotas`}
             />
@@ -308,7 +311,7 @@ export function ReportsPage() {
                 Citas por estado
               </h2>
               {Object.keys(overview?.appointments_by_status || {}).length === 0 ? (
-                <p className="clinic-muted">Sin citas en este periodo.</p>
+                <p className="clinic-report-empty">Sin citas en este periodo.</p>
               ) : (
                 <ul className="clinic-report-breakdown">
                   {Object.entries(overview.appointments_by_status).map(([status, count]) => (
@@ -327,7 +330,7 @@ export function ReportsPage() {
                 Recibos por estado
               </h2>
               {Object.keys(overview?.invoices_by_status || {}).length === 0 ? (
-                <p className="clinic-muted">Sin recibos en este periodo.</p>
+                <p className="clinic-report-empty">Sin recibos en este periodo.</p>
               ) : (
                 <ul className="clinic-report-breakdown">
                   {Object.entries(overview.invoices_by_status).map(([status, count]) => (
@@ -358,7 +361,7 @@ export function ReportsPage() {
                 </Button>
               </div>
               {(overview?.top_products || []).length === 0 ? (
-                <p className="clinic-muted">Sin ventas registradas en este periodo.</p>
+                <p className="clinic-report-empty">Sin ventas registradas en este periodo.</p>
               ) : (
                 <ul className="clinic-report-breakdown">
                   {overview.top_products.map((p, idx) => (

@@ -1,5 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Copy, Save, Users, UserPlus, Trash2 } from "lucide-react";
+import { Copy, Save, Users, UserPlus, Trash2, Settings, ShieldAlert } from "lucide-react";
+import "./clinicPageShared.css";
+import {
+  ClinicSettingsSkeleton,
+  ClinicEmptyState,
+} from "../../components/clinic/ClinicPageUi";
 import { useVet } from "../../context/VetContext";
 import { useClinic } from "../../context/ClinicContext";
 import {
@@ -137,22 +142,28 @@ export function SettingsPage() {
 
   if (!isOrgAdmin) {
     return (
-      <div className="clinic-page">
+      <div className="clinic-page clinic-page-guiaa">
         <div className="clinic-page-header">
           <div>
+            <p className="clinic-page-eyebrow">Consultorio</p>
             <h1>Configuración</h1>
             <p>Solo administradores del consultorio pueden editar esta sección.</p>
           </div>
         </div>
-        <p className="clinic-muted">Tu rol actual no tiene permisos de administración.</p>
+        <ClinicEmptyState
+          icon={ShieldAlert}
+          title="Sin permisos de administración"
+          description="Tu rol actual no permite modificar datos del consultorio ni invitar miembros."
+        />
       </div>
     );
   }
 
   return (
-    <div className="clinic-page">
+    <div className="clinic-page clinic-page-guiaa">
       <div className="clinic-page-header">
         <div>
+          <p className="clinic-page-eyebrow">Consultorio</p>
           <h1>Configuración del consultorio</h1>
           <p>Datos de la clínica, equipo y portal de citas.</p>
         </div>
@@ -162,11 +173,14 @@ export function SettingsPage() {
       {message && <p className="clinic-success-msg">{message}</p>}
 
       {loading ? (
-        <p className="clinic-muted">Cargando...</p>
+        <ClinicSettingsSkeleton />
       ) : (
         <>
-          <form onSubmit={handleSave} className="clinic-settings-card">
-            <h2>Datos generales</h2>
+          <form onSubmit={handleSave} className="clinic-settings-card clinic-form">
+            <h2>
+              <Settings size={18} aria-hidden />
+              Datos generales
+            </h2>
             <div className="clinic-form-grid-2">
               <div className="form-group">
                 <Label htmlFor="org-name">Nombre del consultorio</Label>
@@ -249,7 +263,11 @@ export function SettingsPage() {
             </form>
 
             {members.length === 0 ? (
-              <p className="clinic-muted">No hay miembros registrados.</p>
+              <ClinicEmptyState
+                icon={Users}
+                title="Sin miembros adicionales"
+                description="Invita colegas con su email de registro en GUIAA."
+              />
             ) : (
               <div className="clinic-table-wrap">
                 <table className="clinic-table">

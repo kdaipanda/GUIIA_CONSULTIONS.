@@ -1,11 +1,10 @@
-import React, {
+﻿import React, {
   useState,
   useEffect,
   useRef,
   useCallback,
 } from "react";
-import { BarChart3, CalendarDays, Gem, Sun, Cloud, CloudRain, CloudSun, Thermometer, Plus, ClipboardList, FlaskConical, Crown, Moon, Brain, FileDown } from "lucide-react";
-import * as Tabs from "@radix-ui/react-tabs";
+import { BarChart3, CalendarDays, Gem, Sun, Cloud, CloudRain, CloudSun, Thermometer, Plus, ClipboardList, FlaskConical, Crown, Moon, Brain, FileDown, User } from "lucide-react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
@@ -31,8 +30,22 @@ import { VetProvider, useVet } from "./context/VetContext";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { PrivacyModal } from "./components/PrivacyModal";
 import { LandingPage } from "./pages/LandingPage";
+import { LandingScreenshotCapturePage } from "./pages/LandingScreenshotCapturePage";
+import { MembershipPage } from "./pages/MembershipPage";
+import { PaymentSuccessPage } from "./pages/PaymentSuccessPage";
+import { ProfilePage } from "./pages/ProfilePage";
+import { ConsultationHistoryPage } from "./pages/ConsultationHistoryPage";
+import { MedicalImagesPage } from "./pages/MedicalImagesPage";
+import { DashboardActivitySection } from "./components/dashboard/DashboardActivitySection";
+import {
+  DEFAULT_PACKAGES,
+  getMembershipQuota,
+  parseMembershipCatalogResponse,
+} from "./lib/membershipPlans";
+import { GuiaaBrandLockup } from "./components/GuiaaBrandLockup";
 import { Header } from "./components/Header";
 import { AppShell } from "./layout/AppShell";
+import { AuthPageShell } from "./layout/AuthPageShell";
 import { ClinicShell } from "./layout/ClinicShell";
 import { ClinicProvider } from "./context/ClinicContext";
 import { ClientsPage } from "./pages/clinic/ClientsPage";
@@ -246,7 +259,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       title: "Perfil",
       description: "Ver y editar tu perfil",
       icon: "👤",
-      shortcut: "",
+      shortcut: "P",
       action: () => setView("profile"),
     },
   ];
@@ -578,17 +591,17 @@ const Router = ({ showToast }) => {
   const views = {
     landing: <LandingPage setView={handleSetView} />,
     register: (
-      <AppShell>
+      <AppShell fullBleed>
         <RegisterPage setView={handleSetView} setCedulaFlow={setCedulaFlow} />
       </AppShell>
     ),
     login: (
-      <AppShell>
+      <AppShell fullBleed>
         <LoginPage setView={handleSetView} setCedulaFlow={setCedulaFlow} />
       </AppShell>
     ),
     "cedula-verification": (
-      <AppShell>
+      <AppShell fullBleed>
         <CedulaVerificationPage
           setView={handleSetView}
           cedulaFlow={cedulaFlow}
@@ -603,12 +616,14 @@ const Router = ({ showToast }) => {
             setView={navigateSetView}
             onStartConsultation={openConsultationWithPatient}
           />
+          <div className="clinic-dashboard-cds-bridge" id="dashboard-cds-panel">
           <Dashboard
             embedded
             setView={navigateSetView}
             openConsultation={openConsultation}
             openExpertConsultation={openExpertConsultation}
           />
+          </div>
         </div>
       </ClinicShell>
     ),
@@ -673,7 +688,7 @@ const Router = ({ showToast }) => {
     ),
     "consultation-history": (
       <ClinicShell setView={navigateSetView}>
-        <ConsultationHistory
+        <ConsultationHistoryPage
           setView={navigateSetView}
           openConsultation={openConsultation}
         />
@@ -681,28 +696,38 @@ const Router = ({ showToast }) => {
     ),
     "medical-images": (
       <ClinicShell setView={navigateSetView}>
-        <MedicalImageInterpretation setView={navigateSetView} />
+        <MedicalImagesPage setView={navigateSetView} />
       </ClinicShell>
     ),
-    membership: (
+    membership: veterinarian ? (
       <ClinicShell setView={navigateSetView}>
         <MembershipPage setView={navigateSetView} />
       </ClinicShell>
+    ) : (
+      <AppShell fullBleed>
+        <MembershipPage setView={navigateSetView} />
+      </AppShell>
     ),
     "payment-success": (
-      <AppShell>
-        <PaymentSuccess setView={handleSetView} />
+      <AppShell fullBleed>
+        <PaymentSuccessPage setView={handleSetView} />
       </AppShell>
     ),
     profile: (
       <ClinicShell setView={navigateSetView}>
-        <Profile setView={navigateSetView} />
+        <ProfilePage setView={navigateSetView} />
       </ClinicShell>
     ),
   };
 
   return (
     <>
+      {location.pathname === "/captura-landing" ? (
+        <main id="main-content" className="app-main">
+          <LandingScreenshotCapturePage />
+        </main>
+      ) : (
+        <>
       <main id="main-content" className="app-main">
         {portalOrganizationId ? (
           <AppShell>
@@ -720,6 +745,8 @@ const Router = ({ showToast }) => {
         openExpertConsultation={openExpertConsultation}
         veterinarian={veterinarian}
       />
+        </>
+      )}
     </>
   );
 };
@@ -1168,11 +1195,9 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
   };
 
   return (
-    <div className="auth-page">
-      <Header setView={setView} showAuth={false} />
-
-      <div className="auth-container">
-        <div className="auth-card">
+    <>
+      <AuthPageShell setView={setView} wide>
+          <GuiaaBrandLockup variant="auth" className="mb-6" />
           <h2>Registro Profesional</h2>
           <p>Complete sus datos profesionales para acceder a la plataforma</p>
 
@@ -1419,15 +1444,14 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
               Inicia Sesión
             </button>
           </div>
-        </div>
-      </div>
+      </AuthPageShell>
 
       <TermsAndConditionsModal
         isOpen={showTermsModal}
         onClose={() => setShowTermsModal(false)}
         onAccept={handleAcceptTerms}
       />
-    </div>
+    </>
   );
 };
 
@@ -1622,25 +1646,9 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
   };
 
   return (
-    <div className="auth-page">
-      <Header setView={setView} showAuth={false} />
-
-      <div className="auth-container">
-        <div className="auth-card">
-          <div className="auth-branding">
-            <img
-              src="/GuiaLogo-mark.png"
-              alt="GUIAA"
-              className="auth-logo"
-            />
-            <div className="auth-brand-text">
-              <div className="auth-app-name">GUIAA</div>
-              <div className="auth-tagline">
-                <div>Gran universo de inteligencia animal.</div>
-                <div>Soporte a la decisión clínica CDS avanzado grado L4 y L5.</div>
-              </div>
-            </div>
-          </div>
+    <>
+      <AuthPageShell setView={setView}>
+          <GuiaaBrandLockup variant="auth" className="mb-6" />
           <h2>Iniciar Sesión</h2>
           <p>Ingresa con tu email y tu número de registro profesional</p>
 
@@ -1737,10 +1745,9 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
               Regístrate
             </button>
           </div>
-        </div>
-      </div>
+      </AuthPageShell>
       <PrivacyModal isOpen={showPrivacyModal} onAccept={handlePrivacyAccept} />
-    </div>
+    </>
   );
 };
 
@@ -1764,18 +1771,14 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
 
   if (!cedulaFlow?.veterinarian_id) {
     return (
-      <div className="auth-page">
-        <Header setView={setView} showAuth={false} />
-        <div className="auth-container">
-          <div className="auth-card">
-            <h2>Verificación requerida</h2>
-            <p>No hay una sesión de verificación activa. Vuelve a iniciar sesión.</p>
-            <Button className="w-full" onClick={() => setView("login")}>
-              Ir a Login
-            </Button>
-          </div>
-        </div>
-      </div>
+      <AuthPageShell setView={setView}>
+          <GuiaaBrandLockup variant="auth" className="mb-6" />
+          <h2>Verificación requerida</h2>
+          <p>No hay una sesión de verificación activa. Vuelve a iniciar sesión.</p>
+          <Button className="w-full" onClick={() => setView("login")}>
+            Ir a Login
+          </Button>
+      </AuthPageShell>
     );
   }
 
@@ -1867,10 +1870,8 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
   };
 
   return (
-    <div className="auth-page">
-      <Header setView={setView} showAuth={false} />
-      <div className="auth-container">
-        <div className="auth-card">
+    <AuthPageShell setView={setView} wide>
+          <GuiaaBrandLockup variant="auth" className="mb-6" />
           <h2>Verificación de registro profesional</h2>
           <p>
             Sube tu título, matrícula o licencia. Validamos veterinarios de Latinoamérica;
@@ -2010,9 +2011,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
               Volver al Login
             </Button>
           </div>
-        </div>
-      </div>
-    </div>
+    </AuthPageShell>
   );
 };
 
@@ -2029,6 +2028,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [buyingConsultations, setBuyingConsultations] = useState(false);
+  const [membershipPackages, setMembershipPackages] = useState(DEFAULT_PACKAGES);
 
   useEffect(() => {
     if (veterinarian) {
@@ -2040,6 +2040,26 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       setShowPrivacyModal(!privacyAccepted);
     }
   }, [veterinarian]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMembershipCatalog() {
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/membership/packages`);
+        if (!response.ok || cancelled) return;
+        const data = await response.json();
+        setMembershipPackages(parseMembershipCatalogResponse(data).packages);
+      } catch {
+        /* fallback DEFAULT_PACKAGES */
+      }
+    }
+
+    loadMembershipCatalog();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handlePrivacyAccept = () => {
     localStorage.setItem("sv_privacy_accepted", "true");
@@ -2080,6 +2100,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       else if (key === "i" && isPremiumMember(veterinarian)) {
         setView("medical-images");
       } else if (key === "m") setView("membership");
+      else if (key === "p") setView("profile");
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -2225,62 +2246,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
     }
   };
 
-  const getMembershipStatus = () => {
-    if (!veterinarian || !veterinarian.membership_type) {
-      return {
-        status: "Sin membresía",
-        color: "red",
-        consultations: 0,
-        maxConsultations: 0,
-      };
-    }
-
-    const membershipKey = veterinarian.membership_type.toLowerCase();
-    const maxConsultations =
-      membershipKey === "basic"
-        ? 30
-        : membershipKey === "professional"
-          ? 35
-          : membershipKey === "premium"
-            ? 150
-            : 0;
-
-    const rawRemaining =
-      veterinarian.consultations_remaining != null
-        ? veterinarian.consultations_remaining
-        : maxConsultations;
-    const remaining =
-      maxConsultations > 0
-        ? Math.min(rawRemaining, maxConsultations)
-        : rawRemaining || 0;
-
-    const statusLabel =
-      membershipKey === "basic"
-        ? "Básica"
-        : membershipKey === "professional"
-          ? "Profesional"
-          : membershipKey === "premium"
-            ? "Premium"
-            : veterinarian.membership_type;
-
-    const color =
-      maxConsultations === 0
-        ? "red"
-        : remaining > maxConsultations * 0.3
-          ? "green"
-          : remaining > 0
-            ? "orange"
-            : "red";
-
-    return {
-      status: statusLabel,
-      color,
-      consultations: remaining,
-      maxConsultations,
-    };
-  };
-
-  const membershipStatus = getMembershipStatus();
+  const membershipStatus = getMembershipQuota(veterinarian, membershipPackages);
 
   const vetName = veterinarian?.nombre || "Doctor/a";
   const membershipType = veterinarian?.membership_type?.toLowerCase();
@@ -2399,7 +2365,12 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       <div className="container">
         {embedded ? (
           <div className="clinic-dashboard-section-head clinic-dashboard-cds-head">
-            <h2>Panel CDS y membresía</h2>
+            <div>
+              <h2>Panel CDS y membresía</h2>
+              <p className="clinic-dashboard-cds-sub">
+                Consultas clínicas, saldo del plan y accesos al flujo diagnóstico.
+              </p>
+            </div>
             <button
               type="button"
               onClick={toggleTheme}
@@ -2439,7 +2410,11 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 </span>
                 <span className="hero-summary-divider">•</span>
                 <span className={`hero-badge ${membershipType === 'premium' ? 'premium' : 'basic'}`}>
-                  {membershipType === 'premium' ? '⭐ Premium' : '💎 Básico'}
+                  {membershipType === 'premium'
+                    ? '⭐ Premium'
+                    : membershipStatus.status !== 'Sin membresía'
+                      ? `💎 ${membershipStatus.status}`
+                      : '💎 Sin plan'}
                 </span>
                 {weatherData && (
                   <>
@@ -2477,20 +2452,34 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
             </div>
           </div>
           <div className="today-summary-metrics">
-            <div className="today-pill">
+            <button
+              type="button"
+              className="today-pill today-pill-btn"
+              onClick={() => embedded && setView("consultation-history")}
+              disabled={!embedded}
+            >
               <span className="pill-label">Consultas hoy</span>
               <span className="pill-value">{stats.today || 0}</span>
-            </div>
-            <div className="today-pill">
+            </button>
+            <button
+              type="button"
+              className="today-pill today-pill-btn"
+              onClick={() => embedded && setView("consultation-history")}
+              disabled={!embedded}
+            >
               <span className="pill-label">Este mes</span>
               <span className="pill-value">{stats.thisMonth}</span>
-            </div>
-            <div className="today-pill">
+            </button>
+            <button
+              type="button"
+              className="today-pill today-pill-btn"
+              onClick={() => setView("membership")}
+            >
               <span className="pill-label">Membresía</span>
               <span className="pill-value">
                 {membershipStatus.status} · {membershipConsultationsLabel}
               </span>
-            </div>
+            </button>
           </div>
         </div>
 
@@ -2551,27 +2540,50 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
               </div>
             </Card>
 
-            <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip="Tu plan de membresía actual">
+            <Card
+              className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""} cursor-pointer transition hover:border-guiaa-brand-blue/20`}
+              data-tooltip="Tu plan de membresía actual — clic para administrar"
+              role="button"
+              tabIndex={0}
+              onClick={() => setView("membership")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setView("membership");
+                }
+              }}
+            >
               <div className="stat-icon"><Gem /></div>
               <div className="stat-content">
                 <h3>{membershipStatus.consultations}</h3>
                 <p>Plan: {membershipStatus.status}</p>
-                {membershipType !== 'premium' && (
+                {membershipStatus.maxConsultations > 0 && (
                   <div className="membership-progress">
                     <div className="progress-bar">
-                      <div 
-                        className="progress-fill" 
-                        style={{ width: `${Math.min((stats.consultations / 10) * 100, 100)}%` }} 
+                      <div
+                        className="progress-fill"
+                        style={{
+                          width: `${Math.min(
+                            (membershipStatus.consultations / membershipStatus.maxConsultations) * 100,
+                            100,
+                          )}%`,
+                        }}
                       />
                     </div>
-                    <span className="progress-text">{stats.consultations}/10 consultas usadas</span>
+                    <span className="progress-text">
+                      {membershipStatus.consultations}/{membershipStatus.maxConsultations}{" "}
+                      consultas restantes
+                    </span>
                   </div>
                 )}
                 <div className="buy-consultations-label">Recargar consultas</div>
                 <div className="buy-consultations-group">
                   <Button
                     disabled={buyingConsultations}
-                    onClick={() => handleBuyConsultations("credits_10")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBuyConsultations("credits_10");
+                    }}
                   >
                     {buyingConsultations ? "Procesando..." : "10 consultas - $350"}
                   </Button>
@@ -2579,10 +2591,10 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
               </div>
             </Card>
 
-            {weatherLoading && (
+            {weatherLoading && !embedded && (
               <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`}><div className="skeleton skeleton-card" style={{width:'100%'}}></div></Card>
             )}
-            {weatherData && !weatherLoading && (
+            {weatherData && !weatherLoading && !embedded && (
               <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip="Clima actual en tu zona">
                 <div className="stat-icon">
                   {weatherData.weather[0].main === 'Clear' ? <Sun /> :
@@ -2694,6 +2706,23 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 role="button"
                 tabIndex={0}
                 className={`action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${embedded ? " clinic-dashboard-quick-btn" : ""}`}
+                onClick={() => setView("profile")}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setView("profile");
+                  }
+                }}
+              >
+                <div className="action-icon"><User /></div>
+                <h3>Perfil MVZ</h3>
+                <p>Datos profesionales y verificación</p>
+              </Card>
+
+              <Card
+                role="button"
+                tabIndex={0}
+                className={`action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${embedded ? " clinic-dashboard-quick-btn" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
                   setView("membership");
@@ -2713,171 +2742,16 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
           </div>
           </section>
 
-          <section className={`dashboard-block dashboard-block-activity${embedded ? " clinic-settings-card" : ""}`}>
-          <div className="dashboard-block-head">
-            <h2>Actividad clínica</h2>
-            <p>Seguimiento de consultas, accesos rápidos y casos recientes.</p>
-          </div>
-          <Tabs.Root className="tabs-root" defaultValue="activity">
-            <Tabs.List className="tabs-list" aria-label="Secciones del dashboard">
-              <Tabs.Trigger className="tabs-trigger" value="activity">Actividad</Tabs.Trigger>
-              <Tabs.Trigger className="tabs-trigger" value="shortcuts">Atajos</Tabs.Trigger>
-            </Tabs.List>
-
-            <Tabs.Content className="tabs-content" value="activity">
-              <div className="recent-consultations">
-                <div className="section-header">
-                  <h2>
-                    <span className="section-icon"><ClipboardList size={20} /></span>
-                    Consultas Recientes
-                  </h2>
-                  {recentConsultations.length > 0 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="view-all-btn h-auto px-2 font-semibold text-primary hover:text-primary/90"
-                      onClick={() => setView("consultation-history")}
-                    >
-                      Ver todas →
-                    </Button>
-                  )}
-                </div>
-                {dashboardLoading ? (
-                  <div className={`consultation-list${embedded ? " clinic-dashboard-list" : ""}`}>
-                    {[...Array(3)].map((_, idx) => (
-                      <div key={idx} className="consultation-item">
-                        <div className="skeleton skeleton-text" style={{width:'30%'}}></div>
-                        <div className="skeleton skeleton-text" style={{width:'60%'}}></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : recentConsultations.length > 0 ? (
-                  <div className={`consultation-list${embedded ? " clinic-dashboard-list" : ""}`}>
-                    {recentConsultations.map((consultation) => {
-                      const speciesIcons = {
-                        perro: '🐕', perros: '🐕',
-                        gato: '🐈', gatos: '🐈',
-                        ave: '🦜', aves: '🦜',
-                        tortuga: '🐢', tortugas: '🐢',
-                        conejo: '🐰', conejos: '🐰',
-                        hamster: '🐭', hamsters: '🐭',
-                        huron: '🦡', hurones: '🦡',
-                        erizo: '🦔', erizos: '🦔',
-                        iguana: '🦎', iguanas: '🦎',
-                        cuyo: '🐹', cuyos: '🐹',
-                      };
-                      const icon = speciesIcons[consultation.category?.toLowerCase()] || speciesIcons[consultation.especie?.toLowerCase()] || '🐾';
-                      
-                      return (
-                        <div 
-                          key={consultation.id} 
-                          className={`consultation-item${embedded ? " clinic-dashboard-list-item" : ""}`}
-                          onClick={() => {
-                            console.log('Opening consultation:', consultation.id);
-                            openConsultation && openConsultation(consultation.id);
-                          }}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          <div className="consultation-info">
-                            <div className="consultation-species-icon">{icon}</div>
-                            <div className="consultation-details">
-                              <h4>{consultation.nombre_mascota || consultation.especie || 'Mascota'} - {consultation.raza || consultation.category}</h4>
-                              <p>{consultation.motivo_consulta || consultation.detalle_paciente?.substring(0, 50) || 'Sin descripción'}</p>
-                              <span className="consultation-date">
-                                <CalendarDays size={14} style={{marginRight:4}} /> {new Date(consultation.created_at).toLocaleDateString('es-ES', { 
-                                  day: 'numeric', 
-                                  month: 'short',
-                                  year: 'numeric'
-                                })}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="consultation-actions">
-                            <span className={`status-badge ${consultation.status}`}>
-                              {consultation.status === "completed"
-                                ? "Completada"
-                                : consultation.status === "in_progress"
-                                  ? "En Progreso"
-                                  : "Borrador"}
-                            </span>
-                            <Button
-                              type="button"
-                              variant="guiaaPrimarySm"
-                              size="compactGradient"
-                              className="whitespace-nowrap"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openConsultation && openConsultation(consultation.id);
-                              }}
-                            >
-                              {consultation.status === "draft" ? "Continuar" : "Ver"}
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="empty-state">
-                    <div className="empty-state-icon"><ClipboardList size={48} /></div>
-                    <h3>Sin consultas aún</h3>
-                    <p>Comienza creando tu primera consulta veterinaria</p>
-                    <Button
-                      type="button"
-                      variant="guiaaPrimary"
-                      size="consult"
-                      onClick={() => setView("new-consultation")}
-                    >
-                      Crear Primera Consulta
-                    </Button>
-                  </div>
-                )}
-                {followUpCases.length > 0 && (
-                  <div className="followup-section">
-                    <div className="followup-header">
-                      <h3>Casos en seguimiento</h3>
-                      <span className="followup-count">{followUpCases.length}</span>
-                    </div>
-                    <div className="followup-list">
-                      {followUpCases.map((c) => (
-                        <div key={c.id} className="followup-item">
-                          <div className="followup-main">
-                            <span className="followup-dot" />
-                            <div className="followup-text">
-                              <div className="followup-line">
-                                <strong>{c.especie || "Caso"}</strong>
-                                {c.nombre_mascota && (
-                                  <span className="followup-patient"> · {c.nombre_mascota}</span>
-                                )}
-                              </div>
-                              <div className="followup-sub">
-                                {c.motivo_consulta || "Seguimiento clínico en curso"}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="followup-date">
-                            {c.created_at &&
-                              new Date(c.created_at).toLocaleDateString("es-MX", {
-                                day: "2-digit",
-                                month: "short",
-                              })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </Tabs.Content>
-
-            <Tabs.Content className="tabs-content" value="shortcuts">
-              <div className="keyboard-hints">
-                <strong>Atajos del Teclado</strong>
-                <div><kbd>N</kbd> Nueva Consulta • <kbd>E</kbd> Manejo Experto (Premium) • <kbd>H</kbd> Historial • <kbd>I</kbd> Imágenes (Premium) • <kbd>M</kbd> Membresía</div>
-              </div>
-            </Tabs.Content>
-          </Tabs.Root>
-          </section>
+          <DashboardActivitySection
+            recentConsultations={recentConsultations}
+            followUpCases={followUpCases}
+            dashboardLoading={dashboardLoading}
+            embedded={embedded}
+            isPremium={isPremiumMember(veterinarian)}
+            setView={setView}
+            openConsultation={openConsultation}
+            onExpertConsultation={openExpertConsultation}
+          />
         </div>
       </div>
     </div>
@@ -4036,1949 +3910,6 @@ const NewConsultation = ({
       </div>
     );
   }
-};
-
-// Consultation History
-const ConsultationHistory = ({ setView, openConsultation }) => {
-  const { veterinarian } = useVet();
-  const [consultations, setConsultations] = useState([]);
-  const [filteredConsultations, setFilteredConsultations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedConsultation, setSelectedConsultation] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searching, setSearching] = useState(false);
-  const [pdfLoadingId, setPdfLoadingId] = useState(null);
-  const [pdfError, setPdfError] = useState("");
-
-  const handleDownloadPdf = async (consultationId) => {
-    setPdfError("");
-    setPdfLoadingId(consultationId);
-    try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/consultation/${consultationId}`,
-        { headers: getAuthHeaders(veterinarian.id) },
-      );
-      if (!response.ok) {
-        throw new Error("No se pudo cargar la consulta para exportar");
-      }
-      const consultation = await response.json();
-      await downloadConsultationPdf(consultation, { veterinarian });
-      setPdfError("");
-    } catch (error) {
-      console.error("Error generating consultation PDF:", error);
-      setPdfError(error.message || "Error al generar el PDF");
-    } finally {
-      setPdfLoadingId(null);
-    }
-  };
-
-  useEffect(() => {
-    loadConsultations();
-  }, []);
-
-  useEffect(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) {
-      setFilteredConsultations(consultations);
-      setSearching(false);
-      return;
-    }
-
-    setSearching(true);
-    const filtered = consultations.filter((consultation) => {
-      const formData = consultation.form_data || {};
-      const consultationNumber =
-        consultation.consultation_number ||
-        (consultation.id
-          ? `CONS-${consultation.id.slice(0, 8).toUpperCase()}`
-          : "");
-      const candidateValues = [
-        consultationNumber,
-        consultation.id,
-        formData.nombre_mascota,
-        consultation.nombre_mascota,
-        formData.nombre_dueño,
-        formData.nombre_dueno,
-        consultation.nombre_dueño,
-        consultation.nombre_dueno,
-        formData.raza,
-        consultation.raza,
-        consultation.category,
-        consultation.especie,
-        formData.sintomas,
-        consultation.sintomas,
-        consultation.detalle_paciente,
-        formData.motivo_consulta,
-        consultation.motivo_consulta,
-      ];
-      return candidateValues
-        .filter(Boolean)
-        .some((value) => value.toString().toLowerCase().includes(query));
-    });
-    setFilteredConsultations(filtered);
-    setSearching(false);
-  }, [searchQuery, consultations]);
-
-  const loadConsultations = async () => {
-    try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/consultations/${veterinarian.id}/history`,
-        { headers: getAuthHeaders(veterinarian.id) },
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setConsultations(data.consultations || []);
-        setFilteredConsultations(data.consultations || []);
-      }
-    } catch (error) {
-      console.error("Error loading consultations:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleViewConsultation = async (consultationId) => {
-    try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/consultation/${consultationId}`,
-        { headers: getAuthHeaders(veterinarian.id) },
-      );
-      if (response.ok) {
-        const consultation = await response.json();
-        setSelectedConsultation(consultation);
-      }
-    } catch (error) {
-      console.error("Error loading consultation details:", error);
-    }
-  };
-
-  if (selectedConsultation) {
-    // Extraer datos del form_data para facilitar acceso
-    const formData = selectedConsultation.form_data || {};
-    const speciesIcons = {
-      perro: '🐕', perros: '🐕',
-      gato: '🐈', gatos: '🐈',
-      ave: '🦜', aves: '🦜',
-      tortuga: '🐢', tortugas: '🐢',
-      conejo: '🐰', conejos: '🐰',
-      hamster: '🐭', hamsters: '🐭',
-      huron: '🦡', hurones: '🦡',
-      erizo: '🦔', erizos: '🦔',
-      iguana: '🦎', iguanas: '🦎',
-      cuyo: '🐹', cuyos: '🐹',
-    };
-    const speciesIcon = speciesIcons[selectedConsultation.category?.toLowerCase()] || '🐾';
-    const statusClass = selectedConsultation.status || 'draft';
-    const statusLabel = statusClass === 'completed' ? 'Completada' : statusClass === 'in_progress' ? 'En Progreso' : 'Borrador';
-    const ratingValue = selectedConsultation.rating || 0;
-
-    return (
-      <div className="consultation-detail-page">
-        <div className="container">
-          {/* Header tipo ficha clínica */}
-          <div className="clinical-file-header">
-            <div className="clinical-file-top">
-              <button
-                onClick={() => setSelectedConsultation(null)}
-                className="back-btn-clinical"
-              >
-                <span>←</span> Volver al Historial
-              </button>
-              <div className="clinical-file-id">
-                {selectedConsultation.id ? `CONS-${selectedConsultation.id.slice(0, 8).toUpperCase()}` : "N/A"}
-              </div>
-            </div>
-            
-            <div className="clinical-file-main">
-              <div className="clinical-file-patient">
-                <div className="clinical-file-avatar">
-                  {speciesIcon}
-                </div>
-                <div className="clinical-file-info">
-                  <h1>{formData.nombre_mascota || 'Mascota'}</h1>
-                  <div className="clinical-file-meta">
-                    <span className="meta-pill species">{selectedConsultation.category || 'Especie'}</span>
-                    <span className="meta-pill breed">{formData.raza || 'Raza'}</span>
-                    {formData.edad && <span className="meta-pill age">{formData.edad}</span>}
-                    {formData.peso && <span className="meta-pill weight">{formData.peso}</span>}
-                  </div>
-                </div>
-              </div>
-              <div className="clinical-file-status">
-                <span className={`status-pill ${statusClass}`}>{statusLabel}</span>
-                <div className="clinical-rating" aria-label="Calificación">
-                  {Array.from({ length: 5 }).map((_, idx) => (
-                    <span
-                      key={idx}
-                      className={`paw-static ${idx < ratingValue ? "filled" : ""}`}
-                    >
-                      🐾
-                    </span>
-                  ))}
-                </div>
-                <span className="clinical-file-date">
-                  {new Date(selectedConsultation.created_at).toLocaleDateString("es-MX", {
-                    weekday: 'short',
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Contenido de la ficha */}
-          <div className="clinical-file-content">
-            {/* Datos de la mascota */}
-            <div className="clinical-section">
-              <div className="clinical-section-header">
-                <span className="clinical-section-icon">🩺</span>
-                <h2>Datos Clínicos</h2>
-              </div>
-              <div className="clinical-data-grid">
-                <div className="clinical-data-card">
-                  <span className="data-label">Propietario</span>
-                  <span className="data-value">{formData.nombre_dueño || formData.nombre_dueno || '—'}</span>
-                </div>
-                <div className="clinical-data-card">
-                  <span className="data-label">Sexo</span>
-                  <span className="data-value">{formData.sexo || '—'}</span>
-                </div>
-                <div className="clinical-data-card">
-                  <span className="data-label">Estado Reproductivo</span>
-                  <span className="data-value">{formData.estado_reproductivo || '—'}</span>
-                </div>
-                <div className="clinical-data-card">
-                  <span className="data-label">Condición Corporal</span>
-                  <span className="data-value">{formData.condicion_corporal || '—'}</span>
-                </div>
-                <div className="clinical-data-card">
-                  <span className="data-label">Vacunas</span>
-                  <span className="data-value">{formData.vacunas_vigentes || '—'}</span>
-                </div>
-                <div className="clinical-data-card">
-                  <span className="data-label">Síntomas</span>
-                  <span className="data-value">{formData.sintomas || '—'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Motivo de consulta */}
-            <div className="clinical-section">
-              <div className="clinical-section-header">
-                <span className="clinical-section-icon">📝</span>
-                <h2>Motivo de Consulta</h2>
-              </div>
-              <div className="clinical-text-block">
-                {selectedConsultation.detalle_paciente || 'Sin información adicional'}
-              </div>
-            </div>
-
-            {/* Análisis */}
-            {selectedConsultation.analysis && (
-              <div className="clinical-section analysis">
-                <div className="clinical-section-header">
-                  <span className="clinical-section-icon">🧠</span>
-                  <h2>Análisis Clínico</h2>
-                </div>
-                <div className="clinical-analysis-content">
-                  <pre className="clinical-analysis-text">
-                    {cleanClinicalDisplayText(selectedConsultation.analysis || "")}
-                  </pre>
-                </div>
-              </div>
-            )}
-
-            {/* Acciones */}
-            <div className="clinical-actions clinical-actions-bar">
-              <Button
-                type="button"
-                variant="guiaaSoft"
-                className="clinical-action-btn"
-                onClick={() => setSelectedConsultation(null)}
-              >
-                Cerrar ficha
-              </Button>
-              <Button
-                type="button"
-                variant="guiaaSoft"
-                className="clinical-action-btn gap-2"
-                disabled={pdfLoadingId === selectedConsultation.id}
-                onClick={() => handleDownloadPdf(selectedConsultation.id)}
-              >
-                <FileDown size={16} aria-hidden="true" />
-                <span>
-                  {pdfLoadingId === selectedConsultation.id
-                    ? "Generando PDF..."
-                    : "Descargar PDF"}
-                </span>
-              </Button>
-              {selectedConsultation.status !== 'completed' && openConsultation && (
-                <Button
-                  type="button"
-                  variant="guiaaPrimary"
-                  className="clinical-action-btn"
-                  onClick={() => openConsultation(selectedConsultation.id)}
-                >
-                  Continuar consulta
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="history-page">
-      <div className="container">
-        <div className="page-header">
-          <h1>Historial de Consultas</h1>
-          <p>Todas tus consultas veterinarias realizadas</p>
-        </div>
-
-        <div className="search-bar">
-          <div className="search-input-wrapper">
-            <span className="search-icon">🔍</span>
-            <input
-              type="text"
-              placeholder="Buscar por ID (CONS-0001), nombre de mascota, propietario o raza..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
-            />
-            {searchQuery && (
-              <button
-                className="clear-search-btn"
-                onClick={() => setSearchQuery("")}
-              >
-                ✕
-              </button>
-            )}
-          </div>
-          <Button
-            type="button"
-            onClick={() => setView("new-consultation")}
-          >
-            Nueva Consulta
-          </Button>
-        </div>
-
-        {searching && <div className="searching-indicator">Buscando...</div>}
-
-        {pdfError && (
-          <div className="error-message" style={{ marginBottom: "20px" }}>
-            {pdfError}
-          </div>
-        )}
-
-        {loading ? (
-          <div className="loading-state">Cargando historial...</div>
-        ) : filteredConsultations.length > 0 ? (
-          <div className="history-grid">
-            {filteredConsultations.map((consultation) => {
-              const speciesIcons = {
-                perro: "🐕",
-                perros: "🐕",
-                gato: "🐈",
-                gatos: "🐈",
-                ave: "🦜",
-                aves: "🦜",
-                tortuga: "🐢",
-                tortugas: "🐢",
-                conejo: "🐰",
-                conejos: "🐰",
-                hamster: "🐭",
-                hamsters: "🐭",
-                huron: "🦡",
-                hurones: "🦡",
-                erizo: "🦔",
-                erizos: "🦔",
-                iguana: "🦎",
-                iguanas: "🦎",
-                cuyo: "🐹",
-                cuyos: "🐹",
-              };
-
-              const formData = consultation.form_data || {};
-              const category = consultation.category || consultation.especie || "";
-              const icon = speciesIcons[category?.toLowerCase?.() || ""] || "🐾";
-
-              const consultationNumber =
-                consultation.consultation_number ||
-                (consultation.id
-                  ? `CONS-${consultation.id.slice(0, 8).toUpperCase()}`
-                  : null);
-              const patientName =
-                formData.nombre_mascota || consultation.nombre_mascota || "Sin nombre";
-              const ownerName =
-                formData.nombre_dueño ||
-                formData.nombre_dueno ||
-                consultation.nombre_dueño ||
-                consultation.nombre_dueno ||
-                "No especificado";
-              const breed = formData.raza || consultation.raza || "";
-              const age = formData.edad || consultation.edad || "";
-              const ratingValue = consultation.rating || 0;
-              const sex = formData.sexo || consultation.sexo || "";
-              const weight = formData.peso || consultation.peso || "";
-              const reproductiveStatus =
-                formData.estado_reproductivo ||
-                consultation.estado_reproductivo ||
-                "";
-              const bodyCondition =
-                formData.condicion_corporal || consultation.condicion_corporal || "";
-              const diet =
-                formData.alimentacion ||
-                formData.dieta ||
-                consultation.alimentacion ||
-                consultation.dieta ||
-                "";
-              const vaccines =
-                formData.vacunas_vigentes || consultation.vacunas_vigentes || "";
-              const symptoms =
-                formData.sintomas || consultation.sintomas || consultation.motivo_consulta;
-              const medicalImages = consultation.medical_images || [];
-
-              const status = consultation.status || "completed";
-              const statusLabel =
-                status === "completed"
-                  ? "Completada"
-                  : status === "in_progress"
-                  ? "En Progreso"
-                  : status === "draft"
-                  ? "Borrador"
-                  : "Registrada";
-
-              const categoryLabel = category
-                ? category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-                : "Especie";
-
-              return (
-                <div key={consultation.id} className="history-card">
-                  {/* Header con gradiente */}
-                  <div className={`history-card-header ${status}`}>
-                    <div className="history-card-top">
-                      <span className="history-card-id" title={consultationNumber || "ID-N/A"}>
-                        {consultationNumber || "ID-N/A"}
-                      </span>
-                      <span className={`history-status-badge ${status}`}>
-                        {status === "completed" && "✓ "}
-                        {statusLabel}
-                      </span>
-                    </div>
-                    <div className="history-card-patient">
-                      <div className="history-avatar" aria-hidden="true">
-                        {icon}
-                      </div>
-                      <div className="history-patient-info">
-                        <h3>{patientName}</h3>
-                        <div className="history-patient-meta">
-                          <span className="history-meta-item history-meta-species">
-                            {categoryLabel}
-                          </span>
-                          {breed && (
-                            <span className="history-meta-item">{breed}</span>
-                          )}
-                          {age && (
-                            <span className="history-meta-item">{age}</span>
-                          )}
-                        </div>
-                        {ratingValue > 0 && (
-                          <div
-                            className="history-rating"
-                            aria-label={`Calificación ${ratingValue} de 5`}
-                          >
-                            {Array.from({ length: 5 }).map((_, idx) => (
-                              <span
-                                key={idx}
-                                className={`paw-static ${idx < ratingValue ? "filled" : ""}`}
-                              >
-                                🐾
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Contenido */}
-                  <div className="history-card-body">
-                    <div className="history-info-grid">
-                      <div className="history-info-item">
-                        <span className="history-info-icon">👤</span>
-                        <div className="history-info-content">
-                          <span className="history-info-label">Propietario</span>
-                          <span className="history-info-value">{ownerName}</span>
-                        </div>
-                      </div>
-                      <div className="history-info-item">
-                        <span className="history-info-icon">📅</span>
-                        <div className="history-info-content">
-                          <span className="history-info-label">Fecha</span>
-                          <span className="history-info-value">
-                            {new Date(consultation.created_at || formData.fecha || consultation.fecha).toLocaleDateString("es-MX", {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {(sex || weight || reproductiveStatus || bodyCondition || diet || vaccines) && (
-                      <div className="history-data-pills">
-                        {sex && (
-                          <span className="history-pill">
-                            <strong>Sexo:</strong> {sex}
-                          </span>
-                        )}
-                        {weight && (
-                          <span className="history-pill">
-                            <strong>Peso:</strong> {weight}
-                          </span>
-                        )}
-                        {reproductiveStatus && (
-                          <span className="history-pill">
-                            <strong>Estado Reproductivo:</strong> {reproductiveStatus}
-                          </span>
-                        )}
-                        {bodyCondition && (
-                          <span className="history-pill">
-                            <strong>Condición:</strong> {bodyCondition}
-                          </span>
-                        )}
-                        {diet && (
-                          <span className="history-pill">
-                            <strong>Dieta:</strong> {diet}
-                          </span>
-                        )}
-                        {vaccines && (
-                          <span className="history-pill">
-                            <strong>Vacunas:</strong> {vaccines}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    {consultation.detalle_paciente && (
-                      <div className="history-motivo">
-                        <span className="history-motivo-label">📝 Motivo de consulta</span>
-                        <p className="history-motivo-text">{consultation.detalle_paciente}</p>
-                      </div>
-                    )}
-                    {(symptoms || consultation.analysis) && (
-                      <div className="history-extra">
-                        {symptoms && (
-                          <div className="history-extra-card">
-                            <span className="history-extra-label">Síntomas reportados</span>
-                            <p>{symptoms}</p>
-                          </div>
-                        )}
-                        {consultation.analysis && (
-                          <div className="history-extra-card highlight">
-                            <span className="history-extra-label">Análisis clínico</span>
-                            <p>
-                              {(() => {
-                                const cleaned = cleanClinicalDisplayText(consultation.analysis || "");
-                                return cleaned.length > 220 ? `${cleaned.slice(0, 220)}…` : cleaned;
-                              })()}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {medicalImages.length > 0 && (
-                      <div className="history-attachment-pill">
-                        📷 {medicalImages.length} interpretación
-                        {medicalImages.length > 1 ? "es" : ""} asociad
-                        {medicalImages.length > 1 ? "as" : "a"}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer con acciones */}
-                  <div className="history-card-footer history-card-footer-actions">
-                    <Button
-                      type="button"
-                      variant="guiaaPrimary"
-                      size="consult"
-                      className="history-card-action-btn group gap-2.5"
-                      onClick={() => handleViewConsultation(consultation.id)}
-                    >
-                      <span>Ver ficha clínica</span>
-                      <span className="text-lg transition-transform group-hover:translate-x-1">→</span>
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="guiaaSoft"
-                      size="consult"
-                      className="history-card-action-btn gap-2"
-                      disabled={pdfLoadingId === consultation.id}
-                      onClick={() => handleDownloadPdf(consultation.id)}
-                    >
-                      <FileDown size={16} aria-hidden="true" />
-                      <span>
-                        {pdfLoadingId === consultation.id
-                          ? "Generando PDF..."
-                          : "Descargar PDF"}
-                      </span>
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="empty-state">
-            <div className="empty-icon">📋</div>
-            <h3>
-              {searchQuery
-                ? "No se encontraron consultas"
-                : "No hay consultas aún"}
-            </h3>
-            <p>
-              {searchQuery
-                ? "Intenta con otro término de búsqueda"
-                : "Comienza creando tu primera consulta veterinaria"}
-            </p>
-            {!searchQuery && (
-              <Button
-                type="button"
-                onClick={() => setView("new-consultation")}
-              >
-                Crear Primera Consulta
-              </Button>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Medical Image Interpretation Component (Premium Only)
-const MedicalImageInterpretation = ({ setView }) => {
-  const { veterinarian } = useVet();
-  const [imageType, setImageType] = useState("blood_test");
-  const [patientName, setPatientName] = useState("");
-  const [imageClinicalContext, setImageClinicalContext] = useState(null);
-  const [additionalContext, setAdditionalContext] = useState("");
-  const [consultationId, setConsultationId] = useState("");
-  const [pastedStudyData, setPastedStudyData] = useState("");  // Datos de estudio pegados
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
-  const [history, setHistory] = useState([]);
-  const [showHistory, setShowHistory] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
-
-  const typeMeta = {
-    blood_test: {
-      label: "Análisis de Sangre",
-      icon: "🩸",
-      hint: "Especifica tipo de estudio (hemograma, bioquímica, etc.) y valores relevantes.",
-    },
-    urinalysis: {
-      label: "Urianálisis",
-      icon: "🧪",
-      hint: "Indica método de recolección y hallazgos previos en tira reactiva o sedimento.",
-    },
-  };
-
-  const imageMeta = typeMeta[imageType] || typeMeta.blood_test;
-
-  useEffect(() => {
-    if (veterinarian.membership_type?.toLowerCase() !== "premium") {
-      setError("Esta función es exclusiva para miembros Premium");
-    } else {
-      console.log("useEffect: Cargando historial para veterinario:", veterinarian.id);
-      loadHistory();
-    }
-  }, [veterinarian]);
-
-  const loadHistory = async () => {
-    try {
-      console.log("Cargando historial para veterinario:", veterinarian.id);
-      const response = await fetch(
-        `${BACKEND_URL}/api/medical-images/history?limit=50`,
-        { headers: getAuthHeaders(veterinarian.id) },
-      );
-      if (!response.ok) {
-        const errText = await response.text().catch(() => "");
-        throw new Error(
-          errText ? errText.slice(0, 200) : `Error del servidor: ${response.status}`,
-        );
-      }
-      const json = await response.json();
-      const rows = Array.isArray(json.images) ? json.images : [];
-      console.log("Historial cargado:", rows);
-      console.log("Número de registros:", rows?.length || 0);
-      setHistory(rows || []);
-    } catch (error) {
-      console.error("Error loading history:", error);
-      setHistory([]); // Asegurar que history sea un array vacío en caso de error
-    }
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const maxSize = 10 * 1024 * 1024;
-      const maxSizeLabel = '10MB';
-      
-      if (file.size > maxSize) {
-        setError(`El archivo es demasiado grande. Máximo ${maxSizeLabel}.`);
-        return;
-      }
-
-      setImageFile(file);
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-      setError("");
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!pastedStudyData || !pastedStudyData.trim()) {
-      setError("Por favor pega los datos del estudio");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setResult(null);
-
-    try {
-      const requestData = {
-        veterinarian_id: veterinarian.id,
-        image_base64: null,  // Enviar explícitamente como null (campo opcional en backend)
-        image_type: imageType,
-        patient_name: imageClinicalContext?.patient?.name || patientName || null,
-        patient_id: imageClinicalContext?.patientId || null,
-        consultation_id: consultationId || null,
-        additional_context: additionalContext || null,
-        pasted_study_data: pastedStudyData || null,  // Datos de estudio pegados
-      };
-
-      const response = await fetch(
-        `${BACKEND_URL}/api/medical-images/interpret`,
-        {
-          method: "POST",
-          headers: getAuthHeaders(veterinarian.id, {
-            "Content-Type": "application/json",
-          }),
-          body: JSON.stringify(requestData),
-        },
-      );
-
-      if (!response.ok) {
-        let errorMessage = `Error del servidor: ${response.status}`;
-        try {
-          const errorData = await response.json();
-          console.log("Error data recibido:", errorData);
-          
-          // Extraer el mensaje de error de diferentes formatos posibles
-          if (errorData) {
-            if (typeof errorData === 'string') {
-              errorMessage = errorData;
-            } else if (typeof errorData === 'object') {
-              // Intentar diferentes campos comunes para mensajes de error
-              errorMessage = errorData.detail || 
-                           errorData.message || 
-                           errorData.error || 
-                           (errorData.error?.message) ||
-                           JSON.stringify(errorData);
-            }
-          }
-        } catch (parseError) {
-          console.log("Error al parsear respuesta de error:", parseError);
-          // Si no se puede parsear como JSON, usar el texto de la respuesta
-          try {
-            const text = await response.text();
-            errorMessage = text || errorMessage;
-          } catch (textError) {
-            console.log("Error al obtener texto de respuesta:", textError);
-            // Si todo falla, usar el mensaje por defecto
-          }
-        }
-        // Asegurar que errorMessage sea siempre un string
-        const finalErrorMessage = typeof errorMessage === 'string' 
-          ? errorMessage 
-          : JSON.stringify(errorMessage);
-        throw new Error(finalErrorMessage);
-      }
-
-      const data = await response.json();
-      console.log("Resultado recibido del backend:", data);
-      console.log("Campo 'analysis' presente:", !!data.analysis);
-      console.log("Longitud de 'analysis':", data.analysis ? data.analysis.length : 0);
-      setResult(data);
-      // Recargar historial después de crear un nuevo análisis
-      await loadHistory();
-
-      // Clear form
-      setPastedStudyData("");
-      setPatientName("");
-      setImageClinicalContext(null);
-      setAdditionalContext("");
-      setConsultationId("");
-    } catch (err) {
-      console.error("Error en handleSubmit:", err);
-      // Asegurar que el error siempre sea un string
-      let errorMessage = "Error al procesar el estudio";
-      
-      if (err instanceof Error) {
-        errorMessage = err.message || errorMessage;
-      } else if (typeof err === 'string') {
-        errorMessage = err;
-      } else if (err && typeof err === 'object') {
-        // Si es un objeto, intentar extraer el mensaje
-        errorMessage = err.message || err.detail || err.error || JSON.stringify(err);
-      }
-      
-      // Asegurar que sea string y no esté vacío
-      errorMessage = String(errorMessage || "Error desconocido");
-      setError(errorMessage);
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (veterinarian.membership_type?.toLowerCase() !== "premium") {
-    return (
-      <div className="medical-images-page">
-        <div className="container">
-          <div className="premium-required">
-            <div className="premium-icon">🔒</div>
-            <h2>Función Premium Requerida</h2>
-            <p>
-              La interpretación de pruebas de laboratorio está disponible
-              exclusivamente para miembros Premium.
-            </p>
-            <Button
-              type="button"
-              onClick={() => setView("membership")}
-            >
-              Ver Planes Premium
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="medical-images-page">
-      <div className="container">
-        <div className="page-header">
-          <div>
-            <h1>🔬 Pruebas de Laboratorio</h1>
-            <p>
-              Interpretación de análisis de sangre y estudios clínicos
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => setShowHistory(!showHistory)}
-          >
-            {showHistory ? "Nueva Interpretación" : "Ver Historial"}
-          </Button>
-        </div>
-
-        {!showHistory ? (
-          <div className="image-interpretation-layout">
-            <div className="image-interpretation-form">
-              <form onSubmit={handleSubmit}>
-              <div className="form-section">
-                <h3>Tipo de Estudio</h3>
-                <div className="image-type-selector">
-                  <label
-                    className={`type-option ${imageType === "blood_test" ? "selected" : ""}`}
-                  >
-                    <input
-                      type="radio"
-                      value="blood_test"
-                      checked={imageType === "blood_test"}
-                      onChange={(e) => setImageType(e.target.value)}
-                    />
-                    <div className="type-content">
-                      <div className="type-icon">🩸</div>
-                      <span>Análisis de Sangre</span>
-                    </div>
-                  </label>
-                  <label
-                    className={`type-option ${imageType === "urinalysis" ? "selected" : ""}`}
-                  >
-                    <input
-                      type="radio"
-                      value="urinalysis"
-                      checked={imageType === "urinalysis"}
-                      onChange={(e) => setImageType(e.target.value)}
-                    />
-                    <div className="type-content">
-                      <div className="type-icon">🧪</div>
-                      <span>Urianálisis</span>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <div className="form-section">
-                <h3>Cargar Estudio</h3>
-                
-                {/* Alerta de ayuda para copiar PDFs */}
-                <div style={{
-                  marginBottom: '16px',
-                  backgroundColor: 'var(--bg-secondary)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '8px',
-                  overflow: 'hidden'
-                }}>
-                  <button
-                    type="button"
-                    onClick={() => setShowHelp(!showHelp)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      textAlign: 'left',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: 'var(--text-primary)'
-                    }}
-                  >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>ℹ️</span>
-                      <span>¿Cómo copiar texto de un PDF?</span>
-                    </span>
-                    <span style={{ fontSize: '18px' }}>{showHelp ? '▼' : '▶'}</span>
-                  </button>
-                  
-                  {showHelp && (
-                    <div style={{
-                      padding: '16px',
-                      borderTop: '1px solid var(--border-color)',
-                      backgroundColor: 'var(--bg-primary)',
-                      fontSize: '13px',
-                      lineHeight: '1.6',
-                      color: 'var(--text-primary)'
-                    }}>
-                      <div style={{ marginBottom: '16px' }}>
-                        <strong style={{ color: 'var(--accent-color)', display: 'block', marginBottom: '8px' }}>
-                          Caso 1: PDF normal (no escaneado ni bloqueado)
-                        </strong>
-                        <div style={{ marginLeft: '12px', marginBottom: '12px' }}>
-                          <strong>En un lector como Adobe Acrobat Reader:</strong>
-                          <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
-                            <li>Abre el PDF.</li>
-                            <li>Haz clic con el botón derecho y elige la herramienta de selección (o simplemente intenta arrastrar sobre el texto).</li>
-                            <li>Arrastra el cursor sobre el texto que quieras copiar.</li>
-                            <li>Clic derecho → Copiar, o usa Ctrl+C y luego Ctrl+V donde lo quieras pegar.</li>
-                          </ul>
-                        </div>
-                        <div style={{ marginLeft: '12px' }}>
-                          <strong>En el navegador (Chrome, Edge, etc.):</strong>
-                          <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
-                            <li>Abre el PDF en una pestaña.</li>
-                            <li>Selecciona el texto con el mouse.</li>
-                            <li>Ctrl+C y luego Ctrl+V en tu editor (Word, Bloc de notas, etc.).</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      <div style={{ marginBottom: '16px' }}>
-                        <strong style={{ color: 'var(--accent-color)', display: 'block', marginBottom: '8px' }}>
-                          Caso 2: PDF escaneado (es una imagen)
-                        </strong>
-                        <div style={{ marginLeft: '12px' }}>
-                          <p style={{ marginBottom: '8px' }}>
-                            Si al arrastrar el mouse no se selecciona texto, el PDF probablemente es una imagen y necesitas OCR.
-                          </p>
-                          <strong>Opciones fáciles y gratis:</strong>
-                          <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
-                            <li>Usar una web de OCR (por ejemplo iLovePDF "OCR PDF", PDF Candy "Extraer texto" o similares). Entra al sitio, sube tu PDF, descarga el TXT/Word resultante y copia el texto.</li>
-                            <li>Convertir el PDF a Word/TXT en webs tipo Smallpdf, PDFgear, etc., y luego copiar el texto desde el archivo convertido.</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      <div style={{ marginBottom: '16px' }}>
-                        <strong style={{ color: 'var(--accent-color)', display: 'block', marginBottom: '8px' }}>
-                          Caso 3: PDF protegido contra copia
-                        </strong>
-                        <div style={{ marginLeft: '12px' }}>
-                          <p style={{ marginBottom: '8px' }}>
-                            Si sí se ve el texto pero no te deja copiarlo, está protegido:
-                          </p>
-                          <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
-                            <li>Si conoces la contraseña, ábrelo en Adobe Acrobat y usa la opción de eliminar seguridad para quitar las restricciones, luego copia normalmente.</li>
-                            <li>Si no tienes la contraseña, algunas herramientas online ("desbloquear PDF") convierten el archivo a Word o lo dejan sin protección, y de ahí ya puedes copiar, siempre respetando derechos de autor.</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      <div>
-                        <strong style={{ color: 'var(--accent-color)', display: 'block', marginBottom: '8px' }}>
-                          Alternativa rápida: abrir en Word o Google Docs
-                        </strong>
-                        <ul style={{ marginTop: '4px', paddingLeft: '20px', marginLeft: '12px' }}>
-                          <li>Abrir PDF en Microsoft Word: Word lo convierte a documento editable y ya puedes copiar el texto.</li>
-                          <li>Subir el PDF a Google Drive, clic derecho → "Abrir con" → Documentos de Google, y luego copiar desde ahí.</li>
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Área para pegar datos del estudio */}
-                <div className="form-group">
-                  <label style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                    📋 Copia y pega los datos de tu estudio
-                  </label>
-                  <Textarea
-                    value={pastedStudyData}
-                    onChange={(e) => setPastedStudyData(e.target.value)}
-                    placeholder={`Pega aquí los resultados del análisis, por ejemplo:
-
-BIOMETRÍA HEMÁTICA
-Eritrocitos: 6.5 x10^6/µL (Ref: 5.5-8.5)
-Hemoglobina: 14.2 g/dL (Ref: 12-18)
-Leucocitos: 12,500/µL (Ref: 6,000-17,000)
-
-QUÍMICA SANGUÍNEA
-Glucosa: 95 mg/dL (Ref: 74-143)
-BUN: 18 mg/dL (Ref: 7-27)
-Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
-...`}
-                    rows={6}
-                    className="resize-y rounded-lg border-2 border-dashed border-[var(--border-color)] bg-[var(--bg-secondary)] font-mono text-[13px] leading-relaxed"
-                  />
-                  <small style={{
-                    color: 'var(--text-secondary)', 
-                    display: 'block', 
-                    marginTop: '8px'
-                  }}>
-                    💡 Copia los resultados del laboratorio y pégalos aquí para su análisis.
-                  </small>
-                </div>
-              </div>
-
-              <PatientSelector
-                value={imageClinicalContext?.patientId}
-                onChange={(ctx) => {
-                  setImageClinicalContext(ctx);
-                  if (ctx?.patient?.name) {
-                    setPatientName(ctx.patient.name);
-                  }
-                }}
-              />
-
-              <div className="form-row">
-                {!imageClinicalContext?.patientId && (
-                  <div className="form-group">
-                    <label>Nombre de la mascota (Opcional)</label>
-                    <input
-                      type="text"
-                      value={patientName}
-                      onChange={(e) => setPatientName(e.target.value)}
-                      placeholder="Ej: Max, Luna, Rocky"
-                    />
-                  </div>
-                )}
-
-                <div className="form-group">
-                  <label>ID de Consulta Previa (Opcional)</label>
-                  <input
-                    type="text"
-                    value={consultationId}
-                    onChange={(e) => setConsultationId(e.target.value)}
-                    placeholder="Para incluir historial de la mascota"
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Contexto Adicional (Opcional)</label>
-                <Textarea
-                  value={additionalContext}
-                  onChange={(e) => setAdditionalContext(e.target.value)}
-                  placeholder="Información adicional relevante para la interpretación..."
-                  rows={4}
-                  className="min-h-[100px] resize-y"
-                />
-              </div>
-
-              {error && (
-                <div className="error-message">
-                  {typeof error === 'string' 
-                    ? error 
-                    : typeof error === 'object' && error !== null
-                      ? (error.message || error.detail || JSON.stringify(error))
-                      : String(error || 'Error desconocido')}
-                </div>
-              )}
-
-              <div className="form-actions">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setView("dashboard")}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={loading || !pastedStudyData || !pastedStudyData.trim()}
-                >
-                  {loading ? "Analizando..." : "Interpretar Estudio"}
-                </Button>
-              </div>
-            </form>
-
-            {result && (
-              <div className="interpretation-result">
-                <h2>Resultado de la Interpretación</h2>
-
-                <div className="result-section">
-                  <h3>🔍 Hallazgos Principales</h3>
-                  <div className="result-content">
-                    {result.findings && Array.isArray(result.findings) && result.findings.length > 0
-                      ? result.findings.map((finding, idx) => <div key={idx}>• {finding}</div>)
-                      : result.findings && !Array.isArray(result.findings)
-                        ? result.findings
-                        : result.analysis
-                          ? <div style={{color: '#64748b', fontStyle: 'italic'}}>Ver análisis detallado abajo para hallazgos completos</div>
-                          : <div style={{color: '#64748b', fontStyle: 'italic'}}>No hay hallazgos disponibles</div>}
-                  </div>
-                </div>
-
-                <div className="result-section">
-                  <h3>💊 Recomendaciones</h3>
-                  <div className="result-content">
-                    {result.recommendations && Array.isArray(result.recommendations) && result.recommendations.length > 0
-                      ? result.recommendations.map((rec, idx) => <div key={idx}>• {rec}</div>)
-                      : result.recommendations && !Array.isArray(result.recommendations)
-                        ? result.recommendations
-                        : result.analysis
-                          ? <div style={{color: '#64748b', fontStyle: 'italic'}}>Ver análisis detallado abajo para recomendaciones completas</div>
-                          : <div style={{color: '#64748b', fontStyle: 'italic'}}>No hay recomendaciones disponibles</div>}
-                  </div>
-                </div>
-
-                <div className="result-section detailed">
-                  <h3>📊 Análisis Detallado</h3>
-                  <div className="result-content detailed-analysis" style={{whiteSpace: "pre-wrap", wordWrap: "break-word", maxHeight: "600px", overflowY: "auto", padding: "16px", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0"}}>
-                    {result.analysis ? (
-                      <pre style={{margin: 0, fontFamily: "inherit", fontSize: "14px", lineHeight: "1.6", color: "#1e293b"}}>{cleanClinicalDisplayText(result.analysis)}</pre>
-                    ) : result.detailed_analysis ? (
-                      <pre style={{margin: 0, fontFamily: "inherit", fontSize: "14px", lineHeight: "1.6", color: "#1e293b"}}>{cleanClinicalDisplayText(result.detailed_analysis)}</pre>
-                    ) : (
-                      <div style={{color: "#64748b", fontStyle: "italic"}}>No hay análisis disponible</div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="result-actions">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setResult(null)}
-                  >
-                    Nueva Interpretación
-                  </Button>
-                  <Button type="button" onClick={() => setShowHistory(true)}>
-                    Ver Historial
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <aside className="image-side-panel">
-            <div className="side-panel-header">
-              <span className="side-panel-pill">Panel clínico</span>
-              <h3>Resumen del estudio</h3>
-              <p>
-                Verifica que la información clave del caso esté completa antes de
-                enviar el estudio a interpretación.
-              </p>
-            </div>
-
-            <div className="side-panel-section">
-              <div className="side-panel-label">Tipo de estudio</div>
-              <div className="side-panel-main">
-                <span className="side-panel-icon">{imageMeta.icon}</span>
-                <span className="side-panel-text">{imageMeta.label}</span>
-              </div>
-              <p className="side-panel-hint">{imageMeta.hint}</p>
-            </div>
-
-            <div className="side-panel-section">
-              <div className="side-panel-label">Mascota</div>
-              <div className="side-panel-chip">
-                {patientName || "Sin nombre asignado"}
-              </div>
-              {consultationId && (
-                <div className="side-panel-sub">
-                  Consulta asociada: <span>#{consultationId}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="side-panel-section">
-              <div className="side-panel-label">Estado</div>
-              <div
-                className={`side-panel-status ${loading ? "loading" : result ? "done" : "idle"}`}
-              >
-                {loading
-                  ? "Analizando imagen..."
-                  : result
-                    ? "Resultado disponible"
-                    : "Listo para enviar"}
-              </div>
-            </div>
-          </aside>
-        </div>
-        ) : (
-          <div className="interpretation-history">
-            <h2>Historial de Interpretaciones</h2>
-            {history.length > 0 ? (
-              <div className="history-grid">
-                {history.map((item) => (
-                  <div key={item.id} className="history-card">
-                    <div className="history-header">
-                      <div className="history-type">
-                        {item.image_type === "blood_test" &&
-                          "🩸 Análisis de Sangre"}
-                        {item.image_type === "urinalysis" && "🧪 Urianálisis"}
-                        {item.image_type === "xray" && "📷 Imagen médica"}
-                      </div>
-                      <div className="history-date">
-                        {new Date(item.created_at).toLocaleDateString("es-MX", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </div>
-                    </div>
-                    {item.patient_name && (
-                      <div className="history-patient">
-                        <strong>Mascota:</strong> {item.patient_name}
-                      </div>
-                    )}
-                    <div className="history-preview">
-                      {(() => {
-                        const preview = item.analysis
-                          ? cleanClinicalDisplayText(item.analysis)
-                          : item.findings && Array.isArray(item.findings)
-                            ? item.findings.join(", ")
-                            : item.findings
-                              ? String(item.findings)
-                              : item.detailed_analysis
-                                ? cleanClinicalDisplayText(item.detailed_analysis)
-                                : "Sin análisis disponible";
-                        return preview.length > 150 ? `${preview.substring(0, 150)}...` : preview;
-                      })()}
-                    </div>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => {
-                        setResult(item);
-                        setShowHistory(false);
-                      }}
-                    >
-                      Ver Completo
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <div className="empty-icon">🔬</div>
-                <h3>No hay interpretaciones aún</h3>
-                <p>Comienza pegando los datos de tu primer estudio</p>
-                <Button type="button" onClick={() => setShowHistory(false)}>
-                  Nueva Interpretación
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Membership Page
-const MembershipPage = ({ setView }) => {
-  const { veterinarian, refreshProfile } = useVet();
-  const [packages, setPackages] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [billingCycle, setBillingCycle] = useState("monthly"); // 'monthly' or 'annual'
-
-  // Refrescar perfil al cargar la página de membresía para tener datos actualizados
-  // Usar un timeout para evitar que el refresh cause redirecciones inmediatas
-  useEffect(() => {
-    if (veterinarian?.id) {
-      // Usar setTimeout para que el refresh ocurra después de que la vista esté establecida
-      const timeoutId = setTimeout(() => {
-        refreshProfile();
-      }, 100);
-      return () => clearTimeout(timeoutId);
-    }
-  }, []); // Solo ejecutar al montar, no cuando cambia veterinarian
-
-  // Si no está autenticado, mostrar mensaje y opción de login
-  if (!veterinarian) {
-    return (
-      <div className="membership-page">
-        <div className="container">
-          <div className="auth-required-message" style={{
-            padding: "40px",
-            textAlign: "center",
-            backgroundColor: "#fff3cd",
-            border: "2px solid #ffc107",
-            borderRadius: "8px",
-            marginTop: "40px"
-          }}>
-            <div style={{ fontSize: "48px", marginBottom: "20px" }}>🔒</div>
-            <h2 style={{ marginBottom: "15px", color: "#856404" }}>
-              Inicia sesión para ver y comprar membresías
-            </h2>
-            <p style={{ marginBottom: "20px", color: "#856404" }}>
-              Necesitas tener una cuenta para acceder a nuestros planes de membresía.
-            </p>
-            <Button
-              type="button"
-              onClick={() => setView("login")}
-              className="mr-2.5"
-            >
-              Iniciar Sesión
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setView("register")}
-            >
-              Registrarse
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const defaultPackages = {
-    basic: {
-      name: "Básico",
-      price_monthly: 950,
-      price_annual: 950 * 10, // 2 meses de cortesía aprox.
-      consultations: 30,
-    },
-    professional: {
-      name: "Profesional",
-      price_monthly: 1250,
-      price_annual: 1250 * 10,
-      consultations: 35,
-    },
-    premium: {
-      name: "Premium",
-      price_monthly: 2200,
-      price_annual: 2200 * 10,
-      consultations: 150,
-    },
-  };
-
-  useEffect(() => {
-    loadPackages();
-  }, []);
-
-  const loadPackages = async () => {
-    try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/membership/packages`,
-      );
-      if (response.ok) {
-        const data = await response.json();
-        if (data.packages && Object.keys(data.packages).length > 0) {
-          setPackages(data.packages);
-        } else {
-          setPackages(defaultPackages);
-        }
-      } else {
-        setPackages(defaultPackages);
-      }
-    } catch (error) {
-      console.error("Error loading packages:", error);
-      setPackages(defaultPackages);
-    }
-  };
-
-  const handlePurchase = async (packageId) => {
-    // Validar que el usuario esté autenticado antes de intentar comprar
-    if (!veterinarian || !veterinarian.id) {
-      alert("Debes estar registrado e iniciar sesión para contratar una membresía");
-      setView("login");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      console.log("Iniciando checkout para paquete:", packageId);
-      console.log("Veterinarian ID:", veterinarian.id);
-      console.log("Veterinarian completo:", veterinarian);
-      
-      const headers = getAuthHeaders(veterinarian.id);
-      console.log("Headers enviados:", headers);
-      
-      const response = await fetch(
-        `${BACKEND_URL}/api/payments/checkout/session`,
-        {
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify({
-            package_id: packageId,
-            origin_url: window.location.origin,
-            billing_cycle: billingCycle,
-            veterinarian_id: veterinarian.id,
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Error del servidor:", response.status, errorText);
-        let errorMessage = "Error creando sesión de pago";
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.detail || errorData.message || errorMessage;
-        } catch (e) {
-          errorMessage = errorText || errorMessage;
-        }
-        throw new Error(errorMessage);
-      }
-
-      const data = await response.json();
-      console.log("Respuesta del servidor:", data);
-      
-      if (!data.checkout_url) {
-        console.error("No se recibió checkout_url en la respuesta:", data);
-        throw new Error("No se recibió la URL de checkout. Por favor, intenta de nuevo.");
-      }
-
-      console.log("Redirigiendo a:", data.checkout_url);
-      window.location.href = data.checkout_url;
-    } catch (error) {
-      console.error("Error en handlePurchase:", error);
-      console.error("Error completo:", error);
-      // Mostrar mensaje más detallado en consola para debugging
-      if (error.message) {
-        console.error("Mensaje de error:", error.message);
-      }
-      const errorMessage = error.message || "Error procesando el pago. Inténtalo de nuevo.";
-      alert(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getMembershipStatus = () => {
-    if (!veterinarian || !veterinarian.membership_type) {
-      return { text: "Sin membresía activa", color: "red" };
-    }
-
-    const expiry = veterinarian.membership_expires
-      ? new Date(veterinarian.membership_expires)
-      : null;
-
-    if (expiry && expiry < new Date()) {
-      return { text: "Membresía expirada", color: "red" };
-    }
-
-    const remaining = veterinarian.consultations_remaining || 0;
-    const packageName =
-      packages[veterinarian.membership_type]?.name ||
-      veterinarian.membership_type;
-
-    return {
-      text: `${packageName} - ${remaining >= 150 ? "150 consultas" : remaining} consultas`,
-      color:
-        remaining > 5 || remaining >= 150
-          ? "green"
-          : remaining > 0
-            ? "orange"
-            : "red",
-    };
-  };
-
-  const status = getMembershipStatus();
-
-  return (
-    <div className="membership-page">
-      <div className="container">
-        <div className="membership-hero">
-          <h1>Elige tu Plan</h1>
-          <p>Selecciona la membresía que mejor se adapte a tu práctica veterinaria</p>
-          {status.text !== "Sin membresía activa" && (
-            <div className="current-membership-badge" style={{ 
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "10px 20px",
-              background: status.color === "#48bb78" ? "rgba(16, 185, 129, 0.1)" : "rgba(245, 158, 11, 0.1)",
-              borderRadius: "50px",
-              marginTop: "16px",
-              fontSize: "14px",
-              fontWeight: "600",
-              color: status.color
-            }}>
-              <span style={{ fontSize: "18px" }}>{status.color === "#48bb78" ? "✓" : "⏳"}</span>
-              {status.text}
-            </div>
-          )}
-        </div>
-
-        <div className="billing-toggle-container">
-          <div className="billing-toggle-wrapper">
-            <button
-              onClick={() => setBillingCycle("monthly")}
-              className={`billing-toggle-btn ${billingCycle === "monthly" ? "active" : ""}`}
-            >
-              Mensual
-            </button>
-            <button
-              onClick={() => setBillingCycle("annual")}
-              className={`billing-toggle-btn ${billingCycle === "annual" ? "active" : ""}`}
-            >
-              Anual
-              <span className="billing-badge">Ahorra 2 meses</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="pricing-grid">
-          {Object.entries(packages).map(([key, pkg]) => {
-            const price =
-              billingCycle === "annual" ? pkg.price_annual : pkg.price_monthly;
-            const periodText =
-              billingCycle === "annual" ? "MXN/año" : "MXN/mes";
-            const monthlyEquivalent =
-              billingCycle === "annual"
-                ? (pkg.price_annual / 12).toFixed(2)
-                : null;
-
-            const consultationsLabel =
-              key === "basic"
-                ? "30C (consultas mensuales)"
-                : key === "professional"
-                  ? "35C (consultas mensuales)"
-                  : key === "premium"
-                    ? "150C (consultas mensuales)"
-                    : pkg.consultations === "unlimited"
-                      ? "Consultas ilimitadas"
-                      : `${pkg.consultations} consultas/mes`;
-
-            return (
-              <div
-                key={key}
-                className={`pricing-card ${veterinarian?.membership_type === key ? "current" : ""}`}
-              >
-                <div className="pricing-header">
-                  <h3>{pkg.name}</h3>
-                  <div className="price">
-                    <span className="currency">$</span>
-                    <span className="amount">{price}</span>
-                    <span className="period">{periodText} + IVA</span>
-                  </div>
-                  {billingCycle === "annual" && (
-                    <div
-                      style={{
-                        fontSize: "14px",
-                        color: "#4CAF50",
-                        marginTop: "5px",
-                      }}
-                    >
-                      ≈ ${monthlyEquivalent} MXN/mes
-                    </div>
-                  )}
-                  {veterinarian?.membership_type === key && (
-                    <div className="current-plan-pill">Plan actual</div>
-                  )}
-                </div>
-
-                <div className="pricing-features">
-                  <div className="feature">
-                    ✅ {consultationsLabel}
-                  </div>
-                  <div className="feature">
-                    ✅ {key === "basic"
-                      ? "Consultas para perros y gatos"
-                      : key === "professional"
-                        ? "Consultas para perros,gatos y especies exoticas"
-                        : key === "premium"
-                          ? "Todas las especies"
-                          : "Sistema especializado por categoría"}
-                  </div>
-                  <div className="feature">✅ Diagnósticos clínicos asistidos</div>
-                  <div className="feature">✅ Planes de tratamiento</div>
-                  <div className="feature">✅ Referencias bibliográficas</div>
-                  {key === "professional" && (
-                    <>
-                      <div className="feature">✅ Soporte prioritario</div>
-                      <div className="feature">✅ Historial extendido</div>
-                    </>
-                  )}
-                  {key === "premium" && (
-                    <>
-                      <div className="feature">✅ Soporte 24/7</div>
-                      <div className="feature">✅ 150 consultas mensuales</div>
-                      <div className="feature">✅ Contenido exclusivo</div>
-                      <div className="feature">✅ Análisis avanzados</div>
-                    </>
-                  )}
-                </div>
-
-                <button
-                  onClick={() => handlePurchase(key)}
-                  disabled={loading || veterinarian?.membership_type === key}
-                  className={`btn ${key === "premium" ? "btn-primary" : "btn-secondary"} btn-full`}
-                >
-                  {veterinarian?.membership_type === key
-                    ? "Plan Actual"
-                    : loading
-                      ? "Procesando..."
-                      : "Seleccionar Plan"}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="membership-info">
-          <h2>¿Por qué elegir una membresía?</h2>
-          <div className="info-grid">
-            <div className="info-card">
-              <div className="info-icon">🔬</div>
-              <h3>Sistema Especializado</h3>
-              <p>
-                Análisis especializados entrenados específicamente para cada
-                categoría animal
-              </p>
-            </div>
-            <div className="info-card">
-              <div className="info-icon">⚡</div>
-              <h3>Resultados Rápidos</h3>
-              <p>Análisis completo en minutos, no en horas</p>
-            </div>
-            <div className="info-card">
-              <div className="info-icon">📚</div>
-              <h3>Basado en Evidencia</h3>
-              <p>
-                Recomendaciones respaldadas por literatura científica
-                actualizada
-              </p>
-            </div>
-            <div className="info-card">
-              <div className="info-icon">🔄</div>
-              <h3>Actualización Continua</h3>
-              <p>Sistema en constante mejora con nuevos avances veterinarios</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Payment Success Page
-const PaymentSuccess = ({ setView }) => {
-  const { login } = useVet();
-  const [paymentStatus, setPaymentStatus] = useState("checking");
-  const [sessionId, setSessionId] = useState(null);
-  const [purchaseType, setPurchaseType] = useState(null);
-  const [creditsPurchased, setCreditsPurchased] = useState(null);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get("session_id");
-
-    if (id) {
-      setSessionId(id);
-      pollPaymentStatus(id);
-    } else {
-      setPaymentStatus("error");
-    }
-  }, []);
-
-  const pollPaymentStatus = async (sessionId, attempts = 0) => {
-    const maxAttempts = 5;
-
-    if (attempts >= maxAttempts) {
-      setPaymentStatus("timeout");
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/payments/checkout/status/${sessionId}`,
-      );
-
-      if (!response.ok) {
-        throw new Error("Error verificando pago");
-      }
-
-      const data = await response.json();
-
-      if (data.payment_status === "paid") {
-        if (data?.veterinarian) {
-          login(data.veterinarian);
-        }
-        setPurchaseType(data.purchase_type || null);
-        setCreditsPurchased(data.credits || null);
-        setPaymentStatus("success");
-        return;
-      } else if (data.status === "expired") {
-        setPaymentStatus("expired");
-        return;
-      }
-
-      // Continue polling
-      setTimeout(() => pollPaymentStatus(sessionId, attempts + 1), 2000);
-    } catch (error) {
-      console.error("Error checking payment:", error);
-      setPaymentStatus("error");
-    }
-  };
-
-  return (
-    <div className="payment-success-page">
-      <Header setView={setView} />
-
-      <div className="container">
-        <div className="payment-status-container">
-          {paymentStatus === "checking" && (
-            <div className="status-card">
-              <div className="status-icon loading">⏳</div>
-              <h2>Verificando Pago</h2>
-              <p>
-                Estamos procesando tu pago, esto puede tomar unos momentos...
-              </p>
-            </div>
-          )}
-
-          {paymentStatus === "success" && (
-            <div className="status-card success">
-              <div className="status-icon">✅</div>
-              <h2>¡Pago Exitoso!</h2>
-              <p>
-                {purchaseType === "consultation_credits"
-                  ? `Se han agregado ${creditsPurchased || ""} consultas a tu cuenta.`
-                  : "Tu membresía ha sido activada correctamente. Ya puedes comenzar\n                a usar todas las funciones de GUIAA."}
-              </p>
-              <div className="status-actions">
-                <Button type="button" onClick={() => setView("dashboard")}>
-                  Ir al Dashboard
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setView("new-consultation")}
-                >
-                  Nueva Consulta
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {paymentStatus === "error" && (
-            <div className="status-card error">
-              <div className="status-icon">❌</div>
-              <h2>Error en el Pago</h2>
-              <p>
-                Hubo un problema procesando tu pago. Por favor, intenta
-                nuevamente.
-              </p>
-              <div className="status-actions">
-                <Button type="button" onClick={() => setView("membership")}>
-                  Intentar Nuevamente
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setView("dashboard")}
-                >
-                  Volver al Dashboard
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {paymentStatus === "expired" && (
-            <div className="status-card error">
-              <div className="status-icon">⌛</div>
-              <h2>Sesión Expirada</h2>
-              <p>
-                La sesión de pago ha expirado. Por favor, inicia el proceso
-                nuevamente.
-              </p>
-              <div className="status-actions">
-                <Button type="button" onClick={() => setView("membership")}>
-                  Volver a Membresías
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {paymentStatus === "timeout" && (
-            <div className="status-card error">
-              <div className="status-icon">⏰</div>
-              <h2>Tiempo Agotado</h2>
-              <p>
-                No pudimos verificar el estado del pago. Revisa tu email para
-                confirmación o contacta soporte.
-              </p>
-              <div className="status-actions">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setView("dashboard")}
-                >
-                  Ir al Dashboard
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Profile Page
-const Profile = ({ setView }) => {
-  const { veterinarian } = useVet();
-
-  return (
-    <div className="profile-page">
-      <div className="container">
-        <div className="page-header">
-          <h1>Perfil Profesional</h1>
-          <p>Información de tu cuenta veterinaria</p>
-        </div>
-
-        <div className="profile-content">
-          <div className="profile-card">
-            <div className="profile-header">
-              <div className="profile-avatar-wrapper">
-                <div className="profile-avatar">
-                  {veterinarian.nombre.charAt(0).toUpperCase()}
-                </div>
-                <div className="profile-avatar-ring"></div>
-              </div>
-              <div className="profile-info">
-                <h2>{veterinarian.nombre}</h2>
-                <p className="profile-specialty">{veterinarian.especialidad || "Medicina Veterinaria"}</p>
-                <div className="verification-badge-wrapper">
-                  <span
-                    className={`verification-status ${veterinarian.verified ? "verified" : "pending"}`}
-                  >
-                    <span className="verification-icon">
-                      {veterinarian.verified ? "✓" : "⏳"}
-                    </span>
-                    <span className="verification-text">
-                      {veterinarian.verified
-                        ? "Verificado"
-                        : "Pendiente de verificación"}
-                    </span>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="profile-details">
-              <div className="detail-row">
-                <div className="detail-label">
-                  <span className="detail-icon">📧</span>
-                  <strong>Email</strong>
-                </div>
-                <span className="detail-value">{veterinarian.email}</span>
-              </div>
-              <div className="detail-row">
-                <div className="detail-label">
-                  <span className="detail-icon">📱</span>
-                  <strong>Teléfono</strong>
-                </div>
-                <span className="detail-value">{veterinarian.telefono || "No registrado"}</span>
-              </div>
-              <div className="detail-row">
-                <div className="detail-label">
-                  <span className="detail-icon">🆔</span>
-                  <strong>Registro profesional</strong>
-                </div>
-                <span className="detail-value">
-                  {veterinarian.cedula_profesional || "No registrado"}
-                  {veterinarian.profesional_pais
-                    ? ` · ${countryLabel(veterinarian.profesional_pais)}`
-                    : ""}
-                </span>
-              </div>
-              <div className="detail-row">
-                <div className="detail-label">
-                  <span className="detail-icon">⭐</span>
-                  <strong>Años de Experiencia</strong>
-                </div>
-                <span className="detail-value">{veterinarian.años_experiencia || 0} años</span>
-              </div>
-              <div className="detail-row">
-                <div className="detail-label">
-                  <span className="detail-icon">🏛️</span>
-                  <strong>Institución</strong>
-                </div>
-                <span className="detail-value">{veterinarian.institucion || "No registrada"}</span>
-              </div>
-              <div className="detail-row">
-                <div className="detail-label">
-                  <span className="detail-icon">📅</span>
-                  <strong>Miembro desde</strong>
-                </div>
-                <span className="detail-value">
-                  {veterinarian.created_at
-                    ? new Date(veterinarian.created_at).toLocaleDateString("es-MX", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })
-                    : "No disponible"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 export default App;
