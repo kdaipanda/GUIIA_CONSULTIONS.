@@ -26,6 +26,7 @@ import { useVet } from "../context/VetContext";
 import { clinicNavIsHero, clinicNavThemeStyle } from "../lib/clinicNavTheme";
 import { PlatformOnboarding } from "../components/PlatformOnboarding";
 import { hasCompletedPlatformOnboarding } from "../lib/platformOnboarding";
+import { ClinicMobileNavDrawer } from "./ClinicMobileNavDrawer";
 
 const BASE_NAV_ITEMS = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard, view: "dashboard" },
@@ -157,8 +158,6 @@ export function ClinicShell({ children, setView }) {
     };
   }, []);
 
-  const closeMobileNav = () => setMobileNavOpen(false);
-
   const navItems = useMemo(() => {
     const items = [...BASE_NAV_ITEMS];
     if (role === "owner" || role === "admin") {
@@ -218,35 +217,38 @@ export function ClinicShell({ children, setView }) {
           <button
             type="button"
             className="clinic-mobile-nav-toggle"
-            onClick={() => setMobileNavOpen((open) => !open)}
+            onClick={() => setMobileNavOpen(true)}
             aria-expanded={mobileNavOpen}
-            aria-controls="clinic-sidebar-nav"
+            aria-controls="clinic-mobile-drawer-nav"
           >
             <Menu size={20} aria-hidden />
-            <span>{mobileNavOpen ? "Cerrar menú" : "Menú clínica"}</span>
+            <span>Menú clínica</span>
           </button>
         </div>
 
-        {mobileNavOpen && (
-          <button
-            type="button"
-            className="clinic-sidebar-backdrop"
-            aria-label="Cerrar menú"
-            onClick={closeMobileNav}
-          />
-        )}
+        <ClinicMobileNavDrawer
+          open={mobileNavOpen}
+          onOpenChange={setMobileNavOpen}
+          navItems={navItems}
+          organizationName={organization?.name}
+          orgLoading={orgLoading}
+          setView={setView}
+          adminSupportOpen={adminSupportOpen}
+          pendingAgendaRequests={pendingAgendaRequests}
+          lowStockCount={lowStockCount}
+        />
 
-        <aside className={`clinic-sidebar${mobileNavOpen ? " mobile-open" : ""}`}>
+        <aside className="clinic-sidebar clinic-sidebar--desktop">
           <div className="clinic-sidebar-head">
             <span className="clinic-sidebar-title">Clínica</span>
             {!orgLoading && organization?.name && (
               <span className="clinic-sidebar-org">{organization.name}</span>
             )}
           </div>
-          <nav
+        <nav
             id="clinic-sidebar-nav"
             className="clinic-sidebar-nav"
-            aria-label="Módulos clínicos"
+            aria-label="Módulos clínicos (escritorio)"
           >
             {navItems.map(({ to, label, icon: Icon, view }, index) => (
               <NavLink
@@ -261,7 +263,6 @@ export function ClinicShell({ children, setView }) {
                 }
                 onClick={() => {
                   setView?.(view);
-                  closeMobileNav();
                 }}
               >
                 <Icon size={18} aria-hidden />

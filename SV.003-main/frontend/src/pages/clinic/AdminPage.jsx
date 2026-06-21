@@ -24,6 +24,7 @@ import {
   updateAdminSupportTicket,
   replyAdminSupportTicket,
 } from "../../lib/clinicApi";
+import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -176,11 +177,9 @@ export function AdminPage() {
   const [cedulaPreview, setCedulaPreview] = useState(null);
   const [cedulaPreviewUrl, setCedulaPreviewUrl] = useState("");
   const [cedulaPreviewLoading, setCedulaPreviewLoading] = useState(false);
-  const [cedulaPreviewError, setCedulaPreviewError] = useState("");
   const [historyUser, setHistoryUser] = useState(null);
   const [historyConsultations, setHistoryConsultations] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [historyError, setHistoryError] = useState("");
   const [historyPdfLoading, setHistoryPdfLoading] = useState(false);
   const [expandedConsultationId, setExpandedConsultationId] = useState(null);
   const [supportTickets, setSupportTickets] = useState([]);
@@ -191,13 +190,10 @@ export function AdminPage() {
   const [ticketDetail, setTicketDetail] = useState(null);
   const [ticketReply, setTicketReply] = useState("");
   const [ticketActing, setTicketActing] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
     setLoading(true);
-    setError("");
     try {
       const access = await fetchAdminAccess(veterinarian.id);
       const allowedUser = !!access.platform_admin;
@@ -226,7 +222,7 @@ export function AdminPage() {
         setSupportLoading(false);
       }
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
       setAllowed(false);
     } finally {
       setLoading(false);
@@ -243,14 +239,13 @@ export function AdminPage() {
     if (!deleteEmail.trim()) return;
     if (!window.confirm(`¿Eliminar permanentemente a ${deleteEmail}?`)) return;
     setActing(true);
-    setMessage("");
     try {
       const data = await adminDeleteUser(veterinarian.id, deleteEmail.trim());
-      setMessage(data.message);
+      notifySuccess(data.message || "Usuario eliminado.");
       setDeleteEmail("");
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setActing(false);
     }
@@ -259,14 +254,12 @@ export function AdminPage() {
   const handleVerifyCedula = async (user) => {
     if (!window.confirm(`¿Intentar validación SEP para ${user.nombre} (México)?`)) return;
     setCedulaActingId(user.id);
-    setError("");
-    setMessage("");
     try {
       const data = await adminVerifyUserCedula(veterinarian.id, user.id);
-      setMessage(data.message || "Verificación completada.");
+      notifySuccess(data.message || "Verificación completada.");
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setCedulaActingId(null);
     }
@@ -275,14 +268,12 @@ export function AdminPage() {
   const handleApproveCedula = async (user) => {
     if (!window.confirm(`¿Aprobar el registro profesional de ${user.nombre}?`)) return;
     setCedulaActingId(user.id);
-    setError("");
-    setMessage("");
     try {
       const data = await adminReviewUserCedula(veterinarian.id, user.id, "approve");
-      setMessage(data.message);
+      notifySuccess(data.message || "Registro profesional aprobado.");
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setCedulaActingId(null);
     }
@@ -292,14 +283,12 @@ export function AdminPage() {
     const note = window.prompt(`Motivo de rechazo para ${user.nombre} (opcional):`, "");
     if (note === null) return;
     setCedulaActingId(user.id);
-    setError("");
-    setMessage("");
     try {
       const data = await adminReviewUserCedula(veterinarian.id, user.id, "reject", note);
-      setMessage(data.message);
+      notifySuccess(data.message || "Registro profesional rechazado.");
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setCedulaActingId(null);
     }
@@ -308,13 +297,12 @@ export function AdminPage() {
   const openConsultationHistory = async (user) => {
     setHistoryUser(user);
     setHistoryConsultations([]);
-    setHistoryError("");
     setHistoryLoading(true);
     try {
       const data = await fetchAdminUserConsultations(veterinarian.id, user.id, 50);
       setHistoryConsultations(data.consultations || []);
     } catch (err) {
-      setHistoryError(err.message);
+      notifyError(err.message);
     } finally {
       setHistoryLoading(false);
     }
@@ -323,7 +311,6 @@ export function AdminPage() {
   const closeConsultationHistory = () => {
     setHistoryUser(null);
     setHistoryConsultations([]);
-    setHistoryError("");
     setHistoryLoading(false);
     setHistoryPdfLoading(false);
     setExpandedConsultationId(null);
@@ -332,13 +319,12 @@ export function AdminPage() {
   const handleDownloadHistoryPdf = async () => {
     if (!historyUser || historyConsultations.length === 0) return;
     setHistoryPdfLoading(true);
-    setHistoryError("");
     try {
       await downloadUserConsultationsHistoryPdf(historyUser, historyConsultations, {
         generatedBy: veterinarian,
       });
     } catch (err) {
-      setHistoryError(err.message || "No se pudo generar el PDF");
+      notifyError(err.message || "No se pudo generar el PDF");
     } finally {
       setHistoryPdfLoading(false);
     }
@@ -347,20 +333,18 @@ export function AdminPage() {
   const closeCedulaPreview = () => {
     setCedulaPreview(null);
     setCedulaPreviewUrl("");
-    setCedulaPreviewError("");
     setCedulaPreviewLoading(false);
   };
 
   const openCedulaPreview = async (user) => {
     setCedulaPreview(user);
     setCedulaPreviewUrl("");
-    setCedulaPreviewError("");
     setCedulaPreviewLoading(true);
     try {
       const data = await fetchAdminUserCedulaDocument(veterinarian.id, user.id);
       setCedulaPreviewUrl(data.url || "");
     } catch (err) {
-      setCedulaPreviewError(err.message);
+      notifyError(err.message);
     } finally {
       setCedulaPreviewLoading(false);
     }
@@ -375,7 +359,7 @@ export function AdminPage() {
       const data = await fetchAdminSupportTicket(veterinarian.id, ticket.id);
       setTicketDetail(data.ticket || null);
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
       setSelectedTicket(null);
     } finally {
       setTicketActing(false);
@@ -391,16 +375,15 @@ export function AdminPage() {
   const handleTicketStatusChange = async (status) => {
     if (!ticketDetail?.id) return;
     setTicketActing(true);
-    setError("");
     try {
       const data = await updateAdminSupportTicket(veterinarian.id, ticketDetail.id, { status });
       setTicketDetail(data.ticket ? { ...ticketDetail, ...data.ticket } : ticketDetail);
       const supportData = await fetchAdminSupportTickets(veterinarian.id, supportFilter);
       setSupportTickets(supportData.tickets || []);
       setSupportOpenCount(supportData.open_count ?? 0);
-      setMessage("Estado del ticket actualizado.");
+      notifySuccess("Estado del ticket actualizado.");
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setTicketActing(false);
     }
@@ -410,7 +393,6 @@ export function AdminPage() {
     e.preventDefault();
     if (!ticketDetail?.id || !ticketReply.trim()) return;
     setTicketActing(true);
-    setError("");
     try {
       await replyAdminSupportTicket(veterinarian.id, ticketDetail.id, ticketReply.trim());
       const data = await fetchAdminSupportTicket(veterinarian.id, ticketDetail.id);
@@ -419,9 +401,9 @@ export function AdminPage() {
       const supportData = await fetchAdminSupportTickets(veterinarian.id, supportFilter);
       setSupportTickets(supportData.tickets || []);
       setSupportOpenCount(supportData.open_count ?? 0);
-      setMessage("Respuesta enviada al usuario.");
+      notifySuccess("Respuesta enviada al usuario.");
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setTicketActing(false);
     }
@@ -461,7 +443,6 @@ export function AdminPage() {
             <p>Acceso restringido a administradores de plataforma.</p>
           </div>
         </div>
-        {error && <p className="clinic-error">{error}</p>}
         <ClinicEmptyState
           icon={Shield}
           title="Sin acceso de administrador"
@@ -485,9 +466,6 @@ export function AdminPage() {
           <p>Usuarios registrados en Supabase (tabla profiles), clínicas y operaciones.</p>
         </div>
       </div>
-
-      {error && <p className="clinic-error">{error}</p>}
-      {message && <p className="clinic-success-msg">{message}</p>}
 
       <div className="clinic-report-kpi-grid">
         <div className="clinic-report-kpi">
@@ -830,10 +808,7 @@ export function AdminPage() {
                 {cedulaPreviewLoading && (
                   <p className="clinic-muted">Cargando documento...</p>
                 )}
-                {cedulaPreviewError && (
-                  <p className="clinic-error">{cedulaPreviewError}</p>
-                )}
-                {!cedulaPreviewLoading && !cedulaPreviewError && cedulaPreviewUrl && (
+                {!cedulaPreviewLoading && cedulaPreviewUrl && (
                   cedulaDocKind(cedulaPreview.cedula_document_url) === "pdf" ? (
                     <iframe
                       title={`Cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
@@ -849,7 +824,7 @@ export function AdminPage() {
                   )
                 )}
               </div>
-              {!cedulaPreviewLoading && !cedulaPreviewError && cedulaPreviewUrl && (
+              {!cedulaPreviewLoading && cedulaPreviewUrl && (
                 <div className="clinic-admin-cedula-preview-footer">
                   <a
                     href={cedulaPreviewUrl}
@@ -883,7 +858,7 @@ export function AdminPage() {
                     <DialogDescription>
                       {historyUser.nombre || historyUser.email}
                       {historyUser.email && historyUser.nombre ? ` · ${historyUser.email}` : ""}
-                      {!historyLoading && !historyError
+                      {!historyLoading
                         ? ` · ${historyConsultations.length} consulta${historyConsultations.length === 1 ? "" : "s"}`
                         : ""}
                     </DialogDescription>
@@ -906,11 +881,10 @@ export function AdminPage() {
                 {historyLoading && (
                   <p className="clinic-muted">Cargando historial...</p>
                 )}
-                {historyError && <p className="clinic-error">{historyError}</p>}
-                {!historyLoading && !historyError && historyConsultations.length === 0 && (
+                {!historyLoading && historyConsultations.length === 0 && (
                   <p className="clinic-muted">Este usuario aún no tiene consultas registradas.</p>
                 )}
-                {!historyLoading && !historyError && historyConsultations.length > 0 && (
+                {!historyLoading && historyConsultations.length > 0 && (
                   <div className="clinic-admin-history-list">
                     {historyConsultations.map((c) => {
                       const patient =

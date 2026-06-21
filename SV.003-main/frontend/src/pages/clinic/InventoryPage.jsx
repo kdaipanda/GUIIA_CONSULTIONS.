@@ -16,6 +16,7 @@ import {
   deleteProduct,
   registerStockMovement,
 } from "../../lib/clinicApi";
+import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -88,7 +89,6 @@ export function InventoryPage() {
   const [search, setSearch] = useState("");
   const [lowStockOnly, setLowStockOnly] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [migrationHint, setMigrationHint] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [stockOpen, setStockOpen] = useState(false);
@@ -105,7 +105,6 @@ export function InventoryPage() {
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
     setLoading(true);
-    setError("");
     setMigrationHint(false);
     try {
       const [data, summaryData] = await Promise.all([
@@ -122,7 +121,7 @@ export function InventoryPage() {
         setMigrationHint(true);
         setProducts([]);
       } else {
-        setError(err.message);
+        notifyError(err.message);
       }
     } finally {
       setLoading(false);
@@ -172,7 +171,7 @@ export function InventoryPage() {
       setMovements(data.movements || []);
       if (data.product) setHistoryProduct(data.product);
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setHistoryLoading(false);
     }
@@ -192,13 +191,15 @@ export function InventoryPage() {
     try {
       if (editing) {
         await updateProduct(veterinarian.id, editing.id, payload);
+        notifySuccess("Producto actualizado.");
       } else {
         await createProduct(veterinarian.id, payload);
+        notifySuccess("Producto registrado.");
       }
       setDialogOpen(false);
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setSaving(false);
     }
@@ -214,10 +215,11 @@ export function InventoryPage() {
         quantity: Number(stockForm.quantity),
         reason: stockForm.reason || null,
       });
+      notifySuccess("Movimiento de stock registrado.");
       setStockOpen(false);
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setSaving(false);
     }
@@ -227,9 +229,10 @@ export function InventoryPage() {
     if (!window.confirm(`¿Eliminar "${product.name}"?`)) return;
     try {
       await deleteProduct(veterinarian.id, product.id);
+      notifySuccess("Producto eliminado.");
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     }
   };
 
@@ -319,8 +322,6 @@ export function InventoryPage() {
           {lowStockOnly ? "Ver todos" : "Solo stock bajo"}
         </Button>
       </div>
-
-      {error && <div className="error-message">{error}</div>}
 
       {loading ? (
         <ClinicTableSkeleton rows={6} cols={5} />

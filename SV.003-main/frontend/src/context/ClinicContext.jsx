@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useVet } from "./VetContext";
 import { fetchOrganization } from "../lib/clinicApi";
+import { notifyError } from "../lib/appToast";
 
 const ClinicContext = createContext(null);
 
@@ -17,7 +18,6 @@ export function ClinicProvider({ children }) {
   const [organization, setOrganization] = useState(null);
   const [membership, setMembership] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const loadOrganization = useCallback(async () => {
     if (!veterinarian?.id) {
@@ -26,13 +26,12 @@ export function ClinicProvider({ children }) {
       return;
     }
     setLoading(true);
-    setError("");
     try {
       const data = await fetchOrganization(veterinarian.id);
       setOrganization(data.organization || null);
       setMembership(data.membership || null);
     } catch (err) {
-      setError(err.message || "No se pudo cargar la organización");
+      notifyError(err.message || "No se pudo cargar la organización");
       setOrganization(null);
       setMembership(null);
     } finally {
@@ -51,7 +50,6 @@ export function ClinicProvider({ children }) {
         membership,
         role: membership?.role || null,
         loading,
-        error,
         reloadOrganization: loadOrganization,
       }}
     >

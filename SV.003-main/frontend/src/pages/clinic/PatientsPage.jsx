@@ -22,6 +22,7 @@ import {
   fetchPatient,
 } from "../../lib/clinicApi";
 import { downloadConsultationPdf, downloadPatientHistoryPdf, cleanClinicalDisplayText } from "../../lib/consultationPdf";
+import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -78,7 +79,6 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
   const [clients, setClients] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -91,7 +91,6 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
     setLoading(true);
-    setError("");
     try {
       const [patientsData, clientsData] = await Promise.all([
         fetchPatients(veterinarian.id, { search }),
@@ -100,7 +99,7 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
       setPatients(patientsData.patients || []);
       setClients(clientsData.clients || []);
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setLoading(false);
     }
@@ -140,7 +139,7 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
       setDetail(data);
       setDetailOpen(true);
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     }
   };
 
@@ -155,13 +154,15 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
     try {
       if (editing) {
         await updatePatient(veterinarian.id, editing.id, payload);
+        notifySuccess("Mascota actualizada.");
       } else {
         await createPatient(veterinarian.id, payload);
+        notifySuccess("Mascota registrada.");
       }
       setDialogOpen(false);
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setSaving(false);
     }
@@ -171,9 +172,10 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
     if (!window.confirm(`¿Eliminar mascota "${patient.name}"?`)) return;
     try {
       await deletePatient(veterinarian.id, patient.id);
+      notifySuccess("Mascota eliminada.");
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     }
   };
 
@@ -182,7 +184,7 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
     try {
       await downloadConsultationPdf(consultation, { veterinarian });
     } catch (err) {
-      setError(err.message || "No se pudo generar el PDF");
+      notifyError(err.message || "No se pudo generar el PDF");
     } finally {
       setPdfLoadingId(null);
     }
@@ -197,7 +199,7 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
         medicalImages: detail.medical_images || [],
       });
     } catch (err) {
-      setError(err.message || "No se pudo generar el historial PDF");
+      notifyError(err.message || "No se pudo generar el historial PDF");
     } finally {
       setHistoryPdfLoading(false);
     }
@@ -237,8 +239,6 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
           />
         </div>
       </div>
-
-      {error && <div className="error-message">{error}</div>}
 
       {!loading && patients.length > 0 && (
         <div className="clinic-stats-row">

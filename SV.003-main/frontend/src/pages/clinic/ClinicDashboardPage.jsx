@@ -17,6 +17,7 @@ import {
 import { useVet } from "../../context/VetContext";
 import { useClinic } from "../../context/ClinicContext";
 import { fetchDashboardOverview } from "../../lib/clinicApi";
+import { notifyError } from "../../lib/appToast";
 import { BACKEND_URL } from "../../lib/backendUrl";
 import {
   DEFAULT_PACKAGES,
@@ -105,18 +106,16 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
   const { organization } = useClinic();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [membershipPackages, setMembershipPackages] = useState(DEFAULT_PACKAGES);
 
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
     setLoading(true);
-    setError("");
     try {
       const data = await fetchDashboardOverview(veterinarian.id);
       setDashboard(data.dashboard || null);
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
       setDashboard(null);
     } finally {
       setLoading(false);
@@ -222,8 +221,6 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
           </Button>
         </div>
       </div>
-
-      {error && <p className="clinic-error">{error}</p>}
 
       {loading ? (
         <>

@@ -13,6 +13,7 @@ import {
   addOrganizationMember,
   removeOrganizationMember,
 } from "../../lib/clinicApi";
+import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -48,15 +49,12 @@ export function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [inviting, setInviting] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
   const isOrgAdmin = role === "owner" || role === "admin";
 
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
     setLoading(true);
-    setError("");
     try {
       const data = await fetchOrganization(veterinarian.id);
       setOrg(data.organization || null);
@@ -66,7 +64,7 @@ export function SettingsPage() {
         timezone: data.organization?.timezone || "America/Mexico_City",
       });
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setLoading(false);
     }
@@ -80,14 +78,12 @@ export function SettingsPage() {
     e.preventDefault();
     if (!isOrgAdmin) return;
     setSaving(true);
-    setError("");
-    setMessage("");
     try {
       const data = await updateOrganization(veterinarian.id, form);
       setOrg(data.organization || null);
-      setMessage("Consultorio actualizado.");
+      notifySuccess("Consultorio actualizado.");
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setSaving(false);
     }
@@ -97,19 +93,17 @@ export function SettingsPage() {
     e.preventDefault();
     if (!inviteEmail.trim()) return;
     setInviting(true);
-    setError("");
-    setMessage("");
     try {
       const data = await addOrganizationMember(
         veterinarian.id,
         inviteEmail.trim(),
         inviteRole,
       );
-      setMessage(data.message || "Miembro agregado.");
+      notifySuccess(data.message || "Miembro agregado.");
       setInviteEmail("");
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setInviting(false);
     }
@@ -119,14 +113,12 @@ export function SettingsPage() {
     if (member.role === "owner") return;
     const label = member.nombre || member.email || "este miembro";
     if (!window.confirm(`¿Quitar a ${label} del consultorio?`)) return;
-    setError("");
-    setMessage("");
     try {
       const data = await removeOrganizationMember(veterinarian.id, member.id);
-      setMessage(data.message || "Miembro eliminado.");
+      notifySuccess(data.message || "Miembro eliminado.");
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     }
   };
 
@@ -137,7 +129,7 @@ export function SettingsPage() {
   const copyPortal = () => {
     if (!portalUrl) return;
     navigator.clipboard.writeText(portalUrl);
-    setMessage("Enlace del portal copiado.");
+    notifySuccess("Enlace del portal copiado.");
   };
 
   if (!isOrgAdmin) {
@@ -168,9 +160,6 @@ export function SettingsPage() {
           <p>Datos de la clínica, equipo y portal de citas.</p>
         </div>
       </div>
-
-      {error && <p className="clinic-error">{error}</p>}
-      {message && <p className="clinic-success-msg">{message}</p>}
 
       {loading ? (
         <ClinicSettingsSkeleton />

@@ -16,6 +16,7 @@ import "./clinicPageShared.css";
 import { ClinicReportsSkeleton } from "../../components/clinic/ClinicPageUi";
 import { useVet } from "../../context/VetContext";
 import { fetchReportsOverview } from "../../lib/clinicApi";
+import { notifyError } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
 
 const PERIOD_OPTIONS = [
@@ -176,18 +177,16 @@ export function ReportsPage() {
   const [period, setPeriod] = useState("30d");
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
     setLoading(true);
-    setError("");
     try {
       const { from, to } = getPeriodRange(period);
       const data = await fetchReportsOverview(veterinarian.id, from, to);
       setOverview(data.overview || null);
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
       setOverview(null);
     } finally {
       setLoading(false);
@@ -248,8 +247,6 @@ export function ReportsPage() {
           </Button>
         </div>
       </div>
-
-      {error && <p className="clinic-error">{error}</p>}
 
       {loading ? (
         <ClinicReportsSkeleton />

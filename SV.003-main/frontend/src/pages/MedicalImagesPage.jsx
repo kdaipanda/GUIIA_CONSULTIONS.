@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Crown, FlaskConical } from "lucide-react";
 import { useVet } from "../context/VetContext";
+import { notifyError, notifySuccess } from "../lib/appToast";
 import { BACKEND_URL } from "../lib/backendUrl";
 import { getAuthHeaders } from "../lib/authHeaders";
 import { cleanClinicalDisplayText } from "../lib/consultationPdf";
@@ -21,7 +22,6 @@ export function MedicalImagesPage({ setView }) {
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -43,7 +43,7 @@ export function MedicalImagesPage({ setView }) {
 
   useEffect(() => {
     if (veterinarian?.membership_type?.toLowerCase() !== "premium") {
-      setError("Esta función es exclusiva para miembros Premium");
+      notifyError("Esta función es exclusiva para miembros Premium");
     } else {
       loadHistory();
     }
@@ -77,7 +77,7 @@ export function MedicalImagesPage({ setView }) {
       const maxSizeLabel = '10MB';
       
       if (file.size > maxSize) {
-        setError(`El archivo es demasiado grande. Máximo ${maxSizeLabel}.`);
+        notifyError(`El archivo es demasiado grande. Máximo ${maxSizeLabel}.`);
         return;
       }
 
@@ -88,7 +88,7 @@ export function MedicalImagesPage({ setView }) {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
-      setError("");
+      notifyError("");
     }
   };
 
@@ -96,12 +96,12 @@ export function MedicalImagesPage({ setView }) {
     e.preventDefault();
 
     if (!pastedStudyData || !pastedStudyData.trim()) {
-      setError("Por favor pega los datos del estudio");
+      notifyError("Por favor pega los datos del estudio");
       return;
     }
 
     setLoading(true);
-    setError("");
+    notifyError("");
     setResult(null);
 
     try {
@@ -169,6 +169,7 @@ export function MedicalImagesPage({ setView }) {
       console.log("Campo 'analysis' presente:", !!data.analysis);
       console.log("Longitud de 'analysis':", data.analysis ? data.analysis.length : 0);
       setResult(data);
+      notifySuccess("Interpretación generada correctamente");
       // Recargar historial después de crear un nuevo análisis
       await loadHistory();
 
@@ -194,7 +195,7 @@ export function MedicalImagesPage({ setView }) {
       
       // Asegurar que sea string y no esté vacío
       errorMessage = String(errorMessage || "Error desconocido");
-      setError(errorMessage);
+      notifyError(errorMessage);
       setLoading(false);
     } finally {
       setLoading(false);
@@ -471,16 +472,6 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
                   className="min-h-[100px] resize-y"
                 />
               </div>
-
-              {error && (
-                <div className="error-message">
-                  {typeof error === 'string' 
-                    ? error 
-                    : typeof error === 'object' && error !== null
-                      ? (error.message || error.detail || JSON.stringify(error))
-                      : String(error || 'Error desconocido')}
-                </div>
-              )}
 
               <div className="form-actions">
                 <Button

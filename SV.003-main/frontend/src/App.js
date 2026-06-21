@@ -23,6 +23,7 @@ import { friendlyFetchError } from "./lib/friendlyFetchError";
 import { getAuthHeaders, storeAccessToken } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
 import { applyDocumentTheme, readStoredTheme } from "./lib/themeSync";
+import { notifyError, notifySuccess, notifyQuotaError } from "./lib/appToast";
 import { clinicNavIsHero, clinicNavThemeStyle } from "./lib/clinicNavTheme";
 import { LATAM_COUNTRIES, countryLabel } from "./lib/latamCountries";
 import { SupportChatWidget } from "./components/SupportChatWidget";
@@ -117,40 +118,7 @@ import {
   CuyosForm,
 } from "./components/forms";
 
-// Toast Component
-const Toast = ({ toast, onClose }) => {
-  const icons = {
-    success: "✓",
-    error: "✕",
-    warning: "⚠",
-    info: "ℹ",
-  };
-
-  return (
-    <div className={`toast toast-${toast.type}`}>
-      <div className="toast-icon">{icons[toast.type] || icons.info}</div>
-      <div className="toast-message">{toast.message}</div>
-      <button className="toast-close" onClick={() => onClose(toast.id)}>
-        ✕
-      </button>
-    </div>
-  );
-};
-
-// Toast Container Component
-const ToastContainer = ({ toasts, onClose }) => {
-  if (toasts.length === 0) return null;
-
-  return (
-    <div className="toast-container">
-      {toasts.map((toast) => (
-        <Toast key={toast.id} toast={toast} onClose={onClose} />
-      ))}
-    </div>
-  );
-};
-
-// Command Palette Component
+import { Toaster } from "./components/ui/sonner";
 const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, veterinarian }) => {
   const { platformAdmin } = useVet();
   const [query, setQuery] = useState("");
@@ -395,30 +363,16 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
 
 // Main App Component
 function App() {
-  const [toasts, setToasts] = useState([]);
-
   useEffect(() => {
     applyDocumentTheme(readStoredTheme());
   }, []);
-
-  const showToast = (message, type = "info") => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3000);
-  };
-
-  const closeToast = (id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
 
   return (
     <VetProvider>
       <ClinicProvider>
         <div className="App">
-          <Router showToast={showToast} />
-          <ToastContainer toasts={toasts} onClose={closeToast} />
+          <Router />
+          <Toaster />
           <SpeedInsights />
         </div>
       </ClinicProvider>
@@ -427,7 +381,7 @@ function App() {
 }
 
 // Router Component
-const Router = ({ showToast }) => {
+const Router = () => {
   const { veterinarian, loading } = useVet();
   const navigate = useNavigate();
   const location = useLocation();
@@ -1130,7 +1084,6 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
   });
   const [cedulaFile, setCedulaFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
@@ -1143,22 +1096,22 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
     e.preventDefault();
 
     if (!acceptedTerms) {
-      setError(
+      notifyError(
         "Debes aceptar los términos y la política de privacidad para registrarte.",
       );
       return;
     }
     if (!cedulaFile) {
-      setError("Debes subir el documento de tu registro profesional (PDF/JPG/PNG).");
+      notifyError("Debes subir el documento de tu registro profesional (PDF/JPG/PNG).");
       return;
     }
     if (!formData.especialidad?.trim()) {
-      setError("Selecciona una especialidad.");
+      notifyError("Selecciona una especialidad.");
       return;
     }
 
     setLoading(true);
-    setError("");
+    notifyError("");
 
     try {
       const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
@@ -1188,7 +1141,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
       });
       setView("cedula-verification");
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setLoading(false);
     }
@@ -1200,8 +1153,6 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
           <GuiaaBrandLockup variant="auth" className="mb-6" />
           <h2>Registro Profesional</h2>
           <p>Complete sus datos profesionales para acceder a la plataforma</p>
-
-          {error && <div className="error-message">{error}</div>}
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-row">
@@ -1463,7 +1414,6 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
     cedula_profesional: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [pending2FA, setPending2FA] = useState(false);
   const [challengeNonce, setChallengeNonce] = useState(null);
   const [twoFactorCode, setTwoFactorCode] = useState("");
@@ -1481,7 +1431,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    notifyError("");
 
     try {
       console.log("Attempting login to:", `${BACKEND_URL}/api/auth/login`);
@@ -1544,7 +1494,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
       login(vetData);
       setView("dashboard");
     } catch (err) {
-      setError(friendlyFetchError(err, BACKEND_URL));
+      notifyError(friendlyFetchError(err, BACKEND_URL));
     } finally {
       setLoading(false);
     }
@@ -1553,14 +1503,14 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
   const handleVerify2FA = async (e) => {
     e.preventDefault();
     if (!challengeNonce) {
-      setError(
+      notifyError(
         "No se encontró el reto de 2FA. Intenta iniciar sesión de nuevo.",
       );
       return;
     }
 
     setVerifying2FA(true);
-    setError("");
+    notifyError("");
 
     try {
       const response = await fetch(`${BACKEND_URL}/api/auth/verify-2fa`, {
@@ -1593,7 +1543,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
       login(vetData);
       setView("dashboard");
     } catch (err) {
-      setError(friendlyFetchError(err, BACKEND_URL));
+      notifyError(friendlyFetchError(err, BACKEND_URL));
     } finally {
       setVerifying2FA(false);
       setTwoFactorCode("");
@@ -1604,15 +1554,15 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
     setPending2FA(false);
     setChallengeNonce(null);
     setTwoFactorCode("");
-    setError("");
+    notifyError("");
   };
 
   const handleSupabaseLogin = async (e) => {
     e.preventDefault();
-    setError("");
+    notifyError("");
     setSupaInfo("");
     if (!supaEmail || !supaPassword) {
-      setError("Ingresa email y contraseña");
+      notifyError("Ingresa email y contraseña");
       return;
     }
     try {
@@ -1621,17 +1571,17 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
       setSupaInfo("Login con Supabase exitoso");
       setView("dashboard");
     } catch (err) {
-      setError(err.message || "Error al iniciar sesión con Supabase");
+      notifyError(err.message || "Error al iniciar sesión con Supabase");
     } finally {
       setLoading(false);
     }
   };
 
   const handleSupabaseMagicLink = async () => {
-    setError("");
+    notifyError("");
     setSupaInfo("");
     if (!supaEmail) {
-      setError("Ingresa el email para enviar el magic link");
+      notifyError("Ingresa el email para enviar el magic link");
       return;
     }
     try {
@@ -1639,7 +1589,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
       await loginWithMagicLink(supaEmail);
       setSupaInfo("Revisa tu correo: se envió un enlace de acceso.");
     } catch (err) {
-      setError(err.message || "Error al enviar magic link");
+      notifyError(err.message || "Error al enviar magic link");
     } finally {
       setLoading(false);
     }
@@ -1651,8 +1601,6 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
           <GuiaaBrandLockup variant="auth" className="mb-6" />
           <h2>Iniciar Sesión</h2>
           <p>Ingresa con tu email y tu número de registro profesional</p>
-
-          {error && <div className="error-message">{error}</div>}
 
           {!pending2FA ? (
             <form onSubmit={handleSubmit} className="auth-form">
@@ -1757,12 +1705,11 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
   const [nombre, setNombre] = useState("");
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("");
 
   useEffect(() => {
-    setError("");
+    notifyError("");
     setInfo("");
     setVerificationStatus(cedulaFlow?.verification_status || "");
     setNombre(cedulaFlow?.expected_nombre || "");
@@ -1791,19 +1738,19 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
   const remainingSkips = 3 - skipCount;
 
   const handleUploadAndVerify = async () => {
-    setError("");
+    notifyError("");
     setInfo("");
 
     if (!cedula_profesional) {
-      setError("Falta el número de registro profesional. Regresa al login o registro.");
+      notifyError("Falta el número de registro profesional. Regresa al login o registro.");
       return;
     }
     if (!nombre?.trim()) {
-      setError("Ingresa tu nombre completo tal como aparece en tu documento profesional.");
+      notifyError("Ingresa tu nombre completo tal como aparece en tu documento profesional.");
       return;
     }
     if (needsUpload && !file) {
-      setError("Debes subir tu documento profesional (PDF/JPG/PNG).");
+      notifyError("Debes subir tu documento profesional (PDF/JPG/PNG).");
       return;
     }
 
@@ -1863,7 +1810,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
         setView("dashboard");
       }
     } catch (e) {
-      setError(e?.message || "Error en verificación");
+      notifyError(e?.message || "Error en verificación");
     } finally {
       setLoading(false);
     }
@@ -1883,7 +1830,6 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
               {cedulaFlow.message}
             </div>
           )}
-          {error && <div className="error-message">{error}</div>}
           {info && <div className="success-message">{info}</div>}
 
           <div className="auth-form">
@@ -1940,7 +1886,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
                 className="mt-2.5 w-full"
                 onClick={async () => {
                   setLoading(true);
-                  setError("");
+                  notifyError("");
                   try {
                     const response = await fetch(`${BACKEND_URL}/api/cedula/skip`, {
                       method: "POST",
@@ -1969,7 +1915,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
                     if (vetData?.status === "requires_cedula_flow") {
                       // Si aún requiere verificación pero ya usó los 3 skips, mostrar error
                       if (skipData.remaining_skips === 0) {
-                        setError("Has alcanzado el límite de 3 posposiciones. Debes completar la verificación ahora.");
+                        notifyError("Has alcanzado el límite de 3 posposiciones. Debes completar la verificación ahora.");
                         setLoading(false);
                         return;
                       }
@@ -1988,7 +1934,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
                     setCedulaFlow?.(null);
                     setView("dashboard");
                   } catch (e) {
-                    setError(e?.message || "Error al posponer verificación");
+                    notifyError(e?.message || "Error al posponer verificación");
                   } finally {
                     setLoading(false);
                   }
@@ -2847,7 +2793,6 @@ const NewConsultation = ({
   const [selectedCategory, setSelectedCategory] = useState("");
   const [consultationId, setConsultationId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [info, setInfo] = useState(
     isExpertMode && !existingConsultationId
       ? "Modo Manejo Experto: describe el caso clínico ahora. Podrás completar los datos de la mascota (paso 1) después."
@@ -2998,7 +2943,7 @@ const NewConsultation = ({
       const errorDetail =
         errorData.detail || `Error del servidor: ${response.status}`;
       if (shouldRedirectToMembership(response.status, errorDetail)) {
-        setView("membership");
+        notifyQuotaError(errorDetail, () => setView("membership"));
         return null;
       }
       throw new Error(errorDetail);
@@ -3029,7 +2974,7 @@ const NewConsultation = ({
 
   const loadExistingConsultation = async (id) => {
     setLoadingExisting(true);
-    setError("");
+    notifyError("");
     console.log('Loading existing consultation:', id);
     try {
       const response = await fetch(`${BACKEND_URL}/api/consultation/${id}`, {
@@ -3102,7 +3047,7 @@ const NewConsultation = ({
       } else {
         const { data: errorData, text } = await safeReadJson(response);
         console.error('Error response:', response.status, errorData || text);
-        setError(
+        notifyError(
           errorData?.detail ||
             text ||
             `Error cargando la consulta (${response.status})`
@@ -3110,7 +3055,7 @@ const NewConsultation = ({
       }
     } catch (error) {
       console.error("Error loading consultation:", error);
-      setError("Error cargando la consulta: " + error.message);
+      notifyError("Error cargando la consulta: " + error.message);
     } finally {
       setLoadingExisting(false);
     }
@@ -3209,7 +3154,7 @@ const NewConsultation = ({
       default:
         return (
           <div className="form-section">
-            <p className="error-message">
+            <p className="info-message">
               Categoría no reconocida. Por favor, selecciona una categoría
               válida.
             </p>
@@ -3221,7 +3166,7 @@ const NewConsultation = ({
   const handleSubmitStep1 = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    notifyError("");
     setInfo("");
 
     try {
@@ -3255,7 +3200,7 @@ const NewConsultation = ({
       setConsultationId(data.id);
       setStep(2);
     } catch (err) {
-      setError(err.message || "Error al crear la consulta");
+      notifyError(err.message || "Error al crear la consulta");
     } finally {
       setLoading(false);
     }
@@ -3264,7 +3209,7 @@ const NewConsultation = ({
   const handleSubmitStep2 = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    notifyError("");
     setInfo("");
 
     try {
@@ -3308,7 +3253,7 @@ const NewConsultation = ({
           : "Observaciones guardadas",
       );
     } catch (err) {
-      setError(err?.message || "Error guardando observaciones");
+      notifyError(err?.message || "Error guardando observaciones");
     } finally {
       setLoading(false);
     }
@@ -3320,7 +3265,7 @@ const NewConsultation = ({
     setRating(value);
     setSavingRating(true);
     setRatingSaved(false);
-    setError("");
+    notifyError("");
 
     try {
       const { error } = await supabase
@@ -3331,7 +3276,7 @@ const NewConsultation = ({
 
       setRatingSaved(true);
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
       setRatingSaved(false);
     } finally {
       setSavingRating(false);
@@ -3340,7 +3285,7 @@ const NewConsultation = ({
 
   const handleAIAnalysis = async () => {
     if (!consultationId) {
-      setError("No hay consulta seleccionada");
+      notifyError("No hay consulta seleccionada");
       return;
     }
 
@@ -3357,14 +3302,15 @@ const NewConsultation = ({
         planName = membershipType.charAt(0).toUpperCase() + membershipType.slice(1);
       }
       
-      setError(
-        `Los análisis avanzados solo están disponibles para miembros Premium. Tu plan actual es: ${planName}. Por favor, actualiza tu membresía para acceder a esta función.`
+      notifyQuotaError(
+        `Los análisis avanzados solo están disponibles para miembros Premium. Tu plan actual es: ${planName}. Por favor, actualiza tu membresía para acceder a esta función.`,
+        () => setView("membership"),
       );
       return;
     }
 
     setLoading(true);
-    setError("");
+    notifyError("");
 
     try {
       const response = await fetch(
@@ -3383,7 +3329,7 @@ const NewConsultation = ({
       const result = await response.json();
       setAiAnalysis(cleanClinicalDisplayText(result.analysis));
     } catch (err) {
-      setError(err.message || "Error generando análisis");
+      notifyError(err.message || "Error generando análisis");
     } finally {
       setLoading(false);
     }
@@ -3454,26 +3400,6 @@ const NewConsultation = ({
           {info && (
             <div className="info-message" style={{ marginBottom: "20px" }}>
               {info}
-            </div>
-          )}
-          {error && (
-            <div className="error-message" style={{ 
-              padding: "20px", 
-              borderRadius: "8px",
-              marginBottom: "20px"
-            }}>
-              {error}
-              {(error.includes("agotado") || error.includes("consultas de prueba") || error.includes("membresía activa")) && (
-                <div style={{ marginTop: "15px" }}>
-                  <Button
-                    type="button"
-                    onClick={() => setView("membership")}
-                    className="mt-2.5"
-                  >
-                    Ver Planes de Membresía
-                  </Button>
-                </div>
-              )}
             </div>
           )}
 
@@ -3595,26 +3521,6 @@ const NewConsultation = ({
               {info}
             </div>
           )}
-          {error && (
-            <div className="error-message" style={{ 
-              padding: "20px", 
-              borderRadius: "8px",
-              marginBottom: "20px"
-            }}>
-              {error}
-              {(error.includes("agotado") || error.includes("consultas de prueba") || error.includes("membresía activa")) && (
-                <div style={{ marginTop: "15px" }}>
-                  <Button
-                    type="button"
-                    onClick={() => setView("membership")}
-                    className="mt-2.5"
-                  >
-                    Ver Planes de Membresía
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
 
           <div className="consultation-form-container">
             {renderStepper(2)}
@@ -3705,7 +3611,6 @@ const NewConsultation = ({
               )}
             </div>
           )}
-          {error && <div className="error-message">{error}</div>}
 
           <div className="consultation-form-container">
             {renderStepper(3)}

@@ -7,6 +7,7 @@ import {
   ClinicStatPill,
   clinicDialogClass,
 } from "../../components/clinic/ClinicPageUi";
+import { notifyError, notifySuccess } from "../../lib/appToast";
 import { useVet } from "../../context/VetContext";
 import {
   fetchClients,
@@ -33,7 +34,6 @@ export function ClientsPage() {
   const [clients, setClients] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -42,12 +42,11 @@ export function ClientsPage() {
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
     setLoading(true);
-    setError("");
     try {
       const data = await fetchClients(veterinarian.id, search);
       setClients(data.clients || []);
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setLoading(false);
     }
@@ -87,9 +86,10 @@ export function ClientsPage() {
         await createClient(veterinarian.id, form);
       }
       setDialogOpen(false);
+      notifySuccess(editing ? "Dueño actualizado" : "Dueño registrado");
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setSaving(false);
     }
@@ -107,7 +107,7 @@ export function ClientsPage() {
       await deleteClient(veterinarian.id, client.id);
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     }
   };
 
@@ -134,8 +134,6 @@ export function ClientsPage() {
           />
         </div>
       </div>
-
-      {error && <div className="error-message">{error}</div>}
 
       {!loading && clients.length > 0 && (
         <div className="clinic-stats-row">

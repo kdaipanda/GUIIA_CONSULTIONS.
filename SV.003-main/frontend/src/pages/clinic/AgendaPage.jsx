@@ -22,6 +22,7 @@ import {
   fetchAppointmentRequests,
   updateAppointmentRequest,
 } from "../../lib/clinicApi";
+import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -126,7 +127,6 @@ export function AgendaPage({ onStartConsultation }) {
   const [patients, setPatients] = useState([]);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({
@@ -168,7 +168,6 @@ export function AgendaPage({ onStartConsultation }) {
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
     setLoading(true);
-    setError("");
     try {
       const [apptData, patientsData, clientsData] = await Promise.all([
         fetchAppointments(veterinarian.id, range.from, range.to),
@@ -186,7 +185,7 @@ export function AgendaPage({ onStartConsultation }) {
         setRequests([]);
       }
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setLoading(false);
     }
@@ -264,13 +263,15 @@ export function AgendaPage({ onStartConsultation }) {
     try {
       if (editing) {
         await updateAppointment(veterinarian.id, editing.id, payload);
+        notifySuccess("Cita actualizada.");
       } else {
         await createAppointment(veterinarian.id, payload);
+        notifySuccess("Cita creada.");
       }
       setDialogOpen(false);
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setSaving(false);
     }
@@ -280,21 +281,27 @@ export function AgendaPage({ onStartConsultation }) {
     if (!editing || !window.confirm("¿Eliminar esta cita?")) return;
     try {
       await deleteAppointment(veterinarian.id, editing.id);
+      notifySuccess("Cita eliminada.");
       setDialogOpen(false);
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     }
   };
 
   const handleRequestAction = async (requestId, status, extra = {}) => {
     try {
       await updateAppointmentRequest(veterinarian.id, requestId, { status, ...extra });
+      if (status === "approved") {
+        notifySuccess("Solicitud aprobada y cita creada.");
+      } else if (status === "rejected") {
+        notifySuccess("Solicitud rechazada.");
+      }
       setApproveOpen(false);
       setApprovingRequest(null);
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     }
   };
 
@@ -344,6 +351,7 @@ export function AgendaPage({ onStartConsultation }) {
     const url = `${window.location.origin}/solicitar-cita/${organization.id}`;
     try {
       await navigator.clipboard.writeText(url);
+      notifySuccess("Enlace del portal copiado.");
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2500);
     } catch {
@@ -450,7 +458,6 @@ export function AgendaPage({ onStartConsultation }) {
         </div>
       )}
 
-      {error && <div className="error-message">{error}</div>}
       {loading ? (
         <AgendaSkeleton />
       ) : viewMode === "list" ? (

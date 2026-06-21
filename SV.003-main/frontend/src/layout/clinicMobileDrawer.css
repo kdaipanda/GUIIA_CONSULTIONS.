@@ -1,0 +1,48 @@
+.clinic-mobile-drawer {
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  border-color: rgba(38, 91, 147, 0.12);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  max-height: min(88vh, 640px);
+}
+
+.clinic-mobile-drawer .clinic-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px 16px;
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .clinic-sidebar--desktop {
+    display: none !important;
+  }
+}
+
+.clinic-mobile-drawer-head {
+  padding: 4px 16px 8px;
+  text-align: left;
+}
+
+.clinic-mobile-drawer-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #265b93;
+}
+
+.clinic-mobile-drawer-org {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0c2d4d;
+}
+
+[data-theme="dark"] .clinic-mobile-drawer-org,
+html.dark .clinic-mobile-drawer-org {
+  color: var(--text-primary);
+}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BACKEND_URL } from '../lib/backendUrl';
+import { notifyError, notifySuccess } from '../lib/appToast';
 
 // Importar formularios específicos por especie
 import DogForm from './species/DogForm';
@@ -18,8 +19,6 @@ const AnimalConsultForm = ({ veterinarianId, onSuccess }) => {
   const [species, setSpecies] = useState('');
   const [speciesList, setSpeciesList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   // Lista por defecto de especies
   const defaultSpecies = [
@@ -52,9 +51,6 @@ const AnimalConsultForm = ({ veterinarianId, onSuccess }) => {
   };
 
   const handleSubmit = async (consultationData) => {
-    setError('');
-    setSuccess('');
-    
     try {
       const payload = {
         veterinarian_id: veterinarianId,
@@ -64,20 +60,18 @@ const AnimalConsultForm = ({ veterinarianId, onSuccess }) => {
 
       const response = await axios.post(`${BACKEND_URL}/api/animal-consults`, payload);
       
-      setSuccess('¡Consulta guardada exitosamente!');
+      notifySuccess('¡Consulta guardada exitosamente!');
       
       if (onSuccess) {
         onSuccess(response.data);
       }
       
-      // Limpiar formulario después de 2 segundos
       setTimeout(() => {
         setSpecies('');
-        setSuccess('');
       }, 2000);
       
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error al guardar la consulta');
+      notifyError(err.response?.data?.detail || 'Error al guardar la consulta');
       console.error('Error:', err);
     }
   };
@@ -129,19 +123,6 @@ const AnimalConsultForm = ({ veterinarianId, onSuccess }) => {
         <h2 className="text-2xl font-bold text-gray-800 mb-6">
           Consulta Veterinaria por Especie
         </h2>
-
-        {/* Mensajes de éxito/error */}
-        {success && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-            {success}
-          </div>
-        )}
-        
-        {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-            {error}
-          </div>
-        )}
 
         {/* Selector de especie */}
         {!species && (

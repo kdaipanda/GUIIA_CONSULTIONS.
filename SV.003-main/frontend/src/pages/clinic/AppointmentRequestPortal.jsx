@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchPublicOrganization, submitAppointmentRequest } from "../../lib/clinicApi";
+import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -11,8 +12,6 @@ export function AppointmentRequestPortal({ organizationId }) {
   const [orgName, setOrgName] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [form, setForm] = useState({
     client_name: "",
     phone: "",
@@ -23,24 +22,24 @@ export function AppointmentRequestPortal({ organizationId }) {
     reason: "",
   });
 
+  const invalidLink = !organizationId;
+
   useEffect(() => {
-    if (!organizationId) {
-      setError("Enlace inválido");
+    if (invalidLink) {
+      notifyError("Enlace inválido");
       setLoading(false);
       return;
     }
     fetchPublicOrganization(organizationId)
       .then((data) => setOrgName(data.organization?.name || "Consultorio"))
-      .catch((err) => setError(err.message))
+      .catch((err) => notifyError(err.message))
       .finally(() => setLoading(false));
-  }, [organizationId]);
+  }, [organizationId, invalidLink]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.client_name.trim() || !form.patient_name.trim()) return;
     setSubmitting(true);
-    setError("");
-    setSuccess("");
     try {
       const data = await submitAppointmentRequest({
         organization_id: organizationId,
@@ -49,7 +48,7 @@ export function AppointmentRequestPortal({ organizationId }) {
           ? new Date(form.preferred_starts_at).toISOString()
           : null,
       });
-      setSuccess(data.message || "Solicitud enviada correctamente.");
+      notifySuccess(data.message || "Solicitud enviada correctamente.");
       setForm({
         client_name: "",
         phone: "",
@@ -60,7 +59,7 @@ export function AppointmentRequestPortal({ organizationId }) {
         reason: "",
       });
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -77,15 +76,7 @@ export function AppointmentRequestPortal({ organizationId }) {
           </div>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
-        {success && (
-          <div className="info-message portal-success">
-            {success}
-            <p className="clinic-muted">Recibirás confirmación por email si indicaste tu correo.</p>
-          </div>
-        )}
-
-        {!loading && !error?.includes("inválido") && (
+        {!loading && !invalidLink && (
           <form onSubmit={handleSubmit} className="clinic-form portal-form">
             <div className="form-group">
               <Label>Tu nombre *</Label>

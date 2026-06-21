@@ -19,6 +19,7 @@ import {
   fetchProducts,
 } from "../../lib/clinicApi";
 import { downloadInvoicePdf } from "../../lib/invoicePdf";
+import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -61,7 +62,6 @@ export function BillingPage() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detail, setDetail] = useState(null);
@@ -78,7 +78,6 @@ export function BillingPage() {
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
     setLoading(true);
-    setError("");
     try {
       const [invData, clientsData] = await Promise.all([
         fetchInvoices(veterinarian.id),
@@ -93,7 +92,7 @@ export function BillingPage() {
         setProducts([]);
       }
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setLoading(false);
     }
@@ -177,10 +176,11 @@ export function BillingPage() {
         deduct_stock: form.deduct_stock,
         items,
       });
+      notifySuccess("Recibo emitido.");
       setDialogOpen(false);
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setSaving(false);
     }
@@ -189,10 +189,11 @@ export function BillingPage() {
   const markPaid = async (invoice) => {
     try {
       await updateInvoice(veterinarian.id, invoice.id, { status: "paid", payment_method: invoice.payment_method || "efectivo" });
+      notifySuccess("Recibo marcado como pagado.");
       setDetailOpen(false);
       load();
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     }
   };
 
@@ -202,7 +203,7 @@ export function BillingPage() {
       setDetail(data.invoice);
       setDetailOpen(true);
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     }
   };
 
@@ -213,7 +214,7 @@ export function BillingPage() {
     try {
       await downloadInvoicePdf(detail, { organizationName: organization?.name });
     } catch (err) {
-      setError(err.message || "No se pudo generar el PDF");
+      notifyError(err.message || "No se pudo generar el PDF");
     }
   };
 
@@ -236,8 +237,6 @@ export function BillingPage() {
           <Input placeholder="Buscar por folio, dueño o público general..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
-
-      {error && <div className="error-message">{error}</div>}
 
       {!loading && invoices.length > 0 && (
         <div className="clinic-stats-row">
