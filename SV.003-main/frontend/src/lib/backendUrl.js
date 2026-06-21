@@ -1,46 +1,92 @@
+const PRODUCTION_API = "https://api.guiaa.vet";
+const LOCAL_API = "http://localhost:8000";
+
+function isProductionHost(hostname) {
+  return (
+    hostname === "guiaa.vet" ||
+    hostname === "www.guiaa.vet" ||
+    hostname.endsWith(".guiaa.vet")
+  );
+}
+
+function isLocalDevHost(hostname) {
+  return hostname === "localhost" || hostname === "127.0.0.1";
+}
+
+function readStoredBackendUrl(requireHttps) {
+  try {
+    const stored = localStorage.getItem("backend_url");
+    if (!stored) return null;
+    const parsed = new URL(stored);
+    if (requireHttps && parsed.protocol !== "https:") return null;
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    return stored.replace(/\/$/, "");
+  } catch {
+    return null;
+  }
+}
+
+function readParamBackendUrl(requireHttps) {
+  try {
+    const paramUrl = new URLSearchParams(window.location.search).get("backend_url");
+    if (!paramUrl) return null;
+    const parsed = new URL(paramUrl);
+    if (requireHttps && parsed.protocol !== "https:") return null;
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    return paramUrl.replace(/\/$/, "");
+  } catch {
+    return null;
+  }
+}
+
 export function getBackendUrl() {
-  const localUrl = "http://localhost:8000";
-  const envUrl = process.env.REACT_APP_BACKEND_URL;
+  const envUrl = process.env.REACT_APP_BACKEND_URL?.trim()?.replace(/\/$/, "");
 
   try {
-    const params = new URLSearchParams(window.location.search);
-    const paramUrl = params.get("backend_url");
-    if (paramUrl) {
-      try {
-        new URL(paramUrl);
-        localStorage.setItem("backend_url", paramUrl);
-        return paramUrl;
-      } catch {
-        /* ignore invalid */
-      }
+    const hostname = window.location.hostname;
+
+    if (isProductionHost(hostname)) {
+      if (envUrl?.startsWith("https://")) return envUrl;
+      return PRODUCTION_API;
     }
 
-    if (window.location.hostname.endsWith("trycloudflare.com")) {
+    if (hostname.endsWith("trycloudflare.com")) {
       return "";
     }
 
-    if (
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-    ) {
-      return localUrl;
+    if (isLocalDevHost(hostname)) {
+      const paramUrl = readParamBackendUrl(false);
+      if (paramUrl) {
+        localStorage.setItem("backend_url", paramUrl);
+        return paramUrl;
+      }
+      const stored = readStoredBackendUrl(false);
+      if (stored) return stored;
+      return LOCAL_API;
     }
 
     if (envUrl) {
       return envUrl;
     }
 
-    if (window.location.hostname.includes("guiaa.vet")) {
-      return "https://api.guiaa.vet";
+    if (hostname.endsWith("vercel.app")) {
+      const paramUrl = readParamBackendUrl(true);
+      if (paramUrl) {
+        localStorage.setItem("backend_url", paramUrl);
+        return paramUrl;
+      }
+      const stored = readStoredBackendUrl(true);
+      if (stored) return stored;
+      return PRODUCTION_API;
     }
 
-    const stored = localStorage.getItem("backend_url");
+    const stored = readStoredBackendUrl(true);
     if (stored) return stored;
   } catch {
     /* ignore */
   }
 
-  return envUrl || localUrl;
+  return envUrl || LOCAL_API;
 }
 
 export const BACKEND_URL = getBackendUrl();
