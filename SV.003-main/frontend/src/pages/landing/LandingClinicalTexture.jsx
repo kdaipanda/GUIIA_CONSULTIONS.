@@ -4,6 +4,8 @@ import React from "react";
 export function LandingClinicalTexture() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+      <div className="absolute -left-24 top-32 h-64 w-64 rounded-full bg-guiaa-brand-blue/[0.06] blur-3xl" />
+      <div className="absolute -right-16 top-[28%] h-72 w-72 rounded-full bg-guiaa-brand-green/[0.07] blur-3xl" />
       <div
         className="absolute inset-0 opacity-[0.35]"
         style={{

@@ -2,11 +2,11 @@ import React from "react";
 import { ArrowUpRight } from "lucide-react";
 import {
   BarChart3,
+  BookOpen,
   ClipboardList,
   Layers,
   Package,
   Receipt,
-  Sparkles,
   Stethoscope,
 } from "lucide-react";
 import { MultiespecieCategoryIcons } from "./MultiespecieCategoryIcons";
@@ -18,7 +18,7 @@ const PRIMARY_FEATURES = [
     icon: Stethoscope,
     title: "GUIAA Diagnóstico",
     description:
-      "Anamnesis guiada, hallazgos clínicos y soporte CDS L4/L5 para estructurar el razonamiento diagnóstico.",
+      "Anamnesis guiada, examen físico y soporte CDS L4/L5 para documentar el razonamiento diagnóstico veterinario.",
     productTab: "consultation",
   },
   {
@@ -26,7 +26,7 @@ const PRIMARY_FEATURES = [
     icon: ClipboardList,
     title: "Expediente clínico",
     description:
-      "Historial por paciente, consultas previas y seguimiento longitudinal en un solo lugar.",
+      "Historial clínico por paciente: consultas previas, tratamientos y evolución entre visitas.",
     productTab: "consultation",
   },
   {
@@ -34,7 +34,7 @@ const PRIMARY_FEATURES = [
     icon: Package,
     title: "Inventario",
     description:
-      "Control de stock, alertas de reorden y trazabilidad de insumos clínicos.",
+      "Stock de medicamentos e insumos clínicos, alertas de reorden y trazabilidad en consulta.",
     productTab: null,
   },
   {
@@ -42,7 +42,7 @@ const PRIMARY_FEATURES = [
     icon: Receipt,
     title: "Ventas",
     description:
-      "Registro de servicios y productos con flujo ágil desde la consulta.",
+      "Cobro de servicios y productos desde la consulta, vinculado al acto clínico del paciente.",
     productTab: null,
   },
 ];
@@ -51,7 +51,7 @@ const SECONDARY_FEATURES = [
   {
     id: "multiespecie",
     title: "Multiespecie",
-    description: "Perros, gatos, exóticos y más con flujos adaptados por especie.",
+    description: "11 categorías con formularios veterinarios dedicados por especie.",
     useCategoryIcons: true,
     productTab: "species",
   },
@@ -59,7 +59,7 @@ const SECONDARY_FEATURES = [
     id: "panel",
     icon: BarChart3,
     title: "Panel clínico",
-    description: "Métricas de consulta y visión general de tu práctica.",
+    description: "Indicadores de consultas, actividad clínica y resumen de tu práctica MVZ.",
     productTab: "dashboard",
   },
   {
@@ -71,9 +71,9 @@ const SECONDARY_FEATURES = [
   },
   {
     id: "onboarding",
-    icon: Sparkles,
-    title: "Onboarding guiado",
-    description: "Recorrido inicial para dominar la plataforma desde el primer día.",
+    icon: BookOpen,
+    title: "Capacitación inicial",
+    description: "Recorrido guiado para dominar la plataforma desde tu primera consulta.",
     productTab: "dashboard",
   },
 ];
@@ -125,15 +125,15 @@ export function LandingFeatures() {
   return (
     <section id="features" className="landing-section landing-section-alt">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-xl">
-            <p className="landing-eyebrow">Módulos principales</p>
+        <div className="landing-section-head-wide">
+          <div className="landing-section-head">
+            <p className="landing-eyebrow">Módulos del consultorio</p>
             <h2 className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl">
-              Cuatro pilares de tu consulta
+              Clínica y operación en un solo entorno
             </h2>
             <p className="landing-lead mt-4">
-              Herramientas clínicas y operativas con la misma identidad visual y flujo
-              coherente.
+              Diagnóstico, expediente, inventario y ventas — diseñados para la rutina del
+              médico veterinario, no para un dashboard genérico.
             </p>
           </div>
           <button
@@ -151,7 +151,9 @@ export function LandingFeatures() {
             <FeatureCard
               key={id}
               productTab={productTab}
-              className="rounded-2xl p-6 landing-card"
+              className={`rounded-2xl p-6 landing-card ${
+                index === 0 ? "landing-card-accent-top landing-card-featured" : ""
+              }`}
             >
               <FeatureIcon icon={icon} alternate={index % 2 === 1} />
               <h3 className="mt-4 text-lg font-semibold text-guiaa-brand-navy">{title}</h3>

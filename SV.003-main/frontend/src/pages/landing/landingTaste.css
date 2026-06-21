@@ -1,7 +1,14 @@
 /* Taste Skill — landing GUIAA (dials 5/5/3 · DESIGN.md) */
 
+.landing-shell {
+  background: linear-gradient(165deg, #0a2540 0%, #0c2d4d 38%, #1e5280 100%);
+}
+
 .landing-shell-inner {
-  box-shadow: 0 24px 80px -12px rgba(12, 45, 77, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 24px 80px -12px rgba(12, 45, 77, 0.35),
+    0 0 0 1px rgba(12, 45, 77, 0.06) inset;
 }
 
 .landing-eyebrow {
@@ -47,7 +54,29 @@
 }
 
 .landing-section-alt {
-  background: rgba(255, 255, 255, 0.55);
+  background: linear-gradient(180deg, rgba(248, 252, 255, 0.85) 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.landing-section-band {
+  background: linear-gradient(180deg, rgba(232, 244, 252, 0.45) 0%, rgba(255, 255, 255, 0.2) 100%);
+}
+
+.landing-section-head {
+  max-width: 36rem;
+}
+
+.landing-section-head-wide {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .landing-section-head-wide {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
 }
 
 .landing-card {
@@ -155,6 +184,155 @@
   font-weight: 800;
 }
 
+.landing-stat-panel {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  border: 1px solid rgba(12, 45, 77, 0.08);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.75);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 12px -8px rgba(12, 45, 77, 0.1);
+}
+
+@media (min-width: 640px) {
+  .landing-stat-panel {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    padding: 1.125rem 0;
+  }
+
+  .landing-stat-panel > div {
+    padding-inline: 1.25rem;
+  }
+
+  .landing-stat-panel > div:not(:last-child) {
+    border-right: 1px solid rgba(12, 45, 77, 0.08);
+  }
+}
+
+.landing-hero-glow {
+  position: absolute;
+  inset: -10% -20% auto -10%;
+  height: 70%;
+  background: radial-gradient(
+    ellipse 70% 60% at 70% 40%,
+    rgba(61, 155, 143, 0.12),
+    transparent 68%
+  );
+  pointer-events: none;
+}
+
+.landing-hero-media-outer {
+  padding: 0.35rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(145deg, rgba(232, 244, 252, 0.95), rgba(255, 255, 255, 0.98));
+  border: 1px solid rgba(12, 45, 77, 0.1);
+  box-shadow: 0 24px 64px -16px rgba(12, 45, 77, 0.24);
+}
+
+.landing-hero-media-inner {
+  overflow: hidden;
+  border-radius: calc(1.25rem - 0.35rem);
+  border: 1px solid rgba(12, 45, 77, 0.08);
+}
+
+.landing-trust-icon {
+  display: inline-flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(232, 244, 252, 0.95), rgba(255, 255, 255, 0.9));
+  border: 1px solid rgba(38, 91, 147, 0.12);
+  box-shadow: 0 2px 8px -4px rgba(12, 45, 77, 0.12);
+}
+
+.landing-tab {
+  border-radius: 999px;
+  border: 1px solid rgba(12, 45, 77, 0.12);
+  background: #ffffff;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(12, 45, 77, 0.72);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .landing-tab {
+    font-size: 0.875rem;
+  }
+}
+
+.landing-tab:hover {
+  border-color: rgba(38, 91, 147, 0.22);
+  color: #0c2d4d;
+}
+
+.landing-tab.is-active {
+  border-color: transparent;
+  background: #265b93;
+  color: #ffffff;
+  box-shadow: 0 4px 14px -4px rgba(38, 91, 147, 0.45);
+}
+
+.landing-card-featured {
+  border-color: rgba(38, 91, 147, 0.18);
+  box-shadow: 0 12px 36px -12px rgba(38, 91, 147, 0.14);
+}
+
+.landing-card-accent-top {
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-card-accent-top::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #265b93, #3d9b8f);
+}
+
+.landing-pricing-featured {
+  border-color: rgba(38, 91, 147, 0.22);
+  box-shadow: 0 16px 48px -14px rgba(38, 91, 147, 0.2);
+}
+
+.landing-trust-banner {
+  border: 1px solid rgba(12, 45, 77, 0.1);
+  border-radius: 1rem;
+  background: linear-gradient(90deg, rgba(232, 244, 252, 0.65), rgba(255, 255, 255, 0.9));
+  box-shadow: 0 2px 12px -8px rgba(12, 45, 77, 0.08);
+}
+
+.landing-btn-on-dark {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 0.875rem 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  transition: background-color 0.2s ease;
+}
+
+.landing-btn-on-dark:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.landing-species-chip {
+  border-radius: 999px;
+  box-shadow: 0 1px 6px -2px rgba(12, 45, 77, 0.1);
+}
+
 .landing-kicker {
   font-size: 0.625rem;
   font-weight: 700;
@@ -209,6 +387,8 @@
 
 .landing-cta-panel {
   text-align: center;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 @media (min-width: 1024px) {
@@ -248,6 +428,162 @@
   border-color: rgba(255, 255, 255, 0.65);
   background: rgba(255, 255, 255, 0.82);
   box-shadow: 0 8px 32px -8px rgba(12, 45, 77, 0.18);
+}
+
+/* —— Flujo clínico veterinario —— */
+
+.landing-clinical-flow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .landing-clinical-flow {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-clinical-flow {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+}
+
+.landing-clinical-step {
+  position: relative;
+  border: 1px solid rgba(12, 45, 77, 0.08);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 1.25rem 1rem 1.125rem;
+  box-shadow: 0 2px 10px -6px rgba(12, 45, 77, 0.08);
+}
+
+@media (min-width: 1024px) {
+  .landing-clinical-step {
+    border-radius: 0;
+    border: none;
+    border-right: 1px solid rgba(12, 45, 77, 0.08);
+    background: transparent;
+    box-shadow: none;
+    padding: 0 1.25rem 0.5rem;
+  }
+
+  .landing-clinical-step:nth-child(3n) {
+    border-right: none;
+  }
+
+  .landing-clinical-step:nth-child(n + 4) {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(12, 45, 77, 0.08);
+    border-right: 1px solid rgba(12, 45, 77, 0.08);
+  }
+
+  .landing-clinical-step:nth-child(6) {
+    border-right: none;
+  }
+}
+
+.landing-clinical-step-num {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #3d9b8f;
+}
+
+.landing-clinical-step-icon {
+  display: inline-flex;
+  margin-top: 0.625rem;
+  height: 2.25rem;
+  width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.625rem;
+  background: rgba(38, 91, 147, 0.08);
+  color: #265b93;
+}
+
+.landing-vet-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.375rem;
+  background: rgba(232, 244, 252, 0.85);
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #265b93;
+}
+
+.landing-clinical-note {
+  border: 1px solid rgba(12, 45, 77, 0.1);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.75rem 0.875rem;
+  box-shadow: 0 4px 16px -8px rgba(12, 45, 77, 0.14);
+}
+
+.landing-clinical-note-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+}
+
+.landing-clinical-note-row + .landing-clinical-note-row {
+  margin-top: 0.375rem;
+  padding-top: 0.375rem;
+  border-top: 1px dashed rgba(12, 45, 77, 0.1);
+}
+
+.landing-clinical-note-label {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.landing-clinical-note-value {
+  font-weight: 700;
+  color: #0c2d4d;
+  text-align: right;
+}
+
+.landing-clinical-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: #2f857a;
+}
+
+.landing-clinical-status::before {
+  content: "";
+  height: 0.375rem;
+  width: 0.375rem;
+  border-radius: 999px;
+  background: #3d9b8f;
+  animation: landing-pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes landing-pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-clinical-status::before {
+    animation: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

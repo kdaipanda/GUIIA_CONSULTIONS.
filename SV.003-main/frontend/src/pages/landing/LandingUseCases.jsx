@@ -1,30 +1,38 @@
 import React from "react";
-import { ArrowUpRight, ClipboardList, Clock, MapPin } from "lucide-react";
+import { ArrowUpRight, HeartPulse, MapPin, PawPrint, Stethoscope } from "lucide-react";
 import { scrollToLandingProduct } from "./landingScroll";
 
 const USE_CASES = [
   {
-    icon: ClipboardList,
-    title: "Consulta estructurada",
+    icon: Stethoscope,
+    title: "Primera consulta y anamnesis",
     description:
-      "Anamnesis por especie, examen físico y razonamiento CDS en secuencia — sin saltos entre herramientas.",
-    tag: "Pequeñas especies",
+      "Captura motivo de consulta, antecedentes y signos referidos con campos adaptados a la especie — caninos, felinos o exóticos.",
+    tag: "Medicina general",
     productTab: "consultation",
   },
   {
-    icon: Clock,
-    title: "Entre pacientes",
+    icon: HeartPulse,
+    title: "Seguimiento de casos crónicos",
     description:
-      "Expediente, inventario y ventas conectados: menos tiempo administrativo entre una cita y la siguiente.",
-    tag: "Clínica de consulta",
-    productTab: "dashboard",
+      "Retoma el expediente del paciente, compara visitas previas y documenta evolución sin reconstruir la historia clínica.",
+    tag: "Medicina interna",
+    productTab: "consultation",
+  },
+  {
+    icon: PawPrint,
+    title: "Exóticos y NAC",
+    description:
+      "Flujos específicos para aves, reptiles, hurones, roedores y más — con la misma trazabilidad que en pequeñas especies.",
+    tag: "Medicina de exóticos",
+    productTab: "species",
   },
   {
     icon: MapPin,
-    title: "Consulta móvil",
+    title: "Consulta domiciliaria",
     description:
-      "Acceso web desde tablet o laptop en domicilio, con el mismo historial clínico que en consultorio.",
-    tag: "Visita externa",
+      "Misma plataforma web en tablet o laptop durante visitas externas, con historial clínico sincronizado al consultorio.",
+    tag: "Visita a domicilio",
     productTab: "consultation",
   },
 ];
@@ -33,44 +41,37 @@ export function LandingUseCases() {
   return (
     <section className="landing-section border-t border-guiaa-brand-navy/8">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
-        <div className="max-w-xl">
-          <p className="landing-eyebrow">Flujos de trabajo</p>
+        <div className="landing-section-head max-w-xl">
+          <p className="landing-eyebrow">Práctica veterinaria</p>
           <h2 className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl">
-            Pensado para el ritmo real de consulta
+            Escenarios reales del consultorio
           </h2>
           <p className="landing-lead mt-4">
-            Escenarios concretos en los que GUIAA encaja en la práctica diaria del MVZ.
+            Desde la primera consulta del cachorro hasta el seguimiento del paciente
+            exótico — GUIAA acompaña cada etapa del acto clínico.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-12">
-          {USE_CASES.map(({ icon: Icon, title, description, tag, productTab }, index) => (
+        <div className="mt-12 grid gap-4 sm:grid-cols-2">
+          {USE_CASES.map(({ icon: Icon, title, description, tag, productTab }) => (
             <button
               key={title}
               type="button"
               onClick={() => scrollToLandingProduct(productTab)}
-              className={`landing-card landing-card-interactive group flex flex-col rounded-2xl p-6 text-left ${
-                index === 0
-                  ? "md:col-span-2 lg:col-span-7"
-                  : index === 1
-                    ? "lg:col-span-5"
-                    : "md:col-span-2 lg:col-span-12 lg:flex-row lg:items-center lg:gap-8 lg:p-8"
-              }`}
+              className="landing-card landing-card-interactive group flex flex-col rounded-2xl p-6 text-left"
             >
-              <div className={index === 2 ? "lg:flex-1" : undefined}>
-                <div className="inline-flex w-fit rounded-xl bg-guiaa-brand-blue/10 p-2.5 text-guiaa-brand-blue">
-                  <Icon size={20} strokeWidth={2} aria-hidden />
-                </div>
-                <span className="mt-4 inline-flex w-fit rounded-md bg-guiaa-sky-soft/80 px-2 py-0.5 text-[11px] font-semibold text-guiaa-brand-ink-muted">
-                  {tag}
+              <div className="flex items-start justify-between gap-3">
+                <span className="landing-clinical-step-icon shrink-0">
+                  <Icon size={18} strokeWidth={1.75} aria-hidden />
                 </span>
-                <h3 className="mt-3 text-base font-semibold text-guiaa-brand-navy">{title}</h3>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-guiaa-brand-ink-muted">
-                  {description}
-                </p>
+                <span className="landing-vet-tag shrink-0">{tag}</span>
               </div>
-              <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-guiaa-brand-blue transition group-hover:gap-1.5 lg:mt-0 lg:shrink-0">
-                Ver en producto
+              <h3 className="mt-4 text-base font-bold text-guiaa-brand-navy">{title}</h3>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-guiaa-brand-ink-muted">
+                {description}
+              </p>
+              <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-guiaa-brand-blue transition group-hover:gap-1.5">
+                Ver flujo clínico
                 <ArrowUpRight size={13} aria-hidden />
               </span>
             </button>

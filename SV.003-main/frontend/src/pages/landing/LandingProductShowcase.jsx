@@ -66,19 +66,19 @@ export function LandingProductShowcase() {
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
         <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
           <div className="lg:sticky lg:top-24">
-            <p className="landing-eyebrow">Producto en acción</p>
+            <p className="landing-eyebrow">Interfaz veterinaria</p>
             <h2 className="landing-section-title mt-3 text-2xl text-guiaa-brand-navy sm:text-3xl">
-              La misma interfaz que usas en consulta
+              La misma pantalla que usas con cada paciente
             </h2>
             <p className="landing-lead mt-4 text-sm sm:text-base">
-              Capturas del flujo real de GUIAA: selección multiespecie, consulta
-              clínica y panel del MVZ.
+              Capturas del flujo real: selección de especie, consulta clínica y panel del
+              MVZ en consultorio.
             </p>
             <ul className="mt-6 space-y-3 text-sm text-guiaa-brand-ink-muted">
               {[
-                "Formularios con los estilos y componentes de la app",
-                "Progreso de consulta visible en sidebar",
-                "Panel con resumen de actividad clínica",
+                "Selector multiespecie con formularios veterinarios por categoría",
+                "Stepper clínico: paciente → anamnesis → examen → plan terapéutico",
+                "Panel con consultas recientes e indicadores de tu práctica",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2.5">
                   <ChevronRight
@@ -127,11 +127,7 @@ export function LandingProductShowcase() {
                       setActiveId(shot.id);
                       setLandingProductTabHash(shot.id);
                     }}
-                    className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition sm:text-sm ${
-                      isActive
-                        ? "bg-guiaa-brand-blue text-white"
-                        : "border border-guiaa-brand-navy/12 bg-white text-guiaa-brand-navy/65 hover:border-guiaa-brand-navy/20"
-                    }`}
+                    className={`landing-tab ${isActive ? "is-active" : ""}`}
                   >
                     {shot.label}
                   </button>

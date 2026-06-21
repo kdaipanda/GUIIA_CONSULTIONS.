@@ -5,6 +5,7 @@ import "./landing/landingTaste.css";
 import { LandingClinicalTexture } from "./landing/LandingClinicalTexture";
 import { LandingNavbar } from "./landing/LandingNavbar";
 import { LandingHero } from "./landing/LandingHero";
+import { LandingClinicalWorkflow } from "./landing/LandingClinicalWorkflow";
 import { LandingTrustStrip } from "./landing/LandingTrustStrip";
 import { LandingProductShowcase } from "./landing/LandingProductShowcase";
 import { LandingFeatures } from "./landing/LandingFeatures";
@@ -20,7 +21,7 @@ import { LandingSeo } from "./landing/LandingSeo";
 
 export function LandingPage({ setView }) {
   return (
-    <div className="landing-shell min-h-screen bg-guiaa-brand-blue p-3 pb-[4.75rem] antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
+    <div className="landing-shell min-h-screen p-3 pb-[4.75rem] antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
       <LandingSeo />
       <div className="landing-shell-inner relative mx-auto max-w-[82rem] overflow-hidden rounded-[2rem] bg-gradient-to-b from-sky-50/90 via-white to-white sm:rounded-[2.75rem]">
         <LandingClinicalTexture />
@@ -29,6 +30,9 @@ export function LandingPage({ setView }) {
           <LandingHero setView={setView} />
           <LandingReveal>
             <LandingTrustStrip />
+          </LandingReveal>
+          <LandingReveal delay={30}>
+            <LandingClinicalWorkflow />
           </LandingReveal>
           <LandingReveal delay={40}>
             <LandingProductShowcase />

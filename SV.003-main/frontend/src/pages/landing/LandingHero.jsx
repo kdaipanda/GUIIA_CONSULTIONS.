@@ -17,9 +17,9 @@ const SERVICES = [
 ];
 
 const HERO_STATS = [
-  { value: "11+", label: "especies con flujo" },
-  { value: "CDS L4·L5", label: "soporte clínico" },
-  { value: "LATAM", label: "enfoque regional" },
+  { value: "11+", label: "especies veterinarias" },
+  { value: "CDS L4·L5", label: "decisión clínica" },
+  { value: "1", label: "expediente por paciente" },
 ];
 
 export function LandingHero({ setView }) {
@@ -32,22 +32,23 @@ export function LandingHero({ setView }) {
   };
 
   return (
-    <section className="relative px-4 pb-20 pt-3 sm:px-8 sm:pb-20 sm:pt-4 lg:px-10 lg:pb-24">
-      <div className="mx-auto grid max-w-6xl items-center gap-8 sm:gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-12">
+    <section className="landing-hero relative px-4 pb-20 pt-6 sm:px-8 sm:pb-20 sm:pt-8 lg:px-10 lg:pb-28 lg:pt-10">
+      <div className="landing-hero-glow" aria-hidden />
+      <div className="relative mx-auto grid max-w-6xl items-center gap-10 sm:gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-14">
         <div className="max-w-xl lg:py-6">
           <p className="landing-eyebrow inline-flex rounded-full border border-guiaa-brand-blue/15 bg-guiaa-sky-soft/50 px-3 py-1">
-            Plataforma clínica · solo MVZ certificados
+            Software clínico veterinario · acceso MVZ
           </p>
 
           <h1 className="landing-display mt-4 text-[1.85rem] font-extrabold leading-[1.14] text-guiaa-brand-navy sm:text-5xl lg:text-[3rem]">
-            Soporte CDS estructurado en tu{" "}
-            <span className="text-guiaa-brand-green-dark">consulta</span>
+            Consulta veterinaria multiespecie,{" "}
+            <span className="text-guiaa-brand-green-dark">estructurada</span>
           </h1>
 
           <p className="landing-lead mt-4 text-sm sm:mt-5 sm:text-base">
-            Anamnesis, hallazgos y antecedentes integrados para hipótesis diagnósticas
-            y planes terapéuticos basados en evidencia — multiespecie y pensado para
-            Latinoamérica.
+            Anamnesis, examen físico y antecedentes por especie — con soporte CDS L4 y L5
+            para organizar hipótesis y planes terapéuticos. Pensado para el consultorio y
+            la visita externa en Latinoamérica.
           </p>
 
           <div className="mt-6 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
@@ -56,7 +57,7 @@ export function LandingHero({ setView }) {
               onClick={() => setView("register")}
               className="landing-btn-primary w-full sm:w-auto"
             >
-              Comenzar registro
+              Comenzar registro MVZ
             </button>
             <button
               type="button"
@@ -68,11 +69,11 @@ export function LandingHero({ setView }) {
             </button>
           </div>
 
-          <dl className="premium-stagger mt-8 grid grid-cols-1 gap-3 border-t border-guiaa-brand-navy/10 pt-6 sm:grid-cols-3 sm:mt-10 sm:pt-8">
+          <dl className="premium-stagger landing-stat-panel mt-8 sm:mt-10">
             {HERO_STATS.map(({ value, label }) => (
-              <div key={label} className="min-w-0">
+              <div key={label} className="min-w-0 text-center sm:text-left">
                 <dt className="landing-stat-value text-base text-guiaa-brand-navy sm:text-xl">{value}</dt>
-                <dd className="mt-0.5 text-[10px] font-medium leading-tight text-guiaa-brand-ink-muted sm:text-xs">
+                <dd className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-guiaa-brand-ink-muted sm:text-xs">
                   {label}
                 </dd>
               </div>
@@ -100,12 +101,28 @@ export function LandingHero({ setView }) {
             aria-hidden
           />
 
+          <div className="absolute right-0 top-2 z-20 hidden max-w-[11rem] sm:block lg:-right-2 lg:top-4 lg:max-w-[12.5rem]">
+            <div className="landing-clinical-note">
+              <p className="landing-kicker">Registro clínico</p>
+              <div className="landing-clinical-note-row mt-2">
+                <span className="landing-clinical-note-label">Paciente</span>
+                <span className="landing-clinical-note-value">Luna · Canino</span>
+              </div>
+              <div className="landing-clinical-note-row">
+                <span className="landing-clinical-note-label">Motivo</span>
+                <span className="landing-clinical-note-value">Vómito agudo</span>
+              </div>
+              <span className="landing-clinical-status">Anamnesis en curso</span>
+            </div>
+          </div>
+
           <div className="absolute left-0 top-4 z-20 rounded-xl border border-guiaa-brand-navy/10 bg-white px-3 py-2 shadow-[0_4px_16px_-6px_rgba(12,45,77,0.15)] sm:-left-3 sm:top-6 sm:py-2.5">
             <p className="landing-kicker">Metodología</p>
             <p className="text-sm font-bold text-guiaa-brand-blue">CDS L4 · L5</p>
           </div>
 
-          <div className="relative z-10 ml-2 mt-6 overflow-hidden rounded-2xl border border-guiaa-brand-navy/12 shadow-[0_16px_48px_-8px_rgba(12,45,77,0.2)] sm:ml-8 sm:mt-10">
+          <div className="landing-hero-media-outer relative z-10 ml-2 mt-6 sm:ml-8 sm:mt-10">
+            <div className="landing-hero-media-inner">
             <video
               autoPlay
               loop
@@ -117,6 +134,7 @@ export function LandingHero({ setView }) {
             >
               <source src="/VG1.mp4" type="video/mp4" />
             </video>
+            </div>
           </div>
 
           <button
@@ -127,9 +145,7 @@ export function LandingHero({ setView }) {
           >
             <div className="flex items-center gap-1.5 border-b border-guiaa-brand-navy/8 bg-guiaa-sky-soft/50 px-2 py-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-guiaa-brand-green" aria-hidden />
-              <span className="text-[9px] font-semibold uppercase tracking-wide text-guiaa-brand-navy/50">
-                App en consulta
-              </span>
+            <span className="landing-kicker normal-case">App en consulta</span>
             </div>
             <img
               src={HERO_PRODUCT_SCREENSHOT.src}
@@ -145,7 +161,7 @@ export function LandingHero({ setView }) {
 
           <div className="landing-hero-badge absolute bottom-14 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-white/20 bg-guiaa-brand-navy/90 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur-sm sm:bottom-6 sm:px-4 sm:py-2 sm:text-xs lg:left-[42%]">
             <span className="h-1.5 w-1.5 rounded-full bg-guiaa-brand-green" aria-hidden />
-            Soporte clínico · LATAM
+            Soporte clínico veterinario · LATAM
           </div>
         </div>
       </div>

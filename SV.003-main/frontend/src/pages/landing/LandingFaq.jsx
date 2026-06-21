@@ -12,7 +12,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "¿Qué especies cubre la plataforma?",
-    a: "Perros, gatos, aves, reptiles, conejos y exóticos. Los flujos se adaptan según la especie seleccionada en cada consulta.",
+    a: "Perros, gatos, conejos, aves, reptiles, hurones, erizos, hámsters, cuyos, iguanas y aves de corral. Cada especie activa un formulario veterinario adaptado en la consulta.",
   },
   {
     q: "¿Mis datos clínicos están seguros?",

@@ -25,8 +25,8 @@ export function LandingFooter({ setView }) {
           <div>
             <LandingBrandLockup variant="footer" className="max-w-md" />
             <p className="landing-body mt-4 max-w-sm text-sm">
-              Plataforma clínica multiespecie con soporte CDS L4 y L5 para médicos
-              veterinarios certificados en Latinoamérica.
+              Software clínico veterinario multiespecie con soporte CDS L4 y L5. Para
+              médicos veterinarios certificados en Latinoamérica.
             </p>
           </div>
 

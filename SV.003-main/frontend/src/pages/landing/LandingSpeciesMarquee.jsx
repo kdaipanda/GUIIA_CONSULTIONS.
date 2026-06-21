@@ -9,7 +9,7 @@ function SpeciesChip({ icon, name, onClick, decorative = false }) {
       onClick={onClick}
       tabIndex={decorative ? -1 : undefined}
       aria-hidden={decorative ? true : undefined}
-      className="landing-species-chip inline-flex shrink-0 items-center gap-2.5 rounded-xl border border-guiaa-brand-navy/10 bg-white px-3.5 py-2 text-sm font-semibold text-guiaa-brand-navy transition hover:border-guiaa-brand-blue/25 hover:shadow-[0_4px_14px_-6px_rgba(12,45,77,0.15)] sm:px-4 sm:py-2.5"
+      className="landing-species-chip inline-flex shrink-0 items-center gap-2.5 border border-guiaa-brand-navy/10 bg-white px-3.5 py-2 text-sm font-semibold text-guiaa-brand-navy transition hover:border-guiaa-brand-blue/25 sm:px-4 sm:py-2.5"
     >
       <span className="category-icon landing-species-icon" aria-hidden>
         {icon}
@@ -25,11 +25,11 @@ export function LandingSpeciesMarquee() {
 
   return (
     <section
-      className="border-y border-guiaa-brand-navy/8 bg-guiaa-sky-soft/30 py-10"
+      className="landing-section-band border-y border-guiaa-brand-navy/8 py-10"
       aria-labelledby="landing-species-heading"
     >
       <p id="landing-species-heading" className="landing-eyebrow mb-6 text-center">
-        Especies soportadas · {speciesCount} categorías de consulta
+        Multiespecie veterinaria · {speciesCount} formularios clínicos
       </p>
 
       <div className="landing-marquee-viewport landing-marquee-fade relative">

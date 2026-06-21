@@ -6,15 +6,15 @@ export function LandingCta({ setView }) {
   return (
     <section className="landing-section">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
-        <div className="landing-cta-panel relative overflow-hidden rounded-2xl bg-guiaa-brand-navy px-6 py-14 sm:px-12">
+        <div className="landing-cta-panel relative overflow-hidden rounded-[1.25rem] bg-guiaa-brand-navy px-6 py-14 sm:px-12 lg:py-16">
           <div>
-            <p className="landing-eyebrow text-sky-100/80">Acceso profesional</p>
+            <p className="landing-eyebrow text-sky-100/80">Registro profesional MVZ</p>
             <h2 className="landing-section-title mt-3 text-3xl text-white sm:text-4xl">
-              Registro exclusivo para MVZ
+              Tu consulta veterinaria, documentada con rigor clínico
             </h2>
             <p className="landing-lead mt-4 max-w-lg">
-              Verificamos tu cédula profesional. Empieza a estructurar consultas con
-              soporte CDS L4 y L5.
+              Verificamos tu cédula profesional. Empieza a registrar pacientes multiespecie
+              con soporte CDS L4 y L5 desde el primer día.
             </p>
             <button
               type="button"
@@ -37,7 +37,7 @@ export function LandingCta({ setView }) {
             <button
               type="button"
               onClick={() => setView("login")}
-              className="rounded-xl border border-white/25 px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10"
+              className="landing-btn-on-dark"
             >
               Ya tengo cuenta
             </button>

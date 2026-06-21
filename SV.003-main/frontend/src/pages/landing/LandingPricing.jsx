@@ -39,13 +39,13 @@ export function LandingPricing({ setView }) {
     <section id="pricing" className="landing-section landing-section-alt">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
         <div className="max-w-xl">
-          <p className="landing-eyebrow">Acceso profesional</p>
+          <p className="landing-eyebrow">Membresía MVZ</p>
           <h2 className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl">
-            Planes para tu consulta
+            Planes para tu consultorio veterinario
           </h2>
           <p className="landing-lead mt-4">
-            Registro exclusivo para MVZ. Verificamos cédula profesional antes de activar
-            tu cuenta clínica.
+            Registro exclusivo para médicos veterinarios. Verificamos cédula profesional
+            antes de activar tu entorno clínico multiespecie.
           </p>
         </div>
 
@@ -55,9 +55,7 @@ export function LandingPricing({ setView }) {
               <article
                 key={name}
                 className={`landing-card relative flex flex-col rounded-2xl p-6 sm:p-8 ${
-                  highlighted
-                    ? "ring-1 ring-guiaa-brand-blue/12 shadow-[0_10px_36px_-10px_rgba(38,91,147,0.2)]"
-                    : ""
+                  highlighted ? "landing-pricing-featured landing-card-accent-top" : ""
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -109,10 +107,10 @@ export function LandingPricing({ setView }) {
           )}
         </div>
 
-        <div className="mt-8 flex flex-col gap-3 rounded-xl border border-guiaa-brand-navy/10 bg-guiaa-sky-soft/35 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="landing-trust-banner mt-8 flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <ShieldCheck size={20} className="mt-0.5 shrink-0 text-guiaa-brand-blue" aria-hidden />
-            <p className="text-sm text-guiaa-brand-navy/65">
+            <p className="text-sm text-guiaa-brand-ink-muted">
               Solo médicos veterinarios certificados. La verificación de cédula es parte
               del registro inicial.
             </p>
@@ -120,7 +118,7 @@ export function LandingPricing({ setView }) {
           <button
             type="button"
             onClick={() => setView("register")}
-            className="shrink-0 text-sm font-semibold text-guiaa-brand-blue transition hover:text-guiaa-brand-navy"
+            className="landing-link-arrow shrink-0"
           >
             Iniciar verificación →
           </button>
