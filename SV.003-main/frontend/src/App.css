@@ -12235,6 +12235,7 @@ html {
   }
 
   .clinic-shell > .header .nav-menu {
+    display: none;
     position: absolute;
     top: calc(100% + 6px);
     left: 12px;
@@ -12244,6 +12245,39 @@ html {
     max-height: min(70vh, 520px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+  }
+
+  .clinic-shell > .header .nav-menu.mobile-open {
+    display: flex;
+  }
+
+  .clinic-shell > .header .user-menu-container {
+    width: 100%;
+    margin: 0;
+  }
+
+  .clinic-shell > .header .user-menu-trigger {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .clinic-shell > .header .user-dropdown-menu {
+    position: relative;
+    top: 0;
+    left: 0;
+    right: auto;
+    width: 100%;
+    margin-top: 8px;
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
   }
 
   .clinic-shell-body {
