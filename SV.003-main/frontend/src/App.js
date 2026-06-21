@@ -2212,17 +2212,15 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
   };
 
   const loadWeatherData = async () => {
+    const apiKey = process.env.REACT_APP_WEATHER_API_KEY?.trim();
+    if (!apiKey) {
+      setWeatherData(null);
+      setWeatherLoading(false);
+      return;
+    }
+
     setWeatherLoading(true);
     try {
-      // Intentar usar la variable de entorno primero, si no existe usar la clave por defecto
-      const apiKey = process.env.REACT_APP_WEATHER_API_KEY || "8149f4e566a3c8e71872e864ad6604ae";
-      
-      // Si no hay API key, no intentar cargar el clima
-      if (!apiKey) {
-        setWeatherLoading(false);
-        return;
-      }
-      
       const lat = 19.4326;
       const lon = -99.1332;
       const response = await fetch(
@@ -2232,14 +2230,10 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       if (response.ok) {
         const data = await response.json();
         setWeatherData(data);
-      } else if (response.status === 401) {
-        // API key inválida o expirada - manejar silenciosamente
-        // No mostrar error en consola, simplemente no cargar el clima
+      } else {
         setWeatherData(null);
       }
-    } catch (error) {
-      // Manejar errores de red silenciosamente
-      // No mostrar errores en consola para no molestar al usuario
+    } catch {
       setWeatherData(null);
     } finally {
       setWeatherLoading(false);
