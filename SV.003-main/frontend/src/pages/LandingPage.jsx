@@ -1,6 +1,7 @@
 import React from "react";
 import "./landing/landingPreview.css";
 import "./landing/landingMotion.css";
+import "./landing/landingTaste.css";
 import { LandingClinicalTexture } from "./landing/LandingClinicalTexture";
 import { LandingNavbar } from "./landing/LandingNavbar";
 import { LandingHero } from "./landing/LandingHero";
@@ -21,7 +22,7 @@ export function LandingPage({ setView }) {
   return (
     <div className="landing-shell min-h-screen bg-guiaa-brand-blue p-3 pb-[4.75rem] antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
       <LandingSeo />
-      <div className="relative mx-auto max-w-[82rem] overflow-hidden rounded-[2rem] bg-gradient-to-b from-sky-50/90 via-white to-white shadow-[0_24px_80px_-12px_rgba(0,0,0,0.35)] sm:rounded-[2.75rem]">
+      <div className="landing-shell-inner relative mx-auto max-w-[82rem] overflow-hidden rounded-[2rem] bg-gradient-to-b from-sky-50/90 via-white to-white sm:rounded-[2.75rem]">
         <LandingClinicalTexture />
         <LandingNavbar setView={setView} />
         <main className="relative">

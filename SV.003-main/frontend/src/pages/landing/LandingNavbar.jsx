@@ -58,7 +58,7 @@ export function LandingNavbar({ setView }) {
 
   const navLinkClass = (sectionId) => {
     const isActive = activeSection === sectionId;
-    return `relative text-xs font-semibold uppercase tracking-[0.12em] transition hover:text-guiaa-brand-navy ${
+    return `relative landing-eyebrow transition hover:text-guiaa-brand-navy ${
       isActive ? "text-guiaa-brand-navy" : "text-guiaa-brand-navy/75"
     }`;
   };
@@ -66,7 +66,7 @@ export function LandingNavbar({ setView }) {
   return (
     <header
       className={`sticky top-0 z-40 transition-all duration-300 ${
-        scrolled ? "bg-white/80 shadow-sm backdrop-blur-md" : "bg-transparent"
+        scrolled ? "landing-nav-scrolled" : "bg-transparent"
       }`}
     >
       <div className="mx-auto flex min-h-[4.75rem] max-w-6xl items-center justify-between gap-3 px-5 py-2 sm:min-h-[5rem] sm:gap-4 sm:px-8 lg:px-10">
@@ -103,14 +103,14 @@ export function LandingNavbar({ setView }) {
           <button
             type="button"
             onClick={() => setView("login")}
-            className="text-sm font-semibold text-guiaa-brand-navy/70 transition hover:text-guiaa-brand-navy"
+            className="landing-btn-ghost"
           >
             Iniciar sesión
           </button>
           <button
             type="button"
             onClick={() => setView("register")}
-            className="rounded-xl bg-guiaa-brand-green px-5 py-2.5 text-sm font-bold text-white transition hover:bg-guiaa-brand-green-dark"
+            className="landing-btn-primary px-5 py-2.5"
           >
             Registrarse
           </button>
@@ -169,7 +169,7 @@ export function LandingNavbar({ setView }) {
                 setMobileOpen(false);
                 setView("register");
               }}
-              className="rounded-xl bg-guiaa-brand-green py-2.5 text-sm font-bold text-white"
+              className="landing-btn-primary w-full py-2.5"
             >
               Registrarse
             </button>

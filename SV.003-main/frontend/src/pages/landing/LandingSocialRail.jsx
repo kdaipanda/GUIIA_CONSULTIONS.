@@ -24,7 +24,7 @@ export function LandingSocialRail({ setView }) {
   return (
     <>
       <aside
-        className="fixed right-3 top-1/2 z-50 hidden -translate-y-1/2 flex-col gap-3 rounded-full border border-white/60 bg-white/70 px-2.5 py-4 shadow-lg backdrop-blur-md lg:flex xl:right-6"
+        className="landing-rail fixed right-3 top-1/2 z-50 hidden -translate-y-1/2 flex-col gap-3 rounded-full border px-2.5 py-4 backdrop-blur-md lg:flex xl:right-6"
         aria-label="Accesos rápidos"
       >
         {DESKTOP_ITEMS.map(({ icon: Icon, label, href, onClick }) =>
@@ -73,7 +73,7 @@ export function LandingSocialRail({ setView }) {
             <button
               type="button"
               onClick={() => setView("register")}
-              className="inline-flex flex-[1.2] items-center justify-center rounded-xl bg-guiaa-brand-green py-2.5 text-xs font-bold text-white"
+              className="landing-btn-primary inline-flex flex-[1.2] items-center justify-center py-2.5 text-xs"
             >
               Registro
             </button>

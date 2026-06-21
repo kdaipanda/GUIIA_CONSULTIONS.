@@ -9,15 +9,15 @@ const ITEMS = [
 
 export function LandingTrustStrip() {
   return (
-    <section className="border-y border-guiaa-brand-navy/8 bg-white/70 py-6">
-      <div className="mx-auto grid max-w-6xl gap-4 px-5 sm:grid-cols-3 sm:gap-6 sm:px-8 lg:px-10">
+    <section className="border-y landing-trust-divider bg-white/70 py-5 sm:py-6">
+      <div className="mx-auto flex max-w-6xl flex-col divide-y landing-trust-divider px-5 sm:flex-row sm:divide-x sm:divide-y-0 sm:px-8 lg:px-10">
         {ITEMS.map(({ icon: Icon, text }) => (
           <div
             key={text}
-            className="flex items-center justify-center gap-2.5 rounded-xl border border-guiaa-brand-navy/8 bg-white/80 px-4 py-3 text-sm font-medium text-guiaa-brand-navy/65 sm:justify-start sm:border-transparent sm:bg-transparent sm:px-0 sm:py-0"
+            className="flex flex-1 items-center justify-center gap-3 px-2 py-3.5 text-sm font-semibold text-guiaa-brand-navy sm:justify-center sm:px-6 sm:py-0"
           >
-            <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-guiaa-brand-blue/10">
-              <Icon size={16} className="text-guiaa-brand-blue" aria-hidden />
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-guiaa-brand-blue/10">
+              <Icon size={17} className="text-guiaa-brand-blue" aria-hidden />
             </span>
             {text}
           </div>

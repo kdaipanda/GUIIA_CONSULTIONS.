@@ -25,6 +25,8 @@ module.exports = {
   				'brand-green': '#3d9b8f',
   				'brand-green-dark': '#2f857a',
   				'brand-blue': '#265B93',
+  				'brand-ink-muted': '#64748b',
+  				'brand-ink-subtle': '#94a3b8',
   				'sky-soft': '#e8f4fc',
   				'sky-mist': '#d4ebf7',
   			},

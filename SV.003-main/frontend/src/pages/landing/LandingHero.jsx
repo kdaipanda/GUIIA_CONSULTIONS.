@@ -35,16 +35,16 @@ export function LandingHero({ setView }) {
     <section className="relative px-4 pb-20 pt-3 sm:px-8 sm:pb-20 sm:pt-4 lg:px-10 lg:pb-24">
       <div className="mx-auto grid max-w-6xl items-center gap-8 sm:gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-12">
         <div className="max-w-xl lg:py-6">
-          <p className="text-sm font-medium text-guiaa-brand-navy/55 sm:text-base">
+          <p className="landing-eyebrow inline-flex rounded-full border border-guiaa-brand-blue/15 bg-guiaa-sky-soft/50 px-3 py-1">
             Plataforma clínica · solo MVZ certificados
           </p>
 
-          <h1 className="mt-3 text-[1.85rem] font-bold leading-[1.14] tracking-tight text-guiaa-brand-navy sm:text-5xl lg:text-[3rem]">
+          <h1 className="landing-display mt-4 text-[1.85rem] font-extrabold leading-[1.14] text-guiaa-brand-navy sm:text-5xl lg:text-[3rem]">
             Soporte CDS estructurado en tu{" "}
             <span className="text-guiaa-brand-green-dark">consulta</span>
           </h1>
 
-          <p className="mt-4 max-w-md text-sm leading-relaxed text-guiaa-brand-navy/55 sm:mt-5 sm:text-base">
+          <p className="landing-lead mt-4 text-sm sm:mt-5 sm:text-base">
             Anamnesis, hallazgos y antecedentes integrados para hipótesis diagnósticas
             y planes terapéuticos basados en evidencia — multiespecie y pensado para
             Latinoamérica.
@@ -54,14 +54,14 @@ export function LandingHero({ setView }) {
             <button
               type="button"
               onClick={() => setView("register")}
-              className="landing-hero-cta-primary w-full rounded-xl bg-guiaa-brand-green px-7 py-3.5 text-sm font-bold text-white transition hover:bg-guiaa-brand-green-dark sm:w-auto"
+              className="landing-btn-primary w-full sm:w-auto"
             >
               Comenzar registro
             </button>
             <button
               type="button"
               onClick={() => scrollToLandingProduct("species")}
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-guiaa-brand-navy/10 bg-guiaa-sky-soft/40 px-4 py-3 text-sm font-semibold text-guiaa-brand-blue transition hover:bg-guiaa-sky-soft sm:w-auto sm:border-transparent sm:bg-transparent"
+              className="landing-btn-secondary w-full sm:w-auto sm:border-transparent sm:bg-transparent"
             >
               <Monitor size={15} aria-hidden />
               Ver producto
@@ -71,32 +71,24 @@ export function LandingHero({ setView }) {
           <dl className="premium-stagger mt-8 grid grid-cols-1 gap-3 border-t border-guiaa-brand-navy/10 pt-6 sm:grid-cols-3 sm:mt-10 sm:pt-8">
             {HERO_STATS.map(({ value, label }) => (
               <div key={label} className="min-w-0">
-                <dt className="text-base font-bold text-guiaa-brand-navy sm:text-xl">{value}</dt>
-                <dd className="mt-0.5 text-[10px] leading-tight text-guiaa-brand-navy/45 sm:text-xs">
+                <dt className="landing-stat-value text-base text-guiaa-brand-navy sm:text-xl">{value}</dt>
+                <dd className="mt-0.5 text-[10px] font-medium leading-tight text-guiaa-brand-ink-muted sm:text-xs">
                   {label}
                 </dd>
               </div>
             ))}
           </dl>
 
-          <div className="mt-8 grid grid-cols-4 gap-2 sm:mt-10 sm:gap-4">
-            {SERVICES.map(({ icon: Icon, label, ...service }, index) => (
+          <div className="mt-8 flex flex-wrap gap-2 sm:mt-10">
+            {SERVICES.map(({ icon: Icon, label, ...service }) => (
               <button
                 key={label}
                 type="button"
                 onClick={() => handleServiceClick(service)}
-                className="group flex flex-col items-center gap-1.5 text-center sm:gap-2"
+                className="landing-service-pill"
               >
-                <span
-                  className={`inline-flex h-11 w-11 items-center justify-center rounded-xl text-white transition group-hover:opacity-90 sm:h-14 sm:w-14 ${
-                    index % 2 === 0 ? "bg-guiaa-brand-blue" : "bg-guiaa-brand-green"
-                  }`}
-                >
-                  <Icon size={18} strokeWidth={2} aria-hidden />
-                </span>
-                <span className="text-[10px] font-medium leading-tight text-guiaa-brand-navy/65 sm:text-xs">
-                  {label}
-                </span>
+                <Icon size={14} strokeWidth={2} aria-hidden />
+                {label}
               </button>
             ))}
           </div>
@@ -108,10 +100,8 @@ export function LandingHero({ setView }) {
             aria-hidden
           />
 
-          <div className="absolute left-0 top-4 z-20 rounded-xl border border-guiaa-brand-navy/10 bg-white px-3 py-2 shadow-md sm:-left-3 sm:top-6 sm:py-2.5">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-guiaa-brand-navy/40">
-              Metodología
-            </p>
+          <div className="absolute left-0 top-4 z-20 rounded-xl border border-guiaa-brand-navy/10 bg-white px-3 py-2 shadow-[0_4px_16px_-6px_rgba(12,45,77,0.15)] sm:-left-3 sm:top-6 sm:py-2.5">
+            <p className="landing-kicker">Metodología</p>
             <p className="text-sm font-bold text-guiaa-brand-blue">CDS L4 · L5</p>
           </div>
 

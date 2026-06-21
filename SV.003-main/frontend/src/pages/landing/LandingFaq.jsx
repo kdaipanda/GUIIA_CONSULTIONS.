@@ -30,7 +30,7 @@ const FAQ_ITEMS = [
 
 function FaqItem({ q, a, isOpen, onToggle }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-guiaa-brand-navy/10 bg-white">
+    <div className="landing-card overflow-hidden rounded-xl">
       <button
         type="button"
         onClick={onToggle}
@@ -52,7 +52,7 @@ function FaqItem({ q, a, isOpen, onToggle }) {
         }`}
       >
         <div className="overflow-hidden">
-          <div className="border-t border-guiaa-brand-navy/8 px-5 py-4 text-sm leading-relaxed text-guiaa-brand-navy/60">
+          <div className="border-t border-guiaa-brand-navy/8 px-5 py-4 text-sm leading-relaxed text-guiaa-brand-ink-muted">
             {a}
           </div>
         </div>
@@ -67,26 +67,24 @@ export function LandingFaq({ setView }) {
   return (
     <section
       id="faq"
-      className="scroll-mt-24 border-t border-guiaa-brand-navy/8 bg-white/40 py-16 sm:py-20"
+      className="landing-section border-t border-guiaa-brand-navy/8 bg-white/40"
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <p className="text-xs font-semibold uppercase tracking-widest text-guiaa-brand-blue">
-              Antes de registrarte
-            </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-guiaa-brand-navy sm:text-4xl">
+            <p className="landing-eyebrow">Antes de registrarte</p>
+            <h2 className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl">
               Preguntas frecuentes
             </h2>
-            <p className="mt-4 text-sm leading-relaxed text-guiaa-brand-navy/55 sm:text-base">
+            <p className="landing-lead mt-4 text-sm sm:text-base">
               Dudas habituales sobre acceso, especies, seguridad y uso en consulta.
             </p>
 
-            <div className="mt-8 rounded-xl border border-guiaa-brand-navy/10 bg-white p-5">
+            <div className="landing-card mt-8 rounded-xl p-5">
               <p className="text-sm font-semibold text-guiaa-brand-navy">
                 ¿No encuentras tu respuesta?
               </p>
-              <p className="mt-2 text-sm text-guiaa-brand-navy/55">
+              <p className="mt-2 text-sm text-guiaa-brand-ink-muted">
                 Escríbenos y te orientamos antes del registro.
               </p>
               <a

@@ -62,21 +62,19 @@ export function LandingProductShowcase() {
   };
 
   return (
-    <section id="product" className="scroll-mt-24 border-y border-guiaa-brand-navy/8 bg-white/60 py-14 sm:py-16">
+    <section id="product" className="landing-section border-y border-guiaa-brand-navy/8 bg-white/60">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
         <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
           <div className="lg:sticky lg:top-24">
-            <p className="text-xs font-semibold uppercase tracking-widest text-guiaa-brand-blue">
-              Producto en acción
-            </p>
-            <h2 className="mt-3 text-2xl font-bold tracking-tight text-guiaa-brand-navy sm:text-3xl">
+            <p className="landing-eyebrow">Producto en acción</p>
+            <h2 className="landing-section-title mt-3 text-2xl text-guiaa-brand-navy sm:text-3xl">
               La misma interfaz que usas en consulta
             </h2>
-            <p className="mt-4 text-sm leading-relaxed text-guiaa-brand-navy/55 sm:text-base">
+            <p className="landing-lead mt-4 text-sm sm:text-base">
               Capturas del flujo real de GUIAA: selección multiespecie, consulta
               clínica y panel del MVZ.
             </p>
-            <ul className="mt-6 space-y-3 text-sm text-guiaa-brand-navy/70">
+            <ul className="mt-6 space-y-3 text-sm text-guiaa-brand-ink-muted">
               {[
                 "Formularios con los estilos y componentes de la app",
                 "Progreso de consulta visible en sidebar",
@@ -141,16 +139,17 @@ export function LandingProductShowcase() {
               })}
             </div>
 
-            <p className="mt-4 text-sm text-guiaa-brand-navy/50">{activeShot.caption}</p>
+            <p className="mt-4 text-sm text-guiaa-brand-ink-subtle">{activeShot.caption}</p>
           </div>
 
           <div className="relative">
-            <div className="overflow-hidden rounded-xl border border-guiaa-brand-navy/12 bg-slate-100 shadow-[0_20px_50px_-12px_rgba(12,45,77,0.22)]">
+            <div className="landing-product-frame">
+              <div className="landing-product-frame-inner">
               <div className="flex items-center gap-2 border-b border-guiaa-brand-navy/10 bg-white px-4 py-2.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
                 <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-                <span className="ml-3 truncate text-[11px] font-medium text-guiaa-brand-navy/45">
+                <span className="landing-kicker ml-3 truncate normal-case">
                   GUIAA · {activeShot.label}
                 </span>
               </div>
@@ -167,6 +166,7 @@ export function LandingProductShowcase() {
                     onFallback={() => markFallback(activeShot.id)}
                   />
                 </div>
+              </div>
               </div>
             </div>
           </div>

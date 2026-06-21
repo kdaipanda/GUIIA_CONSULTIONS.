@@ -81,13 +81,13 @@ const SECONDARY_FEATURES = [
 function FeatureIcon({ icon: Icon, alternate }) {
   return (
     <div
-      className={`inline-flex rounded-xl p-3 ${
+      className={`inline-flex rounded-lg p-2.5 ${
         alternate
           ? "bg-guiaa-brand-green/10 text-guiaa-brand-green-dark"
           : "bg-guiaa-brand-blue/10 text-guiaa-brand-blue"
       }`}
     >
-      <Icon size={22} strokeWidth={2} aria-hidden />
+      <Icon size={20} strokeWidth={1.75} aria-hidden />
     </div>
   );
 }
@@ -103,7 +103,7 @@ function FeatureCard({ children, productTab, className = "" }) {
     <button
       type="button"
       onClick={() => scrollToLandingProduct(productTab)}
-      className={`${className} group w-full text-left transition hover:border-guiaa-brand-blue/25 hover:shadow-sm`}
+      className={`${className} group w-full text-left landing-card landing-card-interactive`}
     >
       {children}
     </button>
@@ -123,17 +123,15 @@ function ProductLink({ productTab }) {
 
 export function LandingFeatures() {
   return (
-    <section id="features" className="scroll-mt-24 py-16 sm:py-20">
+    <section id="features" className="landing-section landing-section-alt">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-guiaa-brand-blue">
-              Módulos principales
-            </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-guiaa-brand-navy sm:text-4xl">
+            <p className="landing-eyebrow">Módulos principales</p>
+            <h2 className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl">
               Cuatro pilares de tu consulta
             </h2>
-            <p className="mt-4 text-guiaa-brand-navy/55">
+            <p className="landing-lead mt-4">
               Herramientas clínicas y operativas con la misma identidad visual y flujo
               coherente.
             </p>
@@ -141,7 +139,7 @@ export function LandingFeatures() {
           <button
             type="button"
             onClick={() => scrollToLandingProduct("species")}
-            className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-guiaa-brand-blue transition hover:text-guiaa-brand-navy"
+            className="landing-link-arrow shrink-0"
           >
             Ver capturas del producto
             <ArrowUpRight size={15} aria-hidden />
@@ -153,11 +151,11 @@ export function LandingFeatures() {
             <FeatureCard
               key={id}
               productTab={productTab}
-              className="rounded-2xl border border-guiaa-brand-navy/10 bg-white p-6"
+              className="rounded-2xl p-6 landing-card"
             >
               <FeatureIcon icon={icon} alternate={index % 2 === 1} />
               <h3 className="mt-4 text-lg font-semibold text-guiaa-brand-navy">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-guiaa-brand-navy/55">
+              <p className="mt-2 text-sm leading-relaxed text-guiaa-brand-ink-muted">
                 {description}
               </p>
               <ProductLink productTab={productTab} />
@@ -165,13 +163,13 @@ export function LandingFeatures() {
           ))}
         </div>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           {SECONDARY_FEATURES.map(
             ({ id, icon, title, description, useCategoryIcons, productTab }, index) => (
               <FeatureCard
                 key={id}
                 productTab={productTab}
-                className="rounded-2xl border border-guiaa-brand-navy/10 bg-white/80 p-5"
+                className="rounded-2xl p-5 landing-card"
               >
                 {useCategoryIcons ? (
                   <div className="rounded-xl border border-guiaa-brand-navy/8 bg-guiaa-sky-soft/40 p-2">
@@ -181,7 +179,7 @@ export function LandingFeatures() {
                   <FeatureIcon icon={icon} alternate={index % 2 === 1} />
                 )}
                 <h3 className="mt-3 text-sm font-semibold text-guiaa-brand-navy">{title}</h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-guiaa-brand-navy/50">
+                <p className="mt-1.5 text-xs leading-relaxed text-guiaa-brand-ink-muted">
                   {description}
                 </p>
                 <ProductLink productTab={productTab} />

@@ -36,16 +36,14 @@ export function LandingPricing({ setView }) {
   }, []);
 
   return (
-    <section id="pricing" className="scroll-mt-24 py-16 sm:py-20">
+    <section id="pricing" className="landing-section landing-section-alt">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
         <div className="max-w-xl">
-          <p className="text-xs font-semibold uppercase tracking-widest text-guiaa-brand-blue">
-            Acceso profesional
-          </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-guiaa-brand-navy sm:text-4xl">
+          <p className="landing-eyebrow">Acceso profesional</p>
+          <h2 className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl">
             Planes para tu consulta
           </h2>
-          <p className="mt-4 text-guiaa-brand-navy/55">
+          <p className="landing-lead mt-4">
             Registro exclusivo para MVZ. Verificamos cédula profesional antes de activar
             tu cuenta clínica.
           </p>
@@ -56,17 +54,17 @@ export function LandingPricing({ setView }) {
             ({ name, price, priceNote, description, highlighted, features, cta, action }) => (
               <article
                 key={name}
-                className={`relative flex flex-col rounded-2xl border p-6 sm:p-8 ${
+                className={`landing-card relative flex flex-col rounded-2xl p-6 sm:p-8 ${
                   highlighted
-                    ? "border-guiaa-brand-blue/25 bg-white shadow-[0_10px_36px_-10px_rgba(38,91,147,0.2)] ring-1 ring-guiaa-brand-blue/12"
-                    : "border-guiaa-brand-navy/10 bg-white/90"
+                    ? "ring-1 ring-guiaa-brand-blue/12 shadow-[0_10px_36px_-10px_rgba(38,91,147,0.2)]"
+                    : ""
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-xl font-bold text-guiaa-brand-navy">{name}</h3>
                     <p className="mt-1 text-2xl font-bold text-guiaa-brand-green-dark">{price}</p>
-                    <p className="mt-0.5 text-xs text-guiaa-brand-navy/45">{priceNote}</p>
+                    <p className="mt-0.5 text-xs text-guiaa-brand-ink-muted">{priceNote}</p>
                   </div>
                   {highlighted && (
                     <span className="rounded-md bg-guiaa-brand-blue/10 px-2 py-1 text-[11px] font-semibold text-guiaa-brand-blue">
@@ -75,7 +73,7 @@ export function LandingPricing({ setView }) {
                   )}
                 </div>
 
-                <p className="mt-4 text-sm leading-relaxed text-guiaa-brand-navy/55">
+                <p className="mt-4 text-sm leading-relaxed text-guiaa-brand-ink-muted">
                   {description}
                 </p>
 
@@ -83,7 +81,7 @@ export function LandingPricing({ setView }) {
                   {features.map((feature) => (
                     <li
                       key={feature}
-                      className="flex items-start gap-2.5 text-sm text-guiaa-brand-navy/70"
+                      className="flex items-start gap-2.5 text-sm text-guiaa-brand-navy/80"
                     >
                       <Check
                         size={15}
@@ -98,10 +96,10 @@ export function LandingPricing({ setView }) {
                 <button
                   type="button"
                   onClick={() => setView(action)}
-                  className={`mt-8 w-full rounded-xl py-3 text-sm font-bold transition ${
+                  className={`mt-8 w-full ${
                     highlighted
-                      ? "bg-guiaa-brand-green text-white hover:bg-guiaa-brand-green-dark"
-                      : "border border-guiaa-brand-navy/15 bg-white text-guiaa-brand-navy hover:bg-guiaa-sky-soft/60"
+                      ? "landing-btn-primary"
+                      : "landing-btn-secondary justify-center py-3 font-bold text-guiaa-brand-navy"
                   }`}
                 >
                   {cta}

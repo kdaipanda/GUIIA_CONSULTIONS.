@@ -1,18 +1,10 @@
 import {
   CONSULTATION_CATEGORY_ICONS,
+  CONSULTATION_CATEGORY_LIST,
   CONSULTATION_CATEGORY_NAMES,
 } from "../../lib/consultationCategories";
 
-export const PREVIEW_CATEGORIES = [
-  "perros",
-  "gatos",
-  "conejos",
-  "aves",
-  "tortugas",
-  "hamsters",
-  "erizos",
-  "hurones",
-];
+export const PREVIEW_CATEGORIES = CONSULTATION_CATEGORY_LIST.map(({ key }) => key);
 
 export const PREVIEW_CATEGORY_LABELS = PREVIEW_CATEGORIES.reduce((acc, key) => {
   acc[key] = CONSULTATION_CATEGORY_NAMES[key] || key;

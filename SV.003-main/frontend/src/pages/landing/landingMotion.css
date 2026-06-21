@@ -41,16 +41,49 @@ html {
 }
 
 @keyframes landing-marquee {
-  0% {
-    transform: translateX(0);
+  from {
+    transform: translate3d(0, 0, 0);
   }
-  100% {
-    transform: translateX(-50%);
+  to {
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
+.landing-marquee-viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
 .landing-marquee-track {
-  animation: landing-marquee 42s linear infinite;
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  gap: 0.75rem;
+  padding-inline: 0.75rem;
+  animation: landing-marquee 32s linear infinite;
+  will-change: transform;
+}
+
+.landing-marquee-viewport:hover .landing-marquee-track,
+.landing-marquee-viewport:focus-within .landing-marquee-track {
+  animation-play-state: paused;
+}
+
+.landing-species-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(12, 45, 77, 0.12));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-marquee-track {
+    animation-duration: 72s;
+  }
+
+  .landing-marquee-fade::before,
+  .landing-marquee-fade::after {
+    opacity: 0.6;
+  }
 }
 
 .landing-marquee-fade::before,
@@ -72,22 +105,6 @@ html {
 .landing-marquee-fade::after {
   right: 0;
   background: linear-gradient(to left, rgba(232, 244, 252, 0.95), transparent);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .landing-marquee-track {
-    animation: none;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.75rem;
-    white-space: normal;
-    padding: 0 1.25rem;
-  }
-
-  .landing-marquee-fade::before,
-  .landing-marquee-fade::after {
-    display: none;
-  }
 }
 
 @keyframes landing-product-panel-enter {
