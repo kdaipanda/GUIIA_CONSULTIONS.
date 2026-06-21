@@ -1,6 +1,26 @@
 /* Correcciones móvil / tablet clínica (≤1023px) */
 
 @media (max-width: 1023px) {
+  .clinic-shell > .header {
+    padding-top: max(8px, env(safe-area-inset-top, 0px));
+  }
+
+  .clinic-shell > .header .container {
+    min-height: 52px;
+  }
+
+  .clinic-shell > .header .header-actions-slot .notification-bell-btn,
+  .clinic-shell > .header .menu-toggle {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .clinic-shell > .header .nav-menu.mobile-open {
+    max-height: min(calc(100dvh - var(--clinic-header-h, 64px) - 16px), 520px);
+  }
+}
+
+@media (max-width: 1023px) {
   .clinic-shell-main .premium-page-enter {
     width: 100%;
     min-width: 0;

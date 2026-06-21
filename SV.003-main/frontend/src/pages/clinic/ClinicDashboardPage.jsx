@@ -177,11 +177,11 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
         : "Sin plan activo";
 
   return (
-    <div className="clinic-page clinic-page-guiaa clinic-dashboard-page">
+    <div className="clinic-page clinic-page-guiaa clinic-dashboard-page" aria-busy={loading}>
       <div className="clinic-page-header">
         <div>
           <p className="clinic-page-eyebrow">Consultorio</p>
-          <h1>
+          <h1 className="clinic-dashboard-greeting">
             {getTimeGreeting()}, {greetingName}
           </h1>
           <p>
@@ -234,6 +234,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
               type="button"
               className="clinic-report-kpi clinic-dashboard-kpi-btn"
               onClick={() => go("agenda", "/app/agenda")}
+              aria-label={`Citas hoy: ${today.appointments_upcoming ?? 0} próximas, ${today.appointments_total ?? 0} en total`}
             >
               <div className="clinic-report-kpi-head">
                 <span className="clinic-report-kpi-icon">
@@ -251,6 +252,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
               type="button"
               className="clinic-report-kpi clinic-dashboard-kpi-btn"
               onClick={() => go("billing", "/app/facturacion")}
+              aria-label={`Ingresos hoy: ${formatMoney(today.revenue_paid)}`}
             >
               <div className="clinic-report-kpi-head">
                 <span className="clinic-report-kpi-icon">
@@ -441,7 +443,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
 
             <section className="clinic-settings-card clinic-dashboard-quick">
               <h2>Accesos rápidos</h2>
-              <div className="clinic-dashboard-quick-grid">
+              <div className="clinic-dashboard-quick-grid premium-stagger">
                 <button
                   type="button"
                   className="clinic-dashboard-quick-btn"

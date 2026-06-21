@@ -40,6 +40,26 @@ export function Header({ setView, showAuth = true, actions }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isUserMenuOpen]);
 
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isMenuOpen]);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };

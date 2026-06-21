@@ -186,6 +186,25 @@
   animation: premium-fade-up 0.52s var(--premium-ease-out) 0.18s both;
 }
 
+.clinic-shell-main .clinic-toolbar,
+.clinic-shell-main .clinic-stats-row {
+  animation: premium-fade-up 0.48s var(--premium-ease-out) 0.12s both;
+}
+
+.clinic-page-guiaa .clinic-table tbody tr {
+  transition: background-color 0.18s var(--premium-ease-out);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .clinic-page-guiaa .clinic-table tbody tr:hover {
+    background-color: rgba(38, 91, 147, 0.04);
+  }
+
+  .clinic-mobile-nav-toggle:active {
+    transform: scale(0.98);
+  }
+}
+
 /* Tarjetas interactivas premium */
 .premium-card-lift {
   transition:

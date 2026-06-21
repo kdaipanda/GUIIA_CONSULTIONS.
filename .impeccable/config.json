@@ -1,0 +1,12 @@
+{
+  "detector": {
+    "designSystem": {
+      "enabled": true,
+      "designMdPath": "DESIGN.md",
+      "productMdPath": "PRODUCT.md"
+    }
+  },
+  "hook": {
+    "enabled": false
+  }
+}

@@ -4,14 +4,11 @@
   --clinic-dash-green: #3d9b8f;
 }
 
-.clinic-dashboard-page.clinic-page-guiaa .clinic-page-header h1 {
+.clinic-dashboard-page .clinic-page-header h1,
+.clinic-dashboard-greeting {
   color: var(--clinic-dash-navy);
   letter-spacing: -0.02em;
-}
-
-.clinic-dashboard-page .clinic-page-header h1 {
-  color: var(--clinic-dash-navy);
-  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 .clinic-dashboard-meta {
@@ -120,6 +117,15 @@
 .clinic-dashboard-kpi-btn:focus-visible {
   outline: 2px solid var(--clinic-dash-blue);
   outline-offset: 2px;
+}
+
+.clinic-dashboard-quick-btn:focus-visible {
+  outline: 2px solid var(--clinic-dash-blue);
+  outline-offset: 2px;
+}
+
+.clinic-dashboard-quick-btn:active {
+  transform: scale(0.98);
 }
 
 .clinic-dashboard-section-skeleton {

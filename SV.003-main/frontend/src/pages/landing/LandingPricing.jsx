@@ -58,7 +58,7 @@ export function LandingPricing({ setView }) {
                 key={name}
                 className={`relative flex flex-col rounded-2xl border p-6 sm:p-8 ${
                   highlighted
-                    ? "border-guiaa-brand-blue/20 bg-white lg:border-l-4 lg:border-l-guiaa-brand-blue lg:pl-7"
+                    ? "border-guiaa-brand-blue/25 bg-white shadow-[0_10px_36px_-10px_rgba(38,91,147,0.2)] ring-1 ring-guiaa-brand-blue/12"
                     : "border-guiaa-brand-navy/10 bg-white/90"
                 }`}
               >

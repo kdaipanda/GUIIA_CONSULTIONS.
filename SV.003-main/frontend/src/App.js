@@ -13,6 +13,7 @@ import "./ThemeEnhancements.css";
 import "./darkModeOverrides.css";
 import "./styles/premiumMotion.css";
 import "./styles/clinicMobileFixes.css";
+import "./styles/consultationFlow.css";
 import "./PlatformOnboarding.css";
 import {
   createConsultationSupabase,
@@ -3357,6 +3358,34 @@ const NewConsultation = ({
     </div>
   );
 
+  const renderConsultationContextBar = (currentStep) => {
+    const speciesName = selectedCategory ? categories[selectedCategory]?.name : "Sin especie";
+    const petLabel = formData.nombre_mascota?.trim() || "Mascota sin nombre";
+    return (
+      <div className="consultation-mobile-context">
+        <div className="consultation-mobile-context-row">
+          <span className="consultation-mobile-context-label">Paso {currentStep} de 3</span>
+          <span className="consultation-mobile-context-meta">
+            {petLabel} · {speciesName}
+          </span>
+        </div>
+        <div
+          className="consultation-mobile-context-track"
+          role="progressbar"
+          aria-valuenow={currentStep}
+          aria-valuemin={1}
+          aria-valuemax={3}
+          aria-label={`Progreso de consulta: paso ${currentStep} de 3`}
+        >
+          <div
+            className="consultation-mobile-context-fill"
+            style={{ width: `${(currentStep / 3) * 100}%` }}
+          />
+        </div>
+      </div>
+    );
+  };
+
   if (isExpertMode && !isPremiumMember(veterinarian)) {
     return (
       <div className="consultation-page">
@@ -3409,6 +3438,7 @@ const NewConsultation = ({
             <div className="consultation-main">
               <div className="consultation-form-container">
                 {renderStepper(1)}
+                {renderConsultationContextBar(1)}
 
                 <form onSubmit={handleSubmitStep1} className="consultation-form">
                   {!existingConsultationId && onClinicalContextChange && (
@@ -3526,6 +3556,7 @@ const NewConsultation = ({
 
           <div className="consultation-form-container">
             {renderStepper(2)}
+            {renderConsultationContextBar(2)}
 
             <form onSubmit={handleSubmitStep2} className="consultation-form">
               {isExpertMode && renderCategorySelector("Especie de la mascota")}
@@ -3616,6 +3647,7 @@ const NewConsultation = ({
 
           <div className="consultation-form-container">
             {renderStepper(3)}
+            {renderConsultationContextBar(3)}
 
             <div className="diagnosis-results">
               {!aiAnalysis ? (
