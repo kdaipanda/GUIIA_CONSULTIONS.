@@ -1407,10 +1407,9 @@ async def verify_2fa(verification: TwoFactorVerify):
 @app.get("/api/auth/profile")
 async def get_current_profile(x_veterinarian_id: str = Header(None)):
     """Obtiene el perfil actualizado del veterinario autenticado"""
-    if not x_veterinarian_id:
-        raise HTTPException(status_code=401, detail="No autenticado")
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
     
-    profile, err = get_profile(x_veterinarian_id)
+    profile, err = get_profile(vet_id)
     if err:
         raise HTTPException(status_code=500, detail=f"Error obteniendo perfil: {err}")
     
@@ -1446,8 +1445,7 @@ async def upload_cedula_document(
     file: UploadFile = File(...),
     x_veterinarian_id: str = Header(None),
 ):
-    if not x_veterinarian_id:
-        raise HTTPException(status_code=401, detail="No autenticado")
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
 
     media_type = (file.content_type or "").strip().lower()
     if media_type not in ALLOWED_CEDULA_CONTENT_TYPES:
@@ -1472,7 +1470,7 @@ async def upload_cedula_document(
 
     ext = ALLOWED_CEDULA_CONTENT_TYPES[media_type]
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    path = f"user-{x_veterinarian_id}/cedula/cedula-{ts}{ext}"
+    path = f"user-{vet_id}/cedula/cedula-{ts}{ext}"
 
     public_url, err_up = upload_bytes_to_storage("uploads", path, data, media_type)
     if err_up or not public_url:
@@ -1480,7 +1478,7 @@ async def upload_cedula_document(
 
     now = datetime.now(timezone.utc).isoformat()
     err = update_profile(
-        x_veterinarian_id,
+        vet_id,
         {
             "cedula_document_url": public_url,
             "cedula_document_uploaded_at": now,
@@ -1503,9 +1501,7 @@ async def verify_cedula(
     payload: CedulaVerifyRequest,
     x_veterinarian_id: str = Header(None),
 ):
-    vet_id = (payload.veterinarian_id or x_veterinarian_id or "").strip()
-    if not vet_id:
-        raise HTTPException(status_code=401, detail="No autenticado")
+    vet_id = _ensure_requested_vet_matches_session(payload.veterinarian_id, x_veterinarian_id)
 
     profile, err = get_profile(vet_id)
     if err:
@@ -1547,10 +1543,9 @@ async def skip_cedula_verification(
     x_veterinarian_id: str = Header(None),
 ):
     """Permite al usuario posponer la verificación de registro profesional (máximo 3 veces)"""
-    if not x_veterinarian_id:
-        raise HTTPException(status_code=401, detail="No autenticado")
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
     
-    profile, err = get_profile(x_veterinarian_id)
+    profile, err = get_profile(vet_id)
     if err:
         raise HTTPException(status_code=500, detail=f"Error perfil: {err}")
     if not profile:
@@ -1568,7 +1563,7 @@ async def skip_cedula_verification(
     # Incrementar contador
     new_skip_count = skip_count + 1
     err_upd = update_profile(
-        x_veterinarian_id,
+        vet_id,
         {
             "cedula_skip_count": new_skip_count,
         },
@@ -1600,12 +1595,10 @@ async def get_animal_categories(x_veterinarian_id: str = Header(None)):
         if cat.get("id") == "cuyos":
             cat["icon"] = "🐹"
 
-    # Si no hay veterinarian_id, retornar todas (para compatibilidad)
-    if not x_veterinarian_id:
-        return {"categories": all_categories}
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
 
     # Obtener membresía del veterinario
-    profile, err = get_profile(x_veterinarian_id)
+    profile, err = get_profile(vet_id)
     if err or not profile:
         # Si no se puede obtener el perfil, retornar todas (fallback)
         return {"categories": all_categories}
@@ -1666,11 +1659,31 @@ def _serialize_consultation(row: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
+def _ensure_requested_vet_matches_session(
+    requested_vet_id: Optional[str],
+    x_veterinarian_id: Optional[str] = None,
+) -> str:
+    """Acepta IDs legacy solo si coinciden con el JWT autenticado."""
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
+    requested = (requested_vet_id or "").strip()
+    if requested and requested != vet_id:
+        raise HTTPException(status_code=403, detail="La identidad no coincide con la sesión")
+    return vet_id
+
+
+def _require_consultation_owner(consultation: Dict[str, Any], vet_id: str) -> None:
+    if (consultation.get("user_id") or "").strip() != vet_id.strip():
+        raise HTTPException(status_code=403, detail="No autorizado para acceder a esta consulta")
+
+
 @app.post("/api/consultations")
-async def create_consultation(payload: ConsultationStageOne):
+async def create_consultation(
+    payload: ConsultationStageOne,
+    x_veterinarian_id: str = Header(None),
+):
     """Crea una consulta en etapa 1 (anamnesis) usando Supabase"""
 
-    vet_id = payload.veterinarian_id
+    vet_id = _ensure_requested_vet_matches_session(payload.veterinarian_id, x_veterinarian_id)
     # Asegurar perfil
     profile, err = get_profile(vet_id)
     if err:
@@ -1906,20 +1919,24 @@ async def get_config_diagnostics():
 async def get_consultations(x_veterinarian_id: str = Header(None), limit: int = 50):
     """Obtiene consultas del veterinario desde Supabase"""
 
-    if not x_veterinarian_id:
-        raise HTTPException(status_code=401, detail="No autenticado")
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
 
-    rows, err = list_consultations(x_veterinarian_id, limit=limit)
+    rows, err = list_consultations(vet_id, limit=limit)
     if err:
         raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
     return {"consultations": [_serialize_consultation(r) for r in rows]}
 
 
 @app.get("/api/consultations/{veterinarian_id}/history")
-async def get_consultation_history(veterinarian_id: str, limit: int = 50):
+async def get_consultation_history(
+    veterinarian_id: str,
+    limit: int = 50,
+    x_veterinarian_id: str = Header(None),
+):
     """Historial de consultas del veterinario (Supabase)"""
 
-    rows, err = list_consultations(veterinarian_id, limit=limit)
+    vet_id = _ensure_requested_vet_matches_session(veterinarian_id, x_veterinarian_id)
+    rows, err = list_consultations(vet_id, limit=limit)
     if err:
         raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
     return {"consultations": [_serialize_consultation(r) for r in rows]}
@@ -1932,8 +1949,7 @@ async def update_consultation_payload(
     x_veterinarian_id: str = Header(None),
 ):
     """Actualiza payload (form_data/detalle_paciente) de una consulta (Supabase)."""
-    if not x_veterinarian_id:
-        raise HTTPException(status_code=401, detail="No autenticado")
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
 
     consultation, err = get_consultation_by_id(consultation_id)
     if err:
@@ -1941,8 +1957,7 @@ async def update_consultation_payload(
     if not consultation:
         raise HTTPException(status_code=404, detail="Consulta no encontrada")
 
-    if (consultation.get("user_id") or "").strip() != x_veterinarian_id.strip():
-        raise HTTPException(status_code=403, detail="No autorizado para modificar esta consulta")
+    _require_consultation_owner(consultation, vet_id)
 
     current_payload = consultation.get("payload") or {}
     form_data = payload.form_data if payload.form_data is not None else current_payload.get("form_data")
@@ -2008,28 +2023,37 @@ async def update_consultation_payload(
 
 
 @app.get("/api/consultation/{consultation_id}")
-async def get_consultation(consultation_id: str):
+async def get_consultation(
+    consultation_id: str,
+    x_veterinarian_id: str = Header(None),
+):
     """Obtiene una consulta específica (Supabase)"""
 
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
     cons, err = get_consultation_by_id(consultation_id)
     if err:
         raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
     if not cons:
         raise HTTPException(status_code=404, detail="Consulta no encontrada")
+    _require_consultation_owner(cons, vet_id)
     return _serialize_consultation(cons)
 
 
 @app.put("/api/consultations/{consultation_id}/observations")
 async def update_consultation_observations(
-    consultation_id: str, observations: ObservationUpdate
+    consultation_id: str,
+    observations: ObservationUpdate,
+    x_veterinarian_id: str = Header(None),
 ):
     """Actualiza la consulta con las observaciones del paso 2"""
 
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
     cons, err = get_consultation_by_id(consultation_id)
     if err:
         raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
     if not cons:
         raise HTTPException(status_code=404, detail="Consulta no encontrada")
+    _require_consultation_owner(cons, vet_id)
 
     payload = cons.get("payload") or {}
     payload["detalle_paciente"] = observations.detalle_paciente
@@ -2051,20 +2075,16 @@ async def update_consultation_observations(
 async def analyze_consultation(consultation_id: str, x_veterinarian_id: str = Header(None)):
     """Genera síntesis clínica CDS L5 — solo disponible para Premium"""
 
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
     consultation, err = get_consultation_by_id(consultation_id)
     if err:
         raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
     if not consultation:
         raise HTTPException(status_code=404, detail="Consulta no encontrada")
+    _require_consultation_owner(consultation, vet_id)
 
     # Verificar que el usuario tenga membresía Premium o consultas de prueba
-    if not x_veterinarian_id:
-        raise HTTPException(
-            status_code=401,
-            detail="Se requiere autenticación para generar la síntesis clínica CDS.",
-        )
-    
-    profile, err = get_profile(x_veterinarian_id)
+    profile, err = get_profile(vet_id)
     if err or not profile:
         raise HTTPException(
             status_code=403,
@@ -2157,12 +2177,12 @@ Por favor, genera un análisis clínico completo."""
         if not has_unlimited and original_membership_type != "premium":
             new_remaining = max(0, remaining - 1)
             err_profile = update_profile(
-                x_veterinarian_id,
+                vet_id,
                 {"consultations_remaining": new_remaining}
             )
             if err_profile:
                 # Log el error pero no fallar la respuesta ya que el análisis ya se guardó
-                print(f"[WARN] Error actualizando consultations_remaining para {x_veterinarian_id}: {err_profile}")
+                print(f"[WARN] Error actualizando consultations_remaining para {vet_id}: {err_profile}")
 
         return {"analysis": analysis_text}
 
@@ -2179,15 +2199,19 @@ Por favor, genera un análisis clínico completo."""
 
 @app.put("/api/consultations/{consultation_id}/rating")
 async def set_consultation_rating(
-    consultation_id: str, payload: ConsultationRatingUpdate
+    consultation_id: str,
+    payload: ConsultationRatingUpdate,
+    x_veterinarian_id: str = Header(None),
 ):
     """Guarda la calificación (1-5) de una consulta"""
 
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
     consultation, err = get_consultation_by_id(consultation_id)
     if err:
         raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
     if not consultation:
         raise HTTPException(status_code=404, detail="Consulta no encontrada")
+    _require_consultation_owner(consultation, vet_id)
 
     err_upd = update_consultation(
         consultation_id,
@@ -2206,15 +2230,14 @@ async def set_consultation_rating(
 async def get_consultation_stats(x_veterinarian_id: str = Header(None)):
     """Obtiene estadísticas de consultas"""
 
-    if not x_veterinarian_id:
-        raise HTTPException(status_code=401, detail="No autenticado")
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
 
-    total, err = count_consultations_by_user(x_veterinarian_id)
+    total, err = count_consultations_by_user(vet_id)
     if err:
         raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
 
     # Consultas del mes actual (approx)
-    rows, err_rows = list_consultations(x_veterinarian_id, limit=500)
+    rows, err_rows = list_consultations(vet_id, limit=500)
     if err_rows:
         raise HTTPException(status_code=500, detail=f"Error consultando: {err_rows}")
     now = datetime.now(timezone.utc)
@@ -2260,24 +2283,17 @@ async def create_checkout_session(
 ):
     """Crea sesión de pago (simulada) - Requiere autenticación"""
 
-    # Debug: Ver todos los headers recibidos
-    print(f"[DEBUG] Headers recibidos: {dict(request.headers)}")
-    print(f"[DEBUG] x-veterinarian-id desde Header(): {x_veterinarian_id}")
-    
     # Intentar obtener el header directamente si no viene por Header()
     if not x_veterinarian_id:
         x_veterinarian_id = request.headers.get("x-veterinarian-id") or request.headers.get("X-Veterinarian-Id")
-        print(f"[DEBUG] x-veterinarian-id desde request.headers: {x_veterinarian_id}")
 
-    # Validar que el usuario esté autenticado
-    if not x_veterinarian_id:
-        raise HTTPException(
-            status_code=401,
-            detail="Debes estar registrado e iniciar sesión para contratar una membresía"
-        )
+    vet_id = _ensure_requested_vet_matches_session(
+        payment_request.veterinarian_id,
+        x_veterinarian_id,
+    )
     
     # Verificar que el usuario exista
-    profile, err = get_profile(x_veterinarian_id)
+    profile, err = get_profile(vet_id)
     if err:
         raise HTTPException(status_code=500, detail=f"Error verificando perfil: {err}")
     if not profile:
@@ -2308,7 +2324,7 @@ async def create_checkout_session(
         "status": "open",
         "payment_status": "unpaid",
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "veterinarian_id": payment_request.veterinarian_id,
+        "veterinarian_id": vet_id,
     }
 
     # Verificar si Stripe está disponible
@@ -2326,8 +2342,7 @@ async def create_checkout_session(
     
     stripe.api_key = STRIPE_API_KEY
     print(f"[DEBUG] Creando sesión Stripe para paquete: {package_key}, precio: {price}, ciclo: {payment_request.billing_cycle}")
-    print(f"[DEBUG] Veterinarian ID: {x_veterinarian_id}")
-    print(f"[DEBUG] Stripe API Key configurada: {STRIPE_API_KEY[:20]}...")
+    print(f"[DEBUG] Veterinarian ID: {vet_id}")
     
     try:
         success_url = (
@@ -2356,7 +2371,7 @@ async def create_checkout_session(
                 "type": "membership",
                 "package": package_key,
                 "billing_cycle": payment_request.billing_cycle,
-                "veterinarian_id": payment_request.veterinarian_id or "",
+                "veterinarian_id": vet_id,
                 "consultations": str(package.get("consultations", 0)),
             },
         )
@@ -2543,14 +2558,19 @@ async def stripe_webhook(request: Request):
 
 
 @app.post("/api/payments/consultations/checkout/session")
-async def create_consultations_checkout_session(payload: ConsultationCreditsPurchaseRequest):
+async def create_consultations_checkout_session(
+    payload: ConsultationCreditsPurchaseRequest,
+    x_veterinarian_id: str = Header(None),
+):
     """Crea sesión de pago para recarga de consultas"""
+
+    vet_id = _ensure_requested_vet_matches_session(payload.veterinarian_id, x_veterinarian_id)
 
     package = CONSULTATION_CREDIT_PACKAGES.get(payload.package_id)
     if not package:
         raise HTTPException(status_code=404, detail="Paquete no encontrado")
 
-    veterinarian, err = get_profile(payload.veterinarian_id)
+    veterinarian, err = get_profile(vet_id)
     if err or not veterinarian:
         raise HTTPException(status_code=404, detail="Veterinario no encontrado")
 
@@ -2569,7 +2589,7 @@ async def create_consultations_checkout_session(payload: ConsultationCreditsPurc
         "status": "open",
         "payment_status": "unpaid",
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "veterinarian_id": payload.veterinarian_id,
+        "veterinarian_id": vet_id,
     }
 
     if stripe and STRIPE_API_KEY:
@@ -2597,7 +2617,7 @@ async def create_consultations_checkout_session(payload: ConsultationCreditsPurc
                     "type": "consultation_credits",
                     "package_id": payload.package_id,
                     "credits": str(credits),
-                    "veterinarian_id": payload.veterinarian_id,
+                    "veterinarian_id": vet_id,
                 },
             )
 
@@ -2627,12 +2647,18 @@ async def create_consultations_checkout_session(payload: ConsultationCreditsPurc
 async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(None)):
     """Obtiene estado del pago (simulado como exitoso)"""
 
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
     transaction, err = get_payment_transaction_by_session_id(session_id)
     if err:
         raise HTTPException(status_code=500, detail=f"Error obteniendo transacción: {err}")
 
     if not transaction:
         raise HTTPException(status_code=404, detail="Transacción no encontrada")
+    transaction_vet_id = (transaction.get("veterinarian_id") or "").strip()
+    if not transaction_vet_id:
+        raise HTTPException(status_code=403, detail="Transacción sin propietario autenticable")
+    if transaction_vet_id != vet_id:
+        raise HTTPException(status_code=403, detail="No autorizado para consultar esta transacción")
 
     status_value = transaction.get("status", "open")
     payment_status = transaction.get("payment_status", "unpaid")
@@ -2669,7 +2695,7 @@ async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(N
 
     if payment_status == "paid":
         transaction_type = transaction.get("type")
-        veterinarian_id = transaction.get("veterinarian_id") or x_veterinarian_id
+        veterinarian_id = transaction_vet_id
 
         if transaction_type == "consultation_credits" and veterinarian_id:
             if not transaction.get("credits_applied"):
@@ -2749,18 +2775,23 @@ class ImageInterpretRequest(BaseModel):
 
 
 @app.post("/api/medical-images/interpret")
-async def interpret_medical_image(request: ImageInterpretRequest):
+async def interpret_medical_image(
+    request: ImageInterpretRequest,
+    x_veterinarian_id: str = Header(None),
+):
     """Interpreta imagen médica usando Claude Vision y persiste en Supabase."""
 
+    vet_id = _ensure_requested_vet_matches_session(request.veterinarian_id, x_veterinarian_id)
+
     # Validar perfil en Supabase
-    vet_profile, err_profile = get_profile(request.veterinarian_id)
+    vet_profile, err_profile = get_profile(vet_id)
     if err_profile:
         raise HTTPException(status_code=500, detail=f"Error perfil: {err_profile}")
     if not vet_profile:
-        if request.veterinarian_id.startswith("dev-"):
+        if vet_id.startswith("dev-"):
             seed_profile = {
-                "id": request.veterinarian_id,
-                "email": f"{request.veterinarian_id}@example.com",
+                "id": vet_id,
+                "email": f"{vet_id}@example.com",
                 "nombre": "Dev Veterinario",
                 "membership_type": "premium",
                 "created_at": datetime.now(timezone.utc).isoformat(),
@@ -2901,6 +2932,12 @@ async def interpret_medical_image(request: ImageInterpretRequest):
         try:
             # Intentar validar como UUID
             uuid.UUID(request.consultation_id)
+            cons, err_cons = get_consultation_by_id(request.consultation_id)
+            if err_cons:
+                raise HTTPException(status_code=500, detail=f"Error consultando consulta: {err_cons}")
+            if not cons:
+                raise HTTPException(status_code=404, detail="Consulta no encontrada")
+            _require_consultation_owner(cons, vet_id)
             valid_consultation_id = request.consultation_id
         except (ValueError, AttributeError):
             # Si no es UUID válido, ignorarlo (no ligar la imagen a la consulta)
@@ -2909,7 +2946,7 @@ async def interpret_medical_image(request: ImageInterpretRequest):
     
     analysis_row = {
         "id": image_id,
-        "user_id": request.veterinarian_id,
+        "user_id": vet_id,
         "consultation_id": valid_consultation_id,
         "image_type": request.image_type,
         "patient_name": request.patient_name,
@@ -2930,7 +2967,7 @@ async def interpret_medical_image(request: ImageInterpretRequest):
         raise HTTPException(status_code=500, detail=f"Error guardando imagen: {err_ins}")
     else:
         print(f"[DEBUG] ✅ Análisis guardado correctamente en medical_images con ID: {image_id}")
-        print(f"[DEBUG] user_id: {request.veterinarian_id}, image_type: {request.image_type}")
+        print(f"[DEBUG] user_id: {vet_id}, image_type: {request.image_type}")
 
     # Ligar interpretación con la consulta (si se proporcionó un UUID válido)
     if valid_consultation_id:
@@ -2961,10 +2998,9 @@ async def interpret_medical_image(request: ImageInterpretRequest):
 async def get_image_history(x_veterinarian_id: str = Header(None), limit: int = 20):
     """Historial de imágenes desde Supabase"""
 
-    if not x_veterinarian_id:
-        raise HTTPException(status_code=401, detail="No autenticado")
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
 
-    rows, err = list_medical_images(x_veterinarian_id, limit=limit)
+    rows, err = list_medical_images(vet_id, limit=limit)
     if err:
         raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
     return {"images": rows}
