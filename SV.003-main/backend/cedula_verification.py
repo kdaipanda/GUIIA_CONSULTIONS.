@@ -11,6 +11,8 @@ from typing import Any, Dict, Optional
 import certifi
 import httpx
 
+import email_notifications
+
 from supabase_client import get_profile, update_profile
 
 CEDULA_STATUS_UNSUBMITTED = "unsubmitted"
@@ -202,8 +204,13 @@ async def _try_mexico_sep_verify(
     profile_id: str,
     cedula: str,
     expected_name: str,
+    profile: Optional[Dict[str, Any]] = None,
 ) -> Optional[Dict[str, Any]]:
     """Intento opcional de auto-verificación vía SEP (solo México, numérico)."""
+    if profile is None:
+        profile, _ = get_profile(profile_id)
+    previous_status = (profile or {}).get("cedula_verification_status") or ""
+
     try:
         sep = await _sep_dgp_lookup_with_retries(cedula, attempts=2)
     except Exception:
@@ -231,6 +238,8 @@ async def _try_mexico_sep_verify(
         )
         if err_upd:
             return {"ok": False, "error": err_upd}
+        if profile:
+            _maybe_notify_cedula_approved(profile, previous_status)
         return {
             "ok": True,
             "verification_status": CEDULA_STATUS_VERIFIED,
@@ -239,6 +248,36 @@ async def _try_mexico_sep_verify(
             "message": "Registro verificado automáticamente con SEP (México).",
         }
     return None
+
+
+def _maybe_notify_cedula_approved(profile: Dict[str, Any], previous_status: str) -> None:
+    """Envía correo solo en la primera transición a verificado (no dev, no re-aprobaciones)."""
+    if (previous_status or "").strip() == CEDULA_STATUS_VERIFIED:
+        return
+    email = (profile.get("email") or "").strip()
+    if not email or is_dev_user(email):
+        return
+    try:
+        email_notifications.notify_user_cedula_approved(profile)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] Email cédula aprobada: {exc}")
+
+
+def _maybe_notify_cedula_rejected(
+    profile: Dict[str, Any],
+    previous_status: str,
+    reason: str = "",
+) -> None:
+    """Envía correo solo en la primera transición a rechazado (no dev, no re-rechazos)."""
+    if (previous_status or "").strip() == CEDULA_STATUS_REJECTED:
+        return
+    email = (profile.get("email") or "").strip()
+    if not email or is_dev_user(email):
+        return
+    try:
+        email_notifications.notify_user_cedula_rejected(profile, reason)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] Email cédula rechazada: {exc}")
 
 
 def _submit_for_manual_review(profile_id: str) -> Dict[str, Any]:
@@ -306,7 +345,9 @@ async def verify_profile_cedula(profile_id: str) -> Dict[str, Any]:
 
     country = profile.get("profesional_pais") or "MX"
     if is_mexico_country(country) and cedula.isdigit():
-        sep_result = await _try_mexico_sep_verify(profile_id, cedula, expected_name)
+        sep_result = await _try_mexico_sep_verify(
+            profile_id, cedula, expected_name, profile=profile
+        )
         if sep_result:
             return sep_result
 
@@ -321,6 +362,7 @@ def manual_review_cedula(profile_id: str, action: str, note: Optional[str] = Non
         return {"ok": False, "error": "Perfil no encontrado"}
 
     action = (action or "").lower().strip()
+    previous_status = (profile.get("cedula_verification_status") or "").strip()
     now = datetime.now(timezone.utc).isoformat()
 
     if action == "approve":
@@ -343,6 +385,15 @@ def manual_review_cedula(profile_id: str, action: str, note: Optional[str] = Non
     err_upd = update_profile(profile_id, fields)
     if err_upd:
         return {"ok": False, "error": err_upd}
+
+    if action == "approve":
+        _maybe_notify_cedula_approved(profile, previous_status)
+    elif action == "reject":
+        _maybe_notify_cedula_rejected(
+            profile,
+            previous_status,
+            fields.get("cedula_verification_error") or note or "",
+        )
 
     return {
         "ok": True,

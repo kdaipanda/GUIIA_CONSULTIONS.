@@ -394,3 +394,85 @@ def notify_client_appointment_status(
     err = send_email([client_email], email_subject, html, text)
     if err:
         print(f"[WARN] Email cliente (cita {status}): {err}")
+
+
+def notify_user_cedula_approved(profile: dict) -> None:
+    """Avisa al veterinario cuando su registro profesional queda verificado."""
+    user_email = (profile.get("email") or "").strip()
+    if not user_email:
+        return
+
+    user_name = (profile.get("nombre") or "").strip() or "colega"
+    cedula = (profile.get("cedula_profesional") or "").strip()
+    app_url = _frontend_url()
+    login_url = f"{app_url}/login"
+
+    cedula_line = f"Registro profesional: {cedula}\n" if cedula else ""
+    cedula_html = (
+        f'<p><strong>Registro profesional:</strong> {cedula}</p>' if cedula else ""
+    )
+
+    email_subject = "[GUIAA] Tu registro profesional fue aprobado"
+    text = (
+        f"Hola {user_name},\n\n"
+        f"Tu registro profesional veterinario en GUIAA fue verificado y aprobado.\n"
+        f"{cedula_line}\n"
+        f"Ya puedes usar la plataforma con acceso completo según tu plan.\n\n"
+        f"Inicia sesión: {login_url}\n\n"
+        f"— Equipo GUIAA\n"
+    )
+    html = f"""
+    <h2>Registro profesional aprobado</h2>
+    <p>Hola {user_name},</p>
+    <p>Tu <strong>registro profesional veterinario</strong> en GUIAA fue verificado y aprobado.</p>
+    {cedula_html}
+    <p>Ya puedes usar la plataforma con acceso completo según tu plan de membresía.</p>
+    <p><a href="{login_url}">Iniciar sesión en GUIAA</a></p>
+    <p style="color:#64748b;font-size:12px;">— Equipo GUIAA</p>
+    """
+
+    err = send_email([user_email], email_subject, html, text)
+    if err:
+        print(f"[WARN] Email usuario (cédula aprobada): {err}")
+
+
+def notify_user_cedula_rejected(profile: dict, reason: str = "") -> None:
+    """Avisa al veterinario cuando su registro profesional fue rechazado."""
+    user_email = (profile.get("email") or "").strip()
+    if not user_email:
+        return
+
+    user_name = (profile.get("nombre") or "").strip() or "colega"
+    app_url = _frontend_url()
+    login_url = f"{app_url}/login"
+    support_email = DEFAULT_SUPPORT_NOTIFY_EMAIL
+
+    reason_text = (reason or profile.get("cedula_verification_error") or "").strip()
+    if not reason_text:
+        reason_text = "No pudimos validar tu documentación con la información proporcionada."
+
+    email_subject = "[GUIAA] Tu registro profesional requiere revisión"
+    text = (
+        f"Hola {user_name},\n\n"
+        f"Lamentamos informarte que tu registro profesional veterinario en GUIAA "
+        f"no pudo ser verificado en este momento.\n\n"
+        f"Motivo:\n{reason_text}\n\n"
+        f"Puedes iniciar sesión, subir un nuevo documento o corregir tus datos "
+        f"y volver a solicitar la verificación:\n{login_url}\n\n"
+        f"Si crees que se trata de un error, escríbenos a {support_email}.\n\n"
+        f"— Equipo GUIAA\n"
+    )
+    html = f"""
+    <h2>Registro profesional no verificado</h2>
+    <p>Hola {user_name},</p>
+    <p>Tu <strong>registro profesional veterinario</strong> en GUIAA no pudo ser verificado en este momento.</p>
+    <pre style="background:#fef2f2;padding:12px;border-radius:8px;white-space:pre-wrap;border:1px solid #fecaca;">{reason_text}</pre>
+    <p>Puedes iniciar sesión, subir un nuevo documento o corregir tus datos y volver a solicitar la verificación.</p>
+    <p><a href="{login_url}">Iniciar sesión en GUIAA</a></p>
+    <p style="color:#64748b;font-size:12px;">¿Dudas? Escríbenos a <a href="mailto:{support_email}">{support_email}</a></p>
+    <p style="color:#64748b;font-size:12px;">— Equipo GUIAA</p>
+    """
+
+    err = send_email([user_email], email_subject, html, text)
+    if err:
+        print(f"[WARN] Email usuario (cédula rechazada): {err}")
