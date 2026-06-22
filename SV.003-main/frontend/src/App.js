@@ -2768,7 +2768,7 @@ const NewConsultation = ({
   clinicalContext = null,
   onClinicalContextChange,
 }) => {
-  const { veterinarian } = useVet();
+  const { veterinarian, platformAdmin } = useVet();
   const isExpertMode = entryMode === "expert";
   const [step, setStep] = useState(isExpertMode && !existingConsultationId ? 2 : 1);
   // Estado inicial: solo perros y gatos (membresía básica)
@@ -3276,19 +3276,14 @@ const NewConsultation = ({
       return;
     }
 
-    // Verificar membresía Premium o consultas restantes
-    const membershipType = veterinarian?.membership_type?.toLowerCase();
-    const consultationsRemaining = veterinarian?.consultations_remaining || 0;
-    const hasPremium = membershipType === "premium";
-    const hasTrialConsultations = !membershipType && consultationsRemaining > 0;
-
-    if (!hasPremium && !hasTrialConsultations) {
-      // Determinar el nombre del plan actual
+    // Verificar membresía Premium o trial (síntesis CDS L5)
+    if (!canAccessFeature(veterinarian, MEMBERSHIP_FEATURES.advancedAnalysis, { platformAdmin })) {
+      const membershipType = veterinarian?.membership_type?.toLowerCase();
       let planName = "Sin membresía";
       if (membershipType) {
         planName = membershipType.charAt(0).toUpperCase() + membershipType.slice(1);
       }
-      
+
       notifyQuotaError(
         `La síntesis clínica CDS L5 solo está disponible para miembros Premium. Tu plan actual es: ${planName}. Por favor, actualiza tu membresía para acceder a esta función.`,
         () => setView("membership"),

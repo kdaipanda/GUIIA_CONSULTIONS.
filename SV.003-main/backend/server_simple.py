@@ -1607,8 +1607,12 @@ async def get_animal_categories(x_veterinarian_id: str = Header(None)):
     # Obtener membresía del veterinario
     profile, err = get_profile(x_veterinarian_id)
     if err or not profile:
-        # Si no se puede obtener el perfil, retornar todas (fallback)
-        return {"categories": all_categories}
+        # Perfil no encontrado: no exponer multiespecie por defecto
+        filtered_categories = filter_categories_for_plan(
+            all_categories,
+            {"membership_type": "basic", "consultations_remaining": 0},
+        )
+        return {"categories": filtered_categories}
 
     user_email = profile.get("email", "")
     has_unlimited = has_unlimited_consultations(user_email) if user_email else False
