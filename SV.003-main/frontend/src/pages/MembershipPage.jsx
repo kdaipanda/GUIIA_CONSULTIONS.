@@ -254,7 +254,7 @@ export function MembershipPage({ setView }) {
         `${BACKEND_URL}/api/payments/consultations/checkout/session`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(veterinarian.id, { "Content-Type": "application/json" }),
           body: JSON.stringify({
             veterinarian_id: veterinarian.id,
             package_id: packageId,
