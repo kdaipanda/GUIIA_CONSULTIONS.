@@ -1,6 +1,14 @@
 const PRODUCTION_API = "https://api.guiaa.vet";
 const LOCAL_API = "http://localhost:8000";
 
+function isPrivateLanHost(hostname) {
+  return (
+    /^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+    /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+    /^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(hostname)
+  );
+}
+
 function isProductionHost(hostname) {
   return (
     hostname === "guiaa.vet" ||
@@ -10,7 +18,23 @@ function isProductionHost(hostname) {
 }
 
 function isLocalDevHost(hostname) {
-  return hostname === "localhost" || hostname === "127.0.0.1";
+  return hostname === "localhost" || hostname === "127.0.0.1" || isPrivateLanHost(hostname);
+}
+
+function isLocalBackendUrl(url) {
+  try {
+    const host = new URL(url).hostname;
+    return host === "localhost" || host === "127.0.0.1" || isPrivateLanHost(host);
+  } catch {
+    return false;
+  }
+}
+
+function localApiUrl(hostname) {
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return LOCAL_API;
+  }
+  return `http://${hostname}:8000`;
 }
 
 function readStoredBackendUrl(requireHttps) {
@@ -61,8 +85,10 @@ export function getBackendUrl() {
         return paramUrl;
       }
       const stored = readStoredBackendUrl(false);
-      if (stored) return stored;
-      return LOCAL_API;
+      if (stored && isLocalBackendUrl(stored)) {
+        return stored;
+      }
+      return localApiUrl(hostname);
     }
 
     if (envUrl) {

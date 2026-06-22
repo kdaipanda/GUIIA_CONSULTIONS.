@@ -112,10 +112,25 @@ else:
         "http://127.0.0.1:3000",
     ]
 
+# En desarrollo local: permitir frontend en IP de red (ej. 192.168.x.x:3000)
+if CORS_ALLOW_ORIGINS:
+    _cors_origin_regex = r"https?://.*\.(trycloudflare\.com|vercel\.app)"
+else:
+    _cors_origin_regex = (
+        r"https?://(?:"
+        r"(?:localhost|127\.0\.0\.1|"
+        r"192\.168\.\d{1,3}\.\d{1,3}|"
+        r"10\.\d{1,3}\.\d{1,3}\.\d{1,3}|"
+        r"172\.(?:1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})"
+        r"(?::\d+)?"
+        r"|.*\.(?:trycloudflare\.com|vercel\.app)"
+        r")"
+    )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_allow_origins,
-    allow_origin_regex=r"https?://.*\.(trycloudflare\.com|vercel\.app)",
+    allow_origin_regex=_cors_origin_regex,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
@@ -2994,7 +3009,8 @@ if __name__ == "__main__":
 
     print("Iniciando Savant Vet API - Modo Local")
     print("Base de datos: Supabase")
-    print("Servidor: http://127.0.0.1:8000")
+    print("Servidor local: http://127.0.0.1:8000")
+    print("Red local (LAN): http://0.0.0.0:8000")
     print("Docs: http://127.0.0.1:8000/docs")
-    # Usamos IPv4 explícito para evitar problemas en Windows cuando 'localhost' resuelve a IPv6 (::1).
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    # 0.0.0.0 permite acceso desde IP de red (ej. 192.168.x.x:3000 → :8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
