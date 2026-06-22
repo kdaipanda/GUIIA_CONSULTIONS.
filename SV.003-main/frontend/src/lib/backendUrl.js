@@ -79,6 +79,16 @@ export function getBackendUrl() {
     }
 
     if (isLocalDevHost(hostname)) {
+      // En desarrollo local, no usar la API de producción guardada por error.
+      try {
+        const stored = localStorage.getItem("backend_url");
+        if (stored && !isLocalBackendUrl(stored)) {
+          localStorage.removeItem("backend_url");
+        }
+      } catch {
+        /* ignore */
+      }
+
       const paramUrl = readParamBackendUrl(false);
       if (paramUrl) {
         localStorage.setItem("backend_url", paramUrl);
@@ -116,3 +126,5 @@ export function getBackendUrl() {
 }
 
 export const BACKEND_URL = getBackendUrl();
+
+// Re-evaluar en cada uso crítico (login) con getBackendUrl().

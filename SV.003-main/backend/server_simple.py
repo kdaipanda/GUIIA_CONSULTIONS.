@@ -110,6 +110,8 @@ else:
     cors_allow_origins = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://guiaa.vet",
+        "https://www.guiaa.vet",
     ]
 
 # En desarrollo local: permitir frontend en IP de red (ej. 192.168.x.x:3000)
@@ -121,9 +123,10 @@ else:
         r"(?:localhost|127\.0\.0\.1|"
         r"192\.168\.\d{1,3}\.\d{1,3}|"
         r"10\.\d{1,3}\.\d{1,3}\.\d{1,3}|"
-        r"172\.(?:1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})"
+        r"172\.(?:1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}|"
+        r"guiaa\.vet|www\.guiaa\.vet)"
         r"(?::\d+)?"
-        r"|.*\.(?:trycloudflare\.com|vercel\.app)"
+        r"|.*\.(?:trycloudflare\.com|vercel\.app|guiaa\.vet)"
         r")"
     )
 

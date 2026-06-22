@@ -21,7 +21,7 @@ import {
   updateConsultationPayloadSupabase,
   uploadMedicalImageSupabase,
 } from "./lib/supabaseApi";
-import { BACKEND_URL } from "./lib/backendUrl";
+import { BACKEND_URL, getBackendUrl } from "./lib/backendUrl";
 import { friendlyFetchError } from "./lib/friendlyFetchError";
 import { getAuthHeaders, storeAccessToken } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
@@ -1444,9 +1444,9 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
     notifyError("");
 
     try {
-      console.log("Attempting login to:", `${BACKEND_URL}/api/auth/login`);
+      console.log("Attempting login to:", `${getBackendUrl()}/api/auth/login`);
       console.log("Form data being sent:", formData);
-      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+      const response = await fetch(`${getBackendUrl()}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -1504,7 +1504,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
       login(vetData);
       setView("dashboard");
     } catch (err) {
-      notifyError(friendlyFetchError(err, BACKEND_URL));
+      notifyError(friendlyFetchError(err, getBackendUrl()));
     } finally {
       setLoading(false);
     }
@@ -1553,7 +1553,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
       login(vetData);
       setView("dashboard");
     } catch (err) {
-      notifyError(friendlyFetchError(err, BACKEND_URL));
+      notifyError(friendlyFetchError(err, getBackendUrl()));
     } finally {
       setVerifying2FA(false);
       setTwoFactorCode("");
