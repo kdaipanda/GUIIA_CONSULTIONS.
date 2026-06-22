@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Check, Coins, ShieldCheck } from "lucide-react";
-import { BACKEND_URL } from "../../lib/backendUrl";
+import { getBackendUrl } from "../../lib/backendUrl";
 import { buildLandingPricingPlans } from "../../lib/landingPricingPlans";
 import {
   DEFAULT_CREDIT_PACKAGES,
@@ -18,9 +18,10 @@ export function LandingPricing({ setView }) {
 
     async function loadCatalog() {
       try {
+        const apiBase = getBackendUrl();
         const [membershipRes, creditsRes] = await Promise.all([
-          fetch(`${BACKEND_URL}/api/membership/packages`),
-          fetch(`${BACKEND_URL}/api/consultations/credit-packages`).catch(() => null),
+          fetch(`${apiBase}/api/membership/packages`),
+          fetch(`${apiBase}/api/consultations/credit-packages`).catch(() => null),
         ]);
 
         if (cancelled || !membershipRes.ok) return;

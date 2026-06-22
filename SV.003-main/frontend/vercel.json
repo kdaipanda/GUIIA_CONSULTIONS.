@@ -40,11 +40,15 @@
   ],
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://api.guiaa.vet/api/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
   "env": {
-    "REACT_APP_BACKEND_URL": "https://api.guiaa.vet"
+    "REACT_APP_BACKEND_URL": ""
   }
 }

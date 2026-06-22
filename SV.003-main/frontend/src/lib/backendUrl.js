@@ -70,7 +70,10 @@ export function getBackendUrl() {
     const hostname = window.location.hostname;
 
     if (isProductionHost(hostname)) {
-      if (envUrl?.startsWith("https://")) return envUrl;
+      // Mismo origen: Vercel reescribe /api/* → api.guiaa.vet (sin CORS).
+      if (typeof window !== "undefined" && window.location?.origin) {
+        return window.location.origin.replace(/\/$/, "");
+      }
       return PRODUCTION_API;
     }
 
@@ -113,6 +116,9 @@ export function getBackendUrl() {
       }
       const stored = readStoredBackendUrl(true);
       if (stored) return stored;
+      if (typeof window !== "undefined" && window.location?.origin) {
+        return window.location.origin.replace(/\/$/, "");
+      }
       return PRODUCTION_API;
     }
 
