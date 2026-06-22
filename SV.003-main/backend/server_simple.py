@@ -948,7 +948,23 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    jwt_configured = True
+    try:
+        auth_security._jwt_secret()
+    except RuntimeError:
+        jwt_configured = False
+    return {
+        "status": "healthy" if jwt_configured else "degraded",
+        "jwt_configured": jwt_configured,
+    }
+
+
+@app.on_event("startup")
+async def startup_security_checks():
+    try:
+        auth_security._jwt_secret()
+    except RuntimeError as exc:
+        print(f"[CRITICAL] {exc}")
 
 
 @app.get("/api/test/claude")

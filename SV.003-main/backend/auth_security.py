@@ -43,6 +43,16 @@ def token_expire_seconds() -> int:
 
 
 def create_access_token(vet_id: str, email: str = "") -> str:
+    try:
+        secret = _jwt_secret()
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Autenticación no disponible: falta JWT_SECRET en el servidor. "
+                "Contacta soporte o al administrador de la plataforma."
+            ),
+        ) from exc
     now = datetime.now(timezone.utc)
     expire = now + timedelta(seconds=token_expire_seconds())
     payload = {
@@ -52,7 +62,7 @@ def create_access_token(vet_id: str, email: str = "") -> str:
         "exp": int(expire.timestamp()),
         "type": "access",
     }
-    return jwt.encode(payload, _jwt_secret(), algorithm=ALGORITHM)
+    return jwt.encode(payload, secret, algorithm=ALGORITHM)
 
 
 def verify_access_token(token: str) -> Dict[str, Any]:

@@ -20,7 +20,10 @@ STRIPE_PUBLISHABLE_KEY=pk_live_tu-clave-aqui
 STRIPE_WEBHOOK_SECRET=whsec_tu-secreto-aqui
 SUPABASE_URL=https://tu-proyecto.supabase.co
 SUPABASE_KEY=tu-service-role-key
-CORS_ALLOW_ORIGINS=https://tu-dominio.com,https://www.tu-dominio.com
+JWT_SECRET=genera-un-secreto-largo-aleatorio-minimo-32-caracteres
+ENVIRONMENT=production
+CORS_ALLOW_ORIGINS=https://guiaa.vet,https://www.guiaa.vet
+ALLOW_INSECURE_VET_HEADER=false
 ```
 
 5. Haz clic en **"Deploy"** o reinicia el servicio
@@ -69,6 +72,7 @@ Este endpoint te dirá específicamente si la API key de Claude está configurad
 - `ANTHROPIC_API_KEY` - Clave de API de Anthropic (Claude)
 - `SUPABASE_URL` - URL de tu proyecto Supabase
 - `SUPABASE_KEY` - Service role key de Supabase
+- `JWT_SECRET` - Secreto para firmar sesiones (login). Sin esto el login devuelve error 500/503 en producción.
 
 ### Opcionales pero Recomendadas
 
