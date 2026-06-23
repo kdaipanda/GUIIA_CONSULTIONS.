@@ -39,6 +39,7 @@ import { MembershipPage } from "./pages/MembershipPage";
 import { PaymentSuccessPage } from "./pages/PaymentSuccessPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ConsultationHistoryPage } from "./pages/ConsultationHistoryPage";
+import { MedicalImagesPage } from "./pages/MedicalImagesPage";
 import { DashboardActivitySection } from "./components/dashboard/DashboardActivitySection";
 import {
   DEFAULT_PACKAGES,
@@ -220,6 +221,15 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       icon: "📋",
       shortcut: "H",
       action: () => setView("consultation-history"),
+    },
+    {
+      id: "medical-images",
+      title: "Laboratorio",
+      description: "Interpretar PDF o resultados de laboratorio",
+      icon: "🔬",
+      shortcut: "",
+      feature: MEMBERSHIP_FEATURES.medicalImages,
+      action: () => setView("medical-images"),
     },
     {
       id: "membership",
@@ -467,11 +477,6 @@ const Router = () => {
       setCurrentView("appointment-request");
       return;
     }
-    if (location.pathname === "/app/imagenes") {
-      navigate(VIEW_TO_PATH.dashboard, { replace: true });
-      setCurrentView("dashboard");
-      return;
-    }
     const view = PATH_TO_VIEW[location.pathname];
     if (view && veterinarian) {
       setCurrentView(view);
@@ -661,6 +666,13 @@ const Router = () => {
           setView={navigateSetView}
           openConsultation={openConsultation}
         />
+      </ClinicShell>
+    ),
+    "medical-images": (
+      <ClinicShell setView={navigateSetView}>
+        <MembershipFeatureGate feature={MEMBERSHIP_FEATURES.medicalImages} setView={navigateSetView}>
+          <MedicalImagesPage setView={navigateSetView} />
+        </MembershipFeatureGate>
       </ClinicShell>
     ),
     membership: veterinarian ? (
@@ -2627,6 +2639,40 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 <div className="action-icon"><ClipboardList /></div>
                 <h3>Ver Historial</h3>
                 <p>Consultas previas y resultados</p>
+              </Card>
+
+              <Card
+                role="button"
+                tabIndex={0}
+                className={`action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${embedded ? " clinic-dashboard-quick-btn" : ""}${membershipType !== "premium" ? " premium-locked" : ""}`}
+                onClick={() => {
+                  if (membershipType !== "premium") {
+                    setView("membership");
+                    return;
+                  }
+                  setView("medical-images");
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    if (membershipType !== "premium") {
+                      setView("membership");
+                      return;
+                    }
+                    setView("medical-images");
+                  }
+                }}
+              >
+                <div className="action-icon"><FlaskConical /></div>
+                <h3>Laboratorio</h3>
+                <p>
+                  {membershipType === "premium"
+                    ? "Interpretar PDF o resultados de laboratorio"
+                    : "Disponible con membresía Premium"}
+                </p>
+                <span className={membershipType === "premium" ? "expert-badge" : "premium-badge"}>
+                  {membershipType === "premium" ? "PDF" : "PREMIUM"}
+                </span>
               </Card>
 
               <Card

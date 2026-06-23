@@ -18,14 +18,16 @@ export function ClinicTableSkeleton({ rows = 5, cols = 4 }) {
   );
 }
 
-export function ClinicEmptyState({ icon: Icon, title, description, actionLabel, onAction }) {
+export function ClinicEmptyState({ icon: Icon, title, description, actionLabel, onAction, mascot }) {
   return (
     <div className="clinic-empty-guiaa premium-card-lift">
-      {Icon && (
+      {mascot ? (
+        mascot
+      ) : Icon ? (
         <div className="clinic-empty-guiaa-icon">
           <Icon size={28} aria-hidden />
         </div>
-      )}
+      ) : null}
       <h3>{title}</h3>
       {description && <p>{description}</p>}
       {actionLabel && onAction && (
@@ -56,7 +58,7 @@ export function ClinicStatusPill({ status, label }) {
 }
 
 export function clinicDialogClass(...extra) {
-  return ["clinic-dialog-guiaa", ...extra.filter(Boolean)].join(" ");
+  return ["clinic-dialog-guiaa", "clinic-dialog-compact", ...extra.filter(Boolean)].join(" ");
 }
 
 export function ClinicReportsSkeleton() {

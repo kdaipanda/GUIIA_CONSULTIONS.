@@ -59,6 +59,7 @@ class MembershipPlanMatrix(unittest.TestCase):
         self.assertFalse(can_access_feature(p, "multiespecies"))
         self.assertFalse(can_access_feature(p, "expert_mode"))
         self.assertFalse(can_access_feature(p, "advanced_analysis"))
+        self.assertFalse(can_access_feature(p, "medical_images"))
 
     def test_professional_plan(self):
         p = _profile("professional")
@@ -68,12 +69,14 @@ class MembershipPlanMatrix(unittest.TestCase):
         self.assertTrue(can_access_feature(p, "multiespecies"))
         self.assertFalse(can_access_feature(p, "expert_mode"))
         self.assertFalse(can_access_feature(p, "advanced_analysis"))
+        self.assertFalse(can_access_feature(p, "medical_images"))
 
     def test_premium_plan(self):
         p = _profile("premium")
         self.assertTrue(can_access_feature(p, "inventory"))
         self.assertTrue(can_access_feature(p, "expert_mode"))
         self.assertTrue(can_access_feature(p, "advanced_analysis"))
+        self.assertTrue(can_access_feature(p, "medical_images"))
 
     def test_trial_plan(self):
         p = _trial_profile()

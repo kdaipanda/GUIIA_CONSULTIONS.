@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, Search, Receipt, FileDown } from "lucide-react";
+import { Plus, Search, Receipt, FileDown, Zap, Settings2 } from "lucide-react";
 import "./clinicPageShared.css";
 import {
   ClinicTableSkeleton,
@@ -38,6 +38,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import {
+  QUICK_SALE_CONCEPTS,
+  PAYMENT_METHODS,
+} from "../../lib/clinicQuickForms";
+import { DoctorPlumitas } from "../../components/brand/DoctorPlumitas";
 
 const STATUS_LABELS = {
   draft: "Borrador",
@@ -54,6 +59,13 @@ const invoiceClientLabel = (invoice) =>
 
 const EMPTY_LINE = { product_id: "", description: "", quantity: "1", unit_price: "" };
 
+const EMPTY_QUICK = {
+  client_id: GENERAL_PUBLIC_ID,
+  description: "",
+  amount: "",
+  payment_method: "efectivo",
+};
+
 export function BillingPage() {
   const { veterinarian } = useVet();
   const { organization } = useClinic();
@@ -66,6 +78,8 @@ export function BillingPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detail, setDetail] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [quickMode, setQuickMode] = useState(true);
+  const [quickForm, setQuickForm] = useState(EMPTY_QUICK);
   const [form, setForm] = useState({
     client_id: "",
     tax_rate: "0",
@@ -118,6 +132,8 @@ export function BillingPage() {
   }, [invoices]);
 
   const openCreate = () => {
+    setQuickMode(true);
+    setQuickForm(EMPTY_QUICK);
     setForm({
       client_id: GENERAL_PUBLIC_ID,
       tax_rate: "0",
@@ -149,6 +165,35 @@ export function BillingPage() {
   const removeLine = (index) => {
     if (form.items.length <= 1) return;
     setForm({ ...form, items: form.items.filter((_, i) => i !== index) });
+  };
+
+  const handleQuickSave = async (e) => {
+    e.preventDefault();
+    const description = quickForm.description.trim();
+    const amount = Number(quickForm.amount);
+    if (!description || !amount || amount <= 0) return;
+    setSaving(true);
+    try {
+      await createInvoice(veterinarian.id, {
+        client_id:
+          quickForm.client_id && quickForm.client_id !== GENERAL_PUBLIC_ID
+            ? quickForm.client_id
+            : null,
+        tax_rate: 0,
+        payment_method: quickForm.payment_method,
+        notes: null,
+        status: "paid",
+        deduct_stock: false,
+        items: [{ description, quantity: 1, unit_price: amount }],
+      });
+      notifySuccess("Venta registrada y cobrada.");
+      setDialogOpen(false);
+      load();
+    } catch (err) {
+      notifyError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSave = async (e) => {
@@ -250,7 +295,7 @@ export function BillingPage() {
         <ClinicTableSkeleton rows={6} cols={5} />
       ) : filtered.length === 0 ? (
         <ClinicEmptyState
-          icon={Receipt}
+          mascot={<DoctorPlumitas size="sm" badge />}
           title={search.trim() ? "Sin resultados" : "Sin recibos registrados"}
           description={
             search.trim()
@@ -293,8 +338,109 @@ export function BillingPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className={clinicDialogClass("max-w-2xl", "max-h-[90vh]", "overflow-y-auto")}>
-          <DialogHeader><DialogTitle>Nueva Venta</DialogTitle></DialogHeader>
+        <DialogContent className={clinicDialogClass("max-w-lg", "max-h-[86vh]", "overflow-y-auto")}>
+          <DialogHeader>
+            <DialogTitle>Nueva venta</DialogTitle>
+          </DialogHeader>
+
+          <div className="clinic-sale-mode-toggle">
+            <button
+              type="button"
+              className={`clinic-quick-chip${quickMode ? " is-active" : ""}`}
+              onClick={() => setQuickMode(true)}
+            >
+              <Zap size={14} aria-hidden /> Rápida
+            </button>
+            <button
+              type="button"
+              className={`clinic-quick-chip${!quickMode ? " is-active" : ""}`}
+              onClick={() => setQuickMode(false)}
+            >
+              <Settings2 size={14} aria-hidden /> Detallada
+            </button>
+          </div>
+
+          {quickMode ? (
+            <form onSubmit={handleQuickSave} className="clinic-form">
+              <div className="form-group">
+                <Label>Concepto *</Label>
+                <div className="clinic-quick-chips" role="group" aria-label="Conceptos frecuentes">
+                  {QUICK_SALE_CONCEPTS.map((concept) => (
+                    <button
+                      key={concept}
+                      type="button"
+                      className={`clinic-quick-chip${quickForm.description === concept ? " is-active" : ""}`}
+                      onClick={() => setQuickForm({ ...quickForm, description: concept })}
+                    >
+                      {concept}
+                    </button>
+                  ))}
+                </div>
+                <Input
+                  className="mt-2"
+                  placeholder="O escribe otro concepto..."
+                  value={quickForm.description}
+                  onChange={(e) => setQuickForm({ ...quickForm, description: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="clinic-form-grid-2">
+                <div className="form-group">
+                  <Label htmlFor="quick-sale-amount">Monto *</Label>
+                  <Input
+                    id="quick-sale-amount"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={quickForm.amount}
+                    onChange={(e) => setQuickForm({ ...quickForm, amount: e.target.value })}
+                    required
+                    autoFocus
+                  />
+                </div>
+                <div className="form-group">
+                  <Label>Receptor</Label>
+                  <Select
+                    value={quickForm.client_id || GENERAL_PUBLIC_ID}
+                    onValueChange={(v) => setQuickForm({ ...quickForm, client_id: v })}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Receptor" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={GENERAL_PUBLIC_ID}>{GENERAL_PUBLIC_LABEL}</SelectItem>
+                      {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <Label>Método de pago</Label>
+                <div className="clinic-quick-chips" role="group" aria-label="Método de pago">
+                  {PAYMENT_METHODS.map(({ value, label }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`clinic-quick-chip${quickForm.payment_method === value ? " is-active" : ""}`}
+                      onClick={() => setQuickForm({ ...quickForm, payment_method: value })}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <p className="clinic-muted clinic-quick-hint">
+                Se registra como pagado al confirmar. Usa venta detallada para IVA, inventario o varias líneas.
+              </p>
+
+              <DialogFooter>
+                <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                <Button type="submit" disabled={saving}>{saving ? "Guardando..." : "Cobrar y registrar"}</Button>
+              </DialogFooter>
+            </form>
+          ) : (
           <form onSubmit={handleSave} className="clinic-form">
             <div className="form-group">
               <Label>Receptor</Label>
@@ -371,11 +517,12 @@ export function BillingPage() {
               <Button type="submit" disabled={saving}>{saving ? "Guardando..." : "Emitir recibo"}</Button>
             </DialogFooter>
           </form>
+          )}
         </DialogContent>
       </Dialog>
 
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className={clinicDialogClass("max-w-lg")}>
+        <DialogContent className={clinicDialogClass("max-w-md")}>
           <DialogHeader>
             <DialogTitle>{detail?.invoice_number || "Recibo"}</DialogTitle>
           </DialogHeader>

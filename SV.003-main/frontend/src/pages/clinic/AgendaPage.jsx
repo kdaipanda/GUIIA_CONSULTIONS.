@@ -526,7 +526,7 @@ export function AgendaPage({ onStartConsultation }) {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className={clinicDialogClass("max-w-lg")}>
+        <DialogContent className={clinicDialogClass("max-w-md")}>
           <DialogHeader>
             <DialogTitle>{editing ? "Editar cita" : "Nueva cita"}</DialogTitle>
           </DialogHeader>
@@ -601,7 +601,7 @@ export function AgendaPage({ onStartConsultation }) {
       </Dialog>
 
       <Dialog open={approveOpen} onOpenChange={setApproveOpen}>
-        <DialogContent className={clinicDialogClass("max-w-md")}>
+        <DialogContent className={clinicDialogClass("max-w-sm")}>
           <DialogHeader>
             <DialogTitle>Confirmar cita</DialogTitle>
           </DialogHeader>

@@ -75,6 +75,7 @@ MEMBERSHIP_PACKAGES = {
             *SHARED_CORE_FEATURES,
             "Inventario, ventas y reportes",
             "Manejo Experto (consulta acelerada)",
+            "Interpretación de laboratorio (PDF)",
             "Onboarding guiado prioritario",
         ],
         "features_annual": [
@@ -83,6 +84,7 @@ MEMBERSHIP_PACKAGES = {
             *SHARED_CORE_FEATURES,
             "Inventario, ventas y reportes",
             "Manejo Experto (consulta acelerada)",
+            "Interpretación de laboratorio (PDF)",
             "Onboarding guiado prioritario",
         ],
     },

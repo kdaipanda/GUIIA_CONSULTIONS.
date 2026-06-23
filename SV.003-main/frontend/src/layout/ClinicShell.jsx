@@ -16,6 +16,7 @@ import {
   Settings,
   Shield,
   Menu,
+  FlaskConical,
 } from "lucide-react";
 import { Header } from "../components/Header";
 import { NotificationBell } from "../components/clinic/NotificationBell";
@@ -61,6 +62,13 @@ const BASE_NAV_ITEMS = [
     icon: BarChart3,
     view: "reports",
     feature: MEMBERSHIP_FEATURES.reports,
+  },
+  {
+    to: "/app/imagenes",
+    label: "Laboratorio",
+    icon: FlaskConical,
+    view: "medical-images",
+    feature: MEMBERSHIP_FEATURES.medicalImages,
   },
   { to: "/app/herramientas", label: "Herramientas", icon: Wrench, view: "tools" },
   { to: "/app/historial", label: "Historial", icon: ClipboardList, view: "consultation-history" },

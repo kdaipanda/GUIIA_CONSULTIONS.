@@ -10718,7 +10718,7 @@ html {
 
 .clinic-dashboard-quick-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 10px;
 }
 
@@ -10944,7 +10944,7 @@ html {
   align-items: center !important;
   text-align: left !important;
   gap: 10px !important;
-  padding: 14px 16px !important;
+  padding: 12px 14px !important;
   border-radius: 10px !important;
   border: 1px solid #e2e8f0 !important;
   background: #fff !important;
@@ -10952,6 +10952,19 @@ html {
   animation: none !important;
   transform: none !important;
   min-height: auto !important;
+  overflow: visible !important;
+}
+
+.clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn.expert-feature:not(.premium-locked) {
+  border-color: #c7d2fe !important;
+  background: linear-gradient(135deg, #fafaff 0%, #fff 100%) !important;
+}
+
+.clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn.premium-feature,
+.clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn.expert-feature.premium-locked {
+  border-color: #fde68a !important;
+  background: linear-gradient(135deg, #fffbeb 0%, #fff 100%) !important;
+  opacity: 1 !important;
 }
 
 .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn::after {
@@ -10977,10 +10990,16 @@ html {
 }
 
 .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn h3 {
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 14px !important;
   font-weight: 600 !important;
   margin: 0 !important;
+  line-height: 1.25 !important;
   color: #0f172a !important;
+  background: none !important;
+  -webkit-text-fill-color: #0f172a !important;
+  white-space: normal;
 }
 
 .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn p {
@@ -10989,10 +11008,17 @@ html {
 
 .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn .expert-badge,
 .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn .premium-badge {
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
   margin-left: auto;
+  flex-shrink: 0;
+  align-self: center;
   font-size: 10px;
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 999px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
 }
 
 .clinic-dashboard-unified .dashboard-block.clinic-settings-card {

@@ -13,6 +13,7 @@ import {
   Gem,
   BarChart3,
   User,
+  Zap,
 } from "lucide-react";
 import { useVet } from "../../context/VetContext";
 import { useClinic } from "../../context/ClinicContext";
@@ -26,6 +27,7 @@ import {
 } from "../../lib/membershipPlans";
 import { canAccessFeature, MEMBERSHIP_FEATURES } from "../../lib/membershipAccess";
 import { Button } from "../../components/ui/button";
+import { QuickClientPatientDialog } from "../../components/clinic/QuickClientPatientDialog";
 import "./clinicDashboardPage.css";
 import "./clinicPageShared.css";
 
@@ -108,6 +110,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [membershipPackages, setMembershipPackages] = useState(DEFAULT_PACKAGES);
+  const [quickDialogOpen, setQuickDialogOpen] = useState(false);
 
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
@@ -225,6 +228,10 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
           </div>
         </div>
         <div className="clinic-dashboard-actions">
+          <Button type="button" variant="secondary" onClick={() => setQuickDialogOpen(true)}>
+            <Zap size={16} aria-hidden />
+            Dueño + mascota
+          </Button>
           <Button type="button" onClick={() => go("agenda", "/app/agenda")}>
             <Plus size={16} aria-hidden />
             Nueva cita
@@ -473,6 +480,14 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
               <div className="clinic-dashboard-quick-grid premium-stagger">
                 <button
                   type="button"
+                  className="clinic-dashboard-quick-btn clinic-dashboard-quick-btn--accent"
+                  onClick={() => setQuickDialogOpen(true)}
+                >
+                  <Zap size={20} aria-hidden />
+                  Registro rápido
+                </button>
+                <button
+                  type="button"
                   className="clinic-dashboard-quick-btn"
                   onClick={() => go("clients", "/app/clientes")}
                 >
@@ -528,6 +543,13 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
           </div>
         </>
       )}
+
+      <QuickClientPatientDialog
+        open={quickDialogOpen}
+        onOpenChange={setQuickDialogOpen}
+        veterinarianId={veterinarian?.id}
+        onSuccess={load}
+      />
     </div>
   );
 }

@@ -169,15 +169,184 @@
 
 /* Modales y formularios clínicos */
 .clinic-dialog-guiaa {
-  border-radius: 16px;
+  border-radius: 14px;
   border: 1px solid rgba(38, 91, 147, 0.14);
-  box-shadow: 0 20px 48px -16px rgba(12, 45, 77, 0.22);
+  box-shadow: 0 16px 40px -18px rgba(12, 45, 77, 0.2);
+}
+
+.clinic-dialog-compact {
+  box-sizing: border-box;
+  width: calc(100% - 2rem) !important;
+  max-width: var(--clinic-dialog-max, 26rem) !important;
+  max-height: min(88vh, 36rem);
+  padding: 1.25rem 1.5rem !important;
+  gap: 0.75rem !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.clinic-dialog-compact.max-w-sm {
+  --clinic-dialog-max: 22rem;
+}
+
+.clinic-dialog-compact.max-w-md {
+  --clinic-dialog-max: 26rem;
+}
+
+.clinic-dialog-compact.max-w-lg {
+  --clinic-dialog-max: 30rem;
+}
+
+.clinic-dialog-compact.max-w-xl {
+  --clinic-dialog-max: 34rem;
+}
+
+.clinic-dialog-compact.max-w-2xl {
+  --clinic-dialog-max: 38rem;
+}
+
+.clinic-dialog-compact.max-w-4xl,
+.clinic-dialog-compact.max-w-5xl {
+  --clinic-dialog-max: none;
+  max-height: min(90vh, 48rem);
+  padding: 1rem 1.25rem !important;
+}
+
+.clinic-dialog-compact > button.absolute {
+  right: 1rem;
+  top: 1rem;
+}
+
+.clinic-quick-register-dialog {
+  --clinic-dialog-max: 28rem;
+}
+
+.clinic-quick-dialog-header {
+  margin: 0;
+  padding: 0;
+  padding-right: 1.75rem;
+  text-align: left;
+}
+
+.clinic-quick-dialog-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.clinic-quick-dialog-intro {
+  flex: 1;
+  min-width: 0;
+}
+
+.clinic-quick-dialog-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--clinic-blue, #265b93);
+}
+
+.clinic-quick-dialog-mascot.guiaa-mascot-wrap {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.clinic-quick-dialog-mascot .guiaa-mascot-img {
+  display: block;
+  width: 52px;
+  height: 52px;
+  max-width: 52px;
+  max-height: 52px;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 12px;
+  background: linear-gradient(165deg, var(--guiaa-sage-light, #e8f3e4), #fff);
+}
+
+.clinic-quick-dialog-form {
+  min-width: 0;
+}
+
+.clinic-quick-dialog-footer {
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+}
+
+.clinic-quick-register-dialog .clinic-form-section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .clinic-dialog-guiaa h2,
 .clinic-dialog-guiaa [class*="DialogTitle"] {
   color: var(--clinic-navy, #0c2d4d);
   letter-spacing: -0.01em;
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.clinic-dialog-compact form.clinic-form .form-group {
+  margin-bottom: 0.625rem;
+}
+
+.clinic-dialog-compact .clinic-form-grid-2 {
+  gap: 0 0.75rem;
+}
+
+.clinic-dialog-compact .clinic-quick-hint {
+  margin: 0 0 0.5rem;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.clinic-dialog-compact .guiaa-mascot-wrap {
+  margin-bottom: 0.35rem;
+}
+
+.clinic-dialog-compact .guiaa-mascot-badge {
+  padding: 6px 10px;
+  border-radius: 14px;
+}
+
+.clinic-dialog-compact .guiaa-mascot-img--sm {
+  max-height: 72px;
+}
+
+.clinic-dialog-compact .clinic-sale-mode-toggle {
+  margin-bottom: 0.75rem;
+}
+
+.clinic-dialog-compact .clinic-quick-chip {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.clinic-dialog-compact [class*="DialogFooter"] {
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+.clinic-dialog-compact .clinic-invoice-lines {
+  margin: 0.5rem 0;
+  gap: 0.5rem;
+}
+
+.clinic-dialog-compact .clinic-invoice-line {
+  grid-template-columns: 1fr;
+  gap: 0.375rem;
+}
+
+@media (min-width: 540px) {
+  .clinic-dialog-compact .clinic-invoice-line {
+    grid-template-columns: 1fr 1.4fr 4.5rem 5.5rem auto;
+    gap: 0.375rem;
+  }
 }
 
 .clinic-dialog-guiaa form.clinic-form .form-group:last-of-type {
@@ -379,5 +548,77 @@
 .membership-feature-gate-cta {
   margin-top: 18px;
   gap: 8px;
+}
+
+.clinic-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.clinic-link-btn {
+  margin: 0 0 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--clinic-blue);
+  cursor: pointer;
+  text-align: left;
+}
+
+.clinic-link-btn:hover {
+  text-decoration: underline;
+}
+
+.clinic-quick-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.clinic-sale-mode-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.clinic-quick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.clinic-quick-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(38, 91, 147, 0.18);
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--clinic-navy);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.clinic-quick-chip:hover {
+  border-color: rgba(38, 91, 147, 0.35);
+  background: rgba(38, 91, 147, 0.04);
+}
+
+.clinic-quick-chip.is-active {
+  border-color: var(--clinic-blue);
+  background: rgba(38, 91, 147, 0.12);
+  color: var(--clinic-navy);
+}
+
+.clinic-quick-chip:focus-visible {
+  outline: 2px solid var(--clinic-blue);
+  outline-offset: 2px;
 }
 

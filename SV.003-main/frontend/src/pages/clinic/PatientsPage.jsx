@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, Search, Pencil, Trash2, Stethoscope, FileDown, ExternalLink, PawPrint } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Stethoscope, FileDown, ExternalLink, PawPrint, Zap } from "lucide-react";
 import "./clinicPageShared.css";
 import {
   ClinicTableSkeleton,
@@ -41,6 +41,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from "../../components/ui/dialog";
+import { QuickClientPatientDialog } from "../../components/clinic/QuickClientPatientDialog";
+import { DoctorPlumitas } from "../../components/brand/DoctorPlumitas";
+import { SpeciesChipPicker } from "../../components/clinic/SpeciesChipPicker";
 
 const SPECIES = ["perros", "gatos", "conejos", "aves", "hamsters", "cuyos", "hurones", "erizos", "tortugas", "iguanas", "patos_pollos", "otros"];
 
@@ -87,6 +90,8 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
   const [saving, setSaving] = useState(false);
   const [pdfLoadingId, setPdfLoadingId] = useState(null);
   const [historyPdfLoading, setHistoryPdfLoading] = useState(false);
+  const [quickDialogOpen, setQuickDialogOpen] = useState(false);
+  const [showFullPetForm, setShowFullPetForm] = useState(false);
 
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
@@ -112,12 +117,14 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ ...EMPTY_FORM, client_id: clients[0]?.id || "" });
+    setShowFullPetForm(false);
+    setForm({ ...EMPTY_FORM, client_id: clients[0]?.id || "", species: "perros" });
     setDialogOpen(true);
   };
 
   const openEdit = (patient) => {
     setEditing(patient);
+    setShowFullPetForm(true);
     setForm({
       client_id: patient.client_id || "",
       name: patient.name || "",
@@ -220,13 +227,20 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
           <h1>Mascotas</h1>
           <p>Fichas clínicas, historial y acceso rápido a consultas.</p>
         </div>
-        <Button type="button" onClick={openCreate} disabled={clients.length === 0}>
-          <Plus size={16} className="mr-1" /> Nueva mascota
-        </Button>
+        <div className="clinic-header-actions">
+          <Button type="button" variant="secondary" onClick={() => setQuickDialogOpen(true)}>
+            <Zap size={16} className="mr-1" /> Registro rápido
+          </Button>
+          <Button type="button" onClick={openCreate} disabled={clients.length === 0}>
+            <Plus size={16} className="mr-1" /> Solo mascota
+          </Button>
+        </div>
       </div>
 
       {clients.length === 0 && (
-        <div className="info-message">Registra al menos un dueño antes de agregar mascotas.</div>
+        <div className="info-message">
+          Usa <strong>Registro rápido</strong> para crear dueño y mascota en un solo paso.
+        </div>
       )}
 
       <div className="clinic-toolbar">
@@ -251,15 +265,15 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
         <ClinicTableSkeleton rows={6} cols={5} />
       ) : patients.length === 0 ? (
         <ClinicEmptyState
-          icon={PawPrint}
+          mascot={<DoctorPlumitas size="sm" badge />}
           title="Sin mascotas registradas"
           description={
             clients.length === 0
               ? "Primero registra un dueño para poder agregar mascotas."
               : "Agrega la primera mascota para iniciar consultas y seguimiento clínico."
           }
-          actionLabel={clients.length > 0 ? "Registrar mascota" : undefined}
-          onAction={clients.length > 0 ? openCreate : undefined}
+          actionLabel={clients.length > 0 ? "Agregar mascota" : "Registro rápido"}
+          onAction={clients.length > 0 ? openCreate : () => setQuickDialogOpen(true)}
         />
       ) : (
         <div className="clinic-table-wrap">
@@ -315,7 +329,7 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className={clinicDialogClass("max-w-lg")}>
+        <DialogContent className={clinicDialogClass("max-w-md")}>
           <DialogHeader>
             <DialogTitle>{editing ? "Editar mascota" : "Nueva mascota"}</DialogTitle>
           </DialogHeader>
@@ -333,27 +347,44 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
             </div>
             <div className="form-group">
               <Label>Nombre *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required autoFocus />
             </div>
-            <div className="form-group">
-              <Label>Especie</Label>
-              <Select value={form.species} onValueChange={(v) => setForm({ ...form, species: v })}>
-                <SelectTrigger><SelectValue placeholder="Especie" /></SelectTrigger>
-                <SelectContent>
-                  {SPECIES.map((s) => (
-                    <SelectItem key={s} value={s}>{s}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="form-group">
-              <Label>Raza</Label>
-              <Input value={form.breed} onChange={(e) => setForm({ ...form, breed: e.target.value })} />
-            </div>
-            <div className="form-group">
-              <Label>Notas</Label>
-              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
-            </div>
+            <SpeciesChipPicker
+              value={form.species || "perros"}
+              onChange={(species) => setForm({ ...form, species })}
+            />
+            {!editing && !showFullPetForm && (
+              <button
+                type="button"
+                className="clinic-link-btn"
+                onClick={() => setShowFullPetForm(true)}
+              >
+                + Raza, sexo y más datos
+              </button>
+            )}
+            {(editing || showFullPetForm) && (
+              <>
+                <div className="form-group">
+                  <Label>Raza</Label>
+                  <Input value={form.breed} onChange={(e) => setForm({ ...form, breed: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <Label>Especie (lista completa)</Label>
+                  <Select value={form.species} onValueChange={(v) => setForm({ ...form, species: v })}>
+                    <SelectTrigger><SelectValue placeholder="Especie" /></SelectTrigger>
+                    <SelectContent>
+                      {SPECIES.map((s) => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="form-group">
+                  <Label>Notas</Label>
+                  <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
+                </div>
+              </>
+            )}
             <DialogFooter>
               <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>Cancelar</Button>
               <Button type="submit" disabled={saving}>{saving ? "Guardando..." : "Guardar"}</Button>
@@ -362,8 +393,15 @@ export function PatientsPage({ onStartConsultation, onViewConsultation }) {
         </DialogContent>
       </Dialog>
 
+      <QuickClientPatientDialog
+        open={quickDialogOpen}
+        onOpenChange={setQuickDialogOpen}
+        veterinarianId={veterinarian?.id}
+        onSuccess={load}
+      />
+
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className={clinicDialogClass("max-w-2xl", "max-h-[90vh]", "overflow-y-auto")}>
+        <DialogContent className={clinicDialogClass("max-w-xl", "max-h-[86vh]", "overflow-y-auto")}>
           <DialogHeader>
             <DialogTitle>{detail?.patient?.name}</DialogTitle>
           </DialogHeader>

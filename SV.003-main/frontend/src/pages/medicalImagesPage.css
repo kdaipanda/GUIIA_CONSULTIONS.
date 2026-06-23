@@ -75,6 +75,37 @@
   line-height: 1.5;
 }
 
+.medical-lab-input-tabs {
+  margin-bottom: 12px;
+}
+
+.medical-lab-file-input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.medical-lab-file-name {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+.medical-lab-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.medical-lab-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 220px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(38, 91, 147, 0.15);
+}
+
 @media (max-width: 768px) {
   .medical-images-page-guiaa .medical-images-header {
     flex-direction: column;

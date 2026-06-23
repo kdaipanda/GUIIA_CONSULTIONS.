@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Crown, FlaskConical } from "lucide-react";
+import { FlaskConical } from "lucide-react";
 import { useVet } from "../context/VetContext";
 import { notifyError, notifySuccess } from "../lib/appToast";
 import { BACKEND_URL } from "../lib/backendUrl";
 import { getAuthHeaders } from "../lib/authHeaders";
 import { cleanClinicalDisplayText } from "../lib/consultationPdf";
+import {
+  fileToBase64Payload,
+  labFileLabel,
+  validateLabUploadFile,
+} from "../lib/labFileUtils";
 import { PatientSelector } from "../components/clinic/PatientSelector";
 import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
@@ -13,6 +18,7 @@ import "./medicalImagesPage.css";
 export function MedicalImagesPage({ setView }) {
   const { veterinarian } = useVet();
   const [imageType, setImageType] = useState("blood_test");
+  const [inputMode, setInputMode] = useState("pdf");
   const [patientName, setPatientName] = useState("");
   const [imageClinicalContext, setImageClinicalContext] = useState(null);
   const [additionalContext, setAdditionalContext] = useState("");
@@ -42,12 +48,8 @@ export function MedicalImagesPage({ setView }) {
   const imageMeta = typeMeta[imageType] || typeMeta.blood_test;
 
   useEffect(() => {
-    if (veterinarian?.membership_type?.toLowerCase() !== "premium") {
-      notifyError("Esta función es exclusiva para miembros Premium");
-    } else {
-      loadHistory();
-    }
-  }, [veterinarian]);
+    loadHistory();
+  }, [veterinarian?.id]);
 
   const loadHistory = async () => {
     try {
@@ -70,33 +72,37 @@ export function MedicalImagesPage({ setView }) {
     }
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const maxSize = 10 * 1024 * 1024;
-      const maxSizeLabel = '10MB';
-      
-      if (file.size > maxSize) {
-        notifyError(`El archivo es demasiado grande. Máximo ${maxSizeLabel}.`);
-        return;
-      }
-
-      setImageFile(file);
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-      notifyError("");
+  const handleLabFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const validationError = validateLabUploadFile(file);
+    if (validationError) {
+      notifyError(validationError);
+      return;
     }
+    const isPdf = file.type === "application/pdf" || file.name?.toLowerCase().endsWith(".pdf");
+    setInputMode(isPdf ? "pdf" : "image");
+    setImageFile(file);
+    setPastedStudyData("");
+
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result);
+    reader.readAsDataURL(file);
   };
+
+  const canSubmit =
+    (inputMode === "text" && pastedStudyData.trim()) ||
+    ((inputMode === "pdf" || inputMode === "image") && imageFile);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!pastedStudyData || !pastedStudyData.trim()) {
-      notifyError("Por favor pega los datos del estudio");
+    if (!canSubmit) {
+      notifyError(
+        inputMode === "text"
+          ? "Pega los resultados del estudio"
+          : "Sube un PDF o imagen del laboratorio",
+      );
       return;
     }
 
@@ -105,15 +111,29 @@ export function MedicalImagesPage({ setView }) {
     setResult(null);
 
     try {
+      let imageBase64 = null;
+      let requestImageType = imageType;
+
+      if (imageFile && inputMode !== "text") {
+        imageBase64 = await fileToBase64Payload(imageFile);
+        const isPdf =
+          imageFile.type === "application/pdf" ||
+          imageFile.name?.toLowerCase().endsWith(".pdf");
+        if (isPdf) {
+          requestImageType = "pdf_report";
+        }
+      }
+
       const requestData = {
         veterinarian_id: veterinarian.id,
-        image_base64: null,  // Enviar explícitamente como null (campo opcional en backend)
-        image_type: imageType,
+        image_base64: imageBase64,
+        image_type: requestImageType,
         patient_name: imageClinicalContext?.patient?.name || patientName || null,
         patient_id: imageClinicalContext?.patientId || null,
         consultation_id: consultationId || null,
         additional_context: additionalContext || null,
-        pasted_study_data: pastedStudyData || null,  // Datos de estudio pegados
+        pasted_study_data:
+          inputMode === "text" && pastedStudyData.trim() ? pastedStudyData : null,
       };
 
       const response = await fetch(
@@ -175,6 +195,8 @@ export function MedicalImagesPage({ setView }) {
 
       // Clear form
       setPastedStudyData("");
+      setImageFile(null);
+      setImagePreview(null);
       setPatientName("");
       setImageClinicalContext(null);
       setAdditionalContext("");
@@ -202,28 +224,6 @@ export function MedicalImagesPage({ setView }) {
     }
   };
 
-  if (veterinarian?.membership_type?.toLowerCase() !== "premium") {
-    return (
-      <div className="medical-images-page medical-images-page-guiaa">
-        <div className="container">
-          <div className="medical-images-premium-gate">
-            <div className="medical-images-premium-icon">
-              <Crown size={32} aria-hidden />
-            </div>
-            <h2>Función Premium</h2>
-            <p>
-              La interpretación de análisis clínicos (sangre, orina y estudios de laboratorio)
-              está incluida en el plan Premium de GUIAA.
-            </p>
-            <Button type="button" onClick={() => setView("membership")}>
-              Ver plan Premium
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="medical-images-page medical-images-page-guiaa">
       <div className="container">
@@ -234,7 +234,7 @@ export function MedicalImagesPage({ setView }) {
               <FlaskConical size={28} aria-hidden />
               Interpretación de análisis
             </h1>
-            <p>Pega resultados de laboratorio para obtener hallazgos y recomendaciones clínicas.</p>
+            <p>Sube el PDF del laboratorio o pega resultados para obtener hallazgos y recomendaciones.</p>
           </div>
           <Button
             type="button"
@@ -284,9 +284,64 @@ export function MedicalImagesPage({ setView }) {
               </div>
 
               <div className="form-section">
-                <h3>Cargar Estudio</h3>
-                
-                {/* Alerta de ayuda para copiar PDFs */}
+                <h3>Cargar estudio</h3>
+
+                <div className="clinic-sale-mode-toggle medical-lab-input-tabs">
+                  <button
+                    type="button"
+                    className={`clinic-quick-chip${inputMode === "pdf" ? " is-active" : ""}`}
+                    onClick={() => setInputMode("pdf")}
+                  >
+                    PDF
+                  </button>
+                  <button
+                    type="button"
+                    className={`clinic-quick-chip${inputMode === "image" ? " is-active" : ""}`}
+                    onClick={() => setInputMode("image")}
+                  >
+                    Imagen
+                  </button>
+                  <button
+                    type="button"
+                    className={`clinic-quick-chip${inputMode === "text" ? " is-active" : ""}`}
+                    onClick={() => setInputMode("text")}
+                  >
+                    Pegar texto
+                  </button>
+                </div>
+
+                {(inputMode === "pdf" || inputMode === "image") && (
+                  <div className="form-group">
+                    <label htmlFor="lab-file-upload">
+                      {inputMode === "pdf" ? "Archivo PDF del laboratorio" : "Foto o captura del estudio"}
+                    </label>
+                    <input
+                      id="lab-file-upload"
+                      type="file"
+                      accept={inputMode === "pdf" ? "application/pdf,.pdf" : "image/*"}
+                      onChange={handleLabFileChange}
+                      className="medical-lab-file-input"
+                    />
+                    {imageFile && (
+                      <p className="clinic-muted medical-lab-file-name">{labFileLabel(imageFile)}</p>
+                    )}
+                    {imagePreview && inputMode === "image" && (
+                      <img
+                        src={imagePreview}
+                        alt="Vista previa del estudio"
+                        className="medical-lab-preview"
+                      />
+                    )}
+                    <small className="clinic-muted medical-lab-hint">
+                      {inputMode === "pdf"
+                        ? "Se leen hasta 5 páginas del PDF automáticamente."
+                        : "JPG o PNG del reporte impreso o pantalla del laboratorio."}
+                    </small>
+                  </div>
+                )}
+
+                {inputMode === "text" && (
+                <>
                 <div style={{
                   marginBottom: '16px',
                   backgroundColor: 'var(--bg-secondary)',
@@ -426,6 +481,8 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
                     💡 Copia los resultados del laboratorio y pégalos aquí para su análisis.
                   </small>
                 </div>
+                </>
+                )}
               </div>
 
               <PatientSelector
@@ -483,9 +540,9 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
                 </Button>
                 <Button
                   type="submit"
-                  disabled={loading || !pastedStudyData || !pastedStudyData.trim()}
+                  disabled={loading || !canSubmit}
                 >
-                  {loading ? "Analizando..." : "Interpretar Estudio"}
+                  {loading ? "Analizando..." : "Interpretar estudio"}
                 </Button>
               </div>
             </form>
@@ -606,6 +663,7 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
                         {item.image_type === "blood_test" &&
                           "🩸 Análisis de Sangre"}
                         {item.image_type === "urinalysis" && "🧪 Urianálisis"}
+                        {item.image_type === "pdf_report" && "📄 PDF laboratorio"}
                         {item.image_type === "xray" && "📷 Imagen médica"}
                       </div>
                       <div className="history-date">

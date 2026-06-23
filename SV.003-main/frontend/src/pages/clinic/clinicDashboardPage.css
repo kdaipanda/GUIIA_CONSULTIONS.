@@ -108,6 +108,20 @@
   color: var(--clinic-dash-blue);
 }
 
+.clinic-dashboard-page.clinic-page-guiaa .clinic-dashboard-quick-btn--accent {
+  border-color: rgba(61, 155, 143, 0.35);
+  background: rgba(61, 155, 143, 0.08);
+}
+
+.clinic-dashboard-page.clinic-page-guiaa .clinic-dashboard-quick-btn--accent:hover {
+  border-color: rgba(61, 155, 143, 0.5);
+  background: rgba(61, 155, 143, 0.14);
+}
+
+.clinic-dashboard-page.clinic-page-guiaa .clinic-dashboard-quick-btn--accent svg {
+  color: #3d9b8f;
+}
+
 .clinic-dashboard-kpi-btn:hover {
   border-color: rgba(38, 91, 147, 0.25);
   box-shadow: 0 4px 14px -6px rgba(12, 45, 77, 0.15);

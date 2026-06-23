@@ -386,7 +386,7 @@ export function InventoryPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className={clinicDialogClass("max-w-xl")}>
+        <DialogContent className={clinicDialogClass("max-w-lg")}>
           <DialogHeader className="clinic-dialog-header">
             <DialogTitle>{editing ? "Editar producto" : "Nuevo producto"}</DialogTitle>
             <p className="clinic-dialog-subtitle">
@@ -523,7 +523,7 @@ export function InventoryPage() {
       </Dialog>
 
       <Dialog open={stockOpen} onOpenChange={setStockOpen}>
-        <DialogContent className={clinicDialogClass("max-w-md")}>
+        <DialogContent className={clinicDialogClass("max-w-sm")}>
           <DialogHeader className="clinic-dialog-header">
             <DialogTitle>Movimiento de stock</DialogTitle>
             <p className="clinic-dialog-subtitle">{stockProduct?.name}</p>
@@ -559,7 +559,7 @@ export function InventoryPage() {
       </Dialog>
 
       <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
-        <DialogContent className={clinicDialogClass("max-w-lg")}>
+        <DialogContent className={clinicDialogClass("max-w-md")}>
           <DialogHeader className="clinic-dialog-header">
             <DialogTitle>Historial de movimientos</DialogTitle>
             <p className="clinic-dialog-subtitle">

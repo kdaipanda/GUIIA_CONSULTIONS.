@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, Search, Pencil, Trash2, Users } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Users, Zap } from "lucide-react";
 import "./clinicPageShared.css";
 import {
   ClinicTableSkeleton,
@@ -26,6 +26,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "../../components/ui/dialog";
+import { QuickClientPatientDialog } from "../../components/clinic/QuickClientPatientDialog";
+import { DoctorPlumitas } from "../../components/brand/DoctorPlumitas";
 
 const EMPTY_FORM = { name: "", email: "", phone: "", address: "", notes: "" };
 
@@ -38,6 +40,8 @@ export function ClientsPage() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [showFullForm, setShowFullForm] = useState(false);
+  const [quickDialogOpen, setQuickDialogOpen] = useState(false);
 
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
@@ -60,11 +64,13 @@ export function ClientsPage() {
   const openCreate = () => {
     setEditing(null);
     setForm(EMPTY_FORM);
+    setShowFullForm(false);
     setDialogOpen(true);
   };
 
   const openEdit = (client) => {
     setEditing(client);
+    setShowFullForm(true);
     setForm({
       name: client.name || "",
       email: client.email || "",
@@ -119,9 +125,14 @@ export function ClientsPage() {
           <h1>Dueños</h1>
           <p>Contactos y datos de tutores registrados en tu consultorio.</p>
         </div>
-        <Button type="button" onClick={openCreate}>
-          <Plus size={16} className="mr-1" /> Nuevo dueño
-        </Button>
+        <div className="clinic-header-actions">
+          <Button type="button" variant="secondary" onClick={() => setQuickDialogOpen(true)}>
+            <Zap size={16} className="mr-1" /> Dueño + mascota
+          </Button>
+          <Button type="button" onClick={openCreate}>
+            <Plus size={16} className="mr-1" /> Nuevo dueño
+          </Button>
+        </div>
       </div>
 
       <div className="clinic-toolbar">
@@ -147,7 +158,7 @@ export function ClientsPage() {
         <ClinicTableSkeleton rows={6} cols={4} />
       ) : clients.length === 0 ? (
         <ClinicEmptyState
-          icon={Users}
+          mascot={<DoctorPlumitas size="sm" badge />}
           title="Sin dueños registrados"
           description="Agrega tutores para vincular mascotas, consultas y ventas."
           actionLabel="Registrar primer dueño"
@@ -188,31 +199,46 @@ export function ClientsPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className={clinicDialogClass("max-w-lg")}>
+        <DialogContent className={clinicDialogClass("max-w-md")}>
           <DialogHeader>
             <DialogTitle>{editing ? "Editar dueño" : "Nuevo dueño"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSave} className="clinic-form">
-            <div className="form-group">
-              <Label htmlFor="client-name">Nombre *</Label>
-              <Input id="client-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+            <div className="clinic-form-grid-2">
+              <div className="form-group">
+                <Label htmlFor="client-name">Nombre *</Label>
+                <Input id="client-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required autoFocus />
+              </div>
+              <div className="form-group">
+                <Label htmlFor="client-phone">Teléfono</Label>
+                <Input id="client-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              </div>
             </div>
-            <div className="form-group">
-              <Label htmlFor="client-phone">Teléfono</Label>
-              <Input id="client-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-            </div>
-            <div className="form-group">
-              <Label htmlFor="client-email">Email</Label>
-              <Input id="client-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            </div>
-            <div className="form-group">
-              <Label htmlFor="client-address">Dirección</Label>
-              <Input id="client-address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
-            </div>
-            <div className="form-group">
-              <Label htmlFor="client-notes">Notas</Label>
-              <Textarea id="client-notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} />
-            </div>
+            {!editing && !showFullForm && (
+              <button
+                type="button"
+                className="clinic-link-btn"
+                onClick={() => setShowFullForm(true)}
+              >
+                + Email, dirección y notas
+              </button>
+            )}
+            {(editing || showFullForm) && (
+              <>
+                <div className="form-group">
+                  <Label htmlFor="client-email">Email</Label>
+                  <Input id="client-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <Label htmlFor="client-address">Dirección</Label>
+                  <Input id="client-address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <Label htmlFor="client-notes">Notas</Label>
+                  <Textarea id="client-notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} />
+                </div>
+              </>
+            )}
             <DialogFooter>
               <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>Cancelar</Button>
               <Button type="submit" disabled={saving}>{saving ? "Guardando..." : "Guardar"}</Button>
@@ -220,6 +246,13 @@ export function ClientsPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <QuickClientPatientDialog
+        open={quickDialogOpen}
+        onOpenChange={setQuickDialogOpen}
+        veterinarianId={veterinarian?.id}
+        onSuccess={load}
+      />
     </div>
   );
 }

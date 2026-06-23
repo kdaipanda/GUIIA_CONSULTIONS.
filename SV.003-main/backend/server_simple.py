@@ -44,7 +44,11 @@ from membership_catalog import (
     MEMBERSHIP_INFO_ITEMS,
     MEMBERSHIP_PACKAGES,
 )
-from membership_access import filter_categories_for_plan, validate_consultation_category
+from membership_access import (
+    filter_categories_for_plan,
+    require_feature_for_profile,
+    validate_consultation_category,
+)
 from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from starlette.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -2777,20 +2781,119 @@ async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(N
 
 class ImageInterpretRequest(BaseModel):
     veterinarian_id: str
-    image_base64: Optional[str] = Field(default=None)  # Opcional: puede ser None si solo se usan datos pegados
-    image_type: str = "general"
+    image_base64: Optional[str] = Field(default=None)
+    image_type: str = "blood_test"
     patient_name: Optional[str] = Field(default=None)
     patient_id: Optional[str] = Field(default=None)
     consultation_id: Optional[str] = Field(default=None)
     additional_context: Optional[str] = Field(default=None)
-    pasted_study_data: Optional[str] = Field(default=None)  # Datos de estudio pegados por el usuario
+    pasted_study_data: Optional[str] = Field(default=None)
+
+
+def _strip_data_url_base64(value: str) -> str:
+    value = (value or "").strip()
+    if "," in value:
+        return value.split(",", 1)[1]
+    return value
+
+
+def _lab_analysis_prompt(
+    image_type: str,
+    patient_name: Optional[str],
+    additional_context: Optional[str],
+    pasted: Optional[str],
+) -> str:
+    type_descriptions = {
+        "xray": "imagen médica/radiografía",
+        "blood_test": "análisis de sangre/hemograma y panel bioquímico",
+        "urinalysis": "urianálisis/examen de orina",
+        "pdf_report": "reporte de laboratorio en PDF",
+        "general": "estudio de laboratorio veterinario",
+    }
+    desc = type_descriptions.get(image_type, type_descriptions["general"])
+    parts = [
+        f"Analiza este {desc} de laboratorio veterinario.",
+        "",
+        "Estructura tu respuesta con estas secciones:",
+        "**HALLAZGOS PRINCIPALES:**",
+        "**ANÁLISIS DETALLADO:**",
+        "**RECOMENDACIONES:**",
+    ]
+    if patient_name:
+        parts.insert(1, f"Paciente: {patient_name}")
+    if additional_context and str(additional_context).strip():
+        parts.append(f"\nContexto adicional del veterinario: {additional_context.strip()}")
+    if pasted and str(pasted).strip():
+        parts.append(f"\n--- DATOS DEL ESTUDIO (texto proporcionado) ---\n{pasted.strip()}")
+    return "\n".join(parts)
+
+
+def _build_lab_vision_content_blocks(
+    image_base64: str,
+    image_type: str,
+    prompt_text: str,
+) -> List[Dict[str, Any]]:
+    blocks: List[Dict[str, Any]] = [{"type": "text", "text": prompt_text}]
+    raw = _strip_data_url_base64(image_base64)
+    is_pdf = image_type == "pdf_report" or raw.startswith("JVBERi")
+
+    if is_pdf:
+        try:
+            import fitz
+        except ImportError as exc:
+            raise HTTPException(
+                status_code=503,
+                detail="El servidor no puede leer PDFs de laboratorio (falta PyMuPDF).",
+            ) from exc
+        pdf_bytes = base64.b64decode(raw)
+        doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+        total = len(doc)
+        max_pages = min(total, 5)
+        if total > max_pages:
+            blocks[0]["text"] = (
+                f"NOTA: El PDF tiene {total} páginas; se analizan las primeras {max_pages}.\n\n"
+                + blocks[0]["text"]
+            )
+        for page_num in range(max_pages):
+            page = doc[page_num]
+            pix = page.get_pixmap(matrix=fitz.Matrix(150 / 72, 150 / 72))
+            img_b64 = base64.b64encode(pix.tobytes("png")).decode("utf-8")
+            blocks.append(
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/png",
+                        "data": img_b64,
+                    },
+                }
+            )
+        doc.close()
+    else:
+        media_type = "image/jpeg"
+        if raw.startswith("iVBOR"):
+            media_type = "image/png"
+        elif raw.startswith("R0lGOD"):
+            media_type = "image/gif"
+        elif raw.startswith("UklGR"):
+            media_type = "image/webp"
+        blocks.append(
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": media_type,
+                    "data": raw,
+                },
+            }
+        )
+    return blocks
 
 
 @app.post("/api/medical-images/interpret")
 async def interpret_medical_image(request: ImageInterpretRequest):
-    """Interpreta imagen médica usando Claude Vision y persiste en Supabase."""
+    """Interpreta estudios de laboratorio (PDF, imagen o texto) — Premium."""
 
-    # Validar perfil en Supabase
     vet_profile, err_profile = get_profile(request.veterinarian_id)
     if err_profile:
         raise HTTPException(status_code=500, detail=f"Error perfil: {err_profile}")
@@ -2810,75 +2913,42 @@ async def interpret_medical_image(request: ImageInterpretRequest):
         else:
             raise HTTPException(status_code=404, detail="Veterinario no encontrado")
 
-    # Verificar si el usuario tiene consultas ilimitadas
     user_email = vet_profile.get("email", "")
     has_unlimited = has_unlimited_consultations(user_email) if user_email else False
-    membership_type = (vet_profile.get("membership_type") or "basic").lower()
-    
-    # Si tiene consultas ilimitadas, tratarlo como premium
-    if has_unlimited:
-        membership_type = "premium"
-    
-    if membership_type != "premium":
-        raise HTTPException(status_code=403, detail="Función exclusiva para miembros Premium")
+    require_feature_for_profile(vet_profile, "medical_images", has_unlimited=has_unlimited)
+
+    has_file = bool(request.image_base64 and str(request.image_base64).strip())
+    has_text = bool(request.pasted_study_data and str(request.pasted_study_data).strip())
+    if not has_file and not has_text:
+        raise HTTPException(
+            status_code=400,
+            detail="Sube un PDF/imagen del laboratorio o pega los resultados del estudio.",
+        )
 
     image_id = str(uuid.uuid4())
-    
-    # Verificar que no sea un PDF
-    if request.image_type == "pdf_report" or (request.image_base64 and request.image_base64.startswith("JVBERi")):
-        raise HTTPException(
-            status_code=400, 
-            detail="No se pueden analizar archivos PDF directamente. Por favor sube una foto o captura de pantalla del documento (JPG, PNG)."
-        )
-    
-    # Preparar el análisis con Claude Vision
-    type_descriptions = {
-        "xray": "imagen médica/radiografía",
-        "blood_test": "análisis de sangre/hemograma",
-        "urinalysis": "urianálisis/examen de orina",
-        "general": "imagen médica veterinaria"
-    }
-    
-    image_type_desc = type_descriptions.get(request.image_type, "imagen médica")
-    
-    # El system prompt se toma exclusivamente desde instrucciones_veterinarias.txt
+    stored_image_type = request.image_type
+    if has_file:
+        raw = _strip_data_url_base64(request.image_base64)
+        if raw.startswith("JVBERi"):
+            stored_image_type = "pdf_report"
 
-    # Construir mensaje para Claude - solo con datos pegados (sin imágenes)
-    user_message = f"Analiza este {image_type_desc}."
-    if request.patient_name:
-        user_message += f"\n\nPaciente: {request.patient_name}"
-    if request.additional_context:
-        user_message += f"\n\nContexto adicional: {request.additional_context}"
-    
-    # Los datos pegados son obligatorios (ya no se usan imágenes)
-    if not request.pasted_study_data or not request.pasted_study_data.strip():
-        raise HTTPException(status_code=400, detail="Se requiere pegar los datos del estudio para el análisis")
-    
-    user_message += f"\n\n--- DATOS DEL ESTUDIO (copiados por el usuario) ---\n{request.pasted_study_data}"
+    prompt_text = _lab_analysis_prompt(
+        stored_image_type,
+        request.patient_name,
+        request.additional_context,
+        request.pasted_study_data if has_text else None,
+    )
 
     try:
-        print(f"[DEBUG] Iniciando análisis de {image_type_desc} tipo: {request.image_type}")
-        print(f"[DEBUG] API Key presente: {bool(ANTHROPIC_API_KEY)}")
-        print(f"[DEBUG] Modelo: {ANTHROPIC_MODEL}")
-        print(f"[DEBUG] Modo: Solo texto (datos pegados) - sin imágenes")
-        print(f"[DEBUG] Tiene datos pegados: {bool(request.pasted_study_data)}")
-        if request.pasted_study_data:
-            print(f"[DEBUG] Longitud de datos pegados: {len(request.pasted_study_data)} caracteres")
-            print(f"[DEBUG] Primeros 200 caracteres de datos pegados:")
-            print(f"[DEBUG] {request.pasted_study_data[:200]}...")
-        print(f"[DEBUG] Mensaje de usuario (primeros 300 caracteres):")
-        print(f"[DEBUG] {user_message[:300]}...")
-        
-        # Verificar que las instrucciones se cargaron
-        instructions = _load_system_instructions()
-        print(f"[DEBUG] Instrucciones cargadas: {bool(instructions)}")
-        if instructions:
-            print(f"[DEBUG] Longitud de instrucciones: {len(instructions)} caracteres")
+        if has_file:
+            content_blocks = _build_lab_vision_content_blocks(
+                request.image_base64,
+                stored_image_type,
+                prompt_text,
+            )
+        else:
+            content_blocks = [{"type": "text", "text": prompt_text}]
 
-        # Solo usar texto - no se procesan imágenes, solo datos pegados
-        content_blocks = [{"type": "text", "text": user_message}]
-
-        print(f"[DEBUG] Enviando solicitud a Claude...")
         analysis_text = await send_llm_message(content_blocks)
 
         print(f"[DEBUG] ✅ Respuesta recibida de Claude: {len(analysis_text)} caracteres")
@@ -2949,7 +3019,7 @@ async def interpret_medical_image(request: ImageInterpretRequest):
         "id": image_id,
         "user_id": request.veterinarian_id,
         "consultation_id": valid_consultation_id,
-        "image_type": request.image_type,
+        "image_type": stored_image_type,
         "patient_name": request.patient_name,
         "patient_id": request.patient_id,
         "image_url": public_url,
@@ -2981,7 +3051,7 @@ async def interpret_medical_image(request: ImageInterpretRequest):
             linked_images.append(
                 {
                     "image_id": image_id,
-                    "image_type": request.image_type,
+                    "image_type": stored_image_type,
                     "patient_name": request.patient_name,
                     "created_at": created_at,
                     "image_url": public_url,
@@ -2997,10 +3067,20 @@ async def interpret_medical_image(request: ImageInterpretRequest):
 
 @app.get("/api/medical-images/history")
 async def get_image_history(x_veterinarian_id: str = Header(None), limit: int = 20):
-    """Historial de imágenes desde Supabase"""
+    """Historial de interpretaciones de laboratorio — Premium."""
 
     if not x_veterinarian_id:
         raise HTTPException(status_code=401, detail="No autenticado")
+
+    vet_profile, err_profile = get_profile(x_veterinarian_id)
+    if err_profile:
+        raise HTTPException(status_code=500, detail=f"Error perfil: {err_profile}")
+    if not vet_profile:
+        raise HTTPException(status_code=404, detail="Veterinario no encontrado")
+
+    user_email = vet_profile.get("email", "")
+    has_unlimited = has_unlimited_consultations(user_email) if user_email else False
+    require_feature_for_profile(vet_profile, "medical_images", has_unlimited=has_unlimited)
 
     rows, err = list_medical_images(x_veterinarian_id, limit=limit)
     if err:

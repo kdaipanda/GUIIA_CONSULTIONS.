@@ -27,7 +27,7 @@ export const FEATURE_UPGRADE_MESSAGES = {
   multiespecies: "Las consultas multiespecie requieren membresía Profesional o Premium.",
   expert_mode: "Manejo Experto está disponible solo con membresía Premium.",
   advanced_analysis: "La síntesis clínica CDS L5 requiere membresía Premium.",
-  medical_images: "Esta función requiere membresía Premium.",
+  medical_images: "La interpretación de laboratorio (PDF y estudios) requiere membresía Premium.",
 };
 
 export function getEffectivePlan(veterinarian, { platformAdmin = false } = {}) {
