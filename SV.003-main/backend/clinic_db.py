@@ -422,13 +422,14 @@ def delete_appointment(appointment_id: str, organization_id: str) -> Optional[st
 
 
 def list_consultations_for_patient(
-    patient_id: str, limit: int = 50
+    patient_id: str, organization_id: str, limit: int = 50
 ) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     try:
         resp = (
             _table("consultations")
             .select("*")
             .eq("patient_id", patient_id)
+            .eq("organization_id", organization_id)
             .order("created_at", desc=True)
             .limit(limit)
             .execute()
@@ -439,46 +440,29 @@ def list_consultations_for_patient(
 
 
 def list_medical_images_for_patient(
-    patient_id: str, patient_name: Optional[str] = None, limit: int = 30
+    patient_id: str, organization_id: str, limit: int = 30
 ) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     try:
+        members, err = list_members(organization_id)
+        if err:
+            return ([], err)
+        profile_ids = [m["profile_id"] for m in members if m.get("profile_id")]
+        if not profile_ids:
+            return ([], None)
         resp = (
             _table("medical_images")
             .select("*")
             .eq("patient_id", patient_id)
+            .in_("user_id", profile_ids)
             .order("created_at", desc=True)
             .limit(limit)
             .execute()
         )
-        rows = resp.data or []
-        if not rows and patient_name:
-            resp2 = (
-                _table("medical_images")
-                .select("*")
-                .ilike("patient_name", patient_name.strip())
-                .order("created_at", desc=True)
-                .limit(limit)
-                .execute()
-            )
-            rows = resp2.data or []
-        return (rows, None)
+        return (resp.data or [], None)
     except Exception as exc:  # noqa: BLE001
         err = str(exc)
         if "patient_id" in err.lower() or "PGRST204" in err:
-            if not patient_name:
-                return ([], None)
-            try:
-                resp = (
-                    _table("medical_images")
-                    .select("*")
-                    .ilike("patient_name", patient_name.strip())
-                    .order("created_at", desc=True)
-                    .limit(limit)
-                    .execute()
-                )
-                return (resp.data or [], None)
-            except Exception as exc2:  # noqa: BLE001
-                return ([], str(exc2))
+            return ([], None)
         return ([], err)
 
 

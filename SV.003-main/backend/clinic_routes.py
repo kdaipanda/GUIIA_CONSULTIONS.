@@ -450,9 +450,11 @@ async def api_get_patient(patient_id: str, x_veterinarian_id: str = Header(None)
         raise HTTPException(status_code=500, detail=err)
     if not patient:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
-    consultations, _ = clinic_db.list_consultations_for_patient(patient_id)
+    consultations, _ = clinic_db.list_consultations_for_patient(
+        patient_id, ctx["organization_id"]
+    )
     medical_images, _ = clinic_db.list_medical_images_for_patient(
-        patient_id, patient_name=patient.get("name")
+        patient_id, ctx["organization_id"]
     )
     return {
         "patient": patient,
