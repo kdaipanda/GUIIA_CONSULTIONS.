@@ -34,7 +34,7 @@ import { LandingVetAnimations } from "./landing/LandingVetAnimations";
 
 export function LandingPage({ setView }) {
   return (
-    <div className="landing-shell min-h-screen p-3 pb-[4.75rem] antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
+    <div className="landing-shell landing-shell--page min-h-screen p-3 pb-[4.75rem] antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
       <LandingSeo />
 
       <div className="landing-page-card mx-auto max-w-[82rem]">

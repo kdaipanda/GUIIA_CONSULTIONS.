@@ -518,44 +518,50 @@
   animation-delay: 0.19s;
 }
 
-/* —— CTA sticky móvil —— */
+/* —— CTA sticky móvil (solo < 1024px) —— */
 .landing-sticky-cta {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 60;
-  display: flex;
-  gap: 0.5rem;
-  padding: 0.65rem 0.85rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid rgba(12, 45, 77, 0.1);
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 -8px 28px -12px rgba(12, 45, 77, 0.2);
+  display: none;
 }
 
-.landing-sticky-cta-btn {
-  flex: 1;
-  min-height: 2.75rem;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #3d9b8f, #2f857a);
-  color: #fff;
-  font-size: 0.875rem;
-  font-weight: 700;
-  box-shadow: 0 8px 20px -10px rgba(47, 133, 122, 0.5);
-}
+@media (max-width: 1023px) {
+  .landing-sticky-cta {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.65rem 0.85rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid rgba(12, 45, 77, 0.1);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 -8px 28px -12px rgba(12, 45, 77, 0.2);
+  }
 
-.landing-sticky-cta-secondary {
-  flex-shrink: 0;
-  min-height: 2.75rem;
-  padding-inline: 1rem;
-  border-radius: 999px;
-  border: 1px solid rgba(12, 45, 77, 0.12);
-  background: #fff;
-  color: #0c2d4d;
-  font-size: 0.8rem;
-  font-weight: 700;
+  .landing-sticky-cta-btn {
+    flex: 1;
+    min-height: 2.75rem;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #3d9b8f, #2f857a);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 700;
+    box-shadow: 0 8px 20px -10px rgba(47, 133, 122, 0.5);
+  }
+
+  .landing-sticky-cta-secondary {
+    flex-shrink: 0;
+    min-height: 2.75rem;
+    padding-inline: 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(12, 45, 77, 0.12);
+    background: #fff;
+    color: #0c2d4d;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
 }
 
 /* —— Mockup dispositivo —— */
