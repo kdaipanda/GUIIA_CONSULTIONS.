@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import "./styles/guiaaColorSystem.css";
+@import "./styles/liquidGlass.css";
 
 body {
     margin: 0;

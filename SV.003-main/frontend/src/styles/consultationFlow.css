@@ -124,18 +124,14 @@
   display: inline-flex;
   align-items: center;
   padding: 7px 14px;
-  border-radius: 999px;
+  border-radius: var(--liquid-glass-radius-pill);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: #0f766e;
-  background: linear-gradient(
-    135deg,
-    rgba(61, 155, 143, 0.22) 0%,
-    rgba(255, 255, 255, 0.78) 100%
-  );
-  border: 1px solid rgba(61, 155, 143, 0.38);
+  background: var(--liquid-glass-teal-fill);
+  border: 1px solid var(--liquid-glass-teal);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow:
@@ -145,20 +141,12 @@
 
 .category-selector-glass-panel {
   padding: 14px 12px;
-  border-radius: 22px;
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.78) 0%,
-    rgba(232, 244, 252, 0.52) 55%,
-    rgba(255, 255, 255, 0.65) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(20px) saturate(1.15);
-  -webkit-backdrop-filter: blur(20px) saturate(1.15);
-  box-shadow:
-    0 14px 40px -18px rgba(12, 45, 77, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(38, 91, 147, 0.06);
+  border-radius: var(--liquid-glass-radius-lg);
+  background: var(--liquid-glass-bg);
+  border: 1px solid var(--liquid-glass-border-color);
+  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate));
+  box-shadow: var(--liquid-glass-shadow);
 }
 
 .category-grid--liquid {

@@ -20,13 +20,48 @@
   --guiaa-glass-fill: rgba(153, 182, 239, 0.12);
   --guiaa-glass-border: rgba(153, 182, 239, 0.35);
   --guiaa-glass-blur: 12px;
+
+  /* Liquid glass — tokens extendidos */
+  --liquid-glass-bg: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(232, 244, 252, 0.55) 50%,
+    rgba(255, 255, 255, 0.72) 100%
+  );
+  --liquid-glass-bg-strong: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(240, 249, 255, 0.78) 100%
+  );
+  --liquid-glass-border-color: rgba(255, 255, 255, 0.72);
+  --liquid-glass-border-subtle: rgba(38, 91, 147, 0.12);
+  --liquid-glass-blur: 20px;
+  --liquid-glass-saturate: 1.12;
+  --liquid-glass-shadow:
+    0 14px 40px -18px rgba(12, 45, 77, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(38, 91, 147, 0.06);
+  --liquid-glass-shadow-soft:
+    0 8px 24px -12px rgba(12, 45, 77, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  --liquid-glass-radius-lg: 22px;
+  --liquid-glass-radius-md: 16px;
+  --liquid-glass-radius-pill: 999px;
+  --liquid-glass-teal: rgba(61, 155, 143, 0.35);
+  --liquid-glass-teal-fill: linear-gradient(
+    135deg,
+    rgba(61, 155, 143, 0.22) 0%,
+    rgba(255, 255, 255, 0.78) 100%
+  );
 }
 
 .guiaa-glass-panel {
-  background: var(--guiaa-glass-fill);
-  border: 1px solid var(--guiaa-glass-border);
-  backdrop-filter: blur(var(--guiaa-glass-blur));
-  -webkit-backdrop-filter: blur(var(--guiaa-glass-blur));
+  background: var(--liquid-glass-bg, var(--guiaa-glass-fill));
+  border: 1px solid var(--liquid-glass-border-color, var(--guiaa-glass-border));
+  backdrop-filter: blur(var(--liquid-glass-blur, var(--guiaa-glass-blur)));
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur, var(--guiaa-glass-blur)));
+  box-shadow: var(--liquid-glass-shadow-soft, none);
+  border-radius: var(--liquid-glass-radius-md, 16px);
 }
 
 .guiaa-mascot-wrap {
