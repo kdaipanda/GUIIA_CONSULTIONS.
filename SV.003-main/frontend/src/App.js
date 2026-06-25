@@ -218,7 +218,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     {
       id: "medical-images",
       title: "Laboratorio",
-      description: "Interpretar PDF o resultados de laboratorio",
+      description: "Premium · Interpretar PDF o resultados de laboratorio",
       icon: "🔬",
       shortcut: "",
       feature: MEMBERSHIP_FEATURES.medicalImages,
@@ -2015,7 +2015,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
 
 // Dashboard
 const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded = false }) => {
-  const { veterinarian } = useVet();
+  const { veterinarian, platformAdmin } = useVet();
   const [stats, setStats] = useState({ consultations: 0, thisMonth: 0, lastMonth: 0, today: 0 });
   const [recentConsultations, setRecentConsultations] = useState([]);
   const [weeklyActivity, setWeeklyActivity] = useState([]);
@@ -2239,6 +2239,12 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
 
   const vetName = veterinarian?.nombre || "Doctor/a";
   const membershipType = veterinarian?.membership_type?.toLowerCase();
+  const accessOptions = { platformAdmin };
+  const canUseLab = canAccessFeature(
+    veterinarian,
+    MEMBERSHIP_FEATURES.medicalImages,
+    accessOptions,
+  );
 
   const handleBuyConsultations = async (packageId) => {
     if (!veterinarian?.id) return;
@@ -2680,9 +2686,9 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
               <Card
                 role="button"
                 tabIndex={0}
-                className={`action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${embedded ? " clinic-dashboard-quick-btn" : ""}${membershipType !== "premium" ? " premium-locked" : ""}`}
+                className={`action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${embedded ? " clinic-dashboard-quick-btn" : ""}${!canUseLab ? " premium-locked" : ""}`}
                 onClick={() => {
-                  if (membershipType !== "premium") {
+                  if (!canUseLab) {
                     setView("membership");
                     return;
                   }
@@ -2691,7 +2697,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    if (membershipType !== "premium") {
+                    if (!canUseLab) {
                       setView("membership");
                       return;
                     }
@@ -2702,12 +2708,12 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 <div className="action-icon"><FlaskConical /></div>
                 <h3>Laboratorio</h3>
                 <p>
-                  {membershipType === "premium"
+                  {canUseLab
                     ? "Interpretar PDF o resultados de laboratorio"
                     : "Disponible con membresía Premium"}
                 </p>
-                <span className={membershipType === "premium" ? "expert-badge" : "premium-badge"}>
-                  {membershipType === "premium" ? "PDF" : "PREMIUM"}
+                <span className={canUseLab ? "expert-badge" : "premium-badge"}>
+                  {canUseLab ? "PDF" : "PREMIUM"}
                 </span>
               </Card>
 

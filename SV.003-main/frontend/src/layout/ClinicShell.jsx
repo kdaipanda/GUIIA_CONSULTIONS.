@@ -188,9 +188,10 @@ export function ClinicShell({ children, setView }) {
   }, []);
 
   const navItems = useMemo(() => {
-    const items = BASE_NAV_ITEMS.filter((item) => {
-      if (!item.feature) return true;
-      return canAccessFeature(veterinarian, item.feature, { platformAdmin });
+    const items = BASE_NAV_ITEMS.map((item) => {
+      if (!item.feature) return item;
+      const allowed = canAccessFeature(veterinarian, item.feature, { platformAdmin });
+      return { ...item, locked: !allowed };
     });
     if (platformAdmin) {
       items.push({
@@ -274,23 +275,30 @@ export function ClinicShell({ children, setView }) {
             className="clinic-sidebar-nav"
             aria-label="Módulos clínicos (escritorio)"
           >
-            {navItems.map(({ to, label, icon: Icon, view }, index) => (
+            {navItems.map(({ to, label, icon: Icon, view, locked }, index) => (
               <NavLink
                 key={to}
-                to={to}
+                to={locked ? "/app/membresia" : to}
                 style={{
                   ...clinicNavThemeStyle(view),
                   animationDelay: `${index * 0.12}s`,
                 }}
                 className={({ isActive }) =>
-                  `clinic-sidebar-link nav-toned nav-pulse${clinicNavIsHero(view) ? " nav-hero" : ""}${isActive ? " active" : ""}`
+                  `clinic-sidebar-link nav-toned nav-pulse${clinicNavIsHero(view) ? " nav-hero" : ""}${isActive && !locked ? " active" : ""}${locked ? " clinic-sidebar-link--locked" : ""}`
                 }
-                onClick={() => {
+                onClick={(e) => {
+                  if (locked) {
+                    e.preventDefault();
+                    setView?.("membership");
+                    navigate("/app/membresia");
+                    return;
+                  }
                   setView?.(view);
                 }}
               >
                 <Icon size={18} aria-hidden />
                 <span>{label}</span>
+                {locked && <span className="clinic-sidebar-lock-badge">Premium</span>}
                 {view === "admin" && adminSupportOpen > 0 && (
                   <span className="clinic-sidebar-badge">{adminSupportOpen}</span>
                 )}

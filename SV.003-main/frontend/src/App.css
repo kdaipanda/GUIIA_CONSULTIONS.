@@ -11716,6 +11716,27 @@ html {
   animation: clinicNavGlowHero 2.2s ease-in-out infinite;
 }
 
+.clinic-sidebar-link--locked {
+  opacity: 0.72;
+  filter: saturate(0.85);
+}
+
+.clinic-sidebar-link--locked:hover {
+  filter: saturate(0.9) brightness(1.05);
+}
+
+.clinic-sidebar-lock-badge {
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
 @keyframes clinicNavGlow {
   0%,
   100% {

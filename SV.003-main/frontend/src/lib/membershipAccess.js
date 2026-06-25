@@ -49,6 +49,11 @@ export function canAccessFeature(veterinarian, feature, options = {}) {
   return allowedPlans.has(plan);
 }
 
+/** Interpretación de laboratorio (PDF / estudios) — solo Premium. */
+export function canUseMedicalImages(veterinarian, options = {}) {
+  return canAccessFeature(veterinarian, MEMBERSHIP_FEATURES.medicalImages, options);
+}
+
 export function getFeatureUpgradeMessage(feature) {
   return FEATURE_UPGRADE_MESSAGES[feature] || "Tu plan no incluye esta función.";
 }

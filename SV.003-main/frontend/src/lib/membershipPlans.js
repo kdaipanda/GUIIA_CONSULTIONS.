@@ -62,6 +62,7 @@ export const PLAN_FEATURES = {
     ...SHARED_CORE,
     "Inventario, ventas y reportes",
     "Manejo Experto (consulta acelerada)",
+    "Interpretación de laboratorio (PDF y estudios)",
     "Onboarding guiado prioritario",
   ],
 };
@@ -87,6 +88,7 @@ export const PLAN_ANNUAL_FEATURES = {
     ...SHARED_CORE,
     "Inventario, ventas y reportes",
     "Manejo Experto (consulta acelerada)",
+    "Interpretación de laboratorio (PDF y estudios)",
     "Onboarding guiado prioritario",
   ],
 };

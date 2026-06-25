@@ -52,24 +52,31 @@ export function ClinicMobileNavDrawer({
           className="clinic-sidebar-nav"
           aria-label="Módulos clínicos"
         >
-          {navItems.map(({ to, label, icon: Icon, view }, index) => (
+          {navItems.map(({ to, label, icon: Icon, view, locked }, index) => (
             <NavLink
               key={to}
-              to={to}
+              to={locked ? "/app/membresia" : to}
               style={{
                 ...clinicNavThemeStyle(view),
                 animationDelay: `${index * 0.06}s`,
               }}
               className={({ isActive }) =>
-                `clinic-sidebar-link nav-toned nav-pulse${clinicNavIsHero(view) ? " nav-hero" : ""}${isActive ? " active" : ""}`
+                `clinic-sidebar-link nav-toned nav-pulse${clinicNavIsHero(view) ? " nav-hero" : ""}${isActive && !locked ? " active" : ""}${locked ? " clinic-sidebar-link--locked" : ""}`
               }
-              onClick={() => {
+              onClick={(e) => {
+                if (locked) {
+                  e.preventDefault();
+                  setView?.("membership");
+                  close();
+                  return;
+                }
                 setView?.(view);
                 close();
               }}
             >
               <Icon size={18} aria-hidden />
               <span>{label}</span>
+              {locked && <span className="clinic-sidebar-lock-badge">Premium</span>}
               {view === "admin" && adminSupportOpen > 0 && (
                 <span className="clinic-sidebar-badge">{adminSupportOpen}</span>
               )}
