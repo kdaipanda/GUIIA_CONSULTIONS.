@@ -740,6 +740,7 @@ class ConsultationPayloadUpdate(BaseModel):
     category: Optional[str] = None
     form_data: Optional[Dict[str, Any]] = None
     detalle_paciente: Optional[str] = None
+    status: Optional[str] = None
     parametros_vitales: Optional[str] = None
     imagenes_videos: Optional[List[str]] = None
     laboratorio_estudios: Optional[str] = None
@@ -2060,6 +2061,11 @@ async def update_consultation_payload(
         consultation_id,
         {
             "payload": updated_payload,
+            **(
+                {"status": payload.status}
+                if payload.status is not None
+                else {}
+            ),
         },
     )
     if err_upd:
@@ -2261,6 +2267,11 @@ async def set_consultation_rating(
             "rated_at": datetime.now(timezone.utc).isoformat(),
         },
     )
+    if err_upd and "rated_at" in str(err_upd).lower():
+        err_upd = update_consultation(
+            consultation_id,
+            {"rating": int(payload.rating)},
+        )
     if err_upd:
         raise HTTPException(status_code=500, detail=f"Error guardando rating: {err_upd}")
 

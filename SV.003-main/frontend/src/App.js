@@ -22,7 +22,7 @@ import {
   uploadMedicalImageSupabase,
 } from "./lib/supabaseApi";
 import { BACKEND_URL, getBackendUrl } from "./lib/backendUrl";
-import { friendlyFetchError, formatApiErrorDetail } from "./lib/friendlyFetchError";
+import { friendlyFetchError, friendlyDatabaseError } from "./lib/friendlyFetchError";
 import { getAuthHeaders, storeAccessToken } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
 import { applyDocumentTheme, readStoredTheme } from "./lib/themeSync";
@@ -2835,6 +2835,46 @@ const buildConsultationDataFromForm = (formData) => ({
   medicamentos_cual: formData.medicamentos_cual,
 });
 
+const normalizeStringList = (value) => {
+  if (value == null || value === "") return null;
+  if (!Array.isArray(value)) return null;
+  const items = value
+    .map((item) => {
+      if (typeof item === "string") return item.trim();
+      if (item && typeof item === "object") {
+        return String(item.url || item.name || item.path || "").trim();
+      }
+      return item == null ? "" : String(item).trim();
+    })
+    .filter(Boolean);
+  return items.length ? items : null;
+};
+
+const sanitizeConsultationFormData = (formData) => {
+  const clean = {};
+  Object.entries(formData || {}).forEach(([key, value]) => {
+    if (value === undefined) return;
+    if (key === "imagenes_videos") return;
+    if (
+      value === null ||
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+    ) {
+      clean[key] = value;
+      return;
+    }
+    if (Array.isArray(value)) {
+      clean[key] = value.map((item) =>
+        typeof item === "string" ? item : JSON.stringify(item),
+      );
+      return;
+    }
+    clean[key] = String(value);
+  });
+  return clean;
+};
+
 // New Consultation Component
 const NewConsultation = ({
   setView,
@@ -3002,7 +3042,7 @@ const NewConsultation = ({
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorDetail = formatApiErrorDetail(
+      const errorDetail = friendlyDatabaseError(
         errorData.detail,
         `Error del servidor: ${response.status}`,
       );
@@ -3112,7 +3152,7 @@ const NewConsultation = ({
         const { data: errorData, text } = await safeReadJson(response);
         console.error('Error response:', response.status, errorData || text);
         notifyError(
-          formatApiErrorDetail(
+          friendlyDatabaseError(
             errorData?.detail,
             text || `Error cargando la consulta (${response.status})`,
           ),
@@ -3243,14 +3283,14 @@ const NewConsultation = ({
             headers: getAuthHeaders(veterinarian.id),
             body: JSON.stringify({
               category: selectedCategory,
-              form_data: formData,
+              form_data: sanitizeConsultationFormData(formData),
             }),
           },
         );
         if (!resp.ok) {
           const { data: errorData, text } = await safeReadJson(resp);
           throw new Error(
-            formatApiErrorDetail(
+            friendlyDatabaseError(
               errorData?.detail,
               text || `Error actualizando consulta: ${resp.status}`,
             ),
@@ -3296,11 +3336,12 @@ const NewConsultation = ({
 
       const payloadUpdates = {
         category: selectedCategory,
-        form_data: formData,
+        form_data: sanitizeConsultationFormData(formData),
         detalle_paciente: formData.detalle_paciente,
+        status: "in_progress",
         // Campos adicionales del paso 2 (observaciones clínicas)
         parametros_vitales: formData.parametros_vitales || null,
-        imagenes_videos: formData.imagenes_videos || null,
+        imagenes_videos: normalizeStringList(formData.imagenes_videos),
         laboratorio_estudios: formData.laboratorio_estudios || null,
         ambiente_manejo: formData.ambiente_manejo || null,
         notas_adicionales: formData.notas_adicionales || null,
@@ -3314,7 +3355,7 @@ const NewConsultation = ({
       if (!resp.ok) {
         const { data: errorData, text } = await safeReadJson(resp);
         throw new Error(
-          formatApiErrorDetail(
+          friendlyDatabaseError(
             errorData?.detail,
             text || `Error actualizando consulta: ${resp.status}`,
           ),
@@ -3343,15 +3384,24 @@ const NewConsultation = ({
     notifyError("");
 
     try {
-      const { error } = await supabase
-        .from("consultations")
-        .update({ rating: value, rated_at: new Date().toISOString() })
-        .eq("id", consultationId);
-      if (error) throw error;
+      const response = await fetch(
+        `${BACKEND_URL}/api/consultations/${consultationId}/rating`,
+        {
+          method: "PUT",
+          headers: getAuthHeaders(veterinarian?.id),
+          body: JSON.stringify({ rating: value }),
+        },
+      );
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          friendlyDatabaseError(errorData.detail, "No se pudo guardar la calificación"),
+        );
+      }
 
       setRatingSaved(true);
     } catch (err) {
-      notifyError(err.message);
+      notifyError(err.message || "No se pudo guardar la calificación");
       setRatingSaved(false);
     } finally {
       setSavingRating(false);
@@ -3393,7 +3443,7 @@ const NewConsultation = ({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(formatApiErrorDetail(errorData.detail, "Error en análisis"));
+        throw new Error(friendlyDatabaseError(errorData.detail, "Error en análisis"));
       }
 
       const result = await response.json();

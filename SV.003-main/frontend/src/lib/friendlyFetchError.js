@@ -1,11 +1,58 @@
 /**
  * Convierte `detail` de FastAPI (string, array de validación u objeto) en texto legible.
  */
+function parseLooseErrorObject(detail) {
+  if (detail == null || typeof detail !== "string") return detail;
+  const trimmed = detail.trim();
+  if (!trimmed.startsWith("{") && !trimmed.includes("message")) return detail;
+  try {
+    const jsonish = trimmed
+      .replace(/'/g, '"')
+      .replace(/\bNone\b/g, "null")
+      .replace(/\bTrue\b/g, "true")
+      .replace(/\bFalse\b/g, "false");
+    return JSON.parse(jsonish);
+  } catch {
+    return detail;
+  }
+}
+
+/**
+ * Mensaje en español para errores típicos de Supabase/PostgreSQL.
+ */
+export function friendlyDatabaseError(detail, fallback = "Error al guardar en la base de datos") {
+  const normalized = parseLooseErrorObject(detail);
+  const text = formatApiErrorDetail(normalized, fallback).toLowerCase();
+
+  if (
+    text.includes("pgrst204") ||
+    (text.includes("column") && text.includes("does not exist")) ||
+    text.includes("schema cache")
+  ) {
+    return "Falta una actualización en la base de datos (columna no encontrada). Avísanos para aplicar la migración en Supabase.";
+  }
+  if (text.includes("permission denied") || text.includes("row-level security") || text.includes("rls")) {
+    return "No se pudo guardar: permiso denegado. Cierra sesión, vuelve a entrar e intenta de nuevo.";
+  }
+  if (text.includes("invalid input syntax for type uuid")) {
+    return "Identificador de consulta inválido. Abre la consulta desde el historial o crea una nueva.";
+  }
+  if (text.includes("duplicate key") || text.includes("already exists")) {
+    return "Este registro ya existe. Recarga la página e intenta de nuevo.";
+  }
+  if (text.includes("connection") || text.includes("timeout") || text.includes("could not connect")) {
+    return "No se pudo conectar con la base de datos. Intenta de nuevo en unos segundos.";
+  }
+
+  return formatApiErrorDetail(normalized, fallback);
+}
+
 export function formatApiErrorDetail(detail, fallback = "Error del servidor") {
-  if (detail == null || detail === "") return fallback;
-  if (typeof detail === "string") return detail;
-  if (Array.isArray(detail)) {
-    const parts = detail
+  const parsed = parseLooseErrorObject(detail);
+  if (parsed == null || parsed === "") return fallback;
+  if (typeof parsed === "string") return parsed;
+  if (Array.isArray(parsed)) {
+    const parts = parsed
       .map((item) => {
         if (typeof item === "string") return item;
         if (item && typeof item === "object") {
@@ -19,16 +66,18 @@ export function formatApiErrorDetail(detail, fallback = "Error del servidor") {
       .filter(Boolean);
     return parts.length ? parts.join(" · ") : fallback;
   }
-  if (typeof detail === "object") {
-    if (typeof detail.message === "string") return detail.message;
-    if (typeof detail.msg === "string") return detail.msg;
+  if (typeof parsed === "object") {
+    if (typeof parsed.message === "string") return parsed.message;
+    if (typeof parsed.msg === "string") return parsed.msg;
+    if (typeof parsed.details === "string" && parsed.details) return parsed.details;
+    if (typeof parsed.hint === "string" && parsed.hint) return parsed.hint;
     try {
-      return JSON.stringify(detail);
+      return JSON.stringify(parsed);
     } catch {
       return fallback;
     }
   }
-  return String(detail);
+  return String(parsed);
 }
 
 /**
