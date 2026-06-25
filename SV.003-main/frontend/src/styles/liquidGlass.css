@@ -33,8 +33,11 @@
 
 .consultation-page {
   background:
-    radial-gradient(ellipse 120% 80% at 0% 0%, rgba(61, 155, 143, 0.08), transparent 50%),
-    radial-gradient(ellipse 90% 60% at 100% 10%, rgba(38, 91, 147, 0.07), transparent 45%),
+    radial-gradient(ellipse 70% 55% at 8% 12%, rgba(240, 138, 93, 0.09), transparent 52%),
+    radial-gradient(ellipse 65% 50% at 92% 18%, rgba(155, 110, 243, 0.1), transparent 48%),
+    radial-gradient(ellipse 120% 80% at 0% 0%, var(--liquid-glass-teal-wash), transparent 50%),
+    radial-gradient(ellipse 90% 60% at 100% 10%, var(--liquid-glass-blue-wash), transparent 45%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(126, 192, 222, 0.08), transparent 55%),
     linear-gradient(180deg, #f4f9fc 0%, #eef4f9 100%);
 }
 
@@ -171,11 +174,40 @@
 /* —— Dashboard —— */
 
 .action-card {
-  background: var(--liquid-glass-bg) !important;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.86) 0%,
+    rgba(232, 244, 252, 0.55) 55%,
+    rgba(255, 255, 255, 0.8) 100%
+  ) !important;
   border: 1px solid var(--liquid-glass-border-color) !important;
-  backdrop-filter: blur(14px) saturate(1.08);
-  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  backdrop-filter: blur(14px) saturate(1.12);
+  -webkit-backdrop-filter: blur(14px) saturate(1.12);
   box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+.action-card:nth-child(3n + 1) {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(224, 247, 244, 0.58) 100%
+  ) !important;
+}
+
+.action-card:nth-child(3n + 2) {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(237, 233, 254, 0.52) 100%
+  ) !important;
+}
+
+.action-card:nth-child(3n) {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(255, 237, 224, 0.5) 100%
+  ) !important;
 }
 
 .action-card:hover {
@@ -286,17 +318,81 @@
   backdrop-filter: blur(8px);
 }
 
-/* —— Landing cards (refuerzo) —— */
+/* —— Landing cards (vidrio + tinte de color) —— */
 
 .landing-card,
 .landing-how-step,
-.landing-clinical-step,
-.landing-colleague-card {
-  background: var(--liquid-glass-bg);
+.landing-clinical-step {
+  background: linear-gradient(
+    148deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(232, 244, 252, 0.62) 45%,
+    rgba(255, 255, 255, 0.78) 100%
+  );
   border: 1px solid var(--liquid-glass-border-color);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
   box-shadow: var(--liquid-glass-shadow-soft);
+}
+
+.landing-card-featured,
+.landing-pricing-featured {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(224, 242, 254, 0.72) 50%,
+    rgba(232, 244, 252, 0.85) 100%
+  );
+  border-color: rgba(38, 91, 147, 0.22);
+  box-shadow:
+    0 12px 36px -14px rgba(38, 91, 147, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.landing-stat-panel,
+.landing-trust-banner {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(232, 244, 252, 0.58) 100%
+  );
+  border: 1px solid var(--liquid-glass-border-color);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: var(--liquid-glass-shadow-soft);
+}
+
+.category-selector-glass-wrap {
+  position: relative;
+  isolation: isolate;
+}
+
+.category-selector-glass-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -12% -4% -8%;
+  z-index: -1;
+  border-radius: var(--liquid-glass-radius-lg);
+  background:
+    radial-gradient(ellipse 45% 55% at 12% 40%, rgba(61, 155, 143, 0.2), transparent 68%),
+    radial-gradient(ellipse 40% 50% at 88% 30%, rgba(155, 110, 243, 0.16), transparent 65%),
+    radial-gradient(ellipse 35% 45% at 55% 85%, rgba(240, 138, 93, 0.12), transparent 62%);
+  pointer-events: none;
+}
+
+.category-selector-glass-panel {
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.78) 0%,
+    rgba(232, 244, 252, 0.52) 50%,
+    rgba(255, 255, 255, 0.7) 100%
+  ) !important;
+}
+
+/* Tarjetas colegas: color propio en landingColleaguesBento.css — solo refuerzo glass */
+.landing-colleague-card {
+  backdrop-filter: blur(22px) saturate(1.38);
+  -webkit-backdrop-filter: blur(22px) saturate(1.38);
 }
 
 /* —— Modo oscuro —— */

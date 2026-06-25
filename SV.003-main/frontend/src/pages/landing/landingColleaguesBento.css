@@ -1,7 +1,28 @@
-/* Bento "Lo que dicen los colegas" — estilo PetPal adaptado a MVZ */
+/* Bento "Lo que dicen los colegas" — liquid glass con acentos de color */
 
 .landing-colleagues-section {
+  position: relative;
   overflow: hidden;
+  isolation: isolate;
+}
+
+.landing-colleagues-section::before {
+  content: "";
+  position: absolute;
+  inset: -8% -12%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 42% 48% at 6% 28%, rgba(240, 138, 93, 0.24), transparent 68%),
+    radial-gradient(ellipse 38% 44% at 94% 18%, rgba(168, 148, 212, 0.22), transparent 65%),
+    radial-gradient(ellipse 48% 42% at 48% 92%, rgba(126, 192, 222, 0.2), transparent 70%),
+    radial-gradient(ellipse 32% 38% at 72% 52%, rgba(240, 183, 106, 0.18), transparent 62%),
+    radial-gradient(ellipse 28% 34% at 22% 78%, rgba(243, 166, 184, 0.16), transparent 60%);
+}
+
+.landing-colleagues-section > div {
+  position: relative;
+  z-index: 1;
 }
 
 .landing-colleagues-head {
@@ -70,35 +91,102 @@
   color: #fff;
   scroll-snap-align: start;
   isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(22px) saturate(1.38);
+  -webkit-backdrop-filter: blur(22px) saturate(1.38);
+  box-shadow:
+    0 14px 36px -14px rgba(12, 45, 77, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
+    inset 0 -1px 0 rgba(12, 45, 77, 0.08);
+}
+
+.landing-colleague-card--coral {
+  background: linear-gradient(
+    148deg,
+    rgba(240, 138, 93, 0.94) 0%,
+    rgba(232, 111, 66, 0.86) 52%,
+    rgba(255, 175, 135, 0.78) 100%
+  );
+  border-color: rgba(255, 220, 195, 0.55);
+  box-shadow:
+    0 16px 40px -14px rgba(232, 111, 66, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -1px 0 rgba(180, 70, 40, 0.18);
+}
+
+.landing-colleague-card--rose {
+  background: linear-gradient(
+    148deg,
+    rgba(243, 166, 184, 0.94) 0%,
+    rgba(232, 137, 159, 0.86) 52%,
+    rgba(255, 200, 215, 0.78) 100%
+  );
+  border-color: rgba(255, 225, 232, 0.58);
+  box-shadow:
+    0 16px 40px -14px rgba(232, 137, 159, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -1px 0 rgba(180, 90, 115, 0.16);
+}
+
+.landing-colleague-card--sky {
+  background: linear-gradient(
+    148deg,
+    rgba(126, 192, 222, 0.94) 0%,
+    rgba(90, 168, 204, 0.86) 52%,
+    rgba(175, 220, 240, 0.78) 100%
+  );
+  border-color: rgba(210, 238, 252, 0.58);
+  box-shadow:
+    0 16px 40px -14px rgba(90, 168, 204, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -1px 0 rgba(50, 120, 155, 0.16);
+}
+
+.landing-colleague-card--amber {
+  background: linear-gradient(
+    148deg,
+    rgba(240, 183, 106, 0.94) 0%,
+    rgba(232, 154, 69, 0.86) 52%,
+    rgba(255, 215, 160, 0.78) 100%
+  );
+  border-color: rgba(255, 230, 195, 0.58);
+  box-shadow:
+    0 16px 40px -14px rgba(232, 154, 69, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -1px 0 rgba(170, 110, 40, 0.16);
+}
+
+.landing-colleague-card--violet {
+  background: linear-gradient(
+    148deg,
+    rgba(168, 148, 212, 0.94) 0%,
+    rgba(143, 120, 192, 0.86) 52%,
+    rgba(200, 185, 235, 0.78) 100%
+  );
+  border-color: rgba(225, 215, 248, 0.58);
+  box-shadow:
+    0 16px 40px -14px rgba(143, 120, 192, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -1px 0 rgba(95, 75, 145, 0.16);
+}
+
+.landing-colleague-card--slate {
+  background: linear-gradient(
+    148deg,
+    rgba(154, 163, 184, 0.92) 0%,
+    rgba(127, 138, 163, 0.84) 52%,
+    rgba(190, 198, 215, 0.76) 100%
+  );
+  border-color: rgba(230, 235, 245, 0.55);
+  box-shadow:
+    0 16px 40px -14px rgba(100, 115, 140, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(70, 85, 110, 0.14);
 }
 
 .landing-colleague-card-top {
   position: relative;
   z-index: 2;
-}
-
-.landing-colleague-card--coral {
-  background: linear-gradient(145deg, #f08a5d 0%, #e86f42 100%);
-}
-
-.landing-colleague-card--rose {
-  background: linear-gradient(145deg, #f3a6b8 0%, #e8899f 100%);
-}
-
-.landing-colleague-card--sky {
-  background: linear-gradient(145deg, #7ec0de 0%, #5aa8cc 100%);
-}
-
-.landing-colleague-card--amber {
-  background: linear-gradient(145deg, #f0b76a 0%, #e89a45 100%);
-}
-
-.landing-colleague-card--violet {
-  background: linear-gradient(145deg, #a894d4 0%, #8f78c0 100%);
-}
-
-.landing-colleague-card--slate {
-  background: linear-gradient(145deg, #9aa3b8 0%, #7f8aa3 100%);
 }
 
 .landing-colleague-name {
@@ -124,11 +212,14 @@
 .landing-colleague-tags li {
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.26);
+  border: 1px solid rgba(255, 255, 255, 0.48);
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(10px) saturate(1.25);
+  -webkit-backdrop-filter: blur(10px) saturate(1.25);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 
 .landing-colleague-quote {
@@ -252,7 +343,14 @@
   width: 55%;
   height: 55%;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 70%);
+}
+
+.landing-colleagues-disclaimer {
+  margin-top: 1.25rem;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: #94a3b8;
 }
 
 @media (max-width: 899px) {

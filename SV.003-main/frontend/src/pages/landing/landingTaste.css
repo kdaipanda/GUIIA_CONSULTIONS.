@@ -329,7 +329,26 @@
 }
 
 .landing-species-glass-section {
+  position: relative;
+  isolation: isolate;
   background: linear-gradient(180deg, rgba(248, 252, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
+}
+
+.landing-species-glass-section::before {
+  content: "";
+  position: absolute;
+  inset: -5% -8%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 40% 50% at 15% 40%, rgba(61, 155, 143, 0.18), transparent 68%),
+    radial-gradient(ellipse 38% 48% at 85% 35%, rgba(155, 110, 243, 0.14), transparent 65%),
+    radial-gradient(ellipse 35% 42% at 50% 85%, rgba(240, 138, 93, 0.1), transparent 62%);
+}
+
+.landing-species-glass-section > div {
+  position: relative;
+  z-index: 1;
 }
 
 .landing-species-glass-badge {

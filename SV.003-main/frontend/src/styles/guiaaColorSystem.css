@@ -53,6 +53,23 @@
     rgba(61, 155, 143, 0.22) 0%,
     rgba(255, 255, 255, 0.78) 100%
   );
+
+  /* Liquid glass — acentos de color (testimonios, chips, paneles) */
+  --liquid-glass-coral: rgba(240, 138, 93, 0.55);
+  --liquid-glass-coral-deep: rgba(232, 111, 66, 0.72);
+  --liquid-glass-rose: rgba(243, 166, 184, 0.55);
+  --liquid-glass-rose-deep: rgba(232, 137, 159, 0.72);
+  --liquid-glass-sky: rgba(126, 192, 222, 0.55);
+  --liquid-glass-sky-deep: rgba(90, 168, 204, 0.72);
+  --liquid-glass-amber: rgba(240, 183, 106, 0.55);
+  --liquid-glass-amber-deep: rgba(232, 154, 69, 0.72);
+  --liquid-glass-violet: rgba(168, 148, 212, 0.55);
+  --liquid-glass-violet-deep: rgba(143, 120, 192, 0.72);
+  --liquid-glass-slate: rgba(154, 163, 184, 0.5);
+  --liquid-glass-slate-deep: rgba(127, 138, 163, 0.68);
+  --liquid-glass-blue-wash: rgba(38, 91, 147, 0.12);
+  --liquid-glass-teal-wash: rgba(61, 155, 143, 0.14);
+  --liquid-glass-purple-wash: rgba(155, 110, 243, 0.12);
 }
 
 .guiaa-glass-panel {
