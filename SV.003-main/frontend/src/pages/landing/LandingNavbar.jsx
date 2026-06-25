@@ -81,6 +81,7 @@ export function LandingNavbar({ setView, hero = false }) {
       <div className="mx-auto flex min-h-[4.75rem] max-w-6xl items-center justify-between gap-3 px-5 py-2 sm:min-h-[5rem] sm:gap-4 sm:px-8 lg:px-10">
         <LandingBrandLockup
           variant="navbar"
+          logoTone={hero ? "on-dark" : "auto"}
           onClick={() => setView("landing")}
           className="max-w-[min(100%,42rem)]"
         />

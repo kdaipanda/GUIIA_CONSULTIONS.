@@ -4,7 +4,7 @@ import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
+import { GuiaaLogoImg } from "../../components/GuiaaBrandLockup";
 
 const SPECIES = ["perros", "gatos", "conejos", "aves", "otros"];
 
@@ -69,7 +69,7 @@ export function AppointmentRequestPortal({ organizationId }) {
     <div className="portal-page">
       <div className="portal-card">
         <div className="portal-brand">
-          <img src="/GuiaaLogo-full.png" alt="GUIAA" className="portal-logo-full" />
+          <GuiaaLogoImg className="portal-logo-full logo-image logo-image-full" tone="on-light" />
           <div>
             <h1>Solicitar cita</h1>
             <p>{loading ? "Cargando..." : orgName}</p>

@@ -348,11 +348,67 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .logo-image {
-  width: 56px;
-  height: 56px;
+  display: block;
   flex-shrink: 0;
   object-fit: contain;
+  object-position: left center;
+}
+
+.logo-image:not(.logo-image-full) {
+  width: 56px;
+  height: 56px;
   filter: drop-shadow(0 2px 8px rgba(30, 64, 175, 0.18));
+}
+
+.logo-image.logo-image-full,
+.loading-logo-full,
+.portal-logo-full {
+  --guiaa-logo-h: 3.75rem;
+  width: auto;
+  height: var(--guiaa-logo-h);
+  max-width: none;
+  aspect-ratio: 398 / 637;
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(0 2px 6px rgba(15, 45, 77, 0.14));
+}
+
+.logo-image-header {
+  --guiaa-logo-h: 3.5rem;
+}
+
+.logo-image-navbar {
+  --guiaa-logo-h: 4.5rem;
+}
+
+.logo-image-auth,
+.logo-image-loading {
+  --guiaa-logo-h: 5.25rem;
+}
+
+@media (min-width: 640px) {
+  .logo-image.logo-image-full,
+  .loading-logo-full,
+  .portal-logo-full {
+    --guiaa-logo-h: 4.25rem;
+  }
+
+  .logo-image-header {
+    --guiaa-logo-h: 4rem;
+  }
+
+  .logo-image-navbar {
+    --guiaa-logo-h: 5rem;
+  }
+
+  .logo-image-auth,
+  .logo-image-loading {
+    --guiaa-logo-h: 5.75rem;
+  }
+}
+
+.guiaa-brand-lockup--header .nav-brand-text {
+  padding-top: 2px;
 }
 
 .nav-brand h1 {
@@ -5249,9 +5305,14 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 20px;
   }
   
-  .logo-image {
+  .logo-image:not(.logo-image-full) {
     width: 48px;
     height: 48px;
+  }
+
+  .logo-image.logo-image-full,
+  .logo-image-header {
+    --guiaa-logo-h: 3.25rem;
   }
 
   .nav-brand-subsubtitle {
@@ -10241,7 +10302,12 @@ html {
   color: transparent;
 }
 
-.clinic-shell > .header.scrolled .logo-image {
+.clinic-shell > .header.scrolled .logo-image.logo-image-full,
+.clinic-shell > .header.scrolled .logo-image-header {
+  --guiaa-logo-h: 3.125rem;
+}
+
+.clinic-shell > .header.scrolled .logo-image:not(.logo-image-full) {
   width: 44px;
   height: 44px;
 }
@@ -12437,7 +12503,12 @@ html {
     max-width: min(42vw, 220px);
   }
 
-  .clinic-shell > .header .logo-image {
+  .clinic-shell > .header .logo-image.logo-image-full,
+  .clinic-shell > .header .logo-image-header {
+    --guiaa-logo-h: 3rem;
+  }
+
+  .clinic-shell > .header .logo-image:not(.logo-image-full) {
     width: 36px;
     height: 36px;
   }

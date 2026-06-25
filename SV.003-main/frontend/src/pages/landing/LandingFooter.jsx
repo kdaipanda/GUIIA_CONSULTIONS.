@@ -23,7 +23,7 @@ export function LandingFooter({ setView }) {
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
           <div>
-            <LandingBrandLockup variant="footer" className="max-w-md" />
+            <LandingBrandLockup variant="footer" logoTone="on-dark" className="max-w-md" />
             <p className="landing-body mt-4 max-w-sm text-sm">
               Software clínico veterinario multiespecie con soporte CDS L4 y L5. Para
               médicos veterinarios certificados en Latinoamérica.
