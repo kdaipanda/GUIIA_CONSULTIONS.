@@ -702,3 +702,51 @@
   padding-bottom: 10px;
 }
 
+.clinic-sale-section {
+  padding: 12px 0 4px;
+  border-top: 1px solid rgba(38, 91, 147, 0.1);
+}
+
+.clinic-sale-section .clinic-form-section-label {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--clinic-navy, #0c2d4d);
+}
+
+.clinic-sale-summary {
+  margin: 8px 0 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(38, 91, 147, 0.06);
+  border: 1px solid rgba(38, 91, 147, 0.1);
+}
+
+.clinic-sale-summary-list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+
+.clinic-sale-summary-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  padding: 5px 0;
+  border-bottom: 1px dashed rgba(38, 91, 147, 0.12);
+}
+
+.clinic-sale-summary-list li:last-child {
+  border-bottom: none;
+}
+
+.clinic-sale-summary-total {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--clinic-navy, #0c2d4d);
+}
+

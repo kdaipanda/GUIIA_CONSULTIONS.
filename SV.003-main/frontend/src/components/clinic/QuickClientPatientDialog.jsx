@@ -53,13 +53,7 @@ export function QuickClientPatientDialog({
         client_id: client.id,
         name: form.petName.trim(),
         species: form.species,
-        breed: "",
-        sex: "",
-        birth_date: "",
-        microchip: "",
-        color: "",
         weight_kg: null,
-        notes: "",
       });
       notifySuccess(`${form.petName.trim()} y ${form.ownerName.trim()} registrados.`);
       onOpenChange(false);

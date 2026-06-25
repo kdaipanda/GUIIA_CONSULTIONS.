@@ -17,6 +17,15 @@ def _table(name: str):
     return get_supabase_client().table(name)
 
 
+def _nullify_empty_optional_fields(row: Dict[str, Any]) -> Dict[str, Any]:
+    """PostgreSQL rechaza '' en columnas date; normalizar a None."""
+    out = dict(row)
+    for key in ("birth_date",):
+        if out.get(key) == "":
+            out[key] = None
+    return out
+
+
 def get_member_by_profile(profile_id: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     try:
         resp = (
@@ -320,7 +329,8 @@ def get_patient(patient_id: str, organization_id: str) -> Tuple[Optional[Dict[st
 
 def insert_patient(row: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     try:
-        resp = _table("patients").insert(row, returning="representation").execute()
+        payload = _nullify_empty_optional_fields(row)
+        resp = _table("patients").insert(payload, returning="representation").execute()
         return (resp.data[0] if resp.data else None, None)
     except Exception as exc:  # noqa: BLE001
         return (None, str(exc))
@@ -329,7 +339,7 @@ def insert_patient(row: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optio
 def update_patient(
     patient_id: str, organization_id: str, fields: Dict[str, Any]
 ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
-    fields = {**fields, "updated_at": _now_iso()}
+    fields = _nullify_empty_optional_fields({**fields, "updated_at": _now_iso()})
     try:
         resp = (
             _table("patients")

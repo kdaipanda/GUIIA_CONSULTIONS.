@@ -292,6 +292,7 @@ export function ClientsPatientsPage({ onStartConsultation, onViewConsultation })
     const payload = {
       ...patientForm,
       weight_kg: patientForm.weight_kg === "" ? null : Number(patientForm.weight_kg),
+      birth_date: patientForm.birth_date?.trim() ? patientForm.birth_date.trim() : null,
     };
     try {
       if (patientEditing) {

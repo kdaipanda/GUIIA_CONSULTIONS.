@@ -3,10 +3,10 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Header, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 import clinic_db
 import cedula_verification
@@ -120,6 +120,13 @@ class PatientCreate(BaseModel):
     status: Optional[str] = "active"
     notes: Optional[str] = None
 
+    @field_validator("birth_date", mode="before")
+    @classmethod
+    def _birth_date_empty_to_none(cls, value: Any) -> Optional[str]:
+        if value == "" or value is None:
+            return None
+        return value
+
 
 class PatientUpdate(BaseModel):
     client_id: Optional[str] = None
@@ -133,6 +140,13 @@ class PatientUpdate(BaseModel):
     weight_kg: Optional[float] = None
     status: Optional[str] = None
     notes: Optional[str] = None
+
+    @field_validator("birth_date", mode="before")
+    @classmethod
+    def _birth_date_empty_to_none(cls, value: Any) -> Optional[str]:
+        if value == "" or value is None:
+            return None
+        return value
 
 
 class AppointmentCreate(BaseModel):
