@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Plus,
   Search,
   Pencil,
   Trash2,
@@ -357,11 +356,8 @@ export function ClientsPatientsPage({ onStartConsultation, onViewConsultation })
           <p>Tutores, fichas clínicas e historial en un solo lugar.</p>
         </div>
         <div className="clinic-header-actions">
-          <Button type="button" variant="secondary" onClick={() => setQuickDialogOpen(true)}>
-            <Zap size={16} className="mr-1" /> Registro rápido
-          </Button>
-          <Button type="button" onClick={openCreateClient}>
-            <Plus size={16} className="mr-1" /> Nuevo dueño
+          <Button type="button" onClick={() => setQuickDialogOpen(true)}>
+            <Zap size={16} className="mr-1" /> Nuevo registro
           </Button>
         </div>
       </div>
@@ -392,7 +388,7 @@ export function ClientsPatientsPage({ onStartConsultation, onViewConsultation })
           mascot={<DoctorPlumitas size="sm" badge />}
           title="Sin dueños registrados"
           description="Usa registro rápido para crear dueño y mascota en un solo paso."
-          actionLabel="Registro rápido"
+          actionLabel="Nuevo registro"
           onAction={() => setQuickDialogOpen(true)}
         />
       ) : visibleClients.length === 0 ? (
@@ -665,6 +661,10 @@ export function ClientsPatientsPage({ onStartConsultation, onViewConsultation })
         onOpenChange={setQuickDialogOpen}
         veterinarianId={veterinarian?.id}
         onSuccess={load}
+        onOwnerOnly={() => {
+          setQuickDialogOpen(false);
+          openCreateClient();
+        }}
       />
 
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>

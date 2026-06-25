@@ -28,6 +28,7 @@ export function QuickClientPatientDialog({
   onOpenChange,
   veterinarianId,
   onSuccess,
+  onOwnerOnly,
 }) {
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
@@ -144,6 +145,12 @@ export function QuickClientPatientDialog({
               ))}
             </div>
           </div>
+
+          {onOwnerOnly && (
+            <button type="button" className="clinic-link-btn" onClick={onOwnerOnly}>
+              Solo dueño (sin mascota)
+            </button>
+          )}
 
           <DialogFooter className="clinic-quick-dialog-footer">
             <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
