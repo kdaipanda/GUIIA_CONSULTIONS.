@@ -3056,25 +3056,44 @@ const NewConsultation = ({
     return response.json();
   };
 
-  const renderCategorySelector = (title = "Categoría Animal") => (
-    <div className="form-section">
-      <h3>{title}</h3>
-      <div className="category-grid">
-        {Object.entries(categories).map(([key, category]) => (
-          <div
-            key={key}
-            className={`category-card ${selectedCategory === key ? "selected" : ""}`}
-            onClick={() => setSelectedCategory(key)}
-          >
-            <span className="category-icon">
-              {CONSULTATION_CATEGORY_ICONS[key] || "🐾"}
-            </span>
-            <h4>{category.name}</h4>
+  const renderCategorySelector = (title = "Categoría Animal") => {
+    const speciesCount = Object.keys(categories).length;
+    return (
+      <div className="form-section category-selector-glass-wrap">
+        <div className="category-selector-glass-head">
+          {title !== "Categoría Animal" ? <h3>{title}</h3> : null}
+          <span className="category-selector-glass-badge">
+            Multiespecie veterinaria · {speciesCount} formularios clínicos
+          </span>
+        </div>
+        <div className="category-selector-glass-panel">
+          <div className="category-grid category-grid--liquid" role="listbox" aria-label="Especie">
+            {Object.entries(categories).map(([key, category]) => (
+              <div
+                key={key}
+                role="option"
+                aria-selected={selectedCategory === key}
+                className={`category-card category-card--liquid ${selectedCategory === key ? "selected" : ""}`}
+                onClick={() => setSelectedCategory(key)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelectedCategory(key);
+                  }
+                }}
+                tabIndex={0}
+              >
+                <span className="category-icon" aria-hidden>
+                  {CONSULTATION_CATEGORY_ICONS[key] || "🐾"}
+                </span>
+                <span className="category-label">{category.name}</span>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const loadExistingConsultation = async (id) => {
     setLoadingExisting(true);

@@ -41,19 +41,26 @@ function PreviewStepper({ currentStep }) {
 }
 
 function CategoryGrid({ selected = "perros" }) {
+  const speciesCount = PREVIEW_CATEGORIES.length;
   return (
-    <div className="form-section">
-      <h3>Categoría Animal</h3>
-      <div className="category-grid">
-        {PREVIEW_CATEGORIES.map((key) => (
-          <div
-            key={key}
-            className={`category-card ${selected === key ? "selected" : ""}`}
-          >
-            <span className="category-icon">{PREVIEW_CATEGORY_ICONS[key]}</span>
-            <h4>{PREVIEW_CATEGORY_LABELS[key]}</h4>
-          </div>
-        ))}
+    <div className="form-section category-selector-glass-wrap">
+      <div className="category-selector-glass-head">
+        <span className="category-selector-glass-badge">
+          Multiespecie veterinaria · {speciesCount} formularios clínicos
+        </span>
+      </div>
+      <div className="category-selector-glass-panel">
+        <div className="category-grid category-grid--liquid">
+          {PREVIEW_CATEGORIES.map((key) => (
+            <div
+              key={key}
+              className={`category-card category-card--liquid ${selected === key ? "selected" : ""}`}
+            >
+              <span className="category-icon">{PREVIEW_CATEGORY_ICONS[key]}</span>
+              <span className="category-label">{PREVIEW_CATEGORY_LABELS[key]}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

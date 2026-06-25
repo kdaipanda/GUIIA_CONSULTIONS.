@@ -1,5 +1,6 @@
 import React from "react";
 
+import "../styles/consultationFlow.css";
 import "./landing/landingPreview.css";
 import "./landing/landingMotion.css";
 import "./landing/landingTaste.css";

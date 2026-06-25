@@ -51,21 +51,31 @@
   grid-template-columns: 1fr 220px;
 }
 
-.landing-app-preview-page .category-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  max-width: none;
+.landing-app-preview-page .category-grid--liquid {
+  flex-wrap: nowrap;
+  gap: 8px;
 }
 
-.landing-app-preview-page .category-card {
-  padding: 16px 10px;
+.landing-app-preview-page .category-card--liquid {
+  padding: 8px 12px 8px 9px;
 }
 
-.landing-app-preview-page .category-card .category-icon {
-  font-size: 32px;
+.landing-app-preview-page .category-card--liquid .category-icon {
+  font-size: 1rem;
 }
 
-.landing-app-preview-page .category-card h4 {
-  font-size: 12px;
+.landing-app-preview-page .category-card--liquid .category-label {
+  font-size: 11px;
+}
+
+.landing-app-preview-page .category-selector-glass-badge {
+  font-size: 9px;
+  padding: 5px 10px;
+}
+
+.landing-app-preview-page .category-selector-glass-panel {
+  padding: 10px;
+  border-radius: 16px;
 }
 
 .landing-app-preview-page .page-title-header {
@@ -96,8 +106,8 @@
   grid-template-columns: 1fr 260px;
 }
 
-.landing-screenshot-capture-page .category-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+.landing-screenshot-capture-page .category-grid--liquid {
+  flex-wrap: wrap;
 }
 
 .landing-hero-screenshot {

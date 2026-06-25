@@ -328,9 +328,23 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
-.landing-species-chip {
-  border-radius: 999px;
-  box-shadow: 0 1px 6px -2px rgba(12, 45, 77, 0.1);
+.landing-species-glass-section {
+  background: linear-gradient(180deg, rgba(248, 252, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
+}
+
+.landing-species-glass-badge {
+  display: block;
+  text-align: center;
+}
+
+.landing-species-glass-panel {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.landing-species-chip.category-card--liquid {
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.82);
 }
 
 .landing-kicker {
