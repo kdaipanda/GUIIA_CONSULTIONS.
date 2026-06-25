@@ -4,7 +4,7 @@ import { useVet } from "../context/VetContext";
 import { notifyError, notifySuccess } from "../lib/appToast";
 import { BACKEND_URL } from "../lib/backendUrl";
 import { getAuthHeaders } from "../lib/authHeaders";
-import { cleanClinicalDisplayText } from "../lib/consultationPdf";
+import { cleanClinicalDisplayText, clinicalTextPreview } from "../lib/consultationPdf";
 import {
   fileToBase64Payload,
   labFileLabel,
@@ -249,6 +249,7 @@ export function MedicalImagesPage({ setView }) {
           <Button
             type="button"
             variant="secondary"
+            className="medical-lab-header-toggle"
             onClick={() => setShowHistory(!showHistory)}
           >
             {showHistory ? "Nueva interpretación" : "Ver historial"}
@@ -547,6 +548,7 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                 </div>
               </div>
 
+              {!result && (
               <div className="form-actions medical-lab-form-actions">
                 <Button
                   type="button"
@@ -567,6 +569,7 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                     : "Interpretar estudio"}
                 </Button>
               </div>
+              )}
             </form>
 
             {result && (
@@ -636,18 +639,21 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                     )}
                     <div className="history-preview">
                       {(() => {
-                        const preview = item.analysis
-                          ? cleanClinicalDisplayText(item.analysis)
+                        const raw = item.analysis
+                          ? item.analysis
                           : item.detailed_analysis
-                            ? cleanClinicalDisplayText(item.detailed_analysis)
-                            : "Sin análisis disponible";
-                        return preview.length > 150 ? `${preview.substring(0, 150)}...` : preview;
+                            ? item.detailed_analysis
+                            : "";
+                        return raw
+                          ? clinicalTextPreview(raw, 150)
+                          : "Sin análisis disponible";
                       })()}
                     </div>
                     <Button
                       type="button"
                       variant="secondary"
                       size="sm"
+                      className="history-card-action"
                       onClick={() => {
                         setResult(item);
                         setShowHistory(false);

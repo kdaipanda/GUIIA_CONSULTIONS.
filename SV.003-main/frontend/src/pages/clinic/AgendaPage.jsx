@@ -526,52 +526,92 @@ export function AgendaPage({ onStartConsultation }) {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className={clinicDialogClass("max-w-md")}>
-          <DialogHeader>
+        <DialogContent className={clinicDialogClass("max-w-md", "clinic-dialog", "clinic-agenda-dialog")}>
+          <DialogHeader className="clinic-dialog-header">
             <DialogTitle>{editing ? "Editar cita" : "Nueva cita"}</DialogTitle>
+            <p className="clinic-dialog-subtitle">
+              {editing
+                ? "Actualiza horario, estado y notas de la cita."
+                : "Programa una cita vinculada a una mascota del consultorio."}
+            </p>
           </DialogHeader>
-          <form onSubmit={handleSave} className="clinic-form">
-            <div className="form-group">
-              <Label>Mascota *</Label>
-              <Select value={form.patient_id} onValueChange={onPatientChange}>
-                <SelectTrigger><SelectValue placeholder="Mascota" /></SelectTrigger>
-                <SelectContent>
-                  {patients.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name} ({p.clients?.name || "dueño"})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <form onSubmit={handleSave} className="clinic-form clinic-form-product">
+            <div className="clinic-form-scroll">
+              <div className="form-group">
+                <Label htmlFor="agenda-patient">Mascota *</Label>
+                <Select value={form.patient_id} onValueChange={onPatientChange}>
+                  <SelectTrigger id="agenda-patient" className="clinic-field-control">
+                    <SelectValue placeholder="Seleccionar mascota" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {patients.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name} ({p.clients?.name || "dueño"})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="clinic-form-grid-2">
+                <div className="form-group">
+                  <Label htmlFor="agenda-starts">Inicio *</Label>
+                  <Input
+                    id="agenda-starts"
+                    className="clinic-field-control"
+                    type="datetime-local"
+                    value={form.starts_at}
+                    onChange={(e) => setForm({ ...form, starts_at: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <Label htmlFor="agenda-ends">Fin *</Label>
+                  <Input
+                    id="agenda-ends"
+                    className="clinic-field-control"
+                    type="datetime-local"
+                    value={form.ends_at}
+                    onChange={(e) => setForm({ ...form, ends_at: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <Label htmlFor="agenda-status">Estado</Label>
+                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+                  <SelectTrigger id="agenda-status" className="clinic-field-control">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(STATUS_LABELS).map(([k, label]) => (
+                      <SelectItem key={k} value={k}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="form-group">
+                <Label htmlFor="agenda-reason">Motivo</Label>
+                <Input
+                  id="agenda-reason"
+                  className="clinic-field-control"
+                  placeholder="Ej. control, vacunación, seguimiento"
+                  value={form.reason}
+                  onChange={(e) => setForm({ ...form, reason: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <Label htmlFor="agenda-notes">Notas</Label>
+                <Textarea
+                  id="agenda-notes"
+                  className="clinic-field-control clinic-field-control--textarea"
+                  placeholder="Indicaciones internas o recordatorios"
+                  value={form.notes}
+                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  rows={3}
+                />
+              </div>
             </div>
-            <div className="form-group">
-              <Label>Inicio *</Label>
-              <Input type="datetime-local" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} required />
-            </div>
-            <div className="form-group">
-              <Label>Fin *</Label>
-              <Input type="datetime-local" value={form.ends_at} onChange={(e) => setForm({ ...form, ends_at: e.target.value })} required />
-            </div>
-            <div className="form-group">
-              <Label>Estado</Label>
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {Object.entries(STATUS_LABELS).map(([k, label]) => (
-                    <SelectItem key={k} value={k}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="form-group">
-              <Label>Motivo</Label>
-              <Input value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} />
-            </div>
-            <div className="form-group">
-              <Label>Notas</Label>
-              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
-            </div>
-            <DialogFooter className="gap-2 flex-wrap">
+            <DialogFooter className="clinic-dialog-footer gap-2 flex-wrap">
               {editing && (
                 <Button type="button" variant="destructive" onClick={handleDelete}>Eliminar</Button>
               )}
@@ -601,37 +641,46 @@ export function AgendaPage({ onStartConsultation }) {
       </Dialog>
 
       <Dialog open={approveOpen} onOpenChange={setApproveOpen}>
-        <DialogContent className={clinicDialogClass("max-w-sm")}>
-          <DialogHeader>
+        <DialogContent className={clinicDialogClass("max-w-sm", "clinic-dialog", "clinic-agenda-dialog")}>
+          <DialogHeader className="clinic-dialog-header">
             <DialogTitle>Confirmar cita</DialogTitle>
+            <p className="clinic-dialog-subtitle">
+              Define el horario definitivo antes de aprobar la solicitud.
+            </p>
           </DialogHeader>
           {approvingRequest && (
-            <form onSubmit={confirmApprove} className="clinic-form">
-              <p className="clinic-muted">
-                <strong>{approvingRequest.client_name}</strong> — {approvingRequest.patient_name}
-              </p>
-              {approvingRequest.reason && (
-                <p className="clinic-muted">{approvingRequest.reason}</p>
-              )}
-              <div className="form-group">
-                <Label>Inicio de la cita *</Label>
-                <Input
-                  type="datetime-local"
-                  value={approveForm.starts_at}
-                  onChange={(e) => setApproveForm({ ...approveForm, starts_at: e.target.value })}
-                  required
-                />
+            <form onSubmit={confirmApprove} className="clinic-form clinic-form-product">
+              <div className="clinic-form-scroll clinic-form-scroll-compact">
+                <p className="clinic-agenda-approve-summary">
+                  <strong>{approvingRequest.client_name}</strong> — {approvingRequest.patient_name}
+                </p>
+                {approvingRequest.reason && (
+                  <p className="clinic-agenda-approve-reason">{approvingRequest.reason}</p>
+                )}
+                <div className="form-group">
+                  <Label htmlFor="approve-starts">Inicio de la cita *</Label>
+                  <Input
+                    id="approve-starts"
+                    className="clinic-field-control"
+                    type="datetime-local"
+                    value={approveForm.starts_at}
+                    onChange={(e) => setApproveForm({ ...approveForm, starts_at: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <Label htmlFor="approve-ends">Fin de la cita *</Label>
+                  <Input
+                    id="approve-ends"
+                    className="clinic-field-control"
+                    type="datetime-local"
+                    value={approveForm.ends_at}
+                    onChange={(e) => setApproveForm({ ...approveForm, ends_at: e.target.value })}
+                    required
+                  />
+                </div>
               </div>
-              <div className="form-group">
-                <Label>Fin de la cita *</Label>
-                <Input
-                  type="datetime-local"
-                  value={approveForm.ends_at}
-                  onChange={(e) => setApproveForm({ ...approveForm, ends_at: e.target.value })}
-                  required
-                />
-              </div>
-              <DialogFooter className="gap-2">
+              <DialogFooter className="clinic-dialog-footer gap-2">
                 <Button type="button" variant="secondary" onClick={() => setApproveOpen(false)}>
                   Cancelar
                 </Button>

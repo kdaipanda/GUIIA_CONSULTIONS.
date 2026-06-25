@@ -250,3 +250,38 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* —— Modal nueva / editar cita —— */
+
+.clinic-agenda-approve-summary {
+  margin: 0 0 0.35rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--agenda-navy);
+}
+
+.clinic-agenda-approve-reason {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(12, 45, 77, 0.58);
+}
+
+.clinic-agenda-dialog .clinic-dialog-footer {
+  flex-shrink: 0;
+}
+
+.clinic-agenda-dialog .clinic-dialog-footer .btn,
+.clinic-agenda-dialog .clinic-dialog-footer button {
+  min-height: 2.5rem;
+}
+
+[data-theme="dark"] .clinic-agenda-approve-summary,
+html.dark .clinic-agenda-approve-summary {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .clinic-agenda-approve-reason,
+html.dark .clinic-agenda-approve-reason {
+  color: var(--text-secondary);
+}

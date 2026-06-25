@@ -361,6 +361,44 @@
   resize: vertical;
 }
 
+/* Acciones del formulario y del resultado — sin pie fijo global */
+.medical-images-page-guiaa .medical-lab-form-actions,
+.medical-images-page-guiaa .medical-lab-result-actions {
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  z-index: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding: 0;
+  background: transparent;
+  backdrop-filter: none;
+  border-top: none;
+  box-shadow: none;
+  animation: none;
+}
+
+.medical-images-page-guiaa .medical-lab-form-actions button,
+.medical-images-page-guiaa .medical-lab-result-actions button {
+  min-width: 8.75rem;
+}
+
+.medical-images-page-guiaa .medical-lab-result-actions {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(38, 91, 147, 0.1);
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-result-actions,
+html.dark .medical-images-page-guiaa .medical-lab-result-actions {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
 /* Opciones colapsables en móvil */
 .medical-lab-optional-toggle {
   display: none;
@@ -406,23 +444,30 @@
 
 /* Acciones sticky en móvil */
 @media (max-width: 768px) {
-  .medical-images-page-guiaa .medical-lab-form-actions {
-    position: sticky;
-    bottom: 0;
-    z-index: 12;
+  .medical-images-page-guiaa .medical-lab-form-actions,
+  .medical-images-page-guiaa .medical-lab-result-actions {
+    position: static;
     flex-direction: column-reverse;
-    gap: 8px;
-    margin: 20px -16px 0;
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(38, 91, 147, 0.12);
-    box-shadow: 0 -8px 24px -14px rgba(12, 45, 77, 0.2);
+    align-items: stretch;
+    gap: 0.625rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    background: transparent;
+    border-top: none;
+    box-shadow: none;
   }
 
-  .medical-images-page-guiaa .medical-lab-form-actions button {
+  .medical-images-page-guiaa .medical-lab-result-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(38, 91, 147, 0.1);
+  }
+
+  .medical-images-page-guiaa .medical-lab-form-actions button,
+  .medical-images-page-guiaa .medical-lab-result-actions button {
     width: 100%;
     min-height: 46px;
+    min-width: 0;
   }
 
   .medical-images-page-guiaa .medical-lab-submit-btn {
@@ -466,8 +511,6 @@
     overflow-y: auto;
     padding: 12px;
     border-radius: 10px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
   }
 
   .medical-lab-detailed-analysis pre {
@@ -477,17 +520,17 @@
     font-family: inherit;
     font-size: 13px;
     line-height: 1.55;
-    color: #1e293b;
   }
 
-  .medical-lab-result-actions {
+  .medical-images-page-guiaa .medical-lab-result-actions {
     flex-direction: column;
-    gap: 8px;
+    gap: 0.625rem;
   }
 
-  .medical-lab-result-actions button {
+  .medical-images-page-guiaa .medical-lab-result-actions button {
     width: 100%;
     min-height: 44px;
+    min-width: 0;
   }
 
   .medical-lab-history {
@@ -583,6 +626,33 @@
   line-height: 1.5;
 }
 
+.medical-images-page-guiaa .medical-lab-history {
+  margin-top: 1.25rem;
+  padding: 1.25rem 1.375rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(38, 91, 147, 0.12);
+  box-shadow: var(--liquid-glass-shadow-soft, 0 8px 24px -12px rgba(12, 45, 77, 0.12));
+}
+
+.medical-images-page-guiaa .medical-lab-history h2 {
+  margin: 0 0 1.125rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0c2d4d;
+  letter-spacing: -0.02em;
+}
+
+.medical-images-page-guiaa .history-card-action {
+  width: 100%;
+  margin-top: 0.625rem;
+}
+
+.medical-lab-header-toggle {
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
 @media (max-width: 768px) {
   .medical-images-page-guiaa .medical-images-header {
     flex-direction: column;
@@ -595,4 +665,196 @@
     width: 100%;
     min-height: 44px;
   }
+}
+
+/* —— Modo oscuro: historial y cabecera —— */
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-history,
+[data-theme="dark"] .medical-images-page-guiaa .interpretation-history,
+html.dark .medical-images-page-guiaa .medical-lab-history,
+html.dark .medical-images-page-guiaa .interpretation-history {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-history h2,
+html.dark .medical-images-page-guiaa .medical-lab-history h2 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-images-eyebrow,
+html.dark .medical-images-page-guiaa .medical-images-eyebrow {
+  color: #6ee7d9;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-header-toggle,
+html.dark .medical-images-page-guiaa .medical-lab-header-toggle {
+  background: rgba(20, 30, 44, 0.78) !important;
+  border-color: rgba(61, 155, 143, 0.35) !important;
+  color: #d4f5f0 !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-header-toggle:hover,
+html.dark .medical-images-page-guiaa .medical-lab-header-toggle:hover {
+  background: rgba(61, 155, 143, 0.14) !important;
+  border-color: rgba(61, 155, 143, 0.48) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .history-type,
+html.dark .medical-images-page-guiaa .history-type {
+  background: rgba(61, 155, 143, 0.14) !important;
+  border-color: rgba(61, 155, 143, 0.28) !important;
+  color: #a7f3ec !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .history-date,
+html.dark .medical-images-page-guiaa .history-date {
+  background: rgba(20, 30, 44, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .history-card,
+html.dark .medical-images-page-guiaa .history-card {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .history-card:hover,
+html.dark .medical-images-page-guiaa .history-card:hover {
+  border-color: rgba(61, 155, 143, 0.38) !important;
+  box-shadow: 0 12px 28px -14px rgba(61, 155, 143, 0.22) !important;
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .history-preview,
+html.dark .medical-images-page-guiaa .history-preview {
+  color: var(--text-secondary) !important;
+  line-height: 1.55;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .history-patient strong,
+html.dark .medical-images-page-guiaa .history-patient strong {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .history-card-action,
+html.dark .medical-images-page-guiaa .history-card-action {
+  background: rgba(61, 155, 143, 0.12) !important;
+  border-color: rgba(61, 155, 143, 0.32) !important;
+  color: #d4f5f0 !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .history-card-action:hover,
+html.dark .medical-images-page-guiaa .history-card-action:hover {
+  background: rgba(61, 155, 143, 0.22) !important;
+  border-color: rgba(61, 155, 143, 0.45) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .empty-state,
+html.dark .medical-images-page-guiaa .empty-state {
+  background: rgba(14, 22, 34, 0.55);
+  border-radius: 0.875rem;
+  padding: 1.5rem;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-images-premium-gate,
+html.dark .medical-images-page-guiaa .medical-images-premium-gate {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+/* —— Resultado del análisis (evitar texto claro sobre fondo blanco) —— */
+
+.medical-images-page-guiaa .interpretation-result.medical-lab-result {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  padding: 1.25rem 1.375rem;
+  border-radius: 1rem;
+  border-top: 1px solid rgba(38, 91, 147, 0.12);
+}
+
+.medical-images-page-guiaa .medical-lab-result-only {
+  margin-bottom: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-left: none;
+}
+
+.medical-images-page-guiaa .medical-lab-detailed-analysis {
+  padding: 1rem 1.125rem;
+  border-radius: 0.75rem;
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid rgba(38, 91, 147, 0.12);
+}
+
+.medical-images-page-guiaa .result-content.detailed-analysis.medical-lab-detailed-analysis pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #1e293b;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .interpretation-result.medical-lab-result,
+html.dark .medical-images-page-guiaa .interpretation-result.medical-lab-result {
+  background: var(--liquid-glass-bg) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  border-top: 1px solid var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .result-section.detailed,
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-result-only,
+html.dark .medical-images-page-guiaa .result-section.detailed,
+html.dark .medical-images-page-guiaa .medical-lab-result-only {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-detailed-analysis,
+html.dark .medical-images-page-guiaa .medical-lab-detailed-analysis {
+  background: rgba(14, 22, 34, 0.78) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .result-content.detailed-analysis.medical-lab-detailed-analysis pre,
+html.dark .medical-images-page-guiaa .result-content.detailed-analysis.medical-lab-detailed-analysis pre {
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-primary) !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-result-fallback,
+html.dark .medical-images-page-guiaa .medical-lab-result-fallback {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-result-actions,
+html.dark .medical-images-page-guiaa .medical-lab-result-actions {
+  margin-top: 1rem;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-result-actions button,
+html.dark .medical-images-page-guiaa .medical-lab-result-actions button {
+  border-color: rgba(61, 155, 143, 0.32) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .interpretation-result .result-content,
+html.dark .medical-images-page-guiaa .interpretation-result .result-content {
+  color: var(--text-primary) !important;
 }

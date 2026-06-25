@@ -185,6 +185,123 @@
   overflow-y: auto;
 }
 
+.clinic-dialog.clinic-dialog-compact {
+  display: flex !important;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 !important;
+  gap: 0 !important;
+  max-height: min(90vh, 40rem);
+}
+
+.clinic-dialog.clinic-dialog-compact .clinic-dialog-header {
+  flex-shrink: 0;
+}
+
+.clinic-dialog.clinic-dialog-compact form.clinic-form-product {
+  flex: 1;
+  min-height: 0;
+}
+
+.clinic-agenda-dialog {
+  --clinic-dialog-max: 28rem;
+}
+
+.clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control {
+  width: 100%;
+  min-height: 2.75rem !important;
+  height: auto !important;
+  padding: 0.5625rem 0.75rem !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(38, 91, 147, 0.16) !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  color: var(--clinic-navy, #0c2d4d) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.35 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  appearance: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control::placeholder {
+  color: rgba(12, 45, 77, 0.42);
+}
+
+.clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control:hover {
+  border-color: rgba(61, 155, 143, 0.32) !important;
+}
+
+.clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control:focus,
+.clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control:focus-visible {
+  outline: none !important;
+  border-color: rgba(61, 155, 143, 0.55) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 0 0 3px rgba(61, 155, 143, 0.14) !important;
+}
+
+.clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control--textarea {
+  min-height: 5.5rem !important;
+  resize: vertical;
+  padding-top: 0.625rem !important;
+  padding-bottom: 0.625rem !important;
+}
+
+.clinic-dialog-guiaa .form-group label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(12, 45, 77, 0.78);
+  line-height: 1.35;
+}
+
+[data-theme="dark"] .clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control,
+html.dark .clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control {
+  background: rgba(20, 30, 44, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: var(--text-primary) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  color-scheme: dark;
+}
+
+[data-theme="dark"] .clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control::placeholder,
+html.dark .clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control::placeholder {
+  color: var(--text-tertiary);
+}
+
+[data-theme="dark"] .clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control:hover,
+html.dark .clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control:hover {
+  border-color: rgba(61, 155, 143, 0.38) !important;
+}
+
+[data-theme="dark"] .clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control:focus,
+[data-theme="dark"] .clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control:focus-visible,
+html.dark .clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control:focus,
+html.dark .clinic-dialog-guiaa .clinic-form .form-group .clinic-field-control:focus-visible {
+  border-color: rgba(61, 155, 143, 0.5) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 0 0 3px rgba(61, 155, 143, 0.16) !important;
+}
+
+[data-theme="dark"] .clinic-dialog-guiaa .form-group label,
+html.dark .clinic-dialog-guiaa .form-group label {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .clinic-dialog-guiaa h2,
+[data-theme="dark"] .clinic-dialog-guiaa [class*="DialogTitle"],
+html.dark .clinic-dialog-guiaa h2,
+html.dark .clinic-dialog-guiaa [class*="DialogTitle"] {
+  color: var(--text-primary) !important;
+}
+
 .clinic-dialog-compact.max-w-sm {
   --clinic-dialog-max: 22rem;
 }
@@ -218,12 +335,213 @@
 }
 
 .clinic-quick-register-dialog {
-  --clinic-dialog-max: 28rem;
+  --clinic-dialog-max: 30rem;
+}
+
+.clinic-quick-register-dialog .clinic-quick-dialog-header {
+  margin: 0;
+  padding-right: 1.75rem;
+  padding-bottom: 0.875rem;
+  text-align: left;
+}
+
+.clinic-quick-register-dialog .clinic-quick-dialog-hero {
+  align-items: center;
+  gap: 1rem;
+}
+
+.clinic-quick-register-dialog .clinic-quick-dialog-mascot .guiaa-mascot-img {
+  width: 3.5rem;
+  height: 3.5rem;
+  max-width: 3.5rem;
+  max-height: 3.5rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(61, 155, 143, 0.22);
+  background: linear-gradient(165deg, rgba(232, 243, 228, 0.95), rgba(255, 255, 255, 0.88));
+  box-shadow:
+    0 10px 24px -14px rgba(47, 133, 122, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.clinic-quick-register-dialog .clinic-quick-dialog-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0.5rem;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(61, 155, 143, 0.24);
+  background: rgba(61, 155, 143, 0.1);
+  color: #267a70;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+}
+
+.clinic-quick-register-dialog .clinic-quick-dialog-eyebrow svg {
+  color: #3d9b8f;
+  flex-shrink: 0;
+}
+
+.clinic-quick-register-dialog .clinic-quick-dialog-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+
+.clinic-quick-register-dialog .clinic-quick-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  max-width: 28ch;
+}
+
+[data-theme="dark"] .clinic-quick-register-dialog .clinic-quick-dialog-mascot .guiaa-mascot-img,
+html.dark .clinic-quick-register-dialog .clinic-quick-dialog-mascot .guiaa-mascot-img {
+  border-color: rgba(110, 231, 217, 0.22);
+  background: linear-gradient(165deg, rgba(61, 155, 143, 0.18), rgba(14, 22, 34, 0.75));
+  box-shadow:
+    0 10px 24px -14px rgba(61, 155, 143, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .clinic-quick-register-dialog .clinic-quick-dialog-eyebrow,
+html.dark .clinic-quick-register-dialog .clinic-quick-dialog-eyebrow {
+  background: rgba(61, 155, 143, 0.16);
+  border-color: rgba(110, 231, 217, 0.3);
+  color: #b8f5ec;
+}
+
+[data-theme="dark"] .clinic-quick-register-dialog .clinic-quick-dialog-eyebrow svg,
+html.dark .clinic-quick-register-dialog .clinic-quick-dialog-eyebrow svg {
+  color: #6ee7d9;
+}
+
+[data-theme="dark"] .clinic-quick-register-dialog .clinic-quick-dialog-title,
+html.dark .clinic-quick-register-dialog .clinic-quick-dialog-title {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .clinic-quick-register-dialog .clinic-quick-hint,
+html.dark .clinic-quick-register-dialog .clinic-quick-hint {
+  color: var(--text-secondary) !important;
+}
+
+.clinic-quick-register-dialog .clinic-form-section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 0.5rem;
+}
+
+.clinic-quick-register-dialog .clinic-form-section-label--spaced {
+  margin-top: 0.875rem;
+}
+
+.clinic-quick-register-dialog .clinic-quick-chips--species {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.clinic-quick-register-dialog .clinic-quick-chip {
+  justify-content: center;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(38, 91, 147, 0.16);
+  background: rgba(255, 255, 255, 0.48);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(12, 45, 77, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.clinic-quick-register-dialog .clinic-quick-chip:hover {
+  border-color: rgba(61, 155, 143, 0.35);
+  background: rgba(232, 244, 252, 0.65);
+}
+
+.clinic-quick-register-dialog .clinic-quick-chip.is-active {
+  border-color: rgba(61, 155, 143, 0.55);
+  background: linear-gradient(135deg, rgba(61, 155, 143, 0.22), rgba(47, 133, 122, 0.14));
+  color: #1a5c54;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 0 0 1px rgba(61, 155, 143, 0.18);
+}
+
+.clinic-quick-register-dialog .clinic-quick-owner-only {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+}
+
+.clinic-quick-register-dialog .clinic-quick-dialog-footer {
+  flex-shrink: 0;
+}
+
+.clinic-quick-submit-btn {
+  min-height: 2.5rem !important;
+  padding: 0 1.125rem !important;
+  border: none !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, #3d9b8f 0%, #2f857a 100%) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px -4px rgba(47, 133, 122, 0.45);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.clinic-quick-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2f857a 0%, #267a70 100%) !important;
+  box-shadow: 0 6px 18px -6px rgba(47, 133, 122, 0.5);
+}
+
+.clinic-quick-submit-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+[data-theme="dark"] .clinic-quick-register-dialog .clinic-quick-chip,
+html.dark .clinic-quick-register-dialog .clinic-quick-chip {
+  background: rgba(20, 30, 44, 0.72);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .clinic-quick-register-dialog .clinic-quick-chip:hover,
+html.dark .clinic-quick-register-dialog .clinic-quick-chip:hover {
+  border-color: rgba(61, 155, 143, 0.38);
+  background: rgba(61, 155, 143, 0.1);
+}
+
+[data-theme="dark"] .clinic-quick-register-dialog .clinic-quick-chip.is-active,
+html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
+  border-color: rgba(110, 231, 217, 0.45);
+  background: linear-gradient(135deg, rgba(61, 155, 143, 0.28), rgba(47, 133, 122, 0.16));
+  color: #d4f5f0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 0 1px rgba(61, 155, 143, 0.22);
+}
+
+@media (max-width: 400px) {
+  .clinic-quick-register-dialog .clinic-quick-chips--species {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .clinic-quick-dialog-header {
   margin: 0;
-  padding: 0;
   padding-right: 1.75rem;
   text-align: left;
 }
@@ -273,14 +591,7 @@
 }
 
 .clinic-quick-dialog-footer {
-  margin-top: 0.25rem;
-  padding-top: 0.5rem;
-}
-
-.clinic-quick-register-dialog .clinic-form-section-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  margin-top: 0;
 }
 
 .clinic-dialog-guiaa h2,

@@ -116,6 +116,20 @@ export function cleanClinicalDisplayText(text) {
     .trim();
 }
 
+/** Texto plano corto para tarjetas de historial (sin markdown crudo). */
+export function clinicalTextPreview(text, maxLength = 150) {
+  if (!text) return "";
+  let plain = cleanClinicalDisplayText(text)
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/^---+$/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (plain.length <= maxLength) return plain;
+  return `${plain.slice(0, maxLength).trim()}…`;
+}
+
 function cleanAnalysisText(text) {
   return cleanClinicalDisplayText(text);
 }

@@ -164,7 +164,7 @@
   box-shadow: var(--liquid-glass-shadow-soft);
 }
 
-.species-form .form-section {
+html:not(.dark):not([data-theme="dark"]) .species-form .form-section {
   background: rgba(255, 255, 255, 0.45) !important;
   border: 1px solid rgba(255, 255, 255, 0.75) !important;
   backdrop-filter: blur(10px);
@@ -380,7 +380,7 @@ html:not(.dark):not([data-theme="dark"]) .history-detail-guiaa .clinical-file-he
   pointer-events: none;
 }
 
-.category-selector-glass-panel {
+html:not(.dark):not([data-theme="dark"]) .category-selector-glass-panel {
   background: linear-gradient(
     155deg,
     rgba(255, 255, 255, 0.78) 0%,

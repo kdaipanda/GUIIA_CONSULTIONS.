@@ -47,7 +47,7 @@ export function PatientSelector({ value, onChange, disabled }) {
         }}
         disabled={disabled || loading}
       >
-        <SelectTrigger>
+        <SelectTrigger className="patient-selector-trigger">
           <SelectValue placeholder={loading ? "Cargando..." : "Seleccionar mascota"} />
         </SelectTrigger>
         <SelectContent>
