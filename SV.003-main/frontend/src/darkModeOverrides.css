@@ -2,15 +2,40 @@
 
 [data-theme="dark"] .header,
 html.dark .header {
-  background: rgba(12, 14, 20, 0.82);
-  border-bottom-color: rgba(148, 163, 184, 0.12);
+  background: linear-gradient(
+    180deg,
+    rgba(18, 26, 38, 0.88) 0%,
+    rgba(12, 18, 28, 0.78) 100%
+  ) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(24px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.15) !important;
 }
 
 [data-theme="dark"] .header.scrolled,
 html.dark .header.scrolled {
-  background: rgba(12, 14, 20, 0.94);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
-  border-bottom-color: rgba(148, 163, 184, 0.16);
+  background: linear-gradient(
+    180deg,
+    rgba(22, 32, 48, 0.94) 0%,
+    rgba(14, 22, 34, 0.9) 100%
+  ) !important;
+  box-shadow:
+    0 12px 40px -16px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  border-bottom-color: rgba(61, 155, 143, 0.15) !important;
+}
+
+[data-theme="dark"] .user-menu-trigger--avatar,
+html.dark .user-menu-trigger--avatar {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  background: transparent !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .user-menu-trigger--avatar:hover,
+html.dark .user-menu-trigger--avatar:hover {
+  border-color: rgba(61, 155, 143, 0.45) !important;
+  background: transparent !important;
 }
 
 [data-theme="dark"] .user-menu-trigger,
@@ -426,21 +451,7 @@ html.dark .command-palette-empty {
   color: var(--text-secondary);
 }
 
-/* Chat de soporte */
-[data-theme="dark"] .support-chat-panel,
-html.dark .support-chat-panel {
-  background: #1a1f2b;
-  border-color: rgba(148, 163, 184, 0.2);
-  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.55);
-}
-
-[data-theme="dark"] .support-chat-header,
-html.dark .support-chat-header {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  border-bottom-color: var(--border-color);
-  color: #f1f5f9;
-}
-
+/* Chat de soporte — glass en darkModeGlass.css */
 [data-theme="dark"] .support-chat-tabs,
 html.dark .support-chat-tabs {
   background: var(--clinic-surface);
@@ -522,20 +533,7 @@ html.dark .support-chat-toggle-badge {
   border-color: #1a1f2b;
 }
 
-/* Consultas / formularios clínicos */
-[data-theme="dark"] .consultation-form-container,
-html.dark .consultation-form-container {
-  background: rgba(22, 25, 34, 0.92);
-  border-color: rgba(148, 163, 184, 0.18);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-}
-
-[data-theme="dark"] .consultation-form > .form-section,
-html.dark .consultation-form > .form-section {
-  background: var(--clinic-surface-elevated);
-  border-color: var(--border-color);
-}
-
+/* Consultas / formularios clínicos — glass en darkModeGlass.css */
 [data-theme="dark"] .consultation-form > .form-section h3,
 html.dark .consultation-form > .form-section h3 {
   color: var(--text-primary);
@@ -873,6 +871,68 @@ html.dark .clinic-dashboard-page.clinic-page-guiaa .clinic-dashboard-quick-btn {
 html.dark .clinic-admin-page-guiaa .clinic-admin-support-status.status-open {
   background: rgba(59, 130, 246, 0.18);
   color: #93c5fd;
+}
+
+/* Dashboard principal — overrides finales (App.css + liquidGlass cargan reglas claras) */
+[data-theme="dark"] .dashboard-page .stat-card.bg-card,
+[data-theme="dark"] .dashboard-page .action-card.bg-card,
+html.dark .dashboard-page .stat-card.bg-card,
+html.dark .dashboard-page .action-card.bg-card {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .dashboard-page .stat-card,
+[data-theme="dark"] .dashboard-page .stat-card:nth-child(n),
+html.dark .dashboard-page .stat-card,
+html.dark .dashboard-page .stat-card:nth-child(n) {
+  background: var(--liquid-glass-bg) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .dashboard-page .stat-content h3,
+html.dark .dashboard-page .stat-content h3 {
+  background: none !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card,
+[data-theme="dark"] .dashboard-page .action-card:nth-child(n),
+html.dark .dashboard-page .action-card,
+html.dark .dashboard-page .action-card:nth-child(n) {
+  background: var(--liquid-glass-bg) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card.expert-feature,
+html.dark .dashboard-page .action-card.expert-feature {
+  background: linear-gradient(
+    145deg,
+    rgba(26, 38, 54, 0.92) 0%,
+    rgba(46, 40, 80, 0.55) 100%
+  ) !important;
+  border-color: rgba(99, 102, 241, 0.4) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card h3,
+html.dark .dashboard-page .action-card h3 {
+  background: none !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card p,
+html.dark .dashboard-page .action-card p {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .today-pill-btn:hover:not(:disabled),
+html.dark .today-pill-btn:hover:not(:disabled) {
+  background: rgba(26, 38, 54, 0.9) !important;
+  border-color: rgba(61, 155, 143, 0.35) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

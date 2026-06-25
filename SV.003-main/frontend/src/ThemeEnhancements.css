@@ -27,25 +27,25 @@
 }
 
 [data-theme="dark"] {
-  /* Dark Theme */
-  --bg-primary: #0c0e14;
-  --bg-secondary: #161922;
-  --bg-tertiary: #22262f;
-  --text-primary: #eef0f4;
-  --text-secondary: #b8bcc8;
-  --text-tertiary: #8b919e;
-  --border-color: #343946;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55);
-  --accent-primary: #66bb6a;
-  --accent-secondary: #42a5f5;
-  --accent-danger: #ef5350;
-  --accent-warning: #ffa726;
-  --accent-info: #26c6da;
-  --clinic-surface: #161922;
-  --clinic-surface-elevated: #1e222c;
-  --clinic-surface-muted: #252932;
+  /* Dark Theme — paleta GUIAA navy profunda */
+  --bg-primary: #0a1018;
+  --bg-secondary: #121a26;
+  --bg-tertiary: #1a2433;
+  --text-primary: #f0f4f8;
+  --text-secondary: #a8b4c4;
+  --text-tertiary: #7a8799;
+  --border-color: #2a3548;
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --accent-primary: #3d9b8f;
+  --accent-secondary: #5ba4e6;
+  --accent-danger: #f87171;
+  --accent-warning: #fbbf24;
+  --accent-info: #38bdf8;
+  --clinic-surface: #121a26;
+  --clinic-surface-elevated: #1a2433;
+  --clinic-surface-muted: #222e40;
 }
 
 .info-message {
@@ -1069,10 +1069,11 @@ html.dark .action-icon {
 
 [data-theme="dark"] .action-card h3,
 html.dark .action-card h3 {
-  background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: var(--text-primary);
+  color: var(--text-primary);
 }
 
 [data-theme="dark"] .action-card p,
@@ -1161,7 +1162,7 @@ html.dark .pill-value {
 
 [data-theme="dark"] .dashboard-header h1,
 html.dark .dashboard-header h1 {
-  color: #93c5fd;
+  color: #7dd3c8;
 }
 
 [data-theme="dark"] .dashboard-header p,

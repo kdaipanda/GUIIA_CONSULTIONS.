@@ -1,0 +1,107 @@
+/**
+ * Dashboard — correcciones modo oscuro (carga al final de App.js).
+ * Anula gradientes de texto y fondos claros de App.css / ThemeEnhancements.
+ */
+
+/* KPI: números legibles */
+[data-theme="dark"] .dashboard-page .stat-card .stat-content > h3,
+[data-theme="dark"] .dashboard-page .stat-card .stat-content h3,
+html.dark .dashboard-page .stat-card .stat-content > h3,
+html.dark .dashboard-page .stat-card .stat-content h3 {
+  background: none !important;
+  background-image: none !important;
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+  -webkit-text-fill-color: #f0f4f8 !important;
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .dashboard-page .stat-card .stat-content > p,
+html.dark .dashboard-page .stat-card .stat-content > p {
+  color: #a8b4c4 !important;
+}
+
+[data-theme="dark"] .dashboard-page .stat-card .trend-indicator.up,
+html.dark .dashboard-page .stat-card .trend-indicator.up {
+  color: #86efac !important;
+}
+
+[data-theme="dark"] .dashboard-page .buy-consultations-label,
+[data-theme="dark"] .dashboard-page .progress-text,
+[data-theme="dark"] .dashboard-page .stat-trend,
+html.dark .dashboard-page .buy-consultations-label,
+html.dark .dashboard-page .progress-text,
+html.dark .dashboard-page .stat-trend {
+  color: #a8b4c4 !important;
+}
+
+/* Acciones rápidas: sin barra decorativa */
+.dashboard-page .quick-actions h2::after {
+  display: none;
+}
+
+[data-theme="dark"] .dashboard-page .quick-actions h2,
+html.dark .dashboard-page .quick-actions h2 {
+  color: #f0f4f8 !important;
+}
+
+/* Tarjetas de acción — fondo oscuro (incl. Manejo Experto) */
+[data-theme="dark"] .dashboard-page .action-card.bg-card,
+[data-theme="dark"] .dashboard-page .action-card.expert-feature,
+[data-theme="dark"] .dashboard-page .action-card.expert-feature:not(.premium-locked),
+[data-theme="dark"] .dashboard-page .action-card.expert-feature.premium-locked,
+html.dark .dashboard-page .action-card.bg-card,
+html.dark .dashboard-page .action-card.expert-feature,
+html.dark .dashboard-page .action-card.expert-feature:not(.premium-locked),
+html.dark .dashboard-page .action-card.expert-feature.premium-locked {
+  background: linear-gradient(
+    145deg,
+    rgba(26, 38, 54, 0.92) 0%,
+    rgba(22, 32, 48, 0.85) 100%
+  ) !important;
+  border: 1px solid rgba(255, 255, 255, 0.11) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card.expert-feature:not(.premium-locked),
+html.dark .dashboard-page .action-card.expert-feature:not(.premium-locked) {
+  background: linear-gradient(
+    145deg,
+    rgba(26, 38, 54, 0.92) 0%,
+    rgba(46, 40, 80, 0.58) 100%
+  ) !important;
+  border-color: rgba(99, 102, 241, 0.42) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card.expert-feature.premium-locked,
+html.dark .dashboard-page .action-card.expert-feature.premium-locked {
+  background: linear-gradient(
+    145deg,
+    rgba(26, 38, 54, 0.9) 0%,
+    rgba(68, 48, 16, 0.48) 100%
+  ) !important;
+  border-color: rgba(251, 191, 36, 0.35) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card h3,
+html.dark .dashboard-page .action-card h3 {
+  background: none !important;
+  background-image: none !important;
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+  -webkit-text-fill-color: #f0f4f8 !important;
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card p,
+html.dark .dashboard-page .action-card p {
+  color: #a8b4c4 !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card:hover,
+html.dark .dashboard-page .action-card:hover {
+  border-color: rgba(61, 155, 143, 0.4) !important;
+  box-shadow:
+    0 16px 36px -14px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}

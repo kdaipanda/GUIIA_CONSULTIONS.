@@ -139,9 +139,11 @@
   width: 100%;
   min-width: 0;
   border-radius: 1.25rem;
-  border: 1px solid rgba(12, 45, 77, 0.1);
-  background: #fff;
-  box-shadow: 0 8px 28px rgba(12, 45, 77, 0.08);
+  border: 1px solid var(--liquid-glass-border-color);
+  background: var(--liquid-glass-bg);
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  box-shadow: var(--liquid-glass-shadow-soft);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -322,8 +324,11 @@
   margin: 0 1rem 2rem;
   padding: 2.5rem 1.25rem;
   border-radius: 1.5rem;
-  border: 1px solid rgba(12, 45, 77, 0.08);
-  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--liquid-glass-border-color);
+  background: var(--liquid-glass-bg);
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  box-shadow: var(--liquid-glass-shadow-soft);
   text-align: center;
 }
 
@@ -364,8 +369,10 @@
 .membership-page .info-card {
   padding: 1.5rem 1rem;
   border-radius: 1rem;
-  border: 1px solid rgba(12, 45, 77, 0.08);
-  background: #fff;
+  border: 1px solid var(--liquid-glass-border-color);
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -500,8 +507,11 @@
   margin: 0 1rem 2rem;
   padding: 1.75rem 1.25rem;
   border-radius: 1.25rem;
-  border: 1px solid rgba(38, 91, 147, 0.15);
-  background: linear-gradient(135deg, rgba(232, 244, 252, 0.9), rgba(255, 255, 255, 0.95));
+  border: 1px solid var(--liquid-glass-border-color);
+  background: var(--liquid-glass-bg);
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  box-shadow: var(--liquid-glass-shadow-soft);
 }
 
 .membership-credits-inner {
@@ -542,8 +552,10 @@
   min-width: min(100%, 14rem);
   padding: 1.125rem;
   border-radius: 1rem;
-  border: 1px solid rgba(12, 45, 77, 0.1);
-  background: #fff;
+  border: 1px solid var(--liquid-glass-border-color);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .membership-credit-name {
@@ -578,4 +590,195 @@
     flex-direction: row;
     justify-content: center;
   }
+}
+
+/* —— Modo oscuro —— */
+[data-theme="dark"] .membership-page .membership-hero h1,
+[data-theme="dark"] .membership-page .membership-credits-inner h2,
+[data-theme="dark"] .membership-page .membership-info h2,
+[data-theme="dark"] .membership-page .info-card h3,
+[data-theme="dark"] .membership-page .pricing-header h3,
+[data-theme="dark"] .membership-page .amount,
+[data-theme="dark"] .membership-page .membership-credit-name,
+html.dark .membership-page .membership-hero h1,
+html.dark .membership-page .membership-credits-inner h2,
+html.dark .membership-page .membership-info h2,
+html.dark .membership-page .info-card h3,
+html.dark .membership-page .pricing-header h3,
+html.dark .membership-page .amount,
+html.dark .membership-page .membership-credit-name {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .membership-page .membership-hero p,
+[data-theme="dark"] .membership-page .membership-info > p,
+[data-theme="dark"] .membership-page .info-card p,
+[data-theme="dark"] .membership-page .feature,
+[data-theme="dark"] .membership-page .period,
+[data-theme="dark"] .membership-page .membership-credits-inner > div > p:last-of-type,
+[data-theme="dark"] .membership-page .membership-credit-note,
+[data-theme="dark"] .membership-page .membership-footnote,
+html.dark .membership-page .membership-hero p,
+html.dark .membership-page .membership-info > p,
+html.dark .membership-page .info-card p,
+html.dark .membership-page .feature,
+html.dark .membership-page .period,
+html.dark .membership-page .membership-credits-inner > div > p:last-of-type,
+html.dark .membership-page .membership-credit-note,
+html.dark .membership-page .membership-footnote {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .membership-page .membership-eyebrow,
+html.dark .membership-page .membership-eyebrow {
+  color: #6ee7d9;
+}
+
+[data-theme="dark"] .membership-page .currency,
+[data-theme="dark"] .membership-page .price-equivalent,
+[data-theme="dark"] .membership-page .membership-credit-price,
+[data-theme="dark"] .membership-page .feature-icon,
+html.dark .membership-page .currency,
+html.dark .membership-page .price-equivalent,
+html.dark .membership-page .membership-credit-price,
+html.dark .membership-page .feature-icon {
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .membership-page .membership-credit-price span,
+html.dark .membership-page .membership-credit-price span {
+  color: var(--text-tertiary) !important;
+}
+
+[data-theme="dark"] .membership-page .pricing-card,
+[data-theme="dark"] .membership-page .pricing-card.current,
+[data-theme="dark"] .membership-page .membership-credits,
+[data-theme="dark"] .membership-page .membership-info,
+[data-theme="dark"] .membership-page .info-card,
+[data-theme="dark"] .membership-page .membership-credit-card,
+html.dark .membership-page .pricing-card,
+html.dark .membership-page .pricing-card.current,
+html.dark .membership-page .membership-credits,
+html.dark .membership-page .membership-info,
+html.dark .membership-page .info-card,
+html.dark .membership-page .membership-credit-card {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .membership-page .pricing-card--featured,
+html.dark .membership-page .pricing-card--featured {
+  border-color: rgba(61, 155, 143, 0.45) !important;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(61, 155, 143, 0.15) !important;
+}
+
+[data-theme="dark"] .membership-page .pricing-card.current,
+html.dark .membership-page .pricing-card.current {
+  border-color: rgba(61, 155, 143, 0.5) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(61, 155, 143, 0.12) 0%,
+    rgba(14, 22, 34, 0.78) 100%
+  ) !important;
+}
+
+[data-theme="dark"] .membership-page .pricing-header,
+html.dark .membership-page .pricing-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .billing-toggle-wrapper,
+html.dark .billing-toggle-wrapper {
+  background: rgba(20, 30, 44, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .billing-toggle-btn,
+html.dark .billing-toggle-btn {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .billing-toggle-btn.active,
+html.dark .billing-toggle-btn.active {
+  background: rgba(26, 38, 54, 0.95) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .membership-page .pricing-card .btn-secondary,
+html.dark .membership-page .pricing-card .btn-secondary {
+  background: rgba(20, 30, 44, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .membership-page .pricing-card .btn-secondary:hover:not(:disabled),
+html.dark .membership-page .pricing-card .btn-secondary:hover:not(:disabled) {
+  background: rgba(38, 91, 147, 0.25) !important;
+  border-color: rgba(61, 155, 143, 0.35) !important;
+}
+
+[data-theme="dark"] .membership-page .pricing-card--featured .btn-secondary,
+html.dark .membership-page .pricing-card--featured .btn-secondary {
+  background: linear-gradient(135deg, #3d9b8f 0%, #2f857a 100%) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+}
+
+[data-theme="dark"] .membership-page .btn.btn-secondary,
+html.dark .membership-page .btn.btn-secondary {
+  background: rgba(20, 30, 44, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .membership-page .btn.btn-secondary:hover:not(:disabled),
+html.dark .membership-page .btn.btn-secondary:hover:not(:disabled) {
+  background: rgba(38, 91, 147, 0.28) !important;
+  border-color: rgba(61, 155, 143, 0.35) !important;
+}
+
+[data-theme="dark"] .membership-page .btn.btn-primary,
+html.dark .membership-page .btn.btn-primary {
+  background: linear-gradient(135deg, #3d9b8f 0%, #2f857a 100%) !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+[data-theme="dark"] .membership-page .info-icon-wrap,
+html.dark .membership-page .info-icon-wrap {
+  background: rgba(61, 155, 143, 0.15) !important;
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .membership-module-chip,
+html.dark .membership-module-chip {
+  background: rgba(20, 30, 44, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .membership-status-badge--success,
+html.dark .membership-status-badge--success {
+  background: rgba(61, 155, 143, 0.18) !important;
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .membership-status-badge--warning,
+html.dark .membership-status-badge--warning {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #fcd34d !important;
+}
+
+[data-theme="dark"] .payment-status-card h2,
+html.dark .payment-status-card h2 {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .payment-status-card p,
+html.dark .payment-status-card p {
+  color: var(--text-secondary);
 }

@@ -234,6 +234,65 @@
   background: linear-gradient(135deg, #475569 0%, #64748b 100%);
 }
 
+/* Tarjeta GUIAA — cuerpo con glass suave */
+.history-card-guiaa.history-card {
+  background: var(--liquid-glass-bg);
+  border: 1px solid var(--liquid-glass-border-color);
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  box-shadow: var(--liquid-glass-shadow-soft);
+}
+
+.history-card-guiaa .history-card-body {
+  padding: 1.25rem 1.35rem;
+  background: transparent;
+}
+
+.history-card-guiaa .history-info-item {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(38, 91, 147, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.history-card-guiaa .history-info-icon {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 8px rgba(12, 45, 77, 0.06);
+}
+
+.history-card-guiaa .history-motivo {
+  background: linear-gradient(
+    135deg,
+    rgba(254, 252, 232, 0.85) 0%,
+    rgba(254, 249, 195, 0.65) 100%
+  );
+  border: 1px solid rgba(234, 179, 8, 0.28);
+  border-left: 4px solid #ca8a04;
+}
+
+.history-card-guiaa .history-extra-card.highlight {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 242, 255, 0.85) 0%,
+    rgba(224, 231, 255, 0.6) 100%
+  );
+  border-color: rgba(99, 102, 241, 0.22);
+}
+
+.history-card-guiaa .history-card-footer {
+  background: rgba(248, 250, 252, 0.55);
+  border-top: 1px solid rgba(38, 91, 147, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.history-card-guiaa:hover {
+  border-color: rgba(61, 155, 143, 0.35);
+  box-shadow:
+    0 14px 36px -12px rgba(12, 45, 77, 0.18),
+    var(--liquid-glass-shadow-soft);
+}
+
 .history-info-icon--lucide {
   display: flex;
   align-items: center;
@@ -290,4 +349,414 @@
   .history-stats-row {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+/* —— Modo oscuro: tarjetas de historial —— */
+[data-theme="dark"] .history-page-guiaa,
+html.dark .history-page-guiaa {
+  background:
+    radial-gradient(ellipse 50% 45% at 8% 12%, var(--liquid-glass-teal-wash), transparent 55%),
+    radial-gradient(ellipse 45% 40% at 92% 18%, var(--liquid-glass-purple-wash), transparent 52%),
+    linear-gradient(180deg, #0c1520 0%, #0a1018 100%);
+}
+
+[data-theme="dark"] .history-page-guiaa .history-page-header h1,
+html.dark .history-page-guiaa .history-page-header h1 {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .history-page-guiaa .history-page-header p,
+[data-theme="dark"] .history-results-count,
+html.dark .history-page-guiaa .history-page-header p,
+html.dark .history-results-count {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .history-page-eyebrow,
+html.dark .history-page-eyebrow {
+  color: #6ee7d9;
+}
+
+[data-theme="dark"] .history-stat-pill,
+[data-theme="dark"] .history-empty-state,
+[data-theme="dark"] .history-card-skeleton,
+html.dark .history-stat-pill,
+html.dark .history-empty-state,
+html.dark .history-card-skeleton {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .history-stat-value,
+[data-theme="dark"] .history-empty-state h3,
+html.dark .history-stat-value,
+html.dark .history-empty-state h3 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .history-stat-label,
+[data-theme="dark"] .history-empty-state p,
+html.dark .history-stat-label,
+html.dark .history-empty-state p {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .history-card.history-card-guiaa,
+html.dark .history-card.history-card-guiaa {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa:hover,
+html.dark .history-card-guiaa:hover {
+  border-color: rgba(61, 155, 143, 0.45) !important;
+  box-shadow:
+    0 14px 36px -12px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(61, 155, 143, 0.15) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-card-header,
+html.dark .history-card-guiaa .history-card-header {
+  background: linear-gradient(135deg, #0c2d4d 0%, #265b93 100%) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-card-header.completed,
+html.dark .history-card-guiaa .history-card-header.completed {
+  background: linear-gradient(135deg, #2a7a70 0%, #3d9b8f 100%) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-card-header.in_progress,
+html.dark .history-card-guiaa .history-card-header.in_progress {
+  background: linear-gradient(135deg, #265b93 0%, #3d7eb8 100%) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-card-header.draft,
+html.dark .history-card-guiaa .history-card-header.draft {
+  background: linear-gradient(135deg, #3d4a5c 0%, #52657a 100%) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-card-body,
+html.dark .history-card-guiaa .history-card-body {
+  background: transparent !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-info-item,
+html.dark .history-card-guiaa .history-info-item {
+  background: rgba(20, 30, 44, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-info-icon,
+html.dark .history-card-guiaa .history-info-icon {
+  background: rgba(26, 38, 54, 0.9) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-info-icon--lucide,
+html.dark .history-card-guiaa .history-info-icon--lucide {
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-info-label,
+html.dark .history-card-guiaa .history-info-label {
+  color: var(--text-tertiary) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-info-value,
+html.dark .history-card-guiaa .history-info-value {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-motivo,
+html.dark .history-card-guiaa .history-motivo {
+  background: linear-gradient(
+    135deg,
+    rgba(68, 48, 16, 0.45) 0%,
+    rgba(42, 32, 12, 0.55) 100%
+  ) !important;
+  border-color: rgba(251, 191, 36, 0.22) !important;
+  border-left-color: rgba(251, 191, 36, 0.55) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-motivo-label,
+html.dark .history-card-guiaa .history-motivo-label {
+  color: #fcd34d !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-motivo-text,
+html.dark .history-card-guiaa .history-motivo-text {
+  color: rgba(254, 243, 199, 0.88) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-extra-card,
+html.dark .history-card-guiaa .history-extra-card {
+  background: rgba(20, 30, 44, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-extra-card.highlight,
+html.dark .history-card-guiaa .history-extra-card.highlight {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 40, 68, 0.65) 0%,
+    rgba(22, 32, 52, 0.75) 100%
+  ) !important;
+  border-color: rgba(99, 102, 241, 0.28) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-extra-label,
+html.dark .history-card-guiaa .history-extra-label {
+  color: #a5b4fc !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-extra-card p,
+html.dark .history-card-guiaa .history-extra-card p {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-attachment-pill,
+html.dark .history-card-guiaa .history-attachment-pill {
+  background: rgba(38, 91, 147, 0.22) !important;
+  border-color: rgba(56, 189, 248, 0.28) !important;
+  color: #7dd3fc !important;
+}
+
+[data-theme="dark"] .history-card-guiaa .history-card-footer,
+html.dark .history-card-guiaa .history-card-footer {
+  background: rgba(10, 16, 24, 0.55) !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .history-search-icon,
+html.dark .history-search-icon {
+  color: var(--text-tertiary);
+}
+
+[data-theme="dark"] .history-search-clear,
+html.dark .history-search-clear {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .history-search-clear:hover,
+html.dark .history-search-clear:hover {
+  background: rgba(61, 155, 143, 0.12);
+  color: var(--text-primary);
+}
+
+/* —— Ficha clínica (detalle) —— */
+.history-detail-guiaa.consultation-detail-page {
+  min-height: 100%;
+  background:
+    radial-gradient(ellipse 50% 45% at 8% 12%, rgba(61, 155, 143, 0.11), transparent 55%),
+    radial-gradient(ellipse 45% 40% at 92% 18%, rgba(38, 91, 147, 0.1), transparent 52%),
+    linear-gradient(180deg, #f4f9fc 0%, #eef4f9 100%);
+  padding-bottom: 2rem;
+}
+
+.history-detail-guiaa .clinical-file-header {
+  margin-top: 1rem;
+  border-radius: 1.25rem 1.25rem 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: none;
+  background: linear-gradient(135deg, #0c2d4d 0%, #265b93 100%);
+  box-shadow: 0 8px 28px rgba(12, 45, 77, 0.2);
+}
+
+.history-detail-guiaa .clinical-file-content {
+  background: var(--liquid-glass-bg);
+  border: 1px solid var(--liquid-glass-border-color);
+  border-top: none;
+  border-radius: 0 0 1.25rem 1.25rem;
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  box-shadow: var(--liquid-glass-shadow-soft);
+}
+
+.history-detail-guiaa .clinical-section {
+  border-bottom-color: rgba(38, 91, 147, 0.1);
+  background: transparent;
+}
+
+.history-detail-guiaa .clinical-section-icon {
+  background: rgba(38, 91, 147, 0.08);
+  border-color: rgba(38, 91, 147, 0.15);
+}
+
+.history-detail-guiaa .clinical-data-card {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(38, 91, 147, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.history-detail-guiaa .clinical-data-card:hover {
+  border-color: rgba(61, 155, 143, 0.4);
+  box-shadow: 0 8px 20px rgba(61, 155, 143, 0.1);
+}
+
+.history-detail-guiaa .clinical-text-block {
+  background: linear-gradient(
+    135deg,
+    rgba(254, 252, 232, 0.88) 0%,
+    rgba(254, 249, 195, 0.65) 100%
+  );
+  border: 1px solid rgba(234, 179, 8, 0.28);
+  border-left: 4px solid #ca8a04;
+}
+
+.history-detail-guiaa .clinical-section.analysis {
+  background: linear-gradient(
+    135deg,
+    rgba(240, 253, 244, 0.85) 0%,
+    rgba(220, 252, 231, 0.55) 100%
+  );
+  border-color: rgba(61, 155, 143, 0.28);
+}
+
+.history-detail-guiaa .clinical-analysis-content {
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(38, 91, 147, 0.1);
+}
+
+.history-detail-guiaa .clinical-actions {
+  border-top-color: rgba(38, 91, 147, 0.1);
+}
+
+@media (max-width: 768px) {
+  .history-detail-guiaa .clinical-file-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 1.25rem 1.1rem;
+  }
+
+  .history-detail-guiaa .clinical-file-status {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .history-detail-guiaa .clinical-file-content {
+    padding: 1.25rem 1.1rem;
+  }
+
+  .history-detail-guiaa .clinical-data-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .history-detail-guiaa .clinical-actions-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .history-detail-guiaa .clinical-actions-bar .clinical-action-btn {
+    width: 100%;
+  }
+}
+
+/* Ficha clínica — modo oscuro */
+[data-theme="dark"] .history-detail-guiaa.consultation-detail-page,
+html.dark .history-detail-guiaa.consultation-detail-page {
+  background:
+    radial-gradient(ellipse 50% 45% at 8% 12%, var(--liquid-glass-teal-wash), transparent 55%),
+    radial-gradient(ellipse 45% 40% at 92% 18%, var(--liquid-glass-purple-wash), transparent 52%),
+    linear-gradient(180deg, #0c1520 0%, #0a1018 100%);
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-file-header,
+html.dark .history-detail-guiaa .clinical-file-header {
+  background: linear-gradient(135deg, #0c2d4d 0%, #265b93 100%) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-file-content,
+html.dark .history-detail-guiaa .clinical-file-content {
+  background: rgba(14, 22, 34, 0.78) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-section,
+html.dark .history-detail-guiaa .clinical-section {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  background: transparent !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-section-header h2,
+html.dark .history-detail-guiaa .clinical-section-header h2 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-section-icon,
+html.dark .history-detail-guiaa .clinical-section-icon {
+  background: rgba(38, 91, 147, 0.22) !important;
+  border-color: rgba(61, 155, 143, 0.25) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-data-card,
+html.dark .history-detail-guiaa .clinical-data-card {
+  background: rgba(20, 30, 44, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-data-card:hover,
+html.dark .history-detail-guiaa .clinical-data-card:hover {
+  border-color: rgba(61, 155, 143, 0.45) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .data-label,
+html.dark .history-detail-guiaa .data-label {
+  color: var(--text-tertiary) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .data-value,
+html.dark .history-detail-guiaa .data-value {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-text-block,
+html.dark .history-detail-guiaa .clinical-text-block {
+  background: linear-gradient(
+    135deg,
+    rgba(68, 48, 16, 0.45) 0%,
+    rgba(42, 32, 12, 0.55) 100%
+  ) !important;
+  border-color: rgba(251, 191, 36, 0.22) !important;
+  border-left-color: rgba(251, 191, 36, 0.55) !important;
+  color: rgba(254, 243, 199, 0.9) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-section.analysis,
+html.dark .history-detail-guiaa .clinical-section.analysis {
+  background: linear-gradient(
+    135deg,
+    rgba(20, 48, 44, 0.55) 0%,
+    rgba(14, 32, 28, 0.65) 100%
+  ) !important;
+  border-color: rgba(61, 155, 143, 0.28) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-section.analysis .clinical-section-icon,
+html.dark .history-detail-guiaa .clinical-section.analysis .clinical-section-icon {
+  background: rgba(61, 155, 143, 0.18) !important;
+  border-color: rgba(61, 155, 143, 0.35) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-analysis-content,
+html.dark .history-detail-guiaa .clinical-analysis-content {
+  background: rgba(10, 16, 24, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-analysis-text,
+html.dark .history-detail-guiaa .clinical-analysis-text {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .history-detail-guiaa .clinical-actions,
+html.dark .history-detail-guiaa .clinical-actions {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
 }

@@ -1,0 +1,560 @@
+/**
+ * Landing GUIAA — modo oscuro + liquid glass
+ * Scoped a .landing-shell para no afectar otras vistas.
+ */
+
+/* —— Contenedor exterior e interior —— */
+
+[data-theme="dark"] .landing-shell,
+html.dark .landing-shell {
+  background: linear-gradient(
+    165deg,
+    #060a10 0%,
+    #0a1018 38%,
+    #0c1520 100%
+  ) !important;
+}
+
+[data-theme="dark"] .landing-page-card,
+html.dark .landing-page-card {
+  background: linear-gradient(
+    180deg,
+    rgba(18, 26, 38, 0.92) 0%,
+    rgba(14, 20, 30, 0.88) 100%
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    0 24px 80px -12px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(20px) saturate(1.12);
+  -webkit-backdrop-filter: blur(20px) saturate(1.12);
+}
+
+[data-theme="dark"] .landing-body-wrap,
+html.dark .landing-body-wrap {
+  background:
+    radial-gradient(ellipse 90% 50% at 50% 0%, rgba(61, 155, 143, 0.12), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 100% 40%, rgba(155, 110, 243, 0.08), transparent 52%),
+    linear-gradient(180deg, #0e1622 0%, #0a1018 45%, #0c121c 100%) !important;
+}
+
+[data-theme="dark"] .landing-body-wrap::before,
+html.dark .landing-body-wrap::before {
+  background-image: radial-gradient(rgba(61, 155, 143, 0.08) 1px, transparent 1px);
+  opacity: 0.25;
+}
+
+/* —— Hero (mantiene teal, más profundo) —— */
+
+[data-theme="dark"] .landing-petpal-top,
+html.dark .landing-petpal-top {
+  background: linear-gradient(
+    145deg,
+    #008f8f 0%,
+    #2f857a 40%,
+    #1a4d48 100%
+  );
+}
+
+[data-theme="dark"] .landing-nav-hero.landing-nav-scrolled,
+html.dark .landing-nav-hero.landing-nav-scrolled {
+  background: rgba(10, 16, 24, 0.62) !important;
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Stats bajo el hero */
+[data-theme="dark"] .landing-petpal-stats,
+html.dark .landing-petpal-stats {
+  background: linear-gradient(
+    180deg,
+    rgba(18, 26, 38, 0.95) 0%,
+    rgba(14, 20, 30, 0.9) 100%
+  );
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+[data-theme="dark"] .landing-petpal-stat,
+html.dark .landing-petpal-stat {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .landing-petpal-stat-icon,
+html.dark .landing-petpal-stat-icon {
+  background: rgba(61, 155, 143, 0.22);
+  color: #6ee7d9;
+}
+
+[data-theme="dark"] .landing-petpal-stat-value,
+html.dark .landing-petpal-stat-value {
+  color: #f0f4f8;
+}
+
+[data-theme="dark"] .landing-petpal-stat-desc,
+html.dark .landing-petpal-stat-desc {
+  color: #94a3b8;
+}
+
+/* —— Tipografía y secciones —— */
+
+[data-theme="dark"] .landing-body-wrap .landing-eyebrow,
+html.dark .landing-body-wrap .landing-eyebrow {
+  background: rgba(61, 155, 143, 0.18);
+  color: #6ee7d9;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-section-title,
+html.dark .landing-body-wrap .landing-section-title {
+  color: #f0f4f8;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-lead,
+[data-theme="dark"] .landing-body-wrap .landing-body,
+html.dark .landing-body-wrap .landing-lead,
+html.dark .landing-body-wrap .landing-body {
+  color: #a8b4c4;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-section-alt,
+html.dark .landing-body-wrap .landing-section-alt {
+  background: linear-gradient(
+    180deg,
+    rgba(18, 26, 38, 0.65) 0%,
+    rgba(14, 20, 30, 0.45) 100%
+  ) !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-section-band,
+html.dark .landing-body-wrap .landing-section-band {
+  background: linear-gradient(
+    90deg,
+    rgba(61, 155, 143, 0.12) 0%,
+    rgba(38, 91, 147, 0.08) 50%,
+    rgba(61, 155, 143, 0.12) 100%
+  ) !important;
+}
+
+[data-theme="dark"] .landing-page-card .border-guiaa-brand-navy\/8,
+[data-theme="dark"] .landing-page-card .border-y.border-guiaa-brand-navy\/8,
+[data-theme="dark"] .landing-page-card .border-t.border-guiaa-brand-navy\/8,
+html.dark .landing-page-card .border-guiaa-brand-navy\/8,
+html.dark .landing-page-card .border-y.border-guiaa-brand-navy\/8,
+html.dark .landing-page-card .border-t.border-guiaa-brand-navy\/8 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .landing-page-card .bg-white\/60,
+[data-theme="dark"] .landing-page-card .bg-white\/40,
+[data-theme="dark"] .landing-page-card .bg-white\/95,
+html.dark .landing-page-card .bg-white\/60,
+html.dark .landing-page-card .bg-white\/40,
+html.dark .landing-page-card .bg-white\/95 {
+  background: rgba(18, 26, 38, 0.55) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Textos Tailwind en cuerpo landing */
+[data-theme="dark"] .landing-body-wrap .text-guiaa-brand-navy,
+html.dark .landing-body-wrap .text-guiaa-brand-navy {
+  color: #e8eef4 !important;
+}
+
+[data-theme="dark"] .landing-body-wrap [class*="text-guiaa-brand-navy/"],
+html.dark .landing-body-wrap [class*="text-guiaa-brand-navy/"] {
+  color: #c5d0dc !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .text-guiaa-brand-ink-muted,
+html.dark .landing-body-wrap .text-guiaa-brand-ink-muted {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .text-guiaa-brand-ink-subtle,
+html.dark .landing-body-wrap .text-guiaa-brand-ink-subtle {
+  color: #7a8799 !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .text-guiaa-brand-blue,
+html.dark .landing-body-wrap .text-guiaa-brand-blue {
+  color: #7cb8f0 !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .text-guiaa-brand-green,
+[data-theme="dark"] .landing-body-wrap .text-guiaa-brand-green-dark,
+html.dark .landing-body-wrap .text-guiaa-brand-green,
+html.dark .landing-body-wrap .text-guiaa-brand-green-dark {
+  color: #6ee7d9 !important;
+}
+
+/* —— Flujo clínico —— */
+
+[data-theme="dark"] .landing-clinical-workflow-section,
+html.dark .landing-clinical-workflow-section {
+  background: linear-gradient(
+    180deg,
+    rgba(14, 20, 30, 0.55) 0%,
+    rgba(10, 16, 24, 0.35) 100%
+  ) !important;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-eyebrow,
+html.dark .landing-clinical-workflow-section .landing-eyebrow {
+  background: rgba(61, 155, 143, 0.2);
+  color: #6ee7d9;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-section-title,
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step-title,
+html.dark .landing-clinical-workflow-section .landing-section-title,
+html.dark .landing-clinical-workflow-section .landing-clinical-step-title {
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-lead,
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step-detail,
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-workflow-foot,
+html.dark .landing-clinical-workflow-section .landing-lead,
+html.dark .landing-clinical-workflow-section .landing-clinical-step-detail,
+html.dark .landing-clinical-workflow-section .landing-clinical-workflow-foot {
+  color: #a8b4c4 !important;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-btn-secondary,
+html.dark .landing-clinical-workflow-section .landing-btn-secondary {
+  background: rgba(26, 38, 54, 0.85) !important;
+  border-color: rgba(61, 155, 143, 0.35) !important;
+  color: #c5ebe6 !important;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step,
+html.dark .landing-clinical-workflow-section .landing-clinical-step {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step:nth-child(1),
+html.dark .landing-clinical-workflow-section .landing-clinical-step:nth-child(1) {
+  background: linear-gradient(145deg, rgba(26, 38, 54, 0.92) 0%, rgba(20, 48, 44, 0.58) 100%) !important;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step:nth-child(2),
+html.dark .landing-clinical-workflow-section .landing-clinical-step:nth-child(2) {
+  background: linear-gradient(145deg, rgba(26, 38, 54, 0.92) 0%, rgba(22, 40, 58, 0.55) 100%) !important;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step:nth-child(3),
+html.dark .landing-clinical-workflow-section .landing-clinical-step:nth-child(3) {
+  background: linear-gradient(145deg, rgba(26, 38, 54, 0.92) 0%, rgba(48, 36, 28, 0.5) 100%) !important;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step:nth-child(4),
+html.dark .landing-clinical-workflow-section .landing-clinical-step:nth-child(4) {
+  background: linear-gradient(145deg, rgba(26, 38, 54, 0.92) 0%, rgba(36, 30, 58, 0.52) 100%) !important;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step:nth-child(5),
+html.dark .landing-clinical-workflow-section .landing-clinical-step:nth-child(5) {
+  background: linear-gradient(145deg, rgba(26, 38, 54, 0.92) 0%, rgba(52, 40, 24, 0.48) 100%) !important;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step:nth-child(6),
+html.dark .landing-clinical-workflow-section .landing-clinical-step:nth-child(6) {
+  background: linear-gradient(145deg, rgba(26, 38, 54, 0.92) 0%, rgba(24, 36, 52, 0.55) 100%) !important;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step-num,
+html.dark .landing-clinical-workflow-section .landing-clinical-step-num {
+  color: #6ee7d9;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step-icon,
+html.dark .landing-clinical-workflow-section .landing-clinical-step-icon {
+  background: rgba(61, 155, 143, 0.2);
+  color: #7dd3fc;
+}
+
+/* Tarjetas y componentes (genérico) */
+
+[data-theme="dark"] .landing-body-wrap .landing-card,
+[data-theme="dark"] .landing-body-wrap .landing-how-step,
+[data-theme="dark"] .landing-body-wrap .landing-clinical-step,
+[data-theme="dark"] .landing-testimonial-card,
+html.dark .landing-body-wrap .landing-card,
+html.dark .landing-body-wrap .landing-how-step,
+html.dark .landing-body-wrap .landing-clinical-step,
+html.dark .landing-testimonial-card {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-card-interactive:hover,
+html.dark .landing-body-wrap .landing-card-interactive:hover {
+  border-color: rgba(61, 155, 143, 0.35) !important;
+  box-shadow: 0 16px 40px -16px rgba(61, 155, 143, 0.2) !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-btn-secondary,
+html.dark .landing-body-wrap .landing-btn-secondary {
+  background: rgba(26, 38, 54, 0.75) !important;
+  border-color: rgba(61, 155, 143, 0.3) !important;
+  color: #c5ebe6 !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-btn-ghost,
+html.dark .landing-body-wrap .landing-btn-ghost {
+  color: #a8b4c4 !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-btn-ghost:hover,
+html.dark .landing-body-wrap .landing-btn-ghost:hover {
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-service-pill,
+html.dark .landing-body-wrap .landing-service-pill {
+  background: rgba(26, 38, 54, 0.75);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-stat-panel,
+[data-theme="dark"] .landing-body-wrap .landing-trust-banner,
+html.dark .landing-body-wrap .landing-stat-panel,
+html.dark .landing-body-wrap .landing-trust-banner {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-pricing-featured,
+html.dark .landing-body-wrap .landing-pricing-featured {
+  border-color: rgba(61, 155, 143, 0.35) !important;
+  box-shadow: 0 20px 50px -20px rgba(61, 155, 143, 0.2) !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-product-frame,
+html.dark .landing-body-wrap .landing-product-frame {
+  background: linear-gradient(
+    145deg,
+    rgba(61, 155, 143, 0.15),
+    rgba(38, 91, 147, 0.12)
+  );
+  box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-product-frame-inner,
+html.dark .landing-body-wrap .landing-product-frame-inner {
+  background: #0e1622;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-clinical-note,
+html.dark .landing-body-wrap .landing-clinical-note {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-clinical-note-label,
+html.dark .landing-body-wrap .landing-clinical-note-label {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-clinical-note-value,
+html.dark .landing-body-wrap .landing-clinical-note-value {
+  color: #f0f4f8;
+}
+
+/* Banda Plumitas */
+[data-theme="dark"] .landing-brand-band,
+html.dark .landing-brand-band {
+  border-block-color: rgba(61, 155, 143, 0.2);
+  background: linear-gradient(
+    180deg,
+    rgba(61, 155, 143, 0.1) 0%,
+    rgba(18, 26, 38, 0.85) 100%
+  );
+}
+
+[data-theme="dark"] .landing-brand-band strong,
+html.dark .landing-brand-band strong {
+  color: #f0f4f8;
+}
+
+[data-theme="dark"] .landing-brand-band span,
+html.dark .landing-brand-band span {
+  color: #94a3b8;
+}
+
+/* Testimonios — blobs más suaves; tarjetas coloridas se mantienen */
+[data-theme="dark"] .landing-colleagues-section::before,
+html.dark .landing-colleagues-section::before {
+  opacity: 0.55;
+}
+
+[data-theme="dark"] .landing-colleagues-disclaimer,
+html.dark .landing-colleagues-disclaimer {
+  color: #7a8799;
+}
+
+/* Especies */
+[data-theme="dark"] .landing-species-glass-section,
+html.dark .landing-species-glass-section {
+  background: linear-gradient(
+    180deg,
+    rgba(18, 26, 38, 0.7) 0%,
+    rgba(14, 20, 30, 0.5) 100%
+  ) !important;
+}
+
+[data-theme="dark"] .landing-species-glass-section::before,
+html.dark .landing-species-glass-section::before {
+  opacity: 0.7;
+}
+
+[data-theme="dark"] .landing-species-chip.category-card--liquid,
+html.dark .landing-species-chip.category-card--liquid {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .landing-species-chip:hover,
+html.dark .landing-species-chip:hover {
+  background: rgba(61, 155, 143, 0.2) !important;
+  border-color: rgba(61, 155, 143, 0.4) !important;
+}
+
+/* Guía consultas */
+[data-theme="dark"] .landing-guia-consultas-panel,
+html.dark .landing-guia-consultas-panel {
+  background: var(--liquid-glass-bg-strong) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+[data-theme="dark"] .landing-guia-consultas-copy,
+html.dark .landing-guia-consultas-copy {
+  background: linear-gradient(165deg, #141e2c 0%, #101820 100%) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .landing-guia-consultas-title,
+html.dark .landing-guia-consultas-title {
+  color: #f0f4f8;
+}
+
+[data-theme="dark"] .landing-guia-consultas-eyebrow,
+[data-theme="dark"] .landing-guia-consultas-lead,
+html.dark .landing-guia-consultas-eyebrow,
+html.dark .landing-guia-consultas-lead {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .landing-guia-consultas-form-col,
+[data-theme="dark"] .landing-guia-consultas-form-wrap,
+html.dark .landing-guia-consultas-form-col,
+html.dark .landing-guia-consultas-form-wrap {
+  background: rgba(14, 20, 30, 0.5);
+}
+
+[data-theme="dark"] .landing-guia-input,
+[data-theme="dark"] .landing-guia-textarea,
+html.dark .landing-guia-input,
+html.dark .landing-guia-textarea {
+  background: rgba(10, 16, 24, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .landing-guia-value-prop,
+[data-theme="dark"] .landing-guia-form-kicker,
+html.dark .landing-guia-value-prop,
+html.dark .landing-guia-form-kicker {
+  color: #f0f4f8;
+}
+
+[data-theme="dark"] .landing-guia-form-sub,
+[data-theme="dark"] .landing-guia-privacy,
+html.dark .landing-guia-form-sub,
+html.dark .landing-guia-privacy {
+  color: #94a3b8;
+}
+
+/* FAQ */
+[data-theme="dark"] .landing-body-wrap .landing-card.overflow-hidden.rounded-xl button:hover,
+html.dark .landing-body-wrap .landing-card.overflow-hidden.rounded-xl button:hover {
+  background: rgba(61, 155, 143, 0.1) !important;
+}
+
+/* CTA — mantiene gradiente teal; refuerzo sombra */
+[data-theme="dark"] .landing-cta-panel-v2,
+html.dark .landing-cta-panel-v2 {
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.5);
+}
+
+/* Footer — ya oscuro; unificar con shell */
+[data-theme="dark"] .landing-footer-v2,
+html.dark .landing-footer-v2 {
+  background: linear-gradient(180deg, #0a1018 0%, #060a10 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Rail social y barra móvil */
+[data-theme="dark"] .landing-rail,
+html.dark .landing-rail {
+  background: rgba(18, 26, 38, 0.88) !important;
+  border-color: rgba(61, 155, 143, 0.25) !important;
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  box-shadow: var(--liquid-glass-shadow-soft);
+}
+
+[data-theme="dark"] .landing-rail a,
+[data-theme="dark"] .landing-rail button,
+html.dark .landing-rail a,
+html.dark .landing-rail button {
+  color: #a8b4c4 !important;
+}
+
+[data-theme="dark"] .landing-rail a:hover,
+[data-theme="dark"] .landing-rail button:hover,
+html.dark .landing-rail a:hover,
+html.dark .landing-rail button:hover {
+  background: rgba(61, 155, 143, 0.15) !important;
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .landing-mobile-bar,
+html.dark .landing-mobile-bar {
+  background: rgba(14, 20, 30, 0.96) !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Preview app embebido */
+[data-theme="dark"] .landing-app-preview-page .category-selector-glass-panel,
+html.dark .landing-app-preview-page .category-selector-glass-panel {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .landing-app-preview-page .consultation-form-container,
+html.dark .landing-app-preview-page .consultation-form-container {
+  background: var(--liquid-glass-bg-strong) !important;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-theme="dark"] .landing-page-card,
+  [data-theme="dark"] .landing-body-wrap .landing-card,
+  html.dark .landing-page-card,
+  html.dark .landing-body-wrap .landing-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}

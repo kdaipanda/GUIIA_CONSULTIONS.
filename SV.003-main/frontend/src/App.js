@@ -15,6 +15,7 @@ import "./styles/premiumMotion.css";
 import "./styles/clinicMobileFixes.css";
 import "./styles/consultationFlow.css";
 import "./PlatformOnboarding.css";
+import "./styles/dashboardDarkMode.css";
 import {
   createConsultationSupabase,
   listConsultationsSupabase,

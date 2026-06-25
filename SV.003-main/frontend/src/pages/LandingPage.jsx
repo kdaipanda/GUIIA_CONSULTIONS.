@@ -10,6 +10,7 @@ import "./landing/landingVetAnimations.css";
 import "./landing/landingColleaguesBento.css";
 import "./landing/landingHero3d.css";
 import "./landing/landingInteractions.css";
+import "./landing/landingDarkMode.css";
 
 import { LandingNavbar } from "./landing/LandingNavbar";
 import { LandingHero } from "./landing/LandingHero";

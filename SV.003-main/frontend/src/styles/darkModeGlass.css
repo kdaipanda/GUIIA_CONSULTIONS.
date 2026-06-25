@@ -1,0 +1,1071 @@
+/**
+ * GUIAA — Modo oscuro + liquid glass
+ * Overrides para paneles glass en tema dark (después de liquidGlass.css)
+ */
+
+[data-theme="dark"] .header,
+html.dark .header {
+  background: linear-gradient(
+    180deg,
+    rgba(18, 26, 38, 0.88) 0%,
+    rgba(12, 18, 28, 0.78) 100%
+  ) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(1.15) !important;
+  box-shadow:
+    0 8px 32px -16px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .header.scrolled,
+html.dark .header.scrolled {
+  background: linear-gradient(
+    180deg,
+    rgba(22, 32, 48, 0.94) 0%,
+    rgba(14, 22, 34, 0.9) 100%
+  ) !important;
+  border-bottom-color: rgba(61, 155, 143, 0.15) !important;
+}
+
+[data-theme="dark"] .nav-menu.mobile-open,
+html.dark .nav-menu.mobile-open {
+  background: linear-gradient(
+    165deg,
+    rgba(26, 38, 54, 0.96) 0%,
+    rgba(16, 24, 36, 0.92) 100%
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .icon-btn,
+html.dark .icon-btn {
+  background: rgba(26, 38, 54, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary) !important;
+  box-shadow:
+    0 4px 12px -6px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .notification-panel,
+html.dark .notification-panel {
+  background: var(--liquid-glass-bg-strong) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .notification-panel-header,
+html.dark .notification-panel-header {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* —— Páginas principales —— */
+
+[data-theme="dark"] .dashboard-page,
+html.dark .dashboard-page {
+  background:
+    radial-gradient(ellipse 55% 45% at 10% 8%, var(--liquid-glass-teal-wash), transparent 58%),
+    radial-gradient(ellipse 50% 42% at 90% 12%, var(--liquid-glass-purple-wash), transparent 55%),
+    radial-gradient(ellipse 45% 40% at 50% 100%, var(--liquid-glass-blue-wash), transparent 60%),
+    linear-gradient(180deg, #0a1018 0%, #0e1622 50%, #0a1018 100%) !important;
+}
+
+[data-theme="dark"] .consultation-page,
+html.dark .consultation-page {
+  background:
+    radial-gradient(ellipse 70% 55% at 8% 12%, rgba(61, 155, 143, 0.14), transparent 52%),
+    radial-gradient(ellipse 65% 50% at 92% 18%, rgba(155, 110, 243, 0.12), transparent 48%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(38, 91, 147, 0.1), transparent 55%),
+    linear-gradient(180deg, #0c1520 0%, #0a1018 100%) !important;
+}
+
+[data-theme="dark"] .history-page,
+[data-theme="dark"] .history-page-guiaa,
+html.dark .history-page,
+html.dark .history-page-guiaa {
+  background:
+    radial-gradient(ellipse 60% 50% at 0% 20%, var(--liquid-glass-teal-wash), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 100% 30%, var(--liquid-glass-purple-wash), transparent 52%),
+    linear-gradient(180deg, #0c1520 0%, #0a1018 100%) !important;
+}
+
+[data-theme="dark"] .history-page-eyebrow,
+html.dark .history-page-eyebrow {
+  color: #6ee7d9;
+}
+
+[data-theme="dark"] .history-page-header h1,
+[data-theme="dark"] .history-stat-value,
+html.dark .history-page-header h1,
+html.dark .history-stat-value {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .history-page-header p,
+[data-theme="dark"] .history-stat-label,
+html.dark .history-page-header p,
+html.dark .history-stat-label {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .medical-images-page-guiaa,
+html.dark .medical-images-page-guiaa {
+  background:
+    radial-gradient(ellipse 50% 45% at 10% 15%, var(--liquid-glass-teal-wash), transparent 55%),
+    radial-gradient(ellipse 45% 40% at 90% 25%, var(--liquid-glass-blue-wash), transparent 52%),
+    linear-gradient(180deg, #0c1520 0%, #0a1018 100%) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-images-header h1,
+html.dark .medical-images-page-guiaa .medical-images-header h1 {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-images-header p,
+html.dark .medical-images-page-guiaa .medical-images-header p {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .clinic-page-guiaa,
+html.dark .clinic-page-guiaa {
+  background:
+    radial-gradient(ellipse 50% 45% at 5% 12%, var(--liquid-glass-teal-wash), transparent 55%),
+    radial-gradient(ellipse 45% 40% at 95% 18%, var(--liquid-glass-blue-wash), transparent 52%),
+    linear-gradient(180deg, #0c1520 0%, #0a1018 100%);
+}
+
+[data-theme="dark"] .membership-page,
+html.dark .membership-page {
+  background:
+    radial-gradient(ellipse 55% 50% at 15% 10%, var(--liquid-glass-teal-wash), transparent 55%),
+    radial-gradient(ellipse 50% 45% at 85% 20%, var(--liquid-glass-purple-wash), transparent 52%),
+    linear-gradient(180deg, #0a1018 0%, #0e1622 100%) !important;
+}
+
+/* —— Paneles glass —— */
+
+[data-theme="dark"] .consultation-form-container,
+[data-theme="dark"] .consultation-sidebar,
+[data-theme="dark"] .consultation-form > .form-section:not(.category-selector-glass-wrap),
+[data-theme="dark"] .step-indicator,
+[data-theme="dark"] .consultation-mobile-context,
+[data-theme="dark"] .patient-antecedents,
+[data-theme="dark"] .analysis-prompt,
+[data-theme="dark"] .analysis-content,
+html.dark .consultation-form-container,
+html.dark .consultation-sidebar,
+html.dark .consultation-form > .form-section:not(.category-selector-glass-wrap),
+html.dark .step-indicator,
+html.dark .consultation-mobile-context,
+html.dark .patient-antecedents,
+html.dark .analysis-prompt,
+html.dark .analysis-content {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .consultation-form-container,
+html.dark .consultation-form-container {
+  background: var(--liquid-glass-bg-strong) !important;
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+[data-theme="dark"] .consultation-form textarea,
+[data-theme="dark"] .consultation-form input[type="text"],
+[data-theme="dark"] .consultation-form input[type="number"],
+[data-theme="dark"] .consultation-form input[type="date"],
+[data-theme="dark"] .consultation-form select,
+html.dark .consultation-form textarea,
+html.dark .consultation-form input[type="text"],
+html.dark .consultation-form input[type="number"],
+html.dark .consultation-form input[type="date"],
+html.dark .consultation-form select {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+[data-theme="dark"] .consultation-form textarea:focus,
+[data-theme="dark"] .consultation-form input:focus,
+[data-theme="dark"] .consultation-form select:focus,
+html.dark .consultation-form textarea:focus,
+html.dark .consultation-form input:focus,
+html.dark .consultation-form select:focus {
+  border-color: rgba(61, 155, 143, 0.5) !important;
+  box-shadow:
+    0 0 0 2px rgba(61, 155, 143, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .step-icon-wrapper,
+html.dark .step-icon-wrapper {
+  background: rgba(26, 38, 54, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .step.active .step-icon-wrapper,
+html.dark .step.active .step-icon-wrapper {
+  background: linear-gradient(145deg, rgba(61, 155, 143, 0.35), rgba(26, 38, 54, 0.9)) !important;
+  border-color: rgba(61, 155, 143, 0.5) !important;
+}
+
+[data-theme="dark"] .category-selector-glass-badge,
+html.dark .category-selector-glass-badge {
+  color: #6ee7d9;
+  background: var(--liquid-glass-teal-fill);
+  border-color: var(--liquid-glass-teal);
+}
+
+[data-theme="dark"] .category-selector-glass-panel,
+html.dark .category-selector-glass-panel {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .category-card--liquid,
+html.dark .category-card--liquid {
+  background: linear-gradient(
+    135deg,
+    rgba(26, 38, 54, 0.85) 0%,
+    rgba(18, 28, 42, 0.72) 100%
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .category-card--liquid .category-label,
+[data-theme="dark"] .category-card--liquid h4,
+html.dark .category-card--liquid .category-label,
+html.dark .category-card--liquid h4 {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .category-card--liquid.selected,
+html.dark .category-card--liquid.selected {
+  background: var(--liquid-glass-teal-fill) !important;
+  border-color: var(--liquid-glass-teal) !important;
+}
+
+[data-theme="dark"] .category-card--liquid.selected .category-label,
+[data-theme="dark"] .category-card--liquid.selected h4,
+html.dark .category-card--liquid.selected .category-label,
+html.dark .category-card--liquid.selected h4 {
+  color: #a7f3ec;
+}
+
+/* —— Dashboard —— */
+
+[data-theme="dark"] .action-card,
+[data-theme="dark"] .dashboard-activity-card,
+[data-theme="dark"] .dashboard-shortcut-card,
+[data-theme="dark"] .dashboard-followup-item,
+[data-theme="dark"] .dashboard-page .dashboard-block,
+html.dark .action-card,
+html.dark .dashboard-activity-card,
+html.dark .dashboard-shortcut-card,
+html.dark .dashboard-followup-item,
+html.dark .dashboard-page .dashboard-block {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .action-card:nth-child(3n + 1),
+html.dark .action-card:nth-child(3n + 1) {
+  background: linear-gradient(
+    145deg,
+    rgba(26, 38, 54, 0.88) 0%,
+    rgba(20, 48, 44, 0.55) 100%
+  ) !important;
+}
+
+[data-theme="dark"] .action-card:nth-child(3n + 2),
+html.dark .action-card:nth-child(3n + 2) {
+  background: linear-gradient(
+    145deg,
+    rgba(26, 38, 54, 0.88) 0%,
+    rgba(36, 30, 58, 0.5) 100%
+  ) !important;
+}
+
+[data-theme="dark"] .action-card:nth-child(3n),
+html.dark .action-card:nth-child(3n) {
+  background: linear-gradient(
+    145deg,
+    rgba(26, 38, 54, 0.88) 0%,
+    rgba(48, 36, 28, 0.48) 100%
+  ) !important;
+}
+
+[data-theme="dark"] .action-card h3,
+[data-theme="dark"] .action-card p,
+html.dark .action-card h3,
+html.dark .action-card p {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .stat-card,
+html.dark .stat-card {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .stat-card h3,
+html.dark .stat-card h3 {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .stat-card p,
+html.dark .stat-card p {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .today-summary-panel,
+html.dark .today-summary-panel {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .today-pill,
+html.dark .today-pill {
+  background: rgba(18, 26, 38, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .today-title,
+[data-theme="dark"] .today-subtitle,
+html.dark .today-title,
+html.dark .today-subtitle {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .pill-label,
+html.dark .pill-label {
+  color: var(--text-tertiary);
+}
+
+[data-theme="dark"] .pill-value,
+html.dark .pill-value {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .dashboard-page .dashboard-header,
+[data-theme="dark"] .dashboard-page .dashboard-header-toolbar,
+html.dark .dashboard-page .dashboard-header,
+html.dark .dashboard-page .dashboard-header-toolbar {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .dashboard-page .stat-card,
+[data-theme="dark"] .dashboard-page .stat-card:nth-child(1),
+[data-theme="dark"] .dashboard-page .stat-card:nth-child(2),
+[data-theme="dark"] .dashboard-page .stat-card:nth-child(3),
+[data-theme="dark"] .dashboard-page .stat-card:nth-child(4),
+html.dark .dashboard-page .stat-card,
+html.dark .dashboard-page .stat-card:nth-child(1),
+html.dark .dashboard-page .stat-card:nth-child(2),
+html.dark .dashboard-page .stat-card:nth-child(3),
+html.dark .dashboard-page .stat-card:nth-child(4) {
+  background: var(--liquid-glass-bg) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate));
+}
+
+[data-theme="dark"] .dashboard-page .stat-content h3,
+html.dark .dashboard-page .stat-content h3 {
+  background: none !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .dashboard-page .stat-content p,
+[data-theme="dark"] .dashboard-page .stat-trend,
+[data-theme="dark"] .dashboard-page .progress-text,
+html.dark .dashboard-page .stat-content p,
+html.dark .dashboard-page .stat-trend,
+html.dark .dashboard-page .progress-text {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .dashboard-page .buy-consultations-label,
+html.dark .dashboard-page .buy-consultations-label {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .dashboard-page .progress-bar,
+html.dark .dashboard-page .progress-bar {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .dashboard-page .stat-icon,
+html.dark .dashboard-page .stat-icon {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 58, 138, 0.4) 0%,
+    rgba(29, 78, 216, 0.28) 100%
+  ) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+  color: #93c5fd !important;
+}
+
+[data-theme="dark"] .dashboard-page .stat-card:nth-child(2) .stat-icon,
+html.dark .dashboard-page .stat-card:nth-child(2) .stat-icon {
+  background: linear-gradient(
+    135deg,
+    rgba(22, 101, 52, 0.4) 0%,
+    rgba(34, 197, 94, 0.25) 100%
+  ) !important;
+  color: #86efac !important;
+}
+
+[data-theme="dark"] .dashboard-page .stat-card:nth-child(3) .stat-icon,
+html.dark .dashboard-page .stat-card:nth-child(3) .stat-icon {
+  background: linear-gradient(
+    135deg,
+    rgba(120, 53, 15, 0.45) 0%,
+    rgba(245, 158, 11, 0.28) 100%
+  ) !important;
+  color: #fcd34d !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card,
+[data-theme="dark"] .dashboard-page .action-card:nth-child(3n + 1),
+[data-theme="dark"] .dashboard-page .action-card:nth-child(3n + 2),
+[data-theme="dark"] .dashboard-page .action-card:nth-child(3n),
+html.dark .dashboard-page .action-card,
+html.dark .dashboard-page .action-card:nth-child(3n + 1),
+html.dark .dashboard-page .action-card:nth-child(3n + 2),
+html.dark .dashboard-page .action-card:nth-child(3n) {
+  background: var(--liquid-glass-bg) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+}
+
+[data-theme="dark"] .dashboard-page .action-card:nth-child(3n + 1),
+html.dark .dashboard-page .action-card:nth-child(3n + 1) {
+  background: linear-gradient(
+    145deg,
+    rgba(26, 38, 54, 0.9) 0%,
+    rgba(20, 48, 44, 0.55) 100%
+  ) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card:nth-child(3n + 2),
+html.dark .dashboard-page .action-card:nth-child(3n + 2) {
+  background: linear-gradient(
+    145deg,
+    rgba(26, 38, 54, 0.9) 0%,
+    rgba(40, 34, 68, 0.52) 100%
+  ) !important;
+  border-color: rgba(99, 102, 241, 0.35) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card:nth-child(3n),
+html.dark .dashboard-page .action-card:nth-child(3n) {
+  background: linear-gradient(
+    145deg,
+    rgba(26, 38, 54, 0.9) 0%,
+    rgba(48, 36, 28, 0.48) 100%
+  ) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card.expert-feature:not(.premium-locked),
+html.dark .dashboard-page .action-card.expert-feature:not(.premium-locked) {
+  background: linear-gradient(
+    145deg,
+    rgba(26, 38, 54, 0.92) 0%,
+    rgba(46, 40, 80, 0.58) 100%
+  ) !important;
+  border-color: rgba(99, 102, 241, 0.45) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card.expert-feature.premium-locked,
+html.dark .dashboard-page .action-card.expert-feature.premium-locked {
+  background: linear-gradient(
+    145deg,
+    rgba(26, 38, 54, 0.88) 0%,
+    rgba(68, 48, 16, 0.45) 100%
+  ) !important;
+  border-color: rgba(251, 191, 36, 0.35) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card h3,
+html.dark .dashboard-page .action-card h3 {
+  background: none !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card p,
+html.dark .dashboard-page .action-card p {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-icon,
+html.dark .dashboard-page .action-icon {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 58, 138, 0.42) 0%,
+    rgba(29, 78, 216, 0.3) 100%
+  ) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+  color: #93c5fd !important;
+}
+
+[data-theme="dark"] .dashboard-page .action-card.expert-feature .action-icon,
+html.dark .dashboard-page .action-card.expert-feature .action-icon {
+  background: linear-gradient(
+    135deg,
+    rgba(67, 56, 202, 0.45) 0%,
+    rgba(99, 102, 241, 0.32) 100%
+  ) !important;
+  color: #c7d2fe !important;
+}
+
+[data-theme="dark"] .dashboard-page .dashboard-block-actions,
+html.dark .dashboard-page .dashboard-block-actions {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* —— Historial —— */
+
+[data-theme="dark"] .history-card-guiaa,
+[data-theme="dark"] .history-detail-guiaa .clinical-section,
+[data-theme="dark"] .history-detail-guiaa .clinical-file-header,
+[data-theme="dark"] .history-stat-pill,
+[data-theme="dark"] .history-toolbar,
+html.dark .history-card-guiaa,
+html.dark .history-detail-guiaa .clinical-section,
+html.dark .history-detail-guiaa .clinical-file-header,
+html.dark .history-stat-pill,
+html.dark .history-toolbar {
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+/* Fondo de tarjeta completo: consultationHistoryPage.css (preserva cabecera teal) */
+
+[data-theme="dark"] .history-filter-tab,
+html.dark .history-filter-tab {
+  background: rgba(26, 38, 54, 0.75);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .history-filter-tab.is-active,
+html.dark .history-filter-tab.is-active {
+  background: var(--liquid-glass-teal-fill);
+  border-color: var(--liquid-glass-teal);
+  color: #a7f3ec;
+}
+
+[data-theme="dark"] .history-search-input,
+html.dark .history-search-input {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary) !important;
+}
+
+/* —— Clínica —— */
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-stat-pill,
+[data-theme="dark"] .clinic-page-guiaa .clinic-empty-guiaa,
+[data-theme="dark"] .clinic-page-guiaa .clinic-table-wrap,
+[data-theme="dark"] .clinic-page-guiaa .clinic-form,
+[data-theme="dark"] .clinic-page-guiaa .clinic-detail,
+[data-theme="dark"] .clinic-page-guiaa .clinic-settings-card,
+[data-theme="dark"] .clinic-page-guiaa .clinic-toolbar,
+[data-theme="dark"] .clinic-page-guiaa .clinic-search,
+html.dark .clinic-page-guiaa .clinic-stat-pill,
+html.dark .clinic-page-guiaa .clinic-empty-guiaa,
+html.dark .clinic-page-guiaa .clinic-table-wrap,
+html.dark .clinic-page-guiaa .clinic-form,
+html.dark .clinic-page-guiaa .clinic-detail,
+html.dark .clinic-page-guiaa .clinic-settings-card,
+html.dark .clinic-page-guiaa .clinic-toolbar,
+html.dark .clinic-page-guiaa .clinic-search {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-quick-chip,
+html.dark .clinic-page-guiaa .clinic-quick-chip {
+  background: rgba(26, 38, 54, 0.75);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-quick-chip.is-active,
+html.dark .clinic-page-guiaa .clinic-quick-chip.is-active {
+  background: var(--liquid-glass-teal-fill);
+  border-color: var(--liquid-glass-teal);
+}
+
+[data-theme="dark"] .clinic-sale-section,
+[data-theme="dark"] .clinic-sale-summary,
+html.dark .clinic-sale-section,
+html.dark .clinic-sale-summary {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .clinic-dialog,
+[data-theme="dark"] .clinic-dialog-compact,
+html.dark .clinic-dialog,
+html.dark .clinic-dialog-compact {
+  background: var(--liquid-glass-bg-strong) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+[data-theme="dark"] .clinic-dialog-header,
+html.dark .clinic-dialog-header {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* —— Laboratorio —— */
+
+[data-theme="dark"] .medical-images-page-guiaa .image-interpretation-form,
+[data-theme="dark"] .medical-images-page-guiaa .interpretation-result,
+[data-theme="dark"] .medical-images-page-guiaa .history-card,
+[data-theme="dark"] .medical-images-page-guiaa .medical-images-header,
+[data-theme="dark"] .medical-images-page-guiaa .image-type-selector,
+[data-theme="dark"] .medical-images-page-guiaa .type-option,
+[data-theme="dark"] .medical-images-page-guiaa .upload-zone,
+[data-theme="dark"] .image-side-panel.medical-lab-summary,
+html.dark .medical-images-page-guiaa .image-interpretation-form,
+html.dark .medical-images-page-guiaa .interpretation-result,
+html.dark .medical-images-page-guiaa .history-card,
+html.dark .medical-images-page-guiaa .medical-images-header,
+html.dark .medical-images-page-guiaa .image-type-selector,
+html.dark .medical-images-page-guiaa .type-option,
+html.dark .medical-images-page-guiaa .upload-zone,
+html.dark .image-side-panel.medical-lab-summary {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .type-option.selected,
+html.dark .medical-images-page-guiaa .type-option.selected {
+  background: var(--liquid-glass-teal-fill) !important;
+  border-color: var(--liquid-glass-teal) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .image-type-selector,
+html.dark .medical-images-page-guiaa .image-type-selector {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-images-eyebrow,
+html.dark .medical-images-page-guiaa .medical-images-eyebrow {
+  color: #6ee7d9;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-form-inner .form-section,
+html.dark .medical-images-page-guiaa .medical-lab-form-inner .form-section {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-form-inner .form-section:hover,
+html.dark .medical-images-page-guiaa .medical-lab-form-inner .form-section:hover {
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  transform: none;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-form-inner .form-section h3,
+html.dark .medical-images-page-guiaa .medical-lab-form-inner .form-section h3 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .type-option span,
+html.dark .medical-images-page-guiaa .type-option span {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .type-option:not(.selected),
+html.dark .medical-images-page-guiaa .type-option:not(.selected) {
+  background: rgba(20, 30, 44, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .clinic-quick-chip,
+html.dark .medical-images-page-guiaa .clinic-quick-chip {
+  background: rgba(20, 30, 44, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .clinic-quick-chip.is-active,
+html.dark .medical-images-page-guiaa .clinic-quick-chip.is-active {
+  background: var(--liquid-glass-teal-fill) !important;
+  border-color: var(--liquid-glass-teal) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .form-group label,
+[data-theme="dark"] .medical-images-page-guiaa .patient-selector label,
+html.dark .medical-images-page-guiaa .form-group label,
+html.dark .medical-images-page-guiaa .patient-selector label {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .patient-selector,
+html.dark .medical-images-page-guiaa .patient-selector {
+  background: rgba(20, 30, 44, 0.65) !important;
+  border-color: rgba(61, 155, 143, 0.22) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa input[type="text"],
+[data-theme="dark"] .medical-images-page-guiaa textarea,
+html.dark .medical-images-page-guiaa input[type="text"],
+html.dark .medical-images-page-guiaa textarea {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa input[type="text"]::placeholder,
+[data-theme="dark"] .medical-images-page-guiaa textarea::placeholder,
+html.dark .medical-images-page-guiaa input[type="text"]::placeholder,
+html.dark .medical-images-page-guiaa textarea::placeholder {
+  color: rgba(240, 244, 248, 0.38) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-upload-zone,
+html.dark .medical-images-page-guiaa .medical-lab-upload-zone {
+  background: rgba(14, 22, 34, 0.55) !important;
+  border-color: rgba(61, 155, 143, 0.28) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-upload-zone:active,
+html.dark .medical-images-page-guiaa .medical-lab-upload-zone:active {
+  background: rgba(61, 155, 143, 0.12) !important;
+  border-color: rgba(61, 155, 143, 0.45) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-upload-icon,
+html.dark .medical-images-page-guiaa .medical-lab-upload-icon {
+  background: rgba(26, 38, 54, 0.9) !important;
+  color: #6ee7d9 !important;
+  box-shadow: 0 4px 14px -8px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-upload-text,
+html.dark .medical-images-page-guiaa .medical-lab-upload-text {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-upload-hint,
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-paste-hint,
+html.dark .medical-images-page-guiaa .medical-lab-upload-hint,
+html.dark .medical-images-page-guiaa .medical-lab-paste-hint {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-help,
+html.dark .medical-images-page-guiaa .medical-lab-help {
+  background: rgba(20, 30, 44, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-help-toggle,
+html.dark .medical-images-page-guiaa .medical-lab-help-toggle {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-help-body,
+html.dark .medical-images-page-guiaa .medical-lab-help-body {
+  color: var(--text-secondary) !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-help-block strong,
+html.dark .medical-images-page-guiaa .medical-lab-help-block strong {
+  color: #6ee7d9;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-help-block + .medical-lab-help-block,
+html.dark .medical-images-page-guiaa .medical-lab-help-block + .medical-lab-help-block {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-paste-area,
+html.dark .medical-images-page-guiaa .medical-lab-paste-area {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-optional-toggle,
+html.dark .medical-images-page-guiaa .medical-lab-optional-toggle {
+  background: rgba(20, 30, 44, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-preview,
+html.dark .medical-images-page-guiaa .medical-lab-preview {
+  background: rgba(14, 22, 34, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-summary,
+html.dark .medical-images-page-guiaa .medical-lab-summary {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-summary .side-panel-header h3,
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-summary-item .side-panel-text,
+html.dark .medical-images-page-guiaa .medical-lab-summary .side-panel-header h3,
+html.dark .medical-images-page-guiaa .medical-lab-summary-item .side-panel-text {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-summary-item .side-panel-label,
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-summary-consult,
+html.dark .medical-images-page-guiaa .medical-lab-summary-item .side-panel-label,
+html.dark .medical-images-page-guiaa .medical-lab-summary-consult {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-summary-item .side-panel-chip,
+html.dark .medical-images-page-guiaa .medical-lab-summary-item .side-panel-chip {
+  background: rgba(61, 155, 143, 0.12) !important;
+  border-color: rgba(61, 155, 143, 0.28) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-summary-consult span,
+html.dark .medical-images-page-guiaa .medical-lab-summary-consult span {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-form-actions,
+html.dark .medical-images-page-guiaa .medical-lab-form-actions {
+  background: rgba(10, 16, 24, 0.94) !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 -8px 24px -14px rgba(0, 0, 0, 0.55) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-detailed-analysis,
+html.dark .medical-images-page-guiaa .medical-lab-detailed-analysis {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-detailed-analysis pre,
+html.dark .medical-images-page-guiaa .medical-lab-detailed-analysis pre {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-extract-badge,
+html.dark .medical-images-page-guiaa .medical-lab-extract-badge {
+  background: rgba(61, 155, 143, 0.15) !important;
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .interpretation-result h2,
+[data-theme="dark"] .medical-images-page-guiaa .medical-lab-history h2,
+html.dark .medical-images-page-guiaa .interpretation-result h2,
+html.dark .medical-images-page-guiaa .medical-lab-history h2 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .history-preview,
+[data-theme="dark"] .medical-images-page-guiaa .history-date,
+html.dark .medical-images-page-guiaa .history-preview,
+html.dark .medical-images-page-guiaa .history-date {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .history-patient,
+html.dark .medical-images-page-guiaa .history-patient {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .empty-state h3,
+html.dark .medical-images-page-guiaa .empty-state h3 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .medical-images-page-guiaa .empty-state p,
+html.dark .medical-images-page-guiaa .empty-state p {
+  color: var(--text-secondary) !important;
+}
+
+/* —— Auth —— */
+
+[data-theme="dark"] .auth-page,
+[data-theme="dark"] .auth-shell,
+html.dark .auth-page,
+html.dark .auth-shell {
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 15%, var(--liquid-glass-teal-wash), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 80% 80%, var(--liquid-glass-purple-wash), transparent 52%),
+    linear-gradient(165deg, #0a1018 0%, #0c2d4d 45%, #0a1018 100%) !important;
+}
+
+[data-theme="dark"] .auth-card,
+[data-theme="dark"] .login-panel,
+html.dark .auth-card,
+html.dark .login-panel {
+  background: var(--liquid-glass-bg-strong) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+[data-theme="dark"] .auth-card .form-group input:not([type="file"]),
+[data-theme="dark"] .login-form-dark input,
+html.dark .auth-card .form-group input:not([type="file"]),
+html.dark .login-form-dark input {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary) !important;
+}
+
+/* —— Membresía —— */
+
+[data-theme="dark"] .membership-card,
+[data-theme="dark"] .pricing-card,
+html.dark .membership-card,
+html.dark .pricing-card {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+/* —— Chat soporte —— */
+
+[data-theme="dark"] .support-chat-panel,
+html.dark .support-chat-panel {
+  background: var(--liquid-glass-bg-strong) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+[data-theme="dark"] .support-chat-header,
+html.dark .support-chat-header {
+  background: linear-gradient(
+    135deg,
+    rgba(26, 38, 54, 0.9) 0%,
+    rgba(14, 22, 34, 0.85) 100%
+  ) !important;
+  border-bottom-color: var(--liquid-glass-border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .support-chat-messages,
+html.dark .support-chat-messages {
+  background: rgba(10, 16, 24, 0.5) !important;
+}
+
+[data-theme="dark"] .support-chat-toggle:not(.is-open),
+html.dark .support-chat-toggle:not(.is-open) {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .support-chat-toggle.is-open,
+html.dark .support-chat-toggle.is-open {
+  background: rgba(14, 22, 34, 0.9) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .support-chat-plumitas-hint,
+html.dark .support-chat-plumitas-hint {
+  background: rgba(14, 22, 34, 0.78) !important;
+  border: 1px solid rgba(61, 155, 143, 0.35) !important;
+  color: #e8f4f2 !important;
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  box-shadow: 0 4px 18px -6px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="dark"] .support-chat-plumitas,
+html.dark .support-chat-plumitas {
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+}
+
+[data-theme="dark"] .support-chat-toggle:hover .support-chat-plumitas,
+html.dark .support-chat-toggle:hover .support-chat-plumitas {
+  filter: drop-shadow(0 10px 22px rgba(61, 155, 143, 0.25));
+}
+
+/* —— Modales —— */
+
+[data-theme="dark"] [role="dialog"],
+html.dark [role="dialog"] {
+  background: var(--liquid-glass-bg-strong) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  color: var(--text-primary);
+}
+
+/* —— Loading —— */
+
+[data-theme="dark"] .loading-screen,
+[data-theme="dark"] .loading-screen-shell,
+html.dark .loading-screen,
+html.dark .loading-screen-shell {
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 40%, var(--liquid-glass-teal-wash), transparent 60%),
+    linear-gradient(165deg, #0a1018 0%, #0c2d4d 50%, #0a1018 100%) !important;
+}
+
+[data-theme="dark"] .loading-screen-shell .guiaa-brand-lockup,
+[data-theme="dark"] .loading-screen-shell .landing-brand-lockup,
+html.dark .loading-screen-shell .guiaa-brand-lockup,
+html.dark .loading-screen-shell .landing-brand-lockup {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+/* —— Diagnóstico / rating —— */
+
+[data-theme="dark"] .diagnosis-results,
+[data-theme="dark"] .interpretation-result,
+[data-theme="dark"] .consultation-rating-panel,
+html.dark .diagnosis-results,
+html.dark .interpretation-result,
+html.dark .consultation-rating-panel {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  color: var(--text-primary);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-theme="dark"] .header,
+  [data-theme="dark"] .consultation-form-container,
+  [data-theme="dark"] .action-card,
+  [data-theme="dark"] [role="dialog"],
+  html.dark .header,
+  html.dark .consultation-form-container,
+  html.dark .action-card,
+  html.dark [role="dialog"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}

@@ -153,8 +153,10 @@ export function ProfilePage({ setView }) {
           </article>
 
           <aside className="profile-membership-card">
-            <div className="flex items-center gap-2 text-guiaa-brand-blue">
-              <Gem size={18} aria-hidden />
+            <div className="profile-membership-card-head">
+              <span className="profile-membership-card-icon" aria-hidden>
+                <Gem size={18} />
+              </span>
               <h3>Tu membresía</h3>
             </div>
             <p className="profile-membership-plan">

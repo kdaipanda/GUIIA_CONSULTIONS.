@@ -176,3 +176,188 @@
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.75);
 }
+
+/* —— Modo oscuro + liquid glass —— */
+
+[data-theme="dark"] .auth-shell,
+html.dark .auth-shell {
+  background: linear-gradient(165deg, #060a10 0%, #0a1018 42%, #0c1520 100%);
+}
+
+[data-theme="dark"] .auth-shell-frame,
+html.dark .auth-shell-frame {
+  background: linear-gradient(
+    180deg,
+    rgba(16, 24, 36, 0.96) 0%,
+    rgba(12, 18, 28, 0.94) 32%,
+    rgba(8, 12, 18, 0.98) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 24px 80px -12px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .auth-shell-frame::after,
+html.dark .auth-shell-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 45% at 15% 18%, rgba(61, 155, 143, 0.14), transparent 58%),
+    radial-gradient(ellipse 50% 42% at 85% 75%, rgba(38, 91, 147, 0.12), transparent 55%);
+}
+
+[data-theme="dark"] .auth-shell-header,
+html.dark .auth-shell-header {
+  background: rgba(14, 20, 30, 0.78) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(20px) saturate(1.12);
+  -webkit-backdrop-filter: blur(20px) saturate(1.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .auth-shell-header .text-guiaa-brand-navy,
+[data-theme="dark"] .auth-shell-header [class*="text-guiaa-brand-navy"],
+html.dark .auth-shell-header .text-guiaa-brand-navy,
+html.dark .auth-shell-header [class*="text-guiaa-brand-navy"] {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .auth-shell-header .border-guiaa-brand-navy\/12,
+html.dark .auth-shell-header .border-guiaa-brand-navy\/12 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .auth-shell-back,
+html.dark .auth-shell-back {
+  color: #a8b4c4;
+}
+
+[data-theme="dark"] .auth-shell-back:hover,
+html.dark .auth-shell-back:hover {
+  background: rgba(61, 155, 143, 0.14);
+  color: #f0f4f8;
+}
+
+[data-theme="dark"] .auth-shell-body,
+html.dark .auth-shell-body {
+  z-index: 1;
+}
+
+[data-theme="dark"] .auth-shell .auth-card,
+html.dark .auth-shell .auth-card {
+  background: var(--liquid-glass-bg-strong) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate));
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+[data-theme="dark"] .auth-shell .auth-card h2,
+html.dark .auth-shell .auth-card h2 {
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .auth-shell .auth-card p,
+html.dark .auth-shell .auth-card p {
+  color: #a8b4c4 !important;
+}
+
+[data-theme="dark"] .auth-shell .auth-card .text-guiaa-brand-navy,
+[data-theme="dark"] .auth-shell .auth-card [class*="text-guiaa-brand-navy"],
+html.dark .auth-shell .auth-card .text-guiaa-brand-navy,
+html.dark .auth-shell .auth-card [class*="text-guiaa-brand-navy"] {
+  color: #dce8f4 !important;
+}
+
+[data-theme="dark"] .auth-shell .auth-card label,
+[data-theme="dark"] .auth-shell .auth-card .form-group label,
+html.dark .auth-shell .auth-card label,
+html.dark .auth-shell .auth-card .form-group label {
+  color: #c5d0dc !important;
+}
+
+[data-theme="dark"] .auth-shell .auth-card input,
+[data-theme="dark"] .auth-shell .auth-card textarea,
+[data-theme="dark"] .auth-shell .auth-form input,
+html.dark .auth-shell .auth-card input,
+html.dark .auth-shell .auth-card textarea,
+html.dark .auth-shell .auth-form input {
+  background: rgba(8, 14, 22, 0.82) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f0f4f8 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .auth-shell .auth-card input::placeholder,
+html.dark .auth-shell .auth-card input::placeholder {
+  color: #6b7a8c;
+}
+
+[data-theme="dark"] .auth-shell .auth-card input:focus,
+html.dark .auth-shell .auth-card input:focus {
+  border-color: rgba(61, 155, 143, 0.45) !important;
+  box-shadow:
+    0 0 0 2px rgba(61, 155, 143, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .auth-shell .auth-card .text-muted-foreground,
+html.dark .auth-shell .auth-card .text-muted-foreground {
+  color: #8b97a8 !important;
+}
+
+[data-theme="dark"] .auth-shell .link-btn,
+html.dark .auth-shell .link-btn {
+  color: #7cb8f0 !important;
+}
+
+[data-theme="dark"] .auth-shell .link-btn:hover,
+html.dark .auth-shell .link-btn:hover {
+  color: #a5d4ff !important;
+}
+
+[data-theme="dark"] .auth-shell .auth-footer,
+html.dark .auth-shell .auth-footer {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .auth-shell-trust,
+html.dark .auth-shell-trust {
+  border-top-color: rgba(255, 255, 255, 0.08);
+  color: #7a8799;
+}
+
+[data-theme="dark"] .auth-shell .auth-card .btn.btn-primary,
+[data-theme="dark"] .auth-shell .auth-card .auth-form > button[type="submit"],
+html.dark .auth-shell .auth-card .btn.btn-primary,
+html.dark .auth-shell .auth-card .auth-form > button[type="submit"] {
+  background: linear-gradient(135deg, #3d9b8f 0%, #2f857a 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px rgba(61, 155, 143, 0.35) !important;
+}
+
+[data-theme="dark"] .auth-shell .auth-card .btn.btn-secondary,
+html.dark .auth-shell .auth-card .btn.btn-secondary {
+  background: rgba(26, 38, 54, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .auth-shell-frame .pointer-events-none,
+html.dark .auth-shell-frame .pointer-events-none {
+  opacity: 0.28;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-theme="dark"] .auth-shell .auth-card,
+  [data-theme="dark"] .auth-shell-header,
+  html.dark .auth-shell .auth-card,
+  html.dark .auth-shell-header {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}

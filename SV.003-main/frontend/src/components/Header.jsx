@@ -92,28 +92,25 @@ export function Header({ setView, showAuth = true, actions }) {
             >
               {isMenuOpen ? "✕" : "☰"}
             </button>
-            <nav className={`nav-menu ${isMenuOpen ? "mobile-open" : ""}`}>
+            <nav
+              className={`nav-menu ${isMenuOpen ? "mobile-open" : ""}${
+                veterinarian ? " nav-menu--user-only" : ""
+              }`}
+            >
               {veterinarian ? (
                 <>
                   <div className="user-menu-container">
                     <button
-                      className="user-menu-trigger"
+                      type="button"
+                      className="user-menu-trigger user-menu-trigger--avatar"
                       onClick={toggleUserMenu}
+                      aria-expanded={isUserMenuOpen}
+                      aria-haspopup="menu"
+                      aria-label={`Cuenta de ${veterinarian.nombre}`}
                     >
                       <div className="user-avatar">
                         {veterinarian.nombre.charAt(0).toUpperCase()}
                       </div>
-                      <div className="user-info-compact">
-                        <span className="user-name-compact">
-                          {veterinarian.nombre}
-                        </span>
-                        <span className="user-membership-compact">
-                          {veterinarian.membership_type || "Básica"}
-                        </span>
-                      </div>
-                      <span className="dropdown-arrow">
-                        {isUserMenuOpen ? "▲" : "▼"}
-                      </span>
                     </button>
 
                     {isUserMenuOpen && (

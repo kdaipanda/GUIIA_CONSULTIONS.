@@ -629,11 +629,13 @@
 }
 
 .clinic-owner-card {
-  border: 1px solid rgba(38, 91, 147, 0.12);
+  border: 1px solid var(--liquid-glass-border-color, rgba(38, 91, 147, 0.12));
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--liquid-glass-bg, rgba(255, 255, 255, 0.92));
+  backdrop-filter: blur(12px) saturate(1.06);
+  -webkit-backdrop-filter: blur(12px) saturate(1.06);
   overflow: hidden;
-  box-shadow: 0 2px 12px -8px rgba(12, 45, 77, 0.1);
+  box-shadow: var(--liquid-glass-shadow-soft, 0 2px 12px -8px rgba(12, 45, 77, 0.1));
 }
 
 .clinic-owner-card-head {
@@ -642,7 +644,11 @@
   gap: 12px;
   padding: 14px 16px;
   border-bottom: 1px solid rgba(38, 91, 147, 0.08);
-  background: linear-gradient(180deg, rgba(232, 243, 228, 0.35), rgba(255, 255, 255, 0));
+  background: linear-gradient(
+    180deg,
+    rgba(232, 243, 228, 0.28),
+    rgba(255, 255, 255, 0.02)
+  );
 }
 
 .clinic-owner-card-icon {
@@ -676,6 +682,15 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.clinic-owner-card-head .clinic-table-actions button {
+  color: #64748b;
+}
+
+.clinic-owner-card-head .clinic-table-actions button:hover {
+  color: var(--clinic-navy, #0c2d4d);
+  background: rgba(38, 91, 147, 0.08);
 }
 
 .clinic-owner-empty {
@@ -748,5 +763,153 @@
   margin: 4px 0 0;
   font-size: 14px;
   color: var(--clinic-navy, #0c2d4d);
+}
+
+/* —— Modo oscuro (páginas clínicas GUIAA) —— */
+[data-theme="dark"] .clinic-page-guiaa .clinic-page-header h1,
+html.dark .clinic-page-guiaa .clinic-page-header h1 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-page-header p,
+html.dark .clinic-page-guiaa .clinic-page-header p {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-stat-pill,
+html.dark .clinic-page-guiaa .clinic-stat-pill {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-stat-value,
+html.dark .clinic-page-guiaa .clinic-stat-value {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-stat-label,
+html.dark .clinic-page-guiaa .clinic-stat-label {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-empty-guiaa,
+html.dark .clinic-page-guiaa .clinic-empty-guiaa {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-empty-guiaa h3,
+html.dark .clinic-page-guiaa .clinic-empty-guiaa h3 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-empty-guiaa p,
+html.dark .clinic-page-guiaa .clinic-empty-guiaa p {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-empty-guiaa-icon,
+html.dark .clinic-page-guiaa .clinic-empty-guiaa-icon {
+  background: rgba(61, 155, 143, 0.15) !important;
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-owner-card,
+html.dark .clinic-page-guiaa .clinic-owner-card {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-owner-card-head,
+html.dark .clinic-page-guiaa .clinic-owner-card-head {
+  background: rgba(20, 30, 44, 0.72) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-owner-card-icon,
+html.dark .clinic-page-guiaa .clinic-owner-card-icon {
+  background: rgba(61, 155, 143, 0.15) !important;
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-owner-card-info strong,
+html.dark .clinic-page-guiaa .clinic-owner-card-info strong {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-owner-card-info span,
+[data-theme="dark"] .clinic-page-guiaa .clinic-owner-empty,
+html.dark .clinic-page-guiaa .clinic-owner-card-info span,
+html.dark .clinic-page-guiaa .clinic-owner-empty {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-owner-card .clinic-table-actions button,
+html.dark .clinic-page-guiaa .clinic-owner-card .clinic-table-actions button {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-owner-card .clinic-table-actions button:hover,
+html.dark .clinic-page-guiaa .clinic-owner-card .clinic-table-actions button:hover {
+  color: #f0f4f8 !important;
+  background: rgba(61, 155, 143, 0.12) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-owner-pets-table,
+html.dark .clinic-page-guiaa .clinic-owner-pets-table {
+  background: transparent !important;
+  border: none !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-owner-pets-table .clinic-table thead th,
+html.dark .clinic-page-guiaa .clinic-owner-pets-table .clinic-table thead th {
+  background: rgba(10, 16, 24, 0.45) !important;
+  color: var(--text-tertiary) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-owner-pets-table .clinic-table tbody td,
+html.dark .clinic-page-guiaa .clinic-owner-pets-table .clinic-table tbody td {
+  color: var(--text-primary) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-owner-pets-table .clinic-table-row-click:hover,
+html.dark .clinic-page-guiaa .clinic-owner-pets-table .clinic-table-row-click:hover {
+  background: rgba(61, 155, 143, 0.08) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-table-skeleton,
+html.dark .clinic-page-guiaa .clinic-table-skeleton {
+  background: var(--liquid-glass-bg) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-table-skeleton-row,
+html.dark .clinic-page-guiaa .clinic-table-skeleton-row {
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-search,
+html.dark .clinic-page-guiaa .clinic-search {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-search svg,
+html.dark .clinic-page-guiaa .clinic-search svg {
+  color: var(--text-tertiary);
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-search input,
+html.dark .clinic-page-guiaa .clinic-search input {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-search input::placeholder,
+html.dark .clinic-page-guiaa .clinic-search input::placeholder {
+  color: var(--text-tertiary) !important;
 }
 

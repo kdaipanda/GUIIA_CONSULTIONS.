@@ -50,7 +50,7 @@ const CLINICAL_STEPS = [
 
 export function LandingClinicalWorkflow() {
   return (
-    <section className="landing-section landing-section-first border-b border-guiaa-brand-navy/8 bg-white">
+    <section className="landing-section landing-section-first landing-clinical-workflow-section border-b border-guiaa-brand-navy/8">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
         <div className="landing-section-head-wide items-start sm:items-end">
           <div className="landing-section-head">
@@ -79,13 +79,13 @@ export function LandingClinicalWorkflow() {
               <span className="landing-clinical-step-icon" aria-hidden>
                 <Icon size={18} strokeWidth={1.75} />
               </span>
-              <h3 className="mt-3 text-sm font-bold text-guiaa-brand-navy">{title}</h3>
-              <p className="landing-body mt-1.5 text-xs leading-relaxed">{detail}</p>
+              <h3 className="landing-clinical-step-title mt-3 text-sm font-bold">{title}</h3>
+              <p className="landing-clinical-step-detail landing-body mt-1.5 text-xs leading-relaxed">{detail}</p>
             </article>
           ))}
         </div>
 
-        <p className="landing-body mt-8 text-center text-xs sm:text-sm">
+        <p className="landing-clinical-workflow-foot landing-body mt-8 text-center text-xs sm:text-sm">
           Cada especie activa formularios veterinarios distintos — perros, felinos, aves,
           reptiles, exóticos y más.
         </p>

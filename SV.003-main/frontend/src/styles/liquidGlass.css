@@ -44,8 +44,8 @@
 .consultation-form-container {
   background: var(--liquid-glass-bg-strong) !important;
   border: 1px solid var(--liquid-glass-border-color) !important;
-  backdrop-filter: blur(24px) saturate(1.15) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.15) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate)) !important;
   box-shadow: var(--liquid-glass-shadow) !important;
 }
 
@@ -171,9 +171,9 @@
   -webkit-backdrop-filter: blur(10px);
 }
 
-/* —— Dashboard —— */
+/* —— Dashboard (solo modo claro; oscuro en darkModeGlass.css) —— */
 
-.action-card {
+html:not(.dark):not([data-theme="dark"]) .action-card {
   background: linear-gradient(
     145deg,
     rgba(255, 255, 255, 0.86) 0%,
@@ -186,7 +186,7 @@
   box-shadow: var(--liquid-glass-shadow-soft) !important;
 }
 
-.action-card:nth-child(3n + 1) {
+html:not(.dark):not([data-theme="dark"]) .action-card:nth-child(3n + 1) {
   background: linear-gradient(
     145deg,
     rgba(255, 255, 255, 0.88) 0%,
@@ -194,7 +194,7 @@
   ) !important;
 }
 
-.action-card:nth-child(3n + 2) {
+html:not(.dark):not([data-theme="dark"]) .action-card:nth-child(3n + 2) {
   background: linear-gradient(
     145deg,
     rgba(255, 255, 255, 0.88) 0%,
@@ -202,7 +202,7 @@
   ) !important;
 }
 
-.action-card:nth-child(3n) {
+html:not(.dark):not([data-theme="dark"]) .action-card:nth-child(3n) {
   background: linear-gradient(
     145deg,
     rgba(255, 255, 255, 0.88) 0%,
@@ -210,7 +210,7 @@
   ) !important;
 }
 
-.action-card:hover {
+html:not(.dark):not([data-theme="dark"]) .action-card:hover {
   border-color: rgba(61, 155, 143, 0.4) !important;
   box-shadow:
     0 16px 36px -14px rgba(12, 45, 77, 0.22),
@@ -287,11 +287,11 @@
   box-shadow: var(--liquid-glass-shadow-soft);
 }
 
-/* —— Historial consultas —— */
+/* —— Historial consultas (glass solo en modo claro; oscuro en consultationHistoryPage.css) —— */
 
-.history-card-guiaa,
-.history-detail-guiaa .clinical-section,
-.history-detail-guiaa .clinical-file-header {
+html:not(.dark):not([data-theme="dark"]) .history-card-guiaa,
+html:not(.dark):not([data-theme="dark"]) .history-detail-guiaa .clinical-section,
+html:not(.dark):not([data-theme="dark"]) .history-detail-guiaa .clinical-file-header {
   background: var(--liquid-glass-bg) !important;
   border: 1px solid var(--liquid-glass-border-color) !important;
   backdrop-filter: blur(14px);
@@ -395,37 +395,453 @@
   -webkit-backdrop-filter: blur(22px) saturate(1.38);
 }
 
-/* —— Modo oscuro —— */
+/* —— Chrome global (header, nav, notificaciones) —— */
 
-[data-theme="dark"] .consultation-page,
-html.dark .consultation-page {
+.header {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.55) 100%
+  ) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
+  box-shadow:
+    0 8px 32px -20px rgba(12, 45, 77, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+}
+
+.header.scrolled {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(248, 252, 255, 0.82) 100%
+  ) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate)) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.75) !important;
+  box-shadow:
+    0 12px 40px -16px rgba(12, 45, 77, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
+.nav-menu.mobile-open {
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.94) 0%,
+    rgba(232, 244, 252, 0.88) 100%
+  ) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(1.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+.notification-panel {
+  background: var(--liquid-glass-bg-strong) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+.notification-panel-header {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.icon-btn {
+  background: rgba(255, 255, 255, 0.58) !important;
+  border: 1px solid rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(10px) saturate(1.08);
+  -webkit-backdrop-filter: blur(10px) saturate(1.08);
+  box-shadow:
+    0 4px 12px -6px rgba(12, 45, 77, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* —— Dashboard (fondo + paneles) —— */
+
+.dashboard-page {
   background:
-    radial-gradient(ellipse 100% 70% at 0% 0%, rgba(61, 155, 143, 0.12), transparent 50%),
-    linear-gradient(180deg, #0f1a28 0%, #0c1520 100%);
+    radial-gradient(ellipse 55% 45% at 12% 8%, rgba(61, 155, 143, 0.12), transparent 58%),
+    radial-gradient(ellipse 50% 42% at 88% 15%, rgba(155, 110, 243, 0.1), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(126, 192, 222, 0.1), transparent 60%),
+    radial-gradient(ellipse 40% 35% at 75% 60%, rgba(240, 138, 93, 0.07), transparent 55%),
+    linear-gradient(180deg, #f8fbfd 0%, #eef4f9 100%) !important;
 }
 
-[data-theme="dark"] .consultation-form-container,
-[data-theme="dark"] .consultation-sidebar,
-[data-theme="dark"] .consultation-form > .form-section,
-[data-theme="dark"] .step-indicator,
-[data-theme="dark"] .action-card,
-[data-theme="dark"] .history-card-guiaa,
-html.dark .consultation-form-container,
-html.dark .consultation-sidebar,
-html.dark .consultation-form > .form-section,
-html.dark .step-indicator,
-html.dark .action-card,
-html.dark .history-card-guiaa {
-  --liquid-glass-bg: linear-gradient(
-    145deg,
-    rgba(30, 45, 62, 0.85) 0%,
-    rgba(20, 32, 48, 0.75) 100%
-  );
-  --liquid-glass-border-color: rgba(255, 255, 255, 0.1);
-  --liquid-glass-shadow:
-    0 14px 40px -18px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+.dashboard-page .dashboard-header,
+.dashboard-page .dashboard-header-toolbar.hero-actions {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.78) 0%,
+    rgba(232, 244, 252, 0.55) 100%
+  ) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  border-radius: var(--liquid-glass-radius-lg);
+  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate));
+  box-shadow: var(--liquid-glass-shadow-soft);
 }
+
+.today-summary-panel {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(224, 242, 254, 0.52) 100%
+  ) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(16px) saturate(1.12);
+  -webkit-backdrop-filter: blur(16px) saturate(1.12);
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+.today-pill {
+  background: rgba(255, 255, 255, 0.62) !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.stat-card {
+  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+.dashboard-block,
+.dashboard-membership-banner,
+.dashboard-onboarding-card {
+  background: var(--liquid-glass-bg) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  border-radius: var(--liquid-glass-radius-lg);
+}
+
+/* —— Historial —— */
+
+.history-page {
+  background:
+    radial-gradient(ellipse 60% 50% at 0% 20%, var(--liquid-glass-teal-wash), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 100% 30%, var(--liquid-glass-purple-wash), transparent 52%),
+    linear-gradient(180deg, #f4f9fc 0%, #eef4f9 100%) !important;
+}
+
+.history-page .page-header,
+.history-page-guiaa .history-toolbar {
+  background: var(--liquid-glass-bg) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur));
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur));
+  box-shadow: var(--liquid-glass-shadow-soft);
+  border-radius: var(--liquid-glass-radius-lg);
+}
+
+/* —— Laboratorio / imágenes —— */
+
+.medical-images-page-guiaa {
+  background:
+    radial-gradient(ellipse 50% 45% at 10% 15%, rgba(61, 155, 143, 0.11), transparent 55%),
+    radial-gradient(ellipse 45% 40% at 90% 25%, rgba(38, 91, 147, 0.1), transparent 52%),
+    linear-gradient(180deg, #f4f9fc 0%, #eef4f9 100%) !important;
+}
+
+.medical-images-page-guiaa .medical-images-header,
+.medical-images-page-guiaa .image-type-selector,
+.medical-images-page-guiaa .type-option,
+.medical-images-page-guiaa .upload-zone,
+.medical-images-page-guiaa .interpretation-result .result-section {
+  background: var(--liquid-glass-bg);
+  border: 1px solid var(--liquid-glass-border-color);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: var(--liquid-glass-shadow-soft);
+}
+
+.medical-images-page-guiaa .type-option.selected,
+.medical-images-page-guiaa .type-option:hover {
+  background: var(--liquid-glass-teal-fill);
+  border-color: var(--liquid-glass-teal);
+}
+
+/* —— Auth y membresía —— */
+
+.auth-page {
+  background:
+    radial-gradient(ellipse 70% 60% at 20% 20%, rgba(61, 155, 143, 0.15), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(155, 110, 243, 0.12), transparent 52%),
+    linear-gradient(165deg, #0a2540 0%, #0c2d4d 42%, #1a4d6e 100%) !important;
+}
+
+.auth-card,
+.login-panel {
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(232, 244, 252, 0.58) 100%
+  ) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate)) !important;
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+.auth-card .form-group input:not([type="file"]),
+.login-form-dark input {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.membership-page {
+  background:
+    radial-gradient(ellipse 55% 50% at 15% 10%, var(--liquid-glass-teal-wash), transparent 55%),
+    radial-gradient(ellipse 50% 45% at 85% 20%, var(--liquid-glass-purple-wash), transparent 52%),
+    linear-gradient(180deg, #f8fbfd 0%, #eef4f9 100%) !important;
+}
+
+.membership-card,
+.pricing-card {
+  background: var(--liquid-glass-bg) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur));
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur));
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+.membership-card.featured,
+.pricing-card.featured {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(224, 242, 254, 0.65) 100%
+  ) !important;
+  border-color: rgba(38, 91, 147, 0.25) !important;
+}
+
+/* —— Clínica (ampliado) —— */
+
+.clinic-page-guiaa {
+  background:
+    radial-gradient(ellipse 50% 45% at 5% 12%, var(--liquid-glass-teal-wash), transparent 55%),
+    radial-gradient(ellipse 45% 40% at 95% 18%, var(--liquid-glass-blue-wash), transparent 52%),
+    linear-gradient(180deg, #f6fafc 0%, #eef4f9 100%);
+}
+
+.clinic-page-guiaa .clinic-page-header,
+.clinic-page-guiaa .clinic-toolbar,
+.clinic-page-guiaa .clinic-settings-card,
+.clinic-page-guiaa .clinic-search,
+.clinic-page-guiaa .clinic-search input {
+  background: var(--liquid-glass-bg);
+  border: 1px solid var(--liquid-glass-border-color);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: var(--liquid-glass-shadow-soft);
+}
+
+.clinic-page-guiaa .clinic-search input {
+  background: rgba(255, 255, 255, 0.55) !important;
+}
+
+.clinic-dialog,
+.clinic-dialog-compact {
+  background: var(--liquid-glass-bg-strong) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate)) !important;
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+.clinic-dialog-header {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* —— Consulta: botones y resultados —— */
+
+.consultation-form .btn-secondary,
+.consultation-form .form-navigation .btn {
+  background: rgba(255, 255, 255, 0.58) !important;
+  border: 1px solid rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.diagnosis-results,
+.interpretation-result,
+.consultation-rating-panel {
+  background: var(--liquid-glass-bg) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  box-shadow: var(--liquid-glass-shadow-soft);
+  border-radius: var(--liquid-glass-radius-md);
+}
+
+/* —— Soporte Plumitas —— */
+
+.support-chat-panel {
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(232, 244, 252, 0.72) 100%
+  ) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+.support-chat-header {
+  background: linear-gradient(
+    135deg,
+    rgba(224, 242, 254, 0.75) 0%,
+    rgba(255, 255, 255, 0.55) 100%
+  ) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.65) !important;
+}
+
+.support-chat-messages {
+  background: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.support-chat-toggle:not(.is-open) {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.support-chat-toggle.is-open {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(232, 244, 252, 0.75) 100%
+  ) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(14px) saturate(1.12);
+  -webkit-backdrop-filter: blur(14px) saturate(1.12);
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  color: #0c2d4d !important;
+}
+
+.support-chat-bubble {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* —— Landing (contenedor + secciones) —— */
+
+.landing-page-card {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(248, 252, 255, 0.85) 100%
+  ) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  box-shadow:
+    0 24px 80px -12px rgba(12, 45, 77, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.landing-nav-scrolled,
+.landing-navbar-glass {
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.65) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+.landing-section-alt,
+.landing-section-band {
+  background: linear-gradient(
+    180deg,
+    rgba(248, 252, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.45) 100%
+  ) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.landing-faq-item,
+.landing-pricing-card,
+#faq .landing-card,
+#pricing .landing-card {
+  background: var(--liquid-glass-bg);
+  border: 1px solid var(--liquid-glass-border-color);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: var(--liquid-glass-shadow-soft);
+}
+
+.landing-cta-panel {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.landing-rail {
+  background: rgba(255, 255, 255, 0.68) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(16px) saturate(1.12) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.12) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+.landing-clinical-note {
+  background: var(--liquid-glass-bg) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--liquid-glass-shadow-soft);
+}
+
+/* —— Modales Radix / shadcn —— */
+
+[role="dialog"] {
+  background: var(--liquid-glass-bg-strong) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate)) !important;
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+/* —— Loading —— */
+
+.loading-screen,
+.loading-screen-shell {
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 40%, rgba(61, 155, 143, 0.12), transparent 60%),
+    linear-gradient(165deg, #0a2540 0%, #0c2d4d 50%, #1a4d6e 100%) !important;
+}
+
+.loading-screen-shell .guiaa-brand-lockup,
+.loading-screen-shell .landing-brand-lockup {
+  padding: 1.25rem 1.75rem;
+  border-radius: var(--liquid-glass-radius-lg);
+  background: var(--liquid-glass-bg) !important;
+  border: 1px solid var(--liquid-glass-border-color) !important;
+  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
+  box-shadow: var(--liquid-glass-shadow) !important;
+}
+
+/* —— Modo oscuro: ver darkModeGlass.css —— */
 
 @media (prefers-reduced-motion: reduce) {
   .action-card:hover,
@@ -440,7 +856,12 @@ html.dark .history-card-guiaa {
   .consultation-sidebar,
   .step-indicator,
   .action-card,
-  .category-selector-glass-panel {
+  .category-selector-glass-panel,
+  .header,
+  .auth-card,
+  .support-chat-panel,
+  .clinic-dialog,
+  [role="dialog"] {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
