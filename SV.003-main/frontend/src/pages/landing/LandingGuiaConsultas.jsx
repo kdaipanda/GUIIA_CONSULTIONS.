@@ -17,6 +17,14 @@ const INITIAL = {
   privacy_accepted: false,
 };
 
+const PAWS = [
+  { className: "landing-guia-paw landing-guia-paw--tl", size: 18 },
+  { className: "landing-guia-paw landing-guia-paw--trail-1", size: 13 },
+  { className: "landing-guia-paw landing-guia-paw--trail-2", size: 15 },
+  { className: "landing-guia-paw landing-guia-paw--trail-3", size: 12 },
+  { className: "landing-guia-paw landing-guia-paw--br", size: 16 },
+];
+
 export function LandingGuiaConsultas() {
   const [form, setForm] = useState(INITIAL);
   const [submitting, setSubmitting] = useState(false);
@@ -60,32 +68,18 @@ export function LandingGuiaConsultas() {
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
         <div className="landing-guia-consultas-panel">
-          <span className="landing-guia-paw landing-guia-paw--tl" aria-hidden>
-            <PawPrint size={18} />
-          </span>
-          <span className="landing-guia-paw landing-guia-paw--tr" aria-hidden>
-            <PawPrint size={14} />
-          </span>
-          <span className="landing-guia-paw landing-guia-paw--br" aria-hidden>
-            <PawPrint size={16} />
-          </span>
-
-          <div className="landing-guia-consultas-mascot" aria-hidden>
-            <img
-              src={LANDING_IMAGES.pets.catGinger}
-              alt=""
-              width={72}
-              height={72}
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
+          {PAWS.map(({ className, size }) => (
+            <span key={className} className={className} aria-hidden>
+              <PawPrint size={size} />
+            </span>
+          ))}
 
           <div className="landing-guia-consultas-grid">
             <div className="landing-guia-consultas-copy">
               <p className="landing-guia-consultas-eyebrow">Guía Consultas · GUIAA</p>
               <h2 id="landing-guia-consultas-heading" className="landing-guia-consultas-title">
-                Conoce el software y el CDS dentro de Guía Consultas
+                Conoce el software y el CDS dentro de{" "}
+                <span className="landing-guia-consultas-title-accent">Guía Consultas</span>
               </h2>
               <p className="landing-guia-consultas-lead">
                 Guía Consultas integra anamnesis multiespecie, expediente clínico y{" "}
@@ -100,95 +94,115 @@ export function LandingGuiaConsultas() {
               </ul>
             </div>
 
-            <div className="landing-guia-consultas-form-wrap">
-              {sent ? (
-                <div className="landing-guia-consultas-success" role="status">
-                  <p className="landing-guia-consultas-success-title">¡Solicitud recibida!</p>
-                  <p className="landing-guia-consultas-success-text">
-                    Un administrador de GUIAA revisará tu mensaje y te contactará pronto para
-                    explicarte Guía Consultas y el módulo CDS.
-                  </p>
-                  <button
-                    type="button"
-                    className="landing-guia-consultas-submit"
-                    onClick={() => setSent(false)}
-                  >
-                    Enviar otra solicitud
-                  </button>
+            <div className="landing-guia-consultas-form-col">
+              <div className="landing-guia-consultas-form-wrap">
+                <div className="landing-guia-consultas-mascot" aria-hidden>
+                  <img
+                    src={LANDING_IMAGES.pets.catGinger}
+                    alt=""
+                    width={88}
+                    height={88}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
-              ) : (
-                <form className="landing-guia-consultas-form" onSubmit={handleSubmit} noValidate>
-                  <div className="landing-guia-field">
-                    <Label htmlFor="gc-name">Nombre</Label>
-                    <Input
-                      id="gc-name"
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      placeholder="Dra. Ana Martínez"
-                      autoComplete="name"
-                      required
-                      className="landing-guia-input"
-                    />
-                  </div>
-                  <div className="landing-guia-field">
-                    <Label htmlFor="gc-email">Email</Label>
-                    <Input
-                      id="gc-email"
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      placeholder="ana@clinica.com"
-                      autoComplete="email"
-                      required
-                      className="landing-guia-input"
-                    />
-                  </div>
-                  <div className="landing-guia-field">
-                    <Label htmlFor="gc-phone">Teléfono</Label>
-                    <Input
-                      id="gc-phone"
-                      type="tel"
-                      value={form.phone}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                      placeholder="+52 55 1234 5678"
-                      autoComplete="tel"
-                      className="landing-guia-input"
-                    />
-                  </div>
-                  <div className="landing-guia-field">
-                    <Label htmlFor="gc-message">¿Qué te interesa conocer?</Label>
-                    <Textarea
-                      id="gc-message"
-                      value={form.message}
-                      onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      placeholder="Ej. demo del CDS, flujo de consulta multiespecie, planes para mi clínica…"
-                      rows={3}
-                      className="landing-guia-input landing-guia-textarea"
-                    />
-                  </div>
 
-                  <label className="landing-guia-privacy">
-                    <Checkbox
-                      checked={form.privacy_accepted}
-                      onCheckedChange={(checked) =>
-                        setForm({ ...form, privacy_accepted: checked === true })
-                      }
-                    />
-                    <span>
-                      Al enviar acepto el tratamiento de mis datos personales para que GUIAA me
-                      contacte con información sobre Guía Consultas.
-                    </span>
-                  </label>
+                {sent ? (
+                  <div className="landing-guia-consultas-success" role="status">
+                    <p className="landing-guia-consultas-success-title">¡Solicitud recibida!</p>
+                    <p className="landing-guia-consultas-success-text">
+                      Un administrador de GUIAA revisará tu mensaje y te contactará pronto para
+                      explicarte Guía Consultas y el módulo CDS.
+                    </p>
+                    <button
+                      type="button"
+                      className="landing-guia-consultas-submit"
+                      onClick={() => setSent(false)}
+                    >
+                      Enviar otra solicitud
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="landing-guia-form-kicker">Solicita información</p>
+                    <p className="landing-guia-form-sub">
+                      El equipo GUIAA te contactará para confirmar día y hora de tu demo.
+                    </p>
 
-                  <button
-                    type="submit"
-                    className="landing-guia-consultas-submit"
-                    disabled={submitting}
-                  >
-                    {submitting ? "Enviando…" : "Solicitar información"}
-                  </button>
-                </form>
-              )}
+                    <form className="landing-guia-consultas-form" onSubmit={handleSubmit} noValidate>
+                      <div className="landing-guia-field">
+                        <Label htmlFor="gc-name">Nombre</Label>
+                        <Input
+                          id="gc-name"
+                          value={form.name}
+                          onChange={(e) => setForm({ ...form, name: e.target.value })}
+                          placeholder="Dra. Ana Martínez"
+                          autoComplete="name"
+                          required
+                          className="landing-guia-input"
+                        />
+                      </div>
+                      <div className="landing-guia-field">
+                        <Label htmlFor="gc-email">Email</Label>
+                        <Input
+                          id="gc-email"
+                          type="email"
+                          value={form.email}
+                          onChange={(e) => setForm({ ...form, email: e.target.value })}
+                          placeholder="ana@clinica.com"
+                          autoComplete="email"
+                          required
+                          className="landing-guia-input"
+                        />
+                      </div>
+                      <div className="landing-guia-field">
+                        <Label htmlFor="gc-phone">Teléfono</Label>
+                        <Input
+                          id="gc-phone"
+                          type="tel"
+                          value={form.phone}
+                          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                          placeholder="+52 55 1234 5678"
+                          autoComplete="tel"
+                          className="landing-guia-input"
+                        />
+                      </div>
+                      <div className="landing-guia-field">
+                        <Label htmlFor="gc-message">¿Qué te interesa conocer?</Label>
+                        <Textarea
+                          id="gc-message"
+                          value={form.message}
+                          onChange={(e) => setForm({ ...form, message: e.target.value })}
+                          placeholder="Ej. demo del CDS, flujo de consulta multiespecie, planes para mi clínica…"
+                          rows={3}
+                          className="landing-guia-input landing-guia-textarea"
+                        />
+                      </div>
+
+                      <label className="landing-guia-privacy">
+                        <Checkbox
+                          checked={form.privacy_accepted}
+                          onCheckedChange={(checked) =>
+                            setForm({ ...form, privacy_accepted: checked === true })
+                          }
+                        />
+                        <span>
+                          Al enviar acepto el tratamiento de mis datos personales para que GUIAA me
+                          contacte con información sobre Guía Consultas.
+                        </span>
+                      </label>
+
+                      <button
+                        type="submit"
+                        className="landing-guia-consultas-submit"
+                        disabled={submitting}
+                      >
+                        {submitting ? "Enviando…" : "Solicitar información"}
+                      </button>
+                    </form>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
