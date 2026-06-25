@@ -31,3 +31,53 @@ export const LANDING_HERO_VIDEO = "/VG1.mp4";
 export const LANDING_HERO_VIDEO_MOBILE = "/VG1-mobile.mp4";
 export const LANDING_HERO_VIDEO_POSTER = LANDING_IMAGES.heroHub;
 export const LANDING_OG_IMAGE = "https://guiaa.vet/brand/doctor-plumitas-hub.png";
+
+/** Redes sociales GUIAA — sobreescribir con REACT_APP_SOCIAL_* en producción si aplica. */
+export const LANDING_SOCIAL_LINKS = [
+  {
+    id: "instagram",
+    label: "Instagram",
+    href:
+      process.env.REACT_APP_SOCIAL_INSTAGRAM?.trim() ||
+      "https://www.instagram.com/guiaacds/",
+  },
+  {
+    id: "tiktok",
+    label: "TikTok",
+    href:
+      process.env.REACT_APP_SOCIAL_TIKTOK?.trim() ||
+      "https://www.tiktok.com/@guiaacds",
+  },
+  {
+    id: "youtube",
+    label: "YouTube",
+    href:
+      process.env.REACT_APP_SOCIAL_YOUTUBE?.trim() ||
+      "https://www.youtube.com/@GUIAAAPOYODECISI%C3%93NCL%C3%8DNICAVETER",
+  },
+  {
+    id: "facebook",
+    label: "Facebook",
+    href:
+      process.env.REACT_APP_SOCIAL_FACEBOOK?.trim() ||
+      "https://www.facebook.com/profile.php?id=61586482517880",
+  },
+  {
+    id: "linkedin",
+    label: "LinkedIn",
+    href:
+      process.env.REACT_APP_SOCIAL_LINKEDIN?.trim() ||
+      "https://www.linkedin.com/in/guiaa-0266363a8",
+  },
+  {
+    id: "whatsapp",
+    label: "WhatsApp",
+    subtitle: "+52 56 2069 0369",
+    href:
+      process.env.REACT_APP_SOCIAL_WHATSAPP?.trim() ||
+      "https://wa.me/525620690369",
+  },
+].filter((item) => item.href);
+
+export const LANDING_NEWSLETTER_EMAIL =
+  process.env.REACT_APP_NEWSLETTER_EMAIL?.trim() || "soporte@guiaa.vet";

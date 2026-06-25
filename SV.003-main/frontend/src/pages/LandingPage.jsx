@@ -99,7 +99,7 @@ export function LandingPage({ setView }) {
             </LandingReveal>
           </main>
 
-          <LandingFooter setView={setView} />
+          <LandingFooter />
         </div>
       </div>
 

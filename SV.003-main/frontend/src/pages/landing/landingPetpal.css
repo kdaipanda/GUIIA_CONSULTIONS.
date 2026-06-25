@@ -68,9 +68,12 @@
   color: #0c2d4d;
 }
 
-.landing-nav-hero .logo-image,
-.landing-footer-v2 .logo-image {
+.landing-nav-hero .logo-image {
   filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.28));
+}
+
+.landing-footer-v2 .logo-image {
+  filter: none;
 }
 
 .landing-nav-hero .nav-brand-subtitle,
