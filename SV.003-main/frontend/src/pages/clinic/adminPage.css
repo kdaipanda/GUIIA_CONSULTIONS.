@@ -58,6 +58,25 @@
   color: #475569;
 }
 
+.clinic-admin-page-guiaa .clinic-admin-support-status.status-new {
+  background: rgba(245, 166, 35, 0.2);
+  color: #b45309;
+}
+
+.clinic-admin-page-guiaa .clinic-admin-support-status.status-contacted {
+  background: rgba(61, 155, 143, 0.16);
+  color: #2f857a;
+}
+
+.clinic-admin-lead-message {
+  max-width: 14rem;
+}
+
+.clinic-admin-lead-detail p {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+}
+
 .clinic-admin-skeleton-block {
   margin-top: 16px;
 }

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint } from "lucide-react";
+import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox } from "lucide-react";
 import "./clinicPageShared.css";
 import "./adminPage.css";
 import {
@@ -23,6 +23,8 @@ import {
   fetchAdminSupportTicket,
   updateAdminSupportTicket,
   replyAdminSupportTicket,
+  fetchAdminGuiaConsultasLeads,
+  updateAdminGuiaConsultasLead,
 } from "../../lib/clinicApi";
 import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
@@ -51,6 +53,19 @@ const SUPPORT_FILTERS = [
   { id: "resolved", label: "Resueltos" },
   { id: "closed", label: "Cerrados" },
 ];
+
+const LEAD_FILTERS = [
+  { id: "", label: "Todas" },
+  { id: "new", label: "Nuevas" },
+  { id: "contacted", label: "Contactadas" },
+  { id: "closed", label: "Cerradas" },
+];
+
+const LEAD_STATUS_LABELS = {
+  new: "Nueva",
+  contacted: "Contactada",
+  closed: "Cerrada",
+};
 
 const SUPPORT_STATUS_LABELS = {
   open: "Abierto",
@@ -190,6 +205,13 @@ export function AdminPage() {
   const [ticketDetail, setTicketDetail] = useState(null);
   const [ticketReply, setTicketReply] = useState("");
   const [ticketActing, setTicketActing] = useState(false);
+  const [guiaLeads, setGuiaLeads] = useState([]);
+  const [guiaLeadsNewCount, setGuiaLeadsNewCount] = useState(0);
+  const [guiaLeadFilter, setGuiaLeadFilter] = useState("");
+  const [guiaLeadsLoading, setGuiaLeadsLoading] = useState(false);
+  const [selectedLead, setSelectedLead] = useState(null);
+  const [leadNotes, setLeadNotes] = useState("");
+  const [leadActing, setLeadActing] = useState(false);
 
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
@@ -221,13 +243,25 @@ export function AdminPage() {
       } finally {
         setSupportLoading(false);
       }
+
+      setGuiaLeadsLoading(true);
+      try {
+        const leadsData = await fetchAdminGuiaConsultasLeads(veterinarian.id, guiaLeadFilter);
+        setGuiaLeads(leadsData.leads || []);
+        setGuiaLeadsNewCount(leadsData.new_count ?? 0);
+      } catch {
+        setGuiaLeads([]);
+        setGuiaLeadsNewCount(0);
+      } finally {
+        setGuiaLeadsLoading(false);
+      }
     } catch (err) {
       notifyError(err.message);
       setAllowed(false);
     } finally {
       setLoading(false);
     }
-  }, [veterinarian?.id, search, planFilter, supportFilter]);
+  }, [veterinarian?.id, search, planFilter, supportFilter, guiaLeadFilter]);
 
   useEffect(() => {
     const t = setTimeout(load, search ? 300 : 0);
@@ -409,6 +443,54 @@ export function AdminPage() {
     }
   };
 
+  const openGuiaLead = (lead) => {
+    setSelectedLead(lead);
+    setLeadNotes(lead.admin_notes || "");
+  };
+
+  const closeGuiaLead = () => {
+    setSelectedLead(null);
+    setLeadNotes("");
+  };
+
+  const handleLeadStatusChange = async (status) => {
+    if (!selectedLead?.id) return;
+    setLeadActing(true);
+    try {
+      await updateAdminGuiaConsultasLead(veterinarian.id, selectedLead.id, { status });
+      const leadsData = await fetchAdminGuiaConsultasLeads(veterinarian.id, guiaLeadFilter);
+      setGuiaLeads(leadsData.leads || []);
+      setGuiaLeadsNewCount(leadsData.new_count ?? 0);
+      setSelectedLead((prev) => (prev ? { ...prev, status } : prev));
+      notifySuccess("Estado actualizado.");
+    } catch (err) {
+      notifyError(err.message);
+    } finally {
+      setLeadActing(false);
+    }
+  };
+
+  const handleLeadNotesSave = async (e) => {
+    e.preventDefault();
+    if (!selectedLead?.id) return;
+    setLeadActing(true);
+    try {
+      const data = await updateAdminGuiaConsultasLead(veterinarian.id, selectedLead.id, {
+        admin_notes: leadNotes.trim(),
+      });
+      const updated = data.lead || { ...selectedLead, admin_notes: leadNotes.trim() };
+      setSelectedLead(updated);
+      const leadsData = await fetchAdminGuiaConsultasLeads(veterinarian.id, guiaLeadFilter);
+      setGuiaLeads(leadsData.leads || []);
+      setGuiaLeadsNewCount(leadsData.new_count ?? 0);
+      notifySuccess("Notas guardadas.");
+    } catch (err) {
+      notifyError(err.message);
+    } finally {
+      setLeadActing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="clinic-page clinic-page-guiaa clinic-admin-page clinic-admin-page-guiaa">
@@ -503,7 +585,88 @@ export function AdminPage() {
           </div>
           <div className="clinic-report-kpi-value">{supportOpenCount}</div>
         </div>
+        <div className="clinic-report-kpi">
+          <div className="clinic-report-kpi-head">
+            <span className="clinic-report-kpi-icon"><Inbox size={18} aria-hidden /></span>
+            <span className="clinic-report-kpi-label">Guía Consultas</span>
+          </div>
+          <div className="clinic-report-kpi-value">{guiaLeadsNewCount}</div>
+        </div>
       </div>
+
+      <section className="clinic-settings-card">
+        <div className="clinic-admin-users-head">
+          <h2>
+            <Inbox size={18} aria-hidden />
+            Guía Consultas — solicitudes landing
+          </h2>
+          <span className="clinic-admin-users-count">{guiaLeads.length} solicitudes</span>
+        </div>
+        <p className="clinic-muted clinic-tools-desc">
+          Interesados en el software y CDS que envían el formulario al final de la landing pública.
+        </p>
+        <div className="clinic-admin-plan-filters">
+          {LEAD_FILTERS.map((f) => (
+            <Button
+              key={f.id || "all"}
+              type="button"
+              size="sm"
+              variant={guiaLeadFilter === f.id ? "default" : "secondary"}
+              onClick={() => setGuiaLeadFilter(f.id)}
+            >
+              {f.label}
+            </Button>
+          ))}
+        </div>
+        {guiaLeadsLoading ? (
+          <ClinicTableSkeleton rows={4} cols={5} />
+        ) : guiaLeads.length === 0 ? (
+          <ClinicEmptyState
+            icon={Inbox}
+            title="Sin solicitudes"
+            description="Aún no hay solicitudes de Guía Consultas con el filtro seleccionado."
+          />
+        ) : (
+          <div className="clinic-table-wrap">
+            <table className="clinic-table clinic-admin-support-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Nombre</th>
+                  <th>Contacto</th>
+                  <th>Mensaje</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {guiaLeads.map((lead) => (
+                  <tr
+                    key={lead.id}
+                    className="clinic-admin-support-row"
+                    onClick={() => openGuiaLead(lead)}
+                  >
+                    <td className="clinic-admin-history-date">{formatDateTime(lead.created_at)}</td>
+                    <td>{lead.name}</td>
+                    <td>
+                      <div>{lead.email}</div>
+                      <div className="clinic-muted clinic-admin-support-email">{lead.phone || "—"}</div>
+                    </td>
+                    <td className="clinic-admin-lead-message">
+                      {(lead.message || "—").slice(0, 80)}
+                      {(lead.message || "").length > 80 ? "…" : ""}
+                    </td>
+                    <td>
+                      <span className={`clinic-admin-support-status status-${lead.status}`}>
+                        {LEAD_STATUS_LABELS[lead.status] || lead.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       <section className="clinic-settings-card">
         <div className="clinic-admin-users-head">
@@ -1073,6 +1236,76 @@ export function AdminPage() {
                   </form>
                 </>
               )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!selectedLead}
+        onOpenChange={(open) => {
+          if (!open) closeGuiaLead();
+        }}
+      >
+        <DialogContent className={clinicDialogClass("clinic-admin-lead-dialog", "max-w-lg")}>
+          {selectedLead && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedLead.name}</DialogTitle>
+                <DialogDescription>
+                  Solicitud Guía Consultas · {formatDateTime(selectedLead.created_at)}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="clinic-admin-support-actions">
+                <span className={`clinic-admin-support-status status-${selectedLead.status}`}>
+                  {LEAD_STATUS_LABELS[selectedLead.status] || selectedLead.status}
+                </span>
+                <select
+                  className="clinic-admin-support-select"
+                  value={selectedLead.status}
+                  disabled={leadActing}
+                  onChange={(e) => handleLeadStatusChange(e.target.value)}
+                >
+                  {Object.entries(LEAD_STATUS_LABELS).map(([k, label]) => (
+                    <option key={k} value={k}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="clinic-admin-lead-detail">
+                <p>
+                  <strong>Email:</strong>{" "}
+                  <a href={`mailto:${selectedLead.email}`}>{selectedLead.email}</a>
+                </p>
+                <p>
+                  <strong>Teléfono:</strong> {selectedLead.phone || "—"}
+                </p>
+                <p>
+                  <strong>Mensaje:</strong>
+                </p>
+                <pre className="clinic-admin-support-msg-body">
+                  {selectedLead.message || "(sin mensaje adicional)"}
+                </pre>
+              </div>
+
+              <form onSubmit={handleLeadNotesSave} className="clinic-admin-support-reply">
+                <Label htmlFor="lead-notes">Notas internas (Admin GUIAA)</Label>
+                <textarea
+                  id="lead-notes"
+                  className="clinic-admin-support-textarea"
+                  rows={3}
+                  value={leadNotes}
+                  onChange={(e) => setLeadNotes(e.target.value)}
+                  placeholder="Seguimiento, llamada programada, etc."
+                  maxLength={2000}
+                />
+                <Button type="submit" disabled={leadActing}>
+                  Guardar notas
+                </Button>
+              </form>
             </>
           )}
         </DialogContent>

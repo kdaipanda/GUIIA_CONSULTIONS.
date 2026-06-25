@@ -576,6 +576,62 @@ def update_appointment_request(
         return (None, str(exc))
 
 
+def _guia_consultas_leads_unavailable(err: str) -> bool:
+    return _table_unavailable(err, "guia_consultas_leads")
+
+
+def insert_guia_consultas_lead(row: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    try:
+        resp = _table("guia_consultas_leads").insert(row, returning="representation").execute()
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def list_guia_consultas_leads(
+    status: str = "", limit: int = 200
+) -> Tuple[List[Dict[str, Any]], Optional[str]]:
+    try:
+        query = _table("guia_consultas_leads").select("*").order("created_at", desc=True).limit(limit)
+        if status:
+            query = query.eq("status", status)
+        resp = query.execute()
+        return (resp.data or [], None)
+    except Exception as exc:  # noqa: BLE001
+        err = str(exc)
+        if _guia_consultas_leads_unavailable(err):
+            return ([], None)
+        return ([], err)
+
+
+def update_guia_consultas_lead(
+    lead_id: str, fields: Dict[str, Any]
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    fields = {**fields, "updated_at": _now_iso()}
+    try:
+        resp = (
+            _table("guia_consultas_leads")
+            .update(fields)
+            .eq("id", lead_id)
+            .execute()
+        )
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def get_guia_consultas_lead(lead_id: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    try:
+        resp = _table("guia_consultas_leads").select("*").eq("id", lead_id).limit(1).execute()
+        rows = resp.data or []
+        return (rows[0] if rows else None, None)
+    except Exception as exc:  # noqa: BLE001
+        err = str(exc)
+        if _guia_consultas_leads_unavailable(err):
+            return (None, None)
+        return (None, err)
+
+
 def _table_unavailable(err: str, table_name: str) -> bool:
     lowered = err.lower()
     name = table_name.lower()

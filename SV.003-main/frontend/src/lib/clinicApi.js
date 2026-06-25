@@ -267,6 +267,33 @@ export async function submitAppointmentRequest(data) {
   return response.json();
 }
 
+export async function submitGuiaConsultasLead(data) {
+  const response = await fetch(`${BACKEND_URL}/api/public/guia-consultas-leads`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.detail || "No se pudo enviar la solicitud");
+  }
+  return response.json();
+}
+
+export async function fetchAdminGuiaConsultasLeads(veterinarianId, status = "") {
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  const q = params.toString() ? `?${params}` : "";
+  return clinicFetch(`/api/admin/guia-consultas-leads${q}`, veterinarianId);
+}
+
+export async function updateAdminGuiaConsultasLead(veterinarianId, leadId, data) {
+  return clinicFetch(`/api/admin/guia-consultas-leads/${leadId}`, veterinarianId, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
 export async function fetchProducts(veterinarianId, search = "") {
   const q = search ? `?search=${encodeURIComponent(search)}` : "";
   return clinicFetch(`/api/products${q}`, veterinarianId);

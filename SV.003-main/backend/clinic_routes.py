@@ -1019,6 +1019,105 @@ async def api_public_appointment_request(body: AppointmentRequestCreate):
     return {"request": created, "message": "Solicitud enviada. El consultorio te contactará pronto."}
 
 
+class GuiaConsultasLeadCreate(BaseModel):
+    name: str
+    email: str
+    phone: Optional[str] = None
+    message: Optional[str] = None
+    privacy_accepted: bool = False
+
+
+class AdminGuiaConsultasLeadPatch(BaseModel):
+    status: Optional[str] = None
+    admin_notes: Optional[str] = None
+
+
+@clinic_router.post("/public/guia-consultas-leads")
+async def api_public_guia_consultas_lead(body: GuiaConsultasLeadCreate):
+    name = body.name.strip()
+    email = (body.email or "").strip().lower()
+    if not name or len(name) < 2:
+        raise HTTPException(status_code=400, detail="Ingresa tu nombre.")
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Ingresa un email válido.")
+    if not body.privacy_accepted:
+        raise HTTPException(status_code=400, detail="Debes aceptar el tratamiento de datos personales.")
+
+    row = {
+        "name": name,
+        "email": email,
+        "phone": (body.phone or "").strip() or None,
+        "message": (body.message or "").strip() or None,
+        "privacy_accepted": True,
+        "status": "new",
+        "source": "landing",
+    }
+    created, ins_err = clinic_db.insert_guia_consultas_lead(row)
+    if ins_err:
+        if "guia_consultas_leads" in ins_err:
+            raise HTTPException(
+                status_code=503,
+                detail="Las solicitudes Guía Consultas aún no están configuradas. Aplica la migración guia_consultas_leads.",
+            )
+        raise HTTPException(status_code=500, detail=ins_err)
+
+    await _email_background(email_notifications.notify_admins_guia_consultas_lead, created or row)
+    return {
+        "lead": created,
+        "message": "Solicitud enviada. El equipo GUIAA te contactará pronto.",
+    }
+
+
+@clinic_router.get("/admin/guia-consultas-leads")
+async def admin_list_guia_consultas_leads(
+    status: str = "",
+    x_veterinarian_id: str = Header(None),
+):
+    await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    leads, err = clinic_db.list_guia_consultas_leads(status=status.strip(), limit=200)
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    new_rows, _ = clinic_db.list_guia_consultas_leads(status="new", limit=500)
+    return {
+        "leads": leads,
+        "count": len(leads),
+        "new_count": len(new_rows or []),
+    }
+
+
+@clinic_router.patch("/admin/guia-consultas-leads/{lead_id}")
+async def admin_patch_guia_consultas_lead(
+    lead_id: str,
+    body: AdminGuiaConsultasLeadPatch,
+    x_veterinarian_id: str = Header(None),
+):
+    admin = await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    current, err = clinic_db.get_guia_consultas_lead(lead_id)
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    if not current:
+        raise HTTPException(status_code=404, detail="Solicitud no encontrada")
+
+    fields = body.model_dump(exclude_none=True)
+    if "status" in fields:
+        status = fields["status"].lower().strip()
+        if status not in ("new", "contacted", "closed"):
+            raise HTTPException(status_code=400, detail="Estado inválido")
+        fields["status"] = status
+
+    updated, upd_err = clinic_db.update_guia_consultas_lead(lead_id, fields)
+    if upd_err:
+        raise HTTPException(status_code=500, detail=upd_err)
+
+    auth_security.audit_admin_action(
+        admin,
+        "guia_consultas_lead_update",
+        target_email=current.get("email"),
+        metadata={"lead_id": lead_id, **fields},
+    )
+    return {"lead": updated or {**current, **fields}}
+
+
 class ProductCreate(BaseModel):
     name: str
     sku: Optional[str] = None

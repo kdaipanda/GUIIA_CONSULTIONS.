@@ -40,6 +40,7 @@ CLINIC_MIGRATION_ORDER = [
     "20260620_platform_security.sql",
     "20260621_support_tickets.sql",
     "20260622_profesional_latam.sql",
+    "20260625_guia_consultas_leads.sql",
     "optimize_rls_policies.sql",
 ]
 

@@ -24,6 +24,7 @@ import { LandingSpeciesMarquee } from "./landing/LandingSpeciesMarquee";
 import { LandingPricing } from "./landing/LandingPricing";
 import { LandingFaq } from "./landing/LandingFaq";
 import { LandingCta } from "./landing/LandingCta";
+import { LandingGuiaConsultas } from "./landing/LandingGuiaConsultas";
 import { LandingFooter } from "./landing/LandingFooter";
 import { LandingSocialRail } from "./landing/LandingSocialRail";
 import { LandingStickyCta } from "./landing/LandingStickyCta";
@@ -89,6 +90,10 @@ export function LandingPage({ setView }) {
 
             <LandingReveal>
               <LandingCta setView={setView} />
+            </LandingReveal>
+
+            <LandingReveal delay={20}>
+              <LandingGuiaConsultas />
             </LandingReveal>
           </main>
 

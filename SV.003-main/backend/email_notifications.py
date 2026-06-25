@@ -202,6 +202,39 @@ def notify_admins_new_ticket(ticket: dict, preview: str = "") -> None:
         print(f"[WARN] Email admins (nuevo ticket): {err}")
 
 
+def notify_admins_guia_consultas_lead(lead: dict) -> None:
+    admins = support_notify_emails()
+    if not admins:
+        return
+
+    name = lead.get("name") or "—"
+    email = lead.get("email") or "—"
+    phone = lead.get("phone") or "—"
+    message = (lead.get("message") or "").strip()[:800]
+    admin_url = f"{_frontend_url()}/app/admin"
+
+    email_subject = f"[GUIAA] Nueva solicitud Guía Consultas: {name}"
+    text = (
+        f"Nueva solicitud desde la landing (Guía Consultas)\n\n"
+        f"Nombre: {name}\n"
+        f"Email: {email}\n"
+        f"Teléfono: {phone}\n\n"
+        f"Mensaje:\n{message or '(sin mensaje)'}\n\n"
+        f"Ver en Admin GUIAA: {admin_url}\n"
+    )
+    html = f"""
+    <h2>Nueva solicitud — Guía Consultas</h2>
+    <p><strong>Nombre:</strong> {name}</p>
+    <p><strong>Email:</strong> {email}</p>
+    <p><strong>Teléfono:</strong> {phone}</p>
+    <pre style="background:#f8fafc;padding:12px;border-radius:8px;white-space:pre-wrap;">{message or "(sin mensaje)"}</pre>
+    <p><a href="{admin_url}">Abrir Admin GUIAA</a></p>
+    """
+    err = send_email(admins, email_subject, html, text)
+    if err:
+        print(f"[WARN] Email admins (Guía Consultas): {err}")
+
+
 def notify_admins_user_message(ticket: dict, message: str) -> None:
     admins = support_notify_emails()
     if not admins:
