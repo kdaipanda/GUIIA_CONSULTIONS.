@@ -2805,7 +2805,12 @@ def _lab_analysis_prompt(
     pasted: Optional[str],
     *,
     from_markitdown: bool = False,
+    has_image_attachment: bool = False,
 ) -> str:
+    """
+    Mensaje de usuario para laboratorio: solo datos del caso y del estudio.
+    El formato de respuesta lo define exclusivamente instrucciones_veterinarias.txt.
+    """
     type_descriptions = {
         "xray": "imagen médica/radiografía",
         "blood_test": "análisis de sangre/hemograma y panel bioquímico",
@@ -2814,25 +2819,22 @@ def _lab_analysis_prompt(
         "general": "estudio de laboratorio veterinario",
     }
     desc = type_descriptions.get(image_type, type_descriptions["general"])
-    parts = [
-        f"Analiza este {desc} de laboratorio veterinario.",
-        "",
-        "Estructura tu respuesta con estas secciones:",
-        "**HALLAZGOS PRINCIPALES:**",
-        "**ANÁLISIS DETALLADO:**",
-        "**RECOMENDACIONES:**",
-    ]
+    parts = [f"Interpreta los resultados de este {desc} veterinario."]
     if patient_name:
-        parts.insert(1, f"Paciente: {patient_name}")
+        parts.append(f"Paciente: {patient_name}")
     if additional_context and str(additional_context).strip():
-        parts.append(f"\nContexto adicional del veterinario: {additional_context.strip()}")
+        parts.append(f"Contexto adicional del veterinario: {additional_context.strip()}")
     if pasted and str(pasted).strip():
         section_title = (
-            "--- CONTENIDO DEL PDF (Markdown vía MarkItDown) ---"
+            "Resultados del estudio (extraídos del PDF)"
             if from_markitdown
-            else "--- DATOS DEL ESTUDIO (texto proporcionado) ---"
+            else "Resultados del estudio"
         )
-        parts.append(f"\n{section_title}\n{pasted.strip()}")
+        parts.append(f"\n{section_title}:\n{pasted.strip()}")
+    elif has_image_attachment:
+        parts.append(
+            "\nLos resultados del estudio se adjuntan como imagen en este mensaje."
+        )
     return "\n".join(parts)
 
 
@@ -2959,16 +2961,18 @@ async def interpret_medical_image(request: ImageInterpretRequest):
             print(f"[LAB] Error decodificando PDF para MarkItDown: {exc}")
             pdf_markdown = None
 
+    uses_vision = has_file and not pdf_markdown
     prompt_text = _lab_analysis_prompt(
         stored_image_type,
         request.patient_name,
         request.additional_context,
         pdf_markdown if pdf_markdown else (request.pasted_study_data if has_text else None),
         from_markitdown=bool(pdf_markdown),
+        has_image_attachment=uses_vision,
     )
 
     try:
-        if has_file and not pdf_markdown:
+        if uses_vision:
             content_blocks = _build_lab_vision_content_blocks(
                 request.image_base64,
                 stored_image_type,
@@ -2989,47 +2993,26 @@ async def interpret_medical_image(request: ImageInterpretRequest):
         print(f"[DEBUG] Primeros 300 caracteres de la respuesta:")
         print(f"[DEBUG] {analysis_text[:300]}...")
 
-        # Parsear hallazgos y recomendaciones del texto
-        findings = []
-        recommendations = []
-
-        lines = analysis_text.split("\n")
-        current_section = None
-        for line in lines:
-            line_lower = line.lower().strip()
-            if "hallazgos" in line_lower:
-                current_section = "findings"
-            elif "recomendaciones" in line_lower or "recomendación" in line_lower:
-                current_section = "recommendations"
-            elif line.strip().startswith("-") or line.strip().startswith("•"):
-                clean_line = line.strip().lstrip("-•").strip()
-                if clean_line and current_section == "findings":
-                    findings.append(clean_line)
-                elif clean_line and current_section == "recommendations":
-                    recommendations.append(clean_line)
-
-        if not findings:
-            findings = ["Ver análisis detallado"]
-        if not recommendations:
-            recommendations = ["Consultar análisis completo"]
+        findings: List[str] = []
+        recommendations: List[str] = []
 
     except ValueError as e:
         print(f"[ERROR] ValueError: {str(e)}")
         analysis_text = f"Error: {str(e)}"
-        findings = ["API key no configurada"]
-        recommendations = ["Configurar ANTHROPIC_API_KEY en backend/.env"]
+        findings = []
+        recommendations = []
     except RuntimeError as e:
         print(f"[ERROR] RuntimeError: {str(e)}")
         analysis_text = f"Error al analizar imagen: {str(e)}"
-        findings = ["Error en servicio externo"]
-        recommendations = ["Revisar conexión con Anthropic y reintentar"]
+        findings = []
+        recommendations = []
     except Exception as e:
         import traceback
         print(f"[ERROR] Exception: {str(e)}")
         print(f"[ERROR] Traceback: {traceback.format_exc()}")
         analysis_text = f"Error al analizar imagen: {str(e)}"
-        findings = ["Error en el análisis"]
-        recommendations = ["Verificar la imagen e intentar de nuevo"]
+        findings = []
+        recommendations = []
 
     # No se suben imágenes - solo se analizan datos de texto pegados
     public_url = None

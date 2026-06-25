@@ -244,7 +244,7 @@ export function MedicalImagesPage({ setView }) {
               <FlaskConical size={28} aria-hidden />
               Interpretación de análisis
             </h1>
-            <p>Sube el PDF del laboratorio o pega resultados para obtener hallazgos y recomendaciones.</p>
+            <p>Sube el PDF del laboratorio o pega resultados para obtener el análisis clínico detallado.</p>
           </div>
           <Button
             type="button"
@@ -571,41 +571,14 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
 
             {result && (
               <div className="interpretation-result medical-lab-result">
-                <h2>Resultado de la interpretación</h2>
+                <h2>Análisis detallado</h2>
                 {result.extraction_method && EXTRACTION_LABELS[result.extraction_method] && (
                   <p className="medical-lab-extract-badge">
                     {EXTRACTION_LABELS[result.extraction_method]}
                   </p>
                 )}
 
-                <div className="result-section">
-                  <h3>🔍 Hallazgos principales</h3>
-                  <div className="result-content">
-                    {result.findings && Array.isArray(result.findings) && result.findings.length > 0
-                      ? result.findings.map((finding, idx) => <div key={idx}>• {finding}</div>)
-                      : result.findings && !Array.isArray(result.findings)
-                        ? result.findings
-                        : result.analysis
-                          ? <div className="medical-lab-result-fallback">Ver análisis detallado abajo.</div>
-                          : <div className="medical-lab-result-fallback">No hay hallazgos disponibles</div>}
-                  </div>
-                </div>
-
-                <div className="result-section">
-                  <h3>💊 Recomendaciones</h3>
-                  <div className="result-content">
-                    {result.recommendations && Array.isArray(result.recommendations) && result.recommendations.length > 0
-                      ? result.recommendations.map((rec, idx) => <div key={idx}>• {rec}</div>)
-                      : result.recommendations && !Array.isArray(result.recommendations)
-                        ? result.recommendations
-                        : result.analysis
-                          ? <div className="medical-lab-result-fallback">Ver análisis detallado abajo.</div>
-                          : <div className="medical-lab-result-fallback">No hay recomendaciones disponibles</div>}
-                  </div>
-                </div>
-
-                <div className="result-section detailed">
-                  <h3>📊 Análisis detallado</h3>
+                <div className="result-section detailed medical-lab-result-only">
                   <div className="result-content detailed-analysis medical-lab-detailed-analysis">
                     {result.analysis ? (
                       <pre>{cleanClinicalDisplayText(result.analysis)}</pre>
@@ -665,13 +638,9 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                       {(() => {
                         const preview = item.analysis
                           ? cleanClinicalDisplayText(item.analysis)
-                          : item.findings && Array.isArray(item.findings)
-                            ? item.findings.join(", ")
-                            : item.findings
-                              ? String(item.findings)
-                              : item.detailed_analysis
-                                ? cleanClinicalDisplayText(item.detailed_analysis)
-                                : "Sin análisis disponible";
+                          : item.detailed_analysis
+                            ? cleanClinicalDisplayText(item.detailed_analysis)
+                            : "Sin análisis disponible";
                         return preview.length > 150 ? `${preview.substring(0, 150)}...` : preview;
                       })()}
                     </div>
