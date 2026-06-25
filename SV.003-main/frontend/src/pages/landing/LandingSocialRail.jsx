@@ -20,7 +20,7 @@ const DESKTOP_ITEMS = [
   },
 ];
 
-export function LandingSocialRail({ setView }) {
+export function LandingSocialRail() {
   return (
     <>
       <aside
@@ -50,36 +50,6 @@ export function LandingSocialRail({ setView }) {
           ),
         )}
       </aside>
-
-      {setView && (
-        <div className="landing-mobile-bar fixed inset-x-0 bottom-0 z-50 border-t border-guiaa-brand-navy/10 bg-white/95 px-3 py-2.5 backdrop-blur-md lg:hidden">
-          <div className="mx-auto flex max-w-lg items-center gap-2">
-            <button
-              type="button"
-              onClick={() => scrollToLandingProduct("species")}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-guiaa-brand-navy/10 py-2.5 text-xs font-semibold text-guiaa-brand-navy"
-            >
-              <Monitor size={15} aria-hidden />
-              Producto
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollToLandingSection("#faq")}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-guiaa-brand-navy/10 py-2.5 text-xs font-semibold text-guiaa-brand-navy"
-            >
-              <MessageCircle size={15} aria-hidden />
-              FAQ
-            </button>
-            <button
-              type="button"
-              onClick={() => setView("register")}
-              className="landing-btn-primary inline-flex flex-[1.2] items-center justify-center py-2.5 text-xs"
-            >
-              Registro
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }

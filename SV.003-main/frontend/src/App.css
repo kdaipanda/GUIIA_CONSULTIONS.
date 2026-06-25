@@ -7051,6 +7051,35 @@ h1, h2, h3, h4, h5, h6 {
   bottom: calc(4.9rem + env(safe-area-inset-bottom, 0px));
 }
 
+@media (max-width: 1023px) {
+  .support-chat-root--landing,
+  .support-chat-root--auth {
+    left: auto;
+    right: max(12px, env(safe-area-inset-right, 0));
+    bottom: max(12px, env(safe-area-inset-bottom, 0));
+  }
+
+  .support-chat-root--landing.support-chat-root--above-sticky,
+  .support-chat-root--auth.support-chat-root--above-sticky {
+    bottom: calc(4.35rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .support-chat-root--landing .support-chat-panel,
+  .support-chat-root--auth .support-chat-panel {
+    left: auto;
+    right: 0;
+  }
+
+  .support-chat-plumitas {
+    width: 3.35rem;
+    height: 3.35rem;
+  }
+
+  .support-chat-plumitas-hint {
+    display: none;
+  }
+}
+
 @media (min-width: 1024px) {
   .support-chat-root--landing,
   .support-chat-root--auth {
@@ -12607,12 +12636,6 @@ html {
   .support-chat-root {
     right: max(12px, env(safe-area-inset-right, 0));
     bottom: max(12px, env(safe-area-inset-bottom, 0));
-  }
-
-  .support-chat-root--landing,
-  .support-chat-root--auth {
-    left: max(12px, env(safe-area-inset-left, 0));
-    right: auto;
   }
 
   .support-chat-panel {
