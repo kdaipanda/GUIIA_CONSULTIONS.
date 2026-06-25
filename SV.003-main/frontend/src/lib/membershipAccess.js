@@ -30,6 +30,14 @@ export const FEATURE_UPGRADE_MESSAGES = {
   medical_images: "La interpretación de laboratorio (PDF y estudios) requiere membresía Premium.",
 };
 
+function membershipIsExpired(veterinarian) {
+  if (!veterinarian?.membership_expires) return false;
+
+  const expiry = new Date(veterinarian.membership_expires);
+  if (Number.isNaN(expiry.getTime())) return false;
+  return expiry < new Date();
+}
+
 export function getEffectivePlan(veterinarian, { platformAdmin = false } = {}) {
   if (platformAdmin) return "premium";
   if (!veterinarian) return "basic";
@@ -37,7 +45,7 @@ export function getEffectivePlan(veterinarian, { platformAdmin = false } = {}) {
   const membershipType = veterinarian.membership_type?.toLowerCase();
   const remaining = veterinarian.consultations_remaining ?? 0;
 
-  if (membershipType) return membershipType;
+  if (membershipType) return membershipIsExpired(veterinarian) ? "basic" : membershipType;
   if (remaining > 0) return "trial";
   return "basic";
 }

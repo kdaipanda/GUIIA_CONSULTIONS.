@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import sys
 import unittest
+from datetime import datetime, timedelta, timezone
 
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BACKEND_DIR)
@@ -17,12 +18,13 @@ from membership_access import (  # noqa: E402
 from fastapi import HTTPException
 
 
-def _profile(plan: str, remaining: int = 10) -> dict:
+def _profile(plan: str, remaining: int = 10, membership_expires: str | None = None) -> dict:
     return {
         "id": f"test-{plan}",
         "email": f"{plan}@guiaa.vet",
         "membership_type": plan,
         "consultations_remaining": remaining,
+        "membership_expires": membership_expires,
     }
 
 
@@ -76,6 +78,23 @@ class MembershipPlanMatrix(unittest.TestCase):
         self.assertTrue(can_access_feature(p, "inventory"))
         self.assertTrue(can_access_feature(p, "expert_mode"))
         self.assertTrue(can_access_feature(p, "advanced_analysis"))
+        self.assertTrue(can_access_feature(p, "medical_images"))
+
+    def test_expired_membership_loses_paid_feature_access(self):
+        expired = (
+            datetime.now(timezone.utc) - timedelta(days=1)
+        ).isoformat()
+        p = _profile("premium", membership_expires=expired)
+        self.assertEqual(resolve_effective_plan(p), "basic")
+        self.assertFalse(can_access_feature(p, "medical_images"))
+        self.assertFalse(can_access_feature(p, "expert_mode"))
+
+    def test_active_membership_keeps_paid_feature_access(self):
+        active = (
+            datetime.now(timezone.utc) + timedelta(days=1)
+        ).isoformat()
+        p = _profile("premium", membership_expires=active)
+        self.assertEqual(resolve_effective_plan(p), "premium")
         self.assertTrue(can_access_feature(p, "medical_images"))
 
     def test_trial_plan(self):
