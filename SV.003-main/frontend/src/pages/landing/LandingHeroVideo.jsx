@@ -1,19 +1,41 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
-import { LANDING_HERO_VIDEO, LANDING_HERO_VIDEO_POSTER } from "./landingBrandAssets";
+import {
+  LANDING_HERO_VIDEO,
+  LANDING_HERO_VIDEO_MOBILE,
+  LANDING_HERO_VIDEO_POSTER,
+} from "./landingBrandAssets";
 
 function useIsMobileCoarse() {
-  const [mobile, setMobile] = useState(false);
+  const [mobile, setMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 1023px)").matches;
+  });
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1023px)");
     const update = () => setMobile(mq.matches);
-    update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
 
   return mobile;
+}
+
+async function tryPlay(video, { retries = 2 } = {}) {
+  if (!video) return false;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      await video.play();
+      return true;
+    } catch {
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, 180 * (attempt + 1)));
+      }
+    }
+  }
+  return false;
 }
 
 export function LandingHeroVideo({ onFailed }) {
@@ -23,6 +45,11 @@ export function LandingHeroVideo({ onFailed }) {
   const [inView, setInView] = useState(false);
   const [userStarted, setUserStarted] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [playBlocked, setPlayBlocked] = useState(false);
+
+  const videoSrc = isMobile ? LANDING_HERO_VIDEO_MOBILE : LANDING_HERO_VIDEO;
+  const shouldAutoplay = !isMobile && inView && !failed;
+  const preload = inView ? (isMobile && !userStarted ? "metadata" : "auto") : "none";
 
   useEffect(() => {
     const node = wrapRef.current;
@@ -30,11 +57,28 @@ export function LandingHeroVideo({ onFailed }) {
 
     const observer = new IntersectionObserver(
       ([entry]) => setInView(entry.isIntersecting),
-      { threshold: 0.35 },
+      { threshold: 0.25, rootMargin: "80px 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
+
+  const handleError = useCallback(() => {
+    setFailed(true);
+    onFailed?.();
+  }, [onFailed]);
+
+  const attemptPlayback = useCallback(async () => {
+    const video = videoRef.current;
+    if (!video || failed) return;
+
+    const ok = await tryPlay(video);
+    if (!ok) {
+      setPlayBlocked(true);
+    } else {
+      setPlayBlocked(false);
+    }
+  }, [failed]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -46,8 +90,7 @@ export function LandingHeroVideo({ onFailed }) {
         return;
       }
       if (inView) {
-        const p = video.play();
-        if (p?.catch) p.catch(() => {});
+        attemptPlayback();
       } else {
         video.pause();
       }
@@ -55,23 +98,23 @@ export function LandingHeroVideo({ onFailed }) {
     }
 
     if (inView) {
-      const p = video.play();
-      if (p?.catch) p.catch(() => {});
+      attemptPlayback();
     } else {
       video.pause();
     }
-  }, [inView, isMobile, userStarted, failed]);
+  }, [inView, isMobile, userStarted, failed, videoSrc, attemptPlayback]);
 
-  const handleError = () => {
-    setFailed(true);
-    onFailed?.();
+  const startMobile = async () => {
+    setUserStarted(true);
+    setPlayBlocked(false);
+    const ok = await tryPlay(videoRef.current);
+    if (!ok) setPlayBlocked(true);
   };
 
-  const startMobile = () => {
-    setUserStarted(true);
-    const video = videoRef.current;
-    const p = video?.play?.();
-    if (p?.catch) p.catch(() => handleError());
+  const handleManualPlay = async () => {
+    setPlayBlocked(false);
+    const ok = await tryPlay(videoRef.current, { retries: 3 });
+    if (!ok) handleError();
   };
 
   if (failed) {
@@ -81,6 +124,7 @@ export function LandingHeroVideo({ onFailed }) {
         alt="Doctor Plumitas presenta GUIAA"
         loading="eager"
         decoding="async"
+        fetchPriority="high"
       />
     );
   }
@@ -88,15 +132,22 @@ export function LandingHeroVideo({ onFailed }) {
   return (
     <div ref={wrapRef} className="landing-hero-video-wrap">
       <video
+        key={videoSrc}
         ref={videoRef}
         loop
         muted
         playsInline
-        preload={inView ? "metadata" : "none"}
+        autoPlay={shouldAutoplay}
+        preload={preload}
         poster={LANDING_HERO_VIDEO_POSTER}
         onError={handleError}
+        onLoadedData={() => {
+          if (shouldAutoplay || (isMobile && userStarted && inView)) {
+            attemptPlayback();
+          }
+        }}
       >
-        <source src={LANDING_HERO_VIDEO} type="video/mp4" />
+        <source src={videoSrc} type="video/mp4" />
       </video>
 
       {isMobile && !userStarted && (
@@ -104,6 +155,17 @@ export function LandingHeroVideo({ onFailed }) {
           type="button"
           className="landing-hero-video-play-overlay"
           onClick={startMobile}
+          aria-label="Reproducir video de presentación"
+        >
+          <Play size={22} fill="currentColor" aria-hidden />
+        </button>
+      )}
+
+      {!isMobile && playBlocked && (
+        <button
+          type="button"
+          className="landing-hero-video-play-overlay landing-hero-video-play-overlay--desktop"
+          onClick={handleManualPlay}
           aria-label="Reproducir video de presentación"
         >
           <Play size={22} fill="currentColor" aria-hidden />

@@ -80,6 +80,13 @@ export function LandingSeo() {
     upsertMeta("name", "twitter:description", LANDING_DESCRIPTION);
     upsertMeta("name", "twitter:image", LANDING_OG_IMAGE);
     upsertLink("canonical", LANDING_URL);
+    upsertLink("preload", "/brand/doctor-plumitas-hub.png");
+    const preloadTag = document.querySelector('link[rel="preload"][href*="doctor-plumitas-hub"]');
+    if (preloadTag) {
+      preloadTag.setAttribute("as", "image");
+      preloadTag.setAttribute("type", "image/png");
+      preloadTag.setAttribute("fetchpriority", "high");
+    }
 
     const structuredDataScript = document.createElement("script");
     structuredDataScript.type = "application/ld+json";

@@ -242,6 +242,10 @@
   background: rgba(12, 45, 77, 0.48);
 }
 
+.landing-hero-video-play-overlay--desktop {
+  background: rgba(12, 45, 77, 0.22);
+}
+
 .landing-petpal-cta-hint {
   margin-top: 0.65rem;
   font-size: 0.75rem;

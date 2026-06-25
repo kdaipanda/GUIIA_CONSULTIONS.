@@ -28,5 +28,6 @@ export const LANDING_IMAGES = {
 };
 
 export const LANDING_HERO_VIDEO = "/VG1.mp4";
+export const LANDING_HERO_VIDEO_MOBILE = "/VG1-mobile.mp4";
 export const LANDING_HERO_VIDEO_POSTER = LANDING_IMAGES.heroHub;
 export const LANDING_OG_IMAGE = "https://guiaa.vet/brand/doctor-plumitas-hub.png";
