@@ -14,8 +14,14 @@ export function clearAccessToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
 
+/**
+ * Cabeceras de autenticación para la API.
+ * Por defecto incluye Content-Type: application/json (requerido por FastAPI).
+ * Para FormData/multipart: getAuthHeaders(vetId, { skipContentType: true })
+ */
 export function getAuthHeaders(veterinarianId, extra = {}) {
-  const headers = { ...extra };
+  const { skipContentType, ...headerFields } = extra;
+  const headers = { ...headerFields };
   const token = getAccessToken();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -23,11 +29,7 @@ export function getAuthHeaders(veterinarianId, extra = {}) {
   if (veterinarianId) {
     headers["x-veterinarian-id"] = veterinarianId;
   }
-  if (
-    !headers["Content-Type"] &&
-    extra.body !== undefined &&
-    !(extra.body instanceof FormData)
-  ) {
+  if (!headers["Content-Type"] && !skipContentType) {
     headers["Content-Type"] = "application/json";
   }
   return headers;

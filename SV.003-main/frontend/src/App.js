@@ -1805,7 +1805,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
         fd.append("file", file);
         const up = await fetch(`${BACKEND_URL}/api/cedula/upload`, {
           method: "POST",
-          headers: getAuthHeaders(vetId),
+          headers: getAuthHeaders(vetId, { skipContentType: true }),
           body: fd,
         });
         if (!up.ok) {
