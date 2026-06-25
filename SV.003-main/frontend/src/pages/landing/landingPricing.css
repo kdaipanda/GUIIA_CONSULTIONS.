@@ -117,7 +117,8 @@
 }
 
 .landing-pricing-features {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   margin: 1.5rem 0 0;
   padding: 0;
   list-style: none;
@@ -145,6 +146,20 @@
   margin-top: auto;
   padding-top: 2rem;
   width: 100%;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.875rem;
+  line-height: 1.35;
+  box-sizing: border-box;
+  text-align: center;
+  white-space: nowrap;
+}
+
+#pricing .landing-pricing-cta.landing-btn-primary {
+  padding: 0.875rem 1.75rem;
+  border-radius: 999px;
 }
 
 #pricing .landing-pricing-cta.landing-btn-secondary {
