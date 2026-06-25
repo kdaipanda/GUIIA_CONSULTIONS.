@@ -2,7 +2,6 @@ import React, { useMemo, useEffect, useState, useCallback, useRef } from "react"
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
-  Users,
   PawPrint,
   CalendarDays,
   Stethoscope,
@@ -39,8 +38,7 @@ const BASE_NAV_ITEMS = [
     icon: Stethoscope,
     view: "new-consultation",
   },
-  { to: "/app/clientes", label: "Dueño", icon: Users, view: "clients" },
-  { to: "/app/pacientes", label: "Mascotas", icon: PawPrint, view: "patients" },
+  { to: "/app/clientes", label: "Dueños y mascotas", icon: PawPrint, view: "clients" },
   { to: "/app/agenda", label: "Agenda", icon: CalendarDays, view: "agenda" },
   {
     to: "/app/inventario",

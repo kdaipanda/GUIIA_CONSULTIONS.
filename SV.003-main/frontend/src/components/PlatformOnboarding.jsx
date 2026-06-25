@@ -18,7 +18,6 @@ const VIEW_TO_PATH = {
   dashboard: "/app/dashboard",
   "new-consultation": "/app/consultas/nueva",
   clients: "/app/clientes",
-  patients: "/app/pacientes",
   agenda: "/app/agenda",
   inventory: "/app/inventario",
   billing: "/app/facturacion",

@@ -54,8 +54,7 @@ import { AppShell } from "./layout/AppShell";
 import { AuthPageShell } from "./layout/AuthPageShell";
 import { ClinicShell } from "./layout/ClinicShell";
 import { ClinicProvider } from "./context/ClinicContext";
-import { ClientsPage } from "./pages/clinic/ClientsPage";
-import { PatientsPage } from "./pages/clinic/PatientsPage";
+import { ClientsPatientsPage } from "./pages/clinic/ClientsPatientsPage";
 import { AgendaPage } from "./pages/clinic/AgendaPage";
 import { InventoryPage } from "./pages/clinic/InventoryPage";
 import { BillingPage } from "./pages/clinic/BillingPage";
@@ -89,7 +88,7 @@ const isPremiumMember = (vet) =>
 const VIEW_TO_PATH = {
   dashboard: "/app/dashboard",
   clients: "/app/clientes",
-  patients: "/app/pacientes",
+  patients: "/app/clientes",
   agenda: "/app/agenda",
   inventory: "/app/inventario",
   billing: "/app/facturacion",
@@ -104,9 +103,14 @@ const VIEW_TO_PATH = {
   profile: "/app/perfil",
 };
 
-const PATH_TO_VIEW = Object.fromEntries(
-  Object.entries(VIEW_TO_PATH).map(([view, path]) => [path, view]),
-);
+const PATH_TO_VIEW = {
+  ...Object.fromEntries(
+    Object.entries(VIEW_TO_PATH)
+      .filter(([view]) => view !== "patients")
+      .map(([view, path]) => [path, view]),
+  ),
+  "/app/pacientes": "clients",
+};
 
 // Importar formularios de especies
 import {
@@ -141,19 +145,11 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     },
     {
       id: "clients",
-      title: "Dueño",
-      description: "Dueño y contactos",
-      icon: "👥",
-      shortcut: "",
-      action: () => setView("clients"),
-    },
-    {
-      id: "patients",
-      title: "Mascotas",
-      description: "Mascotas registradas",
+      title: "Dueños y mascotas",
+      description: "Tutores, fichas clínicas e historial",
       icon: "🐾",
       shortcut: "",
-      action: () => setView("patients"),
+      action: () => setView("clients"),
     },
     {
       id: "agenda",
@@ -477,6 +473,10 @@ const Router = () => {
       setCurrentView("appointment-request");
       return;
     }
+    if (location.pathname === "/app/pacientes") {
+      navigate(VIEW_TO_PATH.clients, { replace: true });
+      return;
+    }
     const view = PATH_TO_VIEW[location.pathname];
     if (view && veterinarian) {
       setCurrentView(view);
@@ -597,12 +597,15 @@ const Router = () => {
     ),
     clients: (
       <ClinicShell setView={navigateSetView}>
-        <ClientsPage />
+        <ClientsPatientsPage
+          onStartConsultation={openConsultationWithPatient}
+          onViewConsultation={openConsultation}
+        />
       </ClinicShell>
     ),
     patients: (
       <ClinicShell setView={navigateSetView}>
-        <PatientsPage
+        <ClientsPatientsPage
           onStartConsultation={openConsultationWithPatient}
           onViewConsultation={openConsultation}
         />

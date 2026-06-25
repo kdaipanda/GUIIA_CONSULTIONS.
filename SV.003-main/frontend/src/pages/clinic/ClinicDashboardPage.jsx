@@ -4,7 +4,6 @@ import {
   CalendarDays,
   DollarSign,
   Stethoscope,
-  Users,
   PawPrint,
   Package,
   Plus,
@@ -491,16 +490,8 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   className="clinic-dashboard-quick-btn"
                   onClick={() => go("clients", "/app/clientes")}
                 >
-                  <Users size={20} aria-hidden />
-                  Dueños
-                </button>
-                <button
-                  type="button"
-                  className="clinic-dashboard-quick-btn"
-                  onClick={() => go("patients", "/app/pacientes")}
-                >
                   <PawPrint size={20} aria-hidden />
-                  Mascotas
+                  Dueños y mascotas
                 </button>
                 <button
                   type="button"
