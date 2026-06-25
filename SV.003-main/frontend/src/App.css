@@ -6002,17 +6002,17 @@ h1, h2, h3, h4, h5, h6 {
   .image-type-selector {
     grid-template-columns: 1fr;
   }
-  
-  .image-interpretation-layout {
+
+  .image-interpretation-layout:not(.medical-lab-layout) {
     grid-template-columns: 1fr;
   }
 
-  .image-side-panel {
+  .image-side-panel:not(.medical-lab-summary) {
     position: static;
     margin-top: 20px;
   }
 
-  .image-interpretation-form {
+  .image-interpretation-form:not(.medical-lab-form) {
     padding: 24px 20px;
   }
   
@@ -12703,7 +12703,8 @@ html {
   }
 
   .clinic-shell-main .dashboard-page .container,
-  .clinic-shell-main .consultation-page .container {
+  .clinic-shell-main .consultation-page .container,
+  .clinic-shell-main .medical-images-page .container {
     padding-left: 12px;
     padding-right: 12px;
   }

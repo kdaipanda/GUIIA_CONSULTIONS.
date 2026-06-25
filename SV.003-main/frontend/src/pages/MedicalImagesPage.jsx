@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { FlaskConical } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronDown, FileUp, FlaskConical, ImageIcon } from "lucide-react";
 import { useVet } from "../context/VetContext";
 import { notifyError, notifySuccess } from "../lib/appToast";
 import { BACKEND_URL } from "../lib/backendUrl";
@@ -13,7 +13,15 @@ import {
 import { PatientSelector } from "../components/clinic/PatientSelector";
 import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
+import "./clinic/clinicPageShared.css";
 import "./medicalImagesPage.css";
+
+const EXTRACTION_LABELS = {
+  markitdown: "Texto extraído del PDF con MarkItDown",
+  vision: "PDF escaneado — análisis visual de páginas",
+  image: "Imagen del estudio analizada",
+  text: "Resultados pegados como texto",
+};
 
 export function MedicalImagesPage({ setView }) {
   const { veterinarian } = useVet();
@@ -31,6 +39,8 @@ export function MedicalImagesPage({ setView }) {
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const fileInputRef = useRef(null);
 
   const typeMeta = {
     blood_test: {
@@ -246,9 +256,58 @@ export function MedicalImagesPage({ setView }) {
         </header>
 
         {!showHistory ? (
-          <div className="image-interpretation-layout">
-            <div className="image-interpretation-form">
-              <form onSubmit={handleSubmit}>
+          <div className="image-interpretation-layout medical-lab-layout">
+            <aside className="image-side-panel medical-lab-summary" aria-label="Resumen del estudio">
+              <div className="side-panel-header">
+                <span className="side-panel-pill">Panel clínico</span>
+                <h3>Resumen del estudio</h3>
+                <p className="medical-lab-summary-lead">
+                  Verifica que la información clave del caso esté completa antes de enviar.
+                </p>
+              </div>
+
+              <div className="medical-lab-summary-grid">
+                <div className="side-panel-section medical-lab-summary-item">
+                  <div className="side-panel-label">Tipo</div>
+                  <div className="side-panel-main">
+                    <span className="side-panel-icon">{imageMeta.icon}</span>
+                    <span className="side-panel-text">{imageMeta.label}</span>
+                  </div>
+                </div>
+
+                <div className="side-panel-section medical-lab-summary-item">
+                  <div className="side-panel-label">Mascota</div>
+                  <div className="side-panel-chip">
+                    {imageClinicalContext?.patient?.name || patientName || "Sin asignar"}
+                  </div>
+                </div>
+
+                <div className="side-panel-section medical-lab-summary-item">
+                  <div className="side-panel-label">Estado</div>
+                  <div
+                    className={`side-panel-status ${loading ? "loading" : result ? "done" : "idle"}`}
+                  >
+                    {loading
+                      ? "Analizando..."
+                      : result
+                        ? "Listo"
+                        : canSubmit
+                          ? "Listo para enviar"
+                          : "Falta estudio"}
+                  </div>
+                </div>
+              </div>
+
+              <p className="side-panel-hint medical-lab-summary-hint">{imageMeta.hint}</p>
+              {consultationId && (
+                <div className="side-panel-sub medical-lab-summary-consult">
+                  Consulta: <span>#{consultationId}</span>
+                </div>
+              )}
+            </aside>
+
+            <div className="image-interpretation-form medical-lab-form">
+              <form onSubmit={handleSubmit} className="medical-lab-form-inner">
               <div className="form-section">
                 <h3>Tipo de Estudio</h3>
                 <div className="image-type-selector">
@@ -316,15 +375,35 @@ export function MedicalImagesPage({ setView }) {
                       {inputMode === "pdf" ? "Archivo PDF del laboratorio" : "Foto o captura del estudio"}
                     </label>
                     <input
+                      ref={fileInputRef}
                       id="lab-file-upload"
                       type="file"
                       accept={inputMode === "pdf" ? "application/pdf,.pdf" : "image/*"}
+                      capture={inputMode === "image" ? "environment" : undefined}
                       onChange={handleLabFileChange}
-                      className="medical-lab-file-input"
+                      className="medical-lab-file-input-hidden"
                     />
-                    {imageFile && (
-                      <p className="clinic-muted medical-lab-file-name">{labFileLabel(imageFile)}</p>
-                    )}
+                    <button
+                      type="button"
+                      className="medical-lab-upload-zone"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <span className="medical-lab-upload-icon" aria-hidden>
+                        {inputMode === "pdf" ? <FileUp size={22} /> : <ImageIcon size={22} />}
+                      </span>
+                      <span className="medical-lab-upload-text">
+                        {imageFile
+                          ? labFileLabel(imageFile)
+                          : inputMode === "pdf"
+                            ? "Toca para seleccionar PDF"
+                            : "Toca para tomar o elegir imagen"}
+                      </span>
+                      <span className="medical-lab-upload-hint">
+                        {inputMode === "pdf"
+                          ? "Se convierte a Markdown con MarkItDown y luego se interpreta"
+                          : "JPG o PNG del reporte"}
+                      </span>
+                    </button>
                     {imagePreview && inputMode === "image" && (
                       <img
                         src={imagePreview}
@@ -332,130 +411,56 @@ export function MedicalImagesPage({ setView }) {
                         className="medical-lab-preview"
                       />
                     )}
-                    <small className="clinic-muted medical-lab-hint">
-                      {inputMode === "pdf"
-                        ? "Se leen hasta 5 páginas del PDF automáticamente."
-                        : "JPG o PNG del reporte impreso o pantalla del laboratorio."}
-                    </small>
                   </div>
                 )}
 
                 {inputMode === "text" && (
                 <>
-                <div style={{
-                  marginBottom: '16px',
-                  backgroundColor: 'var(--bg-secondary)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '8px',
-                  overflow: 'hidden'
-                }}>
+                <div className="medical-lab-help">
                   <button
                     type="button"
+                    className="medical-lab-help-toggle"
                     onClick={() => setShowHelp(!showHelp)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      textAlign: 'left',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: 'var(--text-primary)'
-                    }}
+                    aria-expanded={showHelp}
                   >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>ℹ️</span>
-                      <span>¿Cómo copiar texto de un PDF?</span>
+                    <span className="medical-lab-help-toggle-label">
+                      <span aria-hidden>ℹ️</span>
+                      ¿Cómo copiar texto de un PDF?
                     </span>
-                    <span style={{ fontSize: '18px' }}>{showHelp ? '▼' : '▶'}</span>
+                    <ChevronDown
+                      size={18}
+                      className={`medical-lab-help-chevron${showHelp ? " is-open" : ""}`}
+                      aria-hidden
+                    />
                   </button>
-                  
+
                   {showHelp && (
-                    <div style={{
-                      padding: '16px',
-                      borderTop: '1px solid var(--border-color)',
-                      backgroundColor: 'var(--bg-primary)',
-                      fontSize: '13px',
-                      lineHeight: '1.6',
-                      color: 'var(--text-primary)'
-                    }}>
-                      <div style={{ marginBottom: '16px' }}>
-                        <strong style={{ color: 'var(--accent-color)', display: 'block', marginBottom: '8px' }}>
-                          Caso 1: PDF normal (no escaneado ni bloqueado)
-                        </strong>
-                        <div style={{ marginLeft: '12px', marginBottom: '12px' }}>
-                          <strong>En un lector como Adobe Acrobat Reader:</strong>
-                          <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
-                            <li>Abre el PDF.</li>
-                            <li>Haz clic con el botón derecho y elige la herramienta de selección (o simplemente intenta arrastrar sobre el texto).</li>
-                            <li>Arrastra el cursor sobre el texto que quieras copiar.</li>
-                            <li>Clic derecho → Copiar, o usa Ctrl+C y luego Ctrl+V donde lo quieras pegar.</li>
-                          </ul>
-                        </div>
-                        <div style={{ marginLeft: '12px' }}>
-                          <strong>En el navegador (Chrome, Edge, etc.):</strong>
-                          <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
-                            <li>Abre el PDF en una pestaña.</li>
-                            <li>Selecciona el texto con el mouse.</li>
-                            <li>Ctrl+C y luego Ctrl+V en tu editor (Word, Bloc de notas, etc.).</li>
-                          </ul>
-                        </div>
+                    <div className="medical-lab-help-body">
+                      <div className="medical-lab-help-block">
+                        <strong>Caso 1: PDF normal (no escaneado ni bloqueado)</strong>
+                        <p><strong>Adobe Acrobat Reader:</strong> selecciona el texto y usa Copiar o Ctrl+C.</p>
+                        <p><strong>Navegador:</strong> abre el PDF, selecciona texto y pégalo aquí.</p>
                       </div>
-
-                      <div style={{ marginBottom: '16px' }}>
-                        <strong style={{ color: 'var(--accent-color)', display: 'block', marginBottom: '8px' }}>
-                          Caso 2: PDF escaneado (es una imagen)
-                        </strong>
-                        <div style={{ marginLeft: '12px' }}>
-                          <p style={{ marginBottom: '8px' }}>
-                            Si al arrastrar el mouse no se selecciona texto, el PDF probablemente es una imagen y necesitas OCR.
-                          </p>
-                          <strong>Opciones fáciles y gratis:</strong>
-                          <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
-                            <li>Usar una web de OCR (por ejemplo iLovePDF "OCR PDF", PDF Candy "Extraer texto" o similares). Entra al sitio, sube tu PDF, descarga el TXT/Word resultante y copia el texto.</li>
-                            <li>Convertir el PDF a Word/TXT en webs tipo Smallpdf, PDFgear, etc., y luego copiar el texto desde el archivo convertido.</li>
-                          </ul>
-                        </div>
+                      <div className="medical-lab-help-block">
+                        <strong>Caso 2: PDF escaneado (imagen)</strong>
+                        <p>Usa OCR en iLovePDF, PDF Candy o convierte a Word/Docs y copia el texto.</p>
                       </div>
-
-                      <div style={{ marginBottom: '16px' }}>
-                        <strong style={{ color: 'var(--accent-color)', display: 'block', marginBottom: '8px' }}>
-                          Caso 3: PDF protegido contra copia
-                        </strong>
-                        <div style={{ marginLeft: '12px' }}>
-                          <p style={{ marginBottom: '8px' }}>
-                            Si sí se ve el texto pero no te deja copiarlo, está protegido:
-                          </p>
-                          <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
-                            <li>Si conoces la contraseña, ábrelo en Adobe Acrobat y usa la opción de eliminar seguridad para quitar las restricciones, luego copia normalmente.</li>
-                            <li>Si no tienes la contraseña, algunas herramientas online ("desbloquear PDF") convierten el archivo a Word o lo dejan sin protección, y de ahí ya puedes copiar, siempre respetando derechos de autor.</li>
-                          </ul>
-                        </div>
+                      <div className="medical-lab-help-block">
+                        <strong>Caso 3: PDF protegido</strong>
+                        <p>Quita la protección con la contraseña o convierte el archivo a un formato editable.</p>
                       </div>
-
-                      <div>
-                        <strong style={{ color: 'var(--accent-color)', display: 'block', marginBottom: '8px' }}>
-                          Alternativa rápida: abrir en Word o Google Docs
-                        </strong>
-                        <ul style={{ marginTop: '4px', paddingLeft: '20px', marginLeft: '12px' }}>
-                          <li>Abrir PDF en Microsoft Word: Word lo convierte a documento editable y ya puedes copiar el texto.</li>
-                          <li>Subir el PDF a Google Drive, clic derecho → "Abrir con" → Documentos de Google, y luego copiar desde ahí.</li>
-                        </ul>
+                      <div className="medical-lab-help-block">
+                        <strong>Alternativa rápida</strong>
+                        <p>Abre el PDF en Word o en Google Docs y copia desde ahí.</p>
                       </div>
                     </div>
                   )}
                 </div>
-                
-                {/* Área para pegar datos del estudio */}
+
                 <div className="form-group">
-                  <label style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                    📋 Copia y pega los datos de tu estudio
-                  </label>
+                  <label htmlFor="lab-paste-data">Copia y pega los datos del estudio</label>
                   <Textarea
+                    id="lab-paste-data"
                     value={pastedStudyData}
                     onChange={(e) => setPastedStudyData(e.target.value)}
                     placeholder={`Pega aquí los resultados del análisis, por ejemplo:
@@ -463,74 +468,86 @@ export function MedicalImagesPage({ setView }) {
 BIOMETRÍA HEMÁTICA
 Eritrocitos: 6.5 x10^6/µL (Ref: 5.5-8.5)
 Hemoglobina: 14.2 g/dL (Ref: 12-18)
-Leucocitos: 12,500/µL (Ref: 6,000-17,000)
-
-QUÍMICA SANGUÍNEA
-Glucosa: 95 mg/dL (Ref: 74-143)
-BUN: 18 mg/dL (Ref: 7-27)
-Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
-...`}
+...
+`}
                     rows={6}
-                    className="resize-y rounded-lg border-2 border-dashed border-[var(--border-color)] bg-[var(--bg-secondary)] font-mono text-[13px] leading-relaxed"
+                    className="medical-lab-paste-area"
                   />
-                  <small style={{
-                    color: 'var(--text-secondary)', 
-                    display: 'block', 
-                    marginTop: '8px'
-                  }}>
-                    💡 Copia los resultados del laboratorio y pégalos aquí para su análisis.
+                  <small className="medical-lab-paste-hint">
+                    Copia los resultados del laboratorio y pégalos aquí para su análisis.
                   </small>
                 </div>
                 </>
                 )}
               </div>
 
-              <PatientSelector
-                value={imageClinicalContext?.patientId}
-                onChange={(ctx) => {
-                  setImageClinicalContext(ctx);
-                  if (ctx?.patient?.name) {
-                    setPatientName(ctx.patient.name);
-                  }
-                }}
-              />
+              <div className={`medical-lab-optional${showAdvanced ? " is-open" : ""}`}>
+                <button
+                  type="button"
+                  className="medical-lab-optional-toggle"
+                  onClick={() => setShowAdvanced((open) => !open)}
+                  aria-expanded={showAdvanced}
+                >
+                  {showAdvanced ? "Ocultar opciones" : "Más opciones (mascota, consulta, contexto)"}
+                  <ChevronDown
+                    size={16}
+                    className={`medical-lab-help-chevron${showAdvanced ? " is-open" : ""}`}
+                    aria-hidden
+                  />
+                </button>
 
-              <div className="form-row">
-                {!imageClinicalContext?.patientId && (
+                <div className="medical-lab-optional-body">
+                  <PatientSelector
+                    value={imageClinicalContext?.patientId}
+                    onChange={(ctx) => {
+                      setImageClinicalContext(ctx);
+                      if (ctx?.patient?.name) {
+                        setPatientName(ctx.patient.name);
+                      }
+                    }}
+                  />
+
+                  <div className="form-row medical-lab-form-row">
+                    {!imageClinicalContext?.patientId && (
+                      <div className="form-group">
+                        <label htmlFor="lab-patient-name">Nombre de la mascota (opcional)</label>
+                        <input
+                          id="lab-patient-name"
+                          type="text"
+                          value={patientName}
+                          onChange={(e) => setPatientName(e.target.value)}
+                          placeholder="Ej: Max, Luna, Rocky"
+                        />
+                      </div>
+                    )}
+
+                    <div className="form-group">
+                      <label htmlFor="lab-consultation-id">ID de consulta previa (opcional)</label>
+                      <input
+                        id="lab-consultation-id"
+                        type="text"
+                        value={consultationId}
+                        onChange={(e) => setConsultationId(e.target.value)}
+                        placeholder="Para incluir historial"
+                      />
+                    </div>
+                  </div>
+
                   <div className="form-group">
-                    <label>Nombre de la mascota (Opcional)</label>
-                    <input
-                      type="text"
-                      value={patientName}
-                      onChange={(e) => setPatientName(e.target.value)}
-                      placeholder="Ej: Max, Luna, Rocky"
+                    <label htmlFor="lab-additional-context">Contexto adicional (opcional)</label>
+                    <Textarea
+                      id="lab-additional-context"
+                      value={additionalContext}
+                      onChange={(e) => setAdditionalContext(e.target.value)}
+                      placeholder="Información relevante para la interpretación..."
+                      rows={3}
+                      className="medical-lab-context-area"
                     />
                   </div>
-                )}
-
-                <div className="form-group">
-                  <label>ID de Consulta Previa (Opcional)</label>
-                  <input
-                    type="text"
-                    value={consultationId}
-                    onChange={(e) => setConsultationId(e.target.value)}
-                    placeholder="Para incluir historial de la mascota"
-                  />
                 </div>
               </div>
 
-              <div className="form-group">
-                <label>Contexto Adicional (Opcional)</label>
-                <Textarea
-                  value={additionalContext}
-                  onChange={(e) => setAdditionalContext(e.target.value)}
-                  placeholder="Información adicional relevante para la interpretación..."
-                  rows={4}
-                  className="min-h-[100px] resize-y"
-                />
-              </div>
-
-              <div className="form-actions">
+              <div className="form-actions medical-lab-form-actions">
                 <Button
                   type="button"
                   variant="secondary"
@@ -541,26 +558,36 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
                 <Button
                   type="submit"
                   disabled={loading || !canSubmit}
+                  className="medical-lab-submit-btn"
                 >
-                  {loading ? "Analizando..." : "Interpretar estudio"}
+                  {loading
+                    ? inputMode === "pdf"
+                      ? "Extrayendo y analizando PDF..."
+                      : "Analizando..."
+                    : "Interpretar estudio"}
                 </Button>
               </div>
             </form>
 
             {result && (
-              <div className="interpretation-result">
-                <h2>Resultado de la Interpretación</h2>
+              <div className="interpretation-result medical-lab-result">
+                <h2>Resultado de la interpretación</h2>
+                {result.extraction_method && EXTRACTION_LABELS[result.extraction_method] && (
+                  <p className="medical-lab-extract-badge">
+                    {EXTRACTION_LABELS[result.extraction_method]}
+                  </p>
+                )}
 
                 <div className="result-section">
-                  <h3>🔍 Hallazgos Principales</h3>
+                  <h3>🔍 Hallazgos principales</h3>
                   <div className="result-content">
                     {result.findings && Array.isArray(result.findings) && result.findings.length > 0
                       ? result.findings.map((finding, idx) => <div key={idx}>• {finding}</div>)
                       : result.findings && !Array.isArray(result.findings)
                         ? result.findings
                         : result.analysis
-                          ? <div style={{color: '#64748b', fontStyle: 'italic'}}>Ver análisis detallado abajo para hallazgos completos</div>
-                          : <div style={{color: '#64748b', fontStyle: 'italic'}}>No hay hallazgos disponibles</div>}
+                          ? <div className="medical-lab-result-fallback">Ver análisis detallado abajo.</div>
+                          : <div className="medical-lab-result-fallback">No hay hallazgos disponibles</div>}
                   </div>
                 </div>
 
@@ -572,88 +599,43 @@ Creatinina: 1.2 mg/dL (Ref: 0.5-1.8)
                       : result.recommendations && !Array.isArray(result.recommendations)
                         ? result.recommendations
                         : result.analysis
-                          ? <div style={{color: '#64748b', fontStyle: 'italic'}}>Ver análisis detallado abajo para recomendaciones completas</div>
-                          : <div style={{color: '#64748b', fontStyle: 'italic'}}>No hay recomendaciones disponibles</div>}
+                          ? <div className="medical-lab-result-fallback">Ver análisis detallado abajo.</div>
+                          : <div className="medical-lab-result-fallback">No hay recomendaciones disponibles</div>}
                   </div>
                 </div>
 
                 <div className="result-section detailed">
-                  <h3>📊 Análisis Detallado</h3>
-                  <div className="result-content detailed-analysis" style={{whiteSpace: "pre-wrap", wordWrap: "break-word", maxHeight: "600px", overflowY: "auto", padding: "16px", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0"}}>
+                  <h3>📊 Análisis detallado</h3>
+                  <div className="result-content detailed-analysis medical-lab-detailed-analysis">
                     {result.analysis ? (
-                      <pre style={{margin: 0, fontFamily: "inherit", fontSize: "14px", lineHeight: "1.6", color: "#1e293b"}}>{cleanClinicalDisplayText(result.analysis)}</pre>
+                      <pre>{cleanClinicalDisplayText(result.analysis)}</pre>
                     ) : result.detailed_analysis ? (
-                      <pre style={{margin: 0, fontFamily: "inherit", fontSize: "14px", lineHeight: "1.6", color: "#1e293b"}}>{cleanClinicalDisplayText(result.detailed_analysis)}</pre>
+                      <pre>{cleanClinicalDisplayText(result.detailed_analysis)}</pre>
                     ) : (
-                      <div style={{color: "#64748b", fontStyle: "italic"}}>No hay análisis disponible</div>
+                      <div className="medical-lab-result-fallback">No hay análisis disponible</div>
                     )}
                   </div>
                 </div>
 
-                <div className="result-actions">
+                <div className="result-actions medical-lab-result-actions">
                   <Button
                     type="button"
                     variant="secondary"
                     onClick={() => setResult(null)}
                   >
-                    Nueva Interpretación
+                    Nueva interpretación
                   </Button>
                   <Button type="button" onClick={() => setShowHistory(true)}>
-                    Ver Historial
+                    Ver historial
                   </Button>
                 </div>
               </div>
             )}
           </div>
-
-          <aside className="image-side-panel">
-            <div className="side-panel-header">
-              <span className="side-panel-pill">Panel clínico</span>
-              <h3>Resumen del estudio</h3>
-              <p>
-                Verifica que la información clave del caso esté completa antes de
-                enviar el estudio a interpretación.
-              </p>
-            </div>
-
-            <div className="side-panel-section">
-              <div className="side-panel-label">Tipo de estudio</div>
-              <div className="side-panel-main">
-                <span className="side-panel-icon">{imageMeta.icon}</span>
-                <span className="side-panel-text">{imageMeta.label}</span>
-              </div>
-              <p className="side-panel-hint">{imageMeta.hint}</p>
-            </div>
-
-            <div className="side-panel-section">
-              <div className="side-panel-label">Mascota</div>
-              <div className="side-panel-chip">
-                {patientName || "Sin nombre asignado"}
-              </div>
-              {consultationId && (
-                <div className="side-panel-sub">
-                  Consulta asociada: <span>#{consultationId}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="side-panel-section">
-              <div className="side-panel-label">Estado</div>
-              <div
-                className={`side-panel-status ${loading ? "loading" : result ? "done" : "idle"}`}
-              >
-                {loading
-                  ? "Analizando imagen..."
-                  : result
-                    ? "Resultado disponible"
-                    : "Listo para enviar"}
-              </div>
-            </div>
-          </aside>
         </div>
         ) : (
-          <div className="interpretation-history">
-            <h2>Historial de Interpretaciones</h2>
+          <div className="interpretation-history medical-lab-history">
+            <h2>Historial de interpretaciones</h2>
             {history.length > 0 ? (
               <div className="history-grid">
                 {history.map((item) => (

@@ -28,6 +28,7 @@ anthropic>=0.75.0
 
 # PDF de laboratorio (medical-images/interpret)
 pymupdf>=1.24.0
+markitdown[pdf]>=0.1.0
 
 # Dependencias adicionales
 anyio==4.11.0

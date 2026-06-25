@@ -49,6 +49,7 @@ from membership_access import (
     require_feature_for_profile,
     validate_consultation_category,
 )
+from lab_pdf_converter import convert_pdf_bytes_to_markdown
 from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from starlette.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -2802,6 +2803,8 @@ def _lab_analysis_prompt(
     patient_name: Optional[str],
     additional_context: Optional[str],
     pasted: Optional[str],
+    *,
+    from_markitdown: bool = False,
 ) -> str:
     type_descriptions = {
         "xray": "imagen médica/radiografía",
@@ -2824,7 +2827,12 @@ def _lab_analysis_prompt(
     if additional_context and str(additional_context).strip():
         parts.append(f"\nContexto adicional del veterinario: {additional_context.strip()}")
     if pasted and str(pasted).strip():
-        parts.append(f"\n--- DATOS DEL ESTUDIO (texto proporcionado) ---\n{pasted.strip()}")
+        section_title = (
+            "--- CONTENIDO DEL PDF (Markdown vía MarkItDown) ---"
+            if from_markitdown
+            else "--- DATOS DEL ESTUDIO (texto proporcionado) ---"
+        )
+        parts.append(f"\n{section_title}\n{pasted.strip()}")
     return "\n".join(parts)
 
 
@@ -2927,27 +2935,53 @@ async def interpret_medical_image(request: ImageInterpretRequest):
 
     image_id = str(uuid.uuid4())
     stored_image_type = request.image_type
+    extraction_method = "text" if has_text and not has_file else "image"
+    pdf_markdown: Optional[str] = None
+
     if has_file:
         raw = _strip_data_url_base64(request.image_base64)
         if raw.startswith("JVBERi"):
             stored_image_type = "pdf_report"
 
+    if has_file and stored_image_type == "pdf_report":
+        try:
+            pdf_bytes = base64.b64decode(_strip_data_url_base64(request.image_base64))
+            pdf_markdown, md_error = convert_pdf_bytes_to_markdown(pdf_bytes)
+            if pdf_markdown:
+                extraction_method = "markitdown"
+                print(
+                    f"[LAB] MarkItDown extrajo {len(pdf_markdown)} caracteres del PDF "
+                    f"(motor MarkItDown-MCP / convert_to_markdown)"
+                )
+            elif md_error:
+                print(f"[LAB] MarkItDown no aplicable: {md_error}")
+        except Exception as exc:
+            print(f"[LAB] Error decodificando PDF para MarkItDown: {exc}")
+            pdf_markdown = None
+
     prompt_text = _lab_analysis_prompt(
         stored_image_type,
         request.patient_name,
         request.additional_context,
-        request.pasted_study_data if has_text else None,
+        pdf_markdown if pdf_markdown else (request.pasted_study_data if has_text else None),
+        from_markitdown=bool(pdf_markdown),
     )
 
     try:
-        if has_file:
+        if has_file and not pdf_markdown:
             content_blocks = _build_lab_vision_content_blocks(
                 request.image_base64,
                 stored_image_type,
                 prompt_text,
             )
+            if stored_image_type == "pdf_report":
+                extraction_method = "vision"
         else:
             content_blocks = [{"type": "text", "text": prompt_text}]
+            if has_text and not has_file:
+                extraction_method = "text"
+            elif pdf_markdown:
+                extraction_method = "markitdown"
 
         analysis_text = await send_llm_message(content_blocks)
 
@@ -3027,6 +3061,7 @@ async def interpret_medical_image(request: ImageInterpretRequest):
         "findings": findings,
         "recommendations": recommendations,
         "created_at": created_at,
+        "extraction_method": extraction_method,
     }
     if request.additional_context and str(request.additional_context).strip():
         analysis_row["additional_context"] = str(request.additional_context).strip()
