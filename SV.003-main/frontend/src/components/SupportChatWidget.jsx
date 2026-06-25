@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { MessageCircle } from "lucide-react";
 import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
 import {
@@ -13,6 +12,11 @@ import {
   markTicketMessagesRead,
   SUPPORT_OPEN_EVENT,
 } from "../lib/supportReadState";
+
+const PLUMITAS_FLYING_SRC = "/brand/doctor-plumitas-flying-cutout.png";
+
+const LANDING_VIEWS = new Set(["landing"]);
+const AUTH_VIEWS = new Set(["login", "register", "cedula-verification"]);
 
 const STATUS_LABELS = {
   open: "Abierto",
@@ -62,6 +66,7 @@ export function SupportChatWidget({ currentView }) {
   const [ticketDetailLoading, setTicketDetailLoading] = useState(false);
   const [ticketReply, setTicketReply] = useState("");
   const [ticketReplySending, setTicketReplySending] = useState(false);
+  const [liftAboveSticky, setLiftAboveSticky] = useState(false);
   const listRef = useRef(null);
   const ticketThreadRef = useRef(null);
 
@@ -97,6 +102,22 @@ export function SupportChatWidget({ currentView }) {
     window.addEventListener(SUPPORT_OPEN_EVENT, handler);
     return () => window.removeEventListener(SUPPORT_OPEN_EVENT, handler);
   }, []);
+
+  useEffect(() => {
+    if (!LANDING_VIEWS.has(currentView)) {
+      setLiftAboveSticky(false);
+      return undefined;
+    }
+
+    const syncSticky = () => {
+      setLiftAboveSticky(!!document.querySelector(".landing-sticky-cta"));
+    };
+
+    syncSticky();
+    const observer = new MutationObserver(syncSticky);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [currentView]);
 
   useEffect(() => {
     if (listRef.current) {
@@ -246,12 +267,21 @@ export function SupportChatWidget({ currentView }) {
   const ticketClosed =
     (ticketDetail?.status || "").toLowerCase() === "closed";
 
+  const rootClass = [
+    "support-chat-root",
+    LANDING_VIEWS.has(currentView) ? "support-chat-root--landing" : "",
+    AUTH_VIEWS.has(currentView) ? "support-chat-root--auth" : "",
+    liftAboveSticky ? "support-chat-root--above-sticky" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div className="support-chat-root">
+    <div className={rootClass}>
       {isOpen && (
         <div className="support-chat-panel">
           <div className="support-chat-header">
-            <strong>Soporte GUIAA</strong>
+            <strong>Soporte GUIAA · Doctor Plumitas</strong>
             <button type="button" onClick={() => setIsOpen(false)} aria-label="Cerrar chat">
               ✕
             </button>
@@ -476,15 +506,25 @@ export function SupportChatWidget({ currentView }) {
       )}
       <button
         type="button"
-        className="support-chat-toggle"
+        className={`support-chat-toggle${isOpen ? " is-open" : ""}`}
         onClick={() => setIsOpen((v) => !v)}
-        aria-label={isOpen ? "Cerrar soporte" : "Abrir soporte"}
+        aria-label={isOpen ? "Cerrar soporte" : "Abrir soporte con Doctor Plumitas"}
       >
         {isOpen ? (
-          "–"
+          <span className="support-chat-toggle-close" aria-hidden>
+            ✕
+          </span>
         ) : (
           <>
-            <MessageCircle size={22} aria-hidden />
+            <img
+              src={PLUMITAS_FLYING_SRC}
+              alt=""
+              className="support-chat-plumitas"
+              width={80}
+              height={80}
+              decoding="async"
+            />
+            <span className="support-chat-plumitas-hint">¿Ayuda?</span>
             {unreadCount > 0 && (
               <span className="support-chat-toggle-badge">{unreadCount}</span>
             )}
