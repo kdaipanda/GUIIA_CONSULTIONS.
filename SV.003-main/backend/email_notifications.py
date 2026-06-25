@@ -213,18 +213,18 @@ def notify_admins_guia_consultas_lead(lead: dict) -> None:
     message = (lead.get("message") or "").strip()[:800]
     admin_url = f"{_frontend_url()}/app/admin"
 
-    email_subject = f"[GUIAA] Nueva solicitud Guía Consultas: {name}"
+    email_subject = f"[GUIAA] Nueva solicitud ADSGuiaa: {name}"
     text = (
-        f"Nueva solicitud desde la landing (Guía Consultas)\n\n"
-        f"Nombre: {name}\n"
+        f"Nueva solicitud de publicidad ADSGuiaa (Guía Consultas)\n\n"
+        f"Nombre / empresa: {name}\n"
         f"Email: {email}\n"
         f"Teléfono: {phone}\n\n"
         f"Mensaje:\n{message or '(sin mensaje)'}\n\n"
         f"Ver en Admin GUIAA: {admin_url}\n"
     )
     html = f"""
-    <h2>Nueva solicitud — Guía Consultas</h2>
-    <p><strong>Nombre:</strong> {name}</p>
+    <h2>Nueva solicitud — ADSGuiaa</h2>
+    <p><strong>Nombre / empresa:</strong> {name}</p>
     <p><strong>Email:</strong> {email}</p>
     <p><strong>Teléfono:</strong> {phone}</p>
     <pre style="background:#f8fafc;padding:12px;border-radius:8px;white-space:pre-wrap;">{message or "(sin mensaje)"}</pre>

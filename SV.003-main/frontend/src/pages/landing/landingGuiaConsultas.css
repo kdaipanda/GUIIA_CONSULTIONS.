@@ -116,6 +116,12 @@
   white-space: nowrap;
 }
 
+.landing-guia-ads-brand {
+  color: #0c2d4d;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
 .landing-guia-consultas-lead {
   margin-top: 1rem;
   font-size: clamp(0.9rem, 1.5vw, 1rem);

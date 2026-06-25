@@ -588,7 +588,7 @@ export function AdminPage() {
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><Inbox size={18} aria-hidden /></span>
-            <span className="clinic-report-kpi-label">Guía Consultas</span>
+            <span className="clinic-report-kpi-label">ADSGuiaa</span>
           </div>
           <div className="clinic-report-kpi-value">{guiaLeadsNewCount}</div>
         </div>
@@ -598,12 +598,13 @@ export function AdminPage() {
         <div className="clinic-admin-users-head">
           <h2>
             <Inbox size={18} aria-hidden />
-            Guía Consultas — solicitudes landing
+            ADSGuiaa — solicitudes de publicidad
           </h2>
           <span className="clinic-admin-users-count">{guiaLeads.length} solicitudes</span>
         </div>
         <p className="clinic-muted clinic-tools-desc">
-          Interesados en el software y CDS que envían el formulario al final de la landing pública.
+          Marcas y laboratorios interesados en anunciarse en Guía Consultas (momento de decisión
+          clínica) desde la landing pública.
         </p>
         <div className="clinic-admin-plan-filters">
           {LEAD_FILTERS.map((f) => (
@@ -624,7 +625,7 @@ export function AdminPage() {
           <ClinicEmptyState
             icon={Inbox}
             title="Sin solicitudes"
-            description="Aún no hay solicitudes de Guía Consultas con el filtro seleccionado."
+            description="Aún no hay solicitudes de ADSGuiaa con el filtro seleccionado."
           />
         ) : (
           <div className="clinic-table-wrap">
@@ -1253,7 +1254,7 @@ export function AdminPage() {
               <DialogHeader>
                 <DialogTitle>{selectedLead.name}</DialogTitle>
                 <DialogDescription>
-                  Solicitud Guía Consultas · {formatDateTime(selectedLead.created_at)}
+                  Solicitud ADSGuiaa · {formatDateTime(selectedLead.created_at)}
                 </DialogDescription>
               </DialogHeader>
 

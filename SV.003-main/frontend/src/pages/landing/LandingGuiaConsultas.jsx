@@ -76,21 +76,21 @@ export function LandingGuiaConsultas() {
 
           <div className="landing-guia-consultas-grid">
             <div className="landing-guia-consultas-copy">
-              <p className="landing-guia-consultas-eyebrow">Guía Consultas · GUIAA</p>
+              <p className="landing-guia-consultas-eyebrow">ADSGuiaa · Guía Consultas</p>
               <h2 id="landing-guia-consultas-heading" className="landing-guia-consultas-title">
-                Conoce el software y el CDS dentro de{" "}
+                Anúnciate con nosotros dentro de{" "}
                 <span className="landing-guia-consultas-title-accent">Guía Consultas</span>
               </h2>
               <p className="landing-guia-consultas-lead">
-                Guía Consultas integra anamnesis multiespecie, expediente clínico y{" "}
-                <strong>soporte a la decisión (CDS L4 y L5)</strong> en un solo flujo para MVZ
-                certificados. Solicita información y el equipo GUIAA te contactará para una
-                demostración personalizada.
+                <strong className="landing-guia-ads-brand">ADSGuiaa</strong> coloca tu marca en el
+                software que usan los MVZ cada día: influye en cada consulta veterinaria en el
+                momento exacto de la <strong>decisión clínica</strong>, cuando el profesional y el
+                tutor están evaluando opciones de tratamiento, producto o protocolo.
               </p>
               <ul className="landing-guia-consultas-points">
-                <li>Consulta estructurada con trazabilidad clínica</li>
-                <li>CDS avanzado y documentación lista para el tutor</li>
-                <li>Conexión con inventario, ventas y agenda de tu clínica</li>
+                <li>Visibilidad en el flujo real de consulta multiespecie</li>
+                <li>Contexto de alta intención: decisión clínica, no banner genérico</li>
+                <li>Alcance a médicos veterinarios certificados en Latinoamérica</li>
               </ul>
             </div>
 
@@ -112,7 +112,7 @@ export function LandingGuiaConsultas() {
                     <p className="landing-guia-consultas-success-title">¡Solicitud recibida!</p>
                     <p className="landing-guia-consultas-success-text">
                       Un administrador de GUIAA revisará tu mensaje y te contactará pronto para
-                      explicarte Guía Consultas y el módulo CDS.
+                      explicarte planes y formatos de <strong>ADSGuiaa</strong>.
                     </p>
                     <button
                       type="button"
@@ -124,19 +124,20 @@ export function LandingGuiaConsultas() {
                   </div>
                 ) : (
                   <>
-                    <p className="landing-guia-form-kicker">Solicita información</p>
+                    <p className="landing-guia-form-kicker">Anúnciate con nosotros</p>
                     <p className="landing-guia-form-sub">
-                      El equipo GUIAA te contactará para confirmar día y hora de tu demo.
+                      Cuéntanos tu marca o laboratorio. Te proponemos cómo aparecer en Guía
+                      Consultas en el momento de la decisión clínica.
                     </p>
 
                     <form className="landing-guia-consultas-form" onSubmit={handleSubmit} noValidate>
                       <div className="landing-guia-field">
-                        <Label htmlFor="gc-name">Nombre</Label>
+                        <Label htmlFor="gc-name">Nombre o empresa</Label>
                         <Input
                           id="gc-name"
                           value={form.name}
                           onChange={(e) => setForm({ ...form, name: e.target.value })}
-                          placeholder="Dra. Ana Martínez"
+                          placeholder="Laboratorio VetLab / Dra. Ana Martínez"
                           autoComplete="name"
                           required
                           className="landing-guia-input"
@@ -168,12 +169,12 @@ export function LandingGuiaConsultas() {
                         />
                       </div>
                       <div className="landing-guia-field">
-                        <Label htmlFor="gc-message">¿Qué te interesa conocer?</Label>
+                        <Label htmlFor="gc-message">¿Qué producto o marca quieres promover?</Label>
                         <Textarea
                           id="gc-message"
                           value={form.message}
                           onChange={(e) => setForm({ ...form, message: e.target.value })}
-                          placeholder="Ej. demo del CDS, flujo de consulta multiespecie, planes para mi clínica…"
+                          placeholder="Ej. alimento terapéutico, vacunas, laboratorio, equipamiento…"
                           rows={3}
                           className="landing-guia-input landing-guia-textarea"
                         />
@@ -188,7 +189,8 @@ export function LandingGuiaConsultas() {
                         />
                         <span>
                           Al enviar acepto el tratamiento de mis datos personales para que GUIAA me
-                          contacte con información sobre Guía Consultas.
+                          contacte con información sobre <strong>ADSGuiaa</strong> y publicidad en
+                          Guía Consultas.
                         </span>
                       </label>
 
@@ -197,7 +199,7 @@ export function LandingGuiaConsultas() {
                         className="landing-guia-consultas-submit"
                         disabled={submitting}
                       >
-                        {submitting ? "Enviando…" : "Solicitar información"}
+                        {submitting ? "Enviando…" : "Quiero anunciarme"}
                       </button>
                     </form>
                   </>

@@ -1064,7 +1064,7 @@ async def api_public_guia_consultas_lead(body: GuiaConsultasLeadCreate):
     await _email_background(email_notifications.notify_admins_guia_consultas_lead, created or row)
     return {
         "lead": created,
-        "message": "Solicitud enviada. El equipo GUIAA te contactará pronto.",
+        "message": "Solicitud enviada. El equipo GUIAA te contactará pronto sobre ADSGuiaa.",
     }
 
 
