@@ -1699,6 +1699,18 @@ h1, h2, h3, h4, h5, h6 {
   transition: width 0.5s ease;
 }
 
+.progress-fill--high {
+  background: linear-gradient(90deg, #34d399 0%, #10b981 100%);
+}
+
+.progress-fill--medium {
+  background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+.progress-fill--low {
+  background: linear-gradient(90deg, #f87171 0%, #ef4444 100%);
+}
+
 .progress-text {
   font-size: 11px;
   color: #94a3b8;
@@ -10952,6 +10964,17 @@ html {
 .clinic-dashboard-unified .dashboard-page.dashboard-embedded .container {
   max-width: none;
   padding: 0;
+}
+
+.clinic-dashboard-unified .clinic-dashboard-quick-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 1024px) {
+  .clinic-dashboard-unified .clinic-dashboard-quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .clinic-dashboard-cds-head {

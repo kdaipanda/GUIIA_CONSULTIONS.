@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Search, Pencil, Trash2, PackageMinus, History, AlertTriangle, Package, DollarSign } from "lucide-react";
 import "./clinicPageShared.css";
+import "./inventoryPage.css";
 import {
   ClinicTableSkeleton,
   ClinicEmptyState,
@@ -255,7 +256,7 @@ export function InventoryPage() {
     : UNITS;
 
   return (
-    <div className="clinic-page clinic-page-guiaa">
+    <div className="clinic-page clinic-page-guiaa clinic-inventory-page">
       <div className="clinic-page-header">
         <div>
           <p className="clinic-page-eyebrow">Consultorio</p>
@@ -316,6 +317,7 @@ export function InventoryPage() {
           type="button"
           variant={lowStockOnly ? "default" : "secondary"}
           size="sm"
+          className={lowStockOnly ? "clinic-inventory-filter clinic-inventory-filter--active" : "clinic-inventory-filter"}
           onClick={() => setLowStockOnly((v) => !v)}
         >
           <AlertTriangle size={14} className="mr-1" />
@@ -355,7 +357,7 @@ export function InventoryPage() {
                 <tr key={p.id} className={isLowStock(p) ? "clinic-row-warning" : ""}>
                   <td>
                     <strong>{p.name}</strong>
-                    {p.category && <span className="clinic-muted"> · {p.category}</span>}
+                    {p.category && <span className="clinic-inventory-category"> · {p.category}</span>}
                   </td>
                   <td>{p.sku || "—"}</td>
                   <td>

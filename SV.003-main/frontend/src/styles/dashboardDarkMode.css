@@ -105,3 +105,406 @@ html.dark .dashboard-page .action-card:hover {
     0 16px 36px -14px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
 }
+
+/* —— Actividad clínica: últimas consultas CDS —— */
+
+[data-theme="dark"] .dashboard-activity-panel-head h3,
+html.dark .dashboard-activity-panel-head h3 {
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .dashboard-activity-panel-head h3 svg,
+html.dark .dashboard-activity-panel-head h3 svg {
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .dashboard-activity-view-all,
+html.dark .dashboard-activity-view-all {
+  color: #a8ede4 !important;
+}
+
+[data-theme="dark"] .dashboard-activity-view-all:hover,
+html.dark .dashboard-activity-view-all:hover {
+  color: #d4f5f0 !important;
+  background: rgba(61, 155, 143, 0.1) !important;
+}
+
+[data-theme="dark"] .dashboard-activity-tab-count,
+html.dark .dashboard-activity-tab-count {
+  background: rgba(61, 155, 143, 0.18) !important;
+  color: #a8ede4 !important;
+}
+
+[data-theme="dark"] .dashboard-activity-card,
+html.dark .dashboard-activity-card {
+  background: rgba(14, 22, 34, 0.78) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+}
+
+[data-theme="dark"] .dashboard-activity-card:hover,
+html.dark .dashboard-activity-card:hover {
+  border-color: rgba(61, 155, 143, 0.35) !important;
+  box-shadow: 0 12px 32px -14px rgba(61, 155, 143, 0.18) !important;
+}
+
+[data-theme="dark"] .dashboard-activity-folio,
+html.dark .dashboard-activity-folio {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .dashboard-activity-status--completed,
+html.dark .dashboard-activity-status--completed {
+  background: rgba(61, 155, 143, 0.18) !important;
+  color: #86efac !important;
+  border: 1px solid rgba(61, 155, 143, 0.28);
+}
+
+[data-theme="dark"] .dashboard-activity-status--in_progress,
+html.dark .dashboard-activity-status--in_progress {
+  background: rgba(38, 91, 147, 0.2) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(38, 91, 147, 0.28);
+}
+
+[data-theme="dark"] .dashboard-activity-status--draft,
+html.dark .dashboard-activity-status--draft {
+  background: rgba(245, 158, 11, 0.14) !important;
+  color: #fcd34d !important;
+  border: 1px solid rgba(245, 158, 11, 0.28);
+}
+
+[data-theme="dark"] .dashboard-activity-species,
+html.dark .dashboard-activity-species {
+  background: rgba(20, 30, 44, 0.85) !important;
+  border-color: rgba(61, 155, 143, 0.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .dashboard-activity-body h3,
+html.dark .dashboard-activity-body h3 {
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .dashboard-activity-body p,
+html.dark .dashboard-activity-body p {
+  color: #a8b4c4 !important;
+}
+
+[data-theme="dark"] .dashboard-activity-date,
+html.dark .dashboard-activity-date {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .dashboard-activity-date svg,
+html.dark .dashboard-activity-date svg {
+  color: #64748b;
+}
+
+[data-theme="dark"] .dashboard-activity-skeleton,
+html.dark .dashboard-activity-skeleton {
+  background: rgba(14, 22, 34, 0.6) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .dashboard-activity-empty,
+html.dark .dashboard-activity-empty {
+  background: rgba(14, 22, 34, 0.55) !important;
+  border-color: rgba(61, 155, 143, 0.22) !important;
+}
+
+[data-theme="dark"] .dashboard-activity-empty h3,
+html.dark .dashboard-activity-empty h3 {
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .dashboard-activity-muted,
+html.dark .dashboard-activity-muted {
+  background: rgba(14, 22, 34, 0.55) !important;
+  border-color: rgba(61, 155, 143, 0.22) !important;
+}
+
+[data-theme="dark"] .dashboard-activity-empty--inline p,
+[data-theme="dark"] .dashboard-activity-empty p,
+[data-theme="dark"] .dashboard-activity-muted,
+[data-theme="dark"] .dashboard-activity-panel-note,
+html.dark .dashboard-activity-empty--inline p,
+html.dark .dashboard-activity-empty p,
+html.dark .dashboard-activity-muted,
+html.dark .dashboard-activity-panel-note {
+  color: #a8b4c4 !important;
+}
+
+[data-theme="dark"] .dashboard-block-head p,
+html.dark .dashboard-block-head p {
+  color: #a8b4c4 !important;
+}
+
+[data-theme="dark"] .dashboard-block-activity .tabs-content,
+html.dark .dashboard-block-activity .tabs-content {
+  background: transparent !important;
+  border: none !important;
+  padding: 12px 0 0 !important;
+}
+
+[data-theme="dark"] .dashboard-block-activity .tabs-list,
+html.dark .dashboard-block-activity .tabs-list {
+  background: rgba(14, 22, 34, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .dashboard-block-activity .tabs-trigger,
+html.dark .dashboard-block-activity .tabs-trigger {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .dashboard-block-activity .tabs-trigger[data-state="active"],
+html.dark .dashboard-block-activity .tabs-trigger[data-state="active"] {
+  background: rgba(20, 30, 44, 0.92) !important;
+  color: #e8f4f2 !important;
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .dashboard-block-activity .tabs-trigger[data-state="active"]::after,
+html.dark .dashboard-block-activity .tabs-trigger[data-state="active"]::after {
+  background: linear-gradient(90deg, #3d9b8f, #6ee7d9) !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .dashboard-block-activity .tabs-list,
+html.dark .clinic-dashboard-unified .dashboard-block-activity .tabs-list {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  background: transparent !important;
+  border-radius: 0;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .dashboard-block-activity .tabs-trigger,
+html.dark .clinic-dashboard-unified .dashboard-block-activity .tabs-trigger {
+  color: #94a3b8 !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .dashboard-block-activity .tabs-trigger[data-state="active"],
+html.dark .clinic-dashboard-unified .dashboard-block-activity .tabs-trigger[data-state="active"] {
+  color: #a8ede4 !important;
+  background: rgba(20, 30, 44, 0.75) !important;
+  border-bottom-color: #3d9b8f !important;
+}
+
+[data-theme="dark"] .dashboard-activity-empty-icon,
+html.dark .dashboard-activity-empty-icon {
+  background: rgba(61, 155, 143, 0.14) !important;
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .dashboard-followup-item,
+html.dark .dashboard-followup-item {
+  background: rgba(14, 22, 34, 0.78) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .dashboard-followup-item:hover,
+html.dark .dashboard-followup-item:hover {
+  background: rgba(20, 30, 44, 0.9) !important;
+  border-color: rgba(61, 155, 143, 0.28) !important;
+}
+
+[data-theme="dark"] .dashboard-followup-text strong,
+html.dark .dashboard-followup-text strong {
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .dashboard-followup-text span,
+[data-theme="dark"] .dashboard-followup-date,
+html.dark .dashboard-followup-text span,
+html.dark .dashboard-followup-date {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .dashboard-shortcut-card,
+html.dark .dashboard-shortcut-card {
+  background: rgba(14, 22, 34, 0.78) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .dashboard-shortcut-label,
+html.dark .dashboard-shortcut-label {
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .dashboard-shortcut-icon,
+html.dark .dashboard-shortcut-icon {
+  background: rgba(61, 155, 143, 0.14) !important;
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .dashboard-shortcut-card kbd,
+html.dark .dashboard-shortcut-card kbd {
+  background: rgba(10, 16, 24, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #94a3b8 !important;
+}
+
+/* —— Panel CDS embebido (consultorio unificado) —— */
+
+[data-theme="dark"] .clinic-dashboard-cds-sub,
+html.dark .clinic-dashboard-cds-sub {
+  color: #a8b4c4 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-theme-btn,
+html.dark .clinic-dashboard-theme-btn {
+  background: rgba(14, 22, 34, 0.78) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-theme-btn:hover,
+html.dark .clinic-dashboard-theme-btn:hover {
+  background: rgba(20, 30, 44, 0.9) !important;
+  border-color: rgba(61, 155, 143, 0.35) !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .clinic-dashboard-summary,
+html.dark .clinic-dashboard-unified .clinic-dashboard-summary {
+  background: rgba(14, 22, 34, 0.78) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .clinic-dashboard-summary .today-title,
+html.dark .clinic-dashboard-unified .clinic-dashboard-summary .today-title {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .clinic-dashboard-summary .today-subtitle,
+html.dark .clinic-dashboard-unified .clinic-dashboard-summary .today-subtitle {
+  color: #c5d0dc !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .today-pill,
+html.dark .clinic-dashboard-unified .today-pill {
+  background: rgba(20, 30, 44, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .pill-label,
+html.dark .clinic-dashboard-unified .pill-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .pill-value,
+html.dark .clinic-dashboard-unified .pill-value {
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .stat-card.clinic-report-kpi,
+html.dark .clinic-dashboard-unified .stat-card.clinic-report-kpi {
+  background: rgba(14, 22, 34, 0.78) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  backdrop-filter: blur(16px) saturate(1.08);
+  -webkit-backdrop-filter: blur(16px) saturate(1.08);
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .stat-card.clinic-report-kpi:hover,
+html.dark .clinic-dashboard-unified .stat-card.clinic-report-kpi:hover {
+  border-color: rgba(61, 155, 143, 0.32) !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .stat-card.clinic-report-kpi .stat-icon,
+html.dark .clinic-dashboard-unified .stat-card.clinic-report-kpi .stat-icon {
+  background: rgba(61, 155, 143, 0.14) !important;
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .stat-card.clinic-report-kpi .stat-content h3,
+html.dark .clinic-dashboard-unified .stat-card.clinic-report-kpi .stat-content h3 {
+  color: #f0f4f8 !important;
+  -webkit-text-fill-color: #f0f4f8 !important;
+  background: none !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .stat-card.clinic-report-kpi .stat-content p,
+[data-theme="dark"] .clinic-dashboard-unified .stat-card.clinic-report-kpi .stat-trend,
+html.dark .clinic-dashboard-unified .stat-card.clinic-report-kpi .stat-content p,
+html.dark .clinic-dashboard-unified .stat-card.clinic-report-kpi .stat-trend {
+  color: #a8b4c4 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .buy-consultations-label,
+html.dark .clinic-dashboard-unified .buy-consultations-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .progress-bar,
+html.dark .clinic-dashboard-unified .progress-bar {
+  background: rgba(10, 16, 24, 0.65) !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .progress-text,
+html.dark .clinic-dashboard-unified .progress-text {
+  color: #a8b4c4 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .clinic-dashboard-quick-section h2,
+[data-theme="dark"] .clinic-dashboard-unified .dashboard-block-head h2,
+html.dark .clinic-dashboard-unified .clinic-dashboard-quick-section h2,
+html.dark .clinic-dashboard-unified .dashboard-block-head h2 {
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn,
+html.dark .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn {
+  background: rgba(14, 22, 34, 0.78) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn:hover,
+html.dark .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn:hover {
+  background: rgba(20, 30, 44, 0.92) !important;
+  border-color: rgba(61, 155, 143, 0.35) !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn h3,
+html.dark .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn h3 {
+  color: #f0f4f8 !important;
+  -webkit-text-fill-color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn .action-icon,
+html.dark .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn .action-icon {
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn.expert-feature:not(.premium-locked),
+html.dark .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn.expert-feature:not(.premium-locked) {
+  background: linear-gradient(
+    135deg,
+    rgba(26, 38, 54, 0.92) 0%,
+    rgba(46, 40, 80, 0.55) 100%
+  ) !important;
+  border-color: rgba(99, 102, 241, 0.42) !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn.expert-feature.premium-locked,
+html.dark .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn.expert-feature.premium-locked {
+  background: linear-gradient(
+    135deg,
+    rgba(26, 38, 54, 0.9) 0%,
+    rgba(68, 48, 16, 0.45) 100%
+  ) !important;
+  border-color: rgba(251, 191, 36, 0.35) !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .dashboard-block.clinic-settings-card,
+html.dark .clinic-dashboard-unified .dashboard-block.clinic-settings-card {
+  background: rgba(14, 22, 34, 0.55) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .clinic-dashboard-unified .dashboard-page.dashboard-embedded,
+html.dark .clinic-dashboard-unified .dashboard-page.dashboard-embedded {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}

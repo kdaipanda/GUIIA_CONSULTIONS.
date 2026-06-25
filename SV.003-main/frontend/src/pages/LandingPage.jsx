@@ -11,6 +11,7 @@ import "./landing/landingColleaguesBento.css";
 import "./landing/landingHero3d.css";
 import "./landing/landingInteractions.css";
 import "./landing/landingDarkMode.css";
+import "./landing/landingPricing.css";
 
 import { LandingNavbar } from "./landing/LandingNavbar";
 import { LandingHero } from "./landing/LandingHero";

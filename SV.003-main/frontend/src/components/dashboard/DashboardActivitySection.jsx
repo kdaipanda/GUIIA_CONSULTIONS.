@@ -60,26 +60,25 @@ function ActivityCard({ consultation, embedded, onOpen }) {
         <div className="dashboard-activity-body">
           <h3>{getConsultationPatientTitle(consultation)}</h3>
           <p>{getConsultationReasonPreview(consultation)}</p>
-          <span className="dashboard-activity-date">
-            <CalendarDays size={14} aria-hidden />
-            {formatConsultationDateShort(consultation.created_at)}
-          </span>
+          <div className="dashboard-activity-meta">
+            <span className="dashboard-activity-date">
+              <CalendarDays size={14} aria-hidden />
+              {formatConsultationDateShort(consultation.created_at)}
+            </span>
+            <Button
+              type="button"
+              variant="guiaaPrimarySm"
+              size="compactGradient"
+              className="dashboard-activity-action"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpen?.(consultation.id);
+              }}
+            >
+              {actionLabel}
+            </Button>
+          </div>
         </div>
-      </div>
-
-      <div className="dashboard-activity-footer">
-        <Button
-          type="button"
-          variant="guiaaPrimarySm"
-          size="compactGradient"
-          className="dashboard-activity-action"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpen?.(consultation.id);
-          }}
-        >
-          {actionLabel}
-        </Button>
       </div>
     </article>
   );
@@ -214,11 +213,13 @@ export function DashboardActivitySection({
 
         <Tabs.Content className="tabs-content" value="followup">
           <div className="dashboard-activity-panel">
-            <div className="dashboard-activity-panel-head">
-              <h3>Casos en seguimiento</h3>
-              <p className="dashboard-activity-panel-note">
-                Consultas en progreso que requieren continuidad clínica.
-              </p>
+            <div className="dashboard-activity-panel-head dashboard-activity-panel-head--stacked">
+              <div>
+                <h3>Casos en seguimiento</h3>
+                <p className="dashboard-activity-panel-note">
+                  Consultas en progreso que requieren continuidad clínica.
+                </p>
+              </div>
             </div>
             {followUpCases.length > 0 ? (
               <div className="dashboard-followup-list">
@@ -231,9 +232,12 @@ export function DashboardActivitySection({
                 ))}
               </div>
             ) : (
-              <p className="dashboard-activity-muted">
-                No hay casos abiertos. Las consultas en progreso aparecerán aquí.
-              </p>
+              <div className="dashboard-activity-empty dashboard-activity-empty--inline">
+                <div className="dashboard-activity-empty-icon" aria-hidden>
+                  <ClipboardList size={28} />
+                </div>
+                <p>No hay casos abiertos. Las consultas en progreso aparecerán aquí.</p>
+              </div>
             )}
           </div>
         </Tabs.Content>

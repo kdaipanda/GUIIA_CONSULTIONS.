@@ -1,0 +1,262 @@
+/* —— Inventario (clínica GUIAA) —— */
+
+.clinic-inventory-page .clinic-inventory-kpis {
+  margin-bottom: 18px;
+}
+
+.clinic-inventory-page .clinic-report-kpi {
+  background: var(--liquid-glass-bg, rgba(255, 255, 255, 0.88));
+  backdrop-filter: blur(14px) saturate(1.06);
+  -webkit-backdrop-filter: blur(14px) saturate(1.06);
+  box-shadow: var(--liquid-glass-shadow-soft, 0 2px 12px -8px rgba(12, 45, 77, 0.1));
+  min-height: 120px;
+}
+
+.clinic-inventory-page .clinic-report-kpi-warn {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 251, 235, 0.92) 0%,
+    rgba(255, 255, 255, 0.88) 100%
+  );
+}
+
+.clinic-inventory-page .clinic-report-kpi-warn .clinic-report-kpi-icon {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+}
+
+.clinic-inventory-page .clinic-toolbar {
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.clinic-inventory-page .clinic-search {
+  max-width: none;
+  padding: 10px 14px;
+}
+
+.clinic-inventory-page .clinic-search input {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0;
+  height: auto;
+  min-height: 0;
+  flex: 1;
+  font-size: 14px;
+}
+
+.clinic-inventory-filter {
+  flex-shrink: 0;
+  align-self: center;
+  white-space: nowrap;
+}
+
+.clinic-inventory-filter--active {
+  background: #3d9b8f !important;
+  border-color: #3d9b8f !important;
+  color: #fff !important;
+}
+
+.clinic-inventory-category {
+  font-weight: 500;
+  color: #64748b;
+}
+
+.clinic-inventory-page .clinic-row-warning {
+  background: rgba(255, 251, 235, 0.85);
+  box-shadow: inset 3px 0 0 #f59e0b;
+}
+
+.clinic-inventory-page .clinic-row-warning td {
+  border-bottom-color: rgba(245, 158, 11, 0.15);
+}
+
+.clinic-inventory-page .clinic-badge-warning {
+  background: rgba(245, 158, 11, 0.18);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.28);
+}
+
+.clinic-inventory-page .clinic-table-actions button {
+  color: #64748b;
+}
+
+.clinic-inventory-page .clinic-table-actions button:hover {
+  color: #0c2d4d;
+  background: rgba(38, 91, 147, 0.08);
+}
+
+/* —— Modo oscuro —— */
+
+[data-theme="dark"] .clinic-inventory-page .clinic-report-kpi,
+html.dark .clinic-inventory-page .clinic-report-kpi {
+  background: rgba(14, 22, 34, 0.78) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-icon,
+html.dark .clinic-inventory-page .clinic-report-kpi-icon {
+  background: rgba(61, 155, 143, 0.14) !important;
+  color: #6ee7d9 !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-label,
+[data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-hint,
+html.dark .clinic-inventory-page .clinic-report-kpi-label,
+html.dark .clinic-inventory-page .clinic-report-kpi-hint {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-value,
+html.dark .clinic-inventory-page .clinic-report-kpi-value {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-warn,
+html.dark .clinic-inventory-page .clinic-report-kpi-warn {
+  background: linear-gradient(
+    145deg,
+    rgba(68, 48, 16, 0.35) 0%,
+    rgba(14, 22, 34, 0.78) 100%
+  ) !important;
+  border-color: rgba(245, 158, 11, 0.38) !important;
+  box-shadow:
+    0 0 0 1px rgba(245, 158, 11, 0.08),
+    var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-warn .clinic-report-kpi-icon,
+html.dark .clinic-inventory-page .clinic-report-kpi-warn .clinic-report-kpi-icon {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fcd34d !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-warn .clinic-report-kpi-value,
+html.dark .clinic-inventory-page .clinic-report-kpi-warn .clinic-report-kpi-value {
+  color: #fcd34d !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-warn .clinic-report-kpi-hint,
+html.dark .clinic-inventory-page .clinic-report-kpi-warn .clinic-report-kpi-hint {
+  color: #fbbf24 !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-search,
+html.dark .clinic-inventory-page .clinic-search {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-search input,
+html.dark .clinic-inventory-page .clinic-search input {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-search input::placeholder,
+html.dark .clinic-inventory-page .clinic-search input::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-inventory-filter:not(.clinic-inventory-filter--active),
+html.dark .clinic-inventory-page .clinic-inventory-filter:not(.clinic-inventory-filter--active) {
+  background: rgba(20, 30, 44, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #d4f5f0 !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-inventory-filter--active,
+html.dark .clinic-inventory-page .clinic-inventory-filter--active {
+  background: rgba(61, 155, 143, 0.85) !important;
+  border-color: rgba(61, 155, 143, 0.5) !important;
+  color: #f0fdfa !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-table-wrap,
+html.dark .clinic-inventory-page .clinic-table-wrap {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  box-shadow: var(--liquid-glass-shadow-soft) !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-table thead th,
+html.dark .clinic-inventory-page .clinic-table thead th {
+  background: rgba(10, 16, 24, 0.55) !important;
+  color: var(--text-tertiary) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-table tbody td,
+html.dark .clinic-inventory-page .clinic-table tbody td {
+  color: var(--text-primary) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-inventory-category,
+html.dark .clinic-inventory-page .clinic-inventory-category {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-row-warning,
+html.dark .clinic-inventory-page .clinic-row-warning {
+  background: rgba(245, 158, 11, 0.1) !important;
+  box-shadow: inset 3px 0 0 #f59e0b;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-row-warning td,
+[data-theme="dark"] .clinic-inventory-page .clinic-row-warning td strong,
+html.dark .clinic-inventory-page .clinic-row-warning td,
+html.dark .clinic-inventory-page .clinic-row-warning td strong {
+  color: #f0f4f8 !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-row-warning .clinic-inventory-category,
+html.dark .clinic-inventory-page .clinic-row-warning .clinic-inventory-category {
+  color: #fbbf24 !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-badge-warning,
+html.dark .clinic-inventory-page .clinic-badge-warning {
+  background: rgba(245, 158, 11, 0.2) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #fde68a !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-table-actions button,
+html.dark .clinic-inventory-page .clinic-table-actions button {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-table-actions button:hover,
+html.dark .clinic-inventory-page .clinic-table-actions button:hover {
+  color: #f0f4f8 !important;
+  background: rgba(61, 155, 143, 0.12) !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-row-warning .clinic-table-actions button,
+html.dark .clinic-inventory-page .clinic-row-warning .clinic-table-actions button {
+  color: #fcd34d !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-inventory-history-item,
+html.dark .clinic-inventory-page .clinic-inventory-history-item {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-color: var(--liquid-glass-border-color) !important;
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-inventory-history-item time,
+[data-theme="dark"] .clinic-inventory-page .clinic-inventory-history-item .clinic-muted,
+html.dark .clinic-inventory-page .clinic-inventory-history-item time,
+html.dark .clinic-inventory-page .clinic-inventory-history-item .clinic-muted {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .clinic-inventory-page .clinic-page-eyebrow,
+html.dark .clinic-inventory-page .clinic-page-eyebrow {
+  color: #6ee7d9 !important;
+}

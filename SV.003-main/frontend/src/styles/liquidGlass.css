@@ -646,7 +646,7 @@ html:not(.dark):not([data-theme="dark"]) .history-detail-guiaa .clinical-file-he
   box-shadow: var(--liquid-glass-shadow-soft);
 }
 
-.clinic-page-guiaa .clinic-search input {
+html:not(.dark):not([data-theme="dark"]) .clinic-page-guiaa .clinic-search input {
   background: rgba(255, 255, 255, 0.55) !important;
 }
 

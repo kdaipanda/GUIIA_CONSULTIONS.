@@ -2294,6 +2294,13 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       ? "Sin consultas asignadas"
       : `${membershipStatus.consultations}/${membershipStatus.maxConsultations} consultas restantes`;
 
+  const membershipBalancePct =
+    membershipStatus.maxConsultations > 0
+      ? (membershipStatus.consultations / membershipStatus.maxConsultations) * 100
+      : 0;
+  const membershipProgressTone =
+    membershipBalancePct >= 60 ? "high" : membershipBalancePct >= 25 ? "medium" : "low";
+
   const followUpCases = recentConsultations.filter(
     (c) => c.status === "in_progress",
   );
@@ -2466,7 +2473,9 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
             >
               <span className="pill-label">Membresía</span>
               <span className="pill-value">
-                {membershipStatus.status} · {membershipConsultationsLabel}
+                {embedded
+                  ? membershipStatus.status
+                  : `${membershipStatus.status} · ${membershipConsultationsLabel}`}
               </span>
             </button>
           </div>
@@ -2550,12 +2559,9 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                   <div className="membership-progress">
                     <div className="progress-bar">
                       <div
-                        className="progress-fill"
+                        className={`progress-fill progress-fill--${membershipProgressTone}`}
                         style={{
-                          width: `${Math.min(
-                            (membershipStatus.consultations / membershipStatus.maxConsultations) * 100,
-                            100,
-                          )}%`,
+                          width: `${Math.min(membershipBalancePct, 100)}%`,
                         }}
                       />
                     </div>

@@ -58,17 +58,17 @@
   animation-delay: 0.26s;
 }
 
-.landing-reveal.is-visible #pricing .grid > .landing-card {
+.landing-reveal.is-visible #pricing .landing-pricing-grid > .landing-pricing-card {
   animation: landing-stagger-in 0.55s var(--landing-ease-out) both;
 }
 
-.landing-reveal.is-visible #pricing .grid > .landing-card:nth-child(1) {
+.landing-reveal.is-visible #pricing .landing-pricing-grid > .landing-pricing-card:nth-child(1) {
   animation-delay: 0.06s;
 }
-.landing-reveal.is-visible #pricing .grid > .landing-card:nth-child(2) {
+.landing-reveal.is-visible #pricing .landing-pricing-grid > .landing-pricing-card:nth-child(2) {
   animation-delay: 0.14s;
 }
-.landing-reveal.is-visible #pricing .grid > .landing-card:nth-child(3) {
+.landing-reveal.is-visible #pricing .landing-pricing-grid > .landing-pricing-card:nth-child(3) {
   animation-delay: 0.22s;
 }
 
@@ -343,20 +343,15 @@
   animation: none;
 }
 
-/* —— Pricing —— */
-.landing-pricing-featured {
-  transition:
-    transform 0.3s var(--landing-ease-out),
-    box-shadow 0.3s ease;
+/* —— Pricing (hover fino; estilos base en landingPricing.css) —— */
+#pricing .landing-pricing-card--featured:hover {
+  transform: translateY(-3px);
 }
 
-.landing-pricing-featured:hover {
-  transform: translateY(-6px) scale(1.02);
-}
-
-#pricing .landing-card:not(.landing-pricing-featured):hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 36px -16px rgba(12, 45, 77, 0.14);
+@media (prefers-reduced-motion: reduce) {
+  #pricing .landing-pricing-card--featured:hover {
+    transform: none;
+  }
 }
 
 /* —— FAQ —— */
@@ -454,8 +449,7 @@
   .landing-species-chip:hover,
   .landing-body-wrap .landing-card-interactive:hover,
   .landing-body-wrap .landing-clinical-step:hover,
-  .landing-pricing-featured:hover,
-  #pricing .landing-card:hover {
+  #pricing .landing-pricing-card:hover {
     transform: none;
   }
 }

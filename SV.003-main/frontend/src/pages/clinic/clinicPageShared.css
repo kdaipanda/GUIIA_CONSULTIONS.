@@ -906,6 +906,9 @@ html.dark .clinic-page-guiaa .clinic-search svg {
 [data-theme="dark"] .clinic-page-guiaa .clinic-search input,
 html.dark .clinic-page-guiaa .clinic-search input {
   color: var(--text-primary) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 [data-theme="dark"] .clinic-page-guiaa .clinic-search input::placeholder,

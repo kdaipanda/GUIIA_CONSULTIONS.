@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useVet } from "../context/VetContext";
 import { GuiaaBrandLockup } from "./GuiaaBrandLockup";
+import "./headerToolbar.css";
 
 export function Header({ setView, showAuth = true, actions }) {
   const { veterinarian, logout } = useVet();
@@ -80,25 +81,14 @@ export function Header({ setView, showAuth = true, actions }) {
 
         {showAuth && (
           <div className="header-end">
-            {actions && (
-              <div className="header-actions-slot">{actions}</div>
-            )}
-            <button
-              type="button"
-              className="menu-toggle"
-              onClick={toggleMenu}
-              aria-expanded={isMenuOpen}
-              aria-label={isMenuOpen ? "Cerrar menú de usuario" : "Abrir menú de usuario"}
-            >
-              {isMenuOpen ? "✕" : "☰"}
-            </button>
-            <nav
-              className={`nav-menu ${isMenuOpen ? "mobile-open" : ""}${
-                veterinarian ? " nav-menu--user-only" : ""
-              }`}
-            >
-              {veterinarian ? (
-                <>
+            {veterinarian ? (
+              <div className="header-toolbar-pair">
+                {actions && (
+                  <div className="header-actions-slot">{actions}</div>
+                )}
+                <nav
+                  className={`nav-menu ${isMenuOpen ? "mobile-open" : ""} nav-menu--user-only`}
+                >
                   <div className="user-menu-container">
                     <button
                       type="button"
@@ -170,9 +160,26 @@ export function Header({ setView, showAuth = true, actions }) {
                       </div>
                     )}
                   </div>
-                </>
-              ) : (
-                <>
+                </nav>
+              </div>
+            ) : (
+              actions && (
+                <div className="header-actions-slot">{actions}</div>
+              )
+            )}
+            <button
+              type="button"
+              className="menu-toggle"
+              onClick={toggleMenu}
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? "Cerrar menú de usuario" : "Abrir menú de usuario"}
+            >
+              {isMenuOpen ? "✕" : "☰"}
+            </button>
+            {!veterinarian && (
+            <nav
+              className={`nav-menu ${isMenuOpen ? "mobile-open" : ""}`}
+            >
                   <button
                     onClick={() => {
                       setView("login");
@@ -191,9 +198,8 @@ export function Header({ setView, showAuth = true, actions }) {
                   >
                     Registrarse
                   </button>
-                </>
-              )}
             </nav>
+            )}
           </div>
         )}
       </div>
