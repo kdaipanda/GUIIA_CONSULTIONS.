@@ -1,4 +1,37 @@
 /**
+ * Convierte `detail` de FastAPI (string, array de validación u objeto) en texto legible.
+ */
+export function formatApiErrorDetail(detail, fallback = "Error del servidor") {
+  if (detail == null || detail === "") return fallback;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const parts = detail
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object") {
+          const loc = Array.isArray(item.loc) ? item.loc.filter(Boolean).join(".") : "";
+          const msg = item.msg || item.message || "";
+          if (loc && msg) return `${loc}: ${msg}`;
+          return msg || JSON.stringify(item);
+        }
+        return String(item);
+      })
+      .filter(Boolean);
+    return parts.length ? parts.join(" · ") : fallback;
+  }
+  if (typeof detail === "object") {
+    if (typeof detail.message === "string") return detail.message;
+    if (typeof detail.msg === "string") return detail.msg;
+    try {
+      return JSON.stringify(detail);
+    } catch {
+      return fallback;
+    }
+  }
+  return String(detail);
+}
+
+/**
  * Mensaje útil cuando fetch falla por red (backend apagado, CORS, sin conexión).
  */
 export function friendlyFetchError(err, apiBase = "") {

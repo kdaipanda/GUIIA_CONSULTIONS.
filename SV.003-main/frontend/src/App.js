@@ -22,7 +22,7 @@ import {
   uploadMedicalImageSupabase,
 } from "./lib/supabaseApi";
 import { BACKEND_URL, getBackendUrl } from "./lib/backendUrl";
-import { friendlyFetchError } from "./lib/friendlyFetchError";
+import { friendlyFetchError, formatApiErrorDetail } from "./lib/friendlyFetchError";
 import { getAuthHeaders, storeAccessToken } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
 import { applyDocumentTheme, readStoredTheme } from "./lib/themeSync";
@@ -3002,8 +3002,10 @@ const NewConsultation = ({
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorDetail =
-        errorData.detail || `Error del servidor: ${response.status}`;
+      const errorDetail = formatApiErrorDetail(
+        errorData.detail,
+        `Error del servidor: ${response.status}`,
+      );
       if (shouldRedirectToMembership(response.status, errorDetail)) {
         notifyQuotaError(errorDetail, () => setView("membership"));
         return null;
@@ -3110,9 +3112,10 @@ const NewConsultation = ({
         const { data: errorData, text } = await safeReadJson(response);
         console.error('Error response:', response.status, errorData || text);
         notifyError(
-          errorData?.detail ||
-            text ||
-            `Error cargando la consulta (${response.status})`
+          formatApiErrorDetail(
+            errorData?.detail,
+            text || `Error cargando la consulta (${response.status})`,
+          ),
         );
       }
     } catch (error) {
@@ -3245,8 +3248,13 @@ const NewConsultation = ({
           },
         );
         if (!resp.ok) {
-          const raw = await resp.text().catch(() => "");
-          throw new Error(raw || `Error actualizando consulta: ${resp.status}`);
+          const { data: errorData, text } = await safeReadJson(resp);
+          throw new Error(
+            formatApiErrorDetail(
+              errorData?.detail,
+              text || `Error actualizando consulta: ${resp.status}`,
+            ),
+          );
         }
         setStep(2);
         if (isExpertMode) {
@@ -3304,8 +3312,13 @@ const NewConsultation = ({
         body: JSON.stringify(payloadUpdates),
       });
       if (!resp.ok) {
-        const raw = await resp.text().catch(() => "");
-        throw new Error(raw || `Error actualizando consulta: ${resp.status}`);
+        const { data: errorData, text } = await safeReadJson(resp);
+        throw new Error(
+          formatApiErrorDetail(
+            errorData?.detail,
+            text || `Error actualizando consulta: ${resp.status}`,
+          ),
+        );
       }
 
       setStep(3);
@@ -3380,7 +3393,7 @@ const NewConsultation = ({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || "Error en análisis");
+        throw new Error(formatApiErrorDetail(errorData.detail, "Error en análisis"));
       }
 
       const result = await response.json();

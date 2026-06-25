@@ -1,19 +1,27 @@
 import { toast } from "sonner";
+import { formatApiErrorDetail } from "./friendlyFetchError";
+
+function toastMessage(message) {
+  if (message == null || message === "") return "";
+  if (typeof message === "string") return message;
+  return formatApiErrorDetail(message, "Error desconocido");
+}
 
 export function notify(message, type = "info") {
-  if (!message) return;
+  const text = toastMessage(message);
+  if (!text) return;
   switch (type) {
     case "success":
-      toast.success(message);
+      toast.success(text);
       break;
     case "error":
-      toast.error(message);
+      toast.error(text);
       break;
     case "warning":
-      toast.warning(message);
+      toast.warning(text);
       break;
     default:
-      toast.message(message);
+      toast.message(text);
   }
 }
 
@@ -22,30 +30,32 @@ export function notifySuccess(message) {
 }
 
 export function notifyError(message, options) {
-  if (!message) return;
+  const text = toastMessage(message);
+  if (!text) return;
   if (options) {
-    toast.error(message, options);
+    toast.error(text, options);
     return;
   }
-  notify(message, "error");
+  notify(text, "error");
 }
 
 export function notifyQuotaError(message, onViewMembership) {
-  if (!message) return;
+  const text = toastMessage(message);
+  if (!text) return;
   const isQuota =
-    message.includes("agotado") ||
-    message.includes("consultas de prueba") ||
-    message.includes("consultas gratuitas") ||
-    message.includes("membresía activa") ||
-    message.includes("TRIAL_EXHAUSTED");
+    text.includes("agotado") ||
+    text.includes("consultas de prueba") ||
+    text.includes("consultas gratuitas") ||
+    text.includes("membresía activa") ||
+    text.includes("TRIAL_EXHAUSTED");
   if (isQuota && onViewMembership) {
-    toast.error(message, {
+    toast.error(text, {
       duration: 8000,
       action: { label: "Ver planes", onClick: onViewMembership },
     });
     return;
   }
-  toast.error(message);
+  toast.error(text);
 }
 
 export function notifyWarning(message) {

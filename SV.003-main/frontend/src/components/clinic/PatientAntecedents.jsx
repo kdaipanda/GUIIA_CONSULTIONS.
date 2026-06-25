@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { fetchPatient } from "../../lib/clinicApi";
+import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
 
 const IMAGE_TYPE_LABELS = {
   blood_test: "Análisis de sangre",
@@ -101,8 +102,10 @@ export function PatientAntecedents({ veterinarianId, patientId, patient: initial
                   </p>
                   {lastConsultation.analysis && (
                     <p className="patient-antecedents-analysis">
-                      {String(lastConsultation.analysis).slice(0, 220)}
-                      {lastConsultation.analysis.length > 220 ? "…" : ""}
+                      {(() => {
+                        const preview = cleanClinicalDisplayText(lastConsultation.analysis);
+                        return preview.length > 220 ? `${preview.slice(0, 220).trim()}…` : preview;
+                      })()}
                     </p>
                   )}
                 </div>

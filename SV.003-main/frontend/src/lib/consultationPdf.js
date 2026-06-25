@@ -85,8 +85,27 @@ function formatDate(value) {
   }
 }
 
+/** Normaliza análisis clínico que a veces llega como objeto desde la API o Supabase. */
+export function coerceClinicalText(value) {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "object") {
+    for (const key of ["text", "analysis", "ai_analysis", "detailed_analysis", "content"]) {
+      if (typeof value[key] === "string" && value[key].trim()) {
+        return value[key];
+      }
+    }
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+}
+
 export function cleanClinicalDisplayText(text) {
-  return String(text || "")
+  return coerceClinicalText(text)
     .replace(/AN[ÁA]LISIS\s+CL[ÍI]NICO\s+IA/gi, "ANÁLISIS CLÍNICO")
     .replace(/Análisis con IA/gi, "Análisis clínico")
     .replace(/interpretaci[óo]n.*\scon IA/gi, (match) => match.replace(/\scon IA/i, ""))

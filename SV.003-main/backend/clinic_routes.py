@@ -252,6 +252,27 @@ def _require_membership_feature(ctx: dict, feature: str) -> None:
     require_feature_for_profile(ctx.get("profile"), feature)
 
 
+def _coerce_analysis_text(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        for key in ("text", "analysis", "ai_analysis", "detailed_analysis", "content"):
+            nested = value.get(key)
+            if isinstance(nested, str) and nested.strip():
+                return nested
+        import json
+
+        try:
+            return json.dumps(value, ensure_ascii=False, indent=2)
+        except (TypeError, ValueError):
+            return str(value)
+    if isinstance(value, list):
+        return "\n".join(str(item) for item in value if item is not None)
+    return str(value)
+
+
 def _serialize_consultation_row(row: dict) -> dict:
     payload = row.get("payload") or {}
     form_data = payload.get("form_data") or payload.get("consultation_data") or {}
@@ -262,7 +283,7 @@ def _serialize_consultation_row(row: dict) -> dict:
         "especie": payload.get("category"),
         "form_data": form_data,
         "detalle_paciente": payload.get("detalle_paciente"),
-        "analysis": row.get("analysis"),
+        "analysis": _coerce_analysis_text(row.get("analysis")),
         "status": row.get("status"),
         "created_at": row.get("created_at"),
         "updated_at": row.get("updated_at"),
