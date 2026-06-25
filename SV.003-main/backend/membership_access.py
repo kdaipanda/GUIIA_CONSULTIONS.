@@ -3,6 +3,7 @@ Control de acceso por membresía — alineado con membership_catalog.py.
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Optional
 
 import auth_security
@@ -43,6 +44,24 @@ FEATURE_UPGRADE_MESSAGES = {
 }
 
 
+def _membership_is_expired(profile: dict) -> bool:
+    expires_at = profile.get("membership_expires")
+    if not expires_at:
+        return False
+
+    try:
+        if isinstance(expires_at, str):
+            expiry = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+        else:
+            expiry = expires_at
+        if expiry.tzinfo is None:
+            expiry = expiry.replace(tzinfo=timezone.utc)
+    except (TypeError, ValueError):
+        return False
+
+    return expiry < datetime.now(timezone.utc)
+
+
 def resolve_effective_plan(
     profile: Optional[dict],
     *,
@@ -60,6 +79,8 @@ def resolve_effective_plan(
     remaining = profile.get("consultations_remaining") or 0
 
     if membership_type:
+        if _membership_is_expired(profile):
+            return "basic"
         return str(membership_type).lower()
     if remaining > 0:
         return "trial"
