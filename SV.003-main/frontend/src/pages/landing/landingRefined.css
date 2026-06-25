@@ -1,0 +1,467 @@
+/* Landing GUIAA — refinamiento global (coherente con hero PetPal) */
+
+.landing-shell {
+  background: linear-gradient(165deg, #0a2540 0%, #0c2d4d 42%, #1a4d6e 100%);
+}
+
+/* Tarjeta unificada: hero + stats + cuerpo */
+.landing-page-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 24px 80px -12px rgba(12, 45, 77, 0.35),
+    0 0 0 1px rgba(12, 45, 77, 0.06) inset;
+  background: #fff;
+}
+
+@media (min-width: 1024px) {
+  .landing-page-card {
+    border-radius: 2.5rem;
+  }
+}
+
+.landing-body-wrap {  position: relative;
+  background:
+    radial-gradient(ellipse 90% 50% at 50% 0%, rgba(61, 155, 143, 0.06), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbfd 40%, #f4f9f7 100%);
+}
+
+.landing-body-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(38, 91, 147, 0.045) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.landing-body-wrap > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Secciones */
+.landing-body-wrap .landing-section {
+  scroll-margin-top: 5.5rem;
+  padding-block: clamp(3.5rem, 8vw, 5.5rem);
+}
+
+.landing-body-wrap .landing-section-first {
+  padding-top: clamp(2.25rem, 5vw, 3.25rem);
+  padding-bottom: clamp(3rem, 7vw, 4.5rem);
+}
+.landing-body-wrap .landing-section-alt {
+  background: linear-gradient(
+    180deg,
+    rgba(232, 244, 252, 0.35) 0%,
+    rgba(255, 255, 255, 0.65) 100%
+  );
+}
+
+.landing-body-wrap .landing-section-band {
+  background: linear-gradient(
+    90deg,
+    rgba(61, 155, 143, 0.08) 0%,
+    rgba(38, 91, 147, 0.05) 50%,
+    rgba(61, 155, 143, 0.08) 100%
+  );
+}
+
+.landing-body-wrap .landing-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(61, 155, 143, 0.1);
+  color: #2f857a;
+  letter-spacing: 0.1em;
+}
+
+.landing-body-wrap .landing-section-title {
+  color: #0c2d4d;
+  font-weight: 800;
+}
+
+.landing-body-wrap .landing-lead {
+  color: #5b6b7c;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.landing-body-wrap .landing-card {
+  border-radius: 1.25rem;
+  border-color: rgba(12, 45, 77, 0.09);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 2px 16px -8px rgba(12, 45, 77, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+.landing-body-wrap .landing-card-interactive:hover {
+  border-color: rgba(61, 155, 143, 0.35);
+  box-shadow: 0 16px 40px -16px rgba(47, 133, 122, 0.22);
+  transform: translateY(-3px);
+}
+
+.landing-body-wrap .landing-btn-primary {
+  border-radius: 999px;
+  background: linear-gradient(135deg, #3d9b8f 0%, #2f857a 100%);
+}
+
+.landing-body-wrap .landing-btn-secondary {
+  border-radius: 999px;
+  border-color: rgba(61, 155, 143, 0.25);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.landing-body-wrap .landing-tab.is-active {
+  background: linear-gradient(135deg, #3d9b8f, #265b93);
+}
+
+.landing-body-wrap .landing-clinical-step {
+  border-radius: 1.125rem;
+  background: rgba(255, 255, 255, 0.88);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.landing-body-wrap .landing-clinical-step:hover {
+  box-shadow: 0 12px 28px -14px rgba(12, 45, 77, 0.14);
+  transform: translateY(-2px);
+}
+
+@media (min-width: 1024px) {
+  .landing-body-wrap .landing-clinical-step {
+    border-radius: 1rem;
+    border: 1px solid rgba(12, 45, 77, 0.07);
+    background: rgba(255, 255, 255, 0.75);
+    padding: 1.25rem 1rem;
+    margin: 0;
+  }
+
+  .landing-body-wrap .landing-clinical-step:nth-child(n + 4) {
+    margin-top: 1rem;
+    padding-top: 1.25rem;
+    border-top: none;
+  }
+}
+
+.landing-body-wrap .landing-product-frame {
+  border-radius: 1.25rem;
+  padding: 0.5rem;
+  background: linear-gradient(145deg, rgba(61, 155, 143, 0.12), rgba(38, 91, 147, 0.08));
+  box-shadow: 0 28px 60px -24px rgba(12, 45, 77, 0.28);
+}
+
+.landing-body-wrap .landing-pricing-featured {
+  border-color: rgba(61, 155, 143, 0.35);
+  box-shadow: 0 20px 50px -20px rgba(47, 133, 122, 0.28);
+}
+
+/* Banda Doctor Plumitas */
+.landing-brand-band {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1.25rem;
+  text-align: center;
+  border-block: 1px solid rgba(61, 155, 143, 0.15);
+  background: linear-gradient(
+    180deg,
+    rgba(232, 243, 228, 0.55) 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+}
+
+@media (min-width: 640px) {
+  .landing-brand-band {
+    flex-direction: row;
+    justify-content: center;
+    gap: 1.25rem;
+    text-align: left;
+    padding: 1.75rem 2rem;
+  }
+}
+
+.landing-brand-band-mascot-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 7.5rem;
+  height: 5.75rem;
+}
+
+.landing-brand-band-mascot {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+  filter: drop-shadow(0 10px 18px rgba(12, 45, 77, 0.16));
+  animation: plumitas-brand-fly 4.2s ease-in-out infinite;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.landing-brand-band-spark {
+  position: absolute;
+  z-index: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(255, 212, 120, 0.5) 55%, transparent 100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.landing-brand-band-spark--1 {
+  top: 38%;
+  left: 8%;
+  width: 0.45rem;
+  height: 0.45rem;
+  animation: plumitas-brand-spark 4.2s ease-in-out infinite;
+}
+
+.landing-brand-band-spark--2 {
+  top: 52%;
+  left: 2%;
+  width: 0.35rem;
+  height: 0.35rem;
+  animation: plumitas-brand-spark 4.2s ease-in-out infinite 0.6s;
+}
+
+.landing-brand-band-spark--3 {
+  top: 28%;
+  left: 14%;
+  width: 0.3rem;
+  height: 0.3rem;
+  animation: plumitas-brand-spark 4.2s ease-in-out infinite 1.1s;
+}
+
+@keyframes plumitas-brand-fly {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-3deg) scale(1);
+  }
+  35% {
+    transform: translate3d(10px, -8px, 0) rotate(2deg) scale(1.02);
+  }
+  70% {
+    transform: translate3d(4px, -4px, 0) rotate(-1deg) scale(1);
+  }
+}
+
+@keyframes plumitas-brand-spark {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.6);
+  }
+  40% {
+    opacity: 0.85;
+    transform: translate3d(-10px, 2px, 0) scale(1);
+  }
+  70% {
+    opacity: 0.2;
+    transform: translate3d(-18px, 6px, 0) scale(0.8);
+  }
+}
+
+@media (min-width: 640px) {
+  .landing-brand-band-mascot-wrap {
+    width: 8.5rem;
+    height: 6.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-brand-band-mascot,
+  .landing-brand-band-spark {
+    animation: none !important;
+  }
+}
+
+.landing-brand-band strong {
+  display: block;
+  font-size: 1.05rem;
+  color: #0c2d4d;
+}
+
+.landing-brand-band span {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: #64748b;
+  max-width: 28rem;
+}
+
+/* Testimonios */
+.landing-testimonials-section {
+  padding-block: clamp(3.5rem, 8vw, 5rem);
+}
+
+.landing-testimonial-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(12, 45, 77, 0.08);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 28px -14px rgba(12, 45, 77, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.landing-testimonial-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px -16px rgba(47, 133, 122, 0.18);
+}
+
+.landing-testimonial-quote-icon {
+  color: rgba(61, 155, 143, 0.45);
+}
+
+/* CTA final */
+.landing-cta-panel-v2 {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  padding: 2.5rem 1.5rem;
+  background: linear-gradient(135deg, #00a8a8 0%, #2f857a 45%, #0c2d4d 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 24px 60px -20px rgba(12, 45, 77, 0.45);
+}
+
+@media (min-width: 640px) {
+  .landing-cta-panel-v2 {
+    padding: 3rem 2.5rem;
+  }
+}
+
+.landing-cta-panel-v2::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  right: -10%;
+  width: 50%;
+  height: 80%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.14), transparent 70%);
+  pointer-events: none;
+}
+
+.landing-cta-panel-v2 .landing-section-title,
+.landing-cta-panel-v2 .landing-lead,
+.landing-cta-panel-v2 .landing-eyebrow {
+  color: #fff;
+}
+
+.landing-cta-panel-v2 .landing-lead {
+  opacity: 0.9;
+}
+
+.landing-cta-panel-v2 .landing-eyebrow {
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.landing-cta-panel-v2 .landing-btn-primary {
+  background: #fff;
+  color: #0c2d4d;
+}
+
+.landing-cta-panel-v2 .landing-btn-primary:hover {
+  background: #f0fdfa;
+}
+
+/* Footer */
+.landing-footer-v2 {
+  margin-top: 0;
+  padding: 3rem 0 2rem;
+  background: linear-gradient(180deg, #0c2d4d 0%, #081f35 100%);
+  color: rgba(255, 255, 255, 0.88);
+  border-top: none;
+}
+
+.landing-footer-v2 .landing-eyebrow {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.landing-footer-v2 .landing-body,
+.landing-footer-v2 p {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.landing-footer-v2 .landing-btn-ghost {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.landing-footer-v2 .landing-btn-ghost:hover {
+  color: #fff;
+}
+
+.landing-footer-v2 a {
+  color: #a7f3d0;
+}
+
+.landing-footer-v2 a:hover {
+  color: #fff;
+}
+
+.landing-footer-v2 .landing-trust-divider {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.landing-footer-v2 .logo-image {
+  filter: brightness(0) invert(1);
+}
+
+.landing-footer-v2 .nav-brand-subtitle,
+.landing-footer-v2 .nav-brand-subsubtitle {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.landing-footer-v2 .nav-brand-subsubtitle {
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+
+/* Rail y barra móvil */
+.landing-rail {
+  border-color: rgba(61, 155, 143, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.landing-rail a:hover,
+.landing-rail button:hover {
+  background: rgba(61, 155, 143, 0.12);
+  color: #2f857a;
+}
+
+.landing-mobile-bar {
+  border-top-color: rgba(61, 155, 143, 0.2);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.landing-species-chip:hover {
+  border-color: rgba(61, 155, 143, 0.4);
+  background: rgba(232, 243, 228, 0.65);
+}
+
+/* FAQ */
+.landing-body-wrap .landing-card.overflow-hidden.rounded-xl button:hover {
+  background: rgba(61, 155, 143, 0.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-body-wrap .landing-card-interactive:hover,
+  .landing-body-wrap .landing-clinical-step:hover,
+  .landing-testimonial-card:hover {
+    transform: none;
+  }
+}

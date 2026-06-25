@@ -19,7 +19,7 @@ export function LandingFooter({ setView }) {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-guiaa-brand-navy/8 bg-white/50 py-12">
+    <footer className="landing-footer-v2 py-12">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
           <div>

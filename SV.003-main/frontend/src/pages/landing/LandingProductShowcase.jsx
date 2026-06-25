@@ -138,7 +138,7 @@ export function LandingProductShowcase() {
             <p className="mt-4 text-sm text-guiaa-brand-ink-subtle">{activeShot.caption}</p>
           </div>
 
-          <div className="relative">
+          <div className="landing-device-mockup">
             <div className="landing-product-frame">
               <div className="landing-product-frame-inner">
               <div className="flex items-center gap-2 border-b border-guiaa-brand-navy/10 bg-white px-4 py-2.5">

@@ -1,64 +1,103 @@
 import React from "react";
+
 import "./landing/landingPreview.css";
 import "./landing/landingMotion.css";
 import "./landing/landingTaste.css";
-import { LandingClinicalTexture } from "./landing/LandingClinicalTexture";
+import "./landing/landingPetpal.css";
+import "./landing/landingRefined.css";
+import "./landing/landingVetAnimations.css";
+import "./landing/landingColleaguesBento.css";
+import "./landing/landingHero3d.css";
+import "./landing/landingInteractions.css";
+
 import { LandingNavbar } from "./landing/LandingNavbar";
 import { LandingHero } from "./landing/LandingHero";
+import { LandingHeroStats } from "./landing/LandingHeroStats";
+import { LandingHowItWorks } from "./landing/LandingHowItWorks";
 import { LandingClinicalWorkflow } from "./landing/LandingClinicalWorkflow";
-import { LandingTrustStrip } from "./landing/LandingTrustStrip";
+import { LandingBrandBand } from "./landing/LandingBrandBand";
 import { LandingProductShowcase } from "./landing/LandingProductShowcase";
 import { LandingFeatures } from "./landing/LandingFeatures";
 import { LandingUseCases } from "./landing/LandingUseCases";
+import { LandingTestimonials } from "./landing/LandingTestimonials";
 import { LandingSpeciesMarquee } from "./landing/LandingSpeciesMarquee";
 import { LandingPricing } from "./landing/LandingPricing";
 import { LandingFaq } from "./landing/LandingFaq";
 import { LandingCta } from "./landing/LandingCta";
 import { LandingFooter } from "./landing/LandingFooter";
 import { LandingSocialRail } from "./landing/LandingSocialRail";
+import { LandingStickyCta } from "./landing/LandingStickyCta";
 import { LandingReveal } from "./landing/LandingReveal";
 import { LandingSeo } from "./landing/LandingSeo";
+import { LandingVetAnimations } from "./landing/LandingVetAnimations";
 
 export function LandingPage({ setView }) {
   return (
     <div className="landing-shell min-h-screen p-3 pb-[4.75rem] antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
       <LandingSeo />
-      <div className="landing-shell-inner relative mx-auto max-w-[82rem] overflow-hidden rounded-[2rem] bg-gradient-to-b from-sky-50/90 via-white to-white sm:rounded-[2.75rem]">
-        <LandingClinicalTexture />
-        <LandingNavbar setView={setView} />
-        <main className="relative">
+
+      <div className="landing-page-card mx-auto max-w-[82rem]">
+        <div className="landing-petpal-top">
+          <LandingNavbar setView={setView} hero />
           <LandingHero setView={setView} />
-          <LandingReveal>
-            <LandingTrustStrip />
-          </LandingReveal>
-          <LandingReveal delay={30}>
-            <LandingClinicalWorkflow />
-          </LandingReveal>
-          <LandingReveal delay={40}>
-            <LandingProductShowcase />
-          </LandingReveal>
-          <LandingReveal delay={60}>
-            <LandingFeatures />
-          </LandingReveal>
-          <LandingReveal delay={80}>
-            <LandingUseCases />
-          </LandingReveal>
-          <LandingReveal>
-            <LandingSpeciesMarquee />
-          </LandingReveal>
-          <LandingReveal delay={40}>
-            <LandingPricing setView={setView} />
-          </LandingReveal>
-          <LandingReveal delay={60}>
-            <LandingFaq setView={setView} />
-          </LandingReveal>
-          <LandingReveal>
-            <LandingCta setView={setView} />
-          </LandingReveal>
-        </main>
-        <LandingFooter setView={setView} />
+        </div>
+
+        <LandingHeroStats />
+
+        <div className="landing-body-wrap">
+          <LandingVetAnimations variant="body" />
+          <main className="relative">
+            <LandingReveal>
+              <LandingHowItWorks setView={setView} />
+            </LandingReveal>
+
+            <LandingReveal delay={15}>
+              <LandingClinicalWorkflow />
+            </LandingReveal>
+
+            <LandingReveal delay={20}>
+              <LandingBrandBand />
+            </LandingReveal>
+
+            <LandingReveal delay={30}>
+              <LandingProductShowcase />
+            </LandingReveal>
+
+            <LandingReveal delay={40}>
+              <LandingFeatures />
+            </LandingReveal>
+
+            <LandingReveal delay={50}>
+              <LandingUseCases />
+            </LandingReveal>
+
+            <LandingReveal delay={60}>
+              <LandingTestimonials />
+            </LandingReveal>
+
+            <LandingReveal>
+              <LandingSpeciesMarquee />
+            </LandingReveal>
+
+            <LandingReveal delay={40}>
+              <LandingPricing setView={setView} />
+            </LandingReveal>
+
+            <LandingReveal delay={50}>
+              <LandingFaq setView={setView} />
+            </LandingReveal>
+
+            <LandingReveal>
+              <LandingCta setView={setView} />
+            </LandingReveal>
+          </main>
+
+          <LandingFooter setView={setView} />
+        </div>
       </div>
+
       <LandingSocialRail setView={setView} />
+      <LandingStickyCta setView={setView} />
     </div>
   );
 }

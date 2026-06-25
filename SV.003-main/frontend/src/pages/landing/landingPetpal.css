@@ -1,0 +1,493 @@
+/* Hero estilo PetPal — teal, glassmorphism, video GUIAA */
+
+.landing-petpal-top {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    145deg,
+    #00a8a8 0%,
+    #3d9b8f 42%,
+    #2f857a 100%
+  );
+  color: #fff;
+}
+
+.landing-petpal-top::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 90% 20%, rgba(255, 255, 255, 0.14), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 10% 80%, rgba(12, 45, 77, 0.12), transparent 50%);
+  pointer-events: none;
+}
+
+.landing-petpal-curve {
+  position: absolute;
+  top: 3.5rem;
+  left: -8%;
+  width: 70%;
+  height: 40%;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.landing-nav-hero {
+  position: relative;
+  z-index: 30;
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+  background: transparent !important;
+}
+
+.landing-nav-hero.landing-nav-scrolled {
+  background: rgba(12, 45, 77, 0.35) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.landing-nav-hero .landing-eyebrow,
+.landing-nav-hero .landing-btn-ghost {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.landing-nav-hero .landing-eyebrow:hover,
+.landing-nav-hero .landing-btn-ghost:hover {
+  color: #fff !important;
+}
+
+.landing-nav-hero .landing-btn-primary {
+  background: #fff;
+  color: #0c2d4d;
+  box-shadow: 0 8px 24px -8px rgba(12, 45, 77, 0.35);
+}
+
+.landing-nav-hero .landing-btn-primary:hover {
+  background: #f8fafc;
+  color: #0c2d4d;
+}
+
+.landing-nav-hero .logo-image {
+  filter: brightness(0) invert(1);
+}
+
+.landing-nav-hero .nav-brand-subtitle,
+.landing-nav-hero .nav-brand-subsubtitle {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.landing-nav-hero .nav-brand-subsubtitle {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.landing-nav-hero .sm\:border-guiaa-brand-navy\/12 {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.landing-nav-hero button[aria-label*="menú"],
+.landing-nav-hero button[aria-label*="menú"]:hover,
+.landing-nav-hero button[aria-label*="Menú"],
+.landing-nav-hero button[aria-label*="Cerrar"] {
+  color: #fff;
+}
+
+.landing-nav-hero .h-0\.5.bg-guiaa-brand-green\/80 {
+  background: rgba(255, 255, 255, 0.65) !important;
+}
+
+.landing-nav-hero span.bg-guiaa-brand-green {
+  background: #fff !important;
+}
+
+.landing-petpal-hero {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem 1.25rem 2rem;
+}
+
+@media (min-width: 640px) {
+  .landing-petpal-hero {
+    padding: 2rem 2rem 2.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-petpal-hero {
+    padding: 2.5rem 2.5rem 2.75rem;
+  }
+}
+
+.landing-petpal-grid {
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 1024px) {
+  .landing-petpal-grid {
+    grid-template-columns: 1fr 1.05fr;
+    gap: 2rem;
+    min-height: 28rem;
+  }
+}
+
+.landing-petpal-copy {
+  max-width: 34rem;
+}
+
+.landing-petpal-kicker {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.landing-petpal-title {
+  margin-top: 0.75rem;
+  font-size: clamp(1.85rem, 4.5vw, 3.15rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: #fff;
+}
+
+.landing-petpal-accent {
+  color: #ffd4c8;
+}
+
+.landing-petpal-lead {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+@media (min-width: 640px) {
+  .landing-petpal-lead {
+    font-size: 1.05rem;
+  }
+}
+
+.landing-petpal-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.landing-petpal-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0 1.75rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #0c2d4d;
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 12px 32px -12px rgba(12, 45, 77, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.landing-petpal-cta-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px -10px rgba(12, 45, 77, 0.5);
+}
+
+.landing-petpal-cta-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.landing-petpal-cta-play:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(1.04);
+}
+
+.landing-petpal-scroll-hint {
+  display: none;
+  margin-top: 2.5rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+@media (min-width: 1024px) {
+  .landing-petpal-scroll-hint {
+    display: block;
+  }
+}
+
+.landing-petpal-visual {
+  position: relative;
+  margin: 0 auto;
+  width: min(100%, 22rem);
+  aspect-ratio: 4 / 5;
+}
+
+@media (min-width: 1024px) {
+  .landing-petpal-visual {
+    width: 100%;
+    max-width: 26rem;
+    margin-right: 0;
+    margin-left: auto;
+  }
+}
+
+.landing-petpal-media-ring {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.landing-hero-3d-panel.landing-petpal-media-ring {
+  border-radius: 0;
+}
+
+.landing-petpal-media-ring:not(.landing-hero-3d-panel) video,
+.landing-petpal-media-ring:not(.landing-hero-3d-panel) img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.landing-petpal-glass {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 28px -10px rgba(12, 45, 77, 0.35);
+  color: #fff;
+  min-width: 8.5rem;
+}
+
+.landing-petpal-glass-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.65rem;
+  background: rgba(255, 212, 200, 0.95);
+  color: #0c2d4d;
+  flex-shrink: 0;
+}
+
+.landing-petpal-glass-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+
+.landing-petpal-glass-value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.landing-petpal-glass--appointments {
+  top: 6%;
+  right: -4%;
+}
+
+.landing-petpal-glass--lab {
+  left: -6%;
+  bottom: 28%;
+}
+
+.landing-petpal-glass--cds {
+  right: -2%;
+  bottom: 10%;
+}
+
+@media (max-width: 1023px) {
+  .landing-petpal-glass--appointments {
+    right: 0;
+  }
+
+  .landing-petpal-glass--lab {
+    left: 0;
+  }
+}
+
+.landing-petpal-rail {
+  position: absolute;
+  top: 12%;
+  right: -0.5rem;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (max-width: 1023px) {
+  .landing-petpal-rail {
+    display: none;
+  }
+}
+
+.landing-petpal-rail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.landing-petpal-stats {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-radius: 0;
+  background: #fff;
+  border-bottom: 1px solid rgba(12, 45, 77, 0.08);
+  box-shadow: 0 4px 24px -8px rgba(12, 45, 77, 0.1);
+}
+
+@media (min-width: 768px) {
+  .landing-petpal-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.landing-petpal-stat {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1.15rem 1.25rem;
+  border-bottom: 1px solid rgba(12, 45, 77, 0.08);
+}
+
+@media (min-width: 640px) {
+  .landing-petpal-stat {
+    padding: 1.25rem 1.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .landing-petpal-stat {
+    border-bottom: none;
+    border-right: 1px solid rgba(12, 45, 77, 0.08);
+    padding: 1.35rem 2rem;
+  }
+
+  .landing-petpal-stat:last-child {
+    border-right: none;
+  }
+}
+
+.landing-petpal-stat-copy {
+  min-width: 0;
+}
+
+.landing-petpal-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.75rem;
+  background: rgba(61, 155, 143, 0.12);
+  color: #2f857a;
+  flex-shrink: 0;
+}
+
+.landing-petpal-stat-value {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0c2d4d;
+}
+
+.landing-petpal-stat-desc {
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.landing-video-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(12, 45, 77, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.landing-video-modal-panel {
+  position: relative;
+  width: min(100%, 56rem);
+  border-radius: 1.25rem;
+  overflow: hidden;
+  background: #0c2d4d;
+  box-shadow: 0 24px 80px -20px rgba(0, 0, 0, 0.45);
+}
+
+.landing-video-modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+}
+
+.landing-video-modal-player {
+  display: block;
+  width: 100%;
+  max-height: min(70vh, 720px);
+  background: #000;
+}
+
+.landing-video-modal-caption {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: center;
+}

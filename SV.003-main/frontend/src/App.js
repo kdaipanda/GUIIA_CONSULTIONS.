@@ -26,6 +26,10 @@ import { friendlyFetchError } from "./lib/friendlyFetchError";
 import { getAuthHeaders, storeAccessToken } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
 import { applyDocumentTheme, readStoredTheme } from "./lib/themeSync";
+import {
+  markPostRegisterOnboarding,
+  consumePostRegisterOnboarding,
+} from "./lib/guiaaOnboarding";
 import { notifyError, notifySuccess, notifyQuotaError } from "./lib/appToast";
 import { clinicNavIsHero, clinicNavThemeStyle } from "./lib/clinicNavTheme";
 import { LATAM_COUNTRIES, countryLabel } from "./lib/latamCountries";
@@ -59,7 +63,6 @@ import { AgendaPage } from "./pages/clinic/AgendaPage";
 import { InventoryPage } from "./pages/clinic/InventoryPage";
 import { BillingPage } from "./pages/clinic/BillingPage";
 import { ReportsPage } from "./pages/clinic/ReportsPage";
-import { ToolsPage } from "./pages/clinic/ToolsPage";
 import { SettingsPage } from "./pages/clinic/SettingsPage";
 import { AdminPage } from "./pages/clinic/AdminPage";
 import { ClinicDashboardPage } from "./pages/clinic/ClinicDashboardPage";
@@ -93,7 +96,7 @@ const VIEW_TO_PATH = {
   inventory: "/app/inventario",
   billing: "/app/facturacion",
   reports: "/app/reportes",
-  tools: "/app/herramientas",
+  tools: "/app/configuracion",
   settings: "/app/configuracion",
   admin: "/app/admin",
   "new-consultation": "/app/consultas/nueva",
@@ -106,10 +109,11 @@ const VIEW_TO_PATH = {
 const PATH_TO_VIEW = {
   ...Object.fromEntries(
     Object.entries(VIEW_TO_PATH)
-      .filter(([view]) => view !== "patients")
+      .filter(([view]) => view !== "patients" && view !== "tools")
       .map(([view, path]) => [path, view]),
   ),
   "/app/pacientes": "clients",
+  "/app/herramientas": "settings",
 };
 
 // Importar formularios de especies
@@ -187,17 +191,9 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       action: () => setView("reports"),
     },
     {
-      id: "tools",
-      title: "Herramientas",
-      description: "Calculadoras clínicas",
-      icon: "🔧",
-      shortcut: "",
-      action: () => setView("tools"),
-    },
-    {
       id: "settings",
       title: "Configuración",
-      description: "Consultorio y equipo",
+      description: "Consultorio, equipo y portal de citas",
       icon: "⚙️",
       shortcut: "",
       action: () => setView("settings"),
@@ -468,6 +464,22 @@ const Router = () => {
     setIsInitialized(true);
   };
 
+  const completeAuthAndEnter = useCallback(() => {
+    setCedulaFlow(null);
+    if (consumePostRegisterOnboarding()) {
+      setClinicalContext(null);
+      setSelectedConsultationId(null);
+      setConsultationEntryMode("standard");
+      setCurrentView("new-consultation");
+      setIsInitialized(true);
+      navigate(VIEW_TO_PATH["new-consultation"]);
+      return;
+    }
+    setCurrentView("dashboard");
+    setIsInitialized(true);
+    navigate(VIEW_TO_PATH.dashboard);
+  }, [navigate]);
+
   useEffect(() => {
     if (portalOrganizationId) {
       setCurrentView("appointment-request");
@@ -475,6 +487,10 @@ const Router = () => {
     }
     if (location.pathname === "/app/pacientes") {
       navigate(VIEW_TO_PATH.clients, { replace: true });
+      return;
+    }
+    if (location.pathname === "/app/herramientas") {
+      navigate(VIEW_TO_PATH.settings, { replace: true });
       return;
     }
     const view = PATH_TO_VIEW[location.pathname];
@@ -574,6 +590,7 @@ const Router = () => {
           setView={handleSetView}
           cedulaFlow={cedulaFlow}
           setCedulaFlow={setCedulaFlow}
+          onAuthSuccess={completeAuthAndEnter}
         />
       </AppShell>
     ),
@@ -639,7 +656,7 @@ const Router = () => {
     ),
     tools: (
       <ClinicShell setView={navigateSetView}>
-        <ToolsPage />
+        <SettingsPage />
       </ClinicShell>
     ),
     settings: (
@@ -1164,6 +1181,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
         needs_upload: false,
         file: cedulaFile,
       });
+      markPostRegisterOnboarding();
       setView("cedula-verification");
     } catch (err) {
       notifyError(err.message);
@@ -1725,7 +1743,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
 };
 
 // Verificación de registro profesional (documento + revisión; SEP opcional MX)
-const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
+const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSuccess }) => {
   const { login } = useVet();
   const [nombre, setNombre] = useState("");
   const [file, setFile] = useState(null);
@@ -1831,8 +1849,12 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
           throw new Error(vetData?.message || "Tu registro aún no está verificado.");
         }
         login(vetData);
-        setCedulaFlow?.(null);
-        setView("dashboard");
+        if (onAuthSuccess) {
+          onAuthSuccess();
+        } else {
+          setCedulaFlow?.(null);
+          setView("dashboard");
+        }
       }
     } catch (e) {
       notifyError(e?.message || "Error en verificación");
@@ -1956,8 +1978,12 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow }) => {
                     }
                     
                     login(vetData);
-                    setCedulaFlow?.(null);
-                    setView("dashboard");
+                    if (onAuthSuccess) {
+                      onAuthSuccess();
+                    } else {
+                      setCedulaFlow?.(null);
+                      setView("dashboard");
+                    }
                   } catch (e) {
                     notifyError(e?.message || "Error al posponer verificación");
                   } finally {

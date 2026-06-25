@@ -6,12 +6,12 @@ import { useLandingScrollSpy } from "./useLandingScrollSpy";
 
 const NAV_LINKS = [
   { href: "#product", label: "Producto", sectionId: "product", isProduct: true },
-  { href: "#features", label: "Características", sectionId: "features" },
+  { href: "#features", label: "Servicios", sectionId: "features" },
   { href: "#pricing", label: "Precios", sectionId: "pricing" },
   { href: "#faq", label: "FAQ", sectionId: "faq" },
 ];
 
-export function LandingNavbar({ setView }) {
+export function LandingNavbar({ setView, hero = false }) {
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -58,6 +58,11 @@ export function LandingNavbar({ setView }) {
 
   const navLinkClass = (sectionId) => {
     const isActive = activeSection === sectionId;
+    if (hero) {
+      return `relative text-sm font-semibold transition hover:text-white ${
+        isActive ? "text-white" : "text-white/78"
+      }`;
+    }
     return `relative landing-eyebrow transition hover:text-guiaa-brand-navy ${
       isActive ? "text-guiaa-brand-navy" : "text-guiaa-brand-navy/75"
     }`;
@@ -66,9 +71,11 @@ export function LandingNavbar({ setView }) {
   return (
     <header
       className={`sticky top-0 z-40 border-b transition-all duration-300 ${
-        scrolled
-          ? "landing-nav-scrolled border-transparent"
-          : "border-guiaa-brand-navy/6 bg-white/40 backdrop-blur-sm"
+        hero
+          ? `landing-nav-hero ${scrolled ? "landing-nav-scrolled" : "border-transparent"}`
+          : scrolled
+            ? "landing-nav-scrolled border-transparent"
+            : "border-guiaa-brand-navy/6 bg-white/40 backdrop-blur-sm"
       }`}
     >
       <div className="mx-auto flex min-h-[4.75rem] max-w-6xl items-center justify-between gap-3 px-5 py-2 sm:min-h-[5rem] sm:gap-4 sm:px-8 lg:px-10">
@@ -93,7 +100,9 @@ export function LandingNavbar({ setView }) {
               {label}
               {activeSection === sectionId && (
                 <span
-                  className="absolute -bottom-1 left-0 right-0 mx-auto h-0.5 w-4 rounded-full bg-guiaa-brand-green"
+                  className={`absolute -bottom-1 left-0 right-0 mx-auto h-0.5 w-4 rounded-full ${
+                    hero ? "bg-white" : "bg-guiaa-brand-green"
+                  }`}
                   aria-hidden
                 />
               )}
@@ -120,7 +129,9 @@ export function LandingNavbar({ setView }) {
 
         <button
           type="button"
-          className="inline-flex rounded-lg p-2 text-guiaa-brand-navy hover:bg-guiaa-brand-navy/5 sm:hidden"
+          className={`inline-flex rounded-lg p-2 sm:hidden ${
+            hero ? "text-white hover:bg-white/10" : "text-guiaa-brand-navy hover:bg-guiaa-brand-navy/5"
+          }`}
           onClick={() => setMobileOpen((open) => !open)}
           aria-expanded={mobileOpen}
           aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
@@ -136,7 +147,13 @@ export function LandingNavbar({ setView }) {
       />
 
       {mobileOpen && (
-        <div className="border-t border-guiaa-brand-navy/10 bg-white/95 px-5 py-4 backdrop-blur-md sm:hidden">
+        <div
+          className={`border-t px-5 py-4 backdrop-blur-md sm:hidden ${
+            hero
+              ? "border-white/15 bg-[#0c2d4d]/90"
+              : "border-guiaa-brand-navy/10 bg-white/95"
+          }`}
+        >
           <nav className="flex flex-col gap-1">
             {NAV_LINKS.map(({ href, label, sectionId, isProduct }) => (
               <button
@@ -145,8 +162,12 @@ export function LandingNavbar({ setView }) {
                 onClick={() => scrollTo(href, isProduct)}
                 className={`rounded-lg px-3 py-2.5 text-left text-sm font-semibold ${
                   activeSection === sectionId
-                    ? "bg-guiaa-sky-soft/60 text-guiaa-brand-navy"
-                    : "text-guiaa-brand-navy/80"
+                    ? hero
+                      ? "bg-white/12 text-white"
+                      : "bg-guiaa-sky-soft/60 text-guiaa-brand-navy"
+                    : hero
+                      ? "text-white/85"
+                      : "text-guiaa-brand-navy/80"
                 }`}
                 aria-current={activeSection === sectionId ? "true" : undefined}
               >
@@ -161,7 +182,9 @@ export function LandingNavbar({ setView }) {
                 setMobileOpen(false);
                 setView("login");
               }}
-              className="rounded-lg px-3 py-2.5 text-sm font-semibold text-guiaa-brand-navy/80"
+              className={`rounded-lg px-3 py-2.5 text-sm font-semibold ${
+                hero ? "text-white/85" : "text-guiaa-brand-navy/80"
+              }`}
             >
               Iniciar sesión
             </button>

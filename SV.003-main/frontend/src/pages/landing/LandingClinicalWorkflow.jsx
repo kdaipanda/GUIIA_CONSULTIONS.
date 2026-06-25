@@ -50,7 +50,7 @@ const CLINICAL_STEPS = [
 
 export function LandingClinicalWorkflow() {
   return (
-    <section className="landing-section border-y border-guiaa-brand-navy/8 bg-white/80">
+    <section className="landing-section landing-section-first border-b border-guiaa-brand-navy/8 bg-white">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
         <div className="landing-section-head-wide items-start sm:items-end">
           <div className="landing-section-head">

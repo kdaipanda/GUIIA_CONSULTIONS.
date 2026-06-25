@@ -1,0 +1,265 @@
+/* Hero video — panel 3D estilo gráfico futurista */
+
+.landing-hero-3d-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 1400px;
+  perspective-origin: 50% 42%;
+}
+
+.landing-hero-3d-glow {
+  position: absolute;
+  inset: 8% 4% 12%;
+  border-radius: 2.25rem;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 45%, rgba(61, 155, 143, 0.28), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(38, 91, 147, 0.2), transparent 65%);
+  filter: blur(18px);
+  pointer-events: none;
+  animation: landing-hero-3d-glow-pulse 5s ease-in-out infinite;
+}
+
+.landing-hero-3d-orbit {
+  position: absolute;
+  inset: -6% -8%;
+  border-radius: 50%;
+  border: 1px dashed rgba(61, 155, 143, 0.4);
+  pointer-events: none;
+  animation: landing-hero-3d-orbit-spin 24s linear infinite;
+  opacity: 0.65;
+}
+
+.landing-hero-3d-orbit::before,
+.landing-hero-3d-orbit::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(61, 155, 143, 0.45) 55%, transparent);
+  box-shadow: 0 0 12px rgba(61, 155, 143, 0.45);
+}
+
+.landing-hero-3d-orbit::before {
+  top: 8%;
+  left: 12%;
+  width: 0.45rem;
+  height: 0.45rem;
+}
+
+.landing-hero-3d-orbit::after {
+  bottom: 18%;
+  right: 10%;
+  width: 0.35rem;
+  height: 0.35rem;
+}
+
+.landing-hero-3d-panel {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.landing-hero-3d-panel.is-tilting {
+  transition: transform 0.12s ease-out;
+}
+
+.landing-hero-3d-bezel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0.55rem;
+  border-radius: 2rem;
+  background: linear-gradient(
+    145deg,
+    rgba(18, 42, 72, 0.95) 0%,
+    rgba(8, 22, 42, 0.98) 45%,
+    rgba(22, 58, 88, 0.92) 100%
+  );
+  border: 1px solid rgba(61, 155, 143, 0.45);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.12) inset,
+    0 -18px 36px rgba(0, 0, 0, 0.45) inset,
+    0 28px 56px -16px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(12, 45, 77, 0.4),
+    0 0 40px -8px rgba(61, 155, 143, 0.35);
+  transform: translateZ(18px);
+}
+
+.landing-hero-3d-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 1.55rem;
+  overflow: hidden;
+  background: #061525;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.5) inset,
+    0 12px 32px rgba(0, 0, 0, 0.35) inset;
+  transform: translateZ(8px);
+}
+
+.landing-hero-3d-screen video,
+.landing-hero-3d-screen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.02);
+}
+
+.landing-hero-3d-shine {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    transparent 38%,
+    transparent 62%,
+    rgba(61, 155, 143, 0.1) 100%
+  );
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+}
+
+.landing-hero-3d-scanline {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.12;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.03) 2px,
+    rgba(255, 255, 255, 0.03) 4px
+  );
+}
+
+.landing-hero-3d-floor-shadow {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -4%;
+  height: 14%;
+  z-index: 0;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(12, 45, 77, 0.45), transparent 70%);
+  filter: blur(8px);
+  transform: rotateX(72deg) translateZ(-20px);
+  pointer-events: none;
+}
+
+@keyframes landing-hero-3d-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes landing-hero-3d-orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1023px) {
+  .landing-hero-3d-glow {
+    opacity: 0.55;
+    animation: none;
+  }
+
+  .landing-hero-3d-orbit,
+  .landing-hero-3d-scanline--desktop {
+    display: none;
+  }
+
+  .landing-hero-3d-bezel {
+    padding: 0.4rem;
+  }
+
+  .landing-hero-3d-panel {
+    transform: rotateX(3deg) rotateY(-4deg) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-hero-3d-glow,
+  .landing-hero-3d-orbit {
+    animation: none;
+  }
+
+  .landing-hero-3d-panel {
+    transform: rotateX(4deg) rotateY(-6deg) !important;
+    transition: none;
+  }
+}
+
+.landing-hero-video-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.landing-hero-video-wrap video,
+.landing-hero-video-wrap img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.landing-hero-video-play-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: rgba(12, 45, 77, 0.35);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.landing-hero-video-play-overlay:hover {
+  background: rgba(12, 45, 77, 0.48);
+}
+
+.landing-petpal-cta-hint {
+  margin-top: 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.landing-petpal-demo-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.landing-petpal-demo-link:hover {
+  color: #fff;
+}

@@ -11,7 +11,6 @@ import {
   Package,
   Receipt,
   BarChart3,
-  Wrench,
   Settings,
   Shield,
   Menu,
@@ -68,7 +67,7 @@ const BASE_NAV_ITEMS = [
     view: "medical-images",
     feature: MEMBERSHIP_FEATURES.medicalImages,
   },
-  { to: "/app/herramientas", label: "Herramientas", icon: Wrench, view: "tools" },
+  { to: "/app/configuracion", label: "Configuración", icon: Settings, view: "settings" },
   { to: "/app/historial", label: "Historial", icon: ClipboardList, view: "consultation-history" },
   { to: "/app/membresia", label: "Membresía", icon: Crown, view: "membership" },
   { to: "/app/perfil", label: "Perfil", icon: User, view: "profile" },
@@ -193,14 +192,6 @@ export function ClinicShell({ children, setView }) {
       if (!item.feature) return true;
       return canAccessFeature(veterinarian, item.feature, { platformAdmin });
     });
-    if (role === "owner" || role === "admin") {
-      items.splice(items.length - 2, 0, {
-        to: "/app/configuracion",
-        label: "Configuración",
-        icon: Settings,
-        view: "settings",
-      });
-    }
     if (platformAdmin) {
       items.push({
         to: "/app/admin",
@@ -210,7 +201,7 @@ export function ClinicShell({ children, setView }) {
       });
     }
     return items;
-  }, [role, platformAdmin, veterinarian]);
+  }, [platformAdmin, veterinarian]);
 
   const handleBrandNav = (view) => {
     if (setView) setView(view);

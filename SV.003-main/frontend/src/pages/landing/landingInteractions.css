@@ -1,0 +1,606 @@
+/* Hover y animaciones — landing GUIAA */
+
+:root {
+  --landing-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --landing-ease-spring: cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+/* —— Entrada escalonada al hacer scroll —— */
+@keyframes landing-stagger-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.landing-reveal.is-visible .landing-clinical-flow .landing-clinical-step {
+  animation: landing-stagger-in 0.55s var(--landing-ease-out) both;
+}
+
+.landing-reveal.is-visible .landing-clinical-flow .landing-clinical-step:nth-child(1) {
+  animation-delay: 0.04s;
+}
+.landing-reveal.is-visible .landing-clinical-flow .landing-clinical-step:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.landing-reveal.is-visible .landing-clinical-flow .landing-clinical-step:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.landing-reveal.is-visible .landing-clinical-flow .landing-clinical-step:nth-child(4) {
+  animation-delay: 0.22s;
+}
+.landing-reveal.is-visible .landing-clinical-flow .landing-clinical-step:nth-child(5) {
+  animation-delay: 0.28s;
+}
+.landing-reveal.is-visible .landing-clinical-flow .landing-clinical-step:nth-child(6) {
+  animation-delay: 0.34s;
+}
+
+.landing-reveal.is-visible .landing-section-alt .grid > .landing-card,
+.landing-reveal.is-visible .landing-section-alt .grid > button.landing-card {
+  animation: landing-stagger-in 0.5s var(--landing-ease-out) both;
+}
+
+.landing-reveal.is-visible .landing-section-alt .grid > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.landing-reveal.is-visible .landing-section-alt .grid > *:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.landing-reveal.is-visible .landing-section-alt .grid > *:nth-child(3) {
+  animation-delay: 0.19s;
+}
+.landing-reveal.is-visible .landing-section-alt .grid > *:nth-child(4) {
+  animation-delay: 0.26s;
+}
+
+.landing-reveal.is-visible #pricing .grid > .landing-card {
+  animation: landing-stagger-in 0.55s var(--landing-ease-out) both;
+}
+
+.landing-reveal.is-visible #pricing .grid > .landing-card:nth-child(1) {
+  animation-delay: 0.06s;
+}
+.landing-reveal.is-visible #pricing .grid > .landing-card:nth-child(2) {
+  animation-delay: 0.14s;
+}
+.landing-reveal.is-visible #pricing .grid > .landing-card:nth-child(3) {
+  animation-delay: 0.22s;
+}
+
+.landing-reveal.is-visible .landing-colleague-card {
+  animation: landing-stagger-in 0.55s var(--landing-ease-out) both;
+}
+
+.landing-reveal.is-visible .landing-colleague-card:nth-child(1) {
+  animation-delay: 0.04s;
+}
+.landing-reveal.is-visible .landing-colleague-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.landing-reveal.is-visible .landing-colleague-card:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.landing-reveal.is-visible .landing-colleague-card:nth-child(4) {
+  animation-delay: 0.08s;
+}
+.landing-reveal.is-visible .landing-colleague-card:nth-child(5) {
+  animation-delay: 0.22s;
+}
+.landing-reveal.is-visible .landing-colleague-card:nth-child(6) {
+  animation-delay: 0.28s;
+}
+
+/* —— Botones —— */
+.landing-shell .landing-btn-primary {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.22s var(--landing-ease-out),
+    box-shadow 0.22s var(--landing-ease-out),
+    background-color 0.22s ease;
+}
+
+.landing-shell .landing-btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 65%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.55s ease;
+  pointer-events: none;
+}
+
+.landing-shell .landing-btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+.landing-shell .landing-btn-primary:hover::after {
+  transform: translateX(130%);
+}
+
+.landing-shell .landing-btn-primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.landing-shell .landing-btn-secondary {
+  transition:
+    transform 0.22s var(--landing-ease-out),
+    border-color 0.22s ease,
+    background-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.landing-shell .landing-btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -12px rgba(12, 45, 77, 0.18);
+}
+
+.landing-shell .landing-link-arrow {
+  transition:
+    color 0.2s ease,
+    gap 0.25s var(--landing-ease-out),
+    transform 0.22s var(--landing-ease-out);
+}
+
+.landing-shell .landing-link-arrow:hover {
+  transform: translateX(3px);
+}
+
+.landing-shell .landing-link-arrow svg {
+  transition: transform 0.25s var(--landing-ease-spring);
+}
+
+.landing-shell .landing-link-arrow:hover svg {
+  transform: translate(2px, -2px);
+}
+
+/* —— Hero —— */
+.landing-petpal-cta-primary {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.25s var(--landing-ease-out),
+    box-shadow 0.25s var(--landing-ease-out);
+}
+
+.landing-petpal-cta-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(61, 155, 143, 0.12) 50%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.5s ease;
+}
+
+.landing-petpal-cta-primary:hover::after {
+  transform: translateX(120%);
+}
+
+.landing-petpal-cta-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+}
+
+@keyframes landing-play-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
+  }
+}
+
+.landing-petpal-cta-play {
+  animation: landing-play-pulse 2.5s ease-in-out infinite;
+  transition: transform 0.22s var(--landing-ease-out), background 0.22s ease;
+}
+
+.landing-petpal-cta-play:hover {
+  transform: scale(1.1);
+  animation: none;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.2);
+}
+
+/* —— Stats bar —— */
+.landing-petpal-stat {
+  transition:
+    transform 0.25s var(--landing-ease-out),
+    background-color 0.25s ease;
+}
+
+.landing-petpal-stat:hover {
+  transform: translateY(-3px);
+  background: rgba(61, 155, 143, 0.04);
+}
+
+.landing-petpal-stat-icon {
+  transition: transform 0.3s var(--landing-ease-spring);
+}
+
+/* —— Doctor Plumitas band —— */
+.landing-brand-band:hover .landing-brand-band-mascot {
+  animation-duration: 2.6s;
+}
+
+.landing-brand-band-mascot-wrap {
+  transition: transform 0.3s var(--landing-ease-out);
+}
+
+.landing-brand-band:hover .landing-brand-band-mascot-wrap {
+  transform: scale(1.05);
+}
+
+/* —— Tarjetas colegas —— */
+.landing-colleague-card {
+  transition:
+    transform 0.32s var(--landing-ease-out),
+    box-shadow 0.32s var(--landing-ease-out);
+}
+
+.landing-colleague-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 65%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.65s ease;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.landing-colleague-card:hover::before {
+  opacity: 1;
+  transform: translateX(130%);
+}
+
+.landing-colleague-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 24px 48px -18px rgba(12, 45, 77, 0.4);
+}
+
+.landing-colleague-tags li {
+  transition:
+    transform 0.22s var(--landing-ease-out),
+    background-color 0.22s ease;
+}
+
+.landing-colleague-card:hover .landing-colleague-tags li {
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.landing-colleague-card:hover .landing-colleague-tags li:nth-child(1) {
+  transform: translateY(-2px);
+}
+
+.landing-colleague-card:hover .landing-colleague-tags li:nth-child(2) {
+  transform: translateY(-2px);
+  transition-delay: 0.04s;
+}
+
+/* —— Módulos y clínica —— */
+.landing-body-wrap .landing-card {
+  transition:
+    transform 0.28s var(--landing-ease-out),
+    box-shadow 0.28s var(--landing-ease-out),
+    border-color 0.28s ease;
+}
+
+.landing-body-wrap .landing-card-interactive:hover {
+  transform: translateY(-5px);
+}
+
+.landing-body-wrap .landing-card-interactive:hover .inline-flex.rounded-lg {
+  transform: scale(1.08) rotate(-3deg);
+  transition: transform 0.3s var(--landing-ease-spring);
+}
+
+.landing-body-wrap .landing-card-interactive .inline-flex.rounded-lg {
+  transition: transform 0.3s var(--landing-ease-spring);
+}
+
+.landing-body-wrap .landing-clinical-step {
+  transition:
+    transform 0.28s var(--landing-ease-out),
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
+}
+
+.landing-body-wrap .landing-clinical-step:hover {
+  transform: translateY(-4px);
+  border-color: rgba(61, 155, 143, 0.28);
+}
+
+.landing-body-wrap .landing-clinical-step-icon {
+  transition: transform 0.3s var(--landing-ease-spring);
+}
+
+.landing-body-wrap .landing-clinical-step:hover .landing-clinical-step-icon {
+  transform: scale(1.12);
+  animation: none;
+}
+
+/* —— Pricing —— */
+.landing-pricing-featured {
+  transition:
+    transform 0.3s var(--landing-ease-out),
+    box-shadow 0.3s ease;
+}
+
+.landing-pricing-featured:hover {
+  transform: translateY(-6px) scale(1.02);
+}
+
+#pricing .landing-card:not(.landing-pricing-featured):hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px -16px rgba(12, 45, 77, 0.14);
+}
+
+/* —— FAQ —— */
+.landing-section .landing-card.overflow-hidden.rounded-xl button {
+  transition:
+    background-color 0.2s ease,
+    padding-left 0.25s var(--landing-ease-out);
+}
+
+.landing-section .landing-card.overflow-hidden.rounded-xl button:hover {
+  padding-left: 1.4rem;
+}
+
+/* —— CTA final —— */
+@keyframes landing-cta-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.04);
+  }
+}
+
+.landing-cta-panel-v2 {
+  transition: transform 0.3s var(--landing-ease-out), box-shadow 0.3s ease;
+}
+
+.landing-cta-panel-v2:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 28px 64px -22px rgba(12, 45, 77, 0.5);
+  animation: landing-cta-glow 3s ease-in-out infinite;
+}
+
+/* —— Especies marquee —— */
+.landing-species-chip {
+  transition:
+    transform 0.22s var(--landing-ease-out),
+    border-color 0.22s ease,
+    background-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.landing-species-chip:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 10px 22px -12px rgba(47, 133, 122, 0.28);
+}
+
+/* —— Tabs producto —— */
+.landing-tab {
+  transition:
+    transform 0.2s var(--landing-ease-out),
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.landing-tab:hover:not(.is-active) {
+  transform: translateY(-1px);
+}
+
+.landing-tab.is-active {
+  transform: scale(1.02);
+}
+
+/* —— Eyebrow sutil —— */
+.landing-eyebrow {
+  transition:
+    letter-spacing 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.landing-section-head:hover .landing-eyebrow {
+  letter-spacing: 0.11em;
+}
+
+/* —— Accesibilidad —— */
+@media (prefers-reduced-motion: reduce) {
+  .landing-reveal.is-visible .landing-clinical-step,
+  .landing-reveal.is-visible .landing-card,
+  .landing-reveal.is-visible .landing-colleague-card,
+  .landing-reveal.is-visible .landing-how-step,
+  .landing-petpal-cta-play {
+    animation: none !important;
+  }
+
+  .landing-shell .landing-btn-primary::after,
+  .landing-petpal-cta-primary::after,
+  .landing-colleague-card::before {
+    display: none;
+  }
+
+  .landing-petpal-visual:hover .landing-petpal-media-ring,
+  .landing-cta-panel-v2:hover,
+  .landing-colleague-card:hover,
+  .landing-species-chip:hover,
+  .landing-body-wrap .landing-card-interactive:hover,
+  .landing-body-wrap .landing-clinical-step:hover,
+  .landing-pricing-featured:hover,
+  #pricing .landing-card:hover {
+    transform: none;
+  }
+}
+
+/* —— Cómo funciona —— */
+.landing-how-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.landing-how-step {
+  position: relative;
+  padding: 1.5rem 1.25rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(12, 45, 77, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
+}
+
+.landing-how-step:hover {
+  transform: translateY(-4px);
+  border-color: rgba(61, 155, 143, 0.28);
+  box-shadow: 0 16px 36px -18px rgba(47, 133, 122, 0.22);
+}
+
+.landing-how-step-num {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #3d9b8f;
+}
+
+.landing-how-step-icon {
+  display: inline-flex;
+  margin-top: 0.75rem;
+  padding: 0.55rem;
+  border-radius: 0.75rem;
+  background: rgba(61, 155, 143, 0.12);
+  color: #2f857a;
+  transition: transform 0.3s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+.landing-how-step:hover .landing-how-step-icon {
+  transform: scale(1.08) rotate(-4deg);
+}
+
+.landing-reveal.is-visible .landing-how-step {
+  animation: landing-stagger-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.landing-reveal.is-visible .landing-how-step:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.landing-reveal.is-visible .landing-how-step:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.landing-reveal.is-visible .landing-how-step:nth-child(3) {
+  animation-delay: 0.19s;
+}
+
+/* —— CTA sticky móvil —— */
+.landing-sticky-cta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(12, 45, 77, 0.1);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -8px 28px -12px rgba(12, 45, 77, 0.2);
+}
+
+.landing-sticky-cta-btn {
+  flex: 1;
+  min-height: 2.75rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #3d9b8f, #2f857a);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: 0 8px 20px -10px rgba(47, 133, 122, 0.5);
+}
+
+.landing-sticky-cta-secondary {
+  flex-shrink: 0;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(12, 45, 77, 0.12);
+  background: #fff;
+  color: #0c2d4d;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* —— Mockup dispositivo —— */
+.landing-device-mockup {
+  position: relative;
+  padding: 0.75rem 0.75rem 1.25rem;
+  border-radius: 1.5rem;
+  background: linear-gradient(160deg, #0c2d4d 0%, #1a4d6e 100%);
+  box-shadow:
+    0 28px 60px -24px rgba(12, 45, 77, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  transform: perspective(1200px) rotateY(-4deg) rotateX(2deg);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-device-mockup:hover {
+  transform: perspective(1200px) rotateY(-2deg) rotateX(1deg) translateY(-4px);
+}
+
+.landing-device-mockup::before {
+  content: "";
+  position: absolute;
+  top: 0.35rem;
+  left: 50%;
+  width: 3.5rem;
+  height: 0.35rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(-50%);
+}
+
+.landing-device-mockup .landing-product-frame {
+  margin-top: 0.35rem;
+}
+
+/* —— Colegas: contraste —— */
+.landing-colleague-name,
+.landing-colleague-quote,
+.landing-colleague-role {
+  text-shadow: 0 1px 2px rgba(12, 45, 77, 0.22);
+}
+
+.landing-colleagues-disclaimer {
+  margin-top: 1rem;
+  font-size: 0.7rem;
+  color: #64748b;
+  text-align: center;
+}

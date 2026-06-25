@@ -1,0 +1,494 @@
+/* Animaciones veterinarias — GUIAA landing */
+
+@keyframes vet-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--vet-rotate, 0deg));
+  }
+  50% {
+    transform: translate3d(0, -14px, 0) rotate(calc(var(--vet-rotate, 0deg) + 6deg));
+  }
+}
+
+@keyframes vet-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--vet-rotate, 0deg));
+    opacity: var(--vet-opacity, 0.22);
+  }
+  50% {
+    transform: translate3d(10px, -12px, 0) rotate(calc(var(--vet-rotate, 0deg) - 4deg));
+    opacity: calc(var(--vet-opacity, 0.22) + 0.08);
+  }
+}
+
+@keyframes vet-heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.28;
+  }
+  14% {
+    transform: scale(1.14);
+    opacity: 0.42;
+  }
+  28% {
+    transform: scale(1);
+    opacity: 0.28;
+  }
+  42% {
+    transform: scale(1.1);
+    opacity: 0.38;
+  }
+}
+
+@keyframes vet-paw-step {
+  0%,
+  18%,
+  100% {
+    opacity: 0;
+    transform: rotate(var(--vet-paw-rotate, 0deg)) scale(0.7);
+  }
+  8% {
+    opacity: 0.55;
+    transform: rotate(var(--vet-paw-rotate, 0deg)) scale(1);
+  }
+}
+
+@keyframes vet-ecg-draw {
+  0% {
+    stroke-dashoffset: 120;
+    opacity: 0.15;
+  }
+  40% {
+    opacity: 0.35;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.15;
+  }
+}
+
+@keyframes vet-glass-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+@keyframes vet-ring-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 24px 60px -20px rgba(12, 45, 77, 0.45),
+      0 0 0 0 rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 28px 64px -18px rgba(12, 45, 77, 0.5),
+      0 0 0 6px rgba(255, 255, 255, 0.08);
+  }
+}
+
+@keyframes vet-stat-pop {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.6;
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes vet-scroll-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(6px);
+    opacity: 0.9;
+  }
+}
+
+@keyframes vet-clinical-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(61, 155, 143, 0.2);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 6px rgba(61, 155, 143, 0);
+  }
+}
+
+@keyframes vet-species-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-8deg) scale(1.08);
+  }
+  75% {
+    transform: rotate(8deg) scale(1.08);
+  }
+}
+
+/* Capa hero */
+.landing-vet-anim--hero {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.landing-vet-floater {
+  position: absolute;
+  display: inline-flex;
+  color: rgba(255, 255, 255, 0.28);
+  animation: vet-float 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+.vet-floater--paw-1 {
+  top: 8%;
+  left: 6%;
+  --vet-rotate: -12deg;
+  animation-duration: 8s;
+  animation-delay: 0s;
+}
+
+.vet-floater--paw-2 {
+  top: 22%;
+  right: 12%;
+  --vet-rotate: 18deg;
+  animation-name: vet-drift;
+  animation-duration: 9s;
+  animation-delay: 1.2s;
+  --vet-opacity: 0.2;
+}
+
+.vet-floater--paw-3 {
+  bottom: 18%;
+  left: 14%;
+  --vet-rotate: 8deg;
+  animation-duration: 7.5s;
+  animation-delay: 2s;
+}
+
+.vet-floater--stethoscope {
+  top: 14%;
+  right: 28%;
+  animation-name: vet-drift;
+  animation-duration: 10s;
+  animation-delay: 0.5s;
+  --vet-rotate: -6deg;
+}
+
+.vet-floater--heart {
+  top: 42%;
+  left: 4%;
+  color: rgba(255, 200, 200, 0.45);
+  animation: vet-heartbeat 2.8s ease-in-out infinite;
+}
+
+.vet-floater--syringe {
+  bottom: 32%;
+  right: 8%;
+  --vet-rotate: 22deg;
+  animation-duration: 8.5s;
+  animation-delay: 1.8s;
+}
+
+.vet-floater--dog {
+  bottom: 12%;
+  right: 22%;
+  --vet-rotate: -8deg;
+  animation-duration: 9.5s;
+  animation-delay: 0.8s;
+}
+
+.vet-floater--cat {
+  top: 58%;
+  right: 4%;
+  --vet-rotate: 10deg;
+  animation-name: vet-drift;
+  animation-duration: 8s;
+  animation-delay: 2.4s;
+}
+
+.vet-floater--bone {
+  top: 68%;
+  left: 22%;
+  --vet-rotate: -20deg;
+  animation-duration: 7s;
+  animation-delay: 1.5s;
+  opacity: 0.22;
+}
+
+@media (max-width: 1023px) {
+  .vet-floater--dog,
+  .vet-floater--cat,
+  .vet-floater--bone,
+  .vet-floater--syringe {
+    display: none;
+  }
+}
+
+/* Rastro de huellas */
+.landing-vet-paw-trail {
+  position: absolute;
+  bottom: 12%;
+  left: 8%;
+  display: flex;
+  gap: 0.65rem;
+  transform: rotate(-12deg);
+  opacity: 0.9;
+}
+
+@media (min-width: 1024px) {
+  .landing-vet-paw-trail {
+    bottom: 16%;
+    left: 10%;
+    gap: 0.85rem;
+  }
+}
+
+.landing-vet-paw-step {
+  display: inline-flex;
+  color: rgba(255, 255, 255, 0.35);
+  animation: vet-paw-step 4.5s ease-in-out infinite;
+}
+
+.vet-paw-step--1 {
+  animation-delay: 0s;
+}
+
+.vet-paw-step--2 {
+  animation-delay: 0.7s;
+}
+
+.vet-paw-step--3 {
+  animation-delay: 1.4s;
+}
+
+.vet-paw-step--4 {
+  animation-delay: 2.1s;
+}
+
+.vet-paw-step--5 {
+  animation-delay: 2.8s;
+}
+
+/* Línea ECG decorativa */
+.landing-vet-ecg {
+  position: absolute;
+  top: 36%;
+  right: 6%;
+  width: 7rem;
+  height: 2rem;
+  opacity: 0.25;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 32' fill='none'%3E%3Cpath d='M0 16h20l6-12 8 24 6-16 10 20 8-28 12 32h30' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' stroke-dasharray='120'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  animation: vet-ecg-pulse 3s ease-in-out infinite;
+}
+
+@keyframes vet-ecg-pulse {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scaleX(0.95);
+  }
+  50% {
+    opacity: 0.38;
+    transform: scaleX(1);
+  }
+}
+
+@media (max-width: 767px) {
+  .landing-vet-ecg,
+  .landing-vet-paw-trail {
+    display: none;
+  }
+}
+
+/* Capa cuerpo */
+.landing-vet-anim--body {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.landing-vet-body-floater {
+  position: absolute;
+  display: inline-flex;
+  color: rgba(61, 155, 143, 0.12);
+  animation: vet-drift 12s ease-in-out infinite;
+  --vet-opacity: 0.12;
+}
+
+.vet-body-floater--1 {
+  top: 8%;
+  left: 4%;
+  --vet-rotate: -10deg;
+}
+
+.vet-body-floater--2 {
+  top: 42%;
+  right: 6%;
+  color: rgba(239, 68, 68, 0.1);
+  animation: vet-heartbeat 3.5s ease-in-out infinite;
+}
+
+.vet-body-floater--3 {
+  bottom: 28%;
+  left: 8%;
+  animation-delay: 2s;
+  --vet-rotate: 6deg;
+}
+
+.vet-body-floater--4 {
+  bottom: 12%;
+  right: 10%;
+  animation-delay: 4s;
+  --vet-rotate: 14deg;
+}
+
+/* Hero — tarjetas glass y media */
+.landing-petpal-glass {
+  animation: vet-glass-float 5s ease-in-out infinite;
+}
+
+.landing-petpal-glass--appointments {
+  animation-delay: 0s;
+}
+
+.landing-petpal-glass--lab {
+  animation-delay: 1.6s;
+}
+
+.landing-petpal-glass--cds {
+  animation-delay: 0.8s;
+}
+
+.landing-petpal-scroll-hint svg {
+  animation: vet-scroll-bounce 2s ease-in-out infinite;
+}
+
+.landing-petpal-rail-btn {
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.landing-petpal-rail-btn:nth-child(1) {
+  animation: vet-glass-float 4s ease-in-out infinite;
+}
+
+.landing-petpal-rail-btn:nth-child(2) {
+  animation: vet-glass-float 4.5s ease-in-out infinite 0.5s;
+}
+
+.landing-petpal-rail-btn:nth-child(3) {
+  animation: vet-glass-float 5s ease-in-out infinite 1s;
+}
+
+.landing-petpal-rail-btn:nth-child(4) {
+  animation: vet-glass-float 4.2s ease-in-out infinite 1.5s;
+}
+
+/* Stats */
+.landing-petpal-stat-icon {
+  animation: vet-stat-pop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.landing-petpal-stat:nth-child(1) .landing-petpal-stat-icon {
+  animation-delay: 0.15s;
+}
+
+.landing-petpal-stat:nth-child(2) .landing-petpal-stat-icon {
+  animation-delay: 0.35s;
+}
+
+.landing-petpal-stat:nth-child(3) .landing-petpal-stat-icon {
+  animation-delay: 0.55s;
+}
+
+.landing-petpal-stat:hover .landing-petpal-stat-icon {
+  animation: vet-clinical-pulse 0.9s ease;
+}
+
+/* Flujo clínico */
+.landing-clinical-step-icon {
+  animation: vet-clinical-pulse 3.5s ease-in-out infinite;
+}
+
+.landing-clinical-step:nth-child(1) .landing-clinical-step-icon {
+  animation-delay: 0s;
+}
+
+.landing-clinical-step:nth-child(2) .landing-clinical-step-icon {
+  animation-delay: 0.4s;
+}
+
+.landing-clinical-step:nth-child(3) .landing-clinical-step-icon {
+  animation-delay: 0.8s;
+}
+
+.landing-clinical-step:nth-child(4) .landing-clinical-step-icon {
+  animation-delay: 1.2s;
+}
+
+.landing-clinical-step:nth-child(5) .landing-clinical-step-icon {
+  animation-delay: 1.6s;
+}
+
+.landing-clinical-step:nth-child(6) .landing-clinical-step-icon {
+  animation-delay: 2s;
+}
+
+/* Especies marquee */
+.landing-species-icon {
+  display: inline-block;
+  transition: transform 0.25s ease;
+}
+
+.landing-species-chip:hover .landing-species-icon {
+  animation: vet-species-wiggle 0.45s ease;
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .landing-vet-floater,
+  .landing-vet-body-floater,
+  .landing-vet-paw-step,
+  .landing-vet-ecg,
+  .landing-petpal-glass,
+  .landing-petpal-media-ring,
+  .landing-petpal-mascot-hero,
+  .landing-brand-band-mascot,
+  .landing-brand-band-spark,
+  .landing-petpal-scroll-hint svg,
+  .landing-petpal-rail-btn,
+  .landing-petpal-stat-icon,
+  .landing-clinical-step-icon {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .landing-species-chip:hover .landing-species-icon {
+    animation: none;
+    transform: none;
+  }
+}
