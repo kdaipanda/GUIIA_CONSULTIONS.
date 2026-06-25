@@ -127,17 +127,37 @@ export function LandingNavbar({ setView, hero = false }) {
           </button>
         </div>
 
-        <button
-          type="button"
-          className={`inline-flex rounded-lg p-2 sm:hidden ${
-            hero ? "text-white hover:bg-white/10" : "text-guiaa-brand-navy hover:bg-guiaa-brand-navy/5"
-          }`}
-          onClick={() => setMobileOpen((open) => !open)}
-          aria-expanded={mobileOpen}
-          aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="flex items-center gap-1.5 sm:hidden">
+          <button
+            type="button"
+            onClick={() => setView("login")}
+            className={`rounded-lg px-2 py-1.5 text-xs font-semibold ${
+              hero
+                ? "text-white/90 hover:bg-white/10"
+                : "text-guiaa-brand-navy/80 hover:bg-guiaa-brand-navy/5"
+            }`}
+          >
+            Ingresar
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("register")}
+            className="landing-btn-primary px-3 py-2 text-xs"
+          >
+            Registro
+          </button>
+          <button
+            type="button"
+            className={`inline-flex rounded-lg p-2 ${
+              hero ? "text-white hover:bg-white/10" : "text-guiaa-brand-navy hover:bg-guiaa-brand-navy/5"
+            }`}
+            onClick={() => setMobileOpen((open) => !open)}
+            aria-expanded={mobileOpen}
+            aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       <div
@@ -175,30 +195,6 @@ export function LandingNavbar({ setView, hero = false }) {
               </button>
             ))}
           </nav>
-          <div className="mt-3 flex flex-col gap-2 border-t border-guiaa-brand-navy/10 pt-3">
-            <button
-              type="button"
-              onClick={() => {
-                setMobileOpen(false);
-                setView("login");
-              }}
-              className={`rounded-lg px-3 py-2.5 text-sm font-semibold ${
-                hero ? "text-white/85" : "text-guiaa-brand-navy/80"
-              }`}
-            >
-              Iniciar sesión
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMobileOpen(false);
-                setView("register");
-              }}
-              className="landing-btn-primary w-full py-2.5"
-            >
-              Registrarse
-            </button>
-          </div>
         </div>
       )}
     </header>

@@ -27,14 +27,13 @@ import { LandingCta } from "./landing/LandingCta";
 import { LandingGuiaConsultas } from "./landing/LandingGuiaConsultas";
 import { LandingFooter } from "./landing/LandingFooter";
 import { LandingSocialRail } from "./landing/LandingSocialRail";
-import { LandingStickyCta } from "./landing/LandingStickyCta";
 import { LandingReveal } from "./landing/LandingReveal";
 import { LandingSeo } from "./landing/LandingSeo";
 import { LandingVetAnimations } from "./landing/LandingVetAnimations";
 
 export function LandingPage({ setView }) {
   return (
-    <div className="landing-shell landing-shell--page min-h-screen p-3 pb-5 antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6 max-lg:has-[.landing-sticky-cta]:pb-[4.75rem]">
+    <div className="landing-shell landing-shell--page min-h-screen p-3 pb-5 antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
       <LandingSeo />
 
       <div className="landing-page-card mx-auto max-w-[82rem]">
@@ -102,7 +101,6 @@ export function LandingPage({ setView }) {
       </div>
 
       <LandingSocialRail />
-      <LandingStickyCta setView={setView} />
     </div>
   );
 }

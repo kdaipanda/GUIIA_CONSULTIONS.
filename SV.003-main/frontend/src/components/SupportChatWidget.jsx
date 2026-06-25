@@ -66,7 +66,6 @@ export function SupportChatWidget({ currentView }) {
   const [ticketDetailLoading, setTicketDetailLoading] = useState(false);
   const [ticketReply, setTicketReply] = useState("");
   const [ticketReplySending, setTicketReplySending] = useState(false);
-  const [liftAboveSticky, setLiftAboveSticky] = useState(false);
   const listRef = useRef(null);
   const ticketThreadRef = useRef(null);
 
@@ -102,22 +101,6 @@ export function SupportChatWidget({ currentView }) {
     window.addEventListener(SUPPORT_OPEN_EVENT, handler);
     return () => window.removeEventListener(SUPPORT_OPEN_EVENT, handler);
   }, []);
-
-  useEffect(() => {
-    if (!LANDING_VIEWS.has(currentView)) {
-      setLiftAboveSticky(false);
-      return undefined;
-    }
-
-    const syncSticky = () => {
-      setLiftAboveSticky(!!document.querySelector(".landing-sticky-cta"));
-    };
-
-    syncSticky();
-    const observer = new MutationObserver(syncSticky);
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, [currentView]);
 
   useEffect(() => {
     if (listRef.current) {
@@ -271,7 +254,6 @@ export function SupportChatWidget({ currentView }) {
     "support-chat-root",
     LANDING_VIEWS.has(currentView) ? "support-chat-root--landing" : "",
     AUTH_VIEWS.has(currentView) ? "support-chat-root--auth" : "",
-    liftAboveSticky ? "support-chat-root--above-sticky" : "",
   ]
     .filter(Boolean)
     .join(" ");

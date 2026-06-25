@@ -7044,24 +7044,12 @@ h1, h2, h3, h4, h5, h6 {
   bottom: max(16px, env(safe-area-inset-bottom, 0));
 }
 
-.support-chat-root--landing.support-chat-root--above-sticky,
-.support-chat-root--auth.support-chat-root--above-sticky {
-  left: auto;
-  right: max(12px, env(safe-area-inset-right, 0));
-  bottom: calc(4.9rem + env(safe-area-inset-bottom, 0px));
-}
-
 @media (max-width: 1023px) {
   .support-chat-root--landing,
   .support-chat-root--auth {
     left: auto;
     right: max(12px, env(safe-area-inset-right, 0));
     bottom: max(12px, env(safe-area-inset-bottom, 0));
-  }
-
-  .support-chat-root--landing.support-chat-root--above-sticky,
-  .support-chat-root--auth.support-chat-root--above-sticky {
-    bottom: calc(4.35rem + env(safe-area-inset-bottom, 0px));
   }
 
   .support-chat-root--landing .support-chat-panel,
@@ -7085,11 +7073,6 @@ h1, h2, h3, h4, h5, h6 {
   .support-chat-root--auth {
     left: auto;
     right: max(20px, env(safe-area-inset-right, 0));
-    bottom: max(24px, env(safe-area-inset-bottom, 0));
-  }
-
-  .support-chat-root--landing.support-chat-root--above-sticky,
-  .support-chat-root--auth.support-chat-root--above-sticky {
     bottom: max(24px, env(safe-area-inset-bottom, 0));
   }
 }
