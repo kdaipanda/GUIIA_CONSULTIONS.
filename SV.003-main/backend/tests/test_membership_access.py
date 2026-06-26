@@ -9,6 +9,7 @@ BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BACKEND_DIR)
 
 from membership_access import (  # noqa: E402
+    can_access_reserved_trial_analysis,
     can_access_feature,
     filter_categories_for_plan,
     resolve_effective_plan,
@@ -84,6 +85,28 @@ class MembershipPlanMatrix(unittest.TestCase):
         self.assertTrue(can_access_feature(p, "advanced_analysis"))
         self.assertFalse(can_access_feature(p, "expert_mode"))
         self.assertTrue(can_access_feature(p, "inventory"))
+
+    def test_reserved_trial_consultation_can_complete_analysis(self):
+        p = _trial_profile(remaining=0)
+        consultation = {"id": "consult-1", "user_id": p["id"], "analysis": None}
+        self.assertTrue(can_access_reserved_trial_analysis(p, consultation, p["id"]))
+
+    def test_reserved_trial_analysis_requires_owner_and_unanalyzed_consultation(self):
+        p = _trial_profile(remaining=0)
+        self.assertFalse(
+            can_access_reserved_trial_analysis(
+                p,
+                {"id": "consult-1", "user_id": "other-vet", "analysis": None},
+                p["id"],
+            )
+        )
+        self.assertFalse(
+            can_access_reserved_trial_analysis(
+                p,
+                {"id": "consult-1", "user_id": p["id"], "analysis": "done"},
+                p["id"],
+            )
+        )
 
     def test_basic_species_filter(self):
         p = _profile("basic")

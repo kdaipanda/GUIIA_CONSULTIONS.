@@ -83,6 +83,22 @@ def can_access_feature(
     return plan in FEATURE_ACCESS[feature]
 
 
+def can_access_reserved_trial_analysis(
+    profile: Optional[dict],
+    consultation: Optional[dict],
+    veterinarian_id: Optional[str],
+) -> bool:
+    if not profile or not consultation or not veterinarian_id:
+        return False
+    if profile.get("membership_type"):
+        return False
+    if (profile.get("consultations_remaining") or 0) > 0:
+        return False
+    if consultation.get("analysis"):
+        return False
+    return consultation.get("user_id") == veterinarian_id
+
+
 def require_feature(
     profile: Optional[dict],
     feature: str,

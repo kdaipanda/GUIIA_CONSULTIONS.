@@ -45,6 +45,7 @@ from membership_catalog import (
     MEMBERSHIP_PACKAGES,
 )
 from membership_access import (
+    can_access_reserved_trial_analysis,
     filter_categories_for_plan,
     require_feature_for_profile,
     validate_consultation_category,
@@ -2153,11 +2154,15 @@ async def analyze_consultation(consultation_id: str, x_veterinarian_id: str = He
     if has_unlimited:
         membership_type = "premium"
     
-    # Si tiene consultas de prueba (sin membership_type pero con consultas), permitir como premium
-    has_trial_consultations = not membership_type and remaining > 0
-    
-    # Guardar el tipo de membresía original para usar después
-    original_membership_type = membership_type.lower() if membership_type else None
+    # Si tiene consultas de prueba (sin membership_type pero con consultas), permitir como premium.
+    # La creación de la consulta ya reserva/descuenta el crédito; si era el último crédito,
+    # el análisis de esa misma consulta debe poder completarse sin cobrar de nuevo.
+    has_reserved_trial_analysis = can_access_reserved_trial_analysis(
+        profile,
+        consultation,
+        x_veterinarian_id,
+    )
+    has_trial_consultations = not membership_type and (remaining > 0 or has_reserved_trial_analysis)
     
     if membership_type:
         membership_type = membership_type.lower()
@@ -2171,7 +2176,12 @@ async def analyze_consultation(consultation_id: str, x_veterinarian_id: str = He
         )
     
     # Validar que tenga consultas restantes (solo para usuarios no premium y sin consultas ilimitadas)
-    if not has_unlimited and membership_type != "premium" and remaining <= 0:
+    if (
+        not has_unlimited
+        and membership_type != "premium"
+        and not has_reserved_trial_analysis
+        and remaining <= 0
+    ):
         raise HTTPException(
             status_code=403,
             detail="No tienes consultas disponibles. Por favor, suscríbete a un plan de membresía para continuar."
@@ -2222,18 +2232,6 @@ Por favor, genera un análisis clínico completo."""
         )
         if err_upd:
             raise HTTPException(status_code=500, detail=f"Error guardando análisis: {err_upd}")
-
-        # Decrementar consultations_remaining solo para usuarios no premium y sin consultas ilimitadas
-        # (usuarios premium y con consultas ilimitadas no se descuentan)
-        if not has_unlimited and original_membership_type != "premium":
-            new_remaining = max(0, remaining - 1)
-            err_profile = update_profile(
-                x_veterinarian_id,
-                {"consultations_remaining": new_remaining}
-            )
-            if err_profile:
-                # Log el error pero no fallar la respuesta ya que el análisis ya se guardó
-                print(f"[WARN] Error actualizando consultations_remaining para {x_veterinarian_id}: {err_profile}")
 
         return {"analysis": analysis_text}
 
