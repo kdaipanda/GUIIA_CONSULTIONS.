@@ -1991,6 +1991,23 @@ async def get_consultation_history(veterinarian_id: str, limit: int = 50):
     return {"consultations": [_serialize_consultation(r) for r in rows]}
 
 
+def _require_owned_consultation(
+    consultation_id: str,
+    x_veterinarian_id: Optional[str] = None,
+) -> tuple[Dict[str, Any], str]:
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
+    consultation, err = get_consultation_by_id(consultation_id)
+    if err:
+        raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
+    if not consultation:
+        raise HTTPException(status_code=404, detail="Consulta no encontrada")
+
+    owner_id = str(consultation.get("user_id") or "").strip()
+    if owner_id != vet_id.strip():
+        raise HTTPException(status_code=403, detail="No autorizado para acceder a esta consulta")
+    return consultation, vet_id
+
+
 @app.put("/api/consultations/{consultation_id}/payload")
 async def update_consultation_payload(
     consultation_id: str,
@@ -1998,17 +2015,7 @@ async def update_consultation_payload(
     x_veterinarian_id: str = Header(None),
 ):
     """Actualiza payload (form_data/detalle_paciente) de una consulta (Supabase)."""
-    if not x_veterinarian_id:
-        raise HTTPException(status_code=401, detail="No autenticado")
-
-    consultation, err = get_consultation_by_id(consultation_id)
-    if err:
-        raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
-    if not consultation:
-        raise HTTPException(status_code=404, detail="Consulta no encontrada")
-
-    if (consultation.get("user_id") or "").strip() != x_veterinarian_id.strip():
-        raise HTTPException(status_code=403, detail="No autorizado para modificar esta consulta")
+    consultation, _vet_id = _require_owned_consultation(consultation_id, x_veterinarian_id)
 
     current_payload = consultation.get("payload") or {}
     form_data = payload.form_data if payload.form_data is not None else current_payload.get("form_data")
@@ -2079,28 +2086,25 @@ async def update_consultation_payload(
 
 
 @app.get("/api/consultation/{consultation_id}")
-async def get_consultation(consultation_id: str):
+async def get_consultation(
+    consultation_id: str,
+    x_veterinarian_id: str = Header(None),
+):
     """Obtiene una consulta específica (Supabase)"""
 
-    cons, err = get_consultation_by_id(consultation_id)
-    if err:
-        raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
-    if not cons:
-        raise HTTPException(status_code=404, detail="Consulta no encontrada")
+    cons, _vet_id = _require_owned_consultation(consultation_id, x_veterinarian_id)
     return _serialize_consultation(cons)
 
 
 @app.put("/api/consultations/{consultation_id}/observations")
 async def update_consultation_observations(
-    consultation_id: str, observations: ObservationUpdate
+    consultation_id: str,
+    observations: ObservationUpdate,
+    x_veterinarian_id: str = Header(None),
 ):
     """Actualiza la consulta con las observaciones del paso 2"""
 
-    cons, err = get_consultation_by_id(consultation_id)
-    if err:
-        raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
-    if not cons:
-        raise HTTPException(status_code=404, detail="Consulta no encontrada")
+    cons, _vet_id = _require_owned_consultation(consultation_id, x_veterinarian_id)
 
     payload = cons.get("payload") or {}
     payload["detalle_paciente"] = observations.detalle_paciente
@@ -2122,20 +2126,10 @@ async def update_consultation_observations(
 async def analyze_consultation(consultation_id: str, x_veterinarian_id: str = Header(None)):
     """Genera síntesis clínica CDS L5 — solo disponible para Premium"""
 
-    consultation, err = get_consultation_by_id(consultation_id)
-    if err:
-        raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
-    if not consultation:
-        raise HTTPException(status_code=404, detail="Consulta no encontrada")
-
     # Verificar que el usuario tenga membresía Premium o consultas de prueba
-    if not x_veterinarian_id:
-        raise HTTPException(
-            status_code=401,
-            detail="Se requiere autenticación para generar la síntesis clínica CDS.",
-        )
+    consultation, vet_id = _require_owned_consultation(consultation_id, x_veterinarian_id)
     
-    profile, err = get_profile(x_veterinarian_id)
+    profile, err = get_profile(vet_id)
     if err or not profile:
         raise HTTPException(
             status_code=403,
@@ -2228,12 +2222,12 @@ Por favor, genera un análisis clínico completo."""
         if not has_unlimited and original_membership_type != "premium":
             new_remaining = max(0, remaining - 1)
             err_profile = update_profile(
-                x_veterinarian_id,
+                vet_id,
                 {"consultations_remaining": new_remaining}
             )
             if err_profile:
                 # Log el error pero no fallar la respuesta ya que el análisis ya se guardó
-                print(f"[WARN] Error actualizando consultations_remaining para {x_veterinarian_id}: {err_profile}")
+                print(f"[WARN] Error actualizando consultations_remaining para {vet_id}: {err_profile}")
 
         return {"analysis": analysis_text}
 
@@ -2250,15 +2244,13 @@ Por favor, genera un análisis clínico completo."""
 
 @app.put("/api/consultations/{consultation_id}/rating")
 async def set_consultation_rating(
-    consultation_id: str, payload: ConsultationRatingUpdate
+    consultation_id: str,
+    payload: ConsultationRatingUpdate,
+    x_veterinarian_id: str = Header(None),
 ):
     """Guarda la calificación (1-5) de una consulta"""
 
-    consultation, err = get_consultation_by_id(consultation_id)
-    if err:
-        raise HTTPException(status_code=500, detail=f"Error consultando: {err}")
-    if not consultation:
-        raise HTTPException(status_code=404, detail="Consulta no encontrada")
+    _consultation, _vet_id = _require_owned_consultation(consultation_id, x_veterinarian_id)
 
     err_upd = update_consultation(
         consultation_id,
@@ -2937,14 +2929,15 @@ def _build_lab_vision_content_blocks(
 async def interpret_medical_image(request: ImageInterpretRequest):
     """Interpreta estudios de laboratorio (PDF, imagen o texto) — Premium."""
 
-    vet_profile, err_profile = get_profile(request.veterinarian_id)
+    vet_id = auth_security.resolve_authenticated_vet_id(request.veterinarian_id)
+    vet_profile, err_profile = get_profile(vet_id)
     if err_profile:
         raise HTTPException(status_code=500, detail=f"Error perfil: {err_profile}")
     if not vet_profile:
-        if request.veterinarian_id.startswith("dev-"):
+        if vet_id.startswith("dev-"):
             seed_profile = {
-                "id": request.veterinarian_id,
-                "email": f"{request.veterinarian_id}@example.com",
+                "id": vet_id,
+                "email": f"{vet_id}@example.com",
                 "nombre": "Dev Veterinario",
                 "membership_type": "premium",
                 "created_at": datetime.now(timezone.utc).isoformat(),
@@ -2972,6 +2965,17 @@ async def interpret_medical_image(request: ImageInterpretRequest):
     stored_image_type = request.image_type
     extraction_method = "text" if has_text and not has_file else "image"
     pdf_markdown: Optional[str] = None
+
+    valid_consultation_id = None
+    linked_consultation: Optional[Dict[str, Any]] = None
+    if request.consultation_id:
+        try:
+            uuid.UUID(request.consultation_id)
+            valid_consultation_id = request.consultation_id
+        except (ValueError, AttributeError):
+            print(f"[WARN] consultation_id inválido (no es UUID): {request.consultation_id}. No se ligará la imagen a la consulta.")
+        if valid_consultation_id:
+            linked_consultation, _vet_id = _require_owned_consultation(valid_consultation_id, vet_id)
 
     if has_file:
         raw = _strip_data_url_base64(request.image_base64)
@@ -3052,22 +3056,9 @@ async def interpret_medical_image(request: ImageInterpretRequest):
 
     created_at = datetime.now(timezone.utc).isoformat()
     
-    # Validar que consultation_id sea un UUID válido (si se proporciona)
-    # Si viene con formato "CONS-XXXX" o no es UUID válido, usar None
-    valid_consultation_id = None
-    if request.consultation_id:
-        try:
-            # Intentar validar como UUID
-            uuid.UUID(request.consultation_id)
-            valid_consultation_id = request.consultation_id
-        except (ValueError, AttributeError):
-            # Si no es UUID válido, ignorarlo (no ligar la imagen a la consulta)
-            print(f"[WARN] consultation_id inválido (no es UUID): {request.consultation_id}. No se ligará la imagen a la consulta.")
-            valid_consultation_id = None
-    
     analysis_row = {
         "id": image_id,
-        "user_id": request.veterinarian_id,
+        "user_id": vet_id,
         "consultation_id": valid_consultation_id,
         "image_type": stored_image_type,
         "patient_name": request.patient_name,
@@ -3089,29 +3080,25 @@ async def interpret_medical_image(request: ImageInterpretRequest):
         raise HTTPException(status_code=500, detail=f"Error guardando imagen: {err_ins}")
     else:
         print(f"[DEBUG] ✅ Análisis guardado correctamente en medical_images con ID: {image_id}")
-        print(f"[DEBUG] user_id: {request.veterinarian_id}, image_type: {request.image_type}")
+        print(f"[DEBUG] user_id: {vet_id}, image_type: {request.image_type}")
 
     # Ligar interpretación con la consulta (si se proporcionó un UUID válido)
-    if valid_consultation_id:
-        cons, err_cons = get_consultation_by_id(valid_consultation_id)
-        if err_cons:
-            print(f"[WARN] No se pudo obtener consulta para ligar imagen: {err_cons}")
-        elif cons:
-            payload = cons.get("payload") or {}
-            linked_images = payload.get("medical_images", [])
-            linked_images.append(
-                {
-                    "image_id": image_id,
-                    "image_type": stored_image_type,
-                    "patient_name": request.patient_name,
-                    "created_at": created_at,
-                    "image_url": public_url,
-                }
-            )
-            payload["medical_images"] = linked_images
-            err_upd = update_consultation(valid_consultation_id, {"payload": payload})
-            if err_upd:
-                print(f"[WARN] No se pudo ligar imagen a consulta: {err_upd}")
+    if valid_consultation_id and linked_consultation:
+        payload = linked_consultation.get("payload") or {}
+        linked_images = payload.get("medical_images", [])
+        linked_images.append(
+            {
+                "image_id": image_id,
+                "image_type": stored_image_type,
+                "patient_name": request.patient_name,
+                "created_at": created_at,
+                "image_url": public_url,
+            }
+        )
+        payload["medical_images"] = linked_images
+        err_upd = update_consultation(valid_consultation_id, {"payload": payload})
+        if err_upd:
+            print(f"[WARN] No se pudo ligar imagen a consulta: {err_upd}")
 
     return jsonable_encoder(inserted or analysis_row)
 
