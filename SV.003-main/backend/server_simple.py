@@ -2701,7 +2701,7 @@ async def create_consultations_checkout_session(payload: ConsultationCreditsPurc
 
 @app.get("/api/payments/checkout/status/{session_id}")
 async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(None)):
-    """Obtiene estado del pago (simulado como exitoso)"""
+    """Obtiene estado del pago confirmado por Stripe o persistido."""
 
     transaction, err = get_payment_transaction_by_session_id(session_id)
     if err:
@@ -2731,15 +2731,6 @@ async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(N
                 print(f"[ERROR] Error actualizando transacción: {err_upd}")
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error verificando Stripe: {str(e)}")
-    else:
-        status_value = "complete"
-        payment_status = "paid"
-        err_upd = update_payment_transaction(
-            session_id,
-            {"status": status_value, "payment_status": payment_status},
-        )
-        if err_upd:
-            print(f"[ERROR] Error actualizando transacción: {err_upd}")
 
     updated_veterinarian = None
 
