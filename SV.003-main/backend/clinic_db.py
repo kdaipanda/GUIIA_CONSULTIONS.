@@ -893,14 +893,29 @@ def create_invoice_with_items(
 
     subtotal = 0.0
     normalized_items = []
+    stock_requirements: Dict[str, Dict[str, Any]] = {}
+    status = (header.get("status") or "issued").lower()
+    should_deduct = deduct_stock and status not in ("draft", "cancelled")
     for item in items:
         qty = float(item.get("quantity") or 1)
         unit_price = float(item.get("unit_price") or 0)
         line_total = round(qty * unit_price, 2)
         subtotal += line_total
+        product_id = item.get("product_id")
+        if product_id and should_deduct:
+            if qty <= 0:
+                return (None, f"Cantidad inválida para {item.get('description') or 'producto'}")
+            requirement = stock_requirements.setdefault(
+                product_id,
+                {
+                    "quantity": 0.0,
+                    "description": item.get("description") or "Producto",
+                },
+            )
+            requirement["quantity"] += qty
         normalized_items.append(
             {
-                "product_id": item.get("product_id"),
+                "product_id": product_id,
                 "description": item.get("description") or "Concepto",
                 "quantity": qty,
                 "unit_price": unit_price,
@@ -908,25 +923,20 @@ def create_invoice_with_items(
             }
         )
 
-    status = (header.get("status") or "issued").lower()
-    should_deduct = deduct_stock and status not in ("draft", "cancelled")
-
     if should_deduct:
-        for item in normalized_items:
-            product_id = item.get("product_id")
-            if not product_id:
-                continue
+        for product_id, requirement in stock_requirements.items():
             product, prod_err = get_product(product_id, organization_id)
             if prod_err:
                 return (None, prod_err)
             if not product:
-                return (None, f"Producto no encontrado: {item.get('description')}")
+                return (None, f"Producto no encontrado: {requirement['description']}")
             available = float(product.get("stock_qty") or 0)
-            if available < item["quantity"]:
-                name = product.get("name") or item.get("description")
+            requested = requirement["quantity"]
+            if available < requested:
+                name = product.get("name") or requirement["description"]
                 return (
                     None,
-                    f"Stock insuficiente para «{name}» (disponible: {available}, solicitado: {item['quantity']})",
+                    f"Stock insuficiente para «{name}» (disponible: {available}, solicitado: {requested})",
                 )
 
     tax_rate = float(header.get("tax_rate") or 0)
