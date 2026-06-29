@@ -894,13 +894,15 @@ def create_invoice_with_items(
     subtotal = 0.0
     normalized_items = []
     stock_requirements: Dict[str, Dict[str, Any]] = {}
+    status = (header.get("status") or "issued").lower()
+    should_deduct = deduct_stock and status not in ("draft", "cancelled")
     for item in items:
         qty = float(item.get("quantity") or 1)
         unit_price = float(item.get("unit_price") or 0)
         line_total = round(qty * unit_price, 2)
         subtotal += line_total
         product_id = item.get("product_id")
-        if product_id and deduct_stock:
+        if product_id and should_deduct:
             if qty <= 0:
                 return (None, f"Cantidad inválida para {item.get('description') or 'producto'}")
             requirement = stock_requirements.setdefault(
@@ -920,9 +922,6 @@ def create_invoice_with_items(
                 "line_total": line_total,
             }
         )
-
-    status = (header.get("status") or "issued").lower()
-    should_deduct = deduct_stock and status not in ("draft", "cancelled")
 
     if should_deduct:
         for product_id, requirement in stock_requirements.items():
