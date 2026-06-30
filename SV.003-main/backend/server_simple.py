@@ -43,6 +43,7 @@ from membership_catalog import (
     FEATURED_PLAN_KEY,
     MEMBERSHIP_INFO_ITEMS,
     MEMBERSHIP_PACKAGES,
+    get_membership_consultations,
 )
 from membership_access import (
     filter_categories_for_plan,
@@ -2594,7 +2595,7 @@ async def stripe_webhook(request: Request):
             billing_cycle = (transaction.get("billing_cycle") or metadata.get("billing_cycle") or "monthly").strip()
             package = MEMBERSHIP_PACKAGES.get(package_key)
             if package:
-                consultations = package["consultations"]
+                consultations = get_membership_consultations(package, billing_cycle)
                 days = 30 if billing_cycle == "monthly" else 365
                 expires = datetime.now(timezone.utc) + timedelta(days=days)
                 await update_one_db(
@@ -2773,8 +2774,9 @@ async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(N
             if not transaction.get("membership_activated"):
                 package = MEMBERSHIP_PACKAGES.get(transaction.get("package") or "")
                 if package:
-                    consultations = package["consultations"]
-                    days = 30 if transaction.get("billing_cycle") == "monthly" else 365
+                    billing_cycle = transaction.get("billing_cycle") or "monthly"
+                    consultations = get_membership_consultations(package, billing_cycle)
+                    days = 30 if billing_cycle == "monthly" else 365
                     expires = datetime.now(timezone.utc) + timedelta(days=days)
                     err_upd = update_profile(
                         veterinarian_id,
