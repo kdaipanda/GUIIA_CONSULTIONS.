@@ -67,8 +67,19 @@
 
 .billing-toggle-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
   margin-bottom: 2rem;
+}
+
+.membership-payment-note {
+  margin: 0;
+  max-width: 36rem;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: rgba(12, 45, 77, 0.72);
 }
 
 .billing-toggle-wrapper {

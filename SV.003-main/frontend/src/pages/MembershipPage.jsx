@@ -351,6 +351,10 @@ export function MembershipPage({ setView }) {
         </div>
 
         <div className="billing-toggle-container">
+          <p className="membership-payment-note">
+            Pagos seguros con Stripe en pesos mexicanos (MXN). En México puedes pagar con
+            tarjeta u OXXO; en el resto de Latinoamérica, con tarjeta internacional.
+          </p>
           <div className="billing-toggle-wrapper">
             <button
               type="button"
