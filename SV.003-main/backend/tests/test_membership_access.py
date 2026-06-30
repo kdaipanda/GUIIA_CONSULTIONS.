@@ -14,6 +14,7 @@ from membership_access import (  # noqa: E402
     resolve_effective_plan,
     validate_consultation_category,
 )
+from membership_catalog import MEMBERSHIP_PACKAGES, get_membership_consultations  # noqa: E402
 from fastapi import HTTPException
 
 
@@ -105,6 +106,20 @@ class MembershipPlanMatrix(unittest.TestCase):
     def test_professional_allows_exotic_consultation(self):
         p = _profile("professional")
         validate_consultation_category(p, "aves")
+
+
+class MembershipConsultations(unittest.TestCase):
+    def test_monthly_consultations(self):
+        package = MEMBERSHIP_PACKAGES["premium"]
+        self.assertEqual(get_membership_consultations(package, "monthly"), 150)
+
+    def test_annual_consultations(self):
+        package = MEMBERSHIP_PACKAGES["premium"]
+        self.assertEqual(get_membership_consultations(package, "annual"), 1500)
+
+    def test_defaults_to_monthly_when_cycle_missing(self):
+        package = MEMBERSHIP_PACKAGES["basic"]
+        self.assertEqual(get_membership_consultations(package, ""), 30)
 
 
 if __name__ == "__main__":

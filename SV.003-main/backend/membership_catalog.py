@@ -100,6 +100,14 @@ CONSULTATION_CREDIT_PACKAGES = {
     },
 }
 
+def get_membership_consultations(package: dict, billing_cycle: str) -> int:
+    """Consultas incluidas según ciclo de facturación (mensual o anual)."""
+    cycle = (billing_cycle or "monthly").strip().lower()
+    if cycle == "annual":
+        return int(package.get("consultations_annual", package["consultations"]))
+    return int(package["consultations"])
+
+
 MEMBERSHIP_INFO_ITEMS = [
     {
         "id": "cds",
