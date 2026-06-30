@@ -5,10 +5,11 @@ import { GuiaaBrandLockup } from "../components/GuiaaBrandLockup";
 import { AuthPageShell } from "../layout/AuthPageShell";
 import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
+import { getAuthHeaders } from "../lib/authHeaders";
 import "./membershipPage.css";
 
 export function PaymentSuccessPage({ setView }) {
-  const { login } = useVet();
+  const { login, veterinarian } = useVet();
   const [paymentStatus, setPaymentStatus] = useState("checking");
   const [purchaseType, setPurchaseType] = useState(null);
   const [creditsPurchased, setCreditsPurchased] = useState(null);
@@ -36,6 +37,9 @@ export function PaymentSuccessPage({ setView }) {
     try {
       const response = await fetch(
         `${BACKEND_URL}/api/payments/checkout/status/${sessionId}`,
+        {
+          headers: getAuthHeaders(veterinarian?.id),
+        },
       );
 
       if (!response.ok) {
