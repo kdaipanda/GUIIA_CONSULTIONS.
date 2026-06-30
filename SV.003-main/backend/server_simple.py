@@ -45,6 +45,13 @@ from membership_catalog import (
     MEMBERSHIP_PACKAGES,
     get_membership_consultations,
 )
+from stripe_checkout_config import (
+    build_stripe_checkout_session_kwargs,
+    create_stripe_checkout_session,
+    is_async_payment_pending,
+    is_oxxo_enabled,
+    stripe_payment_method_types,
+)
 from membership_access import (
     filter_categories_for_plan,
     require_feature_for_profile,
@@ -1909,6 +1916,11 @@ async def get_stripe_config():
         "webhook_secret_configured": bool(STRIPE_WEBHOOK_SECRET),
         "stripe_sdk_available": stripe is not None,
         "mode": "test" if STRIPE_API_KEY and "sk_test" in STRIPE_API_KEY else ("live" if STRIPE_API_KEY and "sk_live" in STRIPE_API_KEY else None),
+        "currency": "mxn",
+        "locale": "es",
+        "oxxo_enabled": is_oxxo_enabled(),
+        "payment_methods_mexico": stripe_payment_method_types("mxn", "MX"),
+        "payment_methods_latam": stripe_payment_method_types("mxn", "CO"),
     }
 
 
@@ -2385,7 +2397,7 @@ async def create_checkout_session(
         "status": "open",
         "payment_status": "unpaid",
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "veterinarian_id": payment_request.veterinarian_id,
+        "veterinarian_id": x_veterinarian_id,
     }
 
     # Verificar si Stripe está disponible
@@ -2413,10 +2425,12 @@ async def create_checkout_session(
         cancel_url = f"{payment_request.origin_url}/membership"
         print(f"[DEBUG] Success URL: {success_url}")
         print(f"[DEBUG] Cancel URL: {cancel_url}")
-        session = stripe.checkout.Session.create(
+        session = create_stripe_checkout_session(
+            stripe,
             mode="payment",
             success_url=success_url,
             cancel_url=cancel_url,
+            profile=profile,
             line_items=[
                 {
                     "price_data": {
@@ -2433,7 +2447,8 @@ async def create_checkout_session(
                 "type": "membership",
                 "package": package_key,
                 "billing_cycle": payment_request.billing_cycle,
-                "veterinarian_id": payment_request.veterinarian_id or "",
+                "veterinarian_id": x_veterinarian_id,
+                "profesional_pais": profile.get("profesional_pais") or "MX",
                 "consultations": str(package.get("consultations", 0)),
             },
         )
@@ -2654,10 +2669,12 @@ async def create_consultations_checkout_session(payload: ConsultationCreditsPurc
         try:
             success_url = f"{payload.origin_url}/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
             cancel_url = f"{payload.origin_url}/dashboard"
-            session = stripe.checkout.Session.create(
+            session = create_stripe_checkout_session(
+                stripe,
                 mode="payment",
                 success_url=success_url,
                 cancel_url=cancel_url,
+                profile=veterinarian,
                 line_items=[
                     {
                         "price_data": {
@@ -2675,6 +2692,7 @@ async def create_consultations_checkout_session(payload: ConsultationCreditsPurc
                     "package_id": payload.package_id,
                     "credits": str(credits),
                     "veterinarian_id": payload.veterinarian_id,
+                    "profesional_pais": veterinarian.get("profesional_pais") or "MX",
                 },
             )
 
@@ -2807,6 +2825,8 @@ async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(N
         "purchase_type": transaction.get("type"),
         "credits": transaction.get("credits"),
         "veterinarian": updated_veterinarian,
+        "activation_pending": is_async_payment_pending(payment_status, status_value),
+        "currency": transaction.get("currency") or "mxn",
     }
 
 

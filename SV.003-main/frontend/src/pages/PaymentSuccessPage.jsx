@@ -54,6 +54,12 @@ export function PaymentSuccessPage({ setView }) {
         return;
       }
 
+      if (data.activation_pending) {
+        setPurchaseType(data.purchase_type || null);
+        setPaymentStatus("pending");
+        return;
+      }
+
       if (data.status === "expired") {
         setPaymentStatus("expired");
         return;
@@ -102,6 +108,30 @@ export function PaymentSuccessPage({ setView }) {
               className="w-full sm:w-auto"
             >
               Nueva consulta
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    if (paymentStatus === "pending") {
+      return (
+        <div className="payment-status-card">
+          <span className="payment-status-icon payment-status-icon--loading">
+            <Clock size={28} aria-hidden />
+          </span>
+          <h2>Pago en proceso</h2>
+          <p>
+            {purchaseType === "consultation_credits"
+              ? "Recibimos tu solicitud de recarga. Si pagaste con OXXO u otro método en efectivo, activaremos las consultas en cuanto Stripe confirme el pago (puede tardar hasta 3 días)."
+              : "Recibimos tu solicitud de membresía. Si pagaste con OXXO u otro método en efectivo, activaremos tu plan en cuanto Stripe confirme el pago (puede tardar hasta 3 días)."}
+          </p>
+          <p className="text-sm opacity-80">
+            También te enviaremos la confirmación al correo de tu cuenta. Precios en MXN (pesos mexicanos).
+          </p>
+          <div className="payment-status-actions">
+            <Button type="button" onClick={() => setView("dashboard")} className="w-full sm:w-auto">
+              Ir al dashboard
             </Button>
           </div>
         </div>
