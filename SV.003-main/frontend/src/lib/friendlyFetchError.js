@@ -98,6 +98,14 @@ export function friendlyFetchError(err, apiBase = "") {
   }
 
   const msg = (err && err.message) || "";
+  if (
+    msg.includes("Unexpected end of JSON input") ||
+    msg.includes("Unexpected token") ||
+    msg.includes("is not valid JSON")
+  ) {
+    return "El servidor no devolvió datos válidos. Espera unos segundos e intenta de nuevo.";
+  }
+
   const isNetwork =
     msg === "Failed to fetch" ||
     msg.includes("NetworkError") ||
@@ -129,4 +137,21 @@ export function friendlyFetchError(err, apiBase = "") {
     return `No se pudo conectar con el servidor (${base}). Si trabajas en local, inicia el backend: en la carpeta backend ejecuta «python server_simple.py» y deja ese proceso en marcha.`;
   }
   return msg || "Error de red o del servidor";
+}
+
+/**
+ * Lee el cuerpo de una Response como JSON sin lanzar errores crípticos del navegador.
+ */
+export async function parseJsonResponse(response, emptyFallback = {}) {
+  const text = await response.text();
+  if (!text.trim()) {
+    return emptyFallback;
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(
+      "El servidor devolvió una respuesta inválida. Suele ocurrir cuando la API se reinicia; espera unos segundos e intenta de nuevo.",
+    );
+  }
 }

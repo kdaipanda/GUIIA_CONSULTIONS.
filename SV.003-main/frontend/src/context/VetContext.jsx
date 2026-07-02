@@ -7,6 +7,7 @@ import React, {
 import { supabase } from "../lib/supabaseClient";
 import { getBackendUrl } from "../lib/backendUrl";
 import { fetchWithTimeout } from "../lib/fetchWithTimeout";
+import { parseJsonResponse } from "../lib/friendlyFetchError";
 import { getAuthHeaders, storeAccessToken, clearAccessToken } from "../lib/authHeaders";
 
 const DEV_AUTO_LOGIN = false;
@@ -120,7 +121,10 @@ export const VetProvider = ({ children }) => {
       { headers: getAuthHeaders(veterinarian.id) },
       { timeoutMs: 20000, retries: 2 },
     )
-      .then((response) => (response.ok ? response.json() : { platform_admin: false }))
+      .then(async (response) => {
+        if (!response.ok) return { platform_admin: false };
+        return parseJsonResponse(response, { platform_admin: false });
+      })
       .then((data) => setPlatformAdmin(!!data.platform_admin))
       .catch(() => setPlatformAdmin(false));
   }, [veterinarian?.id]);
@@ -170,9 +174,11 @@ export const VetProvider = ({ children }) => {
       });
 
       if (response.ok) {
-        const updatedProfile = await response.json();
-        setVeterinarian(updatedProfile);
-        localStorage.setItem("veterinarian", JSON.stringify(updatedProfile));
+        const updatedProfile = await parseJsonResponse(response, null);
+        if (updatedProfile) {
+          setVeterinarian(updatedProfile);
+          localStorage.setItem("veterinarian", JSON.stringify(updatedProfile));
+        }
       }
     } catch (error) {
       console.error("Error refrescando perfil:", error);

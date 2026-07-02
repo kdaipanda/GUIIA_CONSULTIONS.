@@ -1,5 +1,5 @@
 import { getBackendUrl } from "./backendUrl";
-import { friendlyFetchError } from "./friendlyFetchError";
+import { friendlyFetchError, formatApiErrorDetail, parseJsonResponse } from "./friendlyFetchError";
 import { getAuthHeaders } from "./authHeaders";
 import { fetchWithTimeout } from "./fetchWithTimeout";
 
@@ -20,12 +20,13 @@ async function clinicFetch(path, veterinarianId, options = {}) {
     { timeoutMs: 45000, retries: 2 },
   );
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
+    const data = await parseJsonResponse(response, {});
     throw new Error(
-      data.detail || friendlyFetchError(response.status, getBackendUrl()) || "Error de servidor",
+      formatApiErrorDetail(data.detail, friendlyFetchError(response.status, getBackendUrl())) ||
+        "Error de servidor",
     );
   }
-  return response.json();
+  return parseJsonResponse(response, {});
 }
 
 export async function fetchOrganization(veterinarianId) {
@@ -112,8 +113,11 @@ export async function fetchAdminUserCedulaDocumentBlob(veterinarianId, profileId
     { timeoutMs: 60000, retries: 2 },
   );
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error(data.detail || friendlyFetchError(response) || "Error de servidor");
+    const data = await parseJsonResponse(response, {});
+    throw new Error(
+      formatApiErrorDetail(data.detail, friendlyFetchError(response.status, getBackendUrl())) ||
+        "Error de servidor",
+    );
   }
   return response.blob();
 }
@@ -269,11 +273,11 @@ export async function updateAppointmentRequest(veterinarianId, requestId, data) 
 
 export async function fetchPublicOrganization(organizationId) {
   const response = await fetch(`${getBackendUrl()}/api/public/organizations/${organizationId}`);
+  const data = await parseJsonResponse(response, {});
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error(data.detail || "Consultorio no encontrado");
+    throw new Error(formatApiErrorDetail(data.detail, "Consultorio no encontrado"));
   }
-  return response.json();
+  return data;
 }
 
 export async function submitAppointmentRequest(data) {
@@ -282,11 +286,11 @@ export async function submitAppointmentRequest(data) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
+  const body = await parseJsonResponse(response, {});
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.detail || "No se pudo enviar la solicitud");
+    throw new Error(formatApiErrorDetail(body.detail, "No se pudo enviar la solicitud"));
   }
-  return response.json();
+  return body;
 }
 
 export async function submitGuiaConsultasLead(data) {
@@ -295,11 +299,11 @@ export async function submitGuiaConsultasLead(data) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
+  const body = await parseJsonResponse(response, {});
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.detail || "No se pudo enviar la solicitud");
+    throw new Error(formatApiErrorDetail(body.detail, "No se pudo enviar la solicitud"));
   }
-  return response.json();
+  return body;
 }
 
 export async function fetchAdminGuiaConsultasLeads(veterinarianId, status = "") {
