@@ -247,8 +247,13 @@ export function ClinicShell({ children, setView }) {
             aria-controls="clinic-mobile-drawer-nav"
           >
             <Menu size={20} aria-hidden />
-            <span>Menú clínica</span>
+            <span>Menú</span>
           </button>
+          {!orgLoading && organization?.name ? (
+            <p className="clinic-mobile-org" title={organization.name}>
+              {organization.name}
+            </p>
+          ) : null}
         </div>
 
         <ClinicMobileNavDrawer
