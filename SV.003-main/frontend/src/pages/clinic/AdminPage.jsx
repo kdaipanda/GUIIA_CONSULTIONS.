@@ -839,6 +839,12 @@ export function AdminPage() {
                             SEP: {u.cedula_sep_nombre}
                           </div>
                         )}
+                        {u.cedula_ocr_registro && (
+                          <div className="clinic-admin-cedula-sep clinic-muted">
+                            OCR: {u.cedula_ocr_nombre || "—"} · Reg. {u.cedula_ocr_registro}
+                            {u.cedula_ocr_match === false ? " · no coincide" : ""}
+                          </div>
+                        )}
                         {u.cedula_verification_error && cedulaStatus === "rejected" && (
                           <div className="clinic-admin-cedula-sep clinic-muted">
                             {u.cedula_verification_error}

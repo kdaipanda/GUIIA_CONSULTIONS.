@@ -1511,6 +1511,12 @@ async def admin_list_users(
                 "cedula_sep_nombre": profile.get("cedula_sep_nombre"),
                 "cedula_sep_profesion": profile.get("cedula_sep_profesion"),
                 "cedula_verification_error": profile.get("cedula_verification_error"),
+                "cedula_ocr_nombre": profile.get("cedula_ocr_nombre"),
+                "cedula_ocr_registro": profile.get("cedula_ocr_registro"),
+                "cedula_ocr_profesion": profile.get("cedula_ocr_profesion"),
+                "cedula_ocr_confidence": profile.get("cedula_ocr_confidence"),
+                "cedula_ocr_match": profile.get("cedula_ocr_match"),
+                "cedula_ocr_notes": profile.get("cedula_ocr_notes"),
             }
         )
         if len(rows) >= limit:

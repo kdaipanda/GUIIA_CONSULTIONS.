@@ -15,6 +15,11 @@ import email_notifications
 
 from supabase_client import get_profile, update_profile
 
+try:
+    import cedula_ocr
+except ImportError:  # pragma: no cover
+    cedula_ocr = None  # type: ignore[assignment]
+
 CEDULA_STATUS_UNSUBMITTED = "unsubmitted"
 CEDULA_STATUS_PENDING = "pending"
 CEDULA_STATUS_VERIFIED = "verified"
@@ -320,6 +325,40 @@ async def verify_profile_cedula(profile_id: str) -> Dict[str, Any]:
             "error": "Debes subir el documento de tu registro profesional (título, matrícula o licencia).",
         }
 
+    ocr_result = None
+    ocr_message = None
+    if cedula_ocr and cedula_ocr.is_cedula_ocr_enabled():
+        ocr_result = await cedula_ocr.ensure_cedula_ocr(profile_id, profile)
+        if ocr_result.ok:
+            if cedula_ocr.ocr_matches_profile(profile, ocr_result):
+                ocr_message = "Documento leído: los datos coinciden con tu registro."
+            elif ocr_result.confidence in ("high", "medium"):
+                mismatch = []
+                if ocr_result.registro_profesional:
+                    mismatch.append(f"registro leído: {ocr_result.registro_profesional}")
+                if ocr_result.nombre:
+                    mismatch.append(f"nombre leído: {ocr_result.nombre}")
+                hint = "; ".join(mismatch)
+                ocr_message = (
+                    "Leímos el documento pero algunos datos no coinciden con tu perfil. "
+                    f"Revisa: {hint}."
+                )
+                update_profile(
+                    profile_id,
+                    {
+                        "cedula_verification_error": (
+                            "Los datos del documento no coinciden con el perfil. "
+                            "Revisa número de registro y nombre."
+                        ),
+                    },
+                )
+            elif ocr_result.notes:
+                ocr_message = f"No pudimos leer el documento con claridad: {ocr_result.notes}"
+        elif ocr_result.error and ocr_result.error != "OCR deshabilitado":
+            ocr_message = (
+                "No pudimos leer automáticamente el documento; un revisor lo validará manualmente."
+            )
+
     email = profile.get("email") or ""
     if is_dev_user(email):
         now = datetime.now(timezone.utc).isoformat()
@@ -349,9 +388,52 @@ async def verify_profile_cedula(profile_id: str) -> Dict[str, Any]:
             profile_id, cedula, expected_name, profile=profile
         )
         if sep_result:
+            if ocr_message and sep_result.get("ok"):
+                sep_result["message"] = f"{sep_result.get('message', '')} {ocr_message}".strip()
             return sep_result
 
-    return _submit_for_manual_review(profile_id)
+    # Fuera de México (o sin SEP): auto-verificar si OCR coincide con alta confianza
+    if (
+        ocr_result
+        and ocr_result.ok
+        and ocr_result.confidence == "high"
+        and cedula_ocr
+        and cedula_ocr.ocr_matches_profile(profile, ocr_result)
+        and _profession_is_vet(ocr_result.profesion or "")
+    ):
+        now = datetime.now(timezone.utc).isoformat()
+        err_upd = update_profile(
+            profile_id,
+            {
+                "cedula_sep_nombre": ocr_result.nombre or expected_name,
+                "cedula_sep_profesion": ocr_result.profesion,
+                "cedula_verification_status": CEDULA_STATUS_VERIFIED,
+                "cedula_verification_checked_at": now,
+                "cedula_verification_error": None,
+            },
+        )
+        if not err_upd:
+            _maybe_notify_cedula_approved(profile, profile.get("cedula_verification_status") or "")
+            return {
+                "ok": True,
+                "verification_status": CEDULA_STATUS_VERIFIED,
+                "sep_nombre": ocr_result.nombre,
+                "sep_profesion": ocr_result.profesion,
+                "message": "Registro verificado por lectura del documento profesional.",
+                "ocr_nombre": ocr_result.nombre,
+                "ocr_registro": ocr_result.registro_profesional,
+                "ocr_match": True,
+            }
+
+    manual = _submit_for_manual_review(profile_id)
+    if manual.get("ok") and ocr_message:
+        manual["message"] = f"{manual.get('message', '')} {ocr_message}".strip()
+    if manual.get("ok") and ocr_result and ocr_result.ok:
+        manual["ocr_nombre"] = ocr_result.nombre
+        manual["ocr_registro"] = ocr_result.registro_profesional
+        manual["ocr_match"] = cedula_ocr.ocr_matches_profile(profile, ocr_result) if cedula_ocr else None
+        manual["ocr_confidence"] = ocr_result.confidence
+    return manual
 
 
 def manual_review_cedula(profile_id: str, action: str, note: Optional[str] = None) -> Dict[str, Any]:

@@ -1479,12 +1479,31 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
       });
       if (!vr.ok) {
         const raw = await vr.text().catch(() => "");
-        throw new Error(raw || "Error al enviar tu registro para revisión");
+        let message = "Error al enviar tu registro para revisión";
+        try {
+          const parsed = JSON.parse(raw);
+          message = parsed.detail || message;
+        } catch {
+          if (raw) message = raw;
+        }
+        throw new Error(message);
       }
       const verifyData = await vr.json().catch(() => ({}));
       const status = verifyData?.verification_status || "";
       setVerificationStatus(status);
-      setInfo(verifyData?.message || "Verificación procesada.");
+      let infoMessage = verifyData?.message || "Verificación procesada.";
+      if (verifyData?.ocr_registro) {
+        const matchLabel =
+          verifyData.ocr_match === true
+            ? "Coincide con tu perfil"
+            : verifyData.ocr_match === false
+              ? "Revisa que el número y nombre coincidan con el documento"
+              : "";
+        infoMessage = `${infoMessage} Lectura del documento: registro ${verifyData.ocr_registro}${
+          verifyData.ocr_nombre ? `, ${verifyData.ocr_nombre}` : ""
+        }${matchLabel ? ` (${matchLabel})` : ""}.`;
+      }
+      setInfo(infoMessage);
 
       // 3) Si verified (o queda pending por caída SEP/DGP), reintentar login y entrar
       if (status === "verified" || status === "pending") {

@@ -80,6 +80,8 @@ Este endpoint te dirá específicamente si la API key de Claude está configurad
 - `STRIPE_PUBLISHABLE_KEY` - Clave pública de Stripe
 - `STRIPE_WEBHOOK_SECRET` - Para webhooks de Stripe
 - `CORS_ALLOW_ORIGINS` - Dominios permitidos (separados por coma)
+- `CEDULA_OCR_ENABLED` - `true` por defecto; lectura automática de cédulas con Claude (requiere `ANTHROPIC_API_KEY`)
+- `CEDULA_OCR_MODEL` - (opcional) modelo para OCR de documentos de cédula
 
 ## Notas Importantes
 

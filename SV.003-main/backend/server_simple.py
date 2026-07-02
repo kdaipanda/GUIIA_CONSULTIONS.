@@ -38,6 +38,7 @@ from starlette.responses import JSONResponse
 import auth_security
 import cedula_verification
 from cedula_document import prepare_cedula_upload
+import cedula_ocr
 import email_notifications
 from membership_catalog import (
     CONSULTATION_CREDIT_PACKAGES,
@@ -513,6 +514,10 @@ class CedulaVerifyResponse(BaseModel):
     sep_nombre: Optional[str] = None
     sep_profesion: Optional[str] = None
     message: Optional[str] = None
+    ocr_nombre: Optional[str] = None
+    ocr_registro: Optional[str] = None
+    ocr_match: Optional[bool] = None
+    ocr_confidence: Optional[str] = None
 
 
 async def _sep_dgp_lookup(cedula: str) -> Dict[str, Optional[str]]:
@@ -1561,6 +1566,9 @@ async def upload_cedula_document(
     if err:
         raise HTTPException(status_code=500, detail=f"Error actualizando perfil: {err}")
 
+    if cedula_ocr.is_cedula_ocr_enabled():
+        asyncio.create_task(cedula_ocr.run_cedula_ocr_for_profile(x_veterinarian_id, data, media_type))
+
     return CedulaUploadResponse(
         status="ok",
         cedula_document_url=public_url,
@@ -1609,6 +1617,10 @@ async def verify_cedula(
         sep_nombre=result.get("sep_nombre"),
         sep_profesion=result.get("sep_profesion"),
         message=result.get("message") or "Verificación procesada.",
+        ocr_nombre=result.get("ocr_nombre"),
+        ocr_registro=result.get("ocr_registro"),
+        ocr_match=result.get("ocr_match"),
+        ocr_confidence=result.get("ocr_confidence"),
     )
 
 
