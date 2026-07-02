@@ -70,10 +70,7 @@ export function getBackendUrl() {
     const hostname = window.location.hostname;
 
     if (isProductionHost(hostname)) {
-      // Mismo origen: Vercel reescribe /api/* → api.guiaa.vet (sin CORS).
-      if (typeof window !== "undefined" && window.location?.origin) {
-        return window.location.origin.replace(/\/$/, "");
-      }
+      // API directa: el proxy /api en Vercel a veces devuelve 200 con cuerpo vacío (502 intermitente).
       return PRODUCTION_API;
     }
 

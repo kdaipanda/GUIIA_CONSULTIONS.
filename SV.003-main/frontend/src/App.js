@@ -24,7 +24,7 @@ import {
 } from "./lib/supabaseApi";
 import { BACKEND_URL, getBackendUrl } from "./lib/backendUrl";
 import { friendlyFetchError, friendlyDatabaseError } from "./lib/friendlyFetchError";
-import { fetchWithTimeout } from "./lib/fetchWithTimeout";
+import { fetchWithTimeout, fetchJsonWithRetry } from "./lib/fetchWithTimeout";
 import { getAuthHeaders, storeAccessToken } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
 import { applyDocumentTheme, readStoredTheme } from "./lib/themeSync";
@@ -1180,38 +1180,15 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
     try {
       console.log("Attempting login to:", `${getBackendUrl()}/api/auth/login`);
       console.log("Form data being sent:", formData);
-      const response = await fetchWithTimeout(
+      const vetData = await fetchJsonWithRetry(
         `${getBackendUrl()}/api/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         },
-        { timeoutMs: 45000, retries: 1 },
+        { timeoutMs: 45000, retries: 2 },
       );
-
-      if (!response.ok) {
-        const raw = await response.text().catch(() => "");
-        let errorData = {};
-        try {
-          errorData = raw ? JSON.parse(raw) : {};
-        } catch (e) {}
-        const detail =
-          errorData?.detail ||
-          friendlyFetchError(response.status, getBackendUrl()) ||
-          (raw ? raw.slice(0, 140) : null) ||
-          `Error del servidor: ${response.status}`;
-        throw new Error(detail);
-      }
-
-      const raw = await response.text().catch(() => "");
-      let vetData = null;
-      try {
-        vetData = raw ? JSON.parse(raw) : null;
-      } catch (e) {}
-      if (!vetData) {
-        throw new Error("Respuesta inválida del servidor");
-      }
 
       // Check if 2FA is required
       if (vetData.status === "pending_2fa" && vetData.nonce) {
