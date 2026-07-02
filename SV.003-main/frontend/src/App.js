@@ -24,6 +24,7 @@ import {
 } from "./lib/supabaseApi";
 import { BACKEND_URL, getBackendUrl } from "./lib/backendUrl";
 import { friendlyFetchError, friendlyDatabaseError } from "./lib/friendlyFetchError";
+import { fetchWithTimeout } from "./lib/fetchWithTimeout";
 import { getAuthHeaders, storeAccessToken } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
 import { applyDocumentTheme, readStoredTheme } from "./lib/themeSync";
@@ -117,6 +118,56 @@ const PATH_TO_VIEW = {
   "/app/pacientes": "clients",
   "/app/herramientas": "settings",
 };
+
+const AUTH_REDIRECT_KEY = "guiaa_auth_redirect";
+
+function isProtectedAppPath(pathname) {
+  return pathname === "/app" || pathname.startsWith("/app/");
+}
+
+function readAuthRedirect() {
+  try {
+    const stored = sessionStorage.getItem(AUTH_REDIRECT_KEY);
+    if (!stored || !PATH_TO_VIEW[stored]) return null;
+    return stored;
+  } catch {
+    return null;
+  }
+}
+
+function storeAuthRedirect(pathname) {
+  if (!isProtectedAppPath(pathname)) return;
+  try {
+    sessionStorage.setItem(AUTH_REDIRECT_KEY, pathname);
+  } catch {
+    /* ignore */
+  }
+}
+
+function consumeAuthRedirect() {
+  const path = readAuthRedirect();
+  if (!path) return null;
+  try {
+    sessionStorage.removeItem(AUTH_REDIRECT_KEY);
+  } catch {
+    /* ignore */
+  }
+  return path;
+}
+
+function navigateAfterAuth(navigate, setView, setIsInitialized) {
+  const redirectPath = consumeAuthRedirect();
+  if (redirectPath && PATH_TO_VIEW[redirectPath]) {
+    const view = PATH_TO_VIEW[redirectPath];
+    setView(view);
+    setIsInitialized?.(true);
+    navigate(redirectPath);
+    return;
+  }
+  setView("dashboard");
+  setIsInitialized?.(true);
+  navigate(VIEW_TO_PATH.dashboard);
+}
 
 // Importar formularios de especies
 import {
@@ -477,9 +528,7 @@ const Router = () => {
       navigate(VIEW_TO_PATH["new-consultation"]);
       return;
     }
-    setCurrentView("dashboard");
-    setIsInitialized(true);
-    navigate(VIEW_TO_PATH.dashboard);
+    navigateAfterAuth(navigate, setCurrentView, setIsInitialized);
   }, [navigate]);
 
   useEffect(() => {
@@ -520,13 +569,22 @@ const Router = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Redirigir a landing cuando se cierre sesión
+  // Sin sesión: rutas /app/* → login (guardando destino para después del login)
   useEffect(() => {
     if (!veterinarian && !loading) {
+      if (isProtectedAppPath(location.pathname)) {
+        storeAuthRedirect(location.pathname);
+        setCurrentView("login");
+        setIsInitialized(true);
+        if (location.pathname !== "/login") {
+          navigate("/login", { replace: true });
+        }
+        return;
+      }
       setCurrentView("landing");
-      setIsInitialized(false); // Resetear cuando se cierra sesión
+      setIsInitialized(false);
     }
-  }, [veterinarian, loading]);
+  }, [veterinarian, loading, location.pathname, navigate]);
 
   // URL parameter handling for payment success - Solo ejecutar una vez al montar
   useEffect(() => {
@@ -1116,11 +1174,15 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
     try {
       console.log("Attempting login to:", `${getBackendUrl()}/api/auth/login`);
       console.log("Form data being sent:", formData);
-      const response = await fetch(`${getBackendUrl()}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetchWithTimeout(
+        `${getBackendUrl()}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        },
+        { timeoutMs: 45000, retries: 1 },
+      );
 
       if (!response.ok) {
         const raw = await response.text().catch(() => "");
@@ -1130,6 +1192,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
         } catch (e) {}
         const detail =
           errorData?.detail ||
+          friendlyFetchError(response.status, getBackendUrl()) ||
           (raw ? raw.slice(0, 140) : null) ||
           `Error del servidor: ${response.status}`;
         throw new Error(detail);
@@ -1172,7 +1235,13 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
       }
 
       login(vetData);
-      setView("dashboard");
+      const redirectPath = consumeAuthRedirect();
+      if (redirectPath && PATH_TO_VIEW[redirectPath]) {
+        setView(PATH_TO_VIEW[redirectPath]);
+        window.history.replaceState(null, "", redirectPath);
+      } else {
+        setView("dashboard");
+      }
     } catch (err) {
       notifyError(friendlyFetchError(err, getBackendUrl()));
     } finally {

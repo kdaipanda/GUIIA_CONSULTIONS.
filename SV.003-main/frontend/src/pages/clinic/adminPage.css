@@ -81,8 +81,143 @@
   margin-top: 16px;
 }
 
+.clinic-admin-cedula-preview-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.clinic-admin-cedula-preview-meta-line {
+  display: block;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
 @media (max-width: 768px) {
   .clinic-admin-page-guiaa .clinic-page-header h1 {
     font-size: 1.35rem;
+  }
+
+  .clinic-admin-page-guiaa .clinic-admin-search {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
+
+  .clinic-admin-page-guiaa .clinic-admin-plan-filters {
+    width: 100%;
+  }
+
+  .clinic-admin-page-guiaa .clinic-admin-plan-filters button {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .clinic-admin-page-guiaa .clinic-admin-delete-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .clinic-admin-page-guiaa .clinic-admin-delete-form .form-group {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .clinic-admin-page-guiaa .clinic-admin-delete-form button {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .clinic-admin-users-table-wrap {
+    margin-inline: -4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .clinic-admin-users-table-wrap .clinic-table {
+    min-width: 920px;
+  }
+
+  .clinic-admin-page-guiaa .clinic-admin-row-actions {
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 7.5rem;
+  }
+
+  .clinic-admin-page-guiaa .clinic-admin-row-actions button {
+    width: 100%;
+    justify-content: center;
+    min-height: 40px;
+  }
+
+  .clinic-admin-cedula-sep {
+    max-width: 12rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .clinic-admin-cedula-preview-dialog.clinic-dialog-compact {
+    position: fixed !important;
+    inset: auto 0 0 0 !important;
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    transform: none !important;
+    translate: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: min(94dvh, 100%) !important;
+    margin: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 0.875rem 1rem calc(0.875rem + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 0.625rem !important;
+    overflow: hidden;
+    display: flex !important;
+    flex-direction: column;
+  }
+
+  .clinic-admin-cedula-preview-dialog > button.absolute {
+    right: 0.75rem;
+    top: 0.75rem;
+  }
+
+  .clinic-admin-cedula-preview-dialog [class*="DialogTitle"] {
+    font-size: 1rem;
+    padding-right: 1.75rem;
+    text-align: left;
+  }
+
+  .clinic-admin-cedula-preview-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .clinic-admin-cedula-preview-frame {
+    width: 100%;
+    min-height: calc(94dvh - 10.5rem);
+    height: calc(94dvh - 10.5rem);
+    border: 0;
+  }
+
+  .clinic-admin-cedula-preview-image {
+    max-height: calc(94dvh - 10.5rem);
+    width: 100%;
+  }
+
+  .clinic-admin-cedula-preview-footer {
+    flex-direction: column;
+    align-items: stretch;
+    flex-shrink: 0;
+  }
+
+  .clinic-admin-cedula-preview-footer .clinic-admin-link-btn {
+    justify-content: center;
+    min-height: 44px;
+    width: 100%;
   }
 }

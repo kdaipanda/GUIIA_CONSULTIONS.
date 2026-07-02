@@ -82,8 +82,21 @@ export function formatApiErrorDetail(detail, fallback = "Error del servidor") {
 
 /**
  * Mensaje útil cuando fetch falla por red (backend apagado, CORS, sin conexión).
+ * Acepta Error, Response de fetch o un código HTTP numérico.
  */
 export function friendlyFetchError(err, apiBase = "") {
+  const status =
+    typeof err === "number"
+      ? err
+      : err?.status ?? err?.statusCode ?? (typeof err?.ok === "boolean" && !err.ok ? err.status : null);
+
+  if (status === 502 || status === 503 || status === 504) {
+    return (
+      "El servidor no respondió a tiempo (error 502/503). Suele ocurrir cuando la API se está reiniciando. " +
+      "Espera 10–20 segundos y vuelve a intentar."
+    );
+  }
+
   const msg = (err && err.message) || "";
   const isNetwork =
     msg === "Failed to fetch" ||

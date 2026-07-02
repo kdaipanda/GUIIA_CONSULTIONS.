@@ -178,7 +178,7 @@ function consultationField(consultation, key) {
 }
 
 export function AdminPage() {
-  const { veterinarian } = useVet();
+  const { veterinarian, loading: vetLoading } = useVet();
   const [allowed, setAllowed] = useState(null);
   const [overview, setOverview] = useState(null);
   const [users, setUsers] = useState([]);
@@ -187,7 +187,7 @@ export function AdminPage() {
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
   const [deleteEmail, setDeleteEmail] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [acting, setActing] = useState(false);
   const [cedulaActingId, setCedulaActingId] = useState(null);
   const [cedulaPreview, setCedulaPreview] = useState(null);
@@ -222,6 +222,10 @@ export function AdminPage() {
       }
     };
   }, [cedulaPreviewObjectUrl]);
+
+  useEffect(() => {
+    setAllowed(null);
+  }, [veterinarian?.id]);
 
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
@@ -274,9 +278,10 @@ export function AdminPage() {
   }, [veterinarian?.id, search, planFilter, supportFilter, guiaLeadFilter]);
 
   useEffect(() => {
+    if (vetLoading || !veterinarian?.id) return undefined;
     const t = setTimeout(load, search ? 300 : 0);
     return () => clearTimeout(t);
-  }, [load, search]);
+  }, [load, search, vetLoading, veterinarian?.id, planFilter, supportFilter, guiaLeadFilter]);
 
   const handleDeleteUser = async (e) => {
     e.preventDefault();
@@ -517,7 +522,9 @@ export function AdminPage() {
     }
   };
 
-  if (loading) {
+  const showSkeleton = vetLoading || loading || allowed === null;
+
+  if (showSkeleton) {
     return (
       <div className="clinic-page clinic-page-guiaa clinic-admin-page clinic-admin-page-guiaa">
         <div className="clinic-page-header">
@@ -984,14 +991,24 @@ export function AdminPage() {
             <>
               <DialogHeader>
                 <DialogTitle>Documento de registro profesional</DialogTitle>
-                <DialogDescription>
-                  {cedulaPreview.nombre || cedulaPreview.email}
-                  {cedulaPreview.cedula_profesional
-                    ? ` · Registro ${cedulaPreview.cedula_profesional}`
-                    : ""}
-                  {cedulaPreview.profesional_pais
-                    ? ` · ${countryLabel(cedulaPreview.profesional_pais)}`
-                    : ""}
+                <DialogDescription className="clinic-admin-cedula-preview-meta">
+                  <span className="clinic-admin-cedula-preview-meta-line">
+                    {cedulaPreview.nombre || cedulaPreview.email}
+                  </span>
+                  {(cedulaPreview.cedula_profesional || cedulaPreview.profesional_pais) && (
+                    <span className="clinic-admin-cedula-preview-meta-line clinic-muted">
+                      {[
+                        cedulaPreview.cedula_profesional
+                          ? `Registro ${cedulaPreview.cedula_profesional}`
+                          : null,
+                        cedulaPreview.profesional_pais
+                          ? countryLabel(cedulaPreview.profesional_pais)
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </span>
+                  )}
                 </DialogDescription>
               </DialogHeader>
               <div className="clinic-admin-cedula-preview-body">
