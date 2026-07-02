@@ -1290,7 +1290,11 @@ async def register_veterinarian(vet: VeterinarianRegister):
     if err:
         raise HTTPException(status_code=500, detail=f"Error guardando perfil: {err}")
 
-    return auth_security.attach_auth_tokens(result or vet_data)
+    saved = result or vet_data
+    if not is_dev:
+        cedula_verification.maybe_send_cedula_upload_reminder(saved, force=True)
+
+    return auth_security.attach_auth_tokens(saved)
 
 
 @app.post("/api/auth/login")
@@ -1339,6 +1343,7 @@ async def login_veterinarian(credentials: VeterinarianLogin):
 
         # Si falta el documento, siempre bloquear y mandar al flujo
         if needs_upload or ced_status == CEDULA_STATUS_UNSUBMITTED:
+            cedula_verification.maybe_send_cedula_upload_reminder(veterinarian)
             msg = "Debes subir tu documento de registro profesional para continuar."
             return {
                 "status": "requires_cedula_flow",
@@ -1624,6 +1629,9 @@ async def skip_cedula_verification(
     
     if err_upd:
         raise HTTPException(status_code=500, detail=f"Error actualizando perfil: {err_upd}")
+
+    if cedula_verification.profile_needs_cedula_document(profile):
+        cedula_verification.maybe_send_cedula_upload_reminder(profile, force=True)
     
     return {
         "status": "ok",

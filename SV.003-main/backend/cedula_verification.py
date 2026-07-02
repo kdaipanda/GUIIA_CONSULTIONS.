@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import os
 import re
+import time
 import unicodedata
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
@@ -41,6 +42,47 @@ PENDING_REVIEW_MESSAGE = (
     "Documento recibido. Nuestro equipo revisará tu registro profesional en 24–48 h. "
     "Puedes usar la plataforma mientras tanto."
 )
+
+CEDULA_REMINDER_COOLDOWN_HOURS = 24
+_recent_cedula_reminders: Dict[str, float] = {}
+
+
+def profile_needs_cedula_document(profile: Optional[dict]) -> bool:
+    if not profile or is_dev_user(profile.get("email", "")):
+        return False
+    if profile.get("cedula_document_url"):
+        return False
+    status = (profile.get("cedula_verification_status") or "").strip()
+    return status != CEDULA_STATUS_VERIFIED
+
+
+def maybe_send_cedula_upload_reminder(profile: dict, *, force: bool = False) -> None:
+    """Envía recordatorio por correo si falta el documento (con cooldown de 24 h)."""
+    if not profile_needs_cedula_document(profile):
+        return
+
+    profile_id = profile.get("id")
+    if not profile_id:
+        return
+
+    now = datetime.now(timezone.utc)
+    if not force:
+        last = profile.get("cedula_reminder_sent_at")
+        if last:
+            try:
+                last_dt = datetime.fromisoformat(str(last).replace("Z", "+00:00"))
+                if (now - last_dt).total_seconds() < CEDULA_REMINDER_COOLDOWN_HOURS * 3600:
+                    return
+            except (ValueError, TypeError):
+                pass
+        cached = _recent_cedula_reminders.get(profile_id)
+        if cached and (time.time() - cached) < CEDULA_REMINDER_COOLDOWN_HOURS * 3600:
+            return
+
+    email_notifications.notify_user_cedula_upload_reminder(profile)
+    err = update_profile(profile_id, {"cedula_reminder_sent_at": now.isoformat()})
+    if err:
+        _recent_cedula_reminders[profile_id] = time.time()
 
 
 def is_dev_user(email: str) -> bool:

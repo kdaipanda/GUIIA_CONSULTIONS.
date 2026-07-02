@@ -439,6 +439,7 @@ def notify_user_cedula_approved(profile: dict) -> None:
     cedula = (profile.get("cedula_profesional") or "").strip()
     app_url = _frontend_url()
     login_url = f"{app_url}/login"
+    support_email = DEFAULT_SUPPORT_NOTIFY_EMAIL
 
     cedula_line = f"Registro profesional: {cedula}\n" if cedula else ""
     cedula_html = (
@@ -448,19 +449,26 @@ def notify_user_cedula_approved(profile: dict) -> None:
     email_subject = "[GUIAA] Tu registro profesional fue aprobado"
     text = (
         f"Hola {user_name},\n\n"
-        f"Tu registro profesional veterinario en GUIAA fue verificado y aprobado.\n"
-        f"{cedula_line}\n"
-        f"Ya puedes usar la plataforma con acceso completo según tu plan.\n\n"
+        f"¡Buenas noticias! Tu registro profesional veterinario en GUIAA fue verificado "
+        f"y aprobado por nuestro equipo.\n\n"
+        f"{cedula_line}"
+        f"Email de tu cuenta: {user_email}\n\n"
+        f"Ya puedes usar la plataforma con acceso completo según tu plan de membresía.\n\n"
         f"Inicia sesión: {login_url}\n\n"
+        f"Si tienes dudas, escríbenos a {support_email}.\n\n"
         f"— Equipo GUIAA\n"
     )
     html = f"""
-    <h2>Registro profesional aprobado</h2>
+    <h2>¡Registro profesional aprobado!</h2>
     <p>Hola {user_name},</p>
     <p>Tu <strong>registro profesional veterinario</strong> en GUIAA fue verificado y aprobado.</p>
     {cedula_html}
+    <p><strong>Email de tu cuenta:</strong> {user_email}</p>
     <p>Ya puedes usar la plataforma con acceso completo según tu plan de membresía.</p>
     <p><a href="{login_url}">Iniciar sesión en GUIAA</a></p>
+    <p style="color:#64748b;font-size:12px;">
+      ¿Dudas? Escríbenos a <a href="mailto:{support_email}">{support_email}</a>
+    </p>
     <p style="color:#64748b;font-size:12px;">— Equipo GUIAA</p>
     """
 
@@ -509,3 +517,59 @@ def notify_user_cedula_rejected(profile: dict, reason: str = "") -> None:
     err = send_email([user_email], email_subject, html, text)
     if err:
         print(f"[WARN] Email usuario (cédula rechazada): {err}")
+
+
+def notify_user_cedula_upload_reminder(profile: dict) -> None:
+    """Recuerda al veterinario que envíe su documento de registro profesional."""
+    user_email = (profile.get("email") or "").strip()
+    if not user_email:
+        return
+
+    user_name = (profile.get("nombre") or "").strip() or "colega"
+    cedula = (profile.get("cedula_profesional") or "").strip()
+    app_url = _frontend_url()
+    login_url = f"{app_url}/login"
+    support_email = DEFAULT_SUPPORT_NOTIFY_EMAIL
+
+    cedula_line = f"Registro profesional: {cedula}\n" if cedula else ""
+    cedula_html = (
+        f'<p><strong>Registro profesional:</strong> {cedula}</p>' if cedula else ""
+    )
+
+    email_subject = "[GUIAA] Recuerda enviar tu documento de registro profesional"
+    text = (
+        f"Hola {user_name},\n\n"
+        f"Para completar tu cuenta en GUIAA necesitamos una copia de tu documento "
+        f"de registro profesional veterinario (cédula, matrícula o licencia).\n\n"
+        f"{cedula_line}"
+        f"Email de tu cuenta: {user_email}\n\n"
+        f"Puedes hacerlo de dos formas:\n"
+        f"1. Inicia sesión y súbelo desde la app: {login_url}\n"
+        f"2. Responde a este correo o escribe a {support_email} adjuntando "
+        f"una foto o PDF legible de tu documento (JPG, PNG o PDF).\n\n"
+        f"Sin este documento no podremos verificar tu perfil profesional.\n\n"
+        f"— Equipo GUIAA\n"
+    )
+    html = f"""
+    <h2>Documento de registro profesional pendiente</h2>
+    <p>Hola {user_name},</p>
+    <p>Para completar tu cuenta en <strong>GUIAA</strong> necesitamos una copia de tu
+    documento de registro profesional veterinario (cédula, matrícula o licencia).</p>
+    {cedula_html}
+    <p><strong>Email de tu cuenta:</strong> {user_email}</p>
+    <h3 style="font-size:15px;margin-bottom:8px;">Cómo enviarlo</h3>
+    <ol style="padding-left:20px;line-height:1.6;">
+      <li><a href="{login_url}">Inicia sesión en GUIAA</a> y súbelo desde la pantalla de verificación.</li>
+      <li>O responde a este correo / escribe a
+        <a href="mailto:{support_email}">{support_email}</a>
+        adjuntando una foto o PDF legible (JPG, PNG o PDF).</li>
+    </ol>
+    <p style="color:#64748b;font-size:13px;">
+      Sin este documento no podremos verificar tu perfil profesional.
+    </p>
+    <p style="color:#64748b;font-size:12px;">— Equipo GUIAA</p>
+    """
+
+    err = send_email([user_email], email_subject, html, text)
+    if err:
+        print(f"[WARN] Email usuario (recordatorio cédula): {err}")

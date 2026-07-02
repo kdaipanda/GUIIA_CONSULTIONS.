@@ -1543,6 +1543,11 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
 
       // 3) Si verified (o queda pending por caída SEP/DGP), reintentar login y entrar
       if (status === "verified" || status === "pending") {
+        if (status === "verified" && email) {
+          notifySuccess(
+            `¡Registro aprobado! Te enviamos un correo de confirmación a ${email}.`
+          );
+        }
         const resp = await fetch(`${BACKEND_URL}/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1616,7 +1621,15 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                 className="mt-1.5 h-auto min-h-10 cursor-pointer border-dashed py-2 file:mr-3 file:cursor-pointer"
               />
               <p className="mt-2 text-xs text-muted-foreground">
-                Puedes volver a subir el documento si fue rechazado.
+                Puedes volver a subir el documento si fue rechazado. También puedes enviarlo
+                por correo a{" "}
+                <a
+                  href="mailto:soporte@guiaa.vet"
+                  className="font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  soporte@guiaa.vet
+                </a>{" "}
+                indicando el email con el que te registraste.
               </p>
             </div>
 
