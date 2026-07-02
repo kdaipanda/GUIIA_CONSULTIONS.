@@ -18,6 +18,7 @@ import {
   adminVerifyUserCedula,
   adminReviewUserCedula,
   adminRerunUserCedulaOcr,
+  adminAssessUserCedulaEligibility,
   fetchAdminUserConsultations,
   fetchAdminUserCedulaDocument,
   fetchAdminSupportTickets,
@@ -296,6 +297,26 @@ export function AdminPage() {
     try {
       const data = await adminVerifyUserCedula(veterinarian.id, user.id);
       notifySuccess(data.message || "Verificación completada.");
+      load();
+    } catch (err) {
+      notifyError(err.message);
+    } finally {
+      setCedulaActingId(null);
+    }
+  };
+
+  const handleAssessEligibility = async (user) => {
+    if (
+      !window.confirm(
+        `¿Consultar portal oficial y generar dictamen IA para ${user.nombre}?`,
+      )
+    ) {
+      return;
+    }
+    setCedulaActingId(user.id);
+    try {
+      const data = await adminAssessUserCedulaEligibility(veterinarian.id, user.id);
+      notifySuccess(data.message || "Dictamen generado.");
       load();
     } catch (err) {
       notifyError(err.message);
@@ -866,6 +887,15 @@ export function AdminPage() {
                             {u.cedula_ocr_match === false ? " · no coincide" : ""}
                           </div>
                         )}
+                        {u.cedula_eligibility_resumen && (
+                          <div className="clinic-admin-cedula-sep clinic-muted">
+                            Dictamen: {u.cedula_eligibility_puede_ejercer || "—"}
+                            {u.cedula_eligibility_confianza
+                              ? ` (${u.cedula_eligibility_confianza})`
+                              : ""}
+                            — {u.cedula_eligibility_resumen}
+                          </div>
+                        )}
                         {u.cedula_verification_error && cedulaStatus === "rejected" && (
                           <div className="clinic-admin-cedula-sep clinic-muted">
                             {u.cedula_verification_error}
@@ -904,6 +934,19 @@ export function AdminPage() {
                             >
                               <Eye size={14} aria-hidden />
                               Ver
+                            </Button>
+                          )}
+                          {u.cedula_document_url && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              disabled={busy}
+                              onClick={() => handleAssessEligibility(u)}
+                              title="Consultar SEP y dictamen IA si puede ejercer"
+                            >
+                              <Shield size={14} aria-hidden />
+                              Dictamen
                             </Button>
                           )}
                           {u.cedula_document_url && (

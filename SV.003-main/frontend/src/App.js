@@ -1492,7 +1492,15 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
       const status = verifyData?.verification_status || "";
       setVerificationStatus(status);
       let infoMessage = verifyData?.message || "Verificación procesada.";
-      if (verifyData?.ocr_registro) {
+      if (verifyData?.eligibility_resumen) {
+        const puedeLabel =
+          verifyData.puede_ejercer === "si"
+            ? "Puede ejercer"
+            : verifyData.puede_ejercer === "no"
+              ? "No confirmado para ejercer"
+              : "Elegibilidad por confirmar";
+        infoMessage = `${infoMessage} ${puedeLabel}: ${verifyData.eligibility_resumen}`;
+      } else if (verifyData?.ocr_registro) {
         const matchLabel =
           verifyData.ocr_match === true
             ? "Coincide con tu perfil"
@@ -1540,8 +1548,8 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
           <GuiaaBrandLockup variant="auth" className="mb-6" />
           <h2>Verificación de registro profesional</h2>
           <p>
-            Sube tu título, matrícula o licencia. Validamos veterinarios de Latinoamérica;
-            en México también intentamos verificación automática con SEP cuando está disponible.
+            Sube tu título, matrícula o licencia. Consultamos el portal oficial SEP en México
+            y la IA indica si puedes ejercer según tu documento y registro.
           </p>
 
           {cedulaFlow?.message && (

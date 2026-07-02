@@ -518,6 +518,10 @@ class CedulaVerifyResponse(BaseModel):
     ocr_registro: Optional[str] = None
     ocr_match: Optional[bool] = None
     ocr_confidence: Optional[str] = None
+    puede_ejercer: Optional[str] = None
+    eligibility_confianza: Optional[str] = None
+    eligibility_resumen: Optional[str] = None
+    eligibility_motivos: Optional[list] = None
 
 
 async def _sep_dgp_lookup(cedula: str) -> Dict[str, Optional[str]]:
@@ -1621,6 +1625,10 @@ async def verify_cedula(
         ocr_registro=result.get("ocr_registro"),
         ocr_match=result.get("ocr_match"),
         ocr_confidence=result.get("ocr_confidence"),
+        puede_ejercer=result.get("puede_ejercer"),
+        eligibility_confianza=result.get("eligibility_confianza"),
+        eligibility_resumen=result.get("eligibility_resumen"),
+        eligibility_motivos=result.get("eligibility_motivos"),
     )
 
 

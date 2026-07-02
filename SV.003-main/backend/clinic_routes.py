@@ -11,6 +11,7 @@ from pydantic import BaseModel, field_validator
 import clinic_db
 import cedula_verification
 import cedula_ocr
+import cedula_eligibility
 import auth_security
 import email_notifications
 from membership_access import require_feature_for_profile
@@ -1518,6 +1519,10 @@ async def admin_list_users(
                 "cedula_ocr_confidence": profile.get("cedula_ocr_confidence"),
                 "cedula_ocr_match": profile.get("cedula_ocr_match"),
                 "cedula_ocr_notes": profile.get("cedula_ocr_notes"),
+                "cedula_eligibility_puede_ejercer": profile.get("cedula_eligibility_puede_ejercer"),
+                "cedula_eligibility_confianza": profile.get("cedula_eligibility_confianza"),
+                "cedula_eligibility_resumen": profile.get("cedula_eligibility_resumen"),
+                "cedula_eligibility_fuente": profile.get("cedula_eligibility_fuente"),
             }
         )
         if len(rows) >= limit:
@@ -1557,6 +1562,59 @@ async def admin_review_user_cedula(
         metadata={"note": body.note or ""},
     )
     return result
+
+
+@clinic_router.post("/admin/users/{profile_id}/cedula/eligibility")
+async def admin_assess_user_cedula_eligibility(
+    profile_id: str,
+    x_veterinarian_id: str = Header(None),
+):
+    """Consulta portal oficial (SEP en MX) y genera dictamen IA de elegibilidad."""
+    admin = await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    profile, err = get_profile(profile_id)
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    if not profile.get("cedula_document_url"):
+        raise HTTPException(status_code=404, detail="Este usuario no tiene documento de cédula")
+
+    ocr_result = None
+    if cedula_ocr and cedula_ocr.is_cedula_ocr_enabled():
+        ocr_result = await cedula_ocr.ensure_cedula_ocr(profile_id, profile)
+
+    assessment = await cedula_eligibility.assess_practice_eligibility(
+        profile_id,
+        profile,
+        ocr_result=ocr_result,
+    )
+    cedula_eligibility.store_eligibility_assessment(profile_id, assessment)
+
+    auth_security.audit_admin_action(
+        admin,
+        "cedula_eligibility_assess",
+        target_profile_id=profile_id,
+        target_email=profile.get("email"),
+        metadata={
+            "puede_ejercer": assessment.puede_ejercer,
+            "confianza": assessment.confianza,
+            "fuente": assessment.fuente_oficial,
+        },
+    )
+
+    return {
+        "status": "ok",
+        "puede_ejercer": assessment.puede_ejercer,
+        "eligibility_confianza": assessment.confianza,
+        "eligibility_resumen": assessment.resumen,
+        "eligibility_motivos": assessment.motivos,
+        "eligibility_fuente": assessment.fuente_oficial,
+        "eligibility_recomendacion": assessment.recomendacion,
+        "sep_nombre": assessment.sep_nombre,
+        "sep_profesion": assessment.sep_profesion,
+        "sep_consultado": assessment.sep_consultado,
+        "message": cedula_eligibility.eligibility_user_message(assessment),
+    }
 
 
 @clinic_router.post("/admin/users/{profile_id}/cedula/ocr")
