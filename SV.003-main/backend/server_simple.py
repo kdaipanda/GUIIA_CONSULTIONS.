@@ -2823,6 +2823,8 @@ async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(N
         "payment_status": payment_status,
         "session_id": session_id,
         "purchase_type": transaction.get("type"),
+        "package": transaction.get("package"),
+        "amount": transaction.get("amount"),
         "credits": transaction.get("credits"),
         "veterinarian": updated_veterinarian,
         "activation_pending": is_async_payment_pending(payment_status, status_value),

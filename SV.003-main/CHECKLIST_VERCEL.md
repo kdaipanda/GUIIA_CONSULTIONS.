@@ -21,6 +21,8 @@ Necesitas estas variables para que el frontend funcione correctamente:
 
 #### ⚠️ Variables Opcionales (si usas funcionalidades adicionales):
 - `REACT_APP_WEATHER_API_KEY` - Si quieres el widget de clima
+- `REACT_APP_META_PIXEL_ID` - ID del Meta Pixel para campañas de Facebook/Instagram Ads
+  - **¿Dónde obtener?**: Meta Events Manager → Data Sources → tu Pixel → Settings
 
 ---
 
