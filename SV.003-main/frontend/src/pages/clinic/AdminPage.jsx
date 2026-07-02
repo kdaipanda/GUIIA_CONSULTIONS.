@@ -223,13 +223,10 @@ export function AdminPage() {
     };
   }, [cedulaPreviewObjectUrl]);
 
-  useEffect(() => {
-    setAllowed(null);
-  }, [veterinarian?.id]);
-
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
     setLoading(true);
+    setAllowed(null);
     try {
       const access = await fetchAdminAccess(veterinarian.id);
       const allowedUser = !!access.platform_admin;
