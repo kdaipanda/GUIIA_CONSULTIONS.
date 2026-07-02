@@ -235,6 +235,53 @@ def notify_admins_guia_consultas_lead(lead: dict) -> None:
         print(f"[WARN] Email admins (Guía Consultas): {err}")
 
 
+def notify_admins_new_registration(profile: dict) -> None:
+    """Avisa a soporte cuando un veterinario se registra en GUIAA."""
+    admins = support_notify_emails()
+    if not admins:
+        return
+
+    name = (profile.get("nombre") or "").strip() or "—"
+    email = (profile.get("email") or "").strip() or "—"
+    phone = (profile.get("telefono") or "").strip() or "—"
+    cedula = (profile.get("cedula_profesional") or "").strip() or "—"
+    pais = (profile.get("profesional_pais") or "").strip() or "—"
+    especialidad = (profile.get("especialidad") or "").strip() or "—"
+    institucion = (profile.get("institucion") or "").strip() or "—"
+    profile_id = profile.get("id") or ""
+    admin_url = f"{_frontend_url()}/app/admin"
+
+    email_subject = f"[GUIAA] Nuevo registro veterinario: {name}"
+    text = (
+        f"Nuevo registro de veterinario en GUIAA\n\n"
+        f"Nombre: {name}\n"
+        f"Email: {email}\n"
+        f"Teléfono: {phone}\n"
+        f"Registro profesional: {cedula}\n"
+        f"País: {pais}\n"
+        f"Especialidad: {especialidad}\n"
+        f"Institución: {institucion}\n"
+        f"ID perfil: {profile_id}\n\n"
+        f"Revisar en admin: {admin_url}\n"
+    )
+    html = f"""
+    <h2>Nuevo registro veterinario</h2>
+    <p><strong>Nombre:</strong> {name}</p>
+    <p><strong>Email:</strong> {email}</p>
+    <p><strong>Teléfono:</strong> {phone}</p>
+    <p><strong>Registro profesional:</strong> {cedula}</p>
+    <p><strong>País:</strong> {pais}</p>
+    <p><strong>Especialidad:</strong> {especialidad}</p>
+    <p><strong>Institución:</strong> {institucion}</p>
+    <p><strong>ID perfil:</strong> {profile_id}</p>
+    <p><a href="{admin_url}">Abrir panel Admin GUIAA</a></p>
+    """
+
+    err = send_email(admins, email_subject, html, text)
+    if err:
+        print(f"[WARN] Email admins (nuevo registro): {err}")
+
+
 def notify_admins_user_message(ticket: dict, message: str) -> None:
     admins = support_notify_emails()
     if not admins:

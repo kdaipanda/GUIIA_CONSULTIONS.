@@ -789,6 +789,13 @@ def is_dev_user(email: str) -> bool:
     return email.lower().strip() in DEV_EMAILS
 
 
+async def _email_background(fn, *args, **kwargs) -> None:
+    try:
+        await asyncio.to_thread(fn, *args, **kwargs)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] Notificación email: {exc}")
+
+
 def has_unlimited_consultations(email: str) -> bool:
     """Verifica si un email tiene consultas ilimitadas"""
     return email.lower().strip() in UNLIMITED_CONSULTATIONS_EMAILS
@@ -1293,6 +1300,9 @@ async def register_veterinarian(vet: VeterinarianRegister):
     saved = result or vet_data
     if not is_dev:
         cedula_verification.maybe_send_cedula_upload_reminder(saved, force=True)
+        asyncio.create_task(
+            _email_background(email_notifications.notify_admins_new_registration, saved)
+        )
 
     return auth_security.attach_auth_tokens(saved)
 
