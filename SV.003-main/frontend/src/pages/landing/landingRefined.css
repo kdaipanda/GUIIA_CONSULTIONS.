@@ -404,6 +404,8 @@
 .landing-footer-v2-inner {
   position: relative;
   z-index: 1;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .landing-footer-v2-panel {
@@ -419,6 +421,8 @@
     0 0 0 1px rgba(255, 255, 255, 0.65) inset;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .landing-footer-v2-hero {
@@ -484,11 +488,17 @@
 
 .landing-footer-v2-social-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 0.55rem;
 }
 
-@media (min-width: 520px) {
+@media (min-width: 480px) and (max-width: 639px) {
+  .landing-footer-v2-social-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 640px) and (max-width: 899px) {
   .landing-footer-v2-social-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -760,6 +770,113 @@
 .landing-footer-v2-legal a:hover,
 .landing-footer-v2-legal button:hover {
   color: #2f857a;
+}
+
+/* Footer — móvil */
+@media (max-width: 639px) {
+  .landing-footer-v2 {
+    padding: 1.25rem 0 1rem;
+  }
+
+  .landing-footer-v2-inner {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .landing-footer-v2-panel {
+    padding: 1.1rem 0.9rem;
+    gap: 1.35rem;
+    border-radius: 1.1rem;
+  }
+
+  .landing-footer-v2-headline {
+    max-width: none;
+    font-size: clamp(1.35rem, 6.8vw, 1.85rem);
+    margin-bottom: 0.35rem;
+    line-height: 1.18;
+  }
+
+  .landing-footer-v2-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .landing-footer-v2-mailbox {
+    order: -1;
+  }
+
+  .landing-footer-v2-mailbox-card {
+    height: auto;
+    padding: 1rem;
+  }
+
+  .landing-footer-v2-mailbox-hint {
+    font-size: 0.8rem;
+  }
+
+  .landing-footer-v2-social-card {
+    min-height: 2.85rem;
+    padding: 0.65rem 0.85rem;
+  }
+
+  .landing-footer-v2-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+  }
+
+  .landing-footer-v2-nav button {
+    width: 100%;
+    padding: 0.52rem 0.65rem;
+    font-size: 0.76rem;
+    text-align: center;
+  }
+
+  .landing-footer-v2-form {
+    flex-direction: column;
+  }
+
+  .landing-footer-v2-input,
+  .landing-footer-v2-submit {
+    width: 100%;
+    flex: none;
+  }
+
+  .landing-footer-v2-bottom {
+    align-items: center;
+    text-align: center;
+    gap: 0.85rem;
+    padding-top: 0.95rem;
+  }
+
+  .landing-footer-v2-legal {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .landing-footer-v2-legal-dot {
+    display: none;
+  }
+
+  .landing-footer-v2-legal a,
+  .landing-footer-v2-legal button {
+    word-break: break-word;
+    text-align: center;
+  }
+}
+
+@media (max-width: 399px) {
+  .landing-footer-v2-inner {
+    padding-left: 0.6rem !important;
+    padding-right: 0.6rem !important;
+  }
+
+  .landing-footer-v2-panel {
+    padding: 1rem 0.75rem;
+  }
 }
 
 /* Compatibilidad con clases legacy del footer */

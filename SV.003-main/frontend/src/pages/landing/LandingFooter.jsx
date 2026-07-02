@@ -90,7 +90,7 @@ export function LandingFooter() {
 
   return (
     <footer className="landing-footer-v2">
-      <div className="landing-footer-v2-inner mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="landing-footer-v2-inner mx-auto max-w-6xl px-3 sm:px-8 lg:px-10">
         <div className="landing-footer-v2-panel">
           <header className="landing-footer-v2-hero">
             <span className="landing-footer-v2-eyebrow">Comunidad GUIAA</span>
