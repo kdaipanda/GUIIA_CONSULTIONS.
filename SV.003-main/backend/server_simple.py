@@ -37,6 +37,8 @@ from starlette.responses import JSONResponse
 
 import auth_security
 import cedula_verification
+from cedula_document import prepare_cedula_upload
+import cedula_ocr
 import email_notifications
 from membership_catalog import (
     CONSULTATION_CREDIT_PACKAGES,
@@ -456,7 +458,12 @@ DEFAULT_CEDULA_MAX_BYTES = 10 * 1024 * 1024  # 10MB
 ALLOWED_CEDULA_CONTENT_TYPES = {
     "application/pdf": ".pdf",
     "image/jpeg": ".jpg",
+    "image/jpg": ".jpg",
     "image/png": ".png",
+    "image/webp": ".webp",
+    "image/heic": ".heic",
+    "image/heif": ".heif",
+    "application/octet-stream": None,
 }
 
 # Profesiones aceptadas para veterinarios (normalizadas / tolerantes)
@@ -507,6 +514,14 @@ class CedulaVerifyResponse(BaseModel):
     sep_nombre: Optional[str] = None
     sep_profesion: Optional[str] = None
     message: Optional[str] = None
+    ocr_nombre: Optional[str] = None
+    ocr_registro: Optional[str] = None
+    ocr_match: Optional[bool] = None
+    ocr_confidence: Optional[str] = None
+    puede_ejercer: Optional[str] = None
+    eligibility_confianza: Optional[str] = None
+    eligibility_resumen: Optional[str] = None
+    eligibility_motivos: Optional[list] = None
 
 
 async def _sep_dgp_lookup(cedula: str) -> Dict[str, Optional[str]]:
@@ -1501,7 +1516,10 @@ async def upload_cedula_document(
     if media_type not in ALLOWED_CEDULA_CONTENT_TYPES:
         raise HTTPException(
             status_code=400,
-            detail="Tipo de archivo no permitido. Sube PDF, JPG o PNG.",
+            detail=(
+                "Tipo de archivo no permitido. Sube PDF, JPG o PNG. "
+                "Si tu teléfono guarda fotos en HEIC, expórtalas como JPG antes de subirlas."
+            ),
         )
 
     max_bytes = DEFAULT_CEDULA_MAX_BYTES
@@ -1516,9 +1534,22 @@ async def upload_cedula_document(
     if not data:
         raise HTTPException(status_code=400, detail="Archivo vacío")
     if len(data) > max_bytes:
-        raise HTTPException(status_code=413, detail="Archivo demasiado grande")
+        raise HTTPException(
+            status_code=413,
+            detail="Archivo demasiado grande. Máximo 10MB. Comprime la imagen o usa PDF.",
+        )
 
-    ext = ALLOWED_CEDULA_CONTENT_TYPES[media_type]
+    try:
+        data, media_type, ext = prepare_cedula_upload(data, media_type)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    if len(data) > max_bytes:
+        raise HTTPException(
+            status_code=413,
+            detail="El archivo procesado sigue siendo demasiado grande. Usa una imagen más comprimida o PDF.",
+        )
+
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     path = f"user-{x_veterinarian_id}/cedula/cedula-{ts}{ext}"
 
@@ -1538,6 +1569,9 @@ async def upload_cedula_document(
     )
     if err:
         raise HTTPException(status_code=500, detail=f"Error actualizando perfil: {err}")
+
+    if cedula_ocr.is_cedula_ocr_enabled():
+        asyncio.create_task(cedula_ocr.run_cedula_ocr_for_profile(x_veterinarian_id, data, media_type))
 
     return CedulaUploadResponse(
         status="ok",
@@ -1587,6 +1621,14 @@ async def verify_cedula(
         sep_nombre=result.get("sep_nombre"),
         sep_profesion=result.get("sep_profesion"),
         message=result.get("message") or "Verificación procesada.",
+        ocr_nombre=result.get("ocr_nombre"),
+        ocr_registro=result.get("ocr_registro"),
+        ocr_match=result.get("ocr_match"),
+        ocr_confidence=result.get("ocr_confidence"),
+        puede_ejercer=result.get("puede_ejercer"),
+        eligibility_confianza=result.get("eligibility_confianza"),
+        eligibility_resumen=result.get("eligibility_resumen"),
+        eligibility_motivos=result.get("eligibility_motivos"),
     )
 
 

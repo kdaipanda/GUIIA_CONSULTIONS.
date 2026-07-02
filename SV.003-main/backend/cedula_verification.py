@@ -15,6 +15,16 @@ import email_notifications
 
 from supabase_client import get_profile, update_profile
 
+try:
+    import cedula_ocr
+except ImportError:  # pragma: no cover
+    cedula_ocr = None  # type: ignore[assignment]
+
+try:
+    import cedula_eligibility
+except ImportError:  # pragma: no cover
+    cedula_eligibility = None  # type: ignore[assignment]
+
 CEDULA_STATUS_UNSUBMITTED = "unsubmitted"
 CEDULA_STATUS_PENDING = "pending"
 CEDULA_STATUS_VERIFIED = "verified"
@@ -320,6 +330,40 @@ async def verify_profile_cedula(profile_id: str) -> Dict[str, Any]:
             "error": "Debes subir el documento de tu registro profesional (título, matrícula o licencia).",
         }
 
+    ocr_result = None
+    ocr_message = None
+    if cedula_ocr and cedula_ocr.is_cedula_ocr_enabled():
+        ocr_result = await cedula_ocr.ensure_cedula_ocr(profile_id, profile)
+        if ocr_result.ok:
+            if cedula_ocr.ocr_matches_profile(profile, ocr_result):
+                ocr_message = "Documento leído: los datos coinciden con tu registro."
+            elif ocr_result.confidence in ("high", "medium"):
+                mismatch = []
+                if ocr_result.registro_profesional:
+                    mismatch.append(f"registro leído: {ocr_result.registro_profesional}")
+                if ocr_result.nombre:
+                    mismatch.append(f"nombre leído: {ocr_result.nombre}")
+                hint = "; ".join(mismatch)
+                ocr_message = (
+                    "Leímos el documento pero algunos datos no coinciden con tu perfil. "
+                    f"Revisa: {hint}."
+                )
+                update_profile(
+                    profile_id,
+                    {
+                        "cedula_verification_error": (
+                            "Los datos del documento no coinciden con el perfil. "
+                            "Revisa número de registro y nombre."
+                        ),
+                    },
+                )
+            elif ocr_result.notes:
+                ocr_message = f"No pudimos leer el documento con claridad: {ocr_result.notes}"
+        elif ocr_result.error and ocr_result.error != "OCR deshabilitado":
+            ocr_message = (
+                "No pudimos leer automáticamente el documento; un revisor lo validará manualmente."
+            )
+
     email = profile.get("email") or ""
     if is_dev_user(email):
         now = datetime.now(timezone.utc).isoformat()
@@ -344,14 +388,110 @@ async def verify_profile_cedula(profile_id: str) -> Dict[str, Any]:
         }
 
     country = profile.get("profesional_pais") or "MX"
-    if is_mexico_country(country) and cedula.isdigit():
+
+    eligibility = None
+    eligibility_message = None
+    if cedula_eligibility:
+        eligibility = await cedula_eligibility.assess_practice_eligibility(
+            profile_id,
+            profile,
+            ocr_result=ocr_result,
+        )
+        cedula_eligibility.store_eligibility_assessment(profile_id, eligibility)
+        eligibility_message = cedula_eligibility.eligibility_user_message(eligibility)
+
+        if cedula_eligibility.should_auto_verify_from_eligibility(eligibility):
+            now = datetime.now(timezone.utc).isoformat()
+            err_upd = update_profile(
+                profile_id,
+                {
+                    "cedula_sep_nombre": eligibility.sep_nombre or expected_name,
+                    "cedula_sep_profesion": eligibility.sep_profesion or (
+                        ocr_result.profesion if ocr_result and ocr_result.ok else None
+                    ),
+                    "cedula_verification_status": CEDULA_STATUS_VERIFIED,
+                    "cedula_verification_checked_at": now,
+                    "cedula_verification_error": None,
+                },
+            )
+            if not err_upd:
+                _maybe_notify_cedula_approved(
+                    profile, profile.get("cedula_verification_status") or ""
+                )
+                return {
+                    "ok": True,
+                    "verification_status": CEDULA_STATUS_VERIFIED,
+                    "sep_nombre": eligibility.sep_nombre,
+                    "sep_profesion": eligibility.sep_profesion,
+                    "message": eligibility_message,
+                    "puede_ejercer": eligibility.puede_ejercer,
+                    "eligibility_confianza": eligibility.confianza,
+                    "eligibility_resumen": eligibility.resumen,
+                    "eligibility_motivos": eligibility.motivos,
+                    "ocr_nombre": ocr_result.nombre if ocr_result and ocr_result.ok else None,
+                    "ocr_registro": ocr_result.registro_profesional
+                    if ocr_result and ocr_result.ok
+                    else None,
+                    "ocr_match": cedula_ocr.ocr_matches_profile(profile, ocr_result)
+                    if ocr_result and ocr_result.ok and cedula_ocr
+                    else None,
+                }
+
+        if (
+            eligibility.puede_ejercer == "no"
+            and eligibility.confianza == "alta"
+            and eligibility.recomendacion == "rechazar"
+        ):
+            now = datetime.now(timezone.utc).isoformat()
+            err_upd = update_profile(
+                profile_id,
+                {
+                    "cedula_verification_status": CEDULA_STATUS_REJECTED,
+                    "cedula_verification_checked_at": now,
+                    "cedula_verification_error": eligibility.resumen,
+                },
+            )
+            if not err_upd:
+                _maybe_notify_cedula_rejected(
+                    profile,
+                    profile.get("cedula_verification_status") or "",
+                    eligibility.resumen,
+                )
+                return {
+                    "ok": True,
+                    "verification_status": CEDULA_STATUS_REJECTED,
+                    "message": eligibility_message,
+                    "puede_ejercer": eligibility.puede_ejercer,
+                    "eligibility_confianza": eligibility.confianza,
+                    "eligibility_resumen": eligibility.resumen,
+                    "eligibility_motivos": eligibility.motivos,
+                }
+
+    # Fallback SEP directo (por si elegibilidad no está disponible)
+    if is_mexico_country(country) and cedula.isdigit() and not cedula_eligibility:
         sep_result = await _try_mexico_sep_verify(
             profile_id, cedula, expected_name, profile=profile
         )
         if sep_result:
+            if ocr_message and sep_result.get("ok"):
+                sep_result["message"] = f"{sep_result.get('message', '')} {ocr_message}".strip()
             return sep_result
 
-    return _submit_for_manual_review(profile_id)
+    manual = _submit_for_manual_review(profile_id)
+    if manual.get("ok"):
+        parts = [manual.get("message", ""), ocr_message, eligibility_message]
+        manual["message"] = " ".join(p for p in parts if p).strip()
+    if manual.get("ok") and ocr_result and ocr_result.ok:
+        manual["ocr_nombre"] = ocr_result.nombre
+        manual["ocr_registro"] = ocr_result.registro_profesional
+        manual["ocr_match"] = cedula_ocr.ocr_matches_profile(profile, ocr_result) if cedula_ocr else None
+        manual["ocr_confidence"] = ocr_result.confidence
+    if manual.get("ok") and eligibility:
+        manual["puede_ejercer"] = eligibility.puede_ejercer
+        manual["eligibility_confianza"] = eligibility.confianza
+        manual["eligibility_resumen"] = eligibility.resumen
+        manual["eligibility_motivos"] = eligibility.motivos
+    return manual
 
 
 def manual_review_cedula(profile_id: str, action: str, note: Optional[str] = None) -> Dict[str, Any]:

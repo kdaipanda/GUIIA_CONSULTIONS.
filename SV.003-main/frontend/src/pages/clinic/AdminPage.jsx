@@ -17,6 +17,8 @@ import {
   adminDeleteUser,
   adminVerifyUserCedula,
   adminReviewUserCedula,
+  adminRerunUserCedulaOcr,
+  adminAssessUserCedulaEligibility,
   fetchAdminUserConsultations,
   fetchAdminUserCedulaDocument,
   fetchAdminUserCedulaDocumentBlob,
@@ -125,8 +127,12 @@ function cedulaDocKind(url) {
   if (!url) return null;
   const path = url.split("?")[0].toLowerCase();
   if (path.endsWith(".pdf")) return "pdf";
-  if (/\.(jpe?g|png|webp|gif)$/.test(path)) return "image";
+  if (/\.(jpe?g|png|webp|gif|heic|heif)$/.test(path)) return "image";
   return "unknown";
+}
+
+function cedulaPreviewKind(storedUrl, previewUrl) {
+  return cedulaDocKind(previewUrl) || cedulaDocKind(storedUrl) || "unknown";
 }
 
 const CONSULTATION_STATUS_LABELS = {
@@ -313,6 +319,46 @@ export function AdminPage() {
     try {
       const data = await adminVerifyUserCedula(veterinarian.id, user.id);
       notifySuccess(data.message || "Verificación completada.");
+      load();
+    } catch (err) {
+      notifyError(err.message);
+    } finally {
+      setCedulaActingId(null);
+    }
+  };
+
+  const handleAssessEligibility = async (user) => {
+    if (
+      !window.confirm(
+        `¿Consultar portal oficial y generar dictamen IA para ${user.nombre}?`,
+      )
+    ) {
+      return;
+    }
+    setCedulaActingId(user.id);
+    try {
+      const data = await adminAssessUserCedulaEligibility(veterinarian.id, user.id);
+      notifySuccess(data.message || "Dictamen generado.");
+      load();
+    } catch (err) {
+      notifyError(err.message);
+    } finally {
+      setCedulaActingId(null);
+    }
+  };
+
+  const handleRerunCedulaOcr = async (user) => {
+    if (
+      !window.confirm(
+        `¿Volver a leer el documento de ${user.nombre} con OCR? Esto puede tardar unos segundos.`,
+      )
+    ) {
+      return;
+    }
+    setCedulaActingId(user.id);
+    try {
+      const data = await adminRerunUserCedulaOcr(veterinarian.id, user.id);
+      notifySuccess(data.message || "OCR completado.");
       load();
     } catch (err) {
       notifyError(err.message);
@@ -891,6 +937,21 @@ export function AdminPage() {
                             SEP: {u.cedula_sep_nombre}
                           </div>
                         )}
+                        {u.cedula_ocr_registro && (
+                          <div className="clinic-admin-cedula-sep clinic-muted">
+                            OCR: {u.cedula_ocr_nombre || "—"} · Reg. {u.cedula_ocr_registro}
+                            {u.cedula_ocr_match === false ? " · no coincide" : ""}
+                          </div>
+                        )}
+                        {u.cedula_eligibility_resumen && (
+                          <div className="clinic-admin-cedula-sep clinic-muted">
+                            Dictamen: {u.cedula_eligibility_puede_ejercer || "—"}
+                            {u.cedula_eligibility_confianza
+                              ? ` (${u.cedula_eligibility_confianza})`
+                              : ""}
+                            — {u.cedula_eligibility_resumen}
+                          </div>
+                        )}
                         {u.cedula_verification_error && cedulaStatus === "rejected" && (
                           <div className="clinic-admin-cedula-sep clinic-muted">
                             {u.cedula_verification_error}
@@ -929,6 +990,32 @@ export function AdminPage() {
                             >
                               <Eye size={14} aria-hidden />
                               Ver
+                            </Button>
+                          )}
+                          {u.cedula_document_url && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              disabled={busy}
+                              onClick={() => handleAssessEligibility(u)}
+                              title="Consultar SEP y dictamen IA si puede ejercer"
+                            >
+                              <Shield size={14} aria-hidden />
+                              Dictamen
+                            </Button>
+                          )}
+                          {u.cedula_document_url && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              disabled={busy}
+                              onClick={() => handleRerunCedulaOcr(u)}
+                              title="Volver a leer el documento con OCR (IA)"
+                            >
+                              <RefreshCw size={14} aria-hidden />
+                              OCR
                             </Button>
                           )}
                           {(u.profesional_pais || "MX").toUpperCase() === "MX" && (
@@ -1039,19 +1126,36 @@ export function AdminPage() {
                   <p className="clinic-muted">Cargando documento...</p>
                 )}
                 {!cedulaPreviewLoading && cedulaPreviewUrl && (
-                  cedulaDocKind(cedulaPreview.cedula_document_url) === "pdf" ? (
-                    <iframe
-                      title={`Cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
-                      src={cedulaPreviewUrl}
-                      className="clinic-admin-cedula-preview-frame"
-                    />
-                  ) : (
-                    <img
-                      src={cedulaPreviewUrl}
-                      alt={`Documento de cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
-                      className="clinic-admin-cedula-preview-image"
-                    />
-                  )
+                  (() => {
+                    const kind = cedulaPreviewKind(
+                      cedulaPreview.cedula_document_url,
+                      cedulaPreviewUrl,
+                    );
+                    if (kind === "pdf") {
+                      return (
+                        <iframe
+                          title={`Cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
+                          src={cedulaPreviewUrl}
+                          className="clinic-admin-cedula-preview-frame"
+                        />
+                      );
+                    }
+                    if (kind === "image") {
+                      return (
+                        <img
+                          src={cedulaPreviewUrl}
+                          alt={`Documento de cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
+                          className="clinic-admin-cedula-preview-image"
+                        />
+                      );
+                    }
+                    return (
+                      <p className="clinic-muted">
+                        No pudimos previsualizar este formato en el navegador. Usa el enlace
+                        inferior para abrirlo en otra pestaña.
+                      </p>
+                    );
+                  })()
                 )}
               </div>
               {!cedulaPreviewLoading && cedulaPreviewUrl && (
