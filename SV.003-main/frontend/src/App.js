@@ -623,7 +623,13 @@ const Router = () => {
       setCurrentView("dashboard");
       setIsInitialized(true);
     } else if (!veterinarian && !isInitialized) {
-      setCurrentView("landing");
+      const path = window.location.pathname;
+      if (isProtectedAppPath(path)) {
+        storeAuthRedirect(path);
+        setCurrentView("login");
+      } else {
+        setCurrentView("landing");
+      }
       setIsInitialized(true);
     }
   }, []); // Solo ejecutar una vez al montar, no cuando cambia veterinarian
@@ -641,7 +647,7 @@ const Router = () => {
     ),
     login: (
       <AppShell fullBleed>
-        <LoginPage setView={handleSetView} setCedulaFlow={setCedulaFlow} />
+        <LoginPage setView={navigateSetView} setCedulaFlow={setCedulaFlow} />
       </AppShell>
     ),
     "cedula-verification": (
@@ -1238,7 +1244,6 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
       const redirectPath = consumeAuthRedirect();
       if (redirectPath && PATH_TO_VIEW[redirectPath]) {
         setView(PATH_TO_VIEW[redirectPath]);
-        window.history.replaceState(null, "", redirectPath);
       } else {
         setView("dashboard");
       }
