@@ -85,6 +85,12 @@ export async function adminReviewUserCedula(veterinarianId, profileId, action, n
   });
 }
 
+export async function adminRerunUserCedulaOcr(veterinarianId, profileId) {
+  return clinicFetch(`/api/admin/users/${profileId}/cedula/ocr`, veterinarianId, {
+    method: "POST",
+  });
+}
+
 export async function fetchAdminUserConsultations(veterinarianId, profileId, limit = 50) {
   const params = new URLSearchParams();
   if (limit) params.set("limit", String(limit));

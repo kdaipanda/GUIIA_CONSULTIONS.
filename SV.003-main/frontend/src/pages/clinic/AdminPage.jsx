@@ -17,6 +17,7 @@ import {
   adminDeleteUser,
   adminVerifyUserCedula,
   adminReviewUserCedula,
+  adminRerunUserCedulaOcr,
   fetchAdminUserConsultations,
   fetchAdminUserCedulaDocument,
   fetchAdminSupportTickets,
@@ -295,6 +296,26 @@ export function AdminPage() {
     try {
       const data = await adminVerifyUserCedula(veterinarian.id, user.id);
       notifySuccess(data.message || "Verificación completada.");
+      load();
+    } catch (err) {
+      notifyError(err.message);
+    } finally {
+      setCedulaActingId(null);
+    }
+  };
+
+  const handleRerunCedulaOcr = async (user) => {
+    if (
+      !window.confirm(
+        `¿Volver a leer el documento de ${user.nombre} con OCR? Esto puede tardar unos segundos.`,
+      )
+    ) {
+      return;
+    }
+    setCedulaActingId(user.id);
+    try {
+      const data = await adminRerunUserCedulaOcr(veterinarian.id, user.id);
+      notifySuccess(data.message || "OCR completado.");
       load();
     } catch (err) {
       notifyError(err.message);
@@ -883,6 +904,19 @@ export function AdminPage() {
                             >
                               <Eye size={14} aria-hidden />
                               Ver
+                            </Button>
+                          )}
+                          {u.cedula_document_url && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              disabled={busy}
+                              onClick={() => handleRerunCedulaOcr(u)}
+                              title="Volver a leer el documento con OCR (IA)"
+                            >
+                              <RefreshCw size={14} aria-hidden />
+                              OCR
                             </Button>
                           )}
                           {(u.profesional_pais || "MX").toUpperCase() === "MX" && (

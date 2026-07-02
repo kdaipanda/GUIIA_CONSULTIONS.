@@ -310,3 +310,20 @@ async def ensure_cedula_ocr(profile_id: str, profile: Optional[Dict[str, Any]] =
     except Exception as exc:  # noqa: BLE001
         return CedulaOcrResult(ok=False, error=str(exc))
     return await run_cedula_ocr_for_profile(profile_id, data, media_type)
+
+
+async def rerun_cedula_ocr_for_profile(profile_id: str) -> CedulaOcrResult:
+    """Fuerza una nueva lectura OCR del documento almacenado (admin)."""
+    if not is_cedula_ocr_enabled():
+        return CedulaOcrResult(ok=False, error="OCR deshabilitado")
+    profile, err = get_profile(profile_id)
+    if err or not profile:
+        return CedulaOcrResult(ok=False, error="Perfil no encontrado")
+    stored_url = profile.get("cedula_document_url")
+    if not stored_url:
+        return CedulaOcrResult(ok=False, error="Este usuario no tiene documento de cédula")
+    try:
+        data, media_type = await download_cedula_document_bytes(stored_url)
+    except Exception as exc:  # noqa: BLE001
+        return CedulaOcrResult(ok=False, error=str(exc))
+    return await run_cedula_ocr_for_profile(profile_id, data, media_type)
