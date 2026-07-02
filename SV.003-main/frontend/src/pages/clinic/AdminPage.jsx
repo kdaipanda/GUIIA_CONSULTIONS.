@@ -178,7 +178,7 @@ function consultationField(consultation, key) {
 }
 
 export function AdminPage() {
-  const { veterinarian, loading: vetLoading } = useVet();
+  const { veterinarian, loading: vetLoading, platformAdmin } = useVet();
   const [allowed, setAllowed] = useState(null);
   const [overview, setOverview] = useState(null);
   const [users, setUsers] = useState([]);
@@ -214,6 +214,7 @@ export function AdminPage() {
   const [selectedLead, setSelectedLead] = useState(null);
   const [leadNotes, setLeadNotes] = useState("");
   const [leadActing, setLeadActing] = useState(false);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     return () => {
@@ -226,12 +227,17 @@ export function AdminPage() {
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
     setLoading(true);
-    setAllowed(null);
+    setLoadError("");
     try {
-      const access = await fetchAdminAccess(veterinarian.id);
-      const allowedUser = !!access.platform_admin;
-      setAllowed(allowedUser);
-      if (!allowedUser) return;
+      let allowedUser = platformAdmin;
+      if (!allowedUser) {
+        const access = await fetchAdminAccess(veterinarian.id);
+        allowedUser = !!access.platform_admin;
+      }
+      if (!allowedUser) {
+        setAllowed(false);
+        return;
+      }
 
       const [ov, usersData, orgsData] = await Promise.all([
         fetchAdminOverview(veterinarian.id),
@@ -266,13 +272,17 @@ export function AdminPage() {
       } finally {
         setGuiaLeadsLoading(false);
       }
+
+      setAllowed(true);
     } catch (err) {
-      notifyError(err.message);
-      setAllowed(false);
+      const message = err.message || "No se pudo cargar el panel de administración";
+      setLoadError(message);
+      notifyError(message);
+      setAllowed(platformAdmin ? null : false);
     } finally {
       setLoading(false);
     }
-  }, [veterinarian?.id, search, planFilter, supportFilter, guiaLeadFilter]);
+  }, [veterinarian?.id, search, planFilter, supportFilter, guiaLeadFilter, platformAdmin]);
 
   useEffect(() => {
     if (vetLoading || !veterinarian?.id) return undefined;
@@ -519,7 +529,8 @@ export function AdminPage() {
     }
   };
 
-  const showSkeleton = vetLoading || loading || allowed === null;
+  const showSkeleton =
+    vetLoading || loading || (allowed === null && !!veterinarian?.id);
 
   if (showSkeleton) {
     return (
@@ -534,10 +545,25 @@ export function AdminPage() {
             <p>Usuarios, clínicas y operaciones de la plataforma.</p>
           </div>
         </div>
-        <ClinicReportsSkeleton />
-        <div className="clinic-admin-skeleton-block">
-          <ClinicTableSkeleton rows={8} cols={5} />
-        </div>
+        {loadError ? (
+          <ClinicEmptyState
+            icon={Shield}
+            title="No se pudo cargar el panel"
+            description={loadError}
+            actionLabel="Reintentar"
+            onAction={load}
+          />
+        ) : (
+          <>
+            <ClinicReportsSkeleton />
+            <div className="clinic-admin-skeleton-block">
+              <ClinicTableSkeleton rows={8} cols={5} />
+            </div>
+            <p className="clinic-muted clinic-admin-loading-hint">
+              Cargando datos de administración… esto puede tardar unos segundos.
+            </p>
+          </>
+        )}
       </div>
     );
   }

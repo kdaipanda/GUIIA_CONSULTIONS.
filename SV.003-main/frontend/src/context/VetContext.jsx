@@ -6,6 +6,7 @@ import React, {
 } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { getBackendUrl } from "../lib/backendUrl";
+import { fetchWithTimeout } from "../lib/fetchWithTimeout";
 import { getAuthHeaders, storeAccessToken, clearAccessToken } from "../lib/authHeaders";
 
 const DEV_AUTO_LOGIN = false;
@@ -114,9 +115,11 @@ export const VetProvider = ({ children }) => {
       return;
     }
     const backendUrl = getBackendUrl();
-    fetch(`${backendUrl}/api/admin/access`, {
-      headers: getAuthHeaders(veterinarian.id),
-    })
+    fetchWithTimeout(
+      `${backendUrl}/api/admin/access`,
+      { headers: getAuthHeaders(veterinarian.id) },
+      { timeoutMs: 20000, retries: 2 },
+    )
       .then((response) => (response.ok ? response.json() : { platform_admin: false }))
       .then((data) => setPlatformAdmin(!!data.platform_admin))
       .catch(() => setPlatformAdmin(false));

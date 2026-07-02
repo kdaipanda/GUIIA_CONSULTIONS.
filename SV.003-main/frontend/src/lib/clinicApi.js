@@ -1,6 +1,7 @@
-import { BACKEND_URL } from "./backendUrl";
+import { getBackendUrl } from "./backendUrl";
 import { friendlyFetchError } from "./friendlyFetchError";
 import { getAuthHeaders } from "./authHeaders";
+import { fetchWithTimeout } from "./fetchWithTimeout";
 
 function vetHeaders(veterinarianId, extra = {}) {
   return {
@@ -10,13 +11,19 @@ function vetHeaders(veterinarianId, extra = {}) {
 }
 
 async function clinicFetch(path, veterinarianId, options = {}) {
-  const response = await fetch(`${BACKEND_URL}${path}`, {
-    ...options,
-    headers: vetHeaders(veterinarianId, options.headers),
-  });
+  const response = await fetchWithTimeout(
+    `${getBackendUrl()}${path}`,
+    {
+      ...options,
+      headers: vetHeaders(veterinarianId, options.headers),
+    },
+    { timeoutMs: 45000, retries: 2 },
+  );
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
-    throw new Error(data.detail || friendlyFetchError(response) || "Error de servidor");
+    throw new Error(
+      data.detail || friendlyFetchError(response.status, getBackendUrl()) || "Error de servidor",
+    );
   }
   return response.json();
 }
@@ -97,11 +104,12 @@ export async function fetchAdminUserCedulaDocument(veterinarianId, profileId) {
 }
 
 export async function fetchAdminUserCedulaDocumentBlob(veterinarianId, profileId) {
-  const response = await fetch(
-    `${BACKEND_URL}/api/admin/users/${profileId}/cedula/document/file`,
+  const response = await fetchWithTimeout(
+    `${getBackendUrl()}/api/admin/users/${profileId}/cedula/document/file`,
     {
       headers: getAuthHeaders(veterinarianId),
     },
+    { timeoutMs: 60000, retries: 2 },
   );
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
@@ -260,7 +268,7 @@ export async function updateAppointmentRequest(veterinarianId, requestId, data) 
 }
 
 export async function fetchPublicOrganization(organizationId) {
-  const response = await fetch(`${BACKEND_URL}/api/public/organizations/${organizationId}`);
+  const response = await fetch(`${getBackendUrl()}/api/public/organizations/${organizationId}`);
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
     throw new Error(data.detail || "Consultorio no encontrado");
@@ -269,7 +277,7 @@ export async function fetchPublicOrganization(organizationId) {
 }
 
 export async function submitAppointmentRequest(data) {
-  const response = await fetch(`${BACKEND_URL}/api/public/appointment-requests`, {
+  const response = await fetch(`${getBackendUrl()}/api/public/appointment-requests`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -282,7 +290,7 @@ export async function submitAppointmentRequest(data) {
 }
 
 export async function submitGuiaConsultasLead(data) {
-  const response = await fetch(`${BACKEND_URL}/api/public/guia-consultas-leads`, {
+  const response = await fetch(`${getBackendUrl()}/api/public/guia-consultas-leads`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
