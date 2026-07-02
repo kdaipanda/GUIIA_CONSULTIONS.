@@ -23,6 +23,10 @@ typing-extensions==4.15.0
 # HTTP client (requerido por server_simple.py)
 httpx==0.27.2
 
+# Imágenes de cédula profesional (HEIC → JPEG, compresión)
+pillow==11.3.0
+pillow-heif==0.21.0
+
 # Claude (Anthropic) - requerido para /api/consultations/*/analyze y /api/medical-images/interpret
 anthropic>=0.75.0
 

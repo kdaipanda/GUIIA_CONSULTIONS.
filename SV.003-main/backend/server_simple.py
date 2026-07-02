@@ -37,6 +37,7 @@ from starlette.responses import JSONResponse
 
 import auth_security
 import cedula_verification
+from cedula_document import prepare_cedula_upload
 import email_notifications
 from membership_catalog import (
     CONSULTATION_CREDIT_PACKAGES,
@@ -456,7 +457,12 @@ DEFAULT_CEDULA_MAX_BYTES = 10 * 1024 * 1024  # 10MB
 ALLOWED_CEDULA_CONTENT_TYPES = {
     "application/pdf": ".pdf",
     "image/jpeg": ".jpg",
+    "image/jpg": ".jpg",
     "image/png": ".png",
+    "image/webp": ".webp",
+    "image/heic": ".heic",
+    "image/heif": ".heif",
+    "application/octet-stream": None,
 }
 
 # Profesiones aceptadas para veterinarios (normalizadas / tolerantes)
@@ -1501,7 +1507,10 @@ async def upload_cedula_document(
     if media_type not in ALLOWED_CEDULA_CONTENT_TYPES:
         raise HTTPException(
             status_code=400,
-            detail="Tipo de archivo no permitido. Sube PDF, JPG o PNG.",
+            detail=(
+                "Tipo de archivo no permitido. Sube PDF, JPG o PNG. "
+                "Si tu teléfono guarda fotos en HEIC, expórtalas como JPG antes de subirlas."
+            ),
         )
 
     max_bytes = DEFAULT_CEDULA_MAX_BYTES
@@ -1516,9 +1525,22 @@ async def upload_cedula_document(
     if not data:
         raise HTTPException(status_code=400, detail="Archivo vacío")
     if len(data) > max_bytes:
-        raise HTTPException(status_code=413, detail="Archivo demasiado grande")
+        raise HTTPException(
+            status_code=413,
+            detail="Archivo demasiado grande. Máximo 10MB. Comprime la imagen o usa PDF.",
+        )
 
-    ext = ALLOWED_CEDULA_CONTENT_TYPES[media_type]
+    try:
+        data, media_type, ext = prepare_cedula_upload(data, media_type)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    if len(data) > max_bytes:
+        raise HTTPException(
+            status_code=413,
+            detail="El archivo procesado sigue siendo demasiado grande. Usa una imagen más comprimida o PDF.",
+        )
+
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     path = f"user-{x_veterinarian_id}/cedula/cedula-{ts}{ext}"
 

@@ -124,8 +124,12 @@ function cedulaDocKind(url) {
   if (!url) return null;
   const path = url.split("?")[0].toLowerCase();
   if (path.endsWith(".pdf")) return "pdf";
-  if (/\.(jpe?g|png|webp|gif)$/.test(path)) return "image";
+  if (/\.(jpe?g|png|webp|gif|heic|heif)$/.test(path)) return "image";
   return "unknown";
+}
+
+function cedulaPreviewKind(storedUrl, previewUrl) {
+  return cedulaDocKind(previewUrl) || cedulaDocKind(storedUrl) || "unknown";
 }
 
 const CONSULTATION_STATUS_LABELS = {
@@ -973,19 +977,36 @@ export function AdminPage() {
                   <p className="clinic-muted">Cargando documento...</p>
                 )}
                 {!cedulaPreviewLoading && cedulaPreviewUrl && (
-                  cedulaDocKind(cedulaPreview.cedula_document_url) === "pdf" ? (
-                    <iframe
-                      title={`Cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
-                      src={cedulaPreviewUrl}
-                      className="clinic-admin-cedula-preview-frame"
-                    />
-                  ) : (
-                    <img
-                      src={cedulaPreviewUrl}
-                      alt={`Documento de cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
-                      className="clinic-admin-cedula-preview-image"
-                    />
-                  )
+                  (() => {
+                    const kind = cedulaPreviewKind(
+                      cedulaPreview.cedula_document_url,
+                      cedulaPreviewUrl,
+                    );
+                    if (kind === "pdf") {
+                      return (
+                        <iframe
+                          title={`Cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
+                          src={cedulaPreviewUrl}
+                          className="clinic-admin-cedula-preview-frame"
+                        />
+                      );
+                    }
+                    if (kind === "image") {
+                      return (
+                        <img
+                          src={cedulaPreviewUrl}
+                          alt={`Documento de cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
+                          className="clinic-admin-cedula-preview-image"
+                        />
+                      );
+                    }
+                    return (
+                      <p className="clinic-muted">
+                        No pudimos previsualizar este formato en el navegador. Usa el enlace
+                        inferior para abrirlo en otra pestaña.
+                      </p>
+                    );
+                  })()
                 )}
               </div>
               {!cedulaPreviewLoading && cedulaPreviewUrl && (

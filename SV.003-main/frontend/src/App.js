@@ -32,6 +32,10 @@ import {
   consumePostRegisterOnboarding,
 } from "./lib/guiaaOnboarding";
 import { notifyError, notifySuccess, notifyQuotaError } from "./lib/appToast";
+import {
+  ACCEPTED_CEDULA_INPUT,
+  prepareCedulaFileForUpload,
+} from "./lib/cedulaFileUtils";
 import { clinicNavIsHero, clinicNavThemeStyle } from "./lib/clinicNavTheme";
 import { LATAM_COUNTRIES, countryLabel } from "./lib/latamCountries";
 import { SupportChatWidget } from "./components/SupportChatWidget";
@@ -793,6 +797,8 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
     notifyError("");
 
     try {
+      const preparedCedulaFile = await prepareCedulaFileForUpload(cedulaFile);
+
       const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -816,7 +822,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
         cedula_profesional: formData.cedula_profesional,
         expected_nombre: formData.nombre,
         needs_upload: false,
-        file: cedulaFile,
+        file: preparedCedulaFile,
       });
       markPostRegisterOnboarding();
       setView("cedula-verification");
@@ -934,13 +940,14 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
               <Input
                 id="reg-cedula-file"
                 type="file"
-                accept="application/pdf,image/png,image/jpeg"
+                accept={ACCEPTED_CEDULA_INPUT}
                 required
                 className="mt-1.5 h-auto min-h-10 cursor-pointer border-dashed bg-background py-2 file:mr-3 file:cursor-pointer"
                 onChange={(e) => setCedulaFile(e.target.files?.[0] || null)}
               />
               <p className="mt-2 text-xs text-muted-foreground">
-                Título universitario, matrícula colegiada o licencia de ejercicio. Máx. 10MB.
+                Título, matrícula o licencia (PDF/JPG/PNG). Fotos de iPhone en HEIC también
+                se aceptan; si falla, exporta como JPG. Máx. 10MB.
               </p>
             </div>
 
@@ -1436,10 +1443,12 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
 
     setLoading(true);
     try {
+      const uploadFile = file ? await prepareCedulaFileForUpload(file) : null;
+
       // 1) Upload (si hay archivo)
-      if (file) {
+      if (uploadFile) {
         const fd = new FormData();
-        fd.append("file", file);
+        fd.append("file", uploadFile);
         const up = await fetch(`${BACKEND_URL}/api/cedula/upload`, {
           method: "POST",
           headers: getAuthHeaders(vetId, { skipContentType: true }),
@@ -1447,7 +1456,14 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
         });
         if (!up.ok) {
           const raw = await up.text().catch(() => "");
-          throw new Error(raw || "Error subiendo documento");
+          let message = "Error subiendo documento";
+          try {
+            const parsed = JSON.parse(raw);
+            message = parsed.detail || message;
+          } catch {
+            if (raw) message = raw;
+          }
+          throw new Error(message);
         }
       }
 
@@ -1540,10 +1556,14 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
               <Input
                 id="cedula-archivo"
                 type="file"
-                accept="application/pdf,image/png,image/jpeg"
+                accept={ACCEPTED_CEDULA_INPUT}
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
                 className="mt-1.5 h-auto min-h-10 cursor-pointer border-dashed py-2 file:mr-3 file:cursor-pointer"
               />
+              <p className="mt-2 text-xs text-muted-foreground">
+                PDF, JPG o PNG legible. Evita fotos borrosas o con poca luz; el sistema no extrae
+                texto automáticamente, pero debe poder verse el documento.
+              </p>
               <p className="mt-2 text-xs text-muted-foreground">
                 Puedes volver a subir el documento si fue rechazado.
               </p>
