@@ -412,6 +412,55 @@ def resolve_cedula_document_url(stored_url: str) -> Tuple[Optional[str], Optiona
     return (stored_url, err)
 
 
+def _content_type_from_storage_path(path: str) -> str:
+    low = (path or "").lower()
+    if low.endswith(".pdf"):
+        return "application/pdf"
+    if low.endswith(".png"):
+        return "image/png"
+    if low.endswith(".jpg") or low.endswith(".jpeg"):
+        return "image/jpeg"
+    if low.endswith(".webp"):
+        return "image/webp"
+    if low.endswith(".gif"):
+        return "image/gif"
+    return "application/octet-stream"
+
+
+def download_storage_bytes(bucket: str, path: str) -> Tuple[Optional[bytes], Optional[str]]:
+    client = get_supabase_client()
+    try:
+        data = client.storage.from_(bucket).download(path)
+        if not data:
+            return (None, "Documento vacío")
+        return (data, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def fetch_cedula_document_bytes(stored_url: str) -> Tuple[Optional[bytes], Optional[str], Optional[str]]:
+    """Descarga bytes del documento de cédula (Storage o URL externa)."""
+    if not stored_url:
+        return (None, None, "Sin documento")
+    parsed = parse_storage_object_url(stored_url)
+    if parsed:
+        bucket, path = parsed
+        data, err = download_storage_bytes(bucket, path)
+        if err or not data:
+            return (None, None, err or "No se pudo descargar el documento")
+        return (data, _content_type_from_storage_path(path), None)
+    try:
+        import httpx
+
+        with httpx.Client(timeout=30.0, follow_redirects=True) as client:
+            resp = client.get(stored_url)
+            resp.raise_for_status()
+            content_type = (resp.headers.get("content-type") or "application/octet-stream").split(";")[0]
+            return (resp.content, content_type, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, None, str(exc))
+
+
 def is_platform_admin_in_db(profile_id: str, email: str = "") -> bool:
     client = get_supabase_client()
     try:

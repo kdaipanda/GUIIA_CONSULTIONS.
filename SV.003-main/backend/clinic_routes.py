@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from fastapi import APIRouter, Header, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel, field_validator
 
 import clinic_db
@@ -20,6 +21,7 @@ from supabase_client import (
     update_profile,
     list_consultations,
     resolve_cedula_document_url,
+    fetch_cedula_document_bytes,
     create_support_ticket,
     insert_support_message,
     list_support_tickets_for_user,
@@ -1599,6 +1601,38 @@ async def admin_user_cedula_document(profile_id: str, x_veterinarian_id: str = H
         target_email=profile.get("email"),
     )
     return {"url": access_url}
+
+
+@clinic_router.get("/admin/users/{profile_id}/cedula/document/file")
+async def admin_user_cedula_document_file(profile_id: str, x_veterinarian_id: str = Header(None)):
+    admin = await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    profile, err = get_profile(profile_id)
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    stored_url = profile.get("cedula_document_url")
+    if not stored_url:
+        raise HTTPException(status_code=404, detail="Este usuario no tiene documento de cédula")
+    data, content_type, fetch_err = await asyncio.to_thread(fetch_cedula_document_bytes, stored_url)
+    if fetch_err or not data:
+        raise HTTPException(status_code=404, detail=fetch_err or "Documento no disponible")
+    auth_security.audit_admin_action(
+        admin,
+        "cedula_view_document",
+        target_profile_id=profile_id,
+        target_email=profile.get("email"),
+    )
+    media_type = content_type or "application/octet-stream"
+    ext = ".pdf" if "pdf" in media_type else ""
+    return Response(
+        content=data,
+        media_type=media_type,
+        headers={
+            "Content-Disposition": f'inline; filename="cedula-{profile_id}{ext}"',
+            "Cache-Control": "private, no-store",
+        },
+    )
 
 
 @clinic_router.get("/admin/organizations")

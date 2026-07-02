@@ -19,6 +19,7 @@ import {
   adminReviewUserCedula,
   fetchAdminUserConsultations,
   fetchAdminUserCedulaDocument,
+  fetchAdminUserCedulaDocumentBlob,
   fetchAdminSupportTickets,
   fetchAdminSupportTicket,
   updateAdminSupportTicket,
@@ -191,6 +192,7 @@ export function AdminPage() {
   const [cedulaActingId, setCedulaActingId] = useState(null);
   const [cedulaPreview, setCedulaPreview] = useState(null);
   const [cedulaPreviewUrl, setCedulaPreviewUrl] = useState("");
+  const [cedulaPreviewObjectUrl, setCedulaPreviewObjectUrl] = useState("");
   const [cedulaPreviewLoading, setCedulaPreviewLoading] = useState(false);
   const [historyUser, setHistoryUser] = useState(null);
   const [historyConsultations, setHistoryConsultations] = useState([]);
@@ -212,6 +214,14 @@ export function AdminPage() {
   const [selectedLead, setSelectedLead] = useState(null);
   const [leadNotes, setLeadNotes] = useState("");
   const [leadActing, setLeadActing] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (cedulaPreviewObjectUrl) {
+        URL.revokeObjectURL(cedulaPreviewObjectUrl);
+      }
+    };
+  }, [cedulaPreviewObjectUrl]);
 
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
@@ -365,18 +375,34 @@ export function AdminPage() {
   };
 
   const closeCedulaPreview = () => {
+    if (cedulaPreviewObjectUrl) {
+      URL.revokeObjectURL(cedulaPreviewObjectUrl);
+    }
     setCedulaPreview(null);
     setCedulaPreviewUrl("");
+    setCedulaPreviewObjectUrl("");
     setCedulaPreviewLoading(false);
   };
 
   const openCedulaPreview = async (user) => {
     setCedulaPreview(user);
     setCedulaPreviewUrl("");
+    if (cedulaPreviewObjectUrl) {
+      URL.revokeObjectURL(cedulaPreviewObjectUrl);
+    }
+    setCedulaPreviewObjectUrl("");
     setCedulaPreviewLoading(true);
     try {
-      const data = await fetchAdminUserCedulaDocument(veterinarian.id, user.id);
-      setCedulaPreviewUrl(data.url || "");
+      const docKind = cedulaDocKind(user.cedula_document_url);
+      if (docKind === "pdf") {
+        const blob = await fetchAdminUserCedulaDocumentBlob(veterinarian.id, user.id);
+        const objectUrl = URL.createObjectURL(blob);
+        setCedulaPreviewObjectUrl(objectUrl);
+        setCedulaPreviewUrl(objectUrl);
+      } else {
+        const data = await fetchAdminUserCedulaDocument(veterinarian.id, user.id);
+        setCedulaPreviewUrl(data.url || "");
+      }
     } catch (err) {
       notifyError(err.message);
     } finally {

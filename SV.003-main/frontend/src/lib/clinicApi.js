@@ -96,6 +96,20 @@ export async function fetchAdminUserCedulaDocument(veterinarianId, profileId) {
   return clinicFetch(`/api/admin/users/${profileId}/cedula/document`, veterinarianId);
 }
 
+export async function fetchAdminUserCedulaDocumentBlob(veterinarianId, profileId) {
+  const response = await fetch(
+    `${BACKEND_URL}/api/admin/users/${profileId}/cedula/document/file`,
+    {
+      headers: getAuthHeaders(veterinarianId),
+    },
+  );
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.detail || friendlyFetchError(response) || "Error de servidor");
+  }
+  return response.blob();
+}
+
 export async function createSupportTicket(veterinarianId, data) {
   return clinicFetch("/api/support/tickets", veterinarianId, {
     method: "POST",
