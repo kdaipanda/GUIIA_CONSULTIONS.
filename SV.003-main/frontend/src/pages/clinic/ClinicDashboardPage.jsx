@@ -17,14 +17,19 @@ import {
 import { useVet } from "../../context/VetContext";
 import { useClinic } from "../../context/ClinicContext";
 import { fetchDashboardOverview } from "../../lib/clinicApi";
-import { notifyError } from "../../lib/appToast";
+import { notifyError, notifyQuotaError } from "../../lib/appToast";
 import { BACKEND_URL } from "../../lib/backendUrl";
 import {
   DEFAULT_PACKAGES,
   getMembershipQuota,
   parseMembershipCatalogResponse,
 } from "../../lib/membershipPlans";
-import { canAccessFeature, MEMBERSHIP_FEATURES } from "../../lib/membershipAccess";
+import {
+  canAccessFeature,
+  MEMBERSHIP_FEATURES,
+  canCreateConsultation,
+  TRIAL_EXHAUSTED_MESSAGE,
+} from "../../lib/membershipAccess";
 import { Button } from "../../components/ui/button";
 import { QuickClientPatientDialog } from "../../components/clinic/QuickClientPatientDialog";
 import "./clinicDashboardPage.css";
@@ -189,12 +194,21 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
     month: "long",
   });
 
-  const membershipPillLabel =
-    membershipQuota.planKey && membershipQuota.maxConsultations > 0
+  const membershipPillLabel = membershipQuota.trialExhausted
+    ? "Prueba agotada — suscríbete"
+    : membershipQuota.planKey && membershipQuota.maxConsultations > 0
       ? `${membershipQuota.planName} · ${membershipQuota.consultations}/${membershipQuota.maxConsultations} CDS`
       : membershipQuota.planKey
         ? membershipQuota.planName
         : "Sin plan activo";
+
+  const startNewConsultation = () => {
+    if (!canCreateConsultation(veterinarian, accessOptions)) {
+      notifyQuotaError(TRIAL_EXHAUSTED_MESSAGE, () => go("membership", "/app/membresia"));
+      return;
+    }
+    go("new-consultation", "/app/consultas/nueva");
+  };
 
   return (
     <div className="clinic-page clinic-page-guiaa clinic-dashboard-page" aria-busy={loading}>
@@ -217,7 +231,9 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
             <button
               type="button"
               className={`clinic-dashboard-plan-pill${
-                membershipQuota.planKey ? "" : " clinic-dashboard-plan-pill--empty"
+                membershipQuota.planKey && !membershipQuota.trialExhausted
+                  ? ""
+                  : " clinic-dashboard-plan-pill--empty"
               }`}
               onClick={() => go("membership", "/app/membresia")}
             >
@@ -235,11 +251,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
             <Plus size={16} aria-hidden />
             Nueva cita
           </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => go("new-consultation", "/app/consultas/nueva")}
-          >
+          <Button type="button" variant="secondary" onClick={startNewConsultation}>
             <Stethoscope size={16} aria-hidden />
             Nueva consulta
           </Button>

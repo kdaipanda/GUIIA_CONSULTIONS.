@@ -30,6 +30,11 @@ export const FEATURE_UPGRADE_MESSAGES = {
   medical_images: "La interpretación de laboratorio (PDF y estudios) requiere membresía Premium.",
 };
 
+export const TRIAL_CONSULTATION_LIMIT = 3;
+
+export const TRIAL_EXHAUSTED_MESSAGE =
+  "Has agotado tus 3 consultas de prueba. Suscríbete a un plan de membresía para continuar usando GUIAA.";
+
 export function getEffectivePlan(veterinarian, { platformAdmin = false } = {}) {
   if (platformAdmin) return "premium";
   if (!veterinarian) return "basic";
@@ -56,6 +61,27 @@ export function canUseMedicalImages(veterinarian, options = {}) {
 
 export function getFeatureUpgradeMessage(feature) {
   return FEATURE_UPGRADE_MESSAGES[feature] || "Tu plan no incluye esta función.";
+}
+
+/** ¿Puede iniciar una nueva consulta CDS? (trial, plan activo o premium) */
+export function canCreateConsultation(veterinarian, options = {}) {
+  if (options.platformAdmin) return true;
+  if (!veterinarian) return false;
+
+  const membershipType = veterinarian.membership_type?.toLowerCase();
+  const remaining = veterinarian.consultations_remaining ?? 0;
+
+  if (membershipType === "premium") return true;
+  if (membershipType && remaining > 0) return true;
+  if (!membershipType && remaining > 0) return true;
+  return false;
+}
+
+export function isTrialExhausted(veterinarian, options = {}) {
+  if (options.platformAdmin) return false;
+  if (!veterinarian) return false;
+  if (veterinarian.membership_type) return false;
+  return (veterinarian.consultations_remaining ?? 0) <= 0;
 }
 
 export function requiresProfessionalPlan(veterinarian, options = {}) {

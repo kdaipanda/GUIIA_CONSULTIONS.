@@ -53,7 +53,13 @@ import {
   getMembershipQuota,
   parseMembershipCatalogResponse,
 } from "./lib/membershipPlans";
-import { canAccessFeature, MEMBERSHIP_FEATURES } from "./lib/membershipAccess";
+import {
+  canAccessFeature,
+  MEMBERSHIP_FEATURES,
+  canCreateConsultation,
+  isTrialExhausted,
+  TRIAL_EXHAUSTED_MESSAGE,
+} from "./lib/membershipAccess";
 import { MembershipFeatureGate } from "./components/MembershipFeatureGate";
 import { GuiaaBrandLockup } from "./components/GuiaaBrandLockup";
 import { Header } from "./components/Header";
@@ -441,7 +447,7 @@ function App() {
 
 // Router Component
 const Router = () => {
-  const { veterinarian, loading } = useVet();
+  const { veterinarian, loading, platformAdmin } = useVet();
   const navigate = useNavigate();
   const location = useLocation();
   const [currentView, setCurrentView] = useState(
@@ -473,13 +479,25 @@ const Router = () => {
     }
   };
 
+  const accessOptions = { platformAdmin };
+
+  const guardNewConsultation = (onAllowed) => {
+    if (canCreateConsultation(veterinarian, accessOptions)) {
+      onAllowed();
+      return;
+    }
+    notifyQuotaError(TRIAL_EXHAUSTED_MESSAGE, () => navigateSetView("membership"));
+  };
+
   const openConsultationWithPatient = (ctx) => {
-    setClinicalContext(ctx);
-    setSelectedConsultationId(null);
-    setConsultationEntryMode("standard");
-    setCurrentView("new-consultation");
-    setIsInitialized(true);
-    navigate(VIEW_TO_PATH["new-consultation"]);
+    guardNewConsultation(() => {
+      setClinicalContext(ctx);
+      setSelectedConsultationId(null);
+      setConsultationEntryMode("standard");
+      setCurrentView("new-consultation");
+      setIsInitialized(true);
+      navigate(VIEW_TO_PATH["new-consultation"]);
+    });
   };
 
   // Helper to navigate to consultation with ID
@@ -520,16 +538,18 @@ const Router = () => {
   const completeAuthAndEnter = useCallback(() => {
     setCedulaFlow(null);
     if (consumePostRegisterOnboarding()) {
-      setClinicalContext(null);
-      setSelectedConsultationId(null);
-      setConsultationEntryMode("standard");
-      setCurrentView("new-consultation");
-      setIsInitialized(true);
-      navigate(VIEW_TO_PATH["new-consultation"]);
+      guardNewConsultation(() => {
+        setClinicalContext(null);
+        setSelectedConsultationId(null);
+        setConsultationEntryMode("standard");
+        setCurrentView("new-consultation");
+        setIsInitialized(true);
+        navigate(VIEW_TO_PATH["new-consultation"]);
+      });
       return;
     }
     navigateAfterAuth(navigate, setCurrentView, setIsInitialized);
-  }, [navigate]);
+  }, [navigate, veterinarian, platformAdmin]);
 
   useEffect(() => {
     if (portalOrganizationId) {
@@ -1778,7 +1798,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       if (isTyping) return;
 
       const key = e.key.toLowerCase();
-      if (key === "n") setView("new-consultation");
+      if (key === "n") handleNewConsultation();
       else if (key === "e" && isPremiumMember(veterinarian)) {
         openExpertConsultation?.();
       }       else if (key === "h") setView("consultation-history"); else if (key === "m") setView("membership");
@@ -1923,6 +1943,14 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
   };
 
   const membershipStatus = getMembershipQuota(veterinarian, membershipPackages);
+
+  const handleNewConsultation = () => {
+    if (canCreateConsultation(veterinarian, { platformAdmin })) {
+      setView("new-consultation");
+      return;
+    }
+    notifyQuotaError(TRIAL_EXHAUSTED_MESSAGE, () => setView("membership"));
+  };
 
   const vetName = veterinarian?.nombre || "Doctor/a";
   const membershipType = veterinarian?.membership_type?.toLowerCase();
@@ -2306,11 +2334,11 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 role="button"
                 tabIndex={0}
                 className={`action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${embedded ? " clinic-dashboard-quick-btn" : ""}`}
-                onClick={() => setView("new-consultation")}
+                onClick={handleNewConsultation}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setView("new-consultation");
+                    handleNewConsultation();
                   }
                 }}
               >
@@ -2583,7 +2611,7 @@ const NewConsultation = ({
   clinicalContext = null,
   onClinicalContextChange,
 }) => {
-  const { veterinarian, platformAdmin } = useVet();
+  const { veterinarian, platformAdmin, refreshProfile } = useVet();
   const isExpertMode = entryMode === "expert";
   const [step, setStep] = useState(isExpertMode && !existingConsultationId ? 2 : 1);
   // Estado inicial: solo perros y gatos (membresía básica)
@@ -2754,6 +2782,14 @@ const NewConsultation = ({
     }
 
     return response.json();
+  };
+
+  const syncProfileAfterConsultation = async () => {
+    try {
+      await refreshProfile?.();
+    } catch {
+      /* ignore */
+    }
   };
 
   const renderCategorySelector = (title = "Categoría Animal") => {
@@ -3027,6 +3063,7 @@ const NewConsultation = ({
       const data = await createStageOneConsultation();
       if (!data) return;
       setConsultationId(data.id);
+      await syncProfileAfterConsultation();
       setStep(2);
     } catch (err) {
       notifyError(err.message || "Error al crear la consulta");
@@ -3051,6 +3088,7 @@ const NewConsultation = ({
         if (!created) return;
         activeConsultationId = created.id;
         setConsultationId(created.id);
+        await syncProfileAfterConsultation();
       }
 
       const payloadUpdates = {
@@ -3234,6 +3272,26 @@ const NewConsultation = ({
             </p>
             <Button type="button" onClick={() => setView("membership")}>
               Ver Planes Premium
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (
+    !existingConsultationId &&
+    !canCreateConsultation(veterinarian, { platformAdmin })
+  ) {
+    return (
+      <div className="consultation-page">
+        <div className="container">
+          <div className="premium-required">
+            <div className="premium-icon">🔒</div>
+            <h2>Consultas de prueba agotadas</h2>
+            <p>{TRIAL_EXHAUSTED_MESSAGE}</p>
+            <Button type="button" onClick={() => setView("membership")}>
+              Ver planes de membresía
             </Button>
           </div>
         </div>

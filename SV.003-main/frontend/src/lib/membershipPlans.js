@@ -1,5 +1,7 @@
 /** Catálogo de planes y funciones — alineado con backend (server_simple.py) y módulos GUIAA. */
 
+import { TRIAL_CONSULTATION_LIMIT } from "./membershipAccess";
+
 export const DEFAULT_PACKAGES = {
   basic: {
     name: "Básica",
@@ -186,19 +188,40 @@ const PLAN_STATUS_LABELS = {
   basic: "Básica",
   professional: "Profesional",
   premium: "Premium",
+  trial: "Prueba gratuita",
 };
 
 export function getMembershipQuota(veterinarian, packages = DEFAULT_PACKAGES) {
   if (!veterinarian?.membership_type) {
+    const remaining = veterinarian?.consultations_remaining ?? 0;
+    if (remaining > 0) {
+      return {
+        planKey: "trial",
+        status: "Periodo de prueba",
+        planName: PLAN_STATUS_LABELS.trial,
+        consultations: remaining,
+        maxConsultations: TRIAL_CONSULTATION_LIMIT,
+        progress: Math.min(
+          ((TRIAL_CONSULTATION_LIMIT - remaining) / TRIAL_CONSULTATION_LIMIT) * 100,
+          100,
+        ),
+        color: remaining > 1 ? "green" : remaining === 1 ? "orange" : "red",
+        speciesScope: "premium",
+        unlimited: false,
+        trialExhausted: false,
+      };
+    }
     return {
       planKey: null,
-      status: "Sin membresía",
+      status: "Prueba agotada",
       planName: null,
       consultations: 0,
-      maxConsultations: 0,
-      progress: 0,
+      maxConsultations: TRIAL_CONSULTATION_LIMIT,
+      progress: 100,
       color: "red",
       speciesScope: null,
+      unlimited: false,
+      trialExhausted: true,
     };
   }
 

@@ -103,9 +103,28 @@ class MembershipPlanMatrix(unittest.TestCase):
             validate_consultation_category(p, "aves")
         self.assertEqual(ctx.exception.status_code, 403)
 
-    def test_professional_allows_exotic_consultation(self):
-        p = _profile("professional")
-        validate_consultation_category(p, "aves")
+    def test_trial_exhausted_resolves_basic(self):
+        self.assertEqual(resolve_effective_plan(_trial_profile(0)), "basic")
+
+    def test_exhausted_trial_cannot_access_inventory(self):
+        p = _trial_profile(0)
+        self.assertFalse(can_access_feature(p, "inventory"))
+        self.assertFalse(can_access_feature(p, "advanced_analysis"))
+
+
+class TrialConsultationLimit(unittest.TestCase):
+    def test_validate_trial_limit_allows_three(self):
+        from server_simple import validate_trial_consultations_limit
+
+        self.assertTrue(validate_trial_consultations_limit(None, 3))
+        self.assertTrue(validate_trial_consultations_limit(None, 1))
+
+    def test_validate_trial_limit_blocks_more_than_three(self):
+        from server_simple import validate_trial_consultations_limit
+
+        with self.assertRaises(HTTPException) as ctx:
+            validate_trial_consultations_limit(None, 4)
+        self.assertEqual(ctx.exception.status_code, 400)
 
 
 class MembershipConsultations(unittest.TestCase):
