@@ -67,11 +67,16 @@ export function trackMetaViewContent(contentName = "Pricing") {
   });
 }
 
-export function trackMetaCompleteRegistration() {
-  trackMetaEvent("CompleteRegistration", {
-    content_name: "MVZ Registration",
-    status: true,
-  });
+export function trackMetaCompleteRegistration(eventId) {
+  const options = eventId ? { eventID: eventId } : {};
+  trackMetaEvent(
+    "CompleteRegistration",
+    {
+      content_name: "MVZ Registration",
+      status: true,
+    },
+    options,
+  );
 }
 
 export function trackMetaInitiateCheckout({

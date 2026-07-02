@@ -817,7 +817,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
       }
 
       const vetData = await response.json();
-      trackMetaCompleteRegistration();
+      trackMetaCompleteRegistration(vetData?.id);
       // Redirigir a flujo obligatorio de cédula (upload + verificación)
       setCedulaFlow?.({
         source: "register",
