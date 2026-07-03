@@ -33,6 +33,11 @@ import {
   consumePostRegisterOnboarding,
 } from "./lib/guiaaOnboarding";
 import { notifyError, notifySuccess, notifyQuotaError } from "./lib/appToast";
+import {
+  trackMetaLead,
+  trackMetaCompleteRegistration,
+  trackMetaInitiateCheckout,
+} from "./lib/metaPixel";
 import { clinicNavIsHero, clinicNavThemeStyle } from "./lib/clinicNavTheme";
 import { LATAM_COUNTRIES, countryLabel } from "./lib/latamCountries";
 import { SupportChatWidget } from "./components/SupportChatWidget";
@@ -50,6 +55,7 @@ import { MedicalImagesPage } from "./pages/MedicalImagesPage";
 import { DashboardActivitySection } from "./components/dashboard/DashboardActivitySection";
 import {
   DEFAULT_PACKAGES,
+  DEFAULT_CREDIT_PACKAGES,
   getMembershipQuota,
   parseMembershipCatalogResponse,
 } from "./lib/membershipPlans";
@@ -526,6 +532,9 @@ const Router = () => {
 
   // Clear consultation ID when leaving new-consultation view
   const handleSetView = (view) => {
+    if (view === "register") {
+      trackMetaLead("register_intent");
+    }
     if (view !== "new-consultation") {
       setSelectedConsultationId(null);
       setConsultationEntryMode("standard");
@@ -892,6 +901,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
       }
 
       const vetData = await response.json();
+      trackMetaCompleteRegistration(vetData?.id);
       // Redirigir a flujo obligatorio de cédula (upload + verificación)
       setCedulaFlow?.({
         source: "register",
@@ -1997,6 +2007,12 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       }
 
       const data = await response.json();
+      const creditPkg = DEFAULT_CREDIT_PACKAGES[packageId];
+      trackMetaInitiateCheckout({
+        packageId,
+        value: creditPkg?.price,
+        contentCategory: "consultation_credits",
+      });
       window.location.href = data.checkout_url;
     } catch (error) {
       console.error("Error:", error);

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Check, Coins, ShieldCheck } from "lucide-react";
 import { getBackendUrl } from "../../lib/backendUrl";
 import { buildLandingPricingPlans } from "../../lib/landingPricingPlans";
+import { trackMetaViewContent } from "../../lib/metaPixel";
 import {
   DEFAULT_CREDIT_PACKAGES,
   parseMembershipCatalogResponse,
@@ -12,6 +13,26 @@ const FALLBACK = buildLandingPricingPlans(null);
 export function LandingPricing({ setView }) {
   const [plans, setPlans] = useState(FALLBACK.plans);
   const [creditAddon, setCreditAddon] = useState(FALLBACK.creditAddon);
+  const pricingRef = useRef(null);
+  const pricingViewTracked = useRef(false);
+
+  useEffect(() => {
+    const section = pricingRef.current;
+    if (!section || pricingViewTracked.current) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting || pricingViewTracked.current) return;
+        pricingViewTracked.current = true;
+        trackMetaViewContent("Pricing");
+        observer.disconnect();
+      },
+      { threshold: 0.35 },
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,7 +78,7 @@ export function LandingPricing({ setView }) {
   }, []);
 
   return (
-    <section id="pricing" className="landing-section landing-section-alt">
+    <section id="pricing" ref={pricingRef} className="landing-section landing-section-alt">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
         <div className="max-w-xl">
           <p className="landing-eyebrow">Membresía MVZ</p>

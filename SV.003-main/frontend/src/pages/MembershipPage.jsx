@@ -23,6 +23,7 @@ import {
   getMembershipStatusText,
   getPlanFeatureList,
 } from "../lib/membershipPlans";
+import { trackMetaInitiateCheckout } from "../lib/metaPixel";
 import "./membershipPage.css";
 
 const INFO_ICONS = {
@@ -234,6 +235,18 @@ export function MembershipPage({ setView }) {
         throw new Error("No se recibió la URL de checkout. Por favor, intenta de nuevo.");
       }
 
+      const pkg = packages[packageId];
+      const price = pkg
+        ? billingCycle === "annual"
+          ? pkg.price_annual
+          : pkg.price_monthly
+        : null;
+      trackMetaInitiateCheckout({
+        packageId,
+        value: price,
+        contentCategory: "membership",
+      });
+
       window.location.href = data.checkout_url;
     } catch (error) {
       alert(error.message || "Error procesando el pago. Inténtalo de nuevo.");
@@ -272,6 +285,13 @@ export function MembershipPage({ setView }) {
       if (!data.checkout_url) {
         throw new Error("No se recibió la URL de checkout.");
       }
+
+      const pkg = creditPackages[packageId];
+      trackMetaInitiateCheckout({
+        packageId,
+        value: pkg?.price,
+        contentCategory: "consultation_credits",
+      });
 
       window.location.href = data.checkout_url;
     } catch (error) {

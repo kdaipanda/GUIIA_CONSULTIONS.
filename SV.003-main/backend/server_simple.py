@@ -38,6 +38,7 @@ from starlette.responses import JSONResponse
 import auth_security
 import cedula_verification
 import email_notifications
+import meta_capi
 from membership_catalog import (
     CONSULTATION_CREDIT_PACKAGES,
     FEATURED_PLAN_KEY,
@@ -152,6 +153,41 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+
+async def _send_meta_purchase_if_needed(transaction: Dict[str, Any], session_id: str) -> None:
+    """Envía Purchase a Meta CAPI una sola vez por sesión de checkout."""
+    if not meta_capi.is_meta_capi_enabled() or transaction.get("meta_capi_purchase_sent"):
+        return
+
+    veterinarian_id = (transaction.get("veterinarian_id") or "").strip()
+    veterinarian = None
+    if veterinarian_id:
+        veterinarian, _ = get_profile(veterinarian_id)
+
+    package_id = transaction.get("package") or transaction.get("package_id")
+    sent = await meta_capi.track_purchase_capi(
+        session_id=session_id,
+        purchase_type=transaction.get("type"),
+        package_id=package_id,
+        value=transaction.get("amount"),
+        currency=(transaction.get("currency") or "mxn"),
+        veterinarian_id=veterinarian_id or None,
+        email=veterinarian.get("email") if veterinarian else None,
+        phone=veterinarian.get("telefono") if veterinarian else None,
+    )
+    if not sent:
+        return
+
+    err = update_payment_transaction(
+        session_id,
+        {
+            "meta_capi_purchase_sent": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        },
+    )
+    if err:
+        print(f"[WARN] Meta CAPI flag no guardado para {session_id}: {err}")
 
 
 @app.middleware("http")
@@ -1237,7 +1273,7 @@ def _flow_auth_fields(vet_id: str, email: str) -> dict:
 
 
 @app.post("/api/auth/register")
-async def register_veterinarian(vet: VeterinarianRegister):
+async def register_veterinarian(vet: VeterinarianRegister, request: Request):
     """Registra un nuevo veterinario"""
 
     # Verificar si ya existe por email
@@ -1298,13 +1334,26 @@ async def register_veterinarian(vet: VeterinarianRegister):
         raise HTTPException(status_code=500, detail=f"Error guardando perfil: {err}")
 
     saved = result or vet_data
+    result_data = auth_security.attach_auth_tokens(saved)
+
     if not is_dev:
         cedula_verification.maybe_send_cedula_upload_reminder(saved, force=True)
         asyncio.create_task(
             _email_background(email_notifications.notify_admins_new_registration, saved)
         )
 
-    return auth_security.attach_auth_tokens(saved)
+    async def _track_meta_registration() -> None:
+        await meta_capi.track_complete_registration_capi(
+            veterinarian_id=vet_data["id"],
+            email=vet.email,
+            phone=vet.telefono,
+            country=pais,
+            request=request,
+        )
+
+    asyncio.create_task(_track_meta_registration())
+
+    return result_data
 
 
 @app.post("/api/auth/login")
@@ -2471,6 +2520,19 @@ async def create_checkout_session(
         if err:
             raise HTTPException(status_code=500, detail=f"Error guardando transacción: {err}")
 
+        asyncio.create_task(
+            meta_capi.track_initiate_checkout_capi(
+                session_id=session_id,
+                package_id=package_key,
+                value=price,
+                currency=package["currency"],
+                content_category="membership",
+                veterinarian_id=x_veterinarian_id,
+                email=profile.get("email"),
+                request=request,
+            )
+        )
+
         return {"checkout_url": session.url, "session_id": session_id}
     except Exception as e:
         import traceback
@@ -2642,11 +2704,19 @@ async def stripe_webhook(request: Request):
                     },
                 )
 
+    if payment_status == "paid":
+        refreshed_transaction, _ = get_payment_transaction_by_session_id(session_id)
+        if refreshed_transaction:
+            await _send_meta_purchase_if_needed(refreshed_transaction, session_id)
+
     return {"received": True}
 
 
 @app.post("/api/payments/consultations/checkout/session")
-async def create_consultations_checkout_session(payload: ConsultationCreditsPurchaseRequest):
+async def create_consultations_checkout_session(
+    payload: ConsultationCreditsPurchaseRequest,
+    request: Request,
+):
     """Crea sesión de pago para recarga de consultas"""
 
     package = CONSULTATION_CREDIT_PACKAGES.get(payload.package_id)
@@ -2713,6 +2783,19 @@ async def create_consultations_checkout_session(payload: ConsultationCreditsPurc
             transaction, err = insert_payment_transaction(transaction_data)
             if err:
                 raise HTTPException(status_code=500, detail=f"Error guardando transacción: {err}")
+
+            asyncio.create_task(
+                meta_capi.track_initiate_checkout_capi(
+                    session_id=session_id,
+                    package_id=payload.package_id,
+                    value=amount,
+                    currency=package["currency"],
+                    content_category="consultation_credits",
+                    veterinarian_id=payload.veterinarian_id,
+                    email=veterinarian.get("email"),
+                    request=request,
+                )
+            )
 
             return {"checkout_url": session.url, "session_id": session_id}
         except Exception as e:
@@ -2829,11 +2912,17 @@ async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(N
         if veterinarian_id and updated_veterinarian is None:
             updated_veterinarian, _ = get_profile(veterinarian_id)
 
+        refreshed_transaction, _ = get_payment_transaction_by_session_id(session_id)
+        if refreshed_transaction:
+            await _send_meta_purchase_if_needed(refreshed_transaction, session_id)
+
     return {
         "status": status_value,
         "payment_status": payment_status,
         "session_id": session_id,
         "purchase_type": transaction.get("type"),
+        "package": transaction.get("package"),
+        "amount": transaction.get("amount"),
         "credits": transaction.get("credits"),
         "veterinarian": updated_veterinarian,
         "activation_pending": is_async_payment_pending(payment_status, status_value),

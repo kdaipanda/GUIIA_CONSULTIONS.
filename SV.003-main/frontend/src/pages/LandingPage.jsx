@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import "../styles/consultationFlow.css";
 import "./landing/landingPreview.css";
@@ -33,8 +33,12 @@ import { LandingSocialRail } from "./landing/LandingSocialRail";
 import { LandingReveal } from "./landing/LandingReveal";
 import { LandingSeo } from "./landing/LandingSeo";
 import { LandingVetAnimations } from "./landing/LandingVetAnimations";
+import { trackMetaPageView } from "../lib/metaPixel";
 
 export function LandingPage({ setView }) {
+  useEffect(() => {
+    trackMetaPageView();
+  }, []);
   return (
     <div className="landing-shell landing-shell--page min-h-screen p-3 pb-5 antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
       <LandingSeo />

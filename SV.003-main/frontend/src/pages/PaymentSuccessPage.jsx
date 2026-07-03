@@ -5,6 +5,7 @@ import { GuiaaBrandLockup } from "../components/GuiaaBrandLockup";
 import { AuthPageShell } from "../layout/AuthPageShell";
 import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
+import { trackMetaPurchaseOnce } from "../lib/metaPixel";
 import "./membershipPage.css";
 
 export function PaymentSuccessPage({ setView }) {
@@ -51,6 +52,14 @@ export function PaymentSuccessPage({ setView }) {
         setPurchaseType(data.purchase_type || null);
         setCreditsPurchased(data.credits || null);
         setPaymentStatus("success");
+        trackMetaPurchaseOnce(sessionId, {
+          purchaseType: data.purchase_type,
+          packageId: data.package,
+          value:
+            data.amount ??
+            (data.amount_total != null ? data.amount_total / 100 : undefined),
+          currency: (data.currency || "mxn").toUpperCase(),
+        });
         return;
       }
 
