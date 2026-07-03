@@ -33,7 +33,11 @@ def is_membership_promotion_codes_enabled() -> bool:
 
 
 def premium_promotion_code_label() -> str:
-    return os.getenv("STRIPE_PREMIUM_PROMO_CODE", "GUIAAFRIENDS").strip() or "GUIAAFRIENDS"
+    return os.getenv("STRIPE_PREMIUM_PROMO_CODE", "FRIENDS40").strip() or "FRIENDS40"
+
+
+def premium_promotion_code_id() -> str:
+    return os.getenv("STRIPE_PREMIUM_PROMOTION_CODE_ID", "").strip()
 
 
 def premium_coupon_id() -> str:
@@ -114,12 +118,47 @@ def resolve_premium_promotion_discount(stripe_api: Any) -> PromoResolution:
             print(f"[WARN] Cupón Stripe no válido ({coupon_id}): {exc}")
             return {}, None, None, f"coupon_lookup_failed:{exc}"
 
+    promo_id = premium_promotion_code_id()
+    if promo_id:
+        return {"discounts": [{"promotion_code": promo_id}]}, "promotion_code", promo_id, None
+
     promo_code = premium_promotion_code_label()
     promo_id = lookup_stripe_promotion_code_id(stripe_api, promo_code)
     if promo_id:
         return {"discounts": [{"promotion_code": promo_id}]}, "promotion_code", promo_id, None
 
     return {}, None, None, f"promotion_code_not_found:{promo_code}"
+
+
+def _stripe_discount_amount(session: Any) -> int:
+    total_details = getattr(session, "total_details", None)
+    if total_details is None:
+        return 0
+    return int(getattr(total_details, "amount_discount", 0) or 0)
+
+
+def session_has_discount(session: Any, expected_subtotal_cents: Optional[int] = None) -> bool:
+    if _stripe_discount_amount(session) > 0:
+        return True
+    if expected_subtotal_cents is None:
+        return False
+    subtotal = getattr(session, "amount_subtotal", None)
+    if subtotal is None:
+        return False
+    return int(subtotal) < int(expected_subtotal_cents)
+
+
+def _coupon_id_from_promotion_code(stripe_api: Any, promo_id: str) -> Optional[str]:
+    try:
+        promo = stripe_api.PromotionCode.retrieve(promo_id)
+        coupon = getattr(promo, "coupon", None)
+        if isinstance(coupon, str):
+            return coupon
+        if coupon is not None:
+            return getattr(coupon, "id", None)
+    except Exception as exc:
+        print(f"[WARN] No se pudo leer cupón del promotion code {promo_id}: {exc}")
+    return None
 
 
 def inspect_premium_promotion_status(stripe_api: Any) -> Dict[str, Any]:
@@ -154,6 +193,68 @@ def inspect_premium_promotion_status(stripe_api: Any) -> Dict[str, Any]:
         ]
     except Exception as exc:
         status["active_promotion_codes_sample_error"] = str(exc)
+
+    if ref_id and kind == "promotion_code":
+        try:
+            promo = stripe_api.PromotionCode.retrieve(ref_id)
+            coupon = getattr(promo, "coupon", None)
+            coupon_id = coupon if isinstance(coupon, str) else getattr(coupon, "id", None)
+            status["promotion_code"] = {
+                "id": ref_id,
+                "code": getattr(promo, "code", None),
+                "active": getattr(promo, "active", None),
+                "times_redeemed": getattr(promo, "times_redeemed", None),
+                "max_redemptions": getattr(promo, "max_redemptions", None),
+                "coupon_id": coupon_id,
+            }
+            if coupon_id:
+                coupon_obj = stripe_api.Coupon.retrieve(coupon_id)
+                status["coupon"] = {
+                    "id": coupon_id,
+                    "valid": getattr(coupon_obj, "valid", None),
+                    "percent_off": getattr(coupon_obj, "percent_off", None),
+                    "amount_off": getattr(coupon_obj, "amount_off", None),
+                    "duration": getattr(coupon_obj, "duration", None),
+                    "applies_to": getattr(coupon_obj, "applies_to", None),
+                    "currency": getattr(coupon_obj, "currency", None),
+                }
+        except Exception as exc:
+            status["promotion_details_error"] = str(exc)
+
+    if kwargs.get("discounts"):
+        try:
+            test_session = stripe_api.checkout.Session.create(
+                mode="payment",
+                success_url="https://guiaa.vet/payment-success?session_id={CHECKOUT_SESSION_ID}",
+                cancel_url="https://guiaa.vet/membership",
+                locale="es",
+                payment_method_types=["card"],
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "mxn",
+                            "product_data": {"name": "Test Membresía Premium"},
+                            "unit_amount": 220000,
+                        },
+                        "quantity": 1,
+                    }
+                ],
+                discounts=kwargs["discounts"],
+            )
+            status["test_checkout"] = {
+                "session_id": test_session.id,
+                "amount_subtotal": getattr(test_session, "amount_subtotal", None),
+                "amount_total": getattr(test_session, "amount_total", None),
+                "amount_discount": _stripe_discount_amount(test_session),
+                "discount_applied": session_has_discount(test_session, 220000),
+                "promotion_ref": ref_id,
+            }
+            try:
+                stripe_api.checkout.Session.expire(test_session.id)
+            except Exception:
+                pass
+        except Exception as exc:
+            status["test_checkout_error"] = str(exc)
 
     return status
 
@@ -219,7 +320,7 @@ def is_async_payment_pending(payment_status: Optional[str], status: Optional[str
 def create_stripe_checkout_session(stripe_api: Any, **session_kwargs: Any):
     """
     Crea la sesión de Checkout con métodos LATAM.
-    Reintenta sin OXXO y preserva descuentos antes de degradar a cupón manual.
+    Con descuento usa solo tarjeta (OXXO + cupón suele fallar en Stripe).
     """
     latam = build_stripe_checkout_session_kwargs(
         session_kwargs.pop("profile", None),
@@ -229,28 +330,38 @@ def create_stripe_checkout_session(stripe_api: Any, **session_kwargs: Any):
     merged = {**session_kwargs, **latam}
     has_discounts = bool(merged.get("discounts"))
 
+    if has_discounts:
+        merged["payment_method_types"] = ["card"]
+        merged.pop("payment_method_options", None)
+
     try:
         return stripe_api.checkout.Session.create(**merged)
     except Exception as primary_error:
         print(f"[WARN] Checkout Stripe falló: {primary_error}")
 
         if has_discounts:
-            card_discount = {**merged, "payment_method_types": ["card"]}
-            card_discount.pop("payment_method_options", None)
-            try:
-                print("[INFO] Reintentando checkout con descuento + solo tarjeta.")
-                return stripe_api.checkout.Session.create(**card_discount)
-            except Exception as discount_card_error:
-                print(f"[WARN] Checkout descuento+tarjeta falló: {discount_card_error}")
+            discounts = merged.get("discounts") or []
+            promo_entry = next((d for d in discounts if d.get("promotion_code")), None)
+            if promo_entry:
+                coupon_id = _coupon_id_from_promotion_code(
+                    stripe_api, promo_entry["promotion_code"]
+                )
+                if coupon_id:
+                    coupon_attempt = {**merged, "discounts": [{"coupon": coupon_id}]}
+                    try:
+                        print(f"[INFO] Reintentando checkout con coupon {coupon_id}.")
+                        return stripe_api.checkout.Session.create(**coupon_attempt)
+                    except Exception as coupon_error:
+                        print(f"[WARN] Checkout con coupon directo falló: {coupon_error}")
 
-            fallback_manual = {**merged}
-            fallback_manual.pop("discounts", None)
-            fallback_manual["allow_promotion_codes"] = True
-            fallback_manual["payment_method_types"] = ["card"]
-            fallback_manual.pop("payment_method_options", None)
+            manual = {**merged}
+            manual.pop("discounts", None)
+            manual["allow_promotion_codes"] = True
+            manual["payment_method_types"] = ["card"]
+            manual.pop("payment_method_options", None)
             try:
                 print("[WARN] Checkout sin auto-descuento; cupón manual habilitado.")
-                return stripe_api.checkout.Session.create(**fallback_manual)
+                return stripe_api.checkout.Session.create(**manual)
             except Exception:
                 raise primary_error
 

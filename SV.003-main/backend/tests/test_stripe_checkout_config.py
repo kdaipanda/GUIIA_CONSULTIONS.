@@ -73,7 +73,8 @@ class StripeCheckoutConfigTests(unittest.TestCase):
                         return _FakePromoList([_FakePromo("GUIAAFRIENDS", "promo_test123")])
                     return _FakePromoList([])
 
-        kwargs = membership_promotion_checkout_kwargs("premium", _FakeStripe())
+        with patch.dict(os.environ, {"STRIPE_PREMIUM_PROMO_CODE": "GUIAAFRIENDS"}):
+            kwargs = membership_promotion_checkout_kwargs("premium", _FakeStripe())
         self.assertEqual(kwargs, {"discounts": [{"promotion_code": "promo_test123"}]})
 
     def test_lookup_fuzzy_promo_code(self):

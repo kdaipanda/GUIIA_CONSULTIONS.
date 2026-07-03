@@ -57,6 +57,7 @@ from stripe_checkout_config import (
     membership_promotion_checkout_kwargs,
     premium_promotion_code_label,
     resolve_premium_promotion_discount,
+    session_has_discount,
     stripe_payment_method_types,
 )
 from membership_access import (
@@ -2566,20 +2567,30 @@ async def create_checkout_session(
             )
         )
 
-        promo_applied = bool(promo_kwargs.get("discounts"))
+        expected_subtotal_cents = int(round(price * 100))
+        promo_requested = bool(promo_kwargs.get("discounts"))
+        promo_applied = session_has_discount(session, expected_subtotal_cents)
         promo_resolution = None
-        if promo_applied:
+        if promo_requested:
             _, promo_kind, promo_ref, _ = resolve_premium_promotion_discount(stripe)
             promo_resolution = {"kind": promo_kind, "id": promo_ref}
 
         return {
             "checkout_url": session.url,
             "session_id": session_id,
+            "promo_requested": promo_requested,
             "promo_applied": promo_applied,
             "promo_resolution": promo_resolution,
             "amount_total": getattr(session, "amount_total", None),
             "amount_subtotal": getattr(session, "amount_subtotal", None),
-            "total_details": getattr(session, "total_details", None),
+            "amount_discount": (
+                getattr(getattr(session, "total_details", None), "amount_discount", None)
+            ),
+            "promo_warning": (
+                "El cupón no se aplicó en Stripe. Verifica restricciones del cupón o usa FRIENDS40."
+                if promo_requested and not promo_applied
+                else None
+            ),
         }
     except Exception as e:
         import traceback
