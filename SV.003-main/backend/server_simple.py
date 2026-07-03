@@ -49,12 +49,14 @@ from membership_catalog import (
 from stripe_checkout_config import (
     build_stripe_checkout_session_kwargs,
     create_stripe_checkout_session,
+    inspect_premium_promotion_status,
     is_async_payment_pending,
     is_auto_apply_premium_promo_enabled,
     is_membership_promotion_codes_enabled,
     is_oxxo_enabled,
     membership_promotion_checkout_kwargs,
     premium_promotion_code_label,
+    resolve_premium_promotion_discount,
     stripe_payment_method_types,
 )
 from membership_access import (
@@ -1998,6 +2000,24 @@ async def get_stripe_config():
     }
 
 
+@app.get("/api/stripe/promo-status")
+async def get_stripe_promo_status():
+    """Diagnóstico: ¿se puede resolver y aplicar el cupón Premium en Stripe?"""
+    if not stripe or not STRIPE_API_KEY:
+        return {
+            "ok": False,
+            "error": "stripe_not_configured",
+            "inspect": inspect_premium_promotion_status(None),
+        }
+
+    stripe.api_key = STRIPE_API_KEY
+    inspect = inspect_premium_promotion_status(stripe)
+    return {
+        "ok": inspect.get("resolved", False),
+        "inspect": inspect,
+    }
+
+
 @app.get("/api/config/diagnostics")
 async def get_config_diagnostics():
     """Endpoint de diagnóstico para verificar todas las configuraciones"""
@@ -2492,13 +2512,14 @@ async def create_checkout_session(
         cancel_url = f"{payment_request.origin_url}/membership"
         print(f"[DEBUG] Success URL: {success_url}")
         print(f"[DEBUG] Cancel URL: {cancel_url}")
+        promo_kwargs = membership_promotion_checkout_kwargs(package_key, stripe)
         session = create_stripe_checkout_session(
             stripe,
             mode="payment",
             success_url=success_url,
             cancel_url=cancel_url,
             profile=profile,
-            **membership_promotion_checkout_kwargs(package_key, stripe),
+            **promo_kwargs,
             line_items=[
                 {
                     "price_data": {
@@ -2545,7 +2566,21 @@ async def create_checkout_session(
             )
         )
 
-        return {"checkout_url": session.url, "session_id": session_id}
+        promo_applied = bool(promo_kwargs.get("discounts"))
+        promo_resolution = None
+        if promo_applied:
+            _, promo_kind, promo_ref, _ = resolve_premium_promotion_discount(stripe)
+            promo_resolution = {"kind": promo_kind, "id": promo_ref}
+
+        return {
+            "checkout_url": session.url,
+            "session_id": session_id,
+            "promo_applied": promo_applied,
+            "promo_resolution": promo_resolution,
+            "amount_total": getattr(session, "amount_total", None),
+            "amount_subtotal": getattr(session, "amount_subtotal", None),
+            "total_details": getattr(session, "total_details", None),
+        }
     except Exception as e:
         import traceback
         error_trace = traceback.format_exc()
