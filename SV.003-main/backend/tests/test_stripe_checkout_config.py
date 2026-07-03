@@ -45,6 +45,19 @@ class StripeCheckoutConfigTests(unittest.TestCase):
         kwargs = membership_promotion_checkout_kwargs("premium")
         self.assertEqual(kwargs, {"allow_promotion_codes": True})
 
+    def test_premium_auto_apply_when_promo_found(self):
+        class _FakePromoList:
+            data = [type("Promo", (), {"id": "promo_test123"})()]
+
+        class _FakeStripe:
+            class PromotionCode:
+                @staticmethod
+                def list(**_kwargs):
+                    return _FakePromoList()
+
+        kwargs = membership_promotion_checkout_kwargs("premium", _FakeStripe())
+        self.assertEqual(kwargs, {"discounts": [{"promotion_code": "promo_test123"}]})
+
     def test_basic_membership_no_promotion_codes(self):
         self.assertEqual(membership_promotion_checkout_kwargs("basic"), {})
         self.assertEqual(membership_promotion_checkout_kwargs("professional"), {})

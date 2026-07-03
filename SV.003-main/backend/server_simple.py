@@ -50,6 +50,7 @@ from stripe_checkout_config import (
     build_stripe_checkout_session_kwargs,
     create_stripe_checkout_session,
     is_async_payment_pending,
+    is_auto_apply_premium_promo_enabled,
     is_membership_promotion_codes_enabled,
     is_oxxo_enabled,
     membership_promotion_checkout_kwargs,
@@ -1993,6 +1994,7 @@ async def get_stripe_config():
         "payment_methods_latam": stripe_payment_method_types("mxn", "CO"),
         "premium_promotion_codes_enabled": is_membership_promotion_codes_enabled(),
         "premium_promotion_code_label": premium_promotion_code_label(),
+        "premium_promotion_auto_apply": is_auto_apply_premium_promo_enabled(),
     }
 
 
@@ -2496,13 +2498,17 @@ async def create_checkout_session(
             success_url=success_url,
             cancel_url=cancel_url,
             profile=profile,
-            **membership_promotion_checkout_kwargs(package_key),
+            **membership_promotion_checkout_kwargs(package_key, stripe),
             line_items=[
                 {
                     "price_data": {
                         "currency": package["currency"],
                         "product_data": {
                             "name": f"Membresía {package['name']}",
+                            "metadata": {
+                                "package_key": package_key,
+                                "billing_cycle": payment_request.billing_cycle,
+                            },
                         },
                         "unit_amount": int(round(price * 100)),
                     },
