@@ -124,7 +124,7 @@ function ProductLink({ productTab }) {
 export function LandingFeatures() {
   return (
     <section id="features" className="landing-section landing-section-alt">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="landing-container">
         <div className="landing-section-head-wide">
           <div className="landing-section-head">
             <p className="landing-eyebrow">Módulos del consultorio</p>
@@ -139,7 +139,7 @@ export function LandingFeatures() {
           <button
             type="button"
             onClick={() => scrollToLandingProduct("species")}
-            className="landing-link-arrow shrink-0"
+            className="landing-link-arrow inline-flex min-h-11 shrink-0 items-center gap-1"
           >
             Ver capturas del producto
             <ArrowUpRight size={15} aria-hidden />

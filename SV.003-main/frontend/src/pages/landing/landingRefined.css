@@ -6,6 +6,7 @@
 
 /* Tarjeta unificada: hero + stats + cuerpo */
 .landing-page-card {
+  --landing-gutter: 1.25rem;
   position: relative;
   overflow: hidden;
   border-radius: 2rem;
@@ -16,9 +17,16 @@
   background: #fff;
 }
 
+@media (min-width: 640px) {
+  .landing-page-card {
+    --landing-gutter: 2rem;
+  }
+}
+
 @media (min-width: 1024px) {
   .landing-page-card {
     border-radius: 2.5rem;
+    --landing-gutter: 2.5rem;
   }
 }
 
@@ -163,12 +171,7 @@
 
 /* Banda Doctor Plumitas */
 .landing-brand-band {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 2rem 1.25rem;
-  text-align: center;
+  padding-block: 2rem;
   border-block: 1px solid rgba(61, 155, 143, 0.15);
   background: linear-gradient(
     180deg,
@@ -177,13 +180,24 @@
   );
 }
 
+.landing-brand-band-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
 @media (min-width: 640px) {
   .landing-brand-band {
+    padding-block: 1.75rem;
+  }
+
+  .landing-brand-band-inner {
     flex-direction: row;
     justify-content: center;
     gap: 1.25rem;
     text-align: left;
-    padding: 1.75rem 2rem;
   }
 }
 
@@ -378,6 +392,24 @@
   background: #f0fdfa;
 }
 
+@media (max-width: 639px) {
+  .landing-cta-panel-v2 .landing-cta-actions {
+    width: 100%;
+  }
+
+  .landing-cta-panel-v2 .landing-cta-primary-btn,
+  .landing-cta-panel-v2 .landing-cta-secondary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.landing-cta-faq-link:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 3px;
+  border-radius: 0.35rem;
+}
+
 /* Footer — estilo editorial con redes y buzón */
 .landing-footer-v2 {
   position: relative;
@@ -456,10 +488,7 @@
 }
 
 .landing-footer-v2-accent {
-  background: linear-gradient(120deg, #2f857a 0%, #3d9b8f 45%, #0c2d4d 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #2f857a;
 }
 
 .landing-footer-v2-grid {
@@ -666,7 +695,8 @@
 .landing-footer-v2-input {
   flex: 1 1 12rem;
   min-width: 0;
-  height: 2.85rem;
+  min-height: 2.75rem;
+  height: 2.75rem;
   padding: 0 1rem;
   border: 1.5px solid rgba(12, 45, 77, 0.12);
   border-radius: 999px;
@@ -686,9 +716,15 @@
   box-shadow: 0 0 0 3px rgba(61, 155, 143, 0.18);
 }
 
+.landing-footer-v2-input:focus-visible {
+  border-color: #3d9b8f;
+  box-shadow: 0 0 0 3px rgba(61, 155, 143, 0.18);
+}
+
 .landing-footer-v2-submit {
   flex: 0 0 auto;
-  height: 2.85rem;
+  min-height: 2.75rem;
+  height: 2.75rem;
   padding: 0 1.35rem;
   border: none;
   border-radius: 999px;
@@ -704,6 +740,18 @@
 .landing-footer-v2-submit:hover {
   transform: translateY(-1px);
   filter: brightness(1.04);
+}
+
+.landing-footer-v2-submit:focus-visible {
+  outline: 2px solid #265b93;
+  outline-offset: 2px;
+}
+
+.landing-footer-v2-legal button,
+.landing-footer-v2-legal a {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
 }
 
 .landing-footer-v2-form-msg {
@@ -776,11 +824,6 @@
 @media (max-width: 639px) {
   .landing-footer-v2 {
     padding: 1.25rem 0 1rem;
-  }
-
-  .landing-footer-v2-inner {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
   }
 
   .landing-footer-v2-panel {
@@ -869,11 +912,6 @@
 }
 
 @media (max-width: 399px) {
-  .landing-footer-v2-inner {
-    padding-left: 0.6rem !important;
-    padding-right: 0.6rem !important;
-  }
-
   .landing-footer-v2-panel {
     padding: 1rem 0.75rem;
   }

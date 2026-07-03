@@ -76,7 +76,7 @@ export function LandingGuiaConsultas() {
       className="landing-section landing-guia-consultas-section"
       aria-labelledby="landing-guia-consultas-heading"
     >
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="landing-container">
         <div className="landing-guia-consultas-panel">
           <div className="landing-guia-consultas-accent" aria-hidden />
 

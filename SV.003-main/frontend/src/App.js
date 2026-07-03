@@ -98,8 +98,6 @@ import {
   SelectValue,
 } from "./components/ui/select";
 
-console.log("Backend URL being used:", BACKEND_URL);
-
 const isPremiumMember = (vet) =>
   canAccessFeature(vet, MEMBERSHIP_FEATURES.expertMode);
 
@@ -1208,8 +1206,6 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
     notifyError("");
 
     try {
-      console.log("Attempting login to:", `${getBackendUrl()}/api/auth/login`);
-      console.log("Form data being sent:", formData);
       const vetData = await fetchJsonWithRetry(
         `${getBackendUrl()}/api/auth/login`,
         {
@@ -1590,17 +1586,23 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
     <AuthPageShell setView={setView} wide>
           <GuiaaBrandLockup variant="auth" className="mb-6" />
           <h2>Verificación de registro profesional</h2>
-          <p>
+          <p className="text-sm text-muted-foreground">
             Sube tu título, matrícula o licencia. Validamos veterinarios de Latinoamérica;
             en México también intentamos verificación automática con SEP cuando está disponible.
           </p>
 
-          {cedulaFlow?.message && (
-            <div className="info-message" style={{ marginBottom: "10px" }}>
-              {cedulaFlow.message}
-            </div>
-          )}
-          {info && <div className="success-message">{info}</div>}
+          <div className="cedula-flow-messages">
+            {cedulaFlow?.message && (
+              <div className="info-message" role="status">
+                {cedulaFlow.message}
+              </div>
+            )}
+            {info && (
+              <div className="success-message" role="status">
+                {info}
+              </div>
+            )}
+          </div>
 
           <div className="auth-form">
             <div className="form-group">
@@ -1652,9 +1654,9 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
             </Button>
 
             {verificationStatus && (
-              <div style={{ marginTop: "10px", color: "var(--text-secondary)" }}>
+              <p className="cedula-verification-status">
                 Estado actual: <strong>{verificationStatus}</strong>
-              </div>
+              </p>
             )}
 
             {canSkip && remainingSkips > 0 && (
@@ -1834,7 +1836,6 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
 
   const loadDashboardData = async () => {
     try {
-      console.log("Loading consultations for veterinarian ID:", veterinarian.id);
       // Cargar desde MongoDB directamente
       const response = await fetch(
         `${BACKEND_URL}/api/consultations/${veterinarian.id}/history`,
@@ -1845,7 +1846,6 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       if (response.ok) {
         const data = await response.json();
         consultations = data.consultations || [];
-        console.log("Consultations loaded:", consultations.length);
       } else {
         console.warn("Error loading consultations:", response.status);
       }
@@ -2863,12 +2863,10 @@ const NewConsultation = ({
   const loadExistingConsultation = async (id) => {
     setLoadingExisting(true);
     notifyError("");
-    console.log('Loading existing consultation:', id);
     try {
       const response = await fetch(`${BACKEND_URL}/api/consultation/${id}`, {
         headers: getAuthHeaders(veterinarian?.id),
       });
-      console.log('Response status:', response.status);
       if (response.ok) {
         const { data: consultation, text } = await safeReadJson(response);
         if (!consultation) {
@@ -2959,14 +2957,11 @@ const NewConsultation = ({
     };
 
     try {
-      console.log("Loading categories from:", BACKEND_URL);
       const response = await fetch(`${BACKEND_URL}/api/animal-categories`, {
         headers: getAuthHeaders(veterinarian?.id),
       });
-      console.log("Categories response status:", response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log("Categories data:", data);
         const normalized = {};
 
         const rawCategories = data.categories || [];
@@ -2988,12 +2983,10 @@ const NewConsultation = ({
         // Ya no agregamos categorías extra - el backend filtra según membresía
         setCategories(Object.keys(normalized).length > 0 ? normalized : defaultCategories);
       } else {
-        console.log("Using default categories (response not ok)");
         setCategories(defaultCategories);
       }
     } catch (error) {
       console.error("Error loading categories:", error);
-      console.log("Using default categories (error)");
       setCategories(defaultCategories);
     }
   };
@@ -3616,19 +3609,10 @@ const NewConsultation = ({
                       )}
                     </div>
                   ) : (
-                    <div className="premium-required-message" style={{
-                      padding: "20px",
-                      backgroundColor: "#fff3cd",
-                      border: "2px solid #ffc107",
-                      borderRadius: "8px",
-                      marginTop: "20px",
-                      textAlign: "center"
-                    }}>
-                      <div style={{ fontSize: "48px", marginBottom: "10px" }}>⭐</div>
-                      <h4 style={{ marginBottom: "10px", color: "#856404" }}>
-                        Síntesis CDS L5 - Solo Premium
-                      </h4>
-                      <p style={{ marginBottom: "15px", color: "#856404" }}>
+                    <div className="premium-required-message">
+                      <div className="premium-required-icon" aria-hidden="true">⭐</div>
+                      <h4>Síntesis CDS L5 - Solo Premium</h4>
+                      <p>
                         La síntesis clínica estructurada (CDS L5) solo está disponible para miembros Premium.
                         Actualiza tu plan para acceder a esta función.
                       </p>

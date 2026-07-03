@@ -5,7 +5,7 @@ import { scrollToLandingSection } from "./landingScroll";
 export function LandingCta({ setView }) {
   return (
     <section className="landing-section">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="landing-container">
         <div className="landing-cta-panel landing-cta-panel-v2 relative overflow-hidden">
           <div>
             <p className="landing-eyebrow">Registro profesional MVZ</p>
@@ -19,7 +19,7 @@ export function LandingCta({ setView }) {
             <button
               type="button"
               onClick={() => scrollToLandingSection("#faq")}
-              className="mt-5 text-sm font-medium text-white/75 transition hover:text-white"
+              className="landing-cta-faq-link mt-5 inline-flex min-h-11 items-center text-sm font-medium text-white/75 transition hover:text-white"
             >
               Ver preguntas frecuentes
             </button>
@@ -29,7 +29,7 @@ export function LandingCta({ setView }) {
             <button
               type="button"
               onClick={() => setView("register")}
-              className="inline-flex items-center gap-2 landing-btn-primary"
+              className="landing-cta-primary-btn inline-flex min-h-11 items-center justify-center gap-2 landing-btn-primary"
             >
               Crear cuenta MVZ
               <ArrowRight size={16} aria-hidden />
@@ -37,7 +37,7 @@ export function LandingCta({ setView }) {
             <button
               type="button"
               onClick={() => setView("login")}
-              className="landing-btn-on-dark"
+              className="landing-cta-secondary-btn landing-btn-on-dark min-h-11"
             >
               Ya tengo cuenta
             </button>

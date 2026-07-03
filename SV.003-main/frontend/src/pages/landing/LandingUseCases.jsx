@@ -40,7 +40,7 @@ const USE_CASES = [
 export function LandingUseCases() {
   return (
     <section className="landing-section border-t border-guiaa-brand-navy/8">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="landing-container">
         <div className="landing-section-head max-w-xl">
           <p className="landing-eyebrow">Práctica veterinaria</p>
           <h2 className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl">

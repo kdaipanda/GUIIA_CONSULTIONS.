@@ -78,7 +78,7 @@ export function LandingNavbar({ setView, hero = false }) {
             : "border-guiaa-brand-navy/6 bg-white/40 backdrop-blur-sm"
       }`}
     >
-      <div className="mx-auto flex min-h-[4.75rem] max-w-6xl items-center justify-between gap-3 px-5 py-2 sm:min-h-[5rem] sm:gap-4 sm:px-8 lg:px-10">
+      <div className="landing-container flex min-h-[4.75rem] items-center justify-between gap-3 py-2 sm:min-h-[5rem] sm:gap-4">
         <LandingBrandLockup
           variant="navbar"
           logoTone={hero ? "on-dark" : "auto"}
@@ -132,7 +132,7 @@ export function LandingNavbar({ setView, hero = false }) {
           <button
             type="button"
             onClick={() => setView("login")}
-            className={`rounded-lg px-2 py-1.5 text-xs font-semibold ${
+            className={`landing-nav-mobile-cta rounded-lg px-3 py-2.5 text-xs font-semibold ${
               hero
                 ? "text-white/90 hover:bg-white/10"
                 : "text-guiaa-brand-navy/80 hover:bg-guiaa-brand-navy/5"
@@ -143,13 +143,13 @@ export function LandingNavbar({ setView, hero = false }) {
           <button
             type="button"
             onClick={() => setView("register")}
-            className="landing-btn-primary px-3 py-2 text-xs"
+            className="landing-btn-primary landing-nav-mobile-cta px-3 py-2.5 text-xs"
           >
             Registro
           </button>
           <button
             type="button"
-            className={`inline-flex rounded-lg p-2 ${
+            className={`landing-nav-mobile-toggle inline-flex items-center justify-center rounded-lg ${
               hero ? "text-white hover:bg-white/10" : "text-guiaa-brand-navy hover:bg-guiaa-brand-navy/5"
             }`}
             onClick={() => setMobileOpen((open) => !open)}
@@ -169,19 +169,20 @@ export function LandingNavbar({ setView, hero = false }) {
 
       {mobileOpen && (
         <div
-          className={`border-t px-5 py-4 backdrop-blur-md sm:hidden ${
+          className={`border-t backdrop-blur-md sm:hidden ${
             hero
               ? "border-white/15 bg-[#0c2d4d]/90"
               : "border-guiaa-brand-navy/10 bg-white/95"
           }`}
         >
-          <nav className="flex flex-col gap-1">
+          <div className="landing-container py-4">
+            <nav className="flex flex-col gap-1">
             {NAV_LINKS.map(({ href, label, sectionId, isProduct }) => (
               <button
                 key={href}
                 type="button"
                 onClick={() => scrollTo(href, isProduct)}
-                className={`rounded-lg px-3 py-2.5 text-left text-sm font-semibold ${
+                className={`landing-nav-mobile-link rounded-lg px-3 py-2.5 text-left text-sm font-semibold ${
                   activeSection === sectionId
                     ? hero
                       ? "bg-white/12 text-white"
@@ -195,7 +196,8 @@ export function LandingNavbar({ setView, hero = false }) {
                 {label}
               </button>
             ))}
-          </nav>
+            </nav>
+          </div>
         </div>
       )}
     </header>

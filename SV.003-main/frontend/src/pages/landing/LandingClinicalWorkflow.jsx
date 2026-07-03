@@ -51,7 +51,7 @@ const CLINICAL_STEPS = [
 export function LandingClinicalWorkflow() {
   return (
     <section className="landing-section landing-section-first landing-clinical-workflow-section border-b border-guiaa-brand-navy/8">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="landing-container">
         <div className="landing-section-head-wide items-start sm:items-end">
           <div className="landing-section-head">
             <p className="landing-eyebrow">Flujo clínico veterinario</p>

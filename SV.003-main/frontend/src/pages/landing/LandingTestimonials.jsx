@@ -78,7 +78,7 @@ export function LandingTestimonials() {
       className="landing-colleagues-section landing-section"
       aria-labelledby="landing-colleagues-heading"
     >
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="landing-container">
         <div className="landing-colleagues-head">
           <p className="landing-eyebrow">Comunidad MVZ</p>
           <h2
@@ -92,7 +92,7 @@ export function LandingTestimonials() {
           </p>
         </div>
 
-        <div className="landing-colleagues-bento" role="list">
+        <div className="landing-colleagues-bento" role="list" aria-label="Testimonios de colegas MVZ">
           {COLLEAGUE_TESTIMONIALS.map(
             ({ id, name, petName, petImage, petAlt, tags, quote, role, tone }) => (
               <figure
@@ -133,7 +133,8 @@ export function LandingTestimonials() {
           )}
         </div>
 
-        <p className="landing-colleagues-disclaimer">
+        <p className="landing-colleagues-disclaimer landing-colleagues-scroll-hint">
+          <span className="landing-colleagues-scroll-hint-mobile">Desliza para ver más testimonios · </span>
           Casos ilustrativos con fines demostrativos. Los testimonios representan flujos típicos
           de consulta MVZ en GUIAA.
         </p>

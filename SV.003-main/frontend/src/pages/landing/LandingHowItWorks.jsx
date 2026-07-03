@@ -1,5 +1,6 @@
 import React from "react";
 import { ClipboardPlus, PawPrint, Stethoscope } from "lucide-react";
+import { scrollToLandingProduct } from "./landingScroll";
 
 const STEPS = [
   {
@@ -29,7 +30,7 @@ export function LandingHowItWorks({ setView }) {
       className="landing-section landing-section-band border-y border-guiaa-brand-navy/8"
       aria-labelledby="landing-how-heading"
     >
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="landing-container">
         <div className="mx-auto max-w-2xl text-center">
           <p className="landing-eyebrow">Cómo funciona</p>
           <h2
@@ -66,10 +67,7 @@ export function LandingHowItWorks({ setView }) {
           </button>
           <button
             type="button"
-            onClick={() => {
-              const el = document.getElementById("product");
-              el?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }}
+            onClick={() => scrollToLandingProduct("species")}
             className="landing-btn-secondary"
           >
             Explorar interfaz sin registro

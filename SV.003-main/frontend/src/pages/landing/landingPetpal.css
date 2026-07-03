@@ -107,18 +107,18 @@
 .landing-petpal-hero {
   position: relative;
   z-index: 1;
-  padding: 1.5rem 1.25rem 2rem;
+  padding-block: 1.5rem 2rem;
 }
 
 @media (min-width: 640px) {
   .landing-petpal-hero {
-    padding: 2rem 2rem 2.25rem;
+    padding-block: 2rem 2.25rem;
   }
 }
 
 @media (min-width: 1024px) {
   .landing-petpal-hero {
-    padding: 2.5rem 2.5rem 2.75rem;
+    padding-block: 2.5rem 2.75rem;
   }
 }
 
@@ -126,8 +126,6 @@
   display: grid;
   gap: 2.5rem;
   align-items: center;
-  max-width: 72rem;
-  margin: 0 auto;
 }
 
 @media (min-width: 1024px) {
@@ -394,13 +392,14 @@
   display: flex;
   align-items: flex-start;
   gap: 0.85rem;
-  padding: 1.15rem 1.25rem;
+  padding-block: 1.15rem;
+  padding-inline: var(--landing-gutter, 1.25rem);
   border-bottom: 1px solid rgba(12, 45, 77, 0.08);
 }
 
 @media (min-width: 640px) {
   .landing-petpal-stat {
-    padding: 1.25rem 1.75rem;
+    padding-block: 1.25rem;
   }
 }
 
@@ -408,7 +407,7 @@
   .landing-petpal-stat {
     border-bottom: none;
     border-right: 1px solid rgba(12, 45, 77, 0.08);
-    padding: 1.35rem 2rem;
+    padding-block: 1.35rem;
   }
 
   .landing-petpal-stat:last-child {

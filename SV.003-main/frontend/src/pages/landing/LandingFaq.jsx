@@ -28,26 +28,32 @@ const FAQ_ITEMS = [
   },
 ];
 
-function FaqItem({ q, a, isOpen, onToggle }) {
+function FaqItem({ id, q, a, isOpen, onToggle }) {
+  const panelId = `${id}-panel`;
   return (
     <div className="landing-card overflow-hidden rounded-xl">
       <button
         type="button"
+        id={id}
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-guiaa-sky-soft/25"
+        className="landing-faq-trigger flex min-h-11 w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-guiaa-sky-soft/25"
         aria-expanded={isOpen}
+        aria-controls={panelId}
       >
         <span className="text-sm font-semibold text-guiaa-brand-navy sm:text-base">{q}</span>
         <ChevronDown
           size={18}
-          className={`shrink-0 text-guiaa-brand-navy/40 transition-transform duration-200 ${
+          className={`landing-faq-chevron shrink-0 text-guiaa-brand-navy/55 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
           aria-hidden
         />
       </button>
       <div
-        className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+        id={panelId}
+        role="region"
+        aria-labelledby={id}
+        className={`landing-faq-panel grid transition-[grid-template-rows] duration-200 ease-out ${
           isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
       >
@@ -69,7 +75,7 @@ export function LandingFaq({ setView }) {
       id="faq"
       className="landing-section border-t border-guiaa-brand-navy/8 bg-white/40"
     >
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="landing-container">
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div className="lg:sticky lg:top-24 lg:self-start">
             <p className="landing-eyebrow">Antes de registrarte</p>
@@ -89,7 +95,7 @@ export function LandingFaq({ setView }) {
               </p>
               <a
                 href="mailto:soporte@guiaa.vet"
-                className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-guiaa-brand-blue transition hover:text-guiaa-brand-navy"
+                className="landing-footer-link mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-guiaa-brand-blue transition hover:text-guiaa-brand-navy"
               >
                 <Mail size={15} aria-hidden />
                 soporte@guiaa.vet
@@ -98,7 +104,7 @@ export function LandingFaq({ setView }) {
                 <button
                   type="button"
                   onClick={() => setView("register")}
-                  className="mt-4 block text-sm font-semibold text-guiaa-brand-green-dark transition hover:text-guiaa-brand-green"
+                  className="landing-footer-link mt-4 block min-h-11 text-left text-sm font-semibold text-guiaa-brand-green-dark transition hover:text-guiaa-brand-green"
                 >
                   Crear cuenta MVZ →
                 </button>
@@ -110,6 +116,7 @@ export function LandingFaq({ setView }) {
             {FAQ_ITEMS.map(({ q, a }, index) => (
               <FaqItem
                 key={q}
+                id={`landing-faq-${index}`}
                 q={q}
                 a={a}
                 isOpen={openIndex === index}

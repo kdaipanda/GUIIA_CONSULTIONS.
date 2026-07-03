@@ -446,6 +446,7 @@
   .landing-petpal-visual:hover .landing-petpal-media-ring,
   .landing-cta-panel-v2:hover,
   .landing-colleague-card:hover,
+  .landing-tab:hover:not(.is-active),
   .landing-species-chip:hover,
   .landing-body-wrap .landing-card-interactive:hover,
   .landing-body-wrap .landing-clinical-step:hover,
@@ -559,4 +560,65 @@
   font-size: 0.7rem;
   color: #64748b;
   text-align: center;
+}
+
+/* —— Polish: touch targets, FAQ, footer —— */
+.landing-faq-trigger {
+  min-height: 2.75rem;
+}
+
+.landing-link-arrow {
+  min-height: 2.75rem;
+}
+
+.landing-faq-trigger:focus-visible {
+  outline: 2px solid #265b93;
+  outline-offset: -2px;
+}
+
+.landing-nav-mobile-toggle {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem;
+}
+
+.landing-nav-mobile-cta {
+  min-height: 2.75rem;
+}
+
+.landing-nav-mobile-link {
+  min-height: 2.75rem;
+}
+
+.landing-footer-v2-nav button {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.9rem;
+}
+
+.landing-cta-panel-v2 .landing-btn-primary,
+.landing-cta-panel-v2 .landing-btn-on-dark {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-cta-panel-v2 > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-cta-panel-v2:hover {
+    animation: none !important;
+  }
+}
+
+.landing-footer-v2-submit {
+  min-height: 2.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-faq-panel,
+  .landing-faq-chevron {
+    transition: none !important;
+  }
 }

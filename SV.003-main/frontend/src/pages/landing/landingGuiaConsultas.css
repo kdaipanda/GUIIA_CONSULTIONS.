@@ -259,7 +259,7 @@
   border: 1px solid #e2e8f0 !important;
   border-radius: 0.65rem !important;
   background: #fff !important;
-  min-height: 2.65rem;
+  min-height: 2.75rem;
   padding-inline: 0.8rem !important;
   font-size: 0.875rem;
   color: #0f172a;
@@ -288,6 +288,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.6rem;
+  padding-block: 0.35rem;
   font-size: 0.72rem;
   line-height: 1.55;
   color: #64748b;
@@ -302,7 +303,8 @@
 .landing-guia-consultas-submit {
   margin-top: 0.25rem;
   width: 100%;
-  min-height: 2.85rem;
+  min-height: 2.75rem;
+  padding-block: 0.65rem;
   border: none;
   border-radius: 0.65rem;
   background: linear-gradient(135deg, #3d9b8f, #2f857a);
@@ -315,6 +317,15 @@
     box-shadow 0.2s ease,
     opacity 0.2s ease;
   box-shadow: 0 8px 20px -12px rgba(47, 133, 122, 0.55);
+}
+
+.landing-guia-consultas-submit:focus-visible {
+  outline: 2px solid #265b93;
+  outline-offset: 2px;
+}
+
+.landing-guia-consultas-submit:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .landing-guia-consultas-submit:hover:not(:disabled) {

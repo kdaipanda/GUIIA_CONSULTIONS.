@@ -28,11 +28,16 @@ export function LandingSpeciesMarquee() {
       className="landing-section-band landing-species-glass-section border-y border-guiaa-brand-navy/8 py-10"
       aria-labelledby="landing-species-heading"
     >
-      <p id="landing-species-heading" className="category-selector-glass-badge landing-species-glass-badge mx-auto mb-6 w-fit">
-        Multiespecie veterinaria · {speciesCount} formularios clínicos
-      </p>
+      <div className="landing-container mb-6 text-center">
+        <p
+          id="landing-species-heading"
+          className="category-selector-glass-badge landing-species-glass-badge inline-block w-fit"
+        >
+          Multiespecie veterinaria · {speciesCount} formularios clínicos
+        </p>
+      </div>
 
-      <div className="category-selector-glass-panel landing-species-glass-panel mx-auto max-w-6xl px-3 sm:px-4">
+      <div className="category-selector-glass-panel landing-species-glass-panel landing-container">
         <div className="landing-marquee-viewport landing-marquee-fade relative">
           <div className="landing-marquee-track" aria-label="Especies disponibles en consulta">
             {loopItems.map(({ key, icon, name }, index) => (

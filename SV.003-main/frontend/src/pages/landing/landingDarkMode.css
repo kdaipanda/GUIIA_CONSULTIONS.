@@ -333,6 +333,68 @@ html.dark .landing-body-wrap .landing-trust-banner {
   border-color: var(--liquid-glass-border-color) !important;
 }
 
+[data-theme="dark"] .landing-trust-strip,
+html.dark .landing-trust-strip {
+  background: linear-gradient(
+    180deg,
+    rgba(14, 22, 34, 0.92) 0%,
+    rgba(10, 16, 26, 0.98) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .landing-trust-strip-item,
+html.dark .landing-trust-strip-item {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .landing-trust-strip .landing-trust-icon,
+html.dark .landing-trust-strip .landing-trust-icon {
+  background: rgba(38, 91, 147, 0.18);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .landing-trust-strip .text-guiaa-brand-navy,
+html.dark .landing-trust-strip .text-guiaa-brand-navy {
+  color: #f0f4f8;
+}
+
+[data-theme="dark"] .landing-trust-strip .text-guiaa-brand-ink-muted,
+html.dark .landing-trust-strip .text-guiaa-brand-ink-muted {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-tab,
+html.dark .landing-body-wrap .landing-tab {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-tab:hover:not(.is-active),
+html.dark .landing-body-wrap .landing-tab:hover:not(.is-active) {
+  border-color: rgba(61, 155, 143, 0.35);
+  color: #f0f4f8;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-tab.is-active,
+html.dark .landing-body-wrap .landing-tab.is-active {
+  background: #265b93;
+  border-color: transparent;
+  color: #fff;
+}
+
+[data-theme="dark"] .landing-product-chrome,
+html.dark .landing-product-chrome {
+  background: rgba(14, 20, 30, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .landing-product-chrome .landing-kicker,
+html.dark .landing-product-chrome .landing-kicker {
+  color: #94a3b8;
+}
+
 [data-theme="dark"] .landing-body-wrap .landing-pricing-featured,
 html.dark .landing-body-wrap .landing-pricing-featured {
   border-color: rgba(61, 155, 143, 0.35) !important;
@@ -491,6 +553,21 @@ html.dark .landing-body-wrap .landing-card.overflow-hidden.rounded-xl button:hov
   background: rgba(61, 155, 143, 0.1) !important;
 }
 
+[data-theme="dark"] .landing-colleagues-scroll-hint-mobile,
+html.dark .landing-colleagues-scroll-hint-mobile {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+[data-theme="dark"] .landing-cta-faq-link,
+html.dark .landing-cta-faq-link {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+[data-theme="dark"] .landing-cta-faq-link:hover,
+html.dark .landing-cta-faq-link:hover {
+  color: #fff;
+}
+
 /* CTA — mantiene gradiente teal; refuerzo sombra */
 [data-theme="dark"] .landing-cta-panel-v2,
 html.dark .landing-cta-panel-v2 {
@@ -542,10 +619,7 @@ html.dark .landing-footer-v2-label {
 
 [data-theme="dark"] .landing-footer-v2-accent,
 html.dark .landing-footer-v2-accent {
-  background: linear-gradient(120deg, #8fe0d4 0%, #6ee7d9 50%, #d7e6f5 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #3d9b8f;
 }
 
 [data-theme="dark"] .landing-footer-v2-social-card,

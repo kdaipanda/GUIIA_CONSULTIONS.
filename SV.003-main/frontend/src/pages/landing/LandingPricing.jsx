@@ -79,7 +79,7 @@ export function LandingPricing({ setView }) {
 
   return (
     <section id="pricing" ref={pricingRef} className="landing-section landing-section-alt">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="landing-container">
         <div className="max-w-xl">
           <p className="landing-eyebrow">Membresía MVZ</p>
           <h2 className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl">
@@ -163,7 +163,7 @@ export function LandingPricing({ setView }) {
           </div>
         )}
 
-        <div className="landing-pricing-trust landing-trust-banner flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="landing-pricing-trust landing-trust-banner mt-6 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <ShieldCheck size={20} className="mt-0.5 shrink-0 text-guiaa-brand-blue" aria-hidden />
             <p className="text-sm text-guiaa-brand-ink-muted">
@@ -174,7 +174,7 @@ export function LandingPricing({ setView }) {
           <button
             type="button"
             onClick={() => setView("membership")}
-            className="landing-link-arrow shrink-0"
+            className="landing-link-arrow inline-flex min-h-11 shrink-0 items-center"
           >
             Comparar planes en detalle →
           </button>

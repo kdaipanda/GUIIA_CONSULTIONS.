@@ -66,6 +66,54 @@
   border: 1px solid rgba(134, 239, 172, 0.9);
 }
 
+.premium-required-message {
+  padding: 20px;
+  margin-top: 20px;
+  text-align: center;
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+.premium-required-message h4 {
+  margin-bottom: 10px;
+  color: #92400e;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.premium-required-message p {
+  margin-bottom: 15px;
+  color: #78350f;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.premium-required-message .premium-required-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.cedula-verification-status {
+  margin-top: 10px;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #64748b);
+}
+
+.cedula-flow-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cedula-flow-messages [role="status"] {
+    transition: none;
+  }
+}
+
 /* ============================================
    APLICACIÓN GLOBAL DEL TEMA
    ============================================ */
@@ -1299,4 +1347,25 @@ html.dark .info-message {
   background: rgba(30, 58, 138, 0.35);
   color: #dbeafe;
   border-color: rgba(96, 165, 250, 0.35);
+}
+
+[data-theme="dark"] .premium-required-message,
+html.dark .premium-required-message {
+  background: rgba(146, 64, 14, 0.25);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+[data-theme="dark"] .premium-required-message h4,
+html.dark .premium-required-message h4 {
+  color: #fcd34d;
+}
+
+[data-theme="dark"] .premium-required-message p,
+html.dark .premium-required-message p {
+  color: #fde68a;
+}
+
+[data-theme="dark"] .cedula-verification-status,
+html.dark .cedula-verification-status {
+  color: var(--text-secondary, #94a3b8);
 }

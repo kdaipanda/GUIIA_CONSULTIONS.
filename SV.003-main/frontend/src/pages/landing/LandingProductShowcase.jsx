@@ -63,7 +63,7 @@ export function LandingProductShowcase() {
 
   return (
     <section id="product" className="landing-section border-y border-guiaa-brand-navy/8 bg-white/60">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-10">
+      <div className="landing-container">
         <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
           <div className="lg:sticky lg:top-24">
             <p className="landing-eyebrow">Interfaz veterinaria</p>
@@ -92,7 +92,7 @@ export function LandingProductShowcase() {
             </ul>
 
             <div
-              className="mt-8 flex flex-wrap gap-2"
+              className="landing-product-tabs mt-8 flex gap-2"
               role="tablist"
               aria-label="Vistas del producto"
               onKeyDown={(event) => {
@@ -121,13 +121,15 @@ export function LandingProductShowcase() {
                     key={shot.id}
                     type="button"
                     role="tab"
+                    id={`product-tab-${shot.id}`}
                     aria-selected={isActive}
+                    aria-controls="product-panel"
                     tabIndex={isActive ? 0 : -1}
                     onClick={() => {
                       setActiveId(shot.id);
                       setLandingProductTabHash(shot.id);
                     }}
-                    className={`landing-tab ${isActive ? "is-active" : ""}`}
+                    className={`landing-tab landing-product-tab ${isActive ? "is-active" : ""}`}
                   >
                     {shot.label}
                   </button>
@@ -141,28 +143,29 @@ export function LandingProductShowcase() {
           <div className="landing-device-mockup">
             <div className="landing-product-frame">
               <div className="landing-product-frame-inner">
-              <div className="flex items-center gap-2 border-b border-guiaa-brand-navy/10 bg-white px-4 py-2.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-                <span className="landing-kicker ml-3 truncate normal-case">
-                  GUIAA · {activeShot.label}
-                </span>
-              </div>
-
-              <div
-                className="landing-preview-panel relative bg-slate-50"
-                role="tabpanel"
-                aria-label={activeShot.label}
-              >
-                <div key={activeShot.id} className="landing-product-panel-enter h-full">
-                  <ScreenshotPanel
-                    shot={activeShot}
-                    useFallback={fallbackIds.has(activeShot.id)}
-                    onFallback={() => markFallback(activeShot.id)}
-                  />
+                <div className="landing-product-chrome flex items-center gap-2 border-b border-guiaa-brand-navy/10 bg-white px-4 py-2.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
+                  <span className="landing-kicker ml-3 truncate normal-case">
+                    GUIAA · {activeShot.label}
+                  </span>
                 </div>
-              </div>
+
+                <div
+                  id="product-panel"
+                  className="landing-preview-panel relative bg-slate-50"
+                  role="tabpanel"
+                  aria-labelledby={`product-tab-${activeShot.id}`}
+                >
+                  <div key={activeShot.id} className="landing-product-panel-enter h-full">
+                    <ScreenshotPanel
+                      shot={activeShot}
+                      useFallback={fallbackIds.has(activeShot.id)}
+                      onFallback={() => markFallback(activeShot.id)}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

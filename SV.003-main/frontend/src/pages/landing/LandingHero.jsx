@@ -83,59 +83,61 @@ export function LandingHero({ setView }) {
         <LandingVetAnimations variant="hero" />
         <div className="landing-petpal-curve" aria-hidden />
 
-        <div className="landing-petpal-grid">
-          <div className="landing-petpal-copy">
-            <p className="landing-petpal-kicker">Software clínico veterinario · GUIAA</p>
-            <h1 id="landing-hero-title" className="landing-petpal-title">
-              Conecta con{" "}
-              <span className="landing-petpal-accent">tu consulta</span>, en cualquier momento
-            </h1>
-            <p className="landing-petpal-lead">
-              Comunicación fluida entre tu práctica y cada caso clínico. Gestión de salud
-              simplificada para{" "}
-              <span className="landing-petpal-accent">cada paciente</span> con anamnesis
-              multiespecie y soporte CDS avanzado.
-            </p>
+        <div className="landing-container">
+          <div className="landing-petpal-grid">
+            <div className="landing-petpal-copy">
+              <p className="landing-petpal-kicker">Software clínico veterinario · GUIAA</p>
+              <h1 id="landing-hero-title" className="landing-petpal-title">
+                Conecta con{" "}
+                <span className="landing-petpal-accent">tu consulta</span>, en cualquier momento
+              </h1>
+              <p className="landing-petpal-lead">
+                Comunicación fluida entre tu práctica y cada caso clínico. Gestión de salud
+                simplificada para{" "}
+                <span className="landing-petpal-accent">cada paciente</span> con anamnesis
+                multiespecie y soporte CDS avanzado.
+              </p>
 
-            <div className="landing-petpal-cta-row">
+              <div className="landing-petpal-cta-row">
+                <button
+                  type="button"
+                  onClick={() => setView("register")}
+                  className="landing-petpal-cta-primary"
+                >
+                  Comenzar registro MVZ
+                </button>
+                <button
+                  type="button"
+                  className="landing-petpal-cta-play"
+                  onClick={() => setVideoOpen(true)}
+                  aria-label="Reproducir video de presentación"
+                >
+                  <Play size={18} fill="currentColor" aria-hidden />
+                </button>
+              </div>
+
+              <p className="landing-petpal-cta-hint">
+                Registro MVZ en minutos · Verificación de cédula incluida
+              </p>
+
               <button
                 type="button"
-                onClick={() => setView("register")}
-                className="landing-petpal-cta-primary"
+                onClick={() => scrollToLandingProduct("species")}
+                className="landing-petpal-demo-link"
               >
-                Comenzar registro MVZ
+                Explorar interfaz sin registro →
               </button>
-              <button
-                type="button"
-                className="landing-petpal-cta-play"
-                onClick={() => setVideoOpen(true)}
-                aria-label="Reproducir video de presentación"
-              >
-                <Play size={18} fill="currentColor" aria-hidden />
-              </button>
+
+              <div className="landing-petpal-scroll-hint" aria-hidden>
+                <ChevronDown size={18} className="mx-auto opacity-60" />
+              </div>
             </div>
 
-            <p className="landing-petpal-cta-hint">
-              Registro MVZ en minutos · Verificación de cédula incluida
-            </p>
-
-            <button
-              type="button"
-              onClick={() => scrollToLandingProduct("species")}
-              className="landing-petpal-demo-link"
-            >
-              Explorar interfaz sin registro →
-            </button>
-
-            <div className="landing-petpal-scroll-hint" aria-hidden>
-              <ChevronDown size={18} className="mx-auto opacity-60" />
+            <div className="landing-petpal-visual">
+              <Hero3DPanel>
+                <LandingHeroVideo />
+              </Hero3DPanel>
             </div>
-          </div>
-
-          <div className="landing-petpal-visual">
-            <Hero3DPanel>
-              <LandingHeroVideo />
-            </Hero3DPanel>
           </div>
         </div>
       </section>
