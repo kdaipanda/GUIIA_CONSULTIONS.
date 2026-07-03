@@ -71,6 +71,12 @@ function MembershipPlans({ veterinarian, packages, billingCycle, loading, featur
                 <p className="price-equivalent">≈ ${monthlyEquivalent} MXN/mes</p>
               )}
               {isCurrent && <div className="current-plan-pill">Plan actual</div>}
+              {key === "premium" && !isCurrent && (
+                <p className="pricing-promo-hint">
+                  ¿Tienes código? En el pago escribe{" "}
+                  <strong>GUIAA PREMIER</strong> (un solo uso).
+                </p>
+              )}
             </div>
 
             <div className="pricing-features">

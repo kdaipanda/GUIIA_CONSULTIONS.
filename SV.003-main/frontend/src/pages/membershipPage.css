@@ -82,6 +82,19 @@
   color: rgba(12, 45, 77, 0.72);
 }
 
+.pricing-promo-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(12, 45, 77, 0.78);
+  text-align: center;
+}
+
+.pricing-promo-hint strong {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 .billing-toggle-wrapper {
   display: inline-flex;
   gap: 0.25rem;
