@@ -1017,9 +1017,26 @@ async def health_check():
         auth_security._jwt_secret()
     except RuntimeError:
         jwt_configured = False
+
+    email_status = email_notifications.get_email_config_status()
+    frontend_url = email_status.get("frontend_url") or ""
+    is_production = os.getenv("RAILWAY_ENVIRONMENT") is not None or os.getenv("RENDER") is not None
+    frontend_ok = (
+        not is_production
+        or frontend_url.startswith("https://guiaa.vet")
+        or frontend_url.startswith("https://www.guiaa.vet")
+    )
+
     return {
         "status": "healthy" if jwt_configured else "degraded",
         "jwt_configured": jwt_configured,
+        "environment": "production" if is_production else "development",
+        "frontend_url": frontend_url,
+        "frontend_url_ok": frontend_ok,
+        "email_configured": bool(email_status.get("configured")),
+        "stripe_secret_configured": bool(STRIPE_API_KEY),
+        "stripe_publishable_configured": bool(STRIPE_PUBLISHABLE_KEY),
+        "meta_capi_enabled": meta_capi.is_meta_capi_enabled(),
     }
 
 

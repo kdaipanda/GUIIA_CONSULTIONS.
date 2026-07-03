@@ -49,6 +49,14 @@ def check_env() -> bool:
     print("=== Variables de entorno (backend) ===")
     print(f"  SUPABASE_URL: {_status(bool(url))} ({len(url)} caracteres)")
     print(f"  SUPABASE_SERVICE_ROLE_KEY: {_status(bool(key))} ({len(key)} caracteres)")
+    frontend = (
+        os.getenv("FRONTEND_URL", "").strip()
+        or os.getenv("PUBLIC_APP_URL", "").strip()
+        or "http://localhost:3000"
+    )
+    print(f"  FRONTEND_URL: {frontend}")
+    if "localhost" in frontend or "127.0.0.1" in frontend:
+        print("  [!] En producción (Railway) usa FRONTEND_URL=https://guiaa.vet")
     if key and not key.startswith("eyJ"):
         print("  [!] La service_role key debería empezar con 'eyJ...'")
         return False
@@ -280,7 +288,10 @@ def main() -> int:
     all_ok = conn_ok and schema_ok and email_ok and admins_ok
     if all_ok:
         print("\nEntorno listo: Supabase, PMS clínico, soporte y email configurados.")
-        print("\nProducción (Railway): SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY")
+        print(
+            "\nProducción (Railway): SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, "
+            "FRONTEND_URL=https://guiaa.vet, STRIPE_PUBLISHABLE_KEY"
+        )
         return 0
 
     print("\nHay pendientes. Revisa los mensajes arriba.")
