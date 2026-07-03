@@ -682,7 +682,7 @@ def _build_clinic_notifications(org_id: str) -> list[dict]:
         if now <= starts_dt <= soon_limit:
             notifications.append(
                 {
-                    "id": f"appt-urgent-{appt['id']}",
+                    "id": f"appt-{appt['id']}",
                     "type": "reminder",
                     "title": "Cita en breve",
                     "description": f"{patient} a las {time_label}",
@@ -694,7 +694,7 @@ def _build_clinic_notifications(org_id: str) -> list[dict]:
         else:
             notifications.append(
                 {
-                    "id": f"appt-today-{appt['id']}",
+                    "id": f"appt-{appt['id']}",
                     "type": "reminder",
                     "title": "Cita hoy",
                     "description": f"{patient} a las {time_label}",
@@ -711,7 +711,7 @@ def _build_clinic_notifications(org_id: str) -> list[dict]:
         starts = appt.get("starts_at") or now.isoformat()
         notifications.append(
             {
-                "id": f"appt-tomorrow-{appt['id']}",
+                "id": f"appt-{appt['id']}",
                 "type": "reminder",
                 "title": "Cita mañana",
                 "description": f"{patient} a las {_format_appt_time(starts)}",
@@ -833,7 +833,7 @@ def _build_admin_support_notifications(profile: dict) -> list[dict]:
             preview = (last_msg.get("body") or "").strip().replace("\n", " ")[:80]
             notifications.append(
                 {
-                    "id": f"admin-support-user-{last_msg.get('id')}",
+                    "id": f"admin-support-{ticket_id}",
                     "type": "admin",
                     "title": "Mensaje en ticket",
                     "description": f"{user_name}: {preview or subject}",
@@ -845,7 +845,7 @@ def _build_admin_support_notifications(profile: dict) -> list[dict]:
         else:
             notifications.append(
                 {
-                    "id": f"admin-support-open-{ticket_id}",
+                    "id": f"admin-support-{ticket_id}",
                     "type": "admin",
                     "title": "Ticket pendiente",
                     "description": f"{user_name}: {subject}",

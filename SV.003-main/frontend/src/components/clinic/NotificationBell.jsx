@@ -1,28 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 import { fetchNotifications } from "../../lib/clinicApi";
+import {
+  isNotificationRead,
+  markNotificationRead,
+  markNotificationsRead,
+} from "../../lib/notificationReadState";
 import { dispatchOpenSupport } from "../../lib/supportReadState";
-
-function readStorageKey(vetId) {
-  return `guiaa_notif_read_${vetId}`;
-}
-
-function loadReadIds(vetId) {
-  try {
-    const raw = localStorage.getItem(readStorageKey(vetId));
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveReadIds(vetId, ids) {
-  try {
-    localStorage.setItem(readStorageKey(vetId), JSON.stringify(ids));
-  } catch {
-    /* ignore */
-  }
-}
 
 export function NotificationBell({ veterinarianId, onNavigate }) {
   const [notifications, setNotifications] = useState([]);
@@ -31,24 +15,27 @@ export function NotificationBell({ veterinarianId, onNavigate }) {
   const panelRef = useRef(null);
   const toggleRef = useRef(null);
 
+  const withReadState = useCallback(
+    (items) =>
+      (items || []).map((n) => ({
+        ...n,
+        read: isNotificationRead(veterinarianId, n),
+      })),
+    [veterinarianId],
+  );
+
   const load = useCallback(async () => {
     if (!veterinarianId) return;
     setLoading(true);
     try {
       const data = await fetchNotifications(veterinarianId);
-      const readIds = new Set(loadReadIds(veterinarianId));
-      setNotifications(
-        (data.notifications || []).map((n) => ({
-          ...n,
-          read: readIds.has(n.id),
-        })),
-      );
+      setNotifications(withReadState(data.notifications));
     } catch {
       setNotifications([]);
     } finally {
       setLoading(false);
     }
-  }, [veterinarianId]);
+  }, [veterinarianId, withReadState]);
 
   useEffect(() => {
     load();
@@ -72,15 +59,39 @@ export function NotificationBell({ veterinarianId, onNavigate }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  const markRead = (id, action, relatedId) => {
-    const readIds = loadReadIds(veterinarianId);
-    if (!readIds.includes(id)) {
-      saveReadIds(veterinarianId, [...readIds, id]);
+  const applyRead = useCallback(
+    (items) => {
+      markNotificationsRead(veterinarianId, items);
+      setNotifications((prev) =>
+        prev.map((n) => {
+          const match = items.find((item) => item.id === n.id);
+          return match ? { ...n, read: true } : n;
+        }),
+      );
+    },
+    [veterinarianId],
+  );
+
+  const handleToggle = () => {
+    setOpen((v) => !v);
+  };
+
+  useEffect(() => {
+    if (!open || loading || !veterinarianId) return;
+    const unreadItems = notifications.filter((n) => !n.read);
+    if (unreadItems.length > 0) {
+      applyRead(unreadItems);
     }
+  }, [open, loading, veterinarianId, notifications, applyRead]);
+
+  const markRead = (notif) => {
+    markNotificationRead(veterinarianId, notif);
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+      prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n)),
     );
     setOpen(false);
+
+    const { action, related_id: relatedId } = notif;
     if (action === "support") {
       dispatchOpenSupport(relatedId);
       return;
@@ -90,7 +101,7 @@ export function NotificationBell({ veterinarianId, onNavigate }) {
       return;
     }
     if (action && onNavigate) {
-      onNavigate(action);
+      onNavigate(action, relatedId);
     }
   };
 
@@ -101,7 +112,7 @@ export function NotificationBell({ veterinarianId, onNavigate }) {
       <button
         type="button"
         ref={toggleRef}
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         className="icon-btn notification-bell-btn"
         aria-label={open ? "Cerrar notificaciones" : "Abrir notificaciones"}
         aria-expanded={open}
@@ -126,10 +137,8 @@ export function NotificationBell({ veterinarianId, onNavigate }) {
                   key={notif.id}
                   role="button"
                   tabIndex={0}
-                  onClick={() => markRead(notif.id, notif.action, notif.related_id)}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && markRead(notif.id, notif.action, notif.related_id)
-                  }
+                  onClick={() => markRead(notif)}
+                  onKeyDown={(e) => e.key === "Enter" && markRead(notif)}
                   className={`notification-item ${notif.read ? "" : "unread"}`}
                 >
                   <div className="notification-title">{notif.title}</div>

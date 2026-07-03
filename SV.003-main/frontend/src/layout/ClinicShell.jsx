@@ -210,7 +210,7 @@ export function ClinicShell({ children, setView }) {
     if (item) navigate(item.to);
   };
 
-  const handleNotificationNavigate = (action) => {
+  const handleNotificationNavigate = (action, relatedId) => {
     if (action === "agenda") {
       setView?.("agenda");
       navigate("/app/agenda");
@@ -218,10 +218,10 @@ export function ClinicShell({ children, setView }) {
       setView?.("inventory");
       navigate("/app/inventario");
     } else if (action === "support") {
-      dispatchOpenSupport();
+      dispatchOpenSupport(relatedId);
     } else if (action === "admin-support") {
       setView?.("admin");
-      navigate("/app/admin");
+      navigate(relatedId ? `/app/admin?ticket=${relatedId}` : "/app/admin");
     }
   };
 
