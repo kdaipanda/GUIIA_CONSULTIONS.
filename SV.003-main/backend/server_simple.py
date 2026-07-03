@@ -57,6 +57,7 @@ from stripe_checkout_config import (
     is_oxxo_enabled,
     membership_promotion_checkout_kwargs,
     premium_promotion_code_label,
+    premium_promotion_code_candidates,
     resolve_premium_promotion_discount,
     session_has_discount,
     stripe_payment_method_types,
@@ -1998,6 +1999,7 @@ async def get_stripe_config():
         "payment_methods_latam": stripe_payment_method_types("mxn", "CO"),
         "premium_promotion_codes_enabled": is_membership_promotion_codes_enabled(),
         "premium_promotion_code_label": premium_promotion_code_label(),
+        "premium_promotion_code_candidates": premium_promotion_code_candidates(),
         "premium_promotion_auto_apply": is_auto_apply_premium_promo_enabled(),
     }
 
@@ -2587,7 +2589,7 @@ async def create_checkout_session(
                 getattr(getattr(session, "total_details", None), "amount_discount", None)
             ),
             "promo_warning": (
-                "El cupón no se aplicó en Stripe. El cupón FRIENDS40 debe estar ligado al producto Premium en Stripe."
+                "El cupón no se aplicó en Stripe. Verifica que GUIAAMIGOS esté activo y ligado al producto Premium."
                 if promo_requested and not promo_applied
                 else None
             ),

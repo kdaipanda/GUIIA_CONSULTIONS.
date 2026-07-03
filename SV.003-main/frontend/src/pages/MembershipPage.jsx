@@ -171,7 +171,7 @@ export function MembershipPage({ setView }) {
   const [loading, setLoading] = useState(false);
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState("monthly");
-  const [premiumPromoCode, setPremiumPromoCode] = useState("FRIENDS40");
+  const [premiumPromoCode, setPremiumPromoCode] = useState("GUIAAMIGOS");
   const [premiumPromoAutoApply, setPremiumPromoAutoApply] = useState(true);
 
   const loadStripePromoConfig = useCallback(async () => {

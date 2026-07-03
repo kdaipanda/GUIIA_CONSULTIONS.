@@ -16,6 +16,7 @@ from stripe_checkout_config import (  # noqa: E402
     lookup_stripe_promotion_code_id,
     membership_promotion_checkout_kwargs,
     normalize_country_code,
+    premium_promotion_code_candidates,
     resolve_premium_promotion_discount,
     stripe_payment_method_types,
 )
@@ -29,6 +30,16 @@ class StripeCheckoutConfigTests(unittest.TestCase):
     def test_normalize_promo_token(self):
         self.assertEqual(_normalize_promo_token("GUIAA FRIENDS"), "GUIAAFRIENDS")
         self.assertEqual(_normalize_promo_token("guiaafriends"), "GUIAAFRIENDS")
+        self.assertEqual(_normalize_promo_token("guiaa-migos"), "GUIAAMIGOS")
+
+    def test_default_promo_candidates_include_guiaamigos(self):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("STRIPE_PREMIUM_PROMO_CODE", None)
+            self.assertEqual(premium_promotion_code_candidates(), ["GUIAAMIGOS"])
+
+    def test_promo_candidates_append_guiaamigos_when_env_legacy(self):
+        with patch.dict(os.environ, {"STRIPE_PREMIUM_PROMO_CODE": "FRIENDS40"}):
+            self.assertEqual(premium_promotion_code_candidates(), ["FRIENDS40", "GUIAAMIGOS"])
 
     def test_mexico_mxn_includes_oxxo(self):
         methods = stripe_payment_method_types("mxn", "MX")
@@ -69,13 +80,16 @@ class StripeCheckoutConfigTests(unittest.TestCase):
             class PromotionCode:
                 @staticmethod
                 def list(**kwargs):
-                    if kwargs.get("code") == "GUIAAFRIENDS":
-                        return _FakePromoList([_FakePromo("GUIAAFRIENDS", "promo_test123")])
+                    code = kwargs.get("code")
+                    if code == "FRIENDS40":
+                        return _FakePromoList([])
+                    if code == "GUIAAMIGOS":
+                        return _FakePromoList([_FakePromo("GUIAAMIGOS", "promo_guiaamigos")])
                     return _FakePromoList([])
 
-        with patch.dict(os.environ, {"STRIPE_PREMIUM_PROMO_CODE": "GUIAAFRIENDS"}):
+        with patch.dict(os.environ, {"STRIPE_PREMIUM_PROMO_CODE": "FRIENDS40"}):
             kwargs = membership_promotion_checkout_kwargs("premium", _FakeStripe())
-        self.assertEqual(kwargs, {"discounts": [{"promotion_code": "promo_test123"}]})
+        self.assertEqual(kwargs, {"discounts": [{"promotion_code": "promo_guiaamigos"}]})
 
     def test_lookup_fuzzy_promo_code(self):
         class _FakePromo:

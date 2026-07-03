@@ -34,8 +34,20 @@ def is_membership_promotion_codes_enabled() -> bool:
     }
 
 
+def premium_promotion_code_candidates() -> List[str]:
+    """Códigos a intentar en orden (env + GUIAAMIGOS por defecto)."""
+    raw = os.getenv("STRIPE_PREMIUM_PROMO_CODE", "").strip()
+    codes: List[str] = []
+    if raw:
+        codes.extend(part.strip() for part in re.split(r"[,;]+", raw) if part.strip())
+    for fallback in ("GUIAAMIGOS",):
+        if fallback.upper() not in {code.upper() for code in codes}:
+            codes.append(fallback)
+    return codes or ["GUIAAMIGOS"]
+
+
 def premium_promotion_code_label() -> str:
-    return os.getenv("STRIPE_PREMIUM_PROMO_CODE", "FRIENDS40").strip() or "FRIENDS40"
+    return premium_promotion_code_candidates()[0]
 
 
 def premium_promotion_code_id() -> str:
@@ -124,12 +136,14 @@ def resolve_premium_promotion_discount(stripe_api: Any) -> PromoResolution:
     if promo_id:
         return {"discounts": [{"promotion_code": promo_id}]}, "promotion_code", promo_id, None
 
-    promo_code = premium_promotion_code_label()
-    promo_id = lookup_stripe_promotion_code_id(stripe_api, promo_code)
-    if promo_id:
-        return {"discounts": [{"promotion_code": promo_id}]}, "promotion_code", promo_id, None
+    last_error: Optional[str] = None
+    for promo_code in premium_promotion_code_candidates():
+        promo_id = lookup_stripe_promotion_code_id(stripe_api, promo_code)
+        if promo_id:
+            return {"discounts": [{"promotion_code": promo_id}]}, "promotion_code", promo_id, None
+        last_error = f"promotion_code_not_found:{promo_code}"
 
-    return {}, None, None, f"promotion_code_not_found:{promo_code}"
+    return {}, None, None, last_error or "promotion_code_not_found:GUIAAMIGOS"
 
 
 def _stripe_discount_amount(session: Any) -> int:
@@ -169,6 +183,7 @@ def inspect_premium_promotion_status(stripe_api: Any) -> Dict[str, Any]:
         "enabled": is_membership_promotion_codes_enabled(),
         "auto_apply": is_auto_apply_premium_promo_enabled(),
         "promotion_code_label": premium_promotion_code_label(),
+        "promotion_code_candidates": premium_promotion_code_candidates(),
         "coupon_id_configured": bool(premium_coupon_id()),
         "resolved": False,
         "resolution_kind": None,
