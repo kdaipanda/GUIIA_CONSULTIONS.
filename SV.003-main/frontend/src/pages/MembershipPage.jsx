@@ -33,7 +33,16 @@ const INFO_ICONS = {
   evidence: BookOpen,
 };
 
-function MembershipPlans({ veterinarian, packages, billingCycle, loading, featuredPlanKey, onPurchase }) {
+function MembershipPlans({
+  veterinarian,
+  packages,
+  billingCycle,
+  loading,
+  featuredPlanKey,
+  premiumPromoCode,
+  premiumPromoAutoApply,
+  onPurchase,
+}) {
   const entries = Object.entries(packages);
 
   if (!entries.length) {
@@ -71,10 +80,17 @@ function MembershipPlans({ veterinarian, packages, billingCycle, loading, featur
                 <p className="price-equivalent">≈ ${monthlyEquivalent} MXN/mes</p>
               )}
               {isCurrent && <div className="current-plan-pill">Plan actual</div>}
-              {key === "premium" && !isCurrent && (
+              {key === "premium" && !isCurrent && premiumPromoCode && (
                 <p className="pricing-promo-hint">
-                  ¿Tienes código? En el pago escribe{" "}
-                  <strong>GUIAA PREMIER</strong> (un solo uso).
+                  {premiumPromoAutoApply ? (
+                    <>
+                      Descuento <strong>{premiumPromoCode}</strong> se aplica al pagar Premium.
+                    </>
+                  ) : (
+                    <>
+                      ¿Tienes código? En el pago escribe <strong>{premiumPromoCode}</strong>.
+                    </>
+                  )}
                 </p>
               )}
             </div>
@@ -155,6 +171,24 @@ export function MembershipPage({ setView }) {
   const [loading, setLoading] = useState(false);
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState("monthly");
+  const [premiumPromoCode, setPremiumPromoCode] = useState("GUIAAFRIENDS");
+  const [premiumPromoAutoApply, setPremiumPromoAutoApply] = useState(true);
+
+  const loadStripePromoConfig = useCallback(async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/stripe/config`);
+      if (!response.ok) return;
+      const data = await response.json();
+      if (data.premium_promotion_code_label) {
+        setPremiumPromoCode(data.premium_promotion_code_label);
+      }
+      if (typeof data.premium_promotion_auto_apply === "boolean") {
+        setPremiumPromoAutoApply(data.premium_promotion_auto_apply);
+      }
+    } catch {
+      /* default estático */
+    }
+  }, []);
 
   const loadPackages = useCallback(async () => {
     try {
@@ -203,7 +237,8 @@ export function MembershipPage({ setView }) {
     if (!veterinarian?.id) return;
     loadPackages();
     loadCreditPackages();
-  }, [veterinarian?.id, loadPackages, loadCreditPackages]);
+    loadStripePromoConfig();
+  }, [veterinarian?.id, loadPackages, loadCreditPackages, loadStripePromoConfig]);
 
   const handlePurchase = async (packageId) => {
     if (!veterinarian?.id) {
@@ -406,6 +441,8 @@ export function MembershipPage({ setView }) {
           billingCycle={billingCycle}
           loading={loading}
           featuredPlanKey={featuredPlanKey}
+          premiumPromoCode={premiumPromoCode}
+          premiumPromoAutoApply={premiumPromoAutoApply}
           onPurchase={handlePurchase}
         />
 
