@@ -181,10 +181,13 @@ def is_public_api_route(method: str, path: str) -> bool:
         ("POST", "/api/support/chat"),
         ("POST", "/api/payments/stripe/webhook"),
         ("GET", "/api/stripe/config"),
+        ("GET", "/api/stripe/promo-status"),
         ("GET", "/api/membership/packages"),
         ("GET", "/api/consultations/credit-packages"),
     }
     if (m, p) in public_exact:
+        return True
+    if m == "GET" and p.startswith("/api/payments/checkout/status/"):
         return True
     return False
 
