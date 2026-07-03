@@ -50,7 +50,10 @@ from stripe_checkout_config import (
     build_stripe_checkout_session_kwargs,
     create_stripe_checkout_session,
     is_async_payment_pending,
+    is_membership_promotion_codes_enabled,
     is_oxxo_enabled,
+    membership_promotion_checkout_kwargs,
+    premium_promotion_code_label,
     stripe_payment_method_types,
 )
 from membership_access import (
@@ -1988,6 +1991,8 @@ async def get_stripe_config():
         "oxxo_enabled": is_oxxo_enabled(),
         "payment_methods_mexico": stripe_payment_method_types("mxn", "MX"),
         "payment_methods_latam": stripe_payment_method_types("mxn", "CO"),
+        "premium_promotion_codes_enabled": is_membership_promotion_codes_enabled(),
+        "premium_promotion_code_label": premium_promotion_code_label(),
     }
 
 
@@ -2491,6 +2496,7 @@ async def create_checkout_session(
             success_url=success_url,
             cancel_url=cancel_url,
             profile=profile,
+            **membership_promotion_checkout_kwargs(package_key),
             line_items=[
                 {
                     "price_data": {

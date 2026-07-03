@@ -11,6 +11,7 @@ sys.path.insert(0, BACKEND_DIR)
 from stripe_checkout_config import (  # noqa: E402
     build_stripe_checkout_session_kwargs,
     is_async_payment_pending,
+    membership_promotion_checkout_kwargs,
     normalize_country_code,
     stripe_payment_method_types,
 )
@@ -39,6 +40,14 @@ class StripeCheckoutConfigTests(unittest.TestCase):
     def test_async_payment_pending(self):
         self.assertTrue(is_async_payment_pending("unpaid", "complete"))
         self.assertFalse(is_async_payment_pending("paid", "complete"))
+
+    def test_premium_membership_allows_promotion_codes(self):
+        kwargs = membership_promotion_checkout_kwargs("premium")
+        self.assertEqual(kwargs, {"allow_promotion_codes": True})
+
+    def test_basic_membership_no_promotion_codes(self):
+        self.assertEqual(membership_promotion_checkout_kwargs("basic"), {})
+        self.assertEqual(membership_promotion_checkout_kwargs("professional"), {})
 
 
 if __name__ == "__main__":

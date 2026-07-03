@@ -16,6 +16,31 @@ def is_oxxo_enabled() -> bool:
     return os.getenv("STRIPE_ENABLE_OXXO", "true").strip().lower() in {"1", "true", "yes", "on"}
 
 
+def is_membership_promotion_codes_enabled() -> bool:
+    return os.getenv("STRIPE_ENABLE_MEMBERSHIP_PROMO_CODES", "true").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+def premium_promotion_code_label() -> str:
+    return os.getenv("STRIPE_PREMIUM_PROMO_CODE", "GUIAA PREMIER").strip() or "GUIAA PREMIER"
+
+
+def membership_promotion_checkout_kwargs(package_key: str) -> Dict[str, Any]:
+    """
+    Habilita cupones en Checkout de Stripe para membresía Premium.
+    El usuario ingresa el código promocional (p. ej. GUIAA PREMIER) en Stripe.
+    """
+    if (package_key or "").strip().lower() != "premium":
+        return {}
+    if not is_membership_promotion_codes_enabled():
+        return {}
+    return {"allow_promotion_codes": True}
+
+
 def stripe_payment_method_types(currency: str, country_code: str) -> List[str]:
     """Métodos de pago según moneda y país del profesional."""
     methods = ["card"]
