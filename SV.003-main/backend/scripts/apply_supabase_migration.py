@@ -1,9 +1,29 @@
 import argparse
 import os
+import re
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 import psycopg2
+
+
+def resolve_supabase_db_url() -> str:
+    """SUPABASE_DATABASE_URL, SUPABASE_DB_URL o postgres + SUPABASE_DB_PASSWORD."""
+    direct = (os.getenv("SUPABASE_DATABASE_URL") or os.getenv("SUPABASE_DB_URL") or "").strip()
+    if direct:
+        return direct
+
+    password = (os.getenv("SUPABASE_DB_PASSWORD") or "").strip()
+    supabase_url = (os.getenv("SUPABASE_URL") or "").strip()
+    match = re.search(r"https://([a-z0-9]+)\.supabase\.co", supabase_url, re.I)
+    if password and match:
+        ref = match.group(1)
+        return (
+            f"postgresql://postgres:{quote(password, safe='')}"
+            f"@db.{ref}.supabase.co:5432/postgres"
+        )
+    return ""
 
 
 def _read_sql(sql_path: Path) -> str:
@@ -18,8 +38,8 @@ def main() -> int:
     )
     parser.add_argument(
         "--db-url",
-        default=os.getenv("SUPABASE_DATABASE_URL") or os.getenv("SUPABASE_DB_URL") or "",
-        help="Cadena de conexión Postgres. Alternativas: SUPABASE_DATABASE_URL / SUPABASE_DB_URL",
+        default="",
+        help="Cadena Postgres. Si se omite: SUPABASE_DATABASE_URL, SUPABASE_DB_URL o SUPABASE_DB_PASSWORD",
     )
     parser.add_argument(
         "--sql",
@@ -38,10 +58,17 @@ def main() -> int:
 
     args = parser.parse_args()
 
-    db_url = (args.db_url or "").strip()
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+
+    db_url = (args.db_url or resolve_supabase_db_url()).strip()
     if not db_url:
         print(
-            "Falta DB URL. Define SUPABASE_DATABASE_URL (o SUPABASE_DB_URL) o pasa --db-url.",
+            "Falta conexión Postgres. Añade a backend/.env una de:\n"
+            "  SUPABASE_DATABASE_URL=postgresql://postgres:...@db.<ref>.supabase.co:5432/postgres\n"
+            "  SUPABASE_DB_PASSWORD=<contraseña del proyecto>\n"
+            "O pasa --db-url.",
             file=sys.stderr,
         )
         return 2

@@ -41,6 +41,8 @@ CLINIC_MIGRATION_ORDER = [
     "20260621_support_tickets.sql",
     "20260622_profesional_latam.sql",
     "20260625_guia_consultas_leads.sql",
+    "20260702_cedula_reminder_sent_at.sql",
+    "20260702_meta_capi_purchase_sent.sql",
     "optimize_rls_policies.sql",
 ]
 

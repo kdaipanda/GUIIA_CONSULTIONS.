@@ -183,6 +183,33 @@ def seed_platform_admin(email: str) -> bool:
         return False
 
 
+def check_pending_schema_columns(client) -> bool:
+    print("\n=== Columnas migraciones julio 2026 ===")
+    pending = (
+        ("profiles", "cedula_reminder_sent_at"),
+        ("payment_transactions", "meta_capi_purchase_sent"),
+    )
+    ok = True
+    for table, column in pending:
+        try:
+            client.table(table).select(column).limit(1).execute()
+            print(f"  {table}.{column}: OK")
+        except Exception as exc:
+            msg = str(exc).lower()
+            if "42703" in msg or ("column" in msg and "does not exist" in msg):
+                print(f"  {table}.{column}: FALTA")
+                ok = False
+            else:
+                print(f"  {table}.{column}: ERROR — {str(exc)[:100]}")
+                ok = False
+    if not ok:
+        print(
+            "  Aplica en SQL Editor: "
+            "supabase_migrations/20260702_meta_capi_purchase_sent.sql"
+        )
+    return ok
+
+
 def check_user(email: str) -> None:
     from supabase_client import get_profile_by_email, list_consultations
 
@@ -233,6 +260,7 @@ def main() -> int:
             return 1
 
     conn_ok, client = check_connection()
+    schema_ok = check_pending_schema_columns(client) if client else False
     email_ok = check_email()
     admins_ok = check_platform_admins(client, admin_email) if client else False
 
@@ -242,13 +270,14 @@ def main() -> int:
     print("\n=== Resumen ===")
     checks = [
         ("Conexión + tablas", conn_ok),
+        ("Columnas julio 2026", schema_ok),
         ("Email", email_ok),
         ("Platform admins", admins_ok),
     ]
     for label, ok in checks:
         print(f"  {label}: {_status(ok)}")
 
-    all_ok = conn_ok and email_ok and admins_ok
+    all_ok = conn_ok and schema_ok and email_ok and admins_ok
     if all_ok:
         print("\nEntorno listo: Supabase, PMS clínico, soporte y email configurados.")
         print("\nProducción (Railway): SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY")
