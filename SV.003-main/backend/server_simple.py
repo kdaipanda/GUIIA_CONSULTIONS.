@@ -46,6 +46,7 @@ from membership_catalog import (
     MEMBERSHIP_PACKAGES,
     get_membership_consultations,
 )
+from stripe_catalog import build_credits_line_item, build_membership_line_item
 from stripe_checkout_config import (
     build_stripe_checkout_session_kwargs,
     create_stripe_checkout_session,
@@ -2514,6 +2515,7 @@ async def create_checkout_session(
         print(f"[DEBUG] Success URL: {success_url}")
         print(f"[DEBUG] Cancel URL: {cancel_url}")
         promo_kwargs = membership_promotion_checkout_kwargs(package_key, stripe)
+        unit_amount_cents = int(round(price * 100))
         session = create_stripe_checkout_session(
             stripe,
             mode="payment",
@@ -2522,20 +2524,18 @@ async def create_checkout_session(
             profile=profile,
             **promo_kwargs,
             line_items=[
-                {
-                    "price_data": {
-                        "currency": package["currency"],
-                        "product_data": {
-                            "name": f"Membresía {package['name']}",
-                            "metadata": {
-                                "package_key": package_key,
-                                "billing_cycle": payment_request.billing_cycle,
-                            },
-                        },
-                        "unit_amount": int(round(price * 100)),
+                build_membership_line_item(
+                    package_key,
+                    payment_request.billing_cycle,
+                    package_name=package["name"],
+                    currency=package["currency"],
+                    unit_amount_cents=unit_amount_cents,
+                    stripe_api=stripe,
+                    metadata={
+                        "package_key": package_key,
+                        "billing_cycle": payment_request.billing_cycle,
                     },
-                    "quantity": 1,
-                }
+                )
             ],
             metadata={
                 "type": "membership",
@@ -2567,7 +2567,7 @@ async def create_checkout_session(
             )
         )
 
-        expected_subtotal_cents = int(round(price * 100))
+        expected_subtotal_cents = unit_amount_cents
         promo_requested = bool(promo_kwargs.get("discounts"))
         promo_applied = session_has_discount(session, expected_subtotal_cents)
         promo_resolution = None
@@ -2587,7 +2587,7 @@ async def create_checkout_session(
                 getattr(getattr(session, "total_details", None), "amount_discount", None)
             ),
             "promo_warning": (
-                "El cupón no se aplicó en Stripe. Verifica restricciones del cupón o usa FRIENDS40."
+                "El cupón no se aplicó en Stripe. El cupón FRIENDS40 debe estar ligado al producto Premium en Stripe."
                 if promo_requested and not promo_applied
                 else None
             ),
@@ -2815,16 +2815,13 @@ async def create_consultations_checkout_session(
                 cancel_url=cancel_url,
                 profile=veterinarian,
                 line_items=[
-                    {
-                        "price_data": {
-                            "currency": package["currency"],
-                            "product_data": {
-                                "name": package["name"],
-                            },
-                            "unit_amount": int(round(float(package["price"]) * 100)),
-                        },
-                        "quantity": max(1, quantity),
-                    }
+                    build_credits_line_item(
+                        package_name=package["name"],
+                        currency=package["currency"],
+                        unit_amount_cents=int(round(float(package["price"]) * 100)),
+                        quantity=max(1, quantity),
+                        stripe_api=stripe,
+                    )
                 ],
                 metadata={
                     "type": "consultation_credits",

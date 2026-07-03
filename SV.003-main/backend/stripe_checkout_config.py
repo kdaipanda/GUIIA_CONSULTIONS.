@@ -5,6 +5,8 @@ import os
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
+from stripe_catalog import build_membership_line_item
+
 PromoResolution = Tuple[Dict[str, Any], Optional[str], Optional[str], Optional[str]]
 
 
@@ -150,7 +152,7 @@ def session_has_discount(session: Any, expected_subtotal_cents: Optional[int] = 
 
 def _coupon_id_from_promotion_code(stripe_api: Any, promo_id: str) -> Optional[str]:
     try:
-        promo = stripe_api.PromotionCode.retrieve(promo_id)
+        promo = stripe_api.PromotionCode.retrieve(promo_id, expand=["coupon"])
         coupon = getattr(promo, "coupon", None)
         if isinstance(coupon, str):
             return coupon
@@ -196,7 +198,7 @@ def inspect_premium_promotion_status(stripe_api: Any) -> Dict[str, Any]:
 
     if ref_id and kind == "promotion_code":
         try:
-            promo = stripe_api.PromotionCode.retrieve(ref_id)
+            promo = stripe_api.PromotionCode.retrieve(ref_id, expand=["coupon"])
             coupon = getattr(promo, "coupon", None)
             coupon_id = coupon if isinstance(coupon, str) else getattr(coupon, "id", None)
             status["promotion_code"] = {
@@ -209,13 +211,17 @@ def inspect_premium_promotion_status(stripe_api: Any) -> Dict[str, Any]:
             }
             if coupon_id:
                 coupon_obj = stripe_api.Coupon.retrieve(coupon_id)
+                applies_to = getattr(coupon_obj, "applies_to", None)
+                applies_products = None
+                if applies_to is not None:
+                    applies_products = getattr(applies_to, "products", None)
                 status["coupon"] = {
                     "id": coupon_id,
                     "valid": getattr(coupon_obj, "valid", None),
                     "percent_off": getattr(coupon_obj, "percent_off", None),
                     "amount_off": getattr(coupon_obj, "amount_off", None),
                     "duration": getattr(coupon_obj, "duration", None),
-                    "applies_to": getattr(coupon_obj, "applies_to", None),
+                    "applies_to_products": applies_products,
                     "currency": getattr(coupon_obj, "currency", None),
                 }
         except Exception as exc:
@@ -223,26 +229,27 @@ def inspect_premium_promotion_status(stripe_api: Any) -> Dict[str, Any]:
 
     if kwargs.get("discounts"):
         try:
+            test_line_item = build_membership_line_item(
+                "premium",
+                "monthly",
+                package_name="Premium",
+                currency="mxn",
+                unit_amount_cents=220000,
+                stripe_api=stripe_api,
+            )
             test_session = stripe_api.checkout.Session.create(
                 mode="payment",
                 success_url="https://guiaa.vet/payment-success?session_id={CHECKOUT_SESSION_ID}",
                 cancel_url="https://guiaa.vet/membership",
                 locale="es",
                 payment_method_types=["card"],
-                line_items=[
-                    {
-                        "price_data": {
-                            "currency": "mxn",
-                            "product_data": {"name": "Test Membresía Premium"},
-                            "unit_amount": 220000,
-                        },
-                        "quantity": 1,
-                    }
-                ],
+                line_items=[test_line_item],
                 discounts=kwargs["discounts"],
             )
             status["test_checkout"] = {
                 "session_id": test_session.id,
+                "line_item_mode": "price" if test_line_item.get("price") else "price_data",
+                "stripe_product_id": test_line_item.get("price_data", {}).get("product"),
                 "amount_subtotal": getattr(test_session, "amount_subtotal", None),
                 "amount_total": getattr(test_session, "amount_total", None),
                 "amount_discount": _stripe_discount_amount(test_session),
