@@ -869,8 +869,11 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 }
 
 .clinic-link-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
   margin: 0 0 8px;
-  padding: 0;
+  padding: 0.35rem 0.25rem;
   border: none;
   background: none;
   font-size: 13px;
@@ -882,6 +885,12 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 
 .clinic-link-btn:hover {
   text-decoration: underline;
+}
+
+.clinic-link-btn:focus-visible {
+  outline: 2px solid var(--clinic-blue);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 .clinic-quick-hint {
@@ -906,6 +915,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 2.75rem;
   padding: 8px 12px;
   border-radius: 999px;
   border: 1px solid rgba(38, 91, 147, 0.18);

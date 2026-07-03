@@ -258,6 +258,18 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
         </div>
       </div>
 
+      {membershipQuota.trialExhausted && (
+        <div className="clinic-dashboard-trial-banner" role="alert">
+          <div>
+            <strong>Prueba CDS agotada</strong>
+            <p>{TRIAL_EXHAUSTED_MESSAGE}</p>
+          </div>
+          <Button type="button" size="sm" onClick={() => go("membership", "/app/membresia")}>
+            Ver planes
+          </Button>
+        </div>
+      )}
+
       {loading ? (
         <>
           <DashboardKpiSkeleton />
@@ -310,6 +322,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
               onClick={() => {
                 scrollToCdsPanel();
               }}
+              aria-label={`Consultas CDS hoy: ${today.consultations ?? 0}`}
             >
               <div className="clinic-report-kpi-head">
                 <span className="clinic-report-kpi-icon">

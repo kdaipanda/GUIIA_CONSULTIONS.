@@ -297,7 +297,12 @@
 .profile-membership-progress-label {
   margin-top: 0.35rem;
   font-size: 0.75rem;
-  color: rgba(12, 45, 77, 0.5);
+  color: #64748b;
+}
+
+.profile-membership-btn:focus-visible {
+  outline: 2px solid #265b93;
+  outline-offset: 2px;
 }
 
 .profile-membership-actions {
@@ -313,6 +318,7 @@
   justify-content: center;
   gap: 0.35rem;
   width: 100%;
+  min-height: 2.75rem;
   padding: 0.7rem 1rem;
   border-radius: 0.75rem;
   font-size: 0.8125rem;

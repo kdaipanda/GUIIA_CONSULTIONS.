@@ -1511,6 +1511,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .today-pill {
   min-width: 130px;
+  min-height: 2.75rem;
   padding: 8px 14px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.9);
@@ -1529,8 +1530,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .today-pill-btn:hover:not(:disabled) {
-  border-color: rgba(38, 91, 147, 0.35);
+  border-color: rgba(61, 155, 143, 0.45);
   background: #fff;
+  box-shadow: 0 4px 14px -8px rgba(12, 45, 77, 0.12);
+}
+
+.today-pill-btn:focus-visible {
+  outline: 2px solid #265b93;
+  outline-offset: 2px;
 }
 
 .today-pill-btn:disabled {
@@ -3767,6 +3774,11 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 0.45;
   cursor: not-allowed;
   transform: none;
+}
+
+.paw-btn:focus-visible {
+  outline: 2px solid #265b93;
+  outline-offset: 2px;
 }
 
 .consultation-rating-saved {

@@ -47,7 +47,7 @@
 .agenda-stat-label {
   font-size: 11px;
   font-weight: 600;
-  color: rgba(12, 45, 77, 0.5);
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -73,6 +73,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 2.75rem;
   padding: 7px 12px;
   border: none;
   border-radius: 8px;
@@ -80,8 +81,16 @@
   font: inherit;
   font-size: 13px;
   font-weight: 600;
-  color: rgba(12, 45, 77, 0.55);
+  color: #64748b;
   cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.agenda-view-btn:focus-visible {
+  outline: 2px solid var(--agenda-blue);
+  outline-offset: 2px;
 }
 
 .agenda-view-btn.is-active {
@@ -284,4 +293,40 @@ html.dark .clinic-agenda-approve-summary {
 [data-theme="dark"] .clinic-agenda-approve-reason,
 html.dark .clinic-agenda-approve-reason {
   color: var(--text-secondary);
+}
+
+[data-theme="dark"] .agenda-page-guiaa,
+html.dark .agenda-page-guiaa {
+  background: var(--bg-primary);
+}
+
+[data-theme="dark"] .agenda-stat-pill,
+[data-theme="dark"] .agenda-list-section,
+html.dark .agenda-stat-pill,
+html.dark .agenda-list-section {
+  background: var(--liquid-glass-bg);
+  border-color: var(--liquid-glass-border-color);
+}
+
+[data-theme="dark"] .agenda-view-toggle,
+html.dark .agenda-view-toggle {
+  background: rgba(20, 30, 44, 0.75);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .agenda-view-btn,
+html.dark .agenda-view-btn {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .agenda-view-btn.is-active,
+html.dark .agenda-view-btn.is-active {
+  background: var(--agenda-blue);
+  color: #fff;
+}
+
+[data-theme="dark"] .agenda-list-section-head,
+html.dark .agenda-list-section-head {
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
 }

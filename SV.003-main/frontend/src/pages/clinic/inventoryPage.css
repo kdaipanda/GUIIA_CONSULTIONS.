@@ -51,6 +51,7 @@
 .clinic-inventory-filter {
   flex-shrink: 0;
   align-self: center;
+  min-height: 2.75rem;
   white-space: nowrap;
 }
 

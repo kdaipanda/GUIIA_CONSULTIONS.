@@ -24,6 +24,7 @@ import {
   getPlanFeatureList,
 } from "../lib/membershipPlans";
 import { trackMetaInitiateCheckout } from "../lib/metaPixel";
+import { notifyError } from "../lib/appToast";
 import "./membershipPage.css";
 
 const INFO_ICONS = {
@@ -47,7 +48,7 @@ function MembershipPlans({
 
   if (!entries.length) {
     return (
-      <p className="membership-hero" style={{ paddingTop: 0 }}>
+      <p className="membership-plans-loading" role="status">
         Cargando planes…
       </p>
     );
@@ -108,7 +109,7 @@ function MembershipPlans({
               type="button"
               onClick={() => onPurchase(key)}
               disabled={loading || isCurrent}
-              className={`btn ${isFeatured || key === "premium" ? "btn-primary" : "btn-secondary"} btn-full`}
+              className={`btn ${isFeatured || key === "premium" ? "btn-primary" : "btn-secondary"} btn-full membership-plan-cta`}
             >
               {isCurrent ? "Plan actual" : loading ? "Procesando…" : "Seleccionar plan"}
             </button>
@@ -290,7 +291,7 @@ export function MembershipPage({ setView }) {
 
       window.location.href = data.checkout_url;
     } catch (error) {
-      alert(error.message || "Error procesando el pago. Inténtalo de nuevo.");
+      notifyError(error.message || "Error procesando el pago. Inténtalo de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -336,7 +337,7 @@ export function MembershipPage({ setView }) {
 
       window.location.href = data.checkout_url;
     } catch (error) {
-      alert(error.message || "Error procesando la compra de consultas.");
+      notifyError(error.message || "Error procesando la compra de consultas.");
     } finally {
       setCreditsLoading(false);
     }
@@ -416,11 +417,12 @@ export function MembershipPage({ setView }) {
             Pagos seguros con Stripe en pesos mexicanos (MXN). En México puedes pagar con
             tarjeta u OXXO; en el resto de Latinoamérica, con tarjeta internacional.
           </p>
-          <div className="billing-toggle-wrapper">
+          <div className="billing-toggle-wrapper" role="group" aria-label="Ciclo de facturación">
             <button
               type="button"
               onClick={() => setBillingCycle("monthly")}
               className={`billing-toggle-btn ${billingCycle === "monthly" ? "active" : ""}`}
+              aria-pressed={billingCycle === "monthly"}
             >
               Mensual
             </button>
@@ -428,6 +430,7 @@ export function MembershipPage({ setView }) {
               type="button"
               onClick={() => setBillingCycle("annual")}
               className={`billing-toggle-btn ${billingCycle === "annual" ? "active" : ""}`}
+              aria-pressed={billingCycle === "annual"}
             >
               Anual
               <span className="billing-badge">Ahorra 2 meses</span>

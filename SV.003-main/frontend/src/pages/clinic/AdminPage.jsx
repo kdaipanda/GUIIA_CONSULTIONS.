@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox } from "lucide-react";
 import "./clinicPageShared.css";
 import "./adminPage.css";
+import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
+import { useConfirmAction } from "../../hooks/useConfirmAction";
 import {
   ClinicReportsSkeleton,
   ClinicTableSkeleton,
@@ -179,6 +181,7 @@ function consultationField(consultation, key) {
 
 export function AdminPage() {
   const { veterinarian, loading: vetLoading, platformAdmin } = useVet();
+  const { confirm, dialogProps } = useConfirmAction();
   const [allowed, setAllowed] = useState(null);
   const [overview, setOverview] = useState(null);
   const [users, setUsers] = useState([]);
@@ -293,7 +296,13 @@ export function AdminPage() {
   const handleDeleteUser = async (e) => {
     e.preventDefault();
     if (!deleteEmail.trim()) return;
-    if (!window.confirm(`¿Eliminar permanentemente a ${deleteEmail}?`)) return;
+    const ok = await confirm({
+      title: "Eliminar usuario",
+      description: `¿Eliminar permanentemente a ${deleteEmail}? Esta acción no se puede deshacer.`,
+      confirmLabel: "Eliminar",
+      destructive: true,
+    });
+    if (!ok) return;
     setActing(true);
     try {
       const data = await adminDeleteUser(veterinarian.id, deleteEmail.trim());
@@ -308,7 +317,12 @@ export function AdminPage() {
   };
 
   const handleVerifyCedula = async (user) => {
-    if (!window.confirm(`¿Intentar validación SEP para ${user.nombre} (México)?`)) return;
+    const ok = await confirm({
+      title: "Validación SEP",
+      description: `¿Intentar validación automática SEP para ${user.nombre} (México)?`,
+      confirmLabel: "Validar",
+    });
+    if (!ok) return;
     setCedulaActingId(user.id);
     try {
       const data = await adminVerifyUserCedula(veterinarian.id, user.id);
@@ -322,7 +336,12 @@ export function AdminPage() {
   };
 
   const handleApproveCedula = async (user) => {
-    if (!window.confirm(`¿Aprobar el registro profesional de ${user.nombre}?`)) return;
+    const ok = await confirm({
+      title: "Aprobar registro",
+      description: `¿Aprobar el documento profesional de ${user.nombre}?`,
+      confirmLabel: "Aprobar",
+    });
+    if (!ok) return;
     setCedulaActingId(user.id);
     try {
       const data = await adminReviewUserCedula(veterinarian.id, user.id, "approve");
@@ -1377,6 +1396,7 @@ export function AdminPage() {
           )}
         </DialogContent>
       </Dialog>
+      <ConfirmActionDialog {...dialogProps} />
     </div>
   );
 }

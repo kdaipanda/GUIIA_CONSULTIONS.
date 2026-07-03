@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Copy, Save, Users, UserPlus, Trash2, Settings, ShieldAlert } from "lucide-react";
 import "./clinicPageShared.css";
+import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
+import { useConfirmAction } from "../../hooks/useConfirmAction";
 import {
   ClinicSettingsSkeleton,
   ClinicEmptyState,
@@ -41,6 +43,7 @@ const INVITE_ROLES = [
 export function SettingsPage() {
   const { veterinarian } = useVet();
   const { role } = useClinic();
+  const { confirm, dialogProps } = useConfirmAction();
   const [org, setOrg] = useState(null);
   const [members, setMembers] = useState([]);
   const [form, setForm] = useState({ name: "", timezone: "America/Mexico_City" });
@@ -112,7 +115,13 @@ export function SettingsPage() {
   const handleRemoveMember = async (member) => {
     if (member.role === "owner") return;
     const label = member.nombre || member.email || "este miembro";
-    if (!window.confirm(`¿Quitar a ${label} del consultorio?`)) return;
+    const ok = await confirm({
+      title: "Quitar miembro",
+      description: `¿Quitar a ${label} del consultorio? Perderá acceso a la organización.`,
+      confirmLabel: "Quitar",
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       const data = await removeOrganizationMember(veterinarian.id, member.id);
       notifySuccess(data.message || "Miembro eliminado.");
@@ -302,6 +311,7 @@ export function SettingsPage() {
           </section>
         </>
       )}
+      <ConfirmActionDialog {...dialogProps} />
     </div>
   );
 }

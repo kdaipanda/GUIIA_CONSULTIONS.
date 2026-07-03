@@ -161,30 +161,24 @@ export function MedicalImagesPage({ setView }) {
         let errorMessage = `Error del servidor: ${response.status}`;
         try {
           const errorData = await response.json();
-          console.log("Error data recibido:", errorData);
-          
-          // Extraer el mensaje de error de diferentes formatos posibles
           if (errorData) {
-            if (typeof errorData === 'string') {
+            if (typeof errorData === "string") {
               errorMessage = errorData;
-            } else if (typeof errorData === 'object') {
-              // Intentar diferentes campos comunes para mensajes de error
-              errorMessage = errorData.detail || 
-                           errorData.message || 
-                           errorData.error || 
-                           (errorData.error?.message) ||
-                           JSON.stringify(errorData);
+            } else if (typeof errorData === "object") {
+              errorMessage =
+                errorData.detail ||
+                errorData.message ||
+                errorData.error ||
+                errorData.error?.message ||
+                JSON.stringify(errorData);
             }
           }
-        } catch (parseError) {
-          console.log("Error al parsear respuesta de error:", parseError);
-          // Si no se puede parsear como JSON, usar el texto de la respuesta
+        } catch {
           try {
             const text = await response.text();
             errorMessage = text || errorMessage;
-          } catch (textError) {
-            console.log("Error al obtener texto de respuesta:", textError);
-            // Si todo falla, usar el mensaje por defecto
+          } catch {
+            /* mensaje por defecto */
           }
         }
         // Asegurar que errorMessage sea siempre un string
@@ -195,9 +189,6 @@ export function MedicalImagesPage({ setView }) {
       }
 
       const data = await response.json();
-      console.log("Resultado recibido del backend:", data);
-      console.log("Campo 'analysis' presente:", !!data.analysis);
-      console.log("Longitud de 'analysis':", data.analysis ? data.analysis.length : 0);
       setResult(data);
       notifySuccess("Interpretación generada correctamente");
       // Recargar historial después de crear un nuevo análisis

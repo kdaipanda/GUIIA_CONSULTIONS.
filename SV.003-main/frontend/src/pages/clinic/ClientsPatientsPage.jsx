@@ -11,6 +11,8 @@ import {
   Users,
 } from "lucide-react";
 import "./clinicPageShared.css";
+import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
+import { useConfirmAction } from "../../hooks/useConfirmAction";
 import {
   ClinicTableSkeleton,
   ClinicEmptyState,
@@ -97,6 +99,7 @@ function matchesQuery(value, q) {
 
 export function ClientsPatientsPage({ onStartConsultation, onViewConsultation }) {
   const { veterinarian } = useVet();
+  const { confirm, dialogProps } = useConfirmAction();
   const [clients, setClients] = useState([]);
   const [patients, setPatients] = useState([]);
   const [search, setSearch] = useState("");
@@ -236,7 +239,13 @@ export function ClientsPatientsPage({ onStartConsultation, onViewConsultation })
   };
 
   const handleDeleteClient = async (client) => {
-    if (!window.confirm(`¿Eliminar dueño "${client.name}"?`)) return;
+    const ok = await confirm({
+      title: "Eliminar dueño",
+      description: `¿Eliminar a "${client.name}" y sus datos asociados? Esta acción no se puede deshacer.`,
+      confirmLabel: "Eliminar",
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await deleteClient(veterinarian.id, client.id);
       notifySuccess("Dueño eliminado");
@@ -312,7 +321,13 @@ export function ClientsPatientsPage({ onStartConsultation, onViewConsultation })
   };
 
   const handleDeletePatient = async (patient) => {
-    if (!window.confirm(`¿Eliminar mascota "${patient.name}"?`)) return;
+    const ok = await confirm({
+      title: "Eliminar mascota",
+      description: `¿Eliminar a "${patient.name}" del expediente? Esta acción no se puede deshacer.`,
+      confirmLabel: "Eliminar",
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await deletePatient(veterinarian.id, patient.id);
       notifySuccess("Mascota eliminada");
@@ -796,6 +811,7 @@ export function ClientsPatientsPage({ onStartConsultation, onViewConsultation })
           )}
         </DialogContent>
       </Dialog>
+      <ConfirmActionDialog {...dialogProps} />
     </div>
   );
 }

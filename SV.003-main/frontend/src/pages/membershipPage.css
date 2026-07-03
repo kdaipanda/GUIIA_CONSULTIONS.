@@ -20,14 +20,23 @@
   color: #0c2d4d;
   margin-bottom: 0.75rem;
   letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 .membership-hero p {
   font-size: 1rem;
-  color: rgba(12, 45, 77, 0.55);
+  color: #64748b;
   max-width: 32rem;
   margin: 0 auto;
   line-height: 1.55;
+}
+
+.membership-plans-loading {
+  margin: 0 auto 2rem;
+  padding: 0 1rem;
+  text-align: center;
+  font-size: 0.9375rem;
+  color: #64748b;
 }
 
 .membership-eyebrow {
@@ -108,15 +117,24 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-height: 2.75rem;
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 0.75rem;
   background: transparent;
-  color: rgba(12, 45, 77, 0.55);
+  color: #64748b;
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.billing-toggle-btn:focus-visible {
+  outline: 2px solid #265b93;
+  outline-offset: 2px;
 }
 
 .billing-toggle-btn.active {
@@ -300,13 +318,26 @@
   width: calc(100% - 2rem);
   margin: 0 1rem 1.25rem;
   margin-top: auto;
+  min-height: 2.75rem;
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
   font-size: 0.875rem;
   font-weight: 700;
   text-align: center;
-  transition: all 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
   cursor: pointer;
+}
+
+.membership-page .pricing-card .btn:focus-visible {
+  outline: 2px solid #265b93;
+  outline-offset: 2px;
+}
+
+.membership-page .pricing-card .btn:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .membership-page .pricing-card .btn:disabled {
@@ -483,6 +514,11 @@
   gap: 0.625rem;
 }
 
+.payment-status-note {
+  margin-top: 0.75rem;
+  line-height: 1.5;
+}
+
 .membership-footnote {
   margin: 0 1rem 2rem;
   text-align: center;
@@ -505,13 +541,25 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  min-height: 2rem;
   padding: 0.35rem 0.65rem;
   border-radius: 999px;
   border: 1px solid rgba(12, 45, 77, 0.1);
   background: rgba(255, 255, 255, 0.85);
   font-size: 0.6875rem;
   font-weight: 600;
-  color: rgba(12, 45, 77, 0.65);
+  color: #64748b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .membership-page .pricing-card:hover,
+  .membership-page .info-card:hover {
+    transform: none;
+  }
+
+  .membership-page .pricing-card .btn:active:not(:disabled) {
+    transform: none;
+  }
 }
 
 .membership-auth-features {
@@ -617,6 +665,11 @@
 }
 
 /* —— Modo oscuro —— */
+[data-theme="dark"] .membership-page,
+html.dark .membership-page {
+  background: linear-gradient(180deg, rgba(12, 45, 77, 0.35) 0%, var(--bg-primary) 42%, var(--bg-primary) 100%);
+}
+
 [data-theme="dark"] .membership-page .membership-hero h1,
 [data-theme="dark"] .membership-page .membership-credits-inner h2,
 [data-theme="dark"] .membership-page .membership-info h2,

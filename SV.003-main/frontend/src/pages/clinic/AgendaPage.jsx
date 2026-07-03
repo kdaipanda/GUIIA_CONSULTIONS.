@@ -44,6 +44,8 @@ import {
 import "./agendaPage.css";
 import "./clinicPageShared.css";
 import { clinicDialogClass } from "../../components/clinic/ClinicPageUi";
+import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
+import { useConfirmAction } from "../../hooks/useConfirmAction";
 
 const STATUS_LABELS = {
   scheduled: "Programada",
@@ -121,6 +123,7 @@ function toLocalInputValue(iso) {
 export function AgendaPage({ onStartConsultation }) {
   const { veterinarian } = useVet();
   const { organization } = useClinic();
+  const { confirm, dialogProps } = useConfirmAction();
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [appointments, setAppointments] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -278,7 +281,14 @@ export function AgendaPage({ onStartConsultation }) {
   };
 
   const handleDelete = async () => {
-    if (!editing || !window.confirm("¿Eliminar esta cita?")) return;
+    if (!editing) return;
+    const ok = await confirm({
+      title: "Eliminar cita",
+      description: "Esta acción no se puede deshacer. ¿Eliminar la cita seleccionada?",
+      confirmLabel: "Eliminar",
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await deleteAppointment(veterinarian.id, editing.id);
       notifySuccess("Cita eliminada.");
@@ -692,6 +702,7 @@ export function AgendaPage({ onStartConsultation }) {
           )}
         </DialogContent>
       </Dialog>
+      <ConfirmActionDialog {...dialogProps} />
     </div>
   );
 }

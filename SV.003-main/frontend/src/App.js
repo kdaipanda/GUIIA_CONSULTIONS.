@@ -13,9 +13,11 @@ import "./ThemeEnhancements.css";
 import "./darkModeOverrides.css";
 import "./styles/premiumMotion.css";
 import "./styles/clinicMobileFixes.css";
+import "./styles/clinicPolish.css";
 import "./styles/consultationFlow.css";
 import "./PlatformOnboarding.css";
 import "./styles/dashboardDarkMode.css";
+import "./styles/dashboardPolish.css";
 import {
   createConsultationSupabase,
   listConsultationsSupabase,
@@ -1591,7 +1593,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
             en México también intentamos verificación automática con SEP cuando está disponible.
           </p>
 
-          <div className="cedula-flow-messages">
+          <div className="cedula-flow-messages" aria-live="polite">
             {cedulaFlow?.message && (
               <div className="info-message" role="status">
                 {cedulaFlow.message}
@@ -1637,7 +1639,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                 por correo a{" "}
                 <a
                   href="mailto:soporte@guiaa.vet"
-                  className="font-medium text-primary underline-offset-2 hover:underline"
+                  className="inline-flex min-h-11 items-center font-medium text-primary underline-offset-2 hover:underline"
                 >
                   soporte@guiaa.vet
                 </a>{" "}
@@ -2016,7 +2018,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       window.location.href = data.checkout_url;
     } catch (error) {
       console.error("Error:", error);
-      alert("Error procesando el pago. Inténtalo de nuevo.");
+      notifyError("Error procesando el pago. Inténtalo de nuevo.");
     } finally {
       setBuyingConsultations(false);
     }
@@ -2054,6 +2056,16 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
   const followUpCases = recentConsultations.filter(
     (c) => c.status === "in_progress",
   );
+
+  const greetingHour = new Date().getHours();
+  const greetingText =
+    greetingHour < 12
+      ? `Buenos días, ${vetName}`
+      : greetingHour < 19
+        ? `Buenas tardes, ${vetName}`
+        : `Buenas noches, ${vetName}`;
+  const GreetingIcon =
+    greetingHour < 12 ? Sun : greetingHour < 19 ? CloudSun : Moon;
 
   const MiniAreaChart = ({ data, id, colorFrom, colorTo, ariaLabel }) => {
     if (!data || data.length === 0) return null;
@@ -2131,21 +2143,9 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
           <div className="dashboard-header-row">
             <div className="hero-welcome">
               <div className="hero-greeting">
-                <h1>
-                  {(() => {
-                    const hour = new Date().getHours();
-                    if (hour < 12) return `Buenos días, ${vetName}`;
-                    if (hour < 19) return `Buenas tardes, ${vetName}`;
-                    return `Buenas noches, ${vetName}`;
-                  })()}
-                </h1>
+                <h1>{greetingText}</h1>
                 <span className="greeting-icon">
-                  {(() => {
-                    const hour = new Date().getHours();
-                    if (hour < 12) return <Sun size={18} />;
-                    if (hour < 19) return <CloudSun size={18} />;
-                    return <Moon size={18} />;
-                  })()}
+                  <GreetingIcon size={18} aria-hidden />
                 </span>
               </div>
               <div className="hero-divider"></div>
@@ -2201,8 +2201,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
             <button
               type="button"
               className="today-pill today-pill-btn"
-              onClick={() => embedded && setView("consultation-history")}
-              disabled={!embedded}
+              onClick={() => setView("consultation-history")}
             >
               <span className="pill-label">Consultas hoy</span>
               <span className="pill-value">{stats.today || 0}</span>
@@ -2210,8 +2209,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
             <button
               type="button"
               className="today-pill today-pill-btn"
-              onClick={() => embedded && setView("consultation-history")}
-              disabled={!embedded}
+              onClick={() => setView("consultation-history")}
             >
               <span className="pill-label">Este mes</span>
               <span className="pill-value">{stats.thisMonth}</span>
@@ -2230,6 +2228,18 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
             </button>
           </div>
         </div>
+
+        {membershipStatus.trialExhausted && !embedded && (
+          <div className="dashboard-trial-banner" role="alert">
+            <div className="dashboard-trial-banner-copy">
+              <strong>Prueba agotada</strong>
+              <p>{TRIAL_EXHAUSTED_MESSAGE}</p>
+            </div>
+            <Button type="button" variant="guiaaPrimary" size="sm" onClick={() => setView("membership")}>
+              Ver planes de membresía
+            </Button>
+          </div>
+        )}
 
         <div className={`dashboard-grid${embedded ? " clinic-dashboard-cds-grid" : ""}`}>
           {dashboardLoading ? (
@@ -2255,8 +2265,8 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 <MiniAreaChart
                   data={weeklyActivity}
                   id="kpi-weekly-activity"
-                  colorFrom="#3b82f6"
-                  colorTo="#bfdbfe"
+                  colorFrom="#265B93"
+                  colorTo="#d4ebf7"
                   ariaLabel="Actividad semanal de consultas"
                 />
               </div>
@@ -2277,8 +2287,8 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 <MiniAreaChart
                   data={monthlyActivity}
                   id="kpi-monthly-activity"
-                  colorFrom="#22c55e"
-                  colorTo="#bbf7d0"
+                  colorFrom="#3d9b8f"
+                  colorTo="#c8ebe6"
                   ariaLabel="Actividad mensual de consultas"
                 />
                 <div className={`stat-trend ${stats.thisMonth - stats.lastMonth > 0 ? 'positive' : stats.thisMonth - stats.lastMonth < 0 ? 'negative' : ''}`}>
@@ -2356,8 +2366,8 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
           )}
 
           <section className={`dashboard-block dashboard-block-actions${embedded ? " clinic-settings-card" : ""}`}>
-          <div className={`quick-actions${embedded ? " clinic-dashboard-quick-section" : ""}`}>
-            <h2>Acciones Rápidas</h2>
+          <div className={`quick-actions dashboard-quick-actions${embedded ? " clinic-dashboard-quick-section" : ""}`}>
+            <h2>Acciones rápidas</h2>
             <div className={`action-cards${embedded ? " clinic-dashboard-quick-grid" : ""}`}>
               <Card
                 role="button"
@@ -2513,6 +2523,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
           />
         </div>
       </div>
+      <PrivacyModal isOpen={showPrivacyModal} onAccept={handlePrivacyAccept} />
     </div>
   );
 };
@@ -3345,7 +3356,7 @@ const NewConsultation = ({
 
         <div className="container">
           {info && (
-            <div className="info-message" style={{ marginBottom: "20px" }}>
+            <div className="info-message info-message--spaced">
               {info}
             </div>
           )}
@@ -3465,7 +3476,7 @@ const NewConsultation = ({
 
         <div className="container">
           {info && (
-            <div className="info-message" style={{ marginBottom: "20px" }}>
+            <div className="info-message info-message--spaced">
               {info}
             </div>
           )}
@@ -3544,14 +3555,15 @@ const NewConsultation = ({
 
         <div className="container">
           {info && (
-            <div className="info-message" style={{ marginBottom: "20px" }}>
+            <div className="info-message info-message--spaced">
               {info}
               {isExpertMode && (
-                <div style={{ marginTop: "12px" }}>
+                <div className="info-message-expert-action">
                   <Button
                     type="button"
                     variant="secondary"
                     size="sm"
+                    className="min-h-11"
                     onClick={() => setStep(1)}
                   >
                     Completar datos de la mascota
@@ -3598,12 +3610,7 @@ const NewConsultation = ({
                     </Button>
                       {veterinarian?.membership_type?.toLowerCase() !== "premium" && 
                        (veterinarian?.consultations_remaining || 0) > 0 && (
-                        <p style={{ 
-                          marginTop: "12px", 
-                          fontSize: "14px", 
-                          color: "#64748b",
-                          textAlign: "center" 
-                        }}>
+                        <p className="consultation-trial-remaining">
                           Consultas restantes: {veterinarian.consultations_remaining}
                         </p>
                       )}

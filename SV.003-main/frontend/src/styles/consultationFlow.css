@@ -668,3 +668,25 @@ html.dark .consultation-sidebar .sidebar-progress-bar {
     transform: none;
   }
 }
+
+.info-message--spaced {
+  margin-bottom: 20px;
+}
+
+.info-message-expert-action {
+  margin-top: 12px;
+}
+
+.consultation-trial-remaining {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #64748b;
+  text-align: center;
+}
+
+@media (max-width: 1023px) {
+  .consultation-form-container .form-actions .btn,
+  .consultation-form-container .form-actions button {
+    min-height: 2.75rem;
+  }
+}

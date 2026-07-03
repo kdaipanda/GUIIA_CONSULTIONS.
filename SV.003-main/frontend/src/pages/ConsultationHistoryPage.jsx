@@ -8,6 +8,7 @@ import { getConsultationSearchHaystack } from "../lib/consultationDisplay";
 import { Button } from "../components/ui/button";
 import { ConsultationHistoryCard } from "../components/consultation/ConsultationHistoryCard";
 import { ConsultationDetailPanel } from "../components/consultation/ConsultationDetailPanel";
+import { notifyError } from "../lib/appToast";
 import "./consultationHistoryPage.css";
 
 const STATUS_FILTERS = [
@@ -53,9 +54,11 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
       if (response.ok) {
         const data = await response.json();
         setConsultations(data.consultations || []);
+      } else {
+        notifyError("No se pudo cargar el historial. Intenta de nuevo.");
       }
     } catch (error) {
-      console.error("Error loading consultations:", error);
+      notifyError("No se pudo cargar el historial. Revisa tu conexión.");
     } finally {
       setLoading(false);
     }
@@ -95,8 +98,9 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
       const consultation = await response.json();
       await downloadConsultationPdf(consultation, { veterinarian });
     } catch (error) {
-      console.error("Error generating consultation PDF:", error);
-      setPdfError(error.message || "Error al generar el PDF");
+      const message = error.message || "Error al generar el PDF";
+      setPdfError(message);
+      notifyError(message);
     } finally {
       setPdfLoadingId(null);
     }
@@ -142,12 +146,18 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
           </Button>
         </header>
 
-        <div className="history-stats-row">
+        <div className="history-stats-row" role="group" aria-label="Resumen por estado">
           {STATUS_FILTERS.map(({ id, label }) => (
-            <div key={id} className="history-stat-pill">
+            <button
+              key={id}
+              type="button"
+              className={`history-stat-pill${statusFilter === id ? " is-active" : ""}`}
+              onClick={() => setStatusFilter(id)}
+              aria-pressed={statusFilter === id}
+            >
               <span className="history-stat-value">{stats[id] ?? 0}</span>
               <span className="history-stat-label">{label}</span>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -190,7 +200,11 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
           </div>
         </div>
 
-        {pdfError && <p className="history-error-banner">{pdfError}</p>}
+        {pdfError && (
+          <p className="history-error-banner" role="alert">
+            {pdfError}
+          </p>
+        )}
 
         {loading ? (
           <HistorySkeleton />

@@ -223,13 +223,14 @@ export function ReportsPage() {
           <h1>Reportes</h1>
           <p>Indicadores de operación clínica, ingresos y actividad CDS.</p>
         </div>
-        <div className="clinic-report-period">
+        <div className="clinic-report-period clinic-reports-period">
           {PERIOD_OPTIONS.map((opt) => (
             <Button
               key={opt.id}
               type="button"
               variant={period === opt.id ? "default" : "secondary"}
               size="sm"
+              className="min-h-11"
               onClick={() => setPeriod(opt.id)}
             >
               {opt.label}
@@ -239,6 +240,7 @@ export function ReportsPage() {
             type="button"
             variant="outline"
             size="sm"
+            className="min-h-11"
             disabled={!overview}
             onClick={() => downloadReportCsv(overview, periodLabel)}
           >

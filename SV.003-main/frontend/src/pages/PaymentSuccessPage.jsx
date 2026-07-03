@@ -13,6 +13,7 @@ export function PaymentSuccessPage({ setView }) {
   const [paymentStatus, setPaymentStatus] = useState("checking");
   const [purchaseType, setPurchaseType] = useState(null);
   const [creditsPurchased, setCreditsPurchased] = useState(null);
+  const [pollAttempt, setPollAttempt] = useState(0);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -28,6 +29,7 @@ export function PaymentSuccessPage({ setView }) {
 
   const pollPaymentStatus = async (sessionId, attempts = 0) => {
     const maxAttempts = 5;
+    setPollAttempt(attempts + 1);
 
     if (attempts >= maxAttempts) {
       setPaymentStatus("timeout");
@@ -90,6 +92,11 @@ export function PaymentSuccessPage({ setView }) {
           </span>
           <h2>Verificando pago</h2>
           <p>Estamos confirmando tu transacción. Esto puede tomar unos segundos.</p>
+          {pollAttempt > 0 && (
+            <p className="payment-status-note text-sm text-muted-foreground" role="status">
+              Intento {pollAttempt} de 5…
+            </p>
+          )}
         </div>
       );
     }
@@ -135,7 +142,7 @@ export function PaymentSuccessPage({ setView }) {
               ? "Recibimos tu solicitud de recarga. Si pagaste con OXXO u otro método en efectivo, activaremos las consultas en cuanto Stripe confirme el pago (puede tardar hasta 3 días)."
               : "Recibimos tu solicitud de membresía. Si pagaste con OXXO u otro método en efectivo, activaremos tu plan en cuanto Stripe confirme el pago (puede tardar hasta 3 días)."}
           </p>
-          <p className="text-sm opacity-80">
+          <p className="payment-status-note text-sm text-muted-foreground">
             También te enviaremos la confirmación al correo de tu cuenta. Precios en MXN (pesos mexicanos).
           </p>
           <div className="payment-status-actions">

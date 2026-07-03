@@ -1,0 +1,36 @@
+/**
+ * Pulido transversal — pantallas clínica GUIAA (/app/*).
+ */
+
+/* Targets táctiles en toolbars y páginas clínicas (móvil/tablet) */
+@media (max-width: 1023px) {
+  .clinic-page-guiaa .clinic-page-header > button,
+  .clinic-page-guiaa .clinic-header-actions > button,
+  .clinic-page-guiaa .clinic-toolbar-row > button {
+    min-height: 2.75rem;
+  }
+
+  .clinic-page-guiaa .clinic-period-toggle button,
+  .clinic-page-guiaa .clinic-reports-period button {
+    min-height: 2.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clinic-page-guiaa .clinic-owner-card,
+  .clinic-page-guiaa .info-card,
+  .membership-page .pricing-card {
+    transition: none;
+  }
+}
+
+.clinic-confirm-dialog {
+  max-width: min(28rem, calc(100vw - 2rem));
+}
+
+.clinic-reports-period {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}

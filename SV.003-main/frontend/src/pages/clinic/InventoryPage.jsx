@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Search, Pencil, Trash2, PackageMinus, History, AlertTriangle, Package, DollarSign } from "lucide-react";
 import "./clinicPageShared.css";
 import "./inventoryPage.css";
+import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
+import { useConfirmAction } from "../../hooks/useConfirmAction";
 import {
   ClinicTableSkeleton,
   ClinicEmptyState,
@@ -85,6 +87,7 @@ function formatMoney(value) {
 
 export function InventoryPage() {
   const { veterinarian } = useVet();
+  const { confirm, dialogProps } = useConfirmAction();
   const [products, setProducts] = useState([]);
   const [summary, setSummary] = useState(null);
   const [search, setSearch] = useState("");
@@ -227,7 +230,13 @@ export function InventoryPage() {
   };
 
   const handleDelete = async (product) => {
-    if (!window.confirm(`¿Eliminar "${product.name}"?`)) return;
+    const ok = await confirm({
+      title: "Eliminar producto",
+      description: `¿Eliminar "${product.name}" del inventario? Esta acción no se puede deshacer.`,
+      confirmLabel: "Eliminar",
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await deleteProduct(veterinarian.id, product.id);
       notifySuccess("Producto eliminado.");
@@ -598,6 +607,7 @@ export function InventoryPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConfirmActionDialog {...dialogProps} />
     </div>
   );
 }

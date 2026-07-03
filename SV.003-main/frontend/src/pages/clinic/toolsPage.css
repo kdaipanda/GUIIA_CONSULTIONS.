@@ -86,6 +86,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  min-height: 2.75rem;
   gap: 8px;
   padding: 8px 12px;
   border-radius: 10px;
@@ -101,6 +102,11 @@
 .clinic-tools-page-guiaa .clinic-tools-links a:hover {
   background: rgba(38, 91, 147, 0.1);
   border-color: rgba(38, 91, 147, 0.22);
+}
+
+.clinic-tools-page-guiaa .clinic-tools-links a:focus-visible {
+  outline: 2px solid var(--tools-blue);
+  outline-offset: 2px;
 }
 
 .clinic-tools-link-icon {
