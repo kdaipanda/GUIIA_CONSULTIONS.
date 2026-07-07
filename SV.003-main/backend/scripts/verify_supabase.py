@@ -195,6 +195,7 @@ def check_pending_schema_columns(client) -> bool:
     print("\n=== Columnas migraciones julio 2026 ===")
     pending = (
         ("profiles", "cedula_reminder_sent_at"),
+        ("profiles", "password_hash"),
         ("payment_transactions", "meta_capi_purchase_sent"),
     )
     ok = True

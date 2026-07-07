@@ -853,6 +853,8 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
     especialidad: "",
     años_experiencia: "",
     institucion: "",
+    password: "",
+    password_confirm: "",
   });
   const [cedulaFile, setCedulaFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -881,6 +883,14 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
       notifyError("Selecciona una especialidad.");
       return;
     }
+    if ((formData.password || "").length < 8) {
+      notifyError("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+    if (formData.password !== formData.password_confirm) {
+      notifyError("Las contraseñas no coinciden.");
+      return;
+    }
 
     setLoading(true);
     notifyError("");
@@ -891,7 +901,8 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          años_experiencia: parseInt(formData.años_experiencia),
+          años_experiencia: parseInt(formData.años_experiencia, 10),
+          password: formData.password,
         }),
       });
 
@@ -957,6 +968,41 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                     setFormData({ ...formData, email: e.target.value })
                   }
                   placeholder="juan.perez@email.com"
+                  className="mt-1.5 h-11 min-h-11 bg-background"
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <Label htmlFor="reg-password">Contraseña *</Label>
+                <Input
+                  id="reg-password"
+                  type="password"
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  placeholder="Mínimo 8 caracteres"
+                  className="mt-1.5 h-11 min-h-11 bg-background"
+                />
+              </div>
+              <div className="form-group">
+                <Label htmlFor="reg-password-confirm">Confirmar contraseña *</Label>
+                <Input
+                  id="reg-password-confirm"
+                  type="password"
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  value={formData.password_confirm}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password_confirm: e.target.value })
+                  }
+                  placeholder="Repite tu contraseña"
                   className="mt-1.5 h-11 min-h-11 bg-background"
                 />
               </div>
@@ -1185,8 +1231,10 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
   const { login, loginWithEmailPassword, loginWithMagicLink } = useVet();
   const [formData, setFormData] = useState({
     email: "",
+    password: "",
     cedula_profesional: "",
   });
+  const [legacyLogin, setLegacyLogin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pending2FA, setPending2FA] = useState(false);
   const [challengeNonce, setChallengeNonce] = useState(null);
@@ -1208,12 +1256,22 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
     notifyError("");
 
     try {
+      const loginBody = legacyLogin
+        ? {
+            email: formData.email,
+            cedula_profesional: formData.cedula_profesional,
+          }
+        : {
+            email: formData.email,
+            password: formData.password,
+          };
+
       const vetData = await fetchJsonWithRetry(
         `${getBackendUrl()}/api/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(loginBody),
         },
         { timeoutMs: 45000, retries: 2 },
       );
@@ -1357,7 +1415,11 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
       <AuthPageShell setView={setView}>
           <GuiaaBrandLockup variant="auth" className="mb-6" />
           <h2>Iniciar Sesión</h2>
-          <p>Ingresa con tu email y tu número de registro profesional</p>
+          <p>
+            {legacyLogin
+              ? "Cuenta anterior: usa email y matrícula profesional"
+              : "Ingresa con tu email y contraseña"}
+          </p>
 
           {!pending2FA ? (
             <form onSubmit={handleSubmit} className="auth-form">
@@ -1377,24 +1439,42 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
                 />
               </div>
 
-              <div className="form-group">
-                <Label htmlFor="login-cedula">Matrícula / licencia / registro</Label>
-                <Input
-                  id="login-cedula"
-                  type="text"
-                  required
-                  autoComplete="off"
-                  value={formData.cedula_profesional}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      cedula_profesional: e.target.value,
-                    })
-                  }
-                  placeholder="Ej. 12345678 o MVZ-2024-001"
-                  className="mt-1.5 h-11 min-h-11 bg-background"
-                />
-              </div>
+              {!legacyLogin ? (
+                <div className="form-group">
+                  <Label htmlFor="login-password">Contraseña</Label>
+                  <Input
+                    id="login-password"
+                    type="password"
+                    required
+                    autoComplete="current-password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    placeholder="Tu contraseña"
+                    className="mt-1.5 h-11 min-h-11 bg-background"
+                  />
+                </div>
+              ) : (
+                <div className="form-group">
+                  <Label htmlFor="login-cedula">Matrícula / licencia / registro</Label>
+                  <Input
+                    id="login-cedula"
+                    type="text"
+                    required
+                    autoComplete="off"
+                    value={formData.cedula_profesional}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        cedula_profesional: e.target.value,
+                      })
+                    }
+                    placeholder="Ej. 12345678 o MVZ-2024-001"
+                    className="mt-1.5 h-11 min-h-11 bg-background"
+                  />
+                </div>
+              )}
 
               <Button
                 type="submit"
@@ -1403,6 +1483,19 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
               >
                 {loading ? "Iniciando Sesión..." : "Iniciar Sesión"}
               </Button>
+
+              <button
+                type="button"
+                className="link-btn mt-3 w-full text-center text-sm"
+                onClick={() => {
+                  setLegacyLogin((prev) => !prev);
+                  notifyError("");
+                }}
+              >
+                {legacyLogin
+                  ? "Usar email y contraseña"
+                  : "¿Cuenta anterior sin contraseña? Usa matrícula"}
+              </button>
             </form>
           ) : (
             <form onSubmit={handleVerify2FA} className="auth-form">

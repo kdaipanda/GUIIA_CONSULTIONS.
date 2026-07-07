@@ -13,6 +13,7 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 PENDING = (
     ("profiles", "cedula_reminder_sent_at"),
+    ("profiles", "password_hash"),
     ("payment_transactions", "meta_capi_purchase_sent"),
 )
 
@@ -47,7 +48,7 @@ def main() -> int:
     print(
         "\nAplica las migraciones faltantes:\n"
         "  python scripts/apply_supabase_migration.py "
-        "--sql supabase_migrations/20260702_meta_capi_purchase_sent.sql\n"
+        "--sql supabase_migrations/20260707_password_hash.sql\n"
         "(requiere SUPABASE_DATABASE_URL en backend/.env)\n"
         "O ejecuta el SQL en Supabase Dashboard > SQL Editor.",
     )

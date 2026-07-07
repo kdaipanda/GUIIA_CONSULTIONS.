@@ -39,6 +39,8 @@ import auth_security
 import cedula_verification
 import email_notifications
 import meta_capi
+import password_auth
+import rate_limit
 from membership_catalog import (
     CONSULTATION_CREDIT_PACKAGES,
     FEATURED_PLAN_KEY,
@@ -735,11 +737,18 @@ class VeterinarianRegister(BaseModel):
     especialidad: str
     años_experiencia: int
     institucion: str
+    password: str = Field(..., min_length=8)
 
 
 class VeterinarianLogin(BaseModel):
     email: str
-    cedula_profesional: str
+    password: Optional[str] = None
+    cedula_profesional: Optional[str] = None
+
+
+class SetPasswordRequest(BaseModel):
+    password: str = Field(..., min_length=8)
+    current_password: Optional[str] = None
 
 
 class TwoFactorVerify(BaseModel):
@@ -933,6 +942,18 @@ async def update_one_db(collection_name: str, query: dict, update: dict):
         if match:
             MEMORY_DB[collection_name][doc_id].update(update)
             break
+
+
+async def delete_one_db(collection_name: str, query: dict) -> bool:
+    """Elimina un documento en memoria."""
+    if collection_name not in MEMORY_DB:
+        return False
+    for doc_id, doc in list(MEMORY_DB[collection_name].items()):
+        match = all(doc.get(k) == v for k, v in query.items())
+        if match:
+            del MEMORY_DB[collection_name][doc_id]
+            return True
+    return False
 
 
 async def count_documents_db(collection_name: str, query: dict):
@@ -1323,9 +1344,54 @@ def _require_payment_session_owned(transaction: dict, vet_id: str) -> None:
         )
 
 
+def _authenticate_login_profile(credentials: VeterinarianLogin) -> dict:
+    """Valida email+contraseña o login legacy email+matrícula."""
+    email = (credentials.email or "").strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="Email requerido")
+
+    profile, err = get_profile_by_email(email)
+    if err:
+        raise HTTPException(status_code=500, detail="Error de conexión con la base de datos")
+    if not profile:
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
+
+    stored_hash = (profile.get("password_hash") or "").strip()
+    password = (credentials.password or "").strip()
+
+    if stored_hash:
+        if not password:
+            raise HTTPException(
+                status_code=400,
+                detail="Ingresa tu contraseña para continuar.",
+            )
+        if not password_auth.verify_password(password, stored_hash):
+            raise HTTPException(status_code=401, detail="Credenciales inválidas")
+        return profile
+
+    cedula = normalize_professional_id(credentials.cedula_profesional or "")
+    if not cedula:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Tu cuenta aún no tiene contraseña. "
+                "Inicia sesión con email y matrícula profesional."
+            ),
+        )
+
+    veterinarian, cred_err = get_profile_by_credentials(email, cedula)
+    if cred_err:
+        raise HTTPException(status_code=500, detail="Error de conexión con la base de datos")
+    if not veterinarian:
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
+    return veterinarian
+
+
 @app.post("/api/auth/register")
 async def register_veterinarian(vet: VeterinarianRegister, request: Request):
     """Registra un nuevo veterinario"""
+
+    rate_limit.check_rate_limit(request, "register", vet.email)
 
     # Verificar si ya existe por email
     existing, _ = get_profile_by_email(vet.email)
@@ -1345,6 +1411,11 @@ async def register_veterinarian(vet: VeterinarianRegister, request: Request):
         raise HTTPException(status_code=400, detail="Este registro profesional ya está registrado")
 
     pais = (vet.profesional_pais or "MX").strip().upper()[:2]
+
+    try:
+        password_hash = password_auth.hash_password(vet.password)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     # Verificar si es usuario de desarrollo (pasa verificación automáticamente)
     is_dev = is_dev_user(vet.email)
@@ -1377,6 +1448,7 @@ async def register_veterinarian(vet: VeterinarianRegister, request: Request):
         "cedula_sep_nombre": vet.nombre if is_dev else None,
         "cedula_sep_profesion": "Médico Veterinario Zootecnista" if is_dev else None,
         "cedula_skip_count": 0,  # Contador de veces que ha pospuesto la verificación
+        "password_hash": password_hash,
     }
 
     # Guardar en Supabase
@@ -1404,27 +1476,18 @@ async def register_veterinarian(vet: VeterinarianRegister, request: Request):
 
     asyncio.create_task(_track_meta_registration())
 
+    rate_limit.reset_rate_limit(request, "register", vet.email)
     return result_data
 
 
 @app.post("/api/auth/login")
-async def login_veterinarian(credentials: VeterinarianLogin):
+async def login_veterinarian(credentials: VeterinarianLogin, request: Request):
     """Login de veterinario"""
 
-    email = (credentials.email or "").strip().lower()
-    cedula = normalize_professional_id(credentials.cedula_profesional or "")
-    if not email or not cedula:
-        raise HTTPException(status_code=400, detail="Email y registro profesional son requeridos")
+    rate_limit.check_rate_limit(request, "login", credentials.email)
 
-    # Buscar en Supabase
-    veterinarian, err = get_profile_by_credentials(email, cedula)
-    
-    if err:
-        print(f"Error buscando usuario: {err}")
-        raise HTTPException(status_code=500, detail="Error de conexión con la base de datos")
-    
-    if not veterinarian:
-        raise HTTPException(status_code=401, detail="Credenciales inválidas")
+    email = (credentials.email or "").strip().lower()
+    veterinarian = _authenticate_login_profile(credentials)
 
     # Usuario de desarrollo: auto-verificar si no está verificado
     is_dev = is_dev_user(email)
@@ -1519,6 +1582,7 @@ async def login_veterinarian(credentials: VeterinarianLogin):
                 "nonce": nonce,
                 "code": code,
                 "veterinarian_id": veterinarian["id"],
+                "attempts": 0,
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "expires_at": (
                     datetime.now(timezone.utc) + timedelta(minutes=10)
@@ -1526,44 +1590,101 @@ async def login_veterinarian(credentials: VeterinarianLogin):
             },
         )
 
-        print(f"Codigo 2FA para {credentials.email}: {code}")
+        asyncio.create_task(
+            _email_background(
+                email_notifications.notify_user_2fa_code,
+                veterinarian,
+                code,
+            )
+        )
 
         return {
             "status": "pending_2fa",
             "nonce": nonce,
-            "message": "Se ha enviado un código de verificación (revisa la consola del servidor)",
+            "message": "Enviamos un código de verificación a tu email.",
         }
 
-    # Remover _id de MongoDB si existe
+    rate_limit.reset_rate_limit(request, "login", email)
     if isinstance(veterinarian, dict):
         veterinarian.pop("_id", None)
     return auth_security.attach_auth_tokens(veterinarian)
 
 
+@app.post("/api/auth/set-password")
+async def set_account_password(
+    body: SetPasswordRequest,
+    x_veterinarian_id: str = Header(None),
+):
+    """Establece o cambia la contraseña de la cuenta autenticada."""
+    vet_id = _require_vet_id(x_veterinarian_id)
+    profile, err = get_profile(vet_id)
+    if err:
+        raise HTTPException(status_code=500, detail=f"Error obteniendo perfil: {err}")
+    if not profile:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+
+    stored_hash = (profile.get("password_hash") or "").strip()
+    if stored_hash:
+        current = (body.current_password or "").strip()
+        if not current:
+            raise HTTPException(
+                status_code=400,
+                detail="Ingresa tu contraseña actual para cambiarla.",
+            )
+        if not password_auth.verify_password(current, stored_hash):
+            raise HTTPException(status_code=401, detail="Contraseña actual incorrecta")
+
+    try:
+        new_hash = password_auth.hash_password(body.password)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    err_up = update_profile(vet_id, {"password_hash": new_hash})
+    if err_up:
+        raise HTTPException(status_code=500, detail=f"Error guardando contraseña: {err_up}")
+
+    return {"status": "ok", "message": "Contraseña actualizada correctamente."}
+
+
 @app.post("/api/auth/verify-2fa")
-async def verify_2fa(verification: TwoFactorVerify):
+async def verify_2fa(verification: TwoFactorVerify, request: Request):
     """Verifica código 2FA"""
+
+    rate_limit.check_rate_limit(request, "verify-2fa", verification.nonce)
 
     temp_code = await find_one_db("temp_2fa_codes", {"nonce": verification.nonce})
 
     if not temp_code:
         raise HTTPException(status_code=404, detail="Código no encontrado o expirado")
 
-    # Verificar expiración
     expires_at = datetime.fromisoformat(temp_code["expires_at"])
     if datetime.now(timezone.utc) > expires_at:
+        await delete_one_db("temp_2fa_codes", {"nonce": verification.nonce})
         raise HTTPException(status_code=401, detail="Código expirado")
 
-    # Verificar código
-    if temp_code["code"] != verification.code:
+    if temp_code["code"] != verification.code.strip():
+        attempts = int(temp_code.get("attempts") or 0) + 1
+        if attempts >= 5:
+            await delete_one_db("temp_2fa_codes", {"nonce": verification.nonce})
+            raise HTTPException(
+                status_code=401,
+                detail="Demasiados intentos fallidos. Inicia sesión de nuevo.",
+            )
+        await update_one_db(
+            "temp_2fa_codes",
+            {"nonce": verification.nonce},
+            {"attempts": attempts},
+        )
         raise HTTPException(status_code=401, detail="Código inválido")
 
-    # Obtener veterinario de Supabase
+    await delete_one_db("temp_2fa_codes", {"nonce": verification.nonce})
+
     veterinarian, err = get_profile(temp_code["veterinarian_id"])
 
     if err or not veterinarian:
         raise HTTPException(status_code=404, detail="Veterinario no encontrado")
 
+    rate_limit.reset_rate_limit(request, "verify-2fa", verification.nonce)
     return auth_security.attach_auth_tokens(veterinarian)
 
 
@@ -1579,10 +1700,9 @@ async def get_current_profile(x_veterinarian_id: str = Header(None)):
     if not profile:
         raise HTTPException(status_code=404, detail="Perfil no encontrado")
     
-    # Remover _id si existe
     if isinstance(profile, dict):
-        profile.pop("_id", None)
-    
+        profile = password_auth.strip_sensitive_profile_fields(profile)
+
     return profile
 
 

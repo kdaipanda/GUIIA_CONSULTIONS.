@@ -96,8 +96,9 @@ def allow_insecure_vet_header() -> bool:
 
 def attach_auth_tokens(profile: Dict[str, Any]) -> Dict[str, Any]:
     """Añade access_token a la respuesta de login/registro (sin mutar el original)."""
-    data = dict(profile)
-    data.pop("_id", None)
+    from password_auth import strip_sensitive_profile_fields
+
+    data = strip_sensitive_profile_fields(profile)
     vet_id = str(data.get("id") or "")
     email = data.get("email") or ""
     if vet_id:

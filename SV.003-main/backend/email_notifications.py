@@ -620,3 +620,32 @@ def notify_user_cedula_upload_reminder(profile: dict) -> None:
     err = send_email([user_email], email_subject, html, text)
     if err:
         print(f"[WARN] Email usuario (recordatorio cédula): {err}")
+
+
+def notify_user_2fa_code(profile: dict, code: str) -> None:
+    """Envía código de verificación en dos pasos al email del veterinario."""
+    user_email = (profile.get("email") or "").strip()
+    if not user_email or not code:
+        return
+
+    user_name = (profile.get("nombre") or "").strip() or "colega"
+    email_subject = "[GUIAA] Tu código de verificación"
+    text = (
+        f"Hola {user_name},\n\n"
+        f"Tu código de verificación para iniciar sesión en GUIAA es: {code}\n\n"
+        f"Válido por 10 minutos. Si no solicitaste este código, ignora este mensaje.\n\n"
+        f"— Equipo GUIAA\n"
+    )
+    html = f"""
+    <h2>Código de verificación</h2>
+    <p>Hola {user_name},</p>
+    <p>Usa este código para completar tu inicio de sesión en GUIAA:</p>
+    <p style="font-size:28px;font-weight:700;letter-spacing:6px;margin:24px 0;">{code}</p>
+    <p style="color:#64748b;font-size:13px;">Válido por 10 minutos. Si no fuiste tú, ignora este correo.</p>
+    <p style="color:#64748b;font-size:12px;">— Equipo GUIAA</p>
+    """
+
+    err = send_email([user_email], email_subject, html, text)
+    if err:
+        print(f"[WARN] Email 2FA: {err}")
+
