@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import re
+import uuid
 from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional, Set, Tuple
@@ -11,6 +12,9 @@ from fastapi import HTTPException, Request
 from jose import JWTError, jwt
 
 _current_vet_id: ContextVar[Optional[str]] = ContextVar("current_vet_id", default=None)
+
+_cedula_flow_store: Dict[str, Dict[str, Any]] = {}
+CEDULA_FLOW_TTL_SECONDS = 30 * 60
 
 ALGORITHM = "HS256"
 DEFAULT_TOKEN_HOURS = 24
@@ -111,6 +115,77 @@ def get_request_vet_id() -> Optional[str]:
     return _current_vet_id.get()
 
 
+def _purge_expired_cedula_flow_nonces() -> None:
+    now = datetime.now(timezone.utc).timestamp()
+    expired = [
+        nonce
+        for nonce, entry in _cedula_flow_store.items()
+        if entry.get("exp", 0) < now
+    ]
+    for nonce in expired:
+        _cedula_flow_store.pop(nonce, None)
+
+
+def create_cedula_flow_nonce(vet_id: str) -> str:
+    """Nonce temporal para flujo de cédula (sin JWT de sesión completa)."""
+    _purge_expired_cedula_flow_nonces()
+    nonce = str(uuid.uuid4())
+    _cedula_flow_store[nonce] = {
+        "vet_id": str(vet_id),
+        "exp": datetime.now(timezone.utc).timestamp() + CEDULA_FLOW_TTL_SECONDS,
+    }
+    return nonce
+
+
+def verify_cedula_flow_nonce(
+    nonce: Optional[str], vet_id: Optional[str]
+) -> Optional[str]:
+    if not nonce or not vet_id:
+        return None
+    _purge_expired_cedula_flow_nonces()
+    key = nonce.strip()
+    entry = _cedula_flow_store.get(key)
+    if not entry:
+        return None
+    if entry.get("exp", 0) < datetime.now(timezone.utc).timestamp():
+        _cedula_flow_store.pop(key, None)
+        return None
+    expected = str(vet_id).strip()
+    if entry.get("vet_id") != expected:
+        return None
+    return expected
+
+
+def invalidate_cedula_flow_nonce(nonce: Optional[str]) -> None:
+    if nonce:
+        _cedula_flow_store.pop(nonce.strip(), None)
+
+
+def try_authenticate_cedula_flow_request(request: Request) -> Optional[str]:
+    """Solo rutas /api/cedula/* con nonce + x-veterinarian-id alineados."""
+    path = request.url.path.rstrip("/") or "/"
+    if not path.startswith("/api/cedula"):
+        return None
+    nonce = (
+        request.headers.get("x-cedula-flow-nonce")
+        or request.headers.get("X-Cedula-Flow-Nonce")
+        or ""
+    ).strip()
+    header_id = (
+        request.headers.get("x-veterinarian-id")
+        or request.headers.get("X-Veterinarian-Id")
+        or ""
+    ).strip()
+    return verify_cedula_flow_nonce(nonce, header_id)
+
+
+def cedula_flow_fields(vet_id: str) -> Dict[str, Any]:
+    return {
+        "cedula_flow_nonce": create_cedula_flow_nonce(vet_id),
+        "cedula_flow_expires_in": CEDULA_FLOW_TTL_SECONDS,
+    }
+
+
 def resolve_authenticated_vet_id(x_veterinarian_id: Optional[str]) -> str:
     """Resuelve el ID del veterinario autenticado (JWT middleware o header legacy)."""
     auth_id = get_request_vet_id()
@@ -186,8 +261,6 @@ def is_public_api_route(method: str, path: str) -> bool:
         ("GET", "/api/consultations/credit-packages"),
     }
     if (m, p) in public_exact:
-        return True
-    if m == "GET" and p.startswith("/api/payments/checkout/status/"):
         return True
     return False
 

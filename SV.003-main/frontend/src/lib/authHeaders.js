@@ -1,4 +1,5 @@
 const TOKEN_KEY = "guiaa_access_token";
+const FLOW_NONCE_KEY = "guiaa_cedula_flow_nonce";
 
 export function storeAccessToken(token) {
   if (token) {
@@ -14,6 +15,20 @@ export function clearAccessToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
 
+export function storeCedulaFlowNonce(nonce) {
+  if (nonce) {
+    localStorage.setItem(FLOW_NONCE_KEY, nonce);
+  }
+}
+
+export function getCedulaFlowNonce() {
+  return localStorage.getItem(FLOW_NONCE_KEY) || "";
+}
+
+export function clearCedulaFlowNonce() {
+  localStorage.removeItem(FLOW_NONCE_KEY);
+}
+
 /**
  * Cabeceras de autenticación para la API.
  * Por defecto incluye Content-Type: application/json (requerido por FastAPI).
@@ -25,6 +40,11 @@ export function getAuthHeaders(veterinarianId, extra = {}) {
   const token = getAccessToken();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
+  } else {
+    const flowNonce = getCedulaFlowNonce();
+    if (flowNonce) {
+      headers["x-cedula-flow-nonce"] = flowNonce;
+    }
   }
   if (veterinarianId) {
     headers["x-veterinarian-id"] = veterinarianId;
@@ -37,9 +57,21 @@ export function getAuthHeaders(veterinarianId, extra = {}) {
 
 export function persistAuthFromResponse(data) {
   if (!data || typeof data !== "object") return data;
-  const { access_token, token_type, expires_in, ...profile } = data;
+  const {
+    access_token,
+    token_type,
+    expires_in,
+    cedula_flow_nonce,
+    cedula_flow_expires_in,
+    ...profile
+  } = data;
   if (access_token) {
     storeAccessToken(access_token);
+    clearCedulaFlowNonce();
+  }
+  if (cedula_flow_nonce) {
+    storeCedulaFlowNonce(cedula_flow_nonce);
+    clearAccessToken();
   }
   const hasProfileFields =
     profile.id || profile.email || profile.veterinarian_id || profile.status;

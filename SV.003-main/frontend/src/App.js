@@ -27,7 +27,7 @@ import {
 import { BACKEND_URL, getBackendUrl } from "./lib/backendUrl";
 import { friendlyFetchError, friendlyDatabaseError } from "./lib/friendlyFetchError";
 import { fetchWithTimeout, fetchJsonWithRetry } from "./lib/fetchWithTimeout";
-import { getAuthHeaders, storeAccessToken } from "./lib/authHeaders";
+import { getAuthHeaders, persistAuthFromResponse } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
 import { applyDocumentTheme, readStoredTheme } from "./lib/themeSync";
 import {
@@ -1228,9 +1228,7 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
 
       // Gating: requiere flujo de cédula
       if (vetData.status === "requires_cedula_flow") {
-        if (vetData.access_token) {
-          storeAccessToken(vetData.access_token);
-        }
+        persistAuthFromResponse(vetData);
         setCedulaFlow?.({
           source: "login",
           veterinarian_id: vetData?.veterinarian_id,

@@ -8,7 +8,7 @@ import { supabase } from "../lib/supabaseClient";
 import { getBackendUrl } from "../lib/backendUrl";
 import { fetchWithTimeout } from "../lib/fetchWithTimeout";
 import { parseJsonResponse } from "../lib/friendlyFetchError";
-import { getAuthHeaders, storeAccessToken, clearAccessToken } from "../lib/authHeaders";
+import { getAuthHeaders, clearAccessToken, clearCedulaFlowNonce, persistAuthFromResponse } from "../lib/authHeaders";
 
 const DEV_AUTO_LOGIN = false;
 
@@ -130,10 +130,9 @@ export const VetProvider = ({ children }) => {
   }, [veterinarian?.id]);
 
   const login = (vetData) => {
-    const { access_token, token_type, expires_in, ...profile } = vetData || {};
-    if (access_token) {
-      storeAccessToken(access_token);
-    }
+    persistAuthFromResponse(vetData);
+    const { access_token, token_type, expires_in, cedula_flow_nonce, cedula_flow_expires_in, ...profile } =
+      vetData || {};
     const nextProfile = profile.id || profile.email ? profile : vetData;
     setVeterinarian(nextProfile);
     localStorage.setItem("veterinarian", JSON.stringify(nextProfile));
@@ -144,6 +143,7 @@ export const VetProvider = ({ children }) => {
     setVeterinarian(null);
     localStorage.removeItem("veterinarian");
     clearAccessToken();
+    clearCedulaFlowNonce();
   };
 
   const loginWithEmailPassword = async (email, password) => {
