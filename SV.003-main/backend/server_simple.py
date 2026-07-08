@@ -1457,6 +1457,11 @@ async def register_veterinarian(vet: VeterinarianRegister, request: Request):
         password_hash = password_auth.hash_password(vet.password)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=400,
+            detail=password_auth.PASSWORD_HASH_ERROR_MESSAGE,
+        ) from exc
 
     # Verificar si es usuario de desarrollo (pasa verificación automáticamente)
     is_dev = is_dev_user(vet.email)
@@ -1679,6 +1684,11 @@ async def set_account_password(
         new_hash = password_auth.hash_password(body.password)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=400,
+            detail=password_auth.PASSWORD_HASH_ERROR_MESSAGE,
+        ) from exc
 
     err_up = update_profile(vet_id, {"password_hash": new_hash})
     if err_up:

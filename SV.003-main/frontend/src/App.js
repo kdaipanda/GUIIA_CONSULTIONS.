@@ -35,7 +35,7 @@ import {
   consumeNewUserDiagnosticoRedirect,
 } from "./lib/guiaaOnboarding";
 import { notifyError, notifySuccess, notifyQuotaError } from "./lib/appToast";
-import { getPasswordValidationError, PASSWORD_RULES_ATTR } from "./lib/passwordPolicy";
+import { getPasswordValidationError, PASSWORD_RULES_ATTR, normalizePasswordInput } from "./lib/passwordPolicy";
 import { PasswordRequirementsHint } from "./components/PasswordRequirementsHint";
 import {
   trackMetaLead,
@@ -948,7 +948,9 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
       notifyError(passwordError);
       return;
     }
-    if (formData.password !== formData.password_confirm) {
+    const password = normalizePasswordInput(formData.password);
+    const passwordConfirm = normalizePasswordInput(formData.password_confirm);
+    if (password !== passwordConfirm) {
       notifyError("Las contraseñas no coinciden.");
       return;
     }
@@ -963,7 +965,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
         body: JSON.stringify({
           ...formData,
           años_experiencia: parseInt(formData.años_experiencia, 10),
-          password: formData.password,
+          password,
         }),
       });
 

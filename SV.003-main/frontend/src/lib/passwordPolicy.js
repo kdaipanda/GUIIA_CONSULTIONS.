@@ -50,6 +50,10 @@ export function getPasswordValidationError(password) {
   return failed?.helpText || null;
 }
 
+export function normalizePasswordInput(value) {
+  return (value ?? "").trim();
+}
+
 export function isPasswordValid(password) {
   return !getPasswordValidationError(password);
 }

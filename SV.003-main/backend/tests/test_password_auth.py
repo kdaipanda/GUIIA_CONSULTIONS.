@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import pytest
+from passlib.exc import PasswordSizeError
 
 from password_auth import (
     MIN_PASSWORD_LENGTH,
     PASSWORD_REQUIREMENTS_TEXT,
     hash_password,
     password_validation_errors,
+    prepare_password_for_bcrypt,
     strip_sensitive_profile_fields,
     validate_password,
     verify_password,
@@ -42,6 +44,22 @@ def test_hash_password_accepts_long_password():
     long_password = "Vet1" + ("x" * 80)
     hashed = hash_password(long_password)
     assert verify_password(long_password, hashed)
+    assert verify_password("Vet1" + ("x" * 80), hashed)
+
+
+def test_prepare_password_for_bcrypt_truncates_bytes():
+    long_password = "á" * 40  # >72 bytes in utf-8
+    prepared = prepare_password_for_bcrypt("Vet1" + long_password)
+    assert len(prepared.encode("utf-8")) <= 72
+
+
+def test_hash_password_maps_bcrypt_length_error(monkeypatch):
+    def boom(_value):
+        raise PasswordSizeError("password cannot be longer than 72 bytes")
+
+    monkeypatch.setattr("password_auth._pwd_context.hash", boom)
+    with pytest.raises(ValueError, match="No se pudo guardar"):
+        hash_password("Vet2024")
 
 
 def test_hash_and_verify_password():
