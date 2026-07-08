@@ -31,8 +31,8 @@ import { getAuthHeaders, persistAuthFromResponse } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
 import { applyDocumentTheme, readStoredTheme } from "./lib/themeSync";
 import {
-  markPostRegisterOnboarding,
-  consumePostRegisterOnboarding,
+  markNewUserDiagnosticoRedirect,
+  consumeNewUserDiagnosticoRedirect,
 } from "./lib/guiaaOnboarding";
 import { notifyError, notifySuccess, notifyQuotaError } from "./lib/appToast";
 import { getPasswordValidationError } from "./lib/passwordPolicy";
@@ -169,20 +169,6 @@ function consumeAuthRedirect() {
     /* ignore */
   }
   return path;
-}
-
-function navigateAfterAuth(navigate, setView, setIsInitialized) {
-  const redirectPath = consumeAuthRedirect();
-  if (redirectPath && PATH_TO_VIEW[redirectPath]) {
-    const view = PATH_TO_VIEW[redirectPath];
-    setView(view);
-    setIsInitialized?.(true);
-    navigate(redirectPath);
-    return;
-  }
-  setView("dashboard");
-  setIsInitialized?.(true);
-  navigate(VIEW_TO_PATH.dashboard);
 }
 
 // Importar formularios de especies
@@ -582,21 +568,40 @@ const Router = () => {
     setIsInitialized(true);
   };
 
-  const completeAuthAndEnter = useCallback(() => {
-    setCedulaFlow(null);
-    if (consumePostRegisterOnboarding()) {
-      guardNewConsultation(() => {
-        setClinicalContext(null);
-        setSelectedConsultationId(null);
-        setConsultationEntryMode("standard");
-        setCurrentView("new-consultation");
+  const goToDiagnostico = useCallback(() => {
+    setClinicalContext(null);
+    setSelectedConsultationId(null);
+    setConsultationEntryMode("standard");
+    setCurrentView("new-consultation");
+    setIsInitialized(true);
+    navigate(VIEW_TO_PATH["new-consultation"]);
+  }, [navigate]);
+
+  const completeAuthAndEnter = useCallback(
+    (freshVetData) => {
+      setCedulaFlow(null);
+
+      const redirectPath = consumeAuthRedirect();
+      if (redirectPath && PATH_TO_VIEW[redirectPath]) {
+        const view = PATH_TO_VIEW[redirectPath];
+        setCurrentView(view);
         setIsInitialized(true);
-        navigate(VIEW_TO_PATH["new-consultation"]);
-      });
-      return;
-    }
-    navigateAfterAuth(navigate, setCurrentView, setIsInitialized);
-  }, [navigate, veterinarian, platformAdmin]);
+        navigate(redirectPath);
+        return;
+      }
+
+      const vetId = freshVetData?.id || veterinarian?.id;
+      if (consumeNewUserDiagnosticoRedirect(vetId)) {
+        goToDiagnostico();
+        return;
+      }
+
+      setCurrentView("dashboard");
+      setIsInitialized(true);
+      navigate(VIEW_TO_PATH.dashboard);
+    },
+    [goToDiagnostico, navigate, veterinarian?.id],
+  );
 
   useEffect(() => {
     if (portalOrganizationId) {
@@ -714,7 +719,11 @@ const Router = () => {
     ),
     login: (
       <AppShell fullBleed>
-        <LoginPage setView={navigateSetView} setCedulaFlow={setCedulaFlow} />
+        <LoginPage
+          setView={navigateSetView}
+          setCedulaFlow={setCedulaFlow}
+          onAuthSuccess={completeAuthAndEnter}
+        />
       </AppShell>
     ),
     "cedula-verification": (
@@ -975,7 +984,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
         needs_upload: false,
         file: cedulaFile,
       });
-      markPostRegisterOnboarding();
+      markNewUserDiagnosticoRedirect(vetData?.id);
       setView("cedula-verification");
     } catch (err) {
       notifyError(err.message);
@@ -1280,7 +1289,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
 };
 
 // Login Page
-const LoginPage = ({ setView, setCedulaFlow }) => {
+const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
   const { login, loginWithEmailPassword, loginWithMagicLink } = useVet();
   const [formData, setFormData] = useState({
     email: "",
@@ -1355,11 +1364,15 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
       }
 
       login(vetData);
-      const redirectPath = consumeAuthRedirect();
-      if (redirectPath && PATH_TO_VIEW[redirectPath]) {
-        setView(PATH_TO_VIEW[redirectPath]);
+      if (onAuthSuccess) {
+        onAuthSuccess(vetData);
       } else {
-        setView("dashboard");
+        const redirectPath = consumeAuthRedirect();
+        if (redirectPath && PATH_TO_VIEW[redirectPath]) {
+          setView(PATH_TO_VIEW[redirectPath]);
+        } else {
+          setView("dashboard");
+        }
       }
     } catch (err) {
       notifyError(friendlyFetchError(err, getBackendUrl()));
@@ -1409,7 +1422,11 @@ const LoginPage = ({ setView, setCedulaFlow }) => {
         throw new Error("Respuesta inválida del servidor");
       }
       login(vetData);
-      setView("dashboard");
+      if (onAuthSuccess) {
+        onAuthSuccess(vetData);
+      } else {
+        setView("dashboard");
+      }
     } catch (err) {
       notifyError(friendlyFetchError(err, getBackendUrl()));
     } finally {
@@ -1715,7 +1732,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
         }
         login(vetData);
         if (onAuthSuccess) {
-          onAuthSuccess();
+          onAuthSuccess(vetData);
         } else {
           setCedulaFlow?.(null);
           setView("dashboard");
@@ -1858,7 +1875,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                     
                     login(vetData);
                     if (onAuthSuccess) {
-                      onAuthSuccess();
+                      onAuthSuccess(vetData);
                     } else {
                       setCedulaFlow?.(null);
                       setView("dashboard");
@@ -1871,7 +1888,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                 }}
                 disabled={loading}
               >
-                {loading ? "Procesando..." : `Ir al Dashboard y verificar después (${remainingSkips} restantes)`}
+                {loading ? "Procesando..." : `Continuar a GUIAA Diagnóstico (${remainingSkips} posposiciones restantes)`}
               </Button>
             )}
 
