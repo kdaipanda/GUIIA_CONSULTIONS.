@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { KeyRound, Save } from "lucide-react";
-import { useVet } from "../../context/VetContext";
-import { BACKEND_URL } from "../../lib/backendUrl";
-import { getAuthHeaders } from "../../lib/authHeaders";
-import { notifyError, notifySuccess } from "../../lib/appToast";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
+import { useVet } from "../context/VetContext";
+import { BACKEND_URL } from "../lib/backendUrl";
+import { getAuthHeaders } from "../lib/authHeaders";
+import { notifyError, notifySuccess } from "../lib/appToast";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 export function AccountPasswordSection() {
   const { veterinarian, refreshProfile } = useVet();
