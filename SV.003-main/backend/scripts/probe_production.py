@@ -81,8 +81,15 @@ def main() -> int:
     try:
         with urllib.request.urlopen(WEB, timeout=20) as resp:
             web_ok = resp.status in (200, 301, 302)
-            print(f"\n  [{'OK' if web_ok else 'FAIL'}] {WEB} -> {resp.status}")
-            failures += 0 if web_ok else 1
+            print(f"\n  [{'OK' if web_ok else 'WARN'}] {WEB} -> {resp.status}")
+            if not web_ok:
+                print("       (403 desde scripts es normal si Vercel bloquea bots; prueba en navegador.)")
+    except urllib.error.HTTPError as exc:
+        if exc.code in (403, 401):
+            print(f"\n  [WARN] {WEB} -> {exc.code} (bloqueo anti-bot; abre en navegador para confirmar)")
+        else:
+            print(f"\n  [FAIL] {WEB} -> HTTP {exc.code}")
+            failures += 1
     except Exception as exc:
         print(f"\n  [FAIL] {WEB} -> {exc}")
         failures += 1
