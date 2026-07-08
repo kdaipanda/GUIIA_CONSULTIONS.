@@ -763,7 +763,7 @@ class VeterinarianRegister(BaseModel):
     especialidad: str
     años_experiencia: int
     institucion: str
-    password: str = Field(..., min_length=8)
+    password: str = Field(..., min_length=6)
 
 
 class VeterinarianLogin(BaseModel):
@@ -773,7 +773,7 @@ class VeterinarianLogin(BaseModel):
 
 
 class SetPasswordRequest(BaseModel):
-    password: str = Field(..., min_length=8)
+    password: str = Field(..., min_length=6)
     current_password: Optional[str] = None
 
 
@@ -1455,11 +1455,8 @@ async def register_veterinarian(vet: VeterinarianRegister, request: Request):
 
     try:
         password_hash = password_auth.hash_password(vet.password)
-    except Exception as exc:  # noqa: BLE001
-        detail = str(exc) if isinstance(exc, ValueError) else password_auth.PASSWORD_TOO_LONG_MESSAGE
-        if "72" in detail.lower() and "byte" in detail.lower():
-            detail = password_auth.PASSWORD_TOO_LONG_MESSAGE
-        raise HTTPException(status_code=400, detail=detail) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     # Verificar si es usuario de desarrollo (pasa verificación automáticamente)
     is_dev = is_dev_user(vet.email)
@@ -1680,11 +1677,8 @@ async def set_account_password(
 
     try:
         new_hash = password_auth.hash_password(body.password)
-    except Exception as exc:  # noqa: BLE001
-        detail = str(exc) if isinstance(exc, ValueError) else password_auth.PASSWORD_TOO_LONG_MESSAGE
-        if "72" in detail.lower() and "byte" in detail.lower():
-            detail = password_auth.PASSWORD_TOO_LONG_MESSAGE
-        raise HTTPException(status_code=400, detail=detail) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     err_up = update_profile(vet_id, {"password_hash": new_hash})
     if err_up:

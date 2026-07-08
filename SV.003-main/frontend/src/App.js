@@ -35,7 +35,7 @@ import {
   consumeNewUserDiagnosticoRedirect,
 } from "./lib/guiaaOnboarding";
 import { notifyError, notifySuccess, notifyQuotaError } from "./lib/appToast";
-import { getPasswordValidationError, PASSWORD_RULES_ATTR, clampPasswordInput } from "./lib/passwordPolicy";
+import { getPasswordValidationError, PASSWORD_RULES_ATTR } from "./lib/passwordPolicy";
 import { PasswordRequirementsHint } from "./components/PasswordRequirementsHint";
 import {
   trackMetaLead,
@@ -1041,18 +1041,14 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   id="reg-password"
                   type="password"
                   required
-                  minLength={8}
-                  maxLength={72}
+                  minLength={6}
                   autoComplete="new-password"
                   passwordrules={PASSWORD_RULES_ATTR}
                   value={formData.password}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      password: clampPasswordInput(e.target.value),
-                    })
+                    setFormData({ ...formData, password: e.target.value })
                   }
-                  placeholder="Ej. Clinica2024"
+                  placeholder="Ej. Vet2024"
                   className="mt-1.5 h-11 min-h-11 bg-background"
                   aria-describedby="reg-password-hint"
                 />
@@ -1069,8 +1065,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   id="reg-password-confirm"
                   type="password"
                   required
-                  minLength={8}
-                  maxLength={72}
+                  minLength={6}
                   autoComplete="new-password"
                   value={formData.password_confirm}
                   onChange={(e) =>

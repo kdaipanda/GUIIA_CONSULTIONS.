@@ -4,7 +4,7 @@ import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
 import { getAuthHeaders } from "../lib/authHeaders";
 import { notifyError, notifySuccess } from "../lib/appToast";
-import { getPasswordValidationError, PASSWORD_RULES_ATTR, clampPasswordInput } from "../lib/passwordPolicy";
+import { getPasswordValidationError, PASSWORD_RULES_ATTR } from "../lib/passwordPolicy";
 import { PasswordRequirementsHint } from "./PasswordRequirementsHint";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -115,12 +115,11 @@ export function AccountPasswordSection() {
             id="acct-new-pw"
             type="password"
             autoComplete="new-password"
-            minLength={8}
-            maxLength={72}
+            minLength={6}
             passwordrules={PASSWORD_RULES_ATTR}
             value={password}
-            onChange={(e) => setPassword(clampPasswordInput(e.target.value))}
-            placeholder="Ej. Clinica2024"
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Ej. Vet2024"
             required
             aria-describedby="acct-password-hint"
           />
@@ -132,8 +131,7 @@ export function AccountPasswordSection() {
             id="acct-confirm-pw"
             type="password"
             autoComplete="new-password"
-            minLength={8}
-            maxLength={72}
+            minLength={6}
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required

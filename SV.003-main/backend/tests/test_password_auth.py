@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-from passlib.exc import PasswordSizeError
 
 from password_auth import (
     MIN_PASSWORD_LENGTH,
@@ -16,22 +15,22 @@ from password_auth import (
 
 
 def test_validate_password_min_length():
-    with pytest.raises(ValueError, match="8 caracteres"):
-        validate_password("abc1")
-    assert validate_password("clinica1") == "clinica1"
+    with pytest.raises(ValueError, match="6 caracteres"):
+        validate_password("ab1")
+    assert validate_password("vet001") == "vet001"
 
 
 def test_validate_password_requires_letter_and_digit():
-    assert validate_password("Clinica2024") == "Clinica2024"
+    assert validate_password("Vet2024") == "Vet2024"
     with pytest.raises(ValueError, match="letras"):
-        validate_password("12345678")
+        validate_password("123456")
     with pytest.raises(ValueError, match="número"):
-        validate_password("soloclaro")
+        validate_password("solito")
 
 
 def test_password_validation_errors_lists_missing_rules():
     errors = password_validation_errors("123")
-    assert any("8 caracteres" in item for item in errors)
+    assert any("6 caracteres" in item for item in errors)
     assert any("letras" in item for item in errors)
 
 
@@ -39,24 +38,15 @@ def test_password_requirements_text_is_documented():
     assert str(MIN_PASSWORD_LENGTH) in PASSWORD_REQUIREMENTS_TEXT
 
 
-def test_validate_password_rejects_too_long():
-    too_long = "a1" + ("x" * 80)
-    with pytest.raises(ValueError, match="demasiado larga"):
-        validate_password(too_long)
-
-
-def test_hash_password_maps_bcrypt_length_error(monkeypatch):
-    def boom(_value):
-        raise PasswordSizeError("password cannot be longer than 72 bytes")
-
-    monkeypatch.setattr("password_auth._pwd_context.hash", boom)
-    with pytest.raises(ValueError, match="demasiado larga"):
-        hash_password("Clinica2024")
+def test_hash_password_accepts_long_password():
+    long_password = "Vet1" + ("x" * 80)
+    hashed = hash_password(long_password)
+    assert verify_password(long_password, hashed)
 
 
 def test_hash_and_verify_password():
-    hashed = hash_password("Clinica2024")
-    assert verify_password("Clinica2024", hashed)
+    hashed = hash_password("Vet2024")
+    assert verify_password("Vet2024", hashed)
     assert not verify_password("otra-clave", hashed)
 
 
