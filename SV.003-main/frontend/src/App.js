@@ -1334,7 +1334,7 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
           }
         : {
             email: formData.email,
-            password: formData.password,
+            password: normalizePasswordInput(formData.password),
           };
 
       const vetData = await fetchJsonWithRetry(

@@ -4,15 +4,11 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List, Optional
 
-from passlib.context import CryptContext
-
-try:
-    from passlib.exc import PasswordSizeError
-except ImportError:  # pragma: no cover
-    PasswordSizeError = ValueError  # type: ignore[misc, assignment]
+import bcrypt
 
 MIN_PASSWORD_LENGTH = 6
 BCRYPT_MAX_BYTES = 72
+BCRYPT_ROUNDS = 12
 
 PASSWORD_HELP_INTRO = (
     "Crea una contraseña personal que solo tú conozcas. La usarás cada vez que entres a GUIAA."
@@ -31,13 +27,6 @@ PASSWORD_HASH_ERROR_MESSAGE = (
 _HAS_LETTER = re.compile(r"[A-Za-záéíóúñÁÉÍÓÚÑ]")
 _HAS_DIGIT = re.compile(r"\d")
 
-_pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-    bcrypt__truncate_error=False,
-)
-
-
 _CHECK_HELP = {
     "length": f"Usa al menos {MIN_PASSWORD_LENGTH} caracteres.",
     "letter": "Incluye letras, por ejemplo el nombre de tu clínica o mascota.",
@@ -55,13 +44,6 @@ def _truncate_for_bcrypt(value: str) -> str:
     while trimmed and _password_byte_length(trimmed) > BCRYPT_MAX_BYTES:
         trimmed = trimmed[:-1]
     return trimmed
-
-
-def _is_bcrypt_length_error(exc: BaseException) -> bool:
-    if isinstance(exc, PasswordSizeError):
-        return True
-    msg = str(exc).lower()
-    return "72" in msg and "byte" in msg
 
 
 def password_validation_errors(password: Optional[str]) -> List[str]:
@@ -92,23 +74,20 @@ def prepare_password_for_bcrypt(password: str) -> str:
 def hash_password(password: str) -> str:
     prepared = prepare_password_for_bcrypt(password)
     try:
-        return _pwd_context.hash(prepared)
+        salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
+        hashed = bcrypt.hashpw(prepared.encode("utf-8"), salt)
+        return hashed.decode("ascii")
     except Exception as exc:  # noqa: BLE001
-        if _is_bcrypt_length_error(exc):
-            prepared = _truncate_for_bcrypt(prepared)
-            try:
-                return _pwd_context.hash(prepared)
-            except Exception as retry_exc:  # noqa: BLE001
-                raise ValueError(PASSWORD_HASH_ERROR_MESSAGE) from retry_exc
         raise ValueError(PASSWORD_HASH_ERROR_MESSAGE) from exc
 
 
 def verify_password(plain: Optional[str], hashed: Optional[str]) -> bool:
     if not plain or not hashed:
         return False
-    value = _truncate_for_bcrypt(plain.strip())
+    value = _truncate_for_bcrypt(plain.strip()).encode("utf-8")
+    stored = hashed.strip().encode("ascii")
     try:
-        return _pwd_context.verify(value, hashed)
+        return bcrypt.checkpw(value, stored)
     except Exception:  # noqa: BLE001
         return False
 
