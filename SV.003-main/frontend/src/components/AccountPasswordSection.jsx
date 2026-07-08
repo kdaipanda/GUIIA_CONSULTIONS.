@@ -4,6 +4,8 @@ import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
 import { getAuthHeaders } from "../lib/authHeaders";
 import { notifyError, notifySuccess } from "../lib/appToast";
+import { getPasswordValidationError } from "../lib/passwordPolicy";
+import { PasswordRequirementsHint } from "./PasswordRequirementsHint";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -37,8 +39,9 @@ export function AccountPasswordSection() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password.length < 8) {
-      notifyError("La contraseña debe tener al menos 8 caracteres.");
+    const passwordError = getPasswordValidationError(password);
+    if (passwordError) {
+      notifyError(passwordError);
       return;
     }
     if (password !== confirm) {
@@ -115,8 +118,10 @@ export function AccountPasswordSection() {
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="Mínimo 8 caracteres, mayúscula, minúscula, número y símbolo"
             required
           />
+          <PasswordRequirementsHint password={password} className="mt-2" />
         </div>
         <div className="form-group">
           <Label htmlFor="acct-confirm-pw">Confirmar</Label>

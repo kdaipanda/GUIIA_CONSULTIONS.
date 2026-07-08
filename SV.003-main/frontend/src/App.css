@@ -1294,6 +1294,30 @@ h1, h2, h3, h4, h5, h6 {
   gap: 18px;
 }
 
+.password-requirements-hint {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.password-requirements-hint li::before {
+  content: "○ ";
+  opacity: 0.55;
+}
+
+.password-requirements-hint--met {
+  color: #15803d;
+}
+
+.password-requirements-hint--met::before {
+  content: "✓ ";
+  opacity: 1;
+}
+
 .auth-card .form-group {
   margin-bottom: 0;
 }

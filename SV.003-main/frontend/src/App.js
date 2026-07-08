@@ -35,6 +35,8 @@ import {
   consumePostRegisterOnboarding,
 } from "./lib/guiaaOnboarding";
 import { notifyError, notifySuccess, notifyQuotaError } from "./lib/appToast";
+import { getPasswordValidationError } from "./lib/passwordPolicy";
+import { PasswordRequirementsHint } from "./components/PasswordRequirementsHint";
 import {
   trackMetaLead,
   trackMetaCompleteRegistration,
@@ -932,8 +934,9 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
       notifyError("Selecciona una especialidad.");
       return;
     }
-    if ((formData.password || "").length < 8) {
-      notifyError("La contraseña debe tener al menos 8 caracteres.");
+    const passwordError = getPasswordValidationError(formData.password);
+    if (passwordError) {
+      notifyError(passwordError);
       return;
     }
     if (formData.password !== formData.password_confirm) {
@@ -1035,9 +1038,10 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder="Crea una contraseña segura"
                   className="mt-1.5 h-11 min-h-11 bg-background"
                 />
+                <PasswordRequirementsHint password={formData.password} className="mt-2" />
               </div>
               <div className="form-group">
                 <Label htmlFor="reg-password-confirm">Confirmar contraseña *</Label>
