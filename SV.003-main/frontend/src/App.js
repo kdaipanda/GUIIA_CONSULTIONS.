@@ -27,6 +27,7 @@ import {
 import { BACKEND_URL, getBackendUrl } from "./lib/backendUrl";
 import { friendlyFetchError, friendlyDatabaseError, formatApiErrorDetail } from "./lib/friendlyFetchError";
 import { finalizeCedulaFlowEntry } from "./lib/cedulaFlowAuth";
+import { loadCedulaFlow, saveCedulaFlow } from "./lib/cedulaFlowStorage";
 import { fetchWithTimeout, fetchJsonWithRetry } from "./lib/fetchWithTimeout";
 import { getAuthHeaders, persistAuthFromResponse } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
@@ -454,7 +455,15 @@ const Router = () => {
   const [selectedConsultationId, setSelectedConsultationId] = useState(null);
   const [consultationEntryMode, setConsultationEntryMode] = useState("standard");
   const [clinicalContext, setClinicalContext] = useState(null);
-  const [cedulaFlow, setCedulaFlow] = useState(null);
+  const [cedulaFlow, setCedulaFlowRaw] = useState(() => loadCedulaFlow());
+  const setCedulaFlow = useCallback((flowOrUpdater) => {
+    setCedulaFlowRaw((prev) => {
+      const next =
+        typeof flowOrUpdater === "function" ? flowOrUpdater(prev) : flowOrUpdater;
+      saveCedulaFlow(next);
+      return next;
+    });
+  }, []);
   const [isInitialized, setIsInitialized] = useState(false);
   const [trialSurveyOfferOpen, setTrialSurveyOfferOpen] = useState(false);
   const [trialSurveyOffer, setTrialSurveyOffer] = useState(null);
@@ -1364,12 +1373,15 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
         setCedulaFlow?.({
           source: "login",
           veterinarian_id: vetData?.veterinarian_id,
-          email: formData.email,
-          cedula_profesional: formData.cedula_profesional,
-          expected_nombre: "",
+          email: vetData?.email || formData.email,
+          cedula_profesional:
+            vetData?.cedula_profesional || formData.cedula_profesional,
+          expected_nombre: vetData?.expected_nombre || "",
           needs_upload: !!vetData?.needs_upload,
           verification_status: vetData?.verification_status,
           message: vetData?.message,
+          cedula_skip_count: vetData?.cedula_skip_count,
+          can_skip: vetData?.can_skip,
         });
         setView("cedula-verification");
         return;
@@ -1635,6 +1647,7 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
 const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSuccess }) => {
   const { login } = useVet();
   const [nombre, setNombre] = useState("");
+  const [matricula, setMatricula] = useState("");
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [info, setInfo] = useState("");
@@ -1645,8 +1658,47 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
     setInfo("");
     setVerificationStatus(cedulaFlow?.verification_status || "");
     setNombre(cedulaFlow?.expected_nombre || "");
+    setMatricula(cedulaFlow?.cedula_profesional || "");
     setFile(cedulaFlow?.file || null);
   }, [cedulaFlow]);
+
+  const vetId = cedulaFlow?.veterinarian_id;
+  const email = cedulaFlow?.email;
+
+  useEffect(() => {
+    if (!vetId || matricula) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const resp = await fetch(`${BACKEND_URL}/api/auth/profile`, {
+          headers: getAuthHeaders(vetId),
+        });
+        if (!resp.ok || cancelled) return;
+        const profile = await resp.json();
+        const profileMatricula = (profile?.cedula_profesional || "").trim();
+        if (!profileMatricula) return;
+        setMatricula(profileMatricula);
+        setCedulaFlow?.((prev) =>
+          prev
+            ? {
+                ...prev,
+                cedula_profesional: profileMatricula,
+                expected_nombre: prev.expected_nombre || profile?.nombre || "",
+                email: prev.email || profile?.email || "",
+              }
+            : prev,
+        );
+        if (!nombre?.trim() && profile?.nombre) {
+          setNombre(profile.nombre);
+        }
+      } catch {
+        /* perfil opcional si aún no hay sesión */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [vetId, matricula, nombre, setCedulaFlow]);
 
   if (!cedulaFlow?.veterinarian_id) {
     return (
@@ -1661,20 +1713,21 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
     );
   }
 
-  const vetId = cedulaFlow.veterinarian_id;
-  const email = cedulaFlow.email;
-  const cedula_profesional = cedulaFlow.cedula_profesional;
+  const cedula_profesional = (matricula || cedulaFlow.cedula_profesional || "").trim();
   const needsUpload = !!cedulaFlow.needs_upload;
   const canSkip = cedulaFlow?.can_skip !== false; // Por defecto true si no se especifica
   const skipCount = cedulaFlow?.cedula_skip_count || 0;
   const remainingSkips = 3 - skipCount;
+  const showMatriculaField = !cedula_profesional;
 
   const handleUploadAndVerify = async () => {
     notifyError("");
     setInfo("");
 
     if (!cedula_profesional) {
-      notifyError("Falta el número de registro profesional. Regresa al login o registro.");
+      notifyError(
+        "Ingresa tu número de matrícula, licencia o registro profesional.",
+      );
       return;
     }
     if (!nombre?.trim()) {
@@ -1780,6 +1833,23 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
           </div>
 
           <div className="auth-form">
+            {showMatriculaField && (
+              <div className="form-group">
+                <Label htmlFor="cedula-matricula">
+                  Número de matrícula / registro profesional *
+                </Label>
+                <Input
+                  id="cedula-matricula"
+                  type="text"
+                  value={matricula}
+                  onChange={(e) => setMatricula(e.target.value)}
+                  placeholder="Ej. 12345678"
+                  autoComplete="off"
+                  className="mt-1.5 h-11 min-h-11"
+                />
+              </div>
+            )}
+
             <div className="form-group">
               <Label htmlFor="cedula-nombre">
                 Nombre completo (como en tu documento) *
