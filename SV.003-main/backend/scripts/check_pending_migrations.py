@@ -14,6 +14,7 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 PENDING = (
     ("profiles", "cedula_reminder_sent_at"),
     ("profiles", "password_hash"),
+    ("profiles", "trial_survey_completed_at"),
     ("payment_transactions", "meta_capi_purchase_sent"),
 )
 

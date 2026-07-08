@@ -42,7 +42,8 @@ import {
 } from "./lib/metaPixel";
 import { clinicNavIsHero, clinicNavThemeStyle } from "./lib/clinicNavTheme";
 import { LATAM_COUNTRIES, countryLabel } from "./lib/latamCountries";
-import { SupportChatWidget } from "./components/SupportChatWidget";
+import { shouldShowTrialSurvey } from "./lib/trialSurvey";
+import { TrialSurveyModal } from "./components/TrialSurveyModal";
 import { VetProvider, useVet } from "./context/VetContext";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { PrivacyModal } from "./components/PrivacyModal";
@@ -453,7 +454,7 @@ function App() {
 
 // Router Component
 const Router = () => {
-  const { veterinarian, loading, platformAdmin } = useVet();
+  const { veterinarian, loading, platformAdmin, refreshProfile } = useVet();
   const navigate = useNavigate();
   const location = useLocation();
   const [currentView, setCurrentView] = useState(
@@ -465,11 +466,52 @@ const Router = () => {
   const [clinicalContext, setClinicalContext] = useState(null);
   const [cedulaFlow, setCedulaFlow] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [trialSurveyOpen, setTrialSurveyOpen] = useState(false);
+  const [trialSurveyOffer, setTrialSurveyOffer] = useState(null);
 
   const portalOrganizationId = (() => {
     const match = location.pathname.match(/^\/solicitar-cita\/([^/]+)/);
     return match ? match[1] : null;
   })();
+
+  useEffect(() => {
+    if (!veterinarian?.id || !shouldShowTrialSurvey(veterinarian)) return;
+    setTrialSurveyOpen(true);
+  }, [
+    veterinarian?.id,
+    veterinarian?.membership_type,
+    veterinarian?.consultations_remaining,
+    veterinarian?.trial_survey_completed_at,
+  ]);
+
+  useEffect(() => {
+    if (!trialSurveyOpen || !veterinarian?.id) return;
+    let cancelled = false;
+    fetch(`${BACKEND_URL}/api/trial-survey/status`, {
+      headers: getAuthHeaders(veterinarian.id),
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.offer) {
+          setTrialSurveyOffer(data.offer);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [trialSurveyOpen, veterinarian?.id]);
+
+  const handleTrialSurveyCompleted = async (data) => {
+    if (data?.offer) {
+      setTrialSurveyOffer(data.offer);
+    }
+    try {
+      await refreshProfile?.();
+    } catch {
+      /* ignore */
+    }
+  };
 
   const navigateSetView = (view) => {
     handleSetView(view);
@@ -772,6 +814,7 @@ const Router = () => {
           entryMode={consultationEntryMode}
           clinicalContext={clinicalContext}
           onClinicalContextChange={setClinicalContext}
+          onTrialSurveyDue={() => setTrialSurveyOpen(true)}
         />
       </ClinicShell>
     ),
@@ -836,6 +879,16 @@ const Router = () => {
         openExpertConsultation={openExpertConsultation}
         veterinarian={veterinarian}
       />
+      {veterinarian ? (
+        <TrialSurveyModal
+          open={trialSurveyOpen && shouldShowTrialSurvey(veterinarian)}
+          onOpenChange={setTrialSurveyOpen}
+          veterinarian={veterinarian}
+          offer={trialSurveyOffer}
+          onCompleted={handleTrialSurveyCompleted}
+          onGoMembership={() => navigateSetView("membership")}
+        />
+      ) : null}
         </>
       )}
     </>
@@ -2324,7 +2377,10 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
           <div className="dashboard-trial-banner" role="alert">
             <div className="dashboard-trial-banner-copy">
               <strong>Prueba agotada</strong>
-              <p>{TRIAL_EXHAUSTED_MESSAGE}</p>
+              <p>
+                {TRIAL_EXHAUSTED_MESSAGE} Completa la encuesta para ver tu oferta
+                Premium con cupón de descuento.
+              </p>
             </div>
             <Button type="button" variant="guiaaPrimary" size="sm" onClick={() => setView("membership")}>
               Ver planes de membresía
@@ -2741,6 +2797,7 @@ const NewConsultation = ({
   entryMode = "standard",
   clinicalContext = null,
   onClinicalContextChange,
+  onTrialSurveyDue,
 }) => {
   const { veterinarian, platformAdmin, refreshProfile } = useVet();
   const isExpertMode = entryMode === "expert";
@@ -3188,6 +3245,9 @@ const NewConsultation = ({
       if (!data) return;
       setConsultationId(data.id);
       await syncProfileAfterConsultation();
+      if (data.trial_survey_due) {
+        onTrialSurveyDue?.();
+      }
       setStep(2);
     } catch (err) {
       notifyError(err.message || "Error al crear la consulta");
@@ -3213,6 +3273,9 @@ const NewConsultation = ({
         activeConsultationId = created.id;
         setConsultationId(created.id);
         await syncProfileAfterConsultation();
+        if (created.trial_survey_due) {
+          onTrialSurveyDue?.();
+        }
       }
 
       const payloadUpdates = {
@@ -3329,6 +3392,10 @@ const NewConsultation = ({
 
       const result = await response.json();
       setAiAnalysis(cleanClinicalDisplayText(result.analysis));
+      await refreshProfile?.();
+      if (result.trial_survey_due) {
+        onTrialSurveyDue?.();
+      }
     } catch (err) {
       notifyError(err.message || "Error generando análisis");
     } finally {

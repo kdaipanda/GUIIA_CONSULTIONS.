@@ -262,7 +262,10 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
         <div className="clinic-dashboard-trial-banner" role="alert">
           <div>
             <strong>Prueba CDS agotada</strong>
-            <p>{TRIAL_EXHAUSTED_MESSAGE}</p>
+            <p>
+              {TRIAL_EXHAUSTED_MESSAGE} Completa la encuesta para ver tu oferta
+              Premium con cupón de descuento.
+            </p>
           </div>
           <Button type="button" size="sm" onClick={() => go("membership", "/app/membresia")}>
             Ver planes

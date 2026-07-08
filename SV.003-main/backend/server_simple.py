@@ -41,6 +41,7 @@ import email_notifications
 import meta_capi
 import password_auth
 import rate_limit
+import trial_survey
 from membership_catalog import (
     CONSULTATION_CREDIT_PACKAGES,
     FEATURED_PLAN_KEY,
@@ -842,6 +843,11 @@ class ObservationUpdate(BaseModel):
 
 class ConsultationRatingUpdate(BaseModel):
     rating: int = Field(..., ge=1, le=5)
+
+
+class TrialSurveySubmit(BaseModel):
+    rating: int = Field(..., ge=1, le=5)
+    comment: str = Field(..., min_length=5, max_length=2000)
 
 
 # ============================================
@@ -1741,6 +1747,60 @@ async def get_current_profile(x_veterinarian_id: str = Header(None)):
     return profile
 
 
+@app.get("/api/trial-survey/status")
+async def get_trial_survey_status(x_veterinarian_id: str = Header(None)):
+    """Estado de la encuesta post-prueba y oferta Premium con cupón."""
+    vet_id = _require_vet_id(x_veterinarian_id)
+    profile, err = get_profile(vet_id)
+    if err:
+        raise HTTPException(status_code=500, detail=f"Error obteniendo perfil: {err}")
+    if not profile:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+    return trial_survey.build_trial_survey_status(profile)
+
+
+@app.post("/api/trial-survey")
+async def submit_trial_survey(
+    payload: TrialSurveySubmit,
+    x_veterinarian_id: str = Header(None),
+):
+    """Guarda encuesta al agotar las 3 consultas de prueba."""
+    vet_id = _require_vet_id(x_veterinarian_id)
+    profile, err = get_profile(vet_id)
+    if err:
+        raise HTTPException(status_code=500, detail=f"Error obteniendo perfil: {err}")
+    if not profile:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+
+    if profile.get("trial_survey_completed_at"):
+        return {
+            **trial_survey.build_trial_survey_status(profile),
+            "message": "Ya habías completado la encuesta.",
+        }
+
+    if not trial_survey.trial_survey_pending(profile):
+        raise HTTPException(
+            status_code=403,
+            detail="La encuesta solo está disponible al agotar tus 3 consultas de prueba.",
+        )
+
+    try:
+        trial_survey.validate_survey_submission(payload.rating, payload.comment)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    fields = trial_survey.survey_fields_from_submission(payload.rating, payload.comment)
+    err_upd = update_profile(vet_id, fields)
+    if err_upd:
+        raise HTTPException(status_code=500, detail=f"Error guardando encuesta: {err_upd}")
+
+    updated = {**profile, **fields}
+    return {
+        **trial_survey.build_trial_survey_status(updated),
+        "message": "Gracias por tu retroalimentación.",
+    }
+
+
 # ============================================
 # CÉDULA PROFESIONAL ENDPOINTS
 # ============================================
@@ -2162,6 +2222,7 @@ async def create_consultation(
 
     # Descontar crédito si no es premium y no tiene consultas ilimitadas (las consultas de prueba también se descuentan)
     # Si tiene consultas ilimitadas, no descontar
+    new_remaining = remaining
     if not has_unlimited and (has_trial_consultations or (membership_type and membership_type != "premium")):
         new_remaining = max(0, remaining - 1)
         _, err_prof = upsert_profile(
@@ -2174,7 +2235,16 @@ async def create_consultation(
             # No abortamos la consulta ya creada; solo avisamos
             print(f"[WARN] No se pudo actualizar remaining: {err_prof}")
 
-    return _serialize_consultation(inserted or new_row)
+    serialized = _serialize_consultation(inserted or new_row)
+    trial_survey_due = (
+        not has_unlimited
+        and not membership_type
+        and new_remaining <= 0
+        and not profile.get("trial_survey_completed_at")
+    )
+    if isinstance(serialized, dict):
+        serialized["trial_survey_due"] = trial_survey_due
+    return serialized
 
 
 @app.get("/api/stripe/config")
@@ -2524,7 +2594,11 @@ Por favor, genera un análisis clínico completo."""
         if err_upd:
             raise HTTPException(status_code=500, detail=f"Error guardando análisis: {err_upd}")
 
-        return {"analysis": analysis_text}
+        profile_after, _ = get_profile(vet_id)
+        return {
+            "analysis": analysis_text,
+            "trial_survey_due": trial_survey.trial_survey_pending(profile_after or profile),
+        }
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
