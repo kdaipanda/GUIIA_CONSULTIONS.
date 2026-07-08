@@ -142,3 +142,85 @@ def send_promotional_whatsapp(
         body_params=body_params,
         image_url=image_url,
     )
+
+
+WHATSAPP_PROMO_TEMPLATE_SPEC = {
+    "name": "guiaa_promo_oferta",
+    "language": "es_MX",
+    "category": "MARKETING",
+    "components": [
+        {"type": "HEADER", "format": "IMAGE"},
+        {
+            "type": "BODY",
+            "text": (
+                "¡Hola! Tenemos una oferta para ti:\n\n"
+                "{{1}}\n\n"
+                "Plan {{2}} — cupón: {{3}}\n\n"
+                "Contrata en guiaa.vet y sigue usando GUIAA en tu consulta."
+            ),
+        },
+        {"type": "FOOTER", "text": "GUIAA — software clínico veterinario"},
+        {
+            "type": "BUTTONS",
+            "buttons": [
+                {
+                    "type": "URL",
+                    "text": "Ver oferta",
+                    "url": "https://guiaa.vet/app/membership",
+                }
+            ],
+        },
+    ],
+}
+
+
+def create_whatsapp_promo_template(
+    waba_id: Optional[str] = None,
+) -> tuple[Optional[dict], Optional[str]]:
+    """Crea la plantilla guiaa_promo_oferta en Meta WhatsApp Business."""
+    if httpx is None:
+        return (None, "httpx no disponible")
+    account_id = (waba_id or os.getenv("WHATSAPP_BUSINESS_ACCOUNT_ID", "")).strip()
+    token = os.getenv("WHATSAPP_ACCESS_TOKEN", "").strip()
+    if not account_id or not token:
+        return (None, "Falta WHATSAPP_BUSINESS_ACCOUNT_ID o WHATSAPP_ACCESS_TOKEN")
+
+    url = f"https://graph.facebook.com/v21.0/{account_id}/message_templates"
+    try:
+        response = httpx.post(
+            url,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            },
+            json=WHATSAPP_PROMO_TEMPLATE_SPEC,
+            timeout=30.0,
+        )
+        if response.status_code >= 400:
+            return (None, f"Meta {response.status_code}: {response.text[:500]}")
+        return (response.json(), None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def list_whatsapp_templates(waba_id: Optional[str] = None) -> tuple[list[dict], Optional[str]]:
+    """Lista plantillas existentes en la cuenta WABA."""
+    if httpx is None:
+        return ([], "httpx no disponible")
+    account_id = (waba_id or os.getenv("WHATSAPP_BUSINESS_ACCOUNT_ID", "")).strip()
+    token = os.getenv("WHATSAPP_ACCESS_TOKEN", "").strip()
+    if not account_id or not token:
+        return ([], "Falta WHATSAPP_BUSINESS_ACCOUNT_ID o WHATSAPP_ACCESS_TOKEN")
+    try:
+        response = httpx.get(
+            f"https://graph.facebook.com/v21.0/{account_id}/message_templates",
+            headers={"Authorization": f"Bearer {token}"},
+            params={"limit": 100},
+            timeout=20.0,
+        )
+        if response.status_code >= 400:
+            return ([], f"Meta {response.status_code}: {response.text[:300]}")
+        data = response.json()
+        return (data.get("data") or [], None)
+    except Exception as exc:  # noqa: BLE001
+        return ([], str(exc))

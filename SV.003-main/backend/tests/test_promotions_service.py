@@ -56,3 +56,21 @@ def test_build_offer_payload_merge():
     custom = promotions_service.build_offer_payload({"headline": "Oferta especial"})
     assert custom["headline"] == "Oferta especial"
     assert custom["plan_id"] == base["plan_id"]
+
+
+def test_auto_trial_promo_disabled(monkeypatch):
+    monkeypatch.setenv("PROMO_AUTO_TRIAL_EXHAUSTED", "false")
+    profile = {"id": "x", "membership_type": None, "consultations_remaining": 0}
+    assert promotions_service.maybe_send_trial_exhausted_promo(profile, 1) is None
+
+
+def test_auto_trial_promo_skips_when_not_exhausted():
+    profile = {"id": "x", "membership_type": None, "consultations_remaining": 1}
+    assert promotions_service.maybe_send_trial_exhausted_promo(profile, 2) is None
+
+
+def test_whatsapp_template_spec_has_name():
+    from whatsapp_notifications import WHATSAPP_PROMO_TEMPLATE_SPEC
+
+    assert WHATSAPP_PROMO_TEMPLATE_SPEC["name"] == "guiaa_promo_oferta"
+    assert WHATSAPP_PROMO_TEMPLATE_SPEC["language"] == "es_MX"

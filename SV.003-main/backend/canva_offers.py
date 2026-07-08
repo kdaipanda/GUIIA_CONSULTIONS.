@@ -12,6 +12,24 @@ except ImportError:  # pragma: no cover
 
 CANVA_API_BASE = "https://api.canva.com/rest/v1"
 
+# Campos que la plantilla de marca en Canva debe exponer para autofill
+OFFER_TEMPLATE_FIELDS = ("headline", "plan_name", "promo_code", "message", "cta")
+
+OFFER_TEMPLATE_DESIGN_SPEC = {
+    "size": "1080x1080",
+    "colors": {"navy": "#0c2d4d", "blue": "#265B93", "green": "#3d9b8f"},
+    "layout": [
+        "Fondo navy #0c2d4d con degradado sutil hacia blue #265B93",
+        "Logo GUIAA arriba centrado",
+        "Campo headline — texto grande blanco, bold",
+        "Campo message — párrafo breve gris claro",
+        "Badge plan_name — fondo green #3d9b8f",
+        "Campo promo_code — tipografía monoespaciada, destacado",
+        "Campo cta — botón blanco con texto blue",
+    ],
+    "autofill_fields": list(OFFER_TEMPLATE_FIELDS),
+}
+
 
 def is_canva_configured() -> bool:
     return bool(
@@ -118,12 +136,13 @@ def generate_offer_image(offer: Dict[str, Any]) -> tuple[Optional[str], Optional
 
     autofill_payload = {
         "brand_template_id": template_id,
+        "title": f"GUIAA Oferta {plan}",
         "data": {
-            "headline": headline,
-            "plan_name": plan,
-            "promo_code": promo or "GUIAA",
-            "message": message,
-            "cta": "Contratar en guiaa.vet",
+            "headline": {"type": "text", "text": headline},
+            "plan_name": {"type": "text", "text": plan},
+            "promo_code": {"type": "text", "text": promo or "GUIAA"},
+            "message": {"type": "text", "text": message},
+            "cta": {"type": "text", "text": "Contratar en guiaa.vet"},
         },
     }
 
@@ -192,3 +211,25 @@ def generate_offer_image(offer: Dict[str, Any]) -> tuple[Optional[str], Optional
         if fallback:
             return (fallback, str(exc), "fallback")
         return (None, str(exc), "none")
+
+
+def list_brand_templates() -> tuple[list[dict], Optional[str]]:
+    """Lista plantillas de marca disponibles en Canva (para setup)."""
+    if httpx is None:
+        return ([], "httpx no disponible")
+    access_token, token_err = _canva_access_token()
+    if token_err or not access_token:
+        return ([], token_err or "Sin token Canva")
+    try:
+        response = httpx.get(
+            f"{CANVA_API_BASE}/brand-templates",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=20.0,
+        )
+        if response.status_code >= 400:
+            return ([], f"Canva {response.status_code}: {response.text[:300]}")
+        data = response.json()
+        items = data.get("items") or data.get("brand_templates") or []
+        return (items, None)
+    except Exception as exc:  # noqa: BLE001
+        return ([], str(exc))

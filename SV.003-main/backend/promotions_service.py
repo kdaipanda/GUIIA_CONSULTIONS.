@@ -1,6 +1,7 @@
 """Servicio de campañas promocionales multicanal (email + WhatsApp)."""
 from __future__ import annotations
 
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -8,7 +9,7 @@ import canva_offers
 import email_notifications
 import trial_survey
 import whatsapp_notifications
-from supabase_client import get_supabase_client, list_profiles
+from supabase_client import get_supabase_client, list_profiles, update_profile
 
 VALID_SEGMENTS = {
     "trial_exhausted",
@@ -429,3 +430,228 @@ def list_segments() -> List[Dict[str, str]]:
         "all_marketing_opt_in": "Opt-in marketing explícito",
     }
     return [{"id": key, "label": labels[key]} for key in sorted(VALID_SEGMENTS)]
+
+
+def is_auto_trial_promo_enabled() -> bool:
+    return os.getenv("PROMO_AUTO_TRIAL_EXHAUSTED", "true").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+
+
+def auto_trial_promo_channels() -> List[str]:
+    raw = os.getenv("PROMO_AUTO_TRIAL_CHANNELS", "email,whatsapp").strip()
+    channels = [c.strip().lower() for c in raw.split(",") if c.strip().lower() in VALID_CHANNELS]
+    return channels or ["email"]
+
+
+def trial_promo_already_sent(profile_id: str) -> bool:
+    if not profile_id:
+        return True
+    client = get_supabase_client()
+    try:
+        profile_resp = (
+            client.table("profiles")
+            .select("trial_promo_sent_at")
+            .eq("id", profile_id)
+            .limit(1)
+            .execute()
+        )
+        if profile_resp.data and profile_resp.data[0].get("trial_promo_sent_at"):
+            return True
+        sends_resp = (
+            client.table("promotion_sends")
+            .select("id")
+            .eq("recipient_id", profile_id)
+            .eq("recipient_type", "profile")
+            .eq("status", "sent")
+            .limit(1)
+            .execute()
+        )
+        return bool(sends_resp.data)
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def profile_to_recipient(profile: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "recipient_type": "profile",
+        "recipient_id": profile.get("id"),
+        "nombre": profile.get("nombre"),
+        "email": (profile.get("email") or "").strip() or None,
+        "telefono": (
+            profile.get("telefono_e164") or profile.get("telefono") or ""
+        ).strip()
+        or None,
+        "country_code": _country_code_from_profile(profile),
+    }
+
+
+def _send_to_recipient(
+    recipient: Dict[str, Any],
+    offer: Dict[str, Any],
+    image_url: Optional[str],
+    channels: List[str],
+    campaign_id: str,
+    segment: str,
+) -> Dict[str, int]:
+    stats = {"sent": 0, "failed": 0, "email": 0, "whatsapp": 0}
+    nombre = (recipient.get("nombre") or "colega").split()[0]
+    email = recipient.get("email")
+    telefono = recipient.get("telefono")
+    country = recipient.get("country_code") or "52"
+    channel_set = set(channels)
+
+    if "email" in channel_set and email:
+        err_msg = email_notifications.send_promotional_email(
+            to_addr=email,
+            nombre=nombre,
+            offer=offer,
+            image_url=image_url,
+            segment=segment,
+        )
+        if err_msg:
+            stats["failed"] += 1
+            _insert_send(
+                {
+                    "campaign_id": campaign_id,
+                    "channel": "email",
+                    "recipient_type": recipient.get("recipient_type"),
+                    "recipient_id": recipient.get("recipient_id"),
+                    "recipient_email": email,
+                    "status": "failed",
+                    "error_message": err_msg,
+                }
+            )
+        else:
+            stats["sent"] += 1
+            stats["email"] += 1
+            _insert_send(
+                {
+                    "campaign_id": campaign_id,
+                    "channel": "email",
+                    "recipient_type": recipient.get("recipient_type"),
+                    "recipient_id": recipient.get("recipient_id"),
+                    "recipient_email": email,
+                    "status": "sent",
+                    "sent_at": _now_iso(),
+                }
+            )
+
+    if "whatsapp" in channel_set and telefono:
+        ext_id, wa_err = whatsapp_notifications.send_promotional_whatsapp(
+            to_phone=telefono,
+            offer=offer,
+            image_url=image_url,
+            country_code=country,
+        )
+        if wa_err:
+            stats["failed"] += 1
+            _insert_send(
+                {
+                    "campaign_id": campaign_id,
+                    "channel": "whatsapp",
+                    "recipient_type": recipient.get("recipient_type"),
+                    "recipient_id": recipient.get("recipient_id"),
+                    "recipient_phone": telefono,
+                    "status": "failed",
+                    "error_message": wa_err,
+                }
+            )
+        else:
+            stats["sent"] += 1
+            stats["whatsapp"] += 1
+            _insert_send(
+                {
+                    "campaign_id": campaign_id,
+                    "channel": "whatsapp",
+                    "recipient_type": recipient.get("recipient_type"),
+                    "recipient_id": recipient.get("recipient_id"),
+                    "recipient_phone": telefono,
+                    "status": "sent",
+                    "external_id": ext_id,
+                    "sent_at": _now_iso(),
+                }
+            )
+    return stats
+
+
+def maybe_send_trial_exhausted_promo(
+    profile: Dict[str, Any],
+    previous_remaining: int,
+) -> Optional[Dict[str, Any]]:
+    """
+    Envía promo automática cuando el usuario agota sus 3 consultas de prueba.
+    Llamar en background tras descontar el último crédito.
+    """
+    if not is_auto_trial_promo_enabled():
+        return None
+
+    profile_id = str(profile.get("id") or "")
+    membership = (profile.get("membership_type") or "").strip().lower()
+    remaining = int(profile.get("consultations_remaining") or 0)
+
+    if membership or previous_remaining <= 0 or remaining > 0:
+        return None
+    if _marketing_blocked(profile):
+        return None
+    if trial_promo_already_sent(profile_id):
+        return None
+
+    channels = auto_trial_promo_channels()
+    offer = build_offer_payload()
+    image_url, image_err, image_source = canva_offers.generate_offer_image(offer)
+
+    campaign_row = {
+        "name": f"Auto promo prueba agotada — {profile.get('email') or profile_id[:8]}",
+        "segment": "trial_exhausted",
+        "channels": channels,
+        "offer": offer,
+        "image_url": image_url,
+        "created_by_profile_id": None,
+        "status": "sending",
+        "dry_run": False,
+        "stats": {},
+    }
+    campaign_id, camp_err = _insert_campaign(campaign_row)
+    if camp_err:
+        print(f"[WARN] trial promo campaign: {camp_err}")
+        return None
+
+    recipient = profile_to_recipient(profile)
+    stats = _send_to_recipient(
+        recipient,
+        offer,
+        image_url,
+        channels,
+        campaign_id,
+        "trial_exhausted",
+    )
+
+    update_profile(profile_id, {"trial_promo_sent_at": _now_iso()})
+
+    _update_campaign(
+        campaign_id,
+        {
+            "status": "completed",
+            "stats": stats,
+            "completed_at": _now_iso(),
+        },
+    )
+
+    print(
+        f"[PROMO auto] trial_exhausted profile={profile_id} "
+        f"sent={stats['sent']} failed={stats['failed']} image={image_source}"
+    )
+    if image_err:
+        print(f"[PROMO auto] image note: {image_err}")
+
+    return {
+        "ok": True,
+        "campaign_id": campaign_id,
+        "profile_id": profile_id,
+        "stats": stats,
+        "image_url": image_url,
+        "image_source": image_source,
+    }
