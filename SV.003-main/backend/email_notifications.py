@@ -622,6 +622,56 @@ def notify_user_cedula_upload_reminder(profile: dict) -> None:
         print(f"[WARN] Email usuario (recordatorio cédula): {err}")
 
 
+def notify_user_trial_credits_restored(profile: dict) -> Optional[str]:
+    """Avisa que se restauraron las 3 consultas de prueba."""
+    user_email = (profile.get("email") or "").strip()
+    if not user_email:
+        return "Sin email"
+
+    user_name = (profile.get("nombre") or "").strip() or "colega"
+    credits = int(profile.get("consultations_remaining") or 3)
+    app_url = _frontend_url()
+    login_url = f"{app_url}/login"
+    support_email = DEFAULT_SUPPORT_NOTIFY_EMAIL
+
+    email_subject = "[GUIAA] Te regalamos de nuevo 3 consultas de prueba"
+    text = (
+        f"Hola {user_name},\n\n"
+        f"Queremos que pruebes GUIAA sin fricción: te restauramos "
+        f"{credits} consultas de prueba en tu cuenta.\n\n"
+        f"Email de tu cuenta: {user_email}\n"
+        f"Consultas disponibles: {credits}\n\n"
+        f"Entra y úsalas cuando quieras en una consulta real:\n{login_url}\n\n"
+        f"Si tienes dudas, escríbenos a {support_email}.\n\n"
+        f"— Equipo GUIAA\n"
+    )
+    html = f"""
+    <h2>🎁 Tus 3 consultas de prueba están de vuelta</h2>
+    <p>Hola {user_name},</p>
+    <p>
+      Queremos que pruebes <strong>GUIAA</strong> sin fricción: te restauramos
+      <strong>{credits} consultas de prueba</strong> en tu cuenta.
+    </p>
+    <ul>
+      <li><strong>Email:</strong> {user_email}</li>
+      <li><strong>Consultas disponibles:</strong> {credits}</li>
+    </ul>
+    <p>
+      Úsalas en una consulta clínica real cuando quieras.
+      <a href="{login_url}">Iniciar sesión en GUIAA</a>
+    </p>
+    <p style="color:#64748b;font-size:12px;">
+      ¿Dudas? Escríbenos a <a href="mailto:{support_email}">{support_email}</a>
+    </p>
+    <p style="color:#64748b;font-size:12px;">— Equipo GUIAA</p>
+    """
+
+    err = send_email([user_email], email_subject, html, text)
+    if err:
+        print(f"[WARN] Email trial credits ({user_email}): {err}")
+    return err
+
+
 def notify_user_2fa_code(profile: dict, code: str) -> None:
     """Envía código de verificación en dos pasos al email del veterinario."""
     user_email = (profile.get("email") or "").strip()
