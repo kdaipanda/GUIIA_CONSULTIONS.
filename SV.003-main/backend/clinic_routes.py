@@ -1969,15 +1969,60 @@ async def admin_reply_support_ticket(
 @clinic_router.post("/admin/delete-user")
 async def admin_delete_user(body: AdminDeleteUserBody, x_veterinarian_id: str = Header(None)):
     admin = await _require_platform_admin(_require_vet_id(x_veterinarian_id))
-    from supabase_client import delete_profile_by_email
+    from supabase_client import delete_user_account_detailed, get_profile_by_email
 
     target_email = body.email.strip()
-    success, error = delete_profile_by_email(target_email)
+    if not target_email:
+        raise HTTPException(status_code=400, detail="Email requerido")
+
+    admin_email = (admin.get("email") or "").strip().lower()
+    if admin_email and admin_email == target_email.lower():
+        raise HTTPException(
+            status_code=400,
+            detail="No puedes eliminar tu propia cuenta desde Admin GUIAA.",
+        )
+
+    preview, preview_err = get_profile_by_email(target_email)
+    if preview_err:
+        raise HTTPException(status_code=500, detail=f"Error buscando usuario: {preview_err}")
+    if not preview:
+        raise HTTPException(status_code=404, detail=f"Usuario {target_email} no encontrado")
+
+    success, error, detail = delete_user_account_detailed(target_email)
     if not success:
         raise HTTPException(status_code=400, detail=error or "No se pudo eliminar el usuario")
+
     auth_security.audit_admin_action(
         admin,
         "delete_user",
+        target_profile_id=preview.get("id"),
         target_email=target_email,
+        metadata={"removed": detail.get("removed") or {}},
     )
-    return {"message": f"Usuario {body.email} eliminado correctamente"}
+    removed = detail.get("removed") or {}
+    return {
+        "message": f"Usuario {target_email} eliminado correctamente de Supabase.",
+        "verified": detail.get("verified", True),
+        "profile_id": detail.get("profile_id"),
+        "removed": removed,
+    }
+
+
+@clinic_router.get("/admin/users/lookup")
+async def admin_lookup_user(email: str, x_veterinarian_id: str = Header(None)):
+    """Comprueba si un email sigue registrado (útil tras eliminar)."""
+    await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    from supabase_client import get_profile_by_email
+
+    profile, err = get_profile_by_email(email.strip())
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    if not profile:
+        return {"exists": False, "email": email.strip()}
+    return {
+        "exists": True,
+        "email": profile.get("email"),
+        "id": profile.get("id"),
+        "nombre": profile.get("nombre"),
+        "created_at": profile.get("created_at"),
+    }

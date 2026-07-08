@@ -17,6 +17,7 @@ import {
   fetchAdminUsers,
   fetchAdminOrganizations,
   adminDeleteUser,
+  adminLookupUser,
   adminVerifyUserCedula,
   adminReviewUserCedula,
   fetchAdminUserConsultations,
@@ -327,7 +328,7 @@ export function AdminPage() {
     if (!deleteEmail.trim()) return;
     const ok = await confirm({
       title: "Eliminar usuario",
-      description: `¿Eliminar permanentemente a ${deleteEmail}? Esta acción no se puede deshacer.`,
+      description: `¿Eliminar permanentemente a ${deleteEmail}? Se borrarán perfil, consultas, imágenes, tickets y pagos asociados en Supabase.`,
       confirmLabel: "Eliminar",
       destructive: true,
     });
@@ -335,9 +336,31 @@ export function AdminPage() {
     setActing(true);
     try {
       const data = await adminDeleteUser(veterinarian.id, deleteEmail.trim());
-      notifySuccess(data.message || "Usuario eliminado.");
+      const removed = data.removed || {};
+      const parts = Object.entries(removed)
+        .filter(([, count]) => Number(count) > 0)
+        .map(([key, count]) => `${key}: ${count}`);
+      const summary = parts.length ? ` (${parts.join(", ")})` : "";
+      notifySuccess((data.message || "Usuario eliminado.") + summary);
       setDeleteEmail("");
       load();
+    } catch (err) {
+      notifyError(err.message);
+    } finally {
+      setActing(false);
+    }
+  };
+
+  const handleLookupUser = async () => {
+    if (!deleteEmail.trim()) return;
+    setActing(true);
+    try {
+      const data = await adminLookupUser(veterinarian.id, deleteEmail.trim());
+      if (data.exists) {
+        notifyError(`El email sigue registrado: ${data.nombre || data.email} (${data.id})`);
+      } else {
+        notifySuccess(`No hay usuario con el email ${deleteEmail.trim()} en Supabase.`);
+      }
     } catch (err) {
       notifyError(err.message);
     } finally {
@@ -925,7 +948,8 @@ export function AdminPage() {
       <section className="clinic-settings-card">
         <h2>Acciones</h2>
         <p className="clinic-muted clinic-tools-desc">
-          Las 3 consultas de prueba se otorgan automáticamente al registrarse en la plataforma.
+          Elimina el perfil y datos asociados en Supabase (consultas, laboratorio, pagos,
+          tickets de soporte). Tras borrar, usa «Verificar email» para confirmar que ya no existe.
         </p>
         <div className="clinic-admin-actions">
           <form onSubmit={handleDeleteUser} className="clinic-admin-delete-form">
@@ -939,6 +963,9 @@ export function AdminPage() {
                 onChange={(e) => setDeleteEmail(e.target.value)}
               />
             </div>
+            <Button type="button" variant="secondary" disabled={acting || !deleteEmail.trim()} onClick={handleLookupUser}>
+              Verificar email
+            </Button>
             <Button type="submit" variant="secondary" disabled={acting || !deleteEmail.trim()}>
               <Trash2 size={16} aria-hidden />
               Eliminar

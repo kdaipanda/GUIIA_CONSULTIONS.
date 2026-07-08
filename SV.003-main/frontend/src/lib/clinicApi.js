@@ -80,6 +80,11 @@ export async function adminDeleteUser(veterinarianId, email) {
   });
 }
 
+export async function adminLookupUser(veterinarianId, email) {
+  const params = new URLSearchParams({ email: email.trim() });
+  return clinicFetch(`/api/admin/users/lookup?${params}`, veterinarianId);
+}
+
 export async function adminVerifyUserCedula(veterinarianId, profileId) {
   return clinicFetch(`/api/admin/users/${profileId}/cedula/verify`, veterinarianId, {
     method: "POST",
