@@ -44,6 +44,7 @@ import { clinicNavIsHero, clinicNavThemeStyle } from "./lib/clinicNavTheme";
 import { LATAM_COUNTRIES, countryLabel } from "./lib/latamCountries";
 import { shouldShowTrialSurvey } from "./lib/trialSurvey";
 import { TrialSurveyModal } from "./components/TrialSurveyModal";
+import { SupportChatWidget } from "./components/SupportChatWidget";
 import { VetProvider, useVet } from "./context/VetContext";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { PrivacyModal } from "./components/PrivacyModal";
