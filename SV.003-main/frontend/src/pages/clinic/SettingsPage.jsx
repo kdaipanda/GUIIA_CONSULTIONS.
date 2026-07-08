@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Copy, Save, Users, UserPlus, Trash2, Settings, ShieldAlert } from "lucide-react";
 import "./clinicPageShared.css";
 import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
+import { AccountPasswordSection } from "../../components/AccountPasswordSection";
 import { useConfirmAction } from "../../hooks/useConfirmAction";
 import {
   ClinicSettingsSkeleton,
@@ -146,16 +147,18 @@ export function SettingsPage() {
       <div className="clinic-page clinic-page-guiaa">
         <div className="clinic-page-header">
           <div>
-            <p className="clinic-page-eyebrow">Consultorio</p>
+            <p className="clinic-page-eyebrow">Cuenta</p>
             <h1>Configuración</h1>
-            <p>Solo administradores del consultorio pueden editar esta sección.</p>
+            <p>Seguridad de tu cuenta GUIAA.</p>
           </div>
         </div>
+        <AccountPasswordSection />
         <ClinicEmptyState
           icon={ShieldAlert}
-          title="Sin permisos de administración"
-          description="Tu rol actual no permite modificar datos del consultorio ni invitar miembros."
+          title="Configuración del consultorio"
+          description="Solo administradores del consultorio pueden editar datos de la clínica e invitar miembros."
         />
+        <ConfirmActionDialog {...dialogProps} />
       </div>
     );
   }
@@ -169,6 +172,8 @@ export function SettingsPage() {
           <p>Datos de la clínica, equipo y portal de citas.</p>
         </div>
       </div>
+
+      <AccountPasswordSection />
 
       {loading ? (
         <ClinicSettingsSkeleton />

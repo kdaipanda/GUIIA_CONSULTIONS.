@@ -27,4 +27,5 @@ def test_strip_sensitive_profile_fields():
     profile = {"id": "1", "email": "a@b.com", "password_hash": "secret"}
     clean = strip_sensitive_profile_fields(profile)
     assert "password_hash" not in clean
+    assert clean["has_password"] is True
     assert clean["email"] == "a@b.com"

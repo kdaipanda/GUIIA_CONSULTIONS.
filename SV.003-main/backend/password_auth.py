@@ -35,7 +35,9 @@ def verify_password(plain: Optional[str], hashed: Optional[str]) -> bool:
 def strip_sensitive_profile_fields(profile: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     if not profile:
         return {}
+    has_password = bool((profile.get("password_hash") or "").strip())
     data = dict(profile)
     data.pop("password_hash", None)
     data.pop("_id", None)
+    data["has_password"] = has_password
     return data
