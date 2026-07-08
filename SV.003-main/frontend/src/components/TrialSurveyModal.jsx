@@ -24,6 +24,7 @@ const STAR_LABELS = [
 
 export function TrialSurveyModal({
   open,
+  mandatory = false,
   onOpenChange,
   veterinarian,
   offer,
@@ -120,17 +121,26 @@ export function TrialSurveyModal({
   const activeOffer = localOffer || offer;
   const promoCode = activeOffer?.promo_code;
   const displayRating = hoverRating || rating;
+  const surveyMandatory = phase === "survey" && mandatory;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="trial-survey-dialog sm:max-w-lg">
+    <Dialog open={open} onOpenChange={surveyMandatory ? () => {} : onOpenChange}>
+      <DialogContent
+        className={`trial-survey-dialog sm:max-w-lg${surveyMandatory ? " [&>button.absolute]:hidden trial-survey-dialog--blocking" : ""}`}
+        onPointerDownOutside={(e) => {
+          if (surveyMandatory) e.preventDefault();
+        }}
+        onEscapeKeyDown={(e) => {
+          if (surveyMandatory) e.preventDefault();
+        }}
+      >
         {phase === "survey" ? (
           <form onSubmit={handleSubmitSurvey}>
             <DialogHeader>
-              <DialogTitle>¿Cómo fue tu experiencia con GUIAA?</DialogTitle>
+              <DialogTitle>Encuesta obligatoria — tu experiencia con GUIAA</DialogTitle>
               <DialogDescription>
-                Completaste tus 3 consultas de prueba. Tu opinión nos ayuda a mejorar
-                la plataforma para veterinarios en México.
+                Completaste tus 3 consultas de prueba. Para seguir usando la plataforma,
+                cuéntanos cómo fue tu experiencia. Solo toma un minuto.
               </DialogDescription>
             </DialogHeader>
 
@@ -170,16 +180,8 @@ export function TrialSurveyModal({
             {error ? <p className="trial-survey-error">{error}</p> : null}
 
             <DialogFooter className="trial-survey-footer">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => onOpenChange?.(false)}
-                disabled={submitting}
-              >
-                Recordar después
-              </Button>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? "Enviando…" : "Enviar encuesta"}
+              <Button type="submit" disabled={submitting} className="w-full sm:w-auto">
+                {submitting ? "Enviando…" : "Enviar y continuar"}
               </Button>
             </DialogFooter>
           </form>

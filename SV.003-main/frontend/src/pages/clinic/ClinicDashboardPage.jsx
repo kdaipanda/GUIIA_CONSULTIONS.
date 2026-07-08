@@ -263,8 +263,8 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
           <div>
             <strong>Prueba CDS agotada</strong>
             <p>
-              {TRIAL_EXHAUSTED_MESSAGE} Completa la encuesta para ver tu oferta
-              Premium con cupón de descuento.
+              {TRIAL_EXHAUSTED_MESSAGE} Debes completar la encuesta obligatoria para
+              ver tu oferta Premium con cupón de descuento.
             </p>
           </div>
           <Button type="button" size="sm" onClick={() => go("membership", "/app/membresia")}>
