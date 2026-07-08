@@ -1594,18 +1594,7 @@ async def login_veterinarian(credentials: VeterinarianLogin, request: Request):
     # Gating: manejar estados de verificación de cédula
     if ced_status != CEDULA_STATUS_VERIFIED:
         needs_upload = not bool(veterinarian.get("cedula_document_url"))
-        skip_count = veterinarian.get("cedula_skip_count", 0)
-
-        # Si falta el documento, siempre bloquear y mandar al flujo
-        if needs_upload or ced_status == CEDULA_STATUS_UNSUBMITTED:
-            cedula_verification.maybe_send_cedula_upload_reminder(veterinarian)
-            msg = "Debes subir tu documento de registro profesional para continuar."
-            return _cedula_flow_response(
-                veterinarian,
-                message=msg,
-                needs_upload=True,
-                verification_status=ced_status,
-            )
+        skip_count = int(veterinarian.get("cedula_skip_count") or 0)
 
         # Si fue rechazada, bloquear y pedir reintento (corregir nombre/cedula o re-subir)
         if ced_status == CEDULA_STATUS_REJECTED:
@@ -1617,29 +1606,46 @@ async def login_veterinarian(credentials: VeterinarianLogin, request: Request):
                 verification_status=ced_status,
             )
 
+        # Sin documento / sin enviar: primera vez → flujo cédula; tras posponer → acceso temporal
+        if needs_upload or ced_status == CEDULA_STATUS_UNSUBMITTED:
+            if skip_count >= 3:
+                return _cedula_flow_response(
+                    veterinarian,
+                    message=(
+                        "Has alcanzado el límite de 3 posposiciones. "
+                        "Debes completar la verificación de tu registro profesional."
+                    ),
+                    needs_upload=True,
+                    verification_status=ced_status,
+                    can_skip=False,
+                )
+            if skip_count == 0:
+                cedula_verification.maybe_send_cedula_upload_reminder(veterinarian)
+                msg = "Debes subir tu documento de registro profesional para continuar."
+                return _cedula_flow_response(
+                    veterinarian,
+                    message=msg,
+                    needs_upload=True,
+                    verification_status=ced_status,
+                )
+            # skip_count 1 o 2: permitir login para usar consultas / diagnóstico
+            veterinarian["cedula_verification_status"] = ced_status
+            veterinarian["cedula_skip_count"] = skip_count
+
         # Si está PENDING pero ya hay documento, permitir login y dejar la cuenta en revisión.
-        # Esto evita que el usuario quede bloqueado cuando SEP/DGP no responde.
-        if ced_status == CEDULA_STATUS_PENDING and veterinarian.get("cedula_document_url"):
+        elif ced_status == CEDULA_STATUS_PENDING and veterinarian.get("cedula_document_url"):
             veterinarian["cedula_verification_status"] = CEDULA_STATUS_PENDING
             veterinarian["cedula_verification_message"] = (
                 "Tu registro profesional está en revisión. Puedes continuar mientras lo validamos."
             )
-        else:
-            # Si el usuario tiene menos de 3 skips, permitir acceso temporal
-            if skip_count < 3:
-                # Permitir acceso temporal sin verificación
-                veterinarian["cedula_verification_status"] = ced_status
-                veterinarian["cedula_skip_count"] = skip_count
-                # Continuar con el login normal (sin bloquear)
-            else:
-                # Fallback conservador: si es algún estado raro, mandar al flujo.
-                return _cedula_flow_response(
-                    veterinarian,
-                    message="Necesitamos completar la verificación de tu registro profesional.",
-                    needs_upload=needs_upload,
-                    verification_status=ced_status,
-                    can_skip=False,
-                )
+        elif skip_count >= 3:
+            return _cedula_flow_response(
+                veterinarian,
+                message="Necesitamos completar la verificación de tu registro profesional.",
+                needs_upload=needs_upload,
+                verification_status=ced_status,
+                can_skip=False,
+            )
 
     # Si tiene 2FA habilitado, generar código
     if veterinarian.get("two_factor_enabled", False):
