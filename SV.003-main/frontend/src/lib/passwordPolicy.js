@@ -8,13 +8,29 @@ export const PASSWORD_EXAMPLE_TEXT =
   "Ejemplos válidos: Clinica2024 · LunaVet08 · mipassword1";
 
 export const PASSWORD_REQUIREMENTS_TEXT =
-  "Al menos 8 caracteres, con letras y números. No hace falta un símbolo especial.";
+  "Al menos 8 caracteres, con letras y números. Máximo 72 caracteres.";
+
+export const PASSWORD_TOO_LONG_MESSAGE =
+  "La contraseña es demasiado larga; usa como máximo 72 caracteres.";
 
 const HAS_LETTER = /[A-Za-záéíóúñÁÉÍÓÚÑ]/;
 const HAS_DIGIT = /\d/;
 
 function passwordByteLength(value) {
   return new TextEncoder().encode(value).length;
+}
+
+/** Evita pegar o autocompletar contraseñas que excedan el límite de bcrypt. */
+export function clampPasswordInput(value) {
+  const current = value ?? "";
+  if (!current || passwordByteLength(current) <= MAX_PASSWORD_BYTES) {
+    return current;
+  }
+  let trimmed = current;
+  while (trimmed && passwordByteLength(trimmed) > MAX_PASSWORD_BYTES) {
+    trimmed = trimmed.slice(0, -1);
+  }
+  return trimmed;
 }
 
 export const PASSWORD_CHECKS = [
@@ -27,7 +43,7 @@ export const PASSWORD_CHECKS = [
   {
     id: "max",
     label: "Máximo 72 caracteres",
-    helpText: "La contraseña es demasiado larga; usa como máximo 72 caracteres.",
+    helpText: PASSWORD_TOO_LONG_MESSAGE,
     test: (value) => !value || passwordByteLength(value) <= MAX_PASSWORD_BYTES,
   },
   {

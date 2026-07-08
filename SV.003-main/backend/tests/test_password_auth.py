@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import pytest
+from passlib.exc import PasswordSizeError
 
 from password_auth import (
     MIN_PASSWORD_LENGTH,
@@ -42,6 +43,15 @@ def test_validate_password_rejects_too_long():
     too_long = "a1" + ("x" * 80)
     with pytest.raises(ValueError, match="demasiado larga"):
         validate_password(too_long)
+
+
+def test_hash_password_maps_bcrypt_length_error(monkeypatch):
+    def boom(_value):
+        raise PasswordSizeError("password cannot be longer than 72 bytes")
+
+    monkeypatch.setattr("password_auth._pwd_context.hash", boom)
+    with pytest.raises(ValueError, match="demasiado larga"):
+        hash_password("Clinica2024")
 
 
 def test_hash_and_verify_password():
