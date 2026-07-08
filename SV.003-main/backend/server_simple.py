@@ -154,15 +154,8 @@ else:
         r")"
     )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=cors_allow_origins,
-    allow_origin_regex=_cors_origin_regex,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["*"],
-    expose_headers=["*"],
-)
+# CORS se registra después del middleware de seguridad (más abajo) para que
+# las respuestas 401/403 también incluyan cabeceras CORS en el navegador.
 
 
 async def _send_meta_purchase_if_needed(transaction: Dict[str, Any], session_id: str) -> None:
@@ -252,6 +245,17 @@ async def security_middleware(request: Request, call_next):
         )
 
     return response
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_allow_origins,
+    allow_origin_regex=_cors_origin_regex,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+)
 
 
 from clinic_routes import clinic_router

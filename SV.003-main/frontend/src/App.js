@@ -25,7 +25,8 @@ import {
   uploadMedicalImageSupabase,
 } from "./lib/supabaseApi";
 import { BACKEND_URL, getBackendUrl } from "./lib/backendUrl";
-import { friendlyFetchError, friendlyDatabaseError } from "./lib/friendlyFetchError";
+import { friendlyFetchError, friendlyDatabaseError, formatApiErrorDetail } from "./lib/friendlyFetchError";
+import { finalizeCedulaFlowEntry } from "./lib/cedulaFlowAuth";
 import { fetchWithTimeout, fetchJsonWithRetry } from "./lib/fetchWithTimeout";
 import { getAuthHeaders, persistAuthFromResponse } from "./lib/authHeaders";
 import { downloadConsultationPdf, cleanClinicalDisplayText } from "./lib/consultationPdf";
@@ -975,6 +976,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
       }
 
       const vetData = await response.json();
+      persistAuthFromResponse(vetData);
       trackMetaCompleteRegistration(vetData?.id);
       // Redirigir a flujo obligatorio de cédula (upload + verificación)
       setCedulaFlow?.({
@@ -985,6 +987,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
         expected_nombre: formData.nombre,
         needs_upload: false,
         file: cedulaFile,
+        login_password: password,
       });
       markNewUserDiagnosticoRedirect(vetData?.id);
       setView("cedula-verification");
@@ -1695,8 +1698,10 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
           body: fd,
         });
         if (!up.ok) {
-          const raw = await up.text().catch(() => "");
-          throw new Error(raw || "Error subiendo documento");
+          const errorData = await up.json().catch(() => ({}));
+          throw new Error(
+            formatApiErrorDetail(errorData.detail, "Error subiendo documento"),
+          );
         }
       }
 
@@ -1711,31 +1716,29 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
         }),
       });
       if (!vr.ok) {
-        const raw = await vr.text().catch(() => "");
-        throw new Error(raw || "Error al enviar tu registro para revisión");
+        const errorData = await vr.json().catch(() => ({}));
+        throw new Error(
+          formatApiErrorDetail(errorData.detail, "Error al enviar tu registro para revisión"),
+        );
       }
       const verifyData = await vr.json().catch(() => ({}));
       const status = verifyData?.verification_status || "";
       setVerificationStatus(status);
       setInfo(verifyData?.message || "Verificación procesada.");
 
-      // 3) Si verified (o queda pending por caída SEP/DGP), reintentar login y entrar
+      // 3) Si verified (o queda pending por caída SEP/DGP), entrar a la app
       if (status === "verified" || status === "pending") {
         if (status === "verified" && email) {
           notifySuccess(
             `¡Registro aprobado! Te enviamos un correo de confirmación a ${email}.`
           );
         }
-        const resp = await fetch(`${BACKEND_URL}/api/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, cedula_profesional }),
+        const vetData = await finalizeCedulaFlowEntry({
+          email,
+          cedula_profesional,
+          veterinarian_id: vetId,
+          login_password: cedulaFlow?.login_password,
         });
-        if (!resp.ok) {
-          const raw = await resp.text().catch(() => "");
-          throw new Error(raw || "Error iniciando sesión tras verificación");
-        }
-        const vetData = await resp.json();
         if (vetData?.status === "requires_cedula_flow") {
           throw new Error(vetData?.message || "Tu registro aún no está verificado.");
         }
@@ -1748,7 +1751,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
         }
       }
     } catch (e) {
-      notifyError(e?.message || "Error en verificación");
+      notifyError(friendlyFetchError(e, getBackendUrl()));
     } finally {
       setLoading(false);
     }
@@ -1852,18 +1855,13 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                     
                     const skipData = await response.json();
                     
-                    // Hacer login para entrar al dashboard
-                    const resp = await fetch(`${BACKEND_URL}/api/auth/login`, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ email, cedula_profesional }),
+                    const vetData = await finalizeCedulaFlowEntry({
+                      email,
+                      cedula_profesional,
+                      veterinarian_id: vetId,
+                      login_password: cedulaFlow?.login_password,
                     });
                     
-                    if (!resp.ok) {
-                      throw new Error("Error iniciando sesión");
-                    }
-                    
-                    const vetData = await resp.json();
                     if (vetData?.status === "requires_cedula_flow") {
                       // Si aún requiere verificación pero ya usó los 3 skips, mostrar error
                       if (skipData.remaining_skips === 0) {
@@ -1890,7 +1888,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                       setView("dashboard");
                     }
                   } catch (e) {
-                    notifyError(e?.message || "Error al posponer verificación");
+                    notifyError(friendlyFetchError(e, getBackendUrl()));
                   } finally {
                     setLoading(false);
                   }
