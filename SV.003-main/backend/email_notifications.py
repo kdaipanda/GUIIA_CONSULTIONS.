@@ -14,11 +14,18 @@ except ImportError:  # pragma: no cover
 
 
 def _frontend_url() -> str:
-    return (
+    raw = (
         os.getenv("FRONTEND_URL", "").strip()
         or os.getenv("PUBLIC_APP_URL", "").strip()
-        or "http://localhost:3000"
+        or "https://guiaa.vet"
     ).rstrip("/")
+    # Evitar enlaces a localhost en correos de producción
+    if "localhost" in raw.lower() or "127.0.0.1" in raw:
+        prod = (os.getenv("PUBLIC_APP_URL", "").strip() or "https://guiaa.vet").rstrip("/")
+        if "localhost" not in prod.lower() and "127.0.0.1" not in prod:
+            return prod
+        return "https://guiaa.vet"
+    return raw
 
 
 DEFAULT_SUPPORT_NOTIFY_EMAIL = "soporte@guiaa.vet"
