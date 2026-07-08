@@ -35,10 +35,12 @@ import { LandingReveal } from "./landing/LandingReveal";
 import { LandingSeo } from "./landing/LandingSeo";
 import { LandingVetAnimations } from "./landing/LandingVetAnimations";
 import { trackMetaPageView } from "../lib/metaPixel";
+import { trackGoogleAdsPageView } from "../lib/googleAds";
 
 export function LandingPage({ setView }) {
   useEffect(() => {
     trackMetaPageView();
+    trackGoogleAdsPageView();
   }, []);
   return (
     <div className="landing-shell landing-shell--page min-h-screen p-3 pb-5 antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">

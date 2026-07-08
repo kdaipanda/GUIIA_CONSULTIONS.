@@ -12,6 +12,7 @@ import { getBackendUrl } from "../lib/backendUrl";
 import { getAuthHeaders } from "../lib/authHeaders";
 import { submitTrialSurvey } from "../lib/trialSurvey";
 import { trackMetaInitiateCheckout } from "../lib/metaPixel";
+import { trackGoogleAdsInitiateCheckout } from "../lib/googleAds";
 import "../styles/trialSurvey.css";
 
 const STAR_LABELS = [
@@ -110,6 +111,7 @@ export function TrialSurveyModal({
         packageId: "premium",
         contentCategory: "membership",
       });
+      trackGoogleAdsInitiateCheckout();
 
       window.location.href = data.checkout_url;
     } catch (err) {
