@@ -80,3 +80,25 @@ def survey_fields_from_submission(rating: int, comment: str) -> Dict[str, Any]:
         "trial_survey_comment": (comment or "").strip(),
         "trial_survey_completed_at": now,
     }
+
+
+def list_trial_survey_responses(profiles: list[Dict[str, Any]]) -> list[Dict[str, Any]]:
+    """Respuestas de encuesta post-prueba para Admin GUIAA."""
+    rows: list[Dict[str, Any]] = []
+    for profile in profiles:
+        if not profile.get("trial_survey_completed_at"):
+            continue
+        rows.append(
+            {
+                "id": profile.get("id"),
+                "nombre": profile.get("nombre"),
+                "email": profile.get("email"),
+                "rating": profile.get("trial_survey_rating"),
+                "comment": profile.get("trial_survey_comment") or "",
+                "completed_at": profile.get("trial_survey_completed_at"),
+                "membership_type": profile.get("membership_type"),
+                "consultations_remaining": profile.get("consultations_remaining"),
+            }
+        )
+    rows.sort(key=lambda item: item.get("completed_at") or "", reverse=True)
+    return rows

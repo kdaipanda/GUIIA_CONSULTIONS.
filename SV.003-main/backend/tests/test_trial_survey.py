@@ -57,3 +57,29 @@ def test_survey_fields_from_submission():
     assert fields["trial_survey_rating"] == 4
     assert fields["trial_survey_comment"] == "Muy útil para casos complejos"
     assert fields["trial_survey_completed_at"]
+
+
+def test_list_trial_survey_responses_orders_by_date():
+    profiles = [
+        {
+            "id": "a",
+            "email": "a@test.com",
+            "trial_survey_completed_at": "2026-07-01T00:00:00Z",
+            "trial_survey_rating": 3,
+            "trial_survey_comment": "Bien",
+        },
+        {"id": "b", "email": "b@test.com"},
+        {
+            "id": "c",
+            "email": "c@test.com",
+            "trial_survey_completed_at": "2026-07-07T00:00:00Z",
+            "trial_survey_rating": 5,
+            "trial_survey_comment": "Excelente",
+        },
+    ]
+    from trial_survey import list_trial_survey_responses
+
+    rows = list_trial_survey_responses(profiles)
+    assert len(rows) == 2
+    assert rows[0]["id"] == "c"
+    assert rows[1]["id"] == "a"

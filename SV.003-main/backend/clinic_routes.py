@@ -13,6 +13,7 @@ import clinic_db
 import cedula_verification
 import auth_security
 import email_notifications
+import trial_survey
 from membership_access import require_feature_for_profile
 from supabase_client import (
     get_profile,
@@ -1454,12 +1455,14 @@ async def admin_overview(x_veterinarian_id: str = Header(None)):
     appts_count, _ = clinic_db.count_table_rows("appointments")
     premium = sum(1 for p in profiles if (p.get("membership_type") or "").lower() == "premium")
     trial = sum(1 for p in profiles if not p.get("membership_type") and (p.get("consultations_remaining") or 0) > 0)
+    trial_surveys = len(trial_survey.list_trial_survey_responses(profiles))
     return {
         "overview": {
             "users_total": len(profiles),
             "organizations_total": len(orgs),
             "premium_users": premium,
             "trial_users": trial,
+            "trial_surveys_total": trial_surveys,
             "clients_total": clients_count,
             "patients_total": patients_count,
             "appointments_total": appts_count,
@@ -1518,6 +1521,38 @@ async def admin_list_users(
         if len(rows) >= limit:
             break
     return {"users": rows, "plan_filter": pf, "count": len(rows)}
+
+
+@clinic_router.get("/admin/trial-surveys")
+async def admin_list_trial_surveys(
+    search: str = "",
+    limit: int = 200,
+    x_veterinarian_id: str = Header(None),
+):
+    """Opiniones de la encuesta obligatoria al agotar las 3 consultas de prueba."""
+    await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    profiles, err = list_profiles(limit=5000)
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+
+    rows = trial_survey.list_trial_survey_responses(profiles)
+    q = search.lower().strip()
+    if q:
+        rows = [
+            row
+            for row in rows
+            if q
+            in " ".join(
+                [
+                    row.get("email") or "",
+                    row.get("nombre") or "",
+                    row.get("comment") or "",
+                ]
+            ).lower()
+        ]
+    cap = min(max(limit, 1), 500)
+    rows = rows[:cap]
+    return {"surveys": rows, "count": len(rows)}
 
 
 @clinic_router.post("/admin/users/{profile_id}/cedula/verify")

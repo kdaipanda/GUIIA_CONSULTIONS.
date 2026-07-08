@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox } from "lucide-react";
+import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox, Star } from "lucide-react";
 import "./clinicPageShared.css";
 import "./adminPage.css";
 import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
@@ -28,6 +28,7 @@ import {
   replyAdminSupportTicket,
   fetchAdminGuiaConsultasLeads,
   updateAdminGuiaConsultasLead,
+  fetchAdminTrialSurveys,
 } from "../../lib/clinicApi";
 import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
@@ -173,6 +174,17 @@ function formatDateTime(iso) {
   });
 }
 
+function formatTrialSurveyRating(rating) {
+  const value = Number(rating);
+  if (!Number.isFinite(value) || value < 1) return "—";
+  return `${value}/5`;
+}
+
+function renderTrialSurveyStars(rating) {
+  const value = Math.min(5, Math.max(0, Number(rating) || 0));
+  return "★".repeat(value) + "☆".repeat(5 - value);
+}
+
 function consultationField(consultation, key) {
   const value = consultation[key] ?? consultation.form_data?.[key];
   if (value === null || value === undefined || value === "") return "";
@@ -218,6 +230,11 @@ export function AdminPage() {
   const [leadNotes, setLeadNotes] = useState("");
   const [leadActing, setLeadActing] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [trialSurveys, setTrialSurveys] = useState([]);
+  const [trialSurveysCount, setTrialSurveysCount] = useState(0);
+  const [trialSurveySearch, setTrialSurveySearch] = useState("");
+  const [trialSurveysLoading, setTrialSurveysLoading] = useState(false);
+  const [selectedSurvey, setSelectedSurvey] = useState(null);
 
   useEffect(() => {
     return () => {
@@ -276,6 +293,18 @@ export function AdminPage() {
         setGuiaLeadsLoading(false);
       }
 
+      setTrialSurveysLoading(true);
+      try {
+        const surveysData = await fetchAdminTrialSurveys(veterinarian.id, trialSurveySearch);
+        setTrialSurveys(surveysData.surveys || []);
+        setTrialSurveysCount(surveysData.count ?? surveysData.surveys?.length ?? 0);
+      } catch {
+        setTrialSurveys([]);
+        setTrialSurveysCount(0);
+      } finally {
+        setTrialSurveysLoading(false);
+      }
+
       setAllowed(true);
     } catch (err) {
       const message = err.message || "No se pudo cargar el panel de administración";
@@ -285,13 +314,13 @@ export function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [veterinarian?.id, search, planFilter, supportFilter, guiaLeadFilter, platformAdmin]);
+  }, [veterinarian?.id, search, planFilter, supportFilter, guiaLeadFilter, trialSurveySearch, platformAdmin]);
 
   useEffect(() => {
     if (vetLoading || !veterinarian?.id) return undefined;
     const t = setTimeout(load, search ? 300 : 0);
     return () => clearTimeout(t);
-  }, [load, search, vetLoading, veterinarian?.id, planFilter, supportFilter, guiaLeadFilter]);
+  }, [load, search, vetLoading, veterinarian?.id, planFilter, supportFilter, guiaLeadFilter, trialSurveySearch]);
 
   const handleDeleteUser = async (e) => {
     e.preventDefault();
@@ -667,7 +696,86 @@ export function AdminPage() {
           </div>
           <div className="clinic-report-kpi-value">{guiaLeadsNewCount}</div>
         </div>
+        <div className="clinic-report-kpi">
+          <div className="clinic-report-kpi-head">
+            <span className="clinic-report-kpi-icon"><Star size={18} aria-hidden /></span>
+            <span className="clinic-report-kpi-label">Encuestas prueba</span>
+          </div>
+          <div className="clinic-report-kpi-value">{stats.trial_surveys_total ?? trialSurveysCount}</div>
+        </div>
       </div>
+
+      <section className="clinic-settings-card">
+        <div className="clinic-admin-users-head">
+          <h2>
+            <Star size={18} aria-hidden />
+            Encuestas post-prueba
+          </h2>
+          <span className="clinic-admin-users-count">{trialSurveysCount} respuestas</span>
+        </div>
+        <p className="clinic-muted clinic-tools-desc">
+          Opiniones de veterinarios que agotaron sus 3 consultas de prueba y completaron la
+          encuesta obligatoria.
+        </p>
+        <div className="clinic-admin-users-toolbar">
+          <div className="clinic-search clinic-admin-search">
+            <Input
+              placeholder="Buscar por nombre, email o comentario..."
+              value={trialSurveySearch}
+              onChange={(e) => setTrialSurveySearch(e.target.value)}
+            />
+          </div>
+        </div>
+        {trialSurveysLoading ? (
+          <ClinicTableSkeleton rows={4} cols={5} />
+        ) : trialSurveys.length === 0 ? (
+          <ClinicEmptyState
+            icon={Star}
+            title="Sin encuestas todavía"
+            description="Cuando un usuario complete la encuesta al terminar su prueba, aparecerá aquí."
+          />
+        ) : (
+          <div className="clinic-table-wrap">
+            <table className="clinic-table clinic-admin-support-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Usuario</th>
+                  <th>Calificación</th>
+                  <th>Comentario</th>
+                  <th>Plan actual</th>
+                </tr>
+              </thead>
+              <tbody>
+                {trialSurveys.map((survey) => (
+                  <tr
+                    key={survey.id}
+                    className="clinic-admin-support-row"
+                    onClick={() => setSelectedSurvey(survey)}
+                  >
+                    <td className="clinic-admin-history-date">{formatDateTime(survey.completed_at)}</td>
+                    <td>
+                      <div>{survey.nombre || "—"}</div>
+                      <div className="clinic-muted clinic-admin-support-email">{survey.email || "—"}</div>
+                    </td>
+                    <td>
+                      <span className="clinic-admin-trial-survey-stars" aria-hidden>
+                        {renderTrialSurveyStars(survey.rating)}
+                      </span>
+                      <span className="clinic-muted"> {formatTrialSurveyRating(survey.rating)}</span>
+                    </td>
+                    <td className="clinic-admin-lead-message">
+                      {(survey.comment || "—").slice(0, 100)}
+                      {(survey.comment || "").length > 100 ? "…" : ""}
+                    </td>
+                    <td>{formatPlanLabel(survey)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       <section className="clinic-settings-card">
         <div className="clinic-admin-users-head">
@@ -1392,6 +1500,51 @@ export function AdminPage() {
                   Guardar notas
                 </Button>
               </form>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={!!selectedSurvey}
+        onOpenChange={(open) => {
+          if (!open) setSelectedSurvey(null);
+        }}
+      >
+        <DialogContent className={clinicDialogClass("clinic-admin-lead-dialog", "max-w-lg")}>
+          {selectedSurvey && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedSurvey.nombre || selectedSurvey.email}</DialogTitle>
+                <DialogDescription>
+                  Encuesta post-prueba · {formatDateTime(selectedSurvey.completed_at)}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="clinic-admin-lead-detail">
+                <p>
+                  <strong>Email:</strong>{" "}
+                  {selectedSurvey.email ? (
+                    <a href={`mailto:${selectedSurvey.email}`}>{selectedSurvey.email}</a>
+                  ) : (
+                    "—"
+                  )}
+                </p>
+                <p>
+                  <strong>Calificación:</strong>{" "}
+                  <span className="clinic-admin-trial-survey-stars">
+                    {renderTrialSurveyStars(selectedSurvey.rating)}
+                  </span>{" "}
+                  ({formatTrialSurveyRating(selectedSurvey.rating)})
+                </p>
+                <p>
+                  <strong>Plan actual:</strong> {formatPlanLabel(selectedSurvey)}
+                </p>
+                <p>
+                  <strong>Comentario:</strong>
+                </p>
+                <pre className="clinic-admin-support-msg-body">
+                  {selectedSurvey.comment || "(sin comentario)"}
+                </pre>
+              </div>
             </>
           )}
         </DialogContent>

@@ -77,6 +77,12 @@
   font-size: 0.9rem;
 }
 
+.clinic-admin-trial-survey-stars {
+  color: #f59e0b;
+  letter-spacing: 0.05em;
+  font-size: 0.95rem;
+}
+
 .clinic-admin-skeleton-block {
   margin-top: 16px;
 }

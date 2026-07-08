@@ -313,6 +313,13 @@ export async function fetchAdminGuiaConsultasLeads(veterinarianId, status = "") 
   return clinicFetch(`/api/admin/guia-consultas-leads${q}`, veterinarianId);
 }
 
+export async function fetchAdminTrialSurveys(veterinarianId, search = "") {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  const q = params.toString() ? `?${params}` : "";
+  return clinicFetch(`/api/admin/trial-surveys${q}`, veterinarianId);
+}
+
 export async function updateAdminGuiaConsultasLead(veterinarianId, leadId, data) {
   return clinicFetch(`/api/admin/guia-consultas-leads/${leadId}`, veterinarianId, {
     method: "PATCH",
