@@ -332,6 +332,28 @@ export async function updateAdminGuiaConsultasLead(veterinarianId, leadId, data)
   });
 }
 
+export async function fetchAdminPromotionSegments(veterinarianId) {
+  return clinicFetch("/api/admin/promotions/segments", veterinarianId);
+}
+
+export async function fetchAdminPromotionCampaigns(veterinarianId, limit = 50) {
+  return clinicFetch(`/api/admin/promotions/campaigns?limit=${limit}`, veterinarianId);
+}
+
+export async function previewAdminPromotion(veterinarianId, data) {
+  return clinicFetch("/api/admin/promotions/preview", veterinarianId, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function sendAdminPromotion(veterinarianId, data) {
+  return clinicFetch("/api/admin/promotions/send", veterinarianId, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 export async function fetchProducts(veterinarianId, search = "") {
   const q = search ? `?search=${encodeURIComponent(search)}` : "";
   return clinicFetch(`/api/products${q}`, veterinarianId);
