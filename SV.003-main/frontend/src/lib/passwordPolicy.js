@@ -1,38 +1,35 @@
 export const MIN_PASSWORD_LENGTH = 8;
 
-export const PASSWORD_REQUIREMENTS_TEXT =
-  "Mínimo 8 caracteres, con al menos una mayúscula, una minúscula, un número y un carácter especial (p. ej. !@#$%).";
+export const PASSWORD_HELP_INTRO =
+  "Crea una contraseña personal que solo tú conozcas. La usarás cada vez que entres a GUIAA.";
 
-const HAS_UPPER = /[A-ZÁÉÍÓÚÑ]/;
-const HAS_LOWER = /[a-záéíóúñ]/;
+export const PASSWORD_EXAMPLE_TEXT =
+  "Ejemplos válidos: Clinica2024 · LunaVet08 · mipassword1";
+
+export const PASSWORD_REQUIREMENTS_TEXT =
+  "Al menos 8 caracteres, con letras y números. No hace falta un símbolo especial.";
+
+const HAS_LETTER = /[A-Za-záéíóúñÁÉÍÓÚÑ]/;
 const HAS_DIGIT = /\d/;
-const HAS_SPECIAL = /[^A-Za-z0-9áéíóúñÁÉÍÓÚÑ]/;
 
 export const PASSWORD_CHECKS = [
   {
     id: "length",
-    label: `Al menos ${MIN_PASSWORD_LENGTH} caracteres`,
+    label: "Mínimo 8 caracteres",
+    helpText: "Usa al menos 8 caracteres; entre más larga, más segura.",
     test: (value) => value.length >= MIN_PASSWORD_LENGTH,
   },
   {
-    id: "upper",
-    label: "Una letra mayúscula",
-    test: (value) => HAS_UPPER.test(value),
-  },
-  {
-    id: "lower",
-    label: "Una letra minúscula",
-    test: (value) => HAS_LOWER.test(value),
+    id: "letter",
+    label: "Al menos una letra (a-z)",
+    helpText: "Incluye letras, por ejemplo el nombre de tu clínica o mascota.",
+    test: (value) => HAS_LETTER.test(value),
   },
   {
     id: "digit",
-    label: "Un número",
+    label: "Al menos un número (0-9)",
+    helpText: "Agrega un número, por ejemplo el año o el día de tu cumpleaños.",
     test: (value) => HAS_DIGIT.test(value),
-  },
-  {
-    id: "special",
-    label: "Un carácter especial (!@#$%…)",
-    test: (value) => HAS_SPECIAL.test(value),
   },
 ];
 
@@ -47,12 +44,15 @@ export function getPasswordChecks(password) {
 export function getPasswordValidationError(password) {
   const value = (password || "").trim();
   if (!value) {
-    return "Ingresa una contraseña.";
+    return "Escribe la contraseña con la que iniciarás sesión en GUIAA.";
   }
   const failed = getPasswordChecks(value).find((check) => !check.met);
-  return failed ? `La contraseña no cumple los requisitos: ${failed.label.toLowerCase()}.` : null;
+  return failed?.helpText || null;
 }
 
 export function isPasswordValid(password) {
   return !getPasswordValidationError(password);
 }
+
+/** Texto corto para el atributo passwordrules del navegador (sin jerga de bits). */
+export const PASSWORD_RULES_ATTR = `minlength: ${MIN_PASSWORD_LENGTH}; required: lower; required: digit;`;

@@ -8,32 +8,38 @@ from passlib.context import CryptContext
 
 MIN_PASSWORD_LENGTH = 8
 
-PASSWORD_REQUIREMENTS_TEXT = (
-    "Mínimo 8 caracteres, con al menos una mayúscula, una minúscula, "
-    "un número y un carácter especial (p. ej. !@#$%)."
+PASSWORD_HELP_INTRO = (
+    "Crea una contraseña personal que solo tú conozcas. La usarás cada vez que entres a GUIAA."
 )
 
-_HAS_UPPER = re.compile(r"[A-ZÁÉÍÓÚÑ]")
-_HAS_LOWER = re.compile(r"[a-záéíóúñ]")
+PASSWORD_EXAMPLE_TEXT = "Ejemplos válidos: Clinica2024, LunaVet08 o mipassword1"
+
+PASSWORD_REQUIREMENTS_TEXT = (
+    "Al menos 8 caracteres, con letras y números. No hace falta un símbolo especial."
+)
+
+_HAS_LETTER = re.compile(r"[A-Za-záéíóúñÁÉÍÓÚÑ]")
 _HAS_DIGIT = re.compile(r"\d")
-_HAS_SPECIAL = re.compile(r"[^A-Za-z0-9áéíóúñÁÉÍÓÚÑ]")
 
 _pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+_CHECK_HELP = {
+    "length": "Usa al menos 8 caracteres; entre más larga, más segura.",
+    "letter": "Incluye letras, por ejemplo el nombre de tu clínica o mascota.",
+    "digit": "Agrega un número, por ejemplo el año o el día de tu cumpleaños.",
+}
 
 
 def password_validation_errors(password: Optional[str]) -> List[str]:
     value = (password or "").strip()
     errors: List[str] = []
     if len(value) < MIN_PASSWORD_LENGTH:
-        errors.append(f"Al menos {MIN_PASSWORD_LENGTH} caracteres")
-    if not _HAS_UPPER.search(value):
-        errors.append("Una letra mayúscula")
-    if not _HAS_LOWER.search(value):
-        errors.append("Una letra minúscula")
+        errors.append(_CHECK_HELP["length"])
+    if not _HAS_LETTER.search(value):
+        errors.append(_CHECK_HELP["letter"])
     if not _HAS_DIGIT.search(value):
-        errors.append("Un número")
-    if not _HAS_SPECIAL.search(value):
-        errors.append("Un carácter especial (!@#$%…)")
+        errors.append(_CHECK_HELP["digit"])
     return errors
 
 
@@ -41,9 +47,7 @@ def validate_password(password: Optional[str]) -> str:
     value = (password or "").strip()
     errors = password_validation_errors(value)
     if errors:
-        raise ValueError(
-            f"La contraseña no cumple los requisitos: {errors[0].lower()}."
-        )
+        raise ValueError(errors[0])
     return value
 
 

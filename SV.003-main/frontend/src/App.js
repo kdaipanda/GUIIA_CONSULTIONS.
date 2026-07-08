@@ -35,7 +35,7 @@ import {
   consumeNewUserDiagnosticoRedirect,
 } from "./lib/guiaaOnboarding";
 import { notifyError, notifySuccess, notifyQuotaError } from "./lib/appToast";
-import { getPasswordValidationError } from "./lib/passwordPolicy";
+import { getPasswordValidationError, PASSWORD_RULES_ATTR } from "./lib/passwordPolicy";
 import { PasswordRequirementsHint } from "./components/PasswordRequirementsHint";
 import {
   trackMetaLead,
@@ -1043,14 +1043,20 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   required
                   minLength={8}
                   autoComplete="new-password"
+                  passwordrules={PASSWORD_RULES_ATTR}
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  placeholder="Crea una contraseña segura"
+                  placeholder="Ej. Clinica2024"
                   className="mt-1.5 h-11 min-h-11 bg-background"
+                  aria-describedby="reg-password-hint"
                 />
-                <PasswordRequirementsHint password={formData.password} className="mt-2" />
+                <PasswordRequirementsHint
+                  password={formData.password}
+                  className="mt-2"
+                  id="reg-password-hint"
+                />
               </div>
               <div className="form-group">
                 <Label htmlFor="reg-password-confirm">Confirmar contraseña *</Label>

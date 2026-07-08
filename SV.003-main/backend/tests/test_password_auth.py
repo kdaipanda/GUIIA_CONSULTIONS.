@@ -15,29 +15,23 @@ from password_auth import (
 
 
 def test_validate_password_min_length():
-    with pytest.raises(ValueError, match="requisitos"):
-        validate_password("abc")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="8 caracteres"):
+        validate_password("abc1")
+    assert validate_password("clinica1") == "clinica1"
+
+
+def test_validate_password_requires_letter_and_digit():
+    assert validate_password("Clinica2024") == "Clinica2024"
+    with pytest.raises(ValueError, match="letras"):
         validate_password("12345678")
+    with pytest.raises(ValueError, match="número"):
+        validate_password("soloclaro")
 
 
-def test_validate_password_requires_mixed_rules():
-    assert validate_password("Segura123!") == "Segura123!"
-    with pytest.raises(ValueError):
-        validate_password("segura123!")
-    with pytest.raises(ValueError):
-        validate_password("SEGURA123!")
-    with pytest.raises(ValueError):
-        validate_password("SeguraSegura!")
-    with pytest.raises(ValueError):
-        validate_password("Segura1234")
-
-
-def test_password_validation_errors_lists_all_missing_rules():
-    errors = password_validation_errors("abc")
-    assert f"Al menos {MIN_PASSWORD_LENGTH} caracteres" in errors
-    assert "Una letra mayúscula" in errors
-    assert "Un número" in errors
+def test_password_validation_errors_lists_missing_rules():
+    errors = password_validation_errors("123")
+    assert any("8 caracteres" in item for item in errors)
+    assert any("letras" in item for item in errors)
 
 
 def test_password_requirements_text_is_documented():
@@ -45,8 +39,8 @@ def test_password_requirements_text_is_documented():
 
 
 def test_hash_and_verify_password():
-    hashed = hash_password("MiClaveSegura123!")
-    assert verify_password("MiClaveSegura123!", hashed)
+    hashed = hash_password("Clinica2024")
+    assert verify_password("Clinica2024", hashed)
     assert not verify_password("otra-clave", hashed)
 
 

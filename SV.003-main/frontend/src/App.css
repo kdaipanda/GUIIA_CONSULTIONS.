@@ -1294,6 +1294,36 @@ h1, h2, h3, h4, h5, h6 {
   gap: 18px;
 }
 
+.password-requirements-panel {
+  display: grid;
+  gap: 6px;
+}
+
+.password-requirements-intro,
+.password-requirements-example {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.password-requirements-example {
+  font-size: 12px;
+}
+
+.password-requirements-heading {
+  margin: 2px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.password-requirements-ready {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #15803d;
+}
+
 .password-requirements-hint {
   list-style: none;
   margin: 0;
