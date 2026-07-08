@@ -1042,6 +1042,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   type="password"
                   required
                   minLength={8}
+                  maxLength={72}
                   autoComplete="new-password"
                   passwordrules={PASSWORD_RULES_ATTR}
                   value={formData.password}
@@ -1056,6 +1057,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   password={formData.password}
                   className="mt-2"
                   id="reg-password-hint"
+                  variant="auth"
                 />
               </div>
               <div className="form-group">
@@ -1065,6 +1067,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   type="password"
                   required
                   minLength={8}
+                  maxLength={72}
                   autoComplete="new-password"
                   value={formData.password_confirm}
                   onChange={(e) =>

@@ -38,6 +38,12 @@ def test_password_requirements_text_is_documented():
     assert str(MIN_PASSWORD_LENGTH) in PASSWORD_REQUIREMENTS_TEXT
 
 
+def test_validate_password_rejects_too_long():
+    too_long = "a1" + ("x" * 80)
+    with pytest.raises(ValueError, match="demasiado larga"):
+        validate_password(too_long)
+
+
 def test_hash_and_verify_password():
     hashed = hash_password("Clinica2024")
     assert verify_password("Clinica2024", hashed)

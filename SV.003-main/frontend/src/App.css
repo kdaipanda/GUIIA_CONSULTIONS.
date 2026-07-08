@@ -1296,56 +1296,143 @@ h1, h2, h3, h4, h5, h6 {
 
 .password-requirements-panel {
   display: grid;
-  gap: 6px;
+  gap: 8px;
+  text-align: left;
 }
 
-.password-requirements-intro,
-.password-requirements-example {
+.password-requirements-intro {
   margin: 0;
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.5;
+  color: #475569;
 }
 
-.password-requirements-example {
-  font-size: 12px;
+.password-requirements-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 12px 14px;
+  display: grid;
+  gap: 8px;
 }
 
 .password-requirements-heading {
-  margin: 2px 0 0;
+  margin: 0;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: #64748b;
 }
 
-.password-requirements-ready {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: #15803d;
-}
-
-.password-requirements-hint {
+.password-requirements-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 4px;
-  font-size: 12px;
+  gap: 6px;
+}
+
+.password-requirements-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
   line-height: 1.35;
+  color: #334155;
 }
 
-.password-requirements-hint li::before {
-  content: "○ ";
-  opacity: 0.55;
+.password-requirements-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: #94a3b8;
 }
 
-.password-requirements-hint--met {
+.password-requirements-item--met {
+  color: #166534;
+}
+
+.password-requirements-item--met .password-requirements-icon {
+  color: #16a34a;
+}
+
+.password-requirements-examples {
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px dashed #cbd5e1;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.password-requirements-examples-label {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.password-requirements-ready {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  font-size: 12px;
+  font-weight: 600;
   color: #15803d;
 }
 
-.password-requirements-hint--met::before {
-  content: "✓ ";
-  opacity: 1;
+.auth-shell .password-requirements-intro {
+  color: rgba(12, 45, 77, 0.72);
+}
+
+.auth-shell .password-requirements-card {
+  border-color: rgba(12, 45, 77, 0.12);
+  background: linear-gradient(180deg, rgba(232, 244, 252, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
+}
+
+.auth-shell .password-requirements-heading {
+  color: rgba(12, 45, 77, 0.55);
+}
+
+.auth-shell .password-requirements-item {
+  color: #0c2d4d;
+}
+
+.auth-shell .password-requirements-examples {
+  border-top-color: rgba(12, 45, 77, 0.12);
+  color: rgba(12, 45, 77, 0.62);
+}
+
+[data-theme="dark"] .password-requirements-card,
+html.dark .password-requirements-card {
+  border-color: var(--border-color);
+  background: var(--clinic-surface-elevated);
+}
+
+[data-theme="dark"] .password-requirements-intro,
+[data-theme="dark"] .password-requirements-item,
+html.dark .password-requirements-intro,
+html.dark .password-requirements-item {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .password-requirements-heading,
+[data-theme="dark"] .password-requirements-examples,
+html.dark .password-requirements-heading,
+html.dark .password-requirements-examples {
+  color: var(--text-secondary);
 }
 
 .auth-card .form-group {

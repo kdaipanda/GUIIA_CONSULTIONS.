@@ -116,6 +116,7 @@ export function AccountPasswordSection() {
             type="password"
             autoComplete="new-password"
             minLength={8}
+            maxLength={72}
             passwordrules={PASSWORD_RULES_ATTR}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -132,6 +133,7 @@ export function AccountPasswordSection() {
             type="password"
             autoComplete="new-password"
             minLength={8}
+            maxLength={72}
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required

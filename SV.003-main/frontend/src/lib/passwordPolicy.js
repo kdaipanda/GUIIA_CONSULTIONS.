@@ -1,4 +1,5 @@
 export const MIN_PASSWORD_LENGTH = 8;
+export const MAX_PASSWORD_BYTES = 72;
 
 export const PASSWORD_HELP_INTRO =
   "Crea una contraseña personal que solo tú conozcas. La usarás cada vez que entres a GUIAA.";
@@ -12,12 +13,22 @@ export const PASSWORD_REQUIREMENTS_TEXT =
 const HAS_LETTER = /[A-Za-záéíóúñÁÉÍÓÚÑ]/;
 const HAS_DIGIT = /\d/;
 
+function passwordByteLength(value) {
+  return new TextEncoder().encode(value).length;
+}
+
 export const PASSWORD_CHECKS = [
   {
     id: "length",
     label: "Mínimo 8 caracteres",
     helpText: "Usa al menos 8 caracteres; entre más larga, más segura.",
     test: (value) => value.length >= MIN_PASSWORD_LENGTH,
+  },
+  {
+    id: "max",
+    label: "Máximo 72 caracteres",
+    helpText: "La contraseña es demasiado larga; usa como máximo 72 caracteres.",
+    test: (value) => !value || passwordByteLength(value) <= MAX_PASSWORD_BYTES,
   },
   {
     id: "letter",
@@ -55,4 +66,4 @@ export function isPasswordValid(password) {
 }
 
 /** Texto corto para el atributo passwordrules del navegador (sin jerga de bits). */
-export const PASSWORD_RULES_ATTR = `minlength: ${MIN_PASSWORD_LENGTH}; required: lower; required: digit;`;
+export const PASSWORD_RULES_ATTR = `minlength: ${MIN_PASSWORD_LENGTH}; maxlength: ${MAX_PASSWORD_BYTES}; required: lower; required: digit;`;

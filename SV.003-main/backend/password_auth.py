@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional
 from passlib.context import CryptContext
 
 MIN_PASSWORD_LENGTH = 8
+MAX_PASSWORD_BYTES = 72  # Límite de bcrypt; evita error críptico de passlib
 
 PASSWORD_HELP_INTRO = (
     "Crea una contraseña personal que solo tú conozcas. La usarás cada vez que entres a GUIAA."
@@ -26,9 +27,14 @@ _pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 _CHECK_HELP = {
     "length": "Usa al menos 8 caracteres; entre más larga, más segura.",
+    "too_long": "La contraseña es demasiado larga; usa como máximo 72 caracteres.",
     "letter": "Incluye letras, por ejemplo el nombre de tu clínica o mascota.",
     "digit": "Agrega un número, por ejemplo el año o el día de tu cumpleaños.",
 }
+
+
+def _password_byte_length(value: str) -> int:
+    return len(value.encode("utf-8"))
 
 
 def password_validation_errors(password: Optional[str]) -> List[str]:
@@ -36,6 +42,8 @@ def password_validation_errors(password: Optional[str]) -> List[str]:
     errors: List[str] = []
     if len(value) < MIN_PASSWORD_LENGTH:
         errors.append(_CHECK_HELP["length"])
+    if _password_byte_length(value) > MAX_PASSWORD_BYTES:
+        errors.append(_CHECK_HELP["too_long"])
     if not _HAS_LETTER.search(value):
         errors.append(_CHECK_HELP["letter"])
     if not _HAS_DIGIT.search(value):
