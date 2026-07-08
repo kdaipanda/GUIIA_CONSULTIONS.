@@ -407,7 +407,15 @@ async def send_llm_message(content: List[Dict[str, Any]]) -> str:
     """
     Helper para enviar mensajes al API de Anthropic.
     SOLO usa el system prompt desde instrucciones_veterinarias.txt (sin otros prompts).
+    Con Headroom habilitado: cache del system prompt + compresión conservadora del usuario.
     """
+    from headroom_llm import (
+        build_system_with_cache,
+        get_headroom_mode,
+        get_llm_client,
+        is_headroom_enabled,
+        optimize_consultation_messages,
+    )
     if not ANTHROPIC_API_KEY:
         # Verificar si está en el sistema pero no se cargó
         system_key = os.getenv("ANTHROPIC_API_KEY", "")
@@ -451,20 +459,37 @@ async def send_llm_message(content: List[Dict[str, Any]]) -> str:
             "Este archivo es obligatorio para generar análisis con Claude."
         )
     system_prompt = file_instructions
+    system_param = build_system_with_cache(system_prompt)
+    messages_payload = [{"role": "user", "content": content}]
+    if is_headroom_enabled():
+        messages_payload, _hr_stats = optimize_consultation_messages(
+            messages_payload,
+            ANTHROPIC_MODEL,
+        )
+        if _hr_stats.get("tokens_saved"):
+            print(
+                f"[Headroom] consulta: {_hr_stats['tokens_before']} -> "
+                f"{_hr_stats['tokens_after']} tokens "
+                f"(ahorro {_hr_stats['tokens_saved']})"
+            )
+
+    llm_client = get_llm_client(anthropic_client)
 
     def _call_claude() -> str:
-        response = anthropic_client.messages.create(
-            model=ANTHROPIC_MODEL,
-            max_tokens=ANTHROPIC_MAX_TOKENS,
+        create_kwargs: Dict[str, Any] = {
+            "model": ANTHROPIC_MODEL,
+            "max_tokens": ANTHROPIC_MAX_TOKENS,
             **_anthropic_sampling_params(),
-            system=system_prompt,
-            messages=[
-                {
-                    "role": "user",
-                    "content": content,
-                }
-            ],
-        )
+            "system": system_param,
+            "messages": messages_payload,
+        }
+        if is_headroom_enabled() and hasattr(llm_client, "messages"):
+            response = llm_client.messages.create(
+                **create_kwargs,
+                headroom_mode=get_headroom_mode(),
+            )
+        else:
+            response = llm_client.messages.create(**create_kwargs)
 
         text_blocks = [
             block.text
@@ -1062,7 +1087,17 @@ async def health_check():
         "stripe_secret_configured": bool(STRIPE_API_KEY),
         "stripe_publishable_configured": bool(STRIPE_PUBLISHABLE_KEY),
         "meta_capi_enabled": meta_capi.is_meta_capi_enabled(),
+        "headroom": _headroom_health_status(),
     }
+
+
+def _headroom_health_status() -> Dict[str, Any]:
+    try:
+        from headroom_llm import get_status
+
+        return get_status()
+    except ImportError:
+        return {"available": False, "enabled": False, "mode": "off"}
 
 
 @app.on_event("startup")
