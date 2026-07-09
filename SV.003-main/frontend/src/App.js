@@ -985,20 +985,26 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
       }
 
       const vetData = await response.json();
-      persistAuthFromResponse(vetData);
-      trackMetaCompleteRegistration(vetData?.id);
+      const authProfile = persistAuthFromResponse(vetData);
+      const vetId = vetData?.id || vetData?.veterinarian_id || authProfile?.id;
+      trackMetaCompleteRegistration(vetId);
       // Redirigir a flujo obligatorio de cédula (upload + verificación)
       setCedulaFlow?.({
         source: "register",
-        veterinarian_id: vetData?.id,
-        email: formData.email,
-        cedula_profesional: formData.cedula_profesional,
-        expected_nombre: formData.nombre,
-        needs_upload: false,
+        veterinarian_id: vetId,
+        email: vetData?.email || formData.email,
+        cedula_profesional:
+          vetData?.cedula_profesional || formData.cedula_profesional,
+        expected_nombre: vetData?.expected_nombre || formData.nombre,
+        needs_upload: vetData?.needs_upload ?? true,
+        verification_status: vetData?.verification_status,
+        message: vetData?.message,
+        cedula_skip_count: vetData?.cedula_skip_count,
+        can_skip: vetData?.can_skip,
         file: cedulaFile,
         login_password: password,
       });
-      markNewUserDiagnosticoRedirect(vetData?.id);
+      markNewUserDiagnosticoRedirect(vetId);
       setView("cedula-verification");
     } catch (err) {
       notifyError(err.message);
