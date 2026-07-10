@@ -338,6 +338,24 @@ def list_medical_images(user_id: str, limit: int = 20) -> Tuple[List[Dict[str, A
         return ([], str(exc))
 
 
+def list_medical_images_for_consultation(
+    consultation_id: str,
+) -> Tuple[List[Dict[str, Any]], Optional[str]]:
+    """Interpretaciones de laboratorio vinculadas a una consulta CDS."""
+    client = get_supabase_client()
+    try:
+        resp = (
+            client.table("medical_images")
+            .select("*")
+            .eq("consultation_id", consultation_id)
+            .order("created_at", desc=True)
+            .execute()
+        )
+        return (resp.data or [], None)
+    except Exception as exc:  # noqa: BLE001
+        return ([], str(exc))
+
+
 def upload_bytes_to_storage(bucket: str, path: str, data: bytes, content_type: str) -> Tuple[Optional[str], Optional[str]]:
     """
     Sube bytes al bucket y devuelve public URL.

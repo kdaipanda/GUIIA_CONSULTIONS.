@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { buildClinicalTimeline, getLabStudyLabel } from "./clinicalTimeline";
 import {
   drawPdfBrandHeader,
   embedGuiaaLogo,
@@ -488,9 +489,6 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
   const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const writer = new PdfWriter(pdfDoc, { regular, bold });
   const logoImage = await embedGuiaaLogo(pdfDoc);
-  const sorted = [...(consultations || [])].sort(
-    (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0),
-  );
 
   writer.drawBrandHeader(logoImage);
   writer.drawLine("Historia clínica de la mascota", { size: 14, font: "bold" });
@@ -500,76 +498,83 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
   if (patient.clients?.name) {
     writer.drawLine(`Propietario: ${patient.clients.name}`, { size: 11 });
   }
-  writer.drawLine(`Consultas registradas: ${sorted.length}`, {
+  writer.drawLine(`Consultas CDS: ${(consultations || []).length}`, {
     size: 10.5,
     color: rgb(0.35, 0.42, 0.52),
   });
   if (medicalImages.length) {
-    writer.drawLine(`Estudios / interpretaciones: ${medicalImages.length}`, {
+    writer.drawLine(`Interpretaciones de laboratorio: ${medicalImages.length}`, {
       size: 10.5,
       color: rgb(0.35, 0.42, 0.52),
     });
   }
 
   writer.y -= 8;
-  writer.drawSectionTitle("Timeline de consultas CDS");
+  writer.drawSectionTitle("Historial clínico unificado");
 
-  if (!sorted.length) {
-    writer.drawLine("No hay consultas vinculadas a esta mascota.", {
+  const timeline = buildClinicalTimeline(consultations, medicalImages);
+
+  if (!timeline.length) {
+    writer.drawLine("No hay registros clínicos vinculados a esta mascota.", {
       size: 10.5,
       color: rgb(0.45, 0.5, 0.58),
     });
   } else {
-    sorted.forEach((consultation, index) => {
-      const folio = formatConsultationId(consultation);
-      const statusLabel = STATUS_LABELS[consultation.status] || consultation.status || "Registrada";
-      const motivo =
-        consultation.detalle_paciente ||
-        consultation.motivo_consulta ||
-        consultation.form_data?.motivo_consulta ||
-        "Sin motivo registrado";
-      const analysisPreview = cleanAnalysisText(consultation.analysis).slice(0, 280);
+    timeline.forEach((item, index) => {
+      if (item.kind === "consultation") {
+        const consultation = item.consultation;
+        const folio = formatConsultationId(consultation);
+        const statusLabel = STATUS_LABELS[consultation.status] || consultation.status || "Registrada";
+        const motivo =
+          consultation.detalle_paciente ||
+          consultation.motivo_consulta ||
+          consultation.form_data?.motivo_consulta ||
+          "Sin motivo registrado";
+        const analysisPreview = cleanAnalysisText(consultation.analysis).slice(0, 280);
 
-      writer.drawLine(`${index + 1}. ${folio} — ${formatDate(consultation.created_at)}`, {
-        size: 11,
-        font: "bold",
-      });
-      writer.drawLine(`Estado: ${statusLabel}`, { size: 10.5 });
-      writer.drawLine(`Motivo: ${toPdfSafeText(motivo).slice(0, 200)}`, {
-        size: 10.5,
-        lineHeight: 13,
-      });
-      if (analysisPreview) {
-        writer.drawLine(`Análisis: ${toPdfSafeText(analysisPreview)}${consultation.analysis?.length > 280 ? "…" : ""}`, {
-          size: 10,
-          lineHeight: 12.5,
-          color: rgb(0.35, 0.42, 0.52),
+        writer.drawLine(
+          `${index + 1}. [Consulta CDS] ${folio} — ${formatDate(consultation.created_at)}`,
+          { size: 11, font: "bold" },
+        );
+        writer.drawLine(`Estado: ${statusLabel}`, { size: 10.5 });
+        writer.drawLine(`Motivo: ${toPdfSafeText(motivo).slice(0, 200)}`, {
+          size: 10.5,
+          lineHeight: 13,
         });
+        if (analysisPreview) {
+          writer.drawLine(
+            `Diagnóstico / análisis: ${toPdfSafeText(analysisPreview)}${consultation.analysis?.length > 280 ? "…" : ""}`,
+            { size: 10, lineHeight: 12.5, color: rgb(0.35, 0.42, 0.52) },
+          );
+        }
+        item.linkedStudies.forEach((study) => {
+          writer.drawLine(
+            `  ↳ ${getLabStudyLabel(study)} — ${formatDate(study.created_at)}`,
+            { size: 10, font: "bold", color: rgb(0.28, 0.38, 0.52) },
+          );
+          if (study.analysis) {
+            writer.drawLine(`    ${toPdfSafeText(String(study.analysis).slice(0, 220))}`, {
+              size: 9.5,
+              lineHeight: 12,
+              color: rgb(0.35, 0.42, 0.52),
+            });
+          }
+        });
+      } else {
+        const study = item.study;
+        writer.drawLine(
+          `${index + 1}. [Laboratorio] ${getLabStudyLabel(study)} — ${formatDate(study.created_at)}`,
+          { size: 11, font: "bold" },
+        );
+        if (study.analysis) {
+          writer.drawLine(toPdfSafeText(String(study.analysis).slice(0, 240)), {
+            size: 10,
+            lineHeight: 12.5,
+            color: rgb(0.35, 0.42, 0.52),
+          });
+        }
       }
       writer.y -= 6;
-    });
-  }
-
-  if (medicalImages.length) {
-    writer.y -= 4;
-    writer.drawSectionTitle("Estudios e interpretaciones");
-    const sortedImages = [...medicalImages].sort(
-      (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0),
-    );
-    sortedImages.forEach((img, index) => {
-      const typeLabel = img.image_type || "Estudio";
-      writer.drawLine(`${index + 1}. ${typeLabel} — ${formatDate(img.created_at)}`, {
-        size: 10.5,
-        font: "bold",
-      });
-      if (img.analysis) {
-        writer.drawLine(toPdfSafeText(String(img.analysis).slice(0, 240)), {
-          size: 10,
-          lineHeight: 12.5,
-          color: rgb(0.35, 0.42, 0.52),
-        });
-      }
-      writer.y -= 4;
     });
   }
 

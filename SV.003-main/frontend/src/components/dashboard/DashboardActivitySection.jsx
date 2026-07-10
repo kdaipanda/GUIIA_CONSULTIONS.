@@ -24,7 +24,7 @@ import "./dashboardActivity.css";
 const SHORTCUTS = [
   { key: "N", label: "Nueva consulta", icon: Plus, view: "new-consultation" },
   { key: "E", label: "Manejo Experto", icon: Brain, view: "expert", premium: true },
-  { key: "H", label: "Historial", icon: ClipboardList, view: "consultation-history" },
+  { key: "H", label: "Historial clínico", icon: ClipboardList, view: "consultation-history" },
   { key: "M", label: "Membresía", icon: Crown, view: "membership" },
   { key: "P", label: "Perfil MVZ", icon: User, view: "profile" },
 ];

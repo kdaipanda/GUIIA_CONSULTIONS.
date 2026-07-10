@@ -303,6 +303,7 @@ def _serialize_consultation_row(row: dict) -> dict:
         "laboratorio_estudios": payload.get("laboratorio_estudios"),
         "ambiente_manejo": payload.get("ambiente_manejo"),
         "notas_adicionales": payload.get("notas_adicionales"),
+        "medical_images": payload.get("medical_images") or [],
     }
 
 

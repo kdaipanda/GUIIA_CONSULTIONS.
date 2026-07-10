@@ -1,18 +1,24 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ClipboardList, Plus, Search, Stethoscope, X } from "lucide-react";
+import { ClipboardList, FlaskConical, Plus, Search, Stethoscope, X } from "lucide-react";
 import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
 import { getAuthHeaders } from "../lib/authHeaders";
 import { downloadConsultationPdf } from "../lib/consultationPdf";
 import { getConsultationSearchHaystack } from "../lib/consultationDisplay";
+import {
+  buildClinicalTimeline,
+  countStandaloneLabStudies,
+  getLabStudySearchHaystack,
+} from "../lib/clinicalTimeline";
 import { Button } from "../components/ui/button";
 import { ConsultationHistoryCard } from "../components/consultation/ConsultationHistoryCard";
 import { ConsultationDetailPanel } from "../components/consultation/ConsultationDetailPanel";
+import { LabStudyHistoryCard } from "../components/clinical/LabStudyHistoryCard";
 import { notifyError } from "../lib/appToast";
 import "./consultationHistoryPage.css";
 
 const STATUS_FILTERS = [
-  { id: "all", label: "Todas" },
+  { id: "all", label: "Todo" },
   { id: "completed", label: "Completadas" },
   { id: "in_progress", label: "En progreso" },
   { id: "draft", label: "Borradores" },
@@ -36,6 +42,7 @@ function HistorySkeleton() {
 export function ConsultationHistoryPage({ setView, openConsultation }) {
   const { veterinarian } = useVet();
   const [consultations, setConsultations] = useState([]);
+  const [medicalImages, setMedicalImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedConsultation, setSelectedConsultation] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,19 +50,30 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
   const [pdfLoadingId, setPdfLoadingId] = useState(null);
   const [pdfError, setPdfError] = useState("");
 
-  const loadConsultations = async () => {
+  const loadHistory = async () => {
     if (!veterinarian?.id) return;
     setLoading(true);
     try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/consultations/${veterinarian.id}/history`,
-        { headers: getAuthHeaders(veterinarian.id) },
-      );
-      if (response.ok) {
-        const data = await response.json();
+      const headers = getAuthHeaders(veterinarian.id);
+      const [consultationsRes, imagesRes] = await Promise.all([
+        fetch(`${BACKEND_URL}/api/consultations/${veterinarian.id}/history?limit=100`, { headers }),
+        fetch(`${BACKEND_URL}/api/medical-images/history?limit=100`, { headers }),
+      ]);
+
+      if (consultationsRes.ok) {
+        const data = await consultationsRes.json();
         setConsultations(data.consultations || []);
       } else {
-        notifyError("No se pudo cargar el historial. Intenta de nuevo.");
+        notifyError("No se pudo cargar el historial clínico. Intenta de nuevo.");
+      }
+
+      if (imagesRes.ok) {
+        const data = await imagesRes.json();
+        setMedicalImages(data.images || []);
+      } else if (consultationsRes.ok) {
+        setMedicalImages([]);
+      } else {
+        notifyError("No se pudo cargar el historial clínico completo.");
       }
     } catch (error) {
       notifyError("No se pudo cargar el historial. Revisa tu conexión.");
@@ -65,27 +83,46 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
   };
 
   useEffect(() => {
-    loadConsultations();
+    loadHistory();
   }, [veterinarian?.id]);
 
+  const timeline = useMemo(
+    () => buildClinicalTimeline(consultations, medicalImages),
+    [consultations, medicalImages],
+  );
+
   const stats = useMemo(() => {
-    const counts = { all: consultations.length, completed: 0, in_progress: 0, draft: 0 };
+    const counts = {
+      all: timeline.length,
+      completed: 0,
+      in_progress: 0,
+      draft: 0,
+      lab_studies: medicalImages.length,
+    };
     consultations.forEach((c) => {
       const status = c.status || "completed";
       if (counts[status] != null) counts[status] += 1;
     });
     return counts;
-  }, [consultations]);
+  }, [timeline.length, consultations, medicalImages.length]);
 
-  const filteredConsultations = useMemo(() => {
+  const filteredTimeline = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return consultations.filter((consultation) => {
-      const status = consultation.status || "completed";
-      if (statusFilter !== "all" && status !== statusFilter) return false;
+    return timeline.filter((item) => {
+      if (item.kind === "consultation") {
+        const status = item.consultation.status || "completed";
+        if (statusFilter !== "all" && status !== statusFilter) return false;
+        if (!query) return true;
+        const consultationHaystack = getConsultationSearchHaystack(item.consultation);
+        const labHaystack = item.linkedStudies.map((study) => getLabStudySearchHaystack(study)).join(" ");
+        return `${consultationHaystack} ${labHaystack}`.includes(query);
+      }
+
+      if (statusFilter !== "all") return false;
       if (!query) return true;
-      return getConsultationSearchHaystack(consultation).includes(query);
+      return getLabStudySearchHaystack(item.study).includes(query);
     });
-  }, [consultations, searchQuery, statusFilter]);
+  }, [timeline, searchQuery, statusFilter]);
 
   const handleDownloadPdf = async (consultationId) => {
     setPdfError("");
@@ -119,6 +156,8 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
     }
   };
 
+  const standaloneLabCount = countStandaloneLabStudies(medicalImages, consultations);
+
   if (selectedConsultation) {
     return (
       <ConsultationDetailPanel
@@ -136,9 +175,12 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
       <div className="container">
         <header className="history-page-header">
           <div>
-            <p className="history-page-eyebrow">Expediente CDS</p>
-            <h1>Historial de consultas</h1>
-            <p>Todas tus consultas veterinarias con folio, estado y exportación PDF.</p>
+            <p className="history-page-eyebrow">Expediente clínico</p>
+            <h1>Historial clínico</h1>
+            <p>
+              Consultas CDS e interpretaciones de laboratorio en un solo lugar, con folio, estado y
+              exportación PDF.
+            </p>
           </div>
           <Button type="button" onClick={() => setView("new-consultation")}>
             <Plus size={16} aria-hidden />
@@ -146,7 +188,7 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
           </Button>
         </header>
 
-        <div className="history-stats-row" role="group" aria-label="Resumen por estado">
+        <div className="history-stats-row" role="group" aria-label="Resumen del historial">
           {STATUS_FILTERS.map(({ id, label }) => (
             <button
               key={id}
@@ -159,6 +201,10 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
               <span className="history-stat-label">{label}</span>
             </button>
           ))}
+          <div className="history-stat-pill history-stat-pill--info" aria-label="Interpretaciones de laboratorio">
+            <span className="history-stat-value">{stats.lab_studies}</span>
+            <span className="history-stat-label">Laboratorio</span>
+          </div>
         </div>
 
         <div className="history-toolbar">
@@ -166,11 +212,11 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
             <Search size={18} className="history-search-icon" aria-hidden />
             <input
               type="search"
-              placeholder="Buscar por folio, mascota, propietario o raza…"
+              placeholder="Buscar por folio, mascota, propietario, raza o estudio…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="history-search-input"
-              aria-label="Buscar consultas"
+              aria-label="Buscar en historial clínico"
             />
             {searchQuery && (
               <button
@@ -208,24 +254,40 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
 
         {loading ? (
           <HistorySkeleton />
-        ) : filteredConsultations.length > 0 ? (
+        ) : filteredTimeline.length > 0 ? (
           <>
             <p className="history-results-count">
-              {filteredConsultations.length} consulta
-              {filteredConsultations.length !== 1 ? "s" : ""}
-              {searchQuery || statusFilter !== "all" ? " encontradas" : " en total"}
+              {filteredTimeline.length} registro
+              {filteredTimeline.length !== 1 ? "s" : ""}
+              {searchQuery || statusFilter !== "all" ? " encontrados" : " en total"}
+              {standaloneLabCount > 0 && statusFilter === "all" && (
+                <span className="history-results-subcount">
+                  {" "}
+                  · {standaloneLabCount} interpretación{standaloneLabCount !== 1 ? "es" : ""} de
+                  laboratorio
+                </span>
+              )}
             </p>
             <div className="history-grid">
-              {filteredConsultations.map((consultation) => (
-                <ConsultationHistoryCard
-                  key={consultation.id}
-                  consultation={consultation}
-                  pdfLoadingId={pdfLoadingId}
-                  onView={handleViewConsultation}
-                  onDownloadPdf={handleDownloadPdf}
-                  onContinue={openConsultation}
-                />
-              ))}
+              {filteredTimeline.map((item) => {
+                if (item.kind === "consultation") {
+                  const consultation = {
+                    ...item.consultation,
+                    medical_images: item.linkedStudies,
+                  };
+                  return (
+                    <ConsultationHistoryCard
+                      key={`consultation-${item.id}`}
+                      consultation={consultation}
+                      pdfLoadingId={pdfLoadingId}
+                      onView={handleViewConsultation}
+                      onDownloadPdf={handleDownloadPdf}
+                      onContinue={openConsultation}
+                    />
+                  );
+                }
+                return <LabStudyHistoryCard key={`lab-${item.id}`} study={item.study} />;
+              })}
             </div>
           </>
         ) : (
@@ -239,19 +301,25 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
             </div>
             <h3>
               {searchQuery || statusFilter !== "all"
-                ? "No se encontraron consultas"
-                : "Sin consultas aún"}
+                ? "No se encontraron registros"
+                : "Sin historial clínico aún"}
             </h3>
             <p>
               {searchQuery || statusFilter !== "all"
                 ? "Prueba otro término o cambia el filtro de estado."
-                : "Inicia tu primera consulta CDS con anamnesis estructurada."}
+                : "Inicia una consulta CDS o interpreta un estudio de laboratorio."}
             </p>
             {!searchQuery && statusFilter === "all" && (
-              <Button type="button" variant="guiaaPrimary" onClick={() => setView("new-consultation")}>
-                <Stethoscope size={16} aria-hidden />
-                Nueva consulta
-              </Button>
+              <div className="history-empty-actions">
+                <Button type="button" variant="guiaaPrimary" onClick={() => setView("new-consultation")}>
+                  <Stethoscope size={16} aria-hidden />
+                  Nueva consulta
+                </Button>
+                <Button type="button" variant="guiaaSoft" onClick={() => setView("medical-images")}>
+                  <FlaskConical size={16} aria-hidden />
+                  Interpretar estudio
+                </Button>
+              </div>
             )}
           </div>
         )}

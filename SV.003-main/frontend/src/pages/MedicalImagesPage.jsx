@@ -648,6 +648,17 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
         ) : (
           <div className="interpretation-history medical-lab-history">
             <h2>Historial de interpretaciones</h2>
+            <p className="medical-lab-history-hint">
+              También puedes ver consultas CDS y laboratorio juntos en{" "}
+              <button
+                type="button"
+                className="medical-lab-history-link"
+                onClick={() => setView("consultation-history")}
+              >
+                Historial clínico
+              </button>
+              .
+            </p>
             {history.length > 0 ? (
               <div className="history-grid">
                 {history.map((item) => (

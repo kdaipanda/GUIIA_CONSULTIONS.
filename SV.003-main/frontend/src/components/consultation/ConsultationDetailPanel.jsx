@@ -1,5 +1,5 @@
 import React from "react";
-import { FileDown } from "lucide-react";
+import { FileDown, FlaskConical } from "lucide-react";
 import { Button } from "../ui/button";
 import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
 import {
@@ -9,6 +9,7 @@ import {
   getConsultationSpeciesLabel,
   getConsultationStatusLabel,
 } from "../../lib/consultationDisplay";
+import { getLabStudyLabel } from "../../lib/clinicalTimeline";
 
 export function ConsultationDetailPanel({
   consultation,
@@ -21,6 +22,7 @@ export function ConsultationDetailPanel({
   const speciesIcon = getConsultationSpeciesIcon(consultation);
   const statusClass = consultation.status || "draft";
   const ratingValue = consultation.rating || 0;
+  const linkedStudies = consultation.linked_studies || [];
 
   return (
     <div className="consultation-detail-page history-detail-guiaa">
@@ -125,6 +127,32 @@ export function ConsultationDetailPanel({
                   {cleanClinicalDisplayText(consultation.analysis || "")}
                 </pre>
               </div>
+            </div>
+          )}
+
+          {linkedStudies.length > 0 && (
+            <div className="clinical-section clinical-section-lab">
+              <div className="clinical-section-header">
+                <span className="clinical-section-icon">
+                  <FlaskConical size={20} aria-hidden />
+                </span>
+                <h2>Interpretaciones de laboratorio vinculadas</h2>
+              </div>
+              <ul className="clinical-linked-studies">
+                {linkedStudies.map((study) => (
+                  <li key={study.id} className="clinical-linked-study">
+                    <div className="clinical-linked-study-head">
+                      <strong>{getLabStudyLabel(study)}</strong>
+                      <span>{formatConsultationDateShort(study.created_at)}</span>
+                    </div>
+                    {study.analysis && (
+                      <pre className="clinical-analysis-text clinical-linked-study-text">
+                        {cleanClinicalDisplayText(study.analysis)}
+                      </pre>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 

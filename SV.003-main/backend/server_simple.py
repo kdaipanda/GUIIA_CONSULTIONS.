@@ -91,6 +91,7 @@ from supabase_client import (
     insert_payment_transaction,
     list_consultations,
     list_medical_images,
+    list_medical_images_for_consultation,
     list_profiles,
     update_consultation,
     update_payment_transaction,
@@ -2113,6 +2114,7 @@ def _serialize_consultation(row: Dict[str, Any]) -> Dict[str, Any]:
         "laboratorio_estudios": payload.get("laboratorio_estudios"),
         "ambiente_manejo": payload.get("ambiente_manejo"),
         "notas_adicionales": payload.get("notas_adicionales"),
+        "medical_images": payload.get("medical_images") or [],
     }
     return result
 
@@ -2512,7 +2514,12 @@ async def get_consultation(
 
     vet_id = _require_vet_id(x_veterinarian_id)
     cons = _require_consultation_owned(consultation_id, vet_id)
-    return _serialize_consultation(cons)
+    result = _serialize_consultation(cons)
+    linked_studies, err_studies = list_medical_images_for_consultation(consultation_id)
+    if err_studies:
+        print(f"[WARN] linked_studies consultation={consultation_id}: {err_studies}")
+    result["linked_studies"] = linked_studies or []
+    return result
 
 
 @app.put("/api/consultations/{consultation_id}/observations")

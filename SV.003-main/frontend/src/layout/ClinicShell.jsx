@@ -68,7 +68,7 @@ const BASE_NAV_ITEMS = [
     feature: MEMBERSHIP_FEATURES.medicalImages,
   },
   { to: "/app/configuracion", label: "Configuración", icon: Settings, view: "settings" },
-  { to: "/app/historial", label: "Historial", icon: ClipboardList, view: "consultation-history" },
+  { to: "/app/historial", label: "Historial clínico", icon: ClipboardList, view: "consultation-history" },
   { to: "/app/membresia", label: "Membresía", icon: Crown, view: "membership" },
   { to: "/app/perfil", label: "Perfil", icon: User, view: "profile" },
 ];

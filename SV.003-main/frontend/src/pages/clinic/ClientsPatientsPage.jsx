@@ -5,7 +5,6 @@ import {
   Trash2,
   Stethoscope,
   FileDown,
-  ExternalLink,
   PawPrint,
   Zap,
   Users,
@@ -20,11 +19,6 @@ import {
   ClinicStatPill,
   clinicDialogClass,
 } from "../../components/clinic/ClinicPageUi";
-import {
-  formatConsultationFolio,
-  formatConsultationDateShort,
-  getConsultationStatusLabel,
-} from "../../lib/consultationDisplay";
 import { useVet } from "../../context/VetContext";
 import {
   fetchPatients,
@@ -37,7 +31,8 @@ import {
   updateClient,
   deleteClient,
 } from "../../lib/clinicApi";
-import { downloadConsultationPdf, downloadPatientHistoryPdf, cleanClinicalDisplayText } from "../../lib/consultationPdf";
+import { downloadConsultationPdf, downloadPatientHistoryPdf } from "../../lib/consultationPdf";
+import { ClinicalTimelineList } from "../../components/clinical/ClinicalTimelineList";
 import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -76,22 +71,6 @@ const EMPTY_PATIENT = {
   color: "",
   weight_kg: "",
   notes: "",
-};
-
-function consultationMotivo(consultation) {
-  return (
-    consultation?.motivo_consulta ||
-    consultation?.detalle_paciente ||
-    consultation?.form_data?.motivo_consulta ||
-    "Sin motivo registrado"
-  );
-}
-
-const IMAGE_TYPE_LABELS = {
-  blood_test: "Análisis de sangre",
-  urinalysis: "Urianálisis",
-  xray: "Radiografía",
-  general: "Estudio general",
 };
 
 function matchesQuery(value, q) {
@@ -699,8 +678,11 @@ export function ClientsPatientsPage({
                 <p><strong>Dueño:</strong> {detail.patient.clients?.name}</p>
                 <p><strong>Especie:</strong> {detail.patient.species || "—"}</p>
                 <p><strong>Raza:</strong> {detail.patient.breed || "—"}</p>
-                <p><strong>Consultas CDS:</strong> {detail.consultations?.length || 0}</p>
-                <p><strong>Estudios:</strong> {detail.medical_images?.length || 0}</p>
+                <p><strong>Registros clínicos:</strong> {(detail.consultations?.length || 0) + (detail.medical_images?.length || 0)}</p>
+                <p className="clinic-muted clinic-timeline-summary">
+                  {detail.consultations?.length || 0} consulta{(detail.consultations?.length || 0) !== 1 ? "s" : ""} CDS ·{" "}
+                  {detail.medical_images?.length || 0} interpretación{(detail.medical_images?.length || 0) !== 1 ? "es" : ""} de laboratorio
+                </p>
               </div>
 
               <div className="clinic-detail-actions">
@@ -748,86 +730,20 @@ export function ClientsPatientsPage({
                 )}
               </div>
 
-              <div className="clinic-timeline">
-                <h3>Historia clínica</h3>
-                {!detail.consultations?.length ? (
-                  <p className="clinic-muted">Aún no hay consultas vinculadas a esta mascota.</p>
-                ) : (
-                  <ul className="clinic-timeline-list">
-                    {detail.consultations.map((consultation) => (
-                      <li key={consultation.id} className="clinic-timeline-item">
-                        <div className="clinic-timeline-head">
-                          <span className="clinic-timeline-folio">{formatConsultationFolio(consultation)}</span>
-                          <span className={`clinic-timeline-status status-${consultation.status || "draft"}`}>
-                            {getConsultationStatusLabel(consultation.status)}
-                          </span>
-                        </div>
-                        <p className="clinic-timeline-date">{formatConsultationDateShort(consultation.created_at)}</p>
-                        <p className="clinic-timeline-motivo">{consultationMotivo(consultation)}</p>
-                        {consultation.analysis && (
-                          <p className="clinic-timeline-analysis">
-                            {(() => {
-                              const text = cleanClinicalDisplayText(consultation.analysis);
-                              return text.length > 180 ? `${text.slice(0, 180)}…` : text;
-                            })()}
-                          </p>
-                        )}
-                        <div className="clinic-timeline-actions">
-                          {onViewConsultation && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setDetailOpen(false);
-                                onViewConsultation(consultation.id);
-                              }}
-                            >
-                              <ExternalLink size={14} className="mr-1" /> Ver consulta
-                            </Button>
-                          )}
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            disabled={pdfLoadingId === consultation.id}
-                            onClick={() => handleDownloadConsultationPdf(consultation)}
-                          >
-                            <FileDown size={14} className="mr-1" />
-                            {pdfLoadingId === consultation.id ? "Generando..." : "PDF"}
-                          </Button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+              <div className="clinic-timeline clinic-timeline-unified">
+                <h3>Historial clínico</h3>
+                <p className="clinic-muted clinic-timeline-hint">
+                  Consultas CDS e interpretaciones de laboratorio en orden cronológico.
+                </p>
+                <ClinicalTimelineList
+                  consultations={detail.consultations || []}
+                  medicalImages={detail.medical_images || []}
+                  onViewConsultation={onViewConsultation}
+                  onDownloadConsultationPdf={handleDownloadConsultationPdf}
+                  pdfLoadingId={pdfLoadingId}
+                  onCloseBeforeNavigate={() => setDetailOpen(false)}
+                />
               </div>
-
-              {(detail.medical_images?.length || 0) > 0 && (
-                <div className="clinic-timeline clinic-timeline-studies">
-                  <h3>Estudios e interpretaciones</h3>
-                  <ul className="clinic-timeline-list">
-                    {detail.medical_images.map((img) => (
-                      <li key={img.id} className="clinic-timeline-item clinic-timeline-item-study">
-                        <div className="clinic-timeline-head">
-                          <span className="clinic-timeline-folio">
-                            {IMAGE_TYPE_LABELS[img.image_type] || img.image_type || "Estudio"}
-                          </span>
-                        </div>
-                        <p className="clinic-timeline-date">{formatConsultationDateShort(img.created_at)}</p>
-                        {img.analysis && (
-                          <p className="clinic-timeline-analysis">
-                            {(() => {
-                              const text = cleanClinicalDisplayText(img.analysis);
-                              return text.length > 200 ? `${text.slice(0, 200)}…` : text;
-                            })()}
-                          </p>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
           )}
         </DialogContent>

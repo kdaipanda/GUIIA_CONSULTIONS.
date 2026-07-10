@@ -2,26 +2,8 @@ import React, { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { fetchPatient } from "../../lib/clinicApi";
 import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
-
-const IMAGE_TYPE_LABELS = {
-  blood_test: "Análisis de sangre",
-  urinalysis: "Urianálisis",
-  xray: "Radiografía",
-  general: "Estudio general",
-};
-
-function formatDate(value) {
-  if (!value) return "—";
-  try {
-    return new Date(value).toLocaleDateString("es-MX", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return String(value);
-  }
-}
+import { buildClinicalTimeline, getLabStudyLabel } from "../../lib/clinicalTimeline";
+import { formatConsultationDateShort } from "../../lib/consultationDisplay";
 
 export function PatientAntecedents({ veterinarianId, patientId, patient: initialPatient }) {
   const [open, setOpen] = useState(true);
@@ -43,15 +25,14 @@ export function PatientAntecedents({ veterinarianId, patientId, patient: initial
   const patient = data?.patient || initialPatient;
   const consultations = data?.consultations || [];
   const medicalImages = data?.medical_images || [];
-  const lastConsultation = consultations[0];
+  const recentTimeline = buildClinicalTimeline(consultations, medicalImages).slice(0, 3);
 
   if (!patientId || !patient) return null;
 
   const hasContent =
     patient.notes ||
     patient.microchip ||
-    lastConsultation ||
-    medicalImages.length > 0;
+    recentTimeline.length > 0;
 
   if (!hasContent && !loading) return null;
 
@@ -78,7 +59,7 @@ export function PatientAntecedents({ veterinarianId, patientId, patient: initial
                   <p><strong>Microchip:</strong> {patient.microchip}</p>
                 )}
                 {patient.birth_date && (
-                  <p><strong>Nacimiento:</strong> {formatDate(patient.birth_date)}</p>
+                  <p><strong>Nacimiento:</strong> {formatConsultationDateShort(patient.birth_date)}</p>
                 )}
                 {patient.weight_kg != null && (
                   <p><strong>Peso registrado:</strong> {patient.weight_kg} kg</p>
@@ -91,36 +72,34 @@ export function PatientAntecedents({ veterinarianId, patientId, patient: initial
                 </p>
               )}
 
-              {lastConsultation && (
+              {recentTimeline.length > 0 && (
                 <div className="patient-antecedents-last">
-                  <strong>Última consulta ({formatDate(lastConsultation.created_at)})</strong>
-                  <p>
-                    {lastConsultation.motivo_consulta ||
-                      lastConsultation.detalle_paciente ||
-                      lastConsultation.form_data?.motivo_consulta ||
-                      "Sin motivo registrado"}
-                  </p>
-                  {lastConsultation.analysis && (
-                    <p className="patient-antecedents-analysis">
-                      {(() => {
-                        const preview = cleanClinicalDisplayText(lastConsultation.analysis);
-                        return preview.length > 220 ? `${preview.slice(0, 220).trim()}…` : preview;
-                      })()}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {medicalImages.length > 0 && (
-                <div className="patient-antecedents-studies">
-                  <strong>Estudios recientes ({medicalImages.length})</strong>
+                  <strong>Historial reciente</strong>
                   <ul>
-                    {medicalImages.slice(0, 3).map((img) => (
-                      <li key={img.id}>
-                        {IMAGE_TYPE_LABELS[img.image_type] || img.image_type || "Estudio"} —{" "}
-                        {formatDate(img.created_at)}
-                      </li>
-                    ))}
+                    {recentTimeline.map((item) => {
+                      if (item.kind === "consultation") {
+                        const consultation = item.consultation;
+                        return (
+                          <li key={`consultation-${item.id}`}>
+                            Consulta CDS — {formatConsultationDateShort(consultation.created_at)}
+                            {consultation.analysis && (
+                              <p className="patient-antecedents-analysis">
+                                {(() => {
+                                  const preview = cleanClinicalDisplayText(consultation.analysis);
+                                  return preview.length > 160 ? `${preview.slice(0, 160).trim()}…` : preview;
+                                })()}
+                              </p>
+                            )}
+                          </li>
+                        );
+                      }
+                      const study = item.study;
+                      return (
+                        <li key={`lab-${item.id}`}>
+                          {getLabStudyLabel(study)} — {formatConsultationDateShort(study.created_at)}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}

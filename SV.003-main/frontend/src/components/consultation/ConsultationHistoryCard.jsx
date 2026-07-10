@@ -1,5 +1,5 @@
 import React from "react";
-import { CalendarDays, FileDown, User } from "lucide-react";
+import { CalendarDays, FileDown, FlaskConical, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
 import {
@@ -113,9 +113,9 @@ export function ConsultationHistoryCard({
 
         {medicalImages.length > 0 && (
           <div className="history-attachment-pill">
-            📷 {medicalImages.length} interpretación
-            {medicalImages.length > 1 ? "es" : ""} asociad
-            {medicalImages.length > 1 ? "as" : "a"}
+            <FlaskConical size={14} aria-hidden />
+            {medicalImages.length} estudio{medicalImages.length > 1 ? "s" : ""} de laboratorio
+            {" "}vinculado{medicalImages.length > 1 ? "s" : ""}
           </div>
         )}
       </div>

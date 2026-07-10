@@ -698,6 +698,70 @@ html.dark .history-search-clear:hover {
   border-top-color: rgba(38, 91, 147, 0.1);
 }
 
+.history-detail-guiaa .clinical-section-lab {
+  border-color: rgba(124, 58, 237, 0.2);
+  background: linear-gradient(180deg, rgba(245, 243, 255, 0.9), rgba(255, 255, 255, 0.75));
+}
+
+.history-detail-guiaa .clinical-linked-studies {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-detail-guiaa .clinical-linked-study {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.history-detail-guiaa .clinical-linked-study-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.history-detail-guiaa .clinical-linked-study-text {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 13px;
+}
+
+.history-card--lab .history-card-header {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(38, 91, 147, 0.08));
+}
+
+.history-stat-pill--info {
+  cursor: default;
+  border-style: dashed;
+}
+
+.history-stat-pill--info:hover {
+  transform: none;
+}
+
+.history-results-subcount {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.history-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
 @media (max-width: 768px) {
   .history-detail-guiaa .clinical-file-main {
     flex-direction: column;

@@ -266,7 +266,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     {
       id: "consultation-history",
       title: "Historial",
-      description: "Ver historial de consultas",
+      description: "Consultas CDS e interpretaciones de laboratorio",
       icon: "📋",
       shortcut: "H",
       action: () => setView("consultation-history"),

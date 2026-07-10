@@ -678,11 +678,31 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions {
 }
 
 .medical-images-page-guiaa .medical-lab-history h2 {
-  margin: 0 0 1.125rem;
+  margin: 0 0 0.5rem;
   font-size: 1.25rem;
   font-weight: 800;
   color: #0c2d4d;
   letter-spacing: -0.02em;
+}
+
+.medical-lab-history-hint {
+  margin: 0 0 1.125rem;
+  font-size: 0.92rem;
+  color: #64748b;
+}
+
+.medical-lab-history-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #265b93;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.medical-lab-history-link:hover {
+  color: #0c2d4d;
 }
 
 .medical-images-page-guiaa .history-card-action {
