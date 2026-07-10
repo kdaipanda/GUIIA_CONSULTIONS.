@@ -591,6 +591,15 @@ const Router = () => {
     (freshVetData) => {
       setCedulaFlow(null);
 
+      const checkoutSessionId = new URLSearchParams(window.location.search).get(
+        "session_id",
+      );
+      if (checkoutSessionId) {
+        setCurrentView("payment-success");
+        setIsInitialized(true);
+        return;
+      }
+
       const redirectPath = consumeAuthRedirect();
       if (redirectPath && PATH_TO_VIEW[redirectPath]) {
         const view = PATH_TO_VIEW[redirectPath];
@@ -668,27 +677,21 @@ const Router = () => {
     }
   }, [veterinarian, loading, location.pathname, navigate]);
 
-  // URL parameter handling for payment success - Solo ejecutar una vez al montar
+  // URL parameter handling for payment success.
   useEffect(() => {
-    if (isInitialized) return; // No ejecutar si ya se inicializó la vista
-    
+    if (loading || isInitialized) return;
+
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get("session_id");
     const view = urlParams.get("view");
 
     if (sessionId) {
-      // Solo redirigir a payment-success si el usuario está autenticado
       if (veterinarian) {
-      setCurrentView("payment-success");
+        setCurrentView("payment-success");
         setIsInitialized(true);
       } else {
-        // Si no está autenticado pero hay session_id, limpiar la URL y redirigir al login
-        urlParams.delete("session_id");
-        const query = urlParams.toString();
-        const newUrl = `${window.location.pathname}${query ? `?${query}` : ""}`;
-        window.history.replaceState(null, "", newUrl);
+        // Preserve session_id so the same checkout can be verified after login.
         setCurrentView("login");
-        setIsInitialized(true);
       }
     } else if (view && view !== "profile") {
       setCurrentView(view);
@@ -714,7 +717,7 @@ const Router = () => {
       }
       setIsInitialized(true);
     }
-  }, []); // Solo ejecutar una vez al montar, no cuando cambia veterinarian
+  }, [isInitialized, loading, location.search, veterinarian]);
 
   if (loading) {
     return <LoadingScreen />;
