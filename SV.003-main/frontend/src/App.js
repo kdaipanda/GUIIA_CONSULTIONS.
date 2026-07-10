@@ -540,6 +540,15 @@ const Router = () => {
     });
   };
 
+  const openLabAnalysisWithPatient = (ctx) => {
+    setClinicalContext(ctx || null);
+    setSelectedConsultationId(null);
+    setConsultationEntryMode("standard");
+    setCurrentView("medical-images");
+    setIsInitialized(true);
+    navigate(VIEW_TO_PATH["medical-images"]);
+  };
+
   // Helper to navigate to consultation with ID
   const openConsultation = (consultationId) => {
     setClinicalContext(null);
@@ -569,7 +578,7 @@ const Router = () => {
     if (view === "register") {
       trackMetaLead("register_intent");
     }
-    if (view !== "new-consultation") {
+    if (view !== "new-consultation" && view !== "medical-images") {
       setSelectedConsultationId(null);
       setConsultationEntryMode("standard");
       setClinicalContext(null);
@@ -768,6 +777,7 @@ const Router = () => {
       <ClinicShell setView={navigateSetView}>
         <ClientsPatientsPage
           onStartConsultation={openConsultationWithPatient}
+          onStartLabAnalysis={openLabAnalysisWithPatient}
           onViewConsultation={openConsultation}
         />
       </ClinicShell>
@@ -776,6 +786,7 @@ const Router = () => {
       <ClinicShell setView={navigateSetView}>
         <ClientsPatientsPage
           onStartConsultation={openConsultationWithPatient}
+          onStartLabAnalysis={openLabAnalysisWithPatient}
           onViewConsultation={openConsultation}
         />
       </ClinicShell>
@@ -843,7 +854,11 @@ const Router = () => {
     "medical-images": (
       <ClinicShell setView={navigateSetView}>
         <MembershipFeatureGate feature={MEMBERSHIP_FEATURES.medicalImages} setView={navigateSetView}>
-          <MedicalImagesPage setView={navigateSetView} />
+          <MedicalImagesPage
+            setView={navigateSetView}
+            clinicalContext={clinicalContext}
+            onClinicalContextChange={setClinicalContext}
+          />
         </MembershipFeatureGate>
       </ClinicShell>
     ),

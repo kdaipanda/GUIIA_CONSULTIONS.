@@ -589,6 +589,31 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions {
   text-align: center;
 }
 
+.medical-lab-patient-section .medical-lab-patient-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.medical-lab-patient-linked,
+.medical-lab-patient-unlinked {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.medical-lab-patient-linked {
+  color: #2f857a;
+}
+
+.medical-lab-patient-unlinked {
+  color: #b45309;
+}
+
 @media (max-width: 768px) {
   .medical-lab-extract-badge {
     margin: -8px 0 16px;

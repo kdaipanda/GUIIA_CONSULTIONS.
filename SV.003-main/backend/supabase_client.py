@@ -256,6 +256,8 @@ def _merge_medical_image_stripped(current: Dict[str, Any], removed_col: str, val
         current["analysis"] = f"[{label}: {val}]\n\n" + (current.get("analysis") or "")
     elif removed_col == "consultation_id" and val:
         current["analysis"] = (current.get("analysis") or "") + f"\n\n[ID consulta ligada: {val}]\n"
+    elif removed_col == "patient_id" and val:
+        current["analysis"] = (current.get("analysis") or "") + f"\n\n[ID paciente ligado: {val}]\n"
     elif removed_col == "analysis" and val is not None:
         prev = current.get("findings")
         block = [str(val)]

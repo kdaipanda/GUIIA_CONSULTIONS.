@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronDown, FileUp, FlaskConical, ImageIcon } from "lucide-react";
+import { ChevronDown, FileUp, FlaskConical, ImageIcon, Link2 } from "lucide-react";
 import { useVet } from "../context/VetContext";
 import { notifyError, notifySuccess } from "../lib/appToast";
 import { BACKEND_URL } from "../lib/backendUrl";
@@ -23,12 +23,16 @@ const EXTRACTION_LABELS = {
   text: "Resultados pegados como texto",
 };
 
-export function MedicalImagesPage({ setView }) {
+export function MedicalImagesPage({
+  setView,
+  clinicalContext = null,
+  onClinicalContextChange,
+}) {
   const { veterinarian } = useVet();
   const [imageType, setImageType] = useState("blood_test");
   const [inputMode, setInputMode] = useState("pdf");
   const [patientName, setPatientName] = useState("");
-  const [imageClinicalContext, setImageClinicalContext] = useState(null);
+  const [imageClinicalContext, setImageClinicalContext] = useState(clinicalContext);
   const [additionalContext, setAdditionalContext] = useState("");
   const [consultationId, setConsultationId] = useState("");
   const [pastedStudyData, setPastedStudyData] = useState("");  // Datos de estudio pegados
@@ -60,6 +64,24 @@ export function MedicalImagesPage({ setView }) {
   useEffect(() => {
     loadHistory();
   }, [veterinarian?.id]);
+
+  useEffect(() => {
+    if (!clinicalContext?.patientId) return;
+    setImageClinicalContext(clinicalContext);
+    if (clinicalContext.patient?.name) {
+      setPatientName(clinicalContext.patient.name);
+    }
+  }, [clinicalContext?.patientId, clinicalContext?.patient?.name]);
+
+  const handlePatientContextChange = (ctx) => {
+    setImageClinicalContext(ctx);
+    if (ctx?.patient?.name) {
+      setPatientName(ctx.patient.name);
+    } else if (!ctx) {
+      setPatientName("");
+    }
+    onClinicalContextChange?.(ctx);
+  };
 
   const loadHistory = async () => {
     try {
@@ -198,8 +220,9 @@ export function MedicalImagesPage({ setView }) {
       setPastedStudyData("");
       setImageFile(null);
       setImagePreview(null);
-      setPatientName("");
-      setImageClinicalContext(null);
+      if (!imageClinicalContext?.patientId) {
+        setPatientName("");
+      }
       setAdditionalContext("");
       setConsultationId("");
     } catch (err) {
@@ -332,6 +355,27 @@ export function MedicalImagesPage({ setView }) {
                     </div>
                   </label>
                 </div>
+              </div>
+
+              <div className="form-section medical-lab-patient-section">
+                <h3>Mascota del estudio</h3>
+                <p className="medical-lab-patient-hint">
+                  Vincula el análisis al paciente registrado para que aparezca en su historial clínico.
+                </p>
+                <PatientSelector
+                  value={imageClinicalContext?.patientId}
+                  onChange={handlePatientContextChange}
+                />
+                {imageClinicalContext?.patientId ? (
+                  <p className="medical-lab-patient-linked">
+                    <Link2 size={14} aria-hidden />
+                    Vinculado a {imageClinicalContext.patient?.name || "paciente registrado"}
+                  </p>
+                ) : (
+                  <p className="medical-lab-patient-unlinked">
+                    Sin vincular — el estudio no aparecerá en la ficha del paciente.
+                  </p>
+                )}
               </div>
 
               <div className="form-section">
@@ -480,7 +524,7 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                   onClick={() => setShowAdvanced((open) => !open)}
                   aria-expanded={showAdvanced}
                 >
-                  {showAdvanced ? "Ocultar opciones" : "Más opciones (mascota, consulta, contexto)"}
+                  {showAdvanced ? "Ocultar opciones" : "Más opciones (consulta, contexto)"}
                   <ChevronDown
                     size={16}
                     className={`medical-lab-help-chevron${showAdvanced ? " is-open" : ""}`}
@@ -489,31 +533,24 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                 </button>
 
                 <div className="medical-lab-optional-body">
-                  <PatientSelector
-                    value={imageClinicalContext?.patientId}
-                    onChange={(ctx) => {
-                      setImageClinicalContext(ctx);
-                      if (ctx?.patient?.name) {
-                        setPatientName(ctx.patient.name);
-                      }
-                    }}
-                  />
+                  {!imageClinicalContext?.patientId && (
+                    <div className="form-group">
+                      <label htmlFor="lab-patient-name">Nombre de la mascota (solo texto libre)</label>
+                      <input
+                        id="lab-patient-name"
+                        type="text"
+                        value={patientName}
+                        onChange={(e) => setPatientName(e.target.value)}
+                        placeholder="Ej: Max, Luna, Rocky"
+                      />
+                      <small className="medical-lab-paste-hint">
+                        Si no eliges una mascota registrada arriba, el sistema intentará vincular por nombre exacto.
+                      </small>
+                    </div>
+                  )}
 
                   <div className="form-row medical-lab-form-row">
-                    {!imageClinicalContext?.patientId && (
-                      <div className="form-group">
-                        <label htmlFor="lab-patient-name">Nombre de la mascota (opcional)</label>
-                        <input
-                          id="lab-patient-name"
-                          type="text"
-                          value={patientName}
-                          onChange={(e) => setPatientName(e.target.value)}
-                          placeholder="Ej: Max, Luna, Rocky"
-                        />
-                      </div>
-                    )}
-
-                    <div className="form-group">
+                    <div className="form-group medical-lab-consultation-field">
                       <label htmlFor="lab-consultation-id">ID de consulta previa (opcional)</label>
                       <input
                         id="lab-consultation-id"

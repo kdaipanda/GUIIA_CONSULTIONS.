@@ -10,7 +10,7 @@ import socket
 import unicodedata
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 # Configurar UTF-8 para Windows al inicio del módulo
@@ -3319,6 +3319,85 @@ def _strip_data_url_base64(value: str) -> str:
     return value
 
 
+def _resolve_medical_image_patient(
+    vet_id: str,
+    *,
+    patient_id: Optional[str] = None,
+    patient_name: Optional[str] = None,
+    consultation_id: Optional[str] = None,
+) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Valida y resuelve patient_id + patient_name para medical_images.
+    Prioridad: patient_id explícito → consulta ligada → coincidencia exacta por nombre en la org.
+    """
+    import clinic_db as _clinic_db
+
+    resolved_id: Optional[str] = (patient_id or "").strip() or None
+    resolved_name: Optional[str] = (patient_name or "").strip() or None
+
+    org_ctx, org_err = _clinic_db.ensure_organization_for_profile(vet_id)
+    if org_err or not org_ctx:
+        return (resolved_id, resolved_name)
+
+    org = org_ctx.get("organization") or {}
+    membership = org_ctx.get("membership") or {}
+    org_id = org.get("id") or membership.get("organization_id")
+    if not org_id:
+        return (resolved_id, resolved_name)
+
+    if resolved_id:
+        try:
+            uuid.UUID(resolved_id)
+        except (ValueError, AttributeError):
+            print(f"[WARN] patient_id inválido en lab: {resolved_id}")
+            resolved_id = None
+        else:
+            patient, p_err = _clinic_db.get_patient(resolved_id, org_id)
+            if p_err or not patient:
+                print(f"[WARN] patient_id no encontrado en organización: {resolved_id}")
+                resolved_id = None
+            else:
+                resolved_name = (patient.get("name") or resolved_name or "").strip() or None
+                return (resolved_id, resolved_name)
+
+    if consultation_id:
+        try:
+            uuid.UUID(consultation_id)
+            cons, cons_err = get_consultation_by_id(consultation_id)
+            if not cons_err and cons:
+                cons_patient_id = (cons.get("patient_id") or "").strip() or None
+                if cons_patient_id:
+                    patient, _ = _clinic_db.get_patient(cons_patient_id, org_id)
+                    if patient:
+                        return (
+                            cons_patient_id,
+                            (patient.get("name") or resolved_name or "").strip() or None,
+                        )
+                payload = cons.get("payload") or {}
+                form_data = payload.get("form_data") or {}
+                payload_name = (
+                    form_data.get("nombre_mascota")
+                    or form_data.get("nombre")
+                    or payload.get("nombre_mascota")
+                )
+                if payload_name and not resolved_name:
+                    resolved_name = str(payload_name).strip()
+        except (ValueError, AttributeError):
+            pass
+
+    if resolved_name and not resolved_id:
+        matches, _ = _clinic_db.list_patients(org_id, search=resolved_name, limit=20)
+        exact = [
+            p
+            for p in (matches or [])
+            if (p.get("name") or "").strip().lower() == resolved_name.strip().lower()
+        ]
+        if len(exact) == 1:
+            return (exact[0]["id"], exact[0].get("name") or resolved_name)
+
+    return (resolved_id, resolved_name)
+
+
 def _lab_analysis_prompt(
     _image_type: str,
     patient_name: Optional[str],
@@ -3482,9 +3561,33 @@ async def interpret_medical_image(
             pdf_markdown = None
 
     uses_vision = has_file and not pdf_markdown
+
+    # Validar consultation_id (UUID) antes de resolver paciente
+    valid_consultation_id = None
+    if request.consultation_id:
+        try:
+            uuid.UUID(request.consultation_id)
+            valid_consultation_id = request.consultation_id
+        except (ValueError, AttributeError):
+            print(
+                f"[WARN] consultation_id inválido (no es UUID): {request.consultation_id}. "
+                "No se ligará la imagen a la consulta."
+            )
+
+    resolved_patient_id, resolved_patient_name = _resolve_medical_image_patient(
+        vet_id,
+        patient_id=request.patient_id,
+        patient_name=request.patient_name,
+        consultation_id=valid_consultation_id,
+    )
+    if resolved_patient_id:
+        print(f"[LAB] Paciente vinculado: {resolved_patient_id} ({resolved_patient_name or 'sin nombre'})")
+    elif resolved_patient_name:
+        print(f"[LAB] Estudio sin patient_id; solo nombre libre: {resolved_patient_name}")
+
     prompt_text = _lab_analysis_prompt(
         stored_image_type,
-        request.patient_name,
+        resolved_patient_name,
         request.additional_context,
         pdf_markdown if pdf_markdown else (request.pasted_study_data if has_text else None),
         from_markitdown=bool(pdf_markdown),
@@ -3546,27 +3649,14 @@ async def interpret_medical_image(
     public_url = None
 
     created_at = datetime.now(timezone.utc).isoformat()
-    
-    # Validar que consultation_id sea un UUID válido (si se proporciona)
-    # Si viene con formato "CONS-XXXX" o no es UUID válido, usar None
-    valid_consultation_id = None
-    if request.consultation_id:
-        try:
-            # Intentar validar como UUID
-            uuid.UUID(request.consultation_id)
-            valid_consultation_id = request.consultation_id
-        except (ValueError, AttributeError):
-            # Si no es UUID válido, ignorarlo (no ligar la imagen a la consulta)
-            print(f"[WARN] consultation_id inválido (no es UUID): {request.consultation_id}. No se ligará la imagen a la consulta.")
-            valid_consultation_id = None
-    
+
     analysis_row = {
         "id": image_id,
         "user_id": vet_id,
         "consultation_id": valid_consultation_id,
         "image_type": stored_image_type,
-        "patient_name": request.patient_name,
-        "patient_id": request.patient_id,
+        "patient_name": resolved_patient_name,
+        "patient_id": resolved_patient_id,
         "image_url": public_url,
         "analysis": analysis_text,
         "findings": findings,
@@ -3584,7 +3674,16 @@ async def interpret_medical_image(
         raise HTTPException(status_code=500, detail=f"Error guardando imagen: {err_ins}")
     else:
         print(f"[DEBUG] ✅ Análisis guardado correctamente en medical_images con ID: {image_id}")
-        print(f"[DEBUG] user_id: {request.veterinarian_id}, image_type: {request.image_type}")
+        print(
+            f"[DEBUG] user_id: {vet_id}, patient_id: {resolved_patient_id}, "
+            f"image_type: {stored_image_type}"
+        )
+        saved = inserted or {}
+        if resolved_patient_id and not saved.get("patient_id"):
+            print(
+                "[WARN] El análisis se guardó sin patient_id en BD. "
+                "Verifica la migración 20260615_medical_images_patient_id.sql en Supabase."
+            )
 
     # Ligar interpretación con la consulta (si se proporcionó un UUID válido)
     if valid_consultation_id:
@@ -3598,7 +3697,7 @@ async def interpret_medical_image(
                 {
                     "image_id": image_id,
                     "image_type": stored_image_type,
-                    "patient_name": request.patient_name,
+                    "patient_name": resolved_patient_name,
                     "created_at": created_at,
                     "image_url": public_url,
                 }

@@ -26,7 +26,7 @@ export function PatientSelector({ value, onChange, disabled }) {
 
   return (
     <div className="form-group patient-selector">
-      <Label>Mascota registrada (opcional)</Label>
+      <Label>Mascota registrada</Label>
       <Select
         value={value || "__none__"}
         onValueChange={(v) => {

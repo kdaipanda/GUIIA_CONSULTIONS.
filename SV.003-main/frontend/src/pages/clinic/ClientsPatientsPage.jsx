@@ -9,6 +9,7 @@ import {
   PawPrint,
   Zap,
   Users,
+  FlaskConical,
 } from "lucide-react";
 import "./clinicPageShared.css";
 import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
@@ -97,7 +98,11 @@ function matchesQuery(value, q) {
   return (value || "").toLowerCase().includes(q);
 }
 
-export function ClientsPatientsPage({ onStartConsultation, onViewConsultation }) {
+export function ClientsPatientsPage({
+  onStartConsultation,
+  onStartLabAnalysis,
+  onViewConsultation,
+}) {
   const { veterinarian } = useVet();
   const { confirm, dialogProps } = useConfirmAction();
   const [clients, setClients] = useState([]);
@@ -712,6 +717,22 @@ export function ClientsPatientsPage({ onStartConsultation, onViewConsultation })
                     }}
                   >
                     <Stethoscope size={16} className="mr-1" /> Iniciar consulta
+                  </Button>
+                )}
+                {onStartLabAnalysis && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      setDetailOpen(false);
+                      onStartLabAnalysis({
+                        patientId: detail.patient.id,
+                        clientId: detail.patient.client_id,
+                        patient: detail.patient,
+                      });
+                    }}
+                  >
+                    <FlaskConical size={16} className="mr-1" /> Interpretar estudio
                   </Button>
                 )}
                 {(detail.consultations?.length || detail.medical_images?.length) > 0 && (
