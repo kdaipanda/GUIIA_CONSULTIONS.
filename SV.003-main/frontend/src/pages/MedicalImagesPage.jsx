@@ -571,6 +571,14 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                     {EXTRACTION_LABELS[result.extraction_method]}
                   </p>
                 )}
+                {result.prompt_source && (
+                  <p className="medical-lab-prompt-badge">
+                    Motor CDS: {result.prompt_source}
+                    {result.instructions_chars
+                      ? ` (${Math.round(result.instructions_chars / 1000)}k instrucciones)`
+                      : ""}
+                  </p>
+                )}
 
                 <div className="result-section detailed medical-lab-result-only">
                   <div className="result-content detailed-analysis medical-lab-detailed-analysis">

@@ -408,11 +408,16 @@ async def debug_instructions():
     }
 
 
-async def send_llm_message(content: List[Dict[str, Any]]) -> str:
+async def send_llm_message(
+    content: List[Dict[str, Any]],
+    *,
+    compress_user: bool = True,
+) -> str:
     """
     Helper para enviar mensajes al API de Anthropic.
     SOLO usa el system prompt desde instrucciones_veterinarias.txt (sin otros prompts).
-    Con Headroom habilitado: cache del system prompt + compresión conservadora del usuario.
+    Con Headroom habilitado: cache del system prompt + compresión conservadora del usuario
+    (desactivable con compress_user=False, p. ej. interpretación de laboratorio).
     """
     from headroom_llm import (
         build_system_with_cache,
@@ -466,7 +471,7 @@ async def send_llm_message(content: List[Dict[str, Any]]) -> str:
     system_prompt = file_instructions
     system_param = build_system_with_cache(system_prompt)
     messages_payload = [{"role": "user", "content": content}]
-    if is_headroom_enabled():
+    if compress_user and is_headroom_enabled():
         messages_payload, _hr_stats = optimize_consultation_messages(
             messages_payload,
             ANTHROPIC_MODEL,
@@ -477,6 +482,8 @@ async def send_llm_message(content: List[Dict[str, Any]]) -> str:
                 f"{_hr_stats['tokens_after']} tokens "
                 f"(ahorro {_hr_stats['tokens_saved']})"
             )
+    elif not compress_user:
+        print("[Headroom] compresión de usuario omitida (interpretación de laboratorio)")
 
     llm_client = get_llm_client(anthropic_client)
 
@@ -3313,7 +3320,7 @@ def _strip_data_url_base64(value: str) -> str:
 
 
 def _lab_analysis_prompt(
-    image_type: str,
+    _image_type: str,
     patient_name: Optional[str],
     additional_context: Optional[str],
     pasted: Optional[str],
@@ -3325,31 +3332,23 @@ def _lab_analysis_prompt(
     Mensaje de usuario para laboratorio: solo datos del caso y del estudio.
     El formato de respuesta lo define exclusivamente instrucciones_veterinarias.txt.
     """
-    type_descriptions = {
-        "xray": "imagen médica/radiografía",
-        "blood_test": "análisis de sangre/hemograma y panel bioquímico",
-        "urinalysis": "urianálisis/examen de orina",
-        "pdf_report": "reporte de laboratorio en PDF",
-        "general": "estudio de laboratorio veterinario",
-    }
-    desc = type_descriptions.get(image_type, type_descriptions["general"])
-    parts = [f"Interpreta los resultados de este {desc} veterinario."]
+    parts: List[str] = []
     if patient_name:
         parts.append(f"Paciente: {patient_name}")
     if additional_context and str(additional_context).strip():
-        parts.append(f"Contexto adicional del veterinario: {additional_context.strip()}")
+        parts.append(f"Observaciones del veterinario: {additional_context.strip()}")
     if pasted and str(pasted).strip():
         section_title = (
             "Resultados del estudio (extraídos del PDF)"
             if from_markitdown
             else "Resultados del estudio"
         )
-        parts.append(f"\n{section_title}:\n{pasted.strip()}")
+        parts.append(f"{section_title}:\n{pasted.strip()}")
     elif has_image_attachment:
         parts.append(
-            "\nLos resultados del estudio se adjuntan como imagen en este mensaje."
+            "Resultados del estudio: ver imágenes adjuntas en este mensaje."
         )
-    return "\n".join(parts)
+    return "\n\n".join(parts)
 
 
 def _build_lab_vision_content_blocks(
@@ -3508,7 +3507,15 @@ async def interpret_medical_image(
             elif pdf_markdown:
                 extraction_method = "markitdown"
 
-        analysis_text = await send_llm_message(content_blocks)
+        instructions_text = _load_system_instructions() or ""
+        print(
+            f"[LAB] System prompt: {os.path.basename(ANTHROPIC_INSTRUCTIONS_FILE)} "
+            f"({len(instructions_text)} caracteres), método={extraction_method}"
+        )
+        analysis_text = await send_llm_message(
+            content_blocks,
+            compress_user=False,
+        )
 
         print(f"[DEBUG] ✅ Respuesta recibida de Claude: {len(analysis_text)} caracteres")
         print(f"[DEBUG] Primeros 300 caracteres de la respuesta:")
@@ -3601,7 +3608,14 @@ async def interpret_medical_image(
             if err_upd:
                 print(f"[WARN] No se pudo ligar imagen a consulta: {err_upd}")
 
-    return jsonable_encoder(inserted or analysis_row)
+    response_payload = jsonable_encoder(inserted or analysis_row)
+    if isinstance(response_payload, dict):
+        instructions_text = _load_system_instructions() or ""
+        response_payload["prompt_source"] = os.path.basename(
+            ANTHROPIC_INSTRUCTIONS_FILE or "instrucciones_veterinarias.txt"
+        )
+        response_payload["instructions_chars"] = len(instructions_text)
+    return response_payload
 
 
 @app.get("/api/medical-images/history")
