@@ -445,7 +445,7 @@ function App() {
 
 // Router Component
 const Router = () => {
-  const { veterinarian, loading, platformAdmin, refreshProfile } = useVet();
+  const { veterinarian, loading, platformAdmin, refreshProfile, patchVeterinarian } = useVet();
   const navigate = useNavigate();
   const location = useLocation();
   const [currentView, setCurrentView] = useState(
@@ -494,6 +494,9 @@ const Router = () => {
   }, [trialSurveyVisible, veterinarian?.id]);
 
   const handleTrialSurveyCompleted = async (data) => {
+    if (data?.completed_at) {
+      patchVeterinarian?.({ trial_survey_completed_at: data.completed_at });
+    }
     if (data?.offer) {
       setTrialSurveyOffer(data.offer);
     }

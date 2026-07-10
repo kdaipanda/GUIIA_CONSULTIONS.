@@ -185,6 +185,16 @@ export const VetProvider = ({ children }) => {
     }
   };
 
+  const patchVeterinarian = (partial) => {
+    if (!partial || typeof partial !== "object") return;
+    setVeterinarian((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...partial };
+      localStorage.setItem("veterinarian", JSON.stringify(next));
+      return next;
+    });
+  };
+
   return (
     <VetContext.Provider
       value={{
@@ -197,6 +207,7 @@ export const VetProvider = ({ children }) => {
         loginWithEmailPassword,
         loginWithMagicLink,
         refreshProfile,
+        patchVeterinarian,
       }}
     >
       {children}

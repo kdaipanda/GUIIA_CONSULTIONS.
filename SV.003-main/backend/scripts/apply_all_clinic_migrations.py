@@ -44,6 +44,7 @@ CLINIC_MIGRATION_ORDER = [
     "20260702_cedula_reminder_sent_at.sql",
     "20260702_meta_capi_purchase_sent.sql",
     "20260707_password_hash.sql",
+    "20260707_trial_survey.sql",
     "optimize_rls_policies.sql",
 ]
 

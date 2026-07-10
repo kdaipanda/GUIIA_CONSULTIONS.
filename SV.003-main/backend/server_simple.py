@@ -1840,7 +1840,10 @@ async def submit_trial_survey(
     fields = trial_survey.survey_fields_from_submission(payload.rating, payload.comment)
     err_upd = update_profile(vet_id, fields)
     if err_upd:
-        raise HTTPException(status_code=500, detail=f"Error guardando encuesta: {err_upd}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error guardando encuesta: {err_upd}",
+        )
 
     updated = {**profile, **fields}
     return {

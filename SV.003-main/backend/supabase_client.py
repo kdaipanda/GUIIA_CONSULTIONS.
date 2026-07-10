@@ -178,13 +178,35 @@ def get_profile_by_credentials(email: str, cedula: str) -> Tuple[Optional[Dict[s
 
 
 def update_profile(profile_id: str, fields: Dict[str, Any]) -> Optional[str]:
-    """Actualiza un perfil."""
+    """Actualiza un perfil. Devuelve mensaje de error o None si OK."""
     client = get_supabase_client()
     try:
         client.table("profiles").update(fields).eq("id", profile_id).execute()
         return None
     except Exception as exc:  # noqa: BLE001
-        return str(exc)
+        return format_supabase_error(str(exc))
+
+
+def format_supabase_error(err: str) -> str:
+    """Traduce errores típicos de PostgREST/Supabase a mensajes accionables."""
+    raw = (err or "").strip()
+    lower = raw.lower()
+    if "pgrst204" in lower or ("column" in lower and "does not exist" in lower):
+        if "trial_survey" in lower:
+            return (
+                "Falta la migración de encuesta post-prueba en Supabase "
+                "(20260707_trial_survey.sql). Avísanos para aplicarla en el proyecto."
+            )
+        return (
+            "Falta una actualización en la base de datos (columna no encontrada). "
+            "Recarga el schema de PostgREST en Supabase o aplica la migración pendiente."
+        )
+    if "schema cache" in lower:
+        return (
+            "Supabase no reconoce una columna nueva (schema cache desactualizado). "
+            "En Supabase: Settings → API → Reload schema, o ejecuta NOTIFY pgrst, 'reload schema'."
+        )
+    return raw
 
 
 def delete_profile_by_email(email: str) -> Tuple[bool, Optional[str]]:

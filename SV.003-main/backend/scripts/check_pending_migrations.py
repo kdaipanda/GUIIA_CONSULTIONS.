@@ -47,11 +47,12 @@ def main() -> int:
         return 0
 
     print(
-        "\nAplica las migraciones faltantes:\n"
+        "\nAplica las migraciones faltantes en Supabase Dashboard > SQL Editor, por ejemplo:\n"
+        "  supabase_migrations/20260707_trial_survey.sql\n"
+        "  supabase_migrations/20260707_password_hash.sql\n"
+        "O con conexión Postgres:\n"
         "  python scripts/apply_supabase_migration.py "
-        "--sql supabase_migrations/20260707_password_hash.sql\n"
-        "(requiere SUPABASE_DATABASE_URL en backend/.env)\n"
-        "O ejecuta el SQL en Supabase Dashboard > SQL Editor.",
+        "--sql supabase_migrations/20260707_trial_survey.sql",
     )
     return 1
 

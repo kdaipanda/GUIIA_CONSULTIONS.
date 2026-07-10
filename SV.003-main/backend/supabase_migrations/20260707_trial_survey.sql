@@ -7,3 +7,6 @@ ALTER TABLE profiles
 COMMENT ON COLUMN profiles.trial_survey_completed_at IS 'Cuándo el usuario completó la encuesta post-prueba';
 COMMENT ON COLUMN profiles.trial_survey_rating IS 'Calificación 1-5 de la experiencia en periodo de prueba';
 COMMENT ON COLUMN profiles.trial_survey_comment IS 'Comentarios libres de la encuesta post-prueba';
+
+-- Recargar schema cache de PostgREST (evita PGRST204 tras añadir columnas)
+NOTIFY pgrst, 'reload schema';
