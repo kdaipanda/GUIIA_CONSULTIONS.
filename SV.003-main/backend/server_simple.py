@@ -2245,16 +2245,59 @@ async def create_consultation(
         "created_at": created_at,
     }
 
-    org_id = payload.organization_id
-    if not org_id:
-        try:
-            import clinic_db as _clinic_db
-            org_ctx, _org_err = _clinic_db.ensure_organization_for_profile(vet_id)
-            if org_ctx:
-                org = org_ctx.get("organization") or {}
-                org_id = org.get("id") or (org_ctx.get("membership") or {}).get("organization_id")
-        except Exception:
-            org_id = None
+    supplied_org_id = (payload.organization_id or "").strip() or None
+    supplied_clinic_refs = any((payload.client_id, payload.patient_id, payload.appointment_id))
+    org_id = None
+    clinic_db_module = None
+    try:
+        import clinic_db as _clinic_db
+        clinic_db_module = _clinic_db
+        org_ctx, org_err = _clinic_db.ensure_organization_for_profile(vet_id)
+        if org_err:
+            raise RuntimeError(org_err)
+        if org_ctx:
+            org = org_ctx.get("organization") or {}
+            org_id = org.get("id") or (org_ctx.get("membership") or {}).get("organization_id")
+    except Exception as exc:  # noqa: BLE001
+        if supplied_org_id or supplied_clinic_refs:
+            raise HTTPException(
+                status_code=500,
+                detail=f"No se pudo validar el consultorio de la sesión: {exc}",
+            ) from exc
+        org_id = None
+
+    if supplied_org_id:
+        if not org_id or supplied_org_id != org_id:
+            raise HTTPException(status_code=403, detail="La consulta no pertenece a tu consultorio")
+        org_id = supplied_org_id
+
+    if supplied_clinic_refs:
+        if not org_id or clinic_db_module is None:
+            raise HTTPException(status_code=400, detail="Consultorio no disponible para enlazar la consulta")
+        if payload.client_id:
+            client, client_err = clinic_db_module.get_client(payload.client_id, org_id)
+            if client_err:
+                raise HTTPException(status_code=500, detail=f"Error validando cliente: {client_err}")
+            if not client:
+                raise HTTPException(status_code=404, detail="Cliente no encontrado")
+        if payload.patient_id:
+            patient, patient_err = clinic_db_module.get_patient(payload.patient_id, org_id)
+            if patient_err:
+                raise HTTPException(status_code=500, detail=f"Error validando paciente: {patient_err}")
+            if not patient:
+                raise HTTPException(status_code=404, detail="Paciente no encontrado")
+            if payload.client_id and patient.get("client_id") and patient.get("client_id") != payload.client_id:
+                raise HTTPException(status_code=400, detail="El paciente no pertenece al cliente indicado")
+        if payload.appointment_id:
+            appointment, appointment_err = clinic_db_module.get_appointment(payload.appointment_id, org_id)
+            if appointment_err:
+                raise HTTPException(status_code=500, detail=f"Error validando cita: {appointment_err}")
+            if not appointment:
+                raise HTTPException(status_code=404, detail="Cita no encontrada")
+            if payload.patient_id and appointment.get("patient_id") and appointment.get("patient_id") != payload.patient_id:
+                raise HTTPException(status_code=400, detail="La cita no pertenece al paciente indicado")
+            if payload.client_id and appointment.get("client_id") and appointment.get("client_id") != payload.client_id:
+                raise HTTPException(status_code=400, detail="La cita no pertenece al cliente indicado")
 
     if org_id:
         new_row["organization_id"] = org_id
