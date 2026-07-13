@@ -70,6 +70,7 @@ import {
 import {
   canAccessFeature,
   MEMBERSHIP_FEATURES,
+  canAnalyzeConsultation,
   canCreateConsultation,
   isTrialExhausted,
   TRIAL_EXHAUSTED_MESSAGE,
@@ -3463,8 +3464,8 @@ const NewConsultation = ({
       return;
     }
 
-    // Verificar membresía Premium o trial (síntesis CDS L5)
-    if (!canAccessFeature(veterinarian, MEMBERSHIP_FEATURES.advancedAnalysis, { platformAdmin })) {
+    // Verificar membresía activa o trial con saldo para la síntesis CDS.
+    if (!canAnalyzeConsultation(veterinarian, { platformAdmin })) {
       const membershipType = veterinarian?.membership_type?.toLowerCase();
       let planName = "Sin membresía";
       if (membershipType) {
@@ -3472,7 +3473,7 @@ const NewConsultation = ({
       }
 
       notifyQuotaError(
-        `La síntesis clínica CDS L5 solo está disponible para miembros Premium. Tu plan actual es: ${planName}. Por favor, actualiza tu membresía para acceder a esta función.`,
+        `La síntesis clínica CDS requiere una membresía activa o consultas de prueba disponibles. Tu plan actual es: ${planName}. Por favor, actualiza tu membresía para acceder a esta función.`,
         () => setView("membership"),
       );
       return;
