@@ -913,6 +913,27 @@ def validate_trial_consultations_limit(membership_type: Optional[str], consultat
     return True
 
 
+PAID_CDS_PLANS = frozenset({"basic", "professional", "premium"})
+
+
+def resolve_cds_analysis_plan(
+    membership_type: Optional[str],
+    consultations_remaining: int,
+    *,
+    has_unlimited: bool = False,
+) -> Optional[str]:
+    """Plan efectivo para generar una síntesis CDS sin confundir Básica pagada con trial agotado."""
+    if has_unlimited:
+        return "premium"
+
+    normalized = str(membership_type).strip().lower() if membership_type else ""
+    if normalized in PAID_CDS_PLANS:
+        return normalized
+    if not normalized and consultations_remaining > 0:
+        return "trial"
+    return None
+
+
 def generate_2fa_code():
     """Genera un código de 6 dígitos"""
     return "".join(secrets.choice(string.digits) for _ in range(6))
@@ -2572,23 +2593,17 @@ async def analyze_consultation(
     
     # Verificar si el usuario tiene consultas ilimitadas
     has_unlimited = has_unlimited_consultations(user_email) if user_email else False
-    
-    # Si tiene consultas ilimitadas, tratarlo como premium
-    if has_unlimited:
-        membership_type = "premium"
-    
-    # Si tiene consultas de prueba (sin membership_type pero con consultas), permitir como premium
-    has_trial_consultations = not membership_type and remaining > 0
 
-    if membership_type:
-        membership_type = membership_type.lower()
-    else:
-        membership_type = "trial" if has_trial_consultations else "basic"
-    
-    if membership_type not in ["premium", "trial"]:
+    membership_type = resolve_cds_analysis_plan(
+        membership_type,
+        remaining,
+        has_unlimited=has_unlimited,
+    )
+
+    if not membership_type:
         raise HTTPException(
             status_code=403,
-            detail=f"La síntesis clínica CDS L5 solo está disponible para miembros Premium. Tu plan actual es: {membership_type.capitalize()}. Por favor, actualiza tu membresía para acceder a esta función."
+            detail="La síntesis clínica CDS requiere una membresía activa o consultas de prueba disponibles. Por favor, actualiza tu membresía para acceder a esta función."
         )
     
     # Validar que tenga consultas restantes (solo para usuarios no premium y sin consultas ilimitadas)

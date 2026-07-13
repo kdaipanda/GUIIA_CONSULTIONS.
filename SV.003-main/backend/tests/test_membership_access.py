@@ -127,6 +127,29 @@ class TrialConsultationLimit(unittest.TestCase):
         self.assertEqual(ctx.exception.status_code, 400)
 
 
+class CdsAnalysisPlan(unittest.TestCase):
+    def test_paid_plans_can_analyze_existing_cds_consultations(self):
+        from server_simple import resolve_cds_analysis_plan
+
+        self.assertEqual(resolve_cds_analysis_plan("basic", 0), "basic")
+        self.assertEqual(resolve_cds_analysis_plan("professional", 0), "professional")
+        self.assertEqual(resolve_cds_analysis_plan("premium", 0), "premium")
+
+    def test_trial_requires_remaining_consultations(self):
+        from server_simple import resolve_cds_analysis_plan
+
+        self.assertEqual(resolve_cds_analysis_plan(None, 1), "trial")
+        self.assertIsNone(resolve_cds_analysis_plan(None, 0))
+
+    def test_unlimited_resolves_as_premium(self):
+        from server_simple import resolve_cds_analysis_plan
+
+        self.assertEqual(
+            resolve_cds_analysis_plan(None, 0, has_unlimited=True),
+            "premium",
+        )
+
+
 class MembershipConsultations(unittest.TestCase):
     def test_monthly_consultations(self):
         package = MEMBERSHIP_PACKAGES["premium"]
