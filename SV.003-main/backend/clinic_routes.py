@@ -255,6 +255,33 @@ def _require_membership_feature(ctx: dict, feature: str) -> None:
     require_feature_for_profile(ctx.get("profile"), feature)
 
 
+def _require_client_in_org(client_id: str, organization_id: str) -> dict:
+    client, err = clinic_db.get_client(client_id, organization_id)
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    if not client:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    return client
+
+
+def _require_patient_in_org(patient_id: str, organization_id: str) -> dict:
+    patient, err = clinic_db.get_patient(patient_id, organization_id)
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    if not patient:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    return patient
+
+
+def _validate_patient_client_link(patient_id: str, client_id: Optional[str], organization_id: str) -> dict:
+    patient = _require_patient_in_org(patient_id, organization_id)
+    if client_id:
+        _require_client_in_org(client_id, organization_id)
+        if patient.get("client_id") != client_id:
+            raise HTTPException(status_code=400, detail="El paciente no pertenece al cliente indicado")
+    return patient
+
+
 def _coerce_analysis_text(value: Any) -> Optional[str]:
     if value is None:
         return None
@@ -581,9 +608,7 @@ async def api_create_appointment(body: AppointmentCreate, x_veterinarian_id: str
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
     _check_write(ctx["role"])
-    patient, err = clinic_db.get_patient(body.patient_id, ctx["organization_id"])
-    if err or not patient:
-        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    _validate_patient_client_link(body.patient_id, body.client_id, ctx["organization_id"])
     row = {**body.model_dump(), "organization_id": ctx["organization_id"], "veterinarian_id": body.veterinarian_id or vet_id}
     appt, err = clinic_db.insert_appointment(row)
     if err:
@@ -608,7 +633,20 @@ async def api_update_appointment(appointment_id: str, body: AppointmentUpdate, x
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
     _check_write(ctx["role"])
-    appt, err = clinic_db.update_appointment(appointment_id, ctx["organization_id"], body.model_dump(exclude_none=True))
+    fields = body.model_dump(exclude_none=True)
+    if "patient_id" in fields or "client_id" in fields:
+        current, err = clinic_db.get_appointment(appointment_id, ctx["organization_id"])
+        if err:
+            raise HTTPException(status_code=500, detail=err)
+        if not current:
+            raise HTTPException(status_code=404, detail="Cita no encontrada")
+        patient_id = fields.get("patient_id") or current.get("patient_id")
+        client_id = fields.get("client_id") or current.get("client_id")
+        if patient_id:
+            _validate_patient_client_link(patient_id, client_id, ctx["organization_id"])
+        elif client_id:
+            _require_client_in_org(client_id, ctx["organization_id"])
+    appt, err = clinic_db.update_appointment(appointment_id, ctx["organization_id"], fields)
     if err:
         raise HTTPException(status_code=500, detail=err)
     if not appt:
@@ -1341,10 +1379,10 @@ async def api_create_invoice(body: InvoiceCreate, x_veterinarian_id: str = Heade
     ctx = await _resolve_org_context(vet_id)
     _require_membership_feature(ctx, "billing")
     _check_write(ctx["role"])
-    if body.client_id:
-        client, err = clinic_db.get_client(body.client_id, ctx["organization_id"])
-        if err or not client:
-            raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    if body.patient_id:
+        _validate_patient_client_link(body.patient_id, body.client_id, ctx["organization_id"])
+    elif body.client_id:
+        _require_client_in_org(body.client_id, ctx["organization_id"])
     header = body.model_dump(exclude={"items", "deduct_stock"})
     items = [item.model_dump() for item in body.items]
     invoice, err = clinic_db.create_invoice_with_items(
