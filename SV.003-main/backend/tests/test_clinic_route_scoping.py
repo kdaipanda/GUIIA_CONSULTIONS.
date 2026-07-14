@@ -24,6 +24,7 @@ async def _org_context(_vet_id: str) -> dict:
 
 
 def test_create_appointment_rejects_patient_client_mismatch(monkeypatch):
+    monkeypatch.setattr(clinic_routes, "_require_vet_id", lambda _header: "vet-1")
     monkeypatch.setattr(clinic_routes, "_resolve_org_context", _org_context)
     monkeypatch.setattr(
         clinic_routes.clinic_db,
@@ -56,6 +57,7 @@ def test_create_appointment_rejects_patient_client_mismatch(monkeypatch):
 
 
 def test_update_appointment_rejects_foreign_client(monkeypatch):
+    monkeypatch.setattr(clinic_routes, "_require_vet_id", lambda _header: "vet-1")
     monkeypatch.setattr(clinic_routes, "_resolve_org_context", _org_context)
     monkeypatch.setattr(
         clinic_routes.clinic_db,
@@ -91,6 +93,7 @@ def test_update_appointment_rejects_foreign_client(monkeypatch):
 
 
 def test_create_invoice_rejects_foreign_patient(monkeypatch):
+    monkeypatch.setattr(clinic_routes, "_require_vet_id", lambda _header: "vet-1")
     monkeypatch.setattr(clinic_routes, "_resolve_org_context", _org_context)
     monkeypatch.setattr(clinic_routes, "_require_membership_feature", lambda ctx, feature: None)
     monkeypatch.setattr(
