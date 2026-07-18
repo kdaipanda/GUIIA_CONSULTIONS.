@@ -2275,14 +2275,13 @@ async def create_consultation(
 
     # Descontar crédito si no es premium y no tiene consultas ilimitadas (las consultas de prueba también se descuentan)
     # Si tiene consultas ilimitadas, no descontar
+    # Usar update_profile (no upsert): un upsert parcial falla por NOT NULL en email y no descuenta.
     new_remaining = remaining
     if not has_unlimited and (has_trial_consultations or (membership_type and membership_type != "premium")):
         new_remaining = max(0, remaining - 1)
-        _, err_prof = upsert_profile(
-            {
-                "id": vet_id,
-                "consultations_remaining": new_remaining,
-            }
+        err_prof = update_profile(
+            vet_id,
+            {"consultations_remaining": new_remaining},
         )
         if err_prof:
             # No abortamos la consulta ya creada; solo avisamos

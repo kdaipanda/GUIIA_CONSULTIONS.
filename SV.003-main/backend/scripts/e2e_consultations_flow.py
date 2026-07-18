@@ -247,6 +247,13 @@ def main() -> int:
                 code == 200 and bool(trial_cons.get("id")),
                 f"{code}",
             )
+            code, trial_profile = req("GET", "/api/auth/profile", headers=rh)
+            rem_after = trial_profile.get("consultations_remaining") if isinstance(trial_profile, dict) else None
+            check(
+                "Trial: descuenta 1 credito (3->2)",
+                rem_after == 2,
+                f"remaining={rem_after}",
+            )
 
         try:
             from user_deletion import delete_user_account
