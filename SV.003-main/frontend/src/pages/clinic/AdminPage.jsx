@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox, Star } from "lucide-react";
+import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox, Star, Stethoscope } from "lucide-react";
 import "./clinicPageShared.css";
 import "./adminPage.css";
 import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
@@ -707,6 +707,13 @@ export function AdminPage() {
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
+            <span className="clinic-report-kpi-icon"><Stethoscope size={18} aria-hidden /></span>
+            <span className="clinic-report-kpi-label">Consultas CDS usadas</span>
+          </div>
+          <div className="clinic-report-kpi-value">{stats.consultations_total ?? 0}</div>
+        </div>
+        <div className="clinic-report-kpi">
+          <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><MessageSquare size={18} aria-hidden /></span>
             <span className="clinic-report-kpi-label">Soporte abierto</span>
           </div>
@@ -1014,7 +1021,7 @@ export function AdminPage() {
                 <th>Nº profesional</th>
                 <th>Estado</th>
                 <th>Plan</th>
-                <th>Consultas</th>
+                <th>Uso de consultas</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -1060,7 +1067,17 @@ export function AdminPage() {
                           {formatPlanLabel(u)}
                         </span>
                       </td>
-                      <td>{u.consultations_remaining ?? "—"}</td>
+                      <td>
+                        <div
+                          className="clinic-admin-consultation-usage"
+                          aria-label={`${u.consultations_used ?? 0} consultas usadas; ${
+                            u.consultations_remaining ?? 0
+                          } disponibles`}
+                        >
+                          <strong>{u.consultations_used ?? 0} usadas</strong>
+                          <span>{u.consultations_remaining ?? 0} disponibles</span>
+                        </div>
+                      </td>
                       <td>
                         <div className="clinic-admin-row-actions">
                           <Button

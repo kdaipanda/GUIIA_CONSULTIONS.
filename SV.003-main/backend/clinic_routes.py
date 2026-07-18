@@ -16,6 +16,7 @@ import email_notifications
 import trial_survey
 from membership_access import require_feature_for_profile
 from supabase_client import (
+    count_consultations_by_users,
     get_profile,
     get_profile_by_email,
     list_profiles,
@@ -1454,6 +1455,7 @@ async def admin_overview(x_veterinarian_id: str = Header(None)):
     clients_count, _ = clinic_db.count_table_rows("clients")
     patients_count, _ = clinic_db.count_table_rows("patients")
     appts_count, _ = clinic_db.count_table_rows("appointments")
+    consultations_count, _ = clinic_db.count_table_rows("consultations")
     premium = sum(1 for p in profiles if (p.get("membership_type") or "").lower() == "premium")
     trial = sum(1 for p in profiles if not p.get("membership_type") and (p.get("consultations_remaining") or 0) > 0)
     trial_surveys = len(trial_survey.list_trial_survey_responses(profiles))
@@ -1467,6 +1469,7 @@ async def admin_overview(x_veterinarian_id: str = Header(None)):
             "clients_total": clients_count,
             "patients_total": patients_count,
             "appointments_total": appts_count,
+            "consultations_total": consultations_count,
         }
     }
 
@@ -1482,6 +1485,11 @@ async def admin_list_users(
     profiles, err = list_profiles(limit=min(limit, 500))
     if err:
         raise HTTPException(status_code=500, detail=err)
+    consultation_counts, counts_err = count_consultations_by_users(
+        [str(profile.get("id") or "") for profile in profiles]
+    )
+    if counts_err:
+        raise HTTPException(status_code=500, detail=f"Error contando consultas: {counts_err}")
     q = search.lower().strip()
     pf = (plan_filter or "all").lower().strip()
     paid_plans = {"basic", "professional", "premium"}
@@ -1509,6 +1517,7 @@ async def admin_list_users(
                 "nombre": profile.get("nombre"),
                 "membership_type": profile.get("membership_type"),
                 "consultations_remaining": profile.get("consultations_remaining"),
+                "consultations_used": consultation_counts.get(str(profile.get("id") or ""), 0),
                 "created_at": profile.get("created_at"),
                 "cedula_profesional": profile.get("cedula_profesional"),
                 "profesional_pais": profile.get("profesional_pais"),

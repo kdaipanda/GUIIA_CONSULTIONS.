@@ -26,6 +26,26 @@
   color: var(--admin-navy);
 }
 
+.clinic-admin-consultation-usage {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.clinic-admin-consultation-usage strong {
+  color: var(--admin-navy);
+  font-size: 0.875rem;
+  line-height: 1.25;
+}
+
+.clinic-admin-consultation-usage span {
+  color: #52657a;
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
 .clinic-admin-page-guiaa .clinic-settings-card {
   margin-bottom: 16px;
 }
@@ -148,7 +168,7 @@
   }
 
   .clinic-admin-users-table-wrap .clinic-table {
-    min-width: 920px;
+    min-width: 980px;
   }
 
   .clinic-admin-page-guiaa .clinic-admin-row-actions {

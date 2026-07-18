@@ -261,6 +261,43 @@ def count_consultations_by_user(user_id: str) -> Tuple[int, Optional[str]]:
         return (0, str(exc))
 
 
+def count_consultations_by_users(
+    user_ids: List[str],
+) -> Tuple[Dict[str, int], Optional[str]]:
+    """Cuenta consultas históricas por usuario con consultas paginadas en lote."""
+    normalized_ids = list(dict.fromkeys(user_id for user_id in user_ids if user_id))
+    counts = {user_id: 0 for user_id in normalized_ids}
+    if not normalized_ids:
+        return (counts, None)
+
+    client = get_supabase_client()
+    chunk_size = 100
+    page_size = 1000
+    try:
+        for chunk_start in range(0, len(normalized_ids), chunk_size):
+            chunk = normalized_ids[chunk_start : chunk_start + chunk_size]
+            offset = 0
+            while True:
+                resp = (
+                    client.table("consultations")
+                    .select("user_id")
+                    .in_("user_id", chunk)
+                    .range(offset, offset + page_size - 1)
+                    .execute()
+                )
+                rows = resp.data or []
+                for row in rows:
+                    user_id = row.get("user_id")
+                    if user_id in counts:
+                        counts[user_id] += 1
+                if len(rows) < page_size:
+                    break
+                offset += page_size
+        return (counts, None)
+    except Exception as exc:  # noqa: BLE001
+        return (counts, str(exc))
+
+
 def _merge_medical_image_stripped(current: Dict[str, Any], removed_col: str, val: Any) -> None:
     """Si una columna no existe en BD, fusiona su contenido en analysis o findings."""
     if removed_col in ("findings", "recommendations", "additional_context"):
