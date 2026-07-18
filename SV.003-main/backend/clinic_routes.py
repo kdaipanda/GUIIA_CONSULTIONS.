@@ -14,6 +14,7 @@ import cedula_verification
 import auth_security
 import email_notifications
 import trial_survey
+import promotions_service
 from membership_access import require_feature_for_profile
 from supabase_client import (
     get_profile,
@@ -2027,3 +2028,83 @@ async def admin_lookup_user(email: str, x_veterinarian_id: str = Header(None)):
         "nombre": profile.get("nombre"),
         "created_at": profile.get("created_at"),
     }
+
+
+class PromotionPreviewBody(BaseModel):
+    segment: str
+    channels: list[str] = ["email"]
+    offer: Optional[dict] = None
+
+
+class PromotionSendBody(BaseModel):
+    segment: str
+    channels: list[str] = ["email", "whatsapp"]
+    campaign_name: Optional[str] = None
+    offer: Optional[dict] = None
+    dry_run: bool = False
+    limit: int = 200
+
+
+@clinic_router.get("/admin/promotions/segments")
+async def admin_promotion_segments(x_veterinarian_id: str = Header(None)):
+    await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    return {"segments": promotions_service.list_segments()}
+
+
+@clinic_router.get("/admin/promotions/campaigns")
+async def admin_promotion_campaigns(
+    limit: int = 50,
+    x_veterinarian_id: str = Header(None),
+):
+    await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    campaigns, err = promotions_service.list_campaigns(limit=limit)
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    return {"campaigns": campaigns, "count": len(campaigns)}
+
+
+@clinic_router.post("/admin/promotions/preview")
+async def admin_promotion_preview(
+    body: PromotionPreviewBody,
+    x_veterinarian_id: str = Header(None),
+):
+    await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    result = promotions_service.preview_campaign(
+        segment=body.segment,
+        channels=body.channels,
+        custom_offer=body.offer,
+    )
+    if not result.get("ok"):
+        raise HTTPException(status_code=400, detail=result.get("error") or "Error en preview")
+    return result
+
+
+@clinic_router.post("/admin/promotions/send")
+async def admin_promotion_send(
+    body: PromotionSendBody,
+    x_veterinarian_id: str = Header(None),
+):
+    admin = await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    result = promotions_service.send_campaign(
+        segment=body.segment,
+        channels=body.channels,
+        created_by_profile_id=admin.get("id"),
+        campaign_name=body.campaign_name,
+        custom_offer=body.offer,
+        dry_run=body.dry_run,
+        limit=body.limit,
+    )
+    if not result.get("ok"):
+        raise HTTPException(status_code=400, detail=result.get("error") or "Error al enviar")
+    auth_security.audit_admin_action(
+        admin,
+        "promotion_send",
+        metadata={
+            "campaign_id": result.get("campaign_id"),
+            "segment": body.segment,
+            "channels": body.channels,
+            "dry_run": body.dry_run,
+            "stats": result.get("stats"),
+        },
+    )
+    return result

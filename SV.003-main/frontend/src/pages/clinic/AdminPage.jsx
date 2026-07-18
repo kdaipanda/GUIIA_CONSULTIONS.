@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox, Star } from "lucide-react";
+import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox, Star, Megaphone } from "lucide-react";
 import "./clinicPageShared.css";
 import "./adminPage.css";
 import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
@@ -30,6 +30,10 @@ import {
   fetchAdminGuiaConsultasLeads,
   updateAdminGuiaConsultasLead,
   fetchAdminTrialSurveys,
+  fetchAdminPromotionSegments,
+  fetchAdminPromotionCampaigns,
+  previewAdminPromotion,
+  sendAdminPromotion,
 } from "../../lib/clinicApi";
 import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
@@ -236,6 +240,14 @@ export function AdminPage() {
   const [trialSurveySearch, setTrialSurveySearch] = useState("");
   const [trialSurveysLoading, setTrialSurveysLoading] = useState(false);
   const [selectedSurvey, setSelectedSurvey] = useState(null);
+  const [promoSegments, setPromoSegments] = useState([]);
+  const [promoSegment, setPromoSegment] = useState("trial_exhausted");
+  const [promoChannels, setPromoChannels] = useState({ email: true, whatsapp: true });
+  const [promoPreview, setPromoPreview] = useState(null);
+  const [promoCampaigns, setPromoCampaigns] = useState([]);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoSending, setPromoSending] = useState(false);
+  const [promoDryRun, setPromoDryRun] = useState(true);
 
   useEffect(() => {
     return () => {
@@ -306,6 +318,18 @@ export function AdminPage() {
         setTrialSurveysLoading(false);
       }
 
+      try {
+        const [segmentsData, campaignsData] = await Promise.all([
+          fetchAdminPromotionSegments(veterinarian.id),
+          fetchAdminPromotionCampaigns(veterinarian.id),
+        ]);
+        setPromoSegments(segmentsData.segments || []);
+        setPromoCampaigns(campaignsData.campaigns || []);
+      } catch {
+        setPromoSegments([]);
+        setPromoCampaigns([]);
+      }
+
       setAllowed(true);
     } catch (err) {
       const message = err.message || "No se pudo cargar el panel de administración";
@@ -322,6 +346,61 @@ export function AdminPage() {
     const t = setTimeout(load, search ? 300 : 0);
     return () => clearTimeout(t);
   }, [load, search, vetLoading, veterinarian?.id, planFilter, supportFilter, guiaLeadFilter, trialSurveySearch]);
+
+  const selectedPromoChannels = Object.entries(promoChannels)
+    .filter(([, enabled]) => enabled)
+    .map(([channel]) => channel);
+
+  const handlePromoPreview = async () => {
+    if (!veterinarian?.id) return;
+    setPromoLoading(true);
+    try {
+      const data = await previewAdminPromotion(veterinarian.id, {
+        segment: promoSegment,
+        channels: selectedPromoChannels.length ? selectedPromoChannels : ["email"],
+      });
+      setPromoPreview(data);
+      notifySuccess(`Vista previa: ${data.recipient_count ?? 0} destinatarios`);
+    } catch (err) {
+      notifyError(err.message);
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handlePromoSend = async () => {
+    if (!veterinarian?.id) return;
+    const channels = selectedPromoChannels.length ? selectedPromoChannels : ["email"];
+    const ok = await confirm({
+      title: promoDryRun ? "Simular envío promocional" : "Enviar promociones",
+      description: promoDryRun
+        ? "Se registrará la campaña sin enviar correos ni WhatsApp reales."
+        : `Se enviará la oferta por ${channels.join(" y ")} al segmento seleccionado. ¿Continuar?`,
+      confirmLabel: promoDryRun ? "Simular" : "Enviar",
+      destructive: !promoDryRun,
+    });
+    if (!ok) return;
+    setPromoSending(true);
+    try {
+      const data = await sendAdminPromotion(veterinarian.id, {
+        segment: promoSegment,
+        channels,
+        dry_run: promoDryRun,
+      });
+      const stats = data.stats || {};
+      notifySuccess(
+        promoDryRun
+          ? `Simulación registrada (${data.recipient_count ?? 0} contactos)`
+          : `Enviados: ${stats.sent ?? 0} · Fallidos: ${stats.failed ?? 0}`
+      );
+      const campaignsData = await fetchAdminPromotionCampaigns(veterinarian.id);
+      setPromoCampaigns(campaignsData.campaigns || []);
+    } catch (err) {
+      notifyError(err.message);
+    } finally {
+      setPromoSending(false);
+    }
+  };
 
   const handleDeleteUser = async (e) => {
     e.preventDefault();
@@ -792,6 +871,127 @@ export function AdminPage() {
                       {(survey.comment || "").length > 100 ? "…" : ""}
                     </td>
                     <td>{formatPlanLabel(survey)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="clinic-settings-card">
+        <div className="clinic-admin-users-head">
+          <h2>
+            <Megaphone size={18} aria-hidden />
+            Promociones (email + WhatsApp)
+          </h2>
+          <span className="clinic-admin-users-count">{promoCampaigns.length} campañas</span>
+        </div>
+        <p className="clinic-muted clinic-tools-desc">
+          Envía ofertas a veterinarios y leads registrados. Las imágenes se generan con Canva
+          (plantilla de marca) y se envían por correo y WhatsApp.
+        </p>
+        <div className="clinic-admin-users-toolbar clinic-admin-promo-toolbar">
+          <div className="clinic-form-field">
+            <Label htmlFor="promo-segment">Segmento</Label>
+            <select
+              id="promo-segment"
+              className="clinic-input"
+              value={promoSegment}
+              onChange={(e) => setPromoSegment(e.target.value)}
+            >
+              {(promoSegments.length ? promoSegments : [{ id: "trial_exhausted", label: "Prueba agotada" }]).map(
+                (seg) => (
+                  <option key={seg.id} value={seg.id}>
+                    {seg.label}
+                  </option>
+                )
+              )}
+            </select>
+          </div>
+          <div className="clinic-form-field clinic-admin-promo-channels">
+            <Label>Canales</Label>
+            <div className="clinic-admin-promo-channel-row">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={promoChannels.email}
+                  onChange={(e) => setPromoChannels((prev) => ({ ...prev, email: e.target.checked }))}
+                />
+                Email
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={promoChannels.whatsapp}
+                  onChange={(e) => setPromoChannels((prev) => ({ ...prev, whatsapp: e.target.checked }))}
+                />
+                WhatsApp
+              </label>
+            </div>
+          </div>
+          <label className="clinic-admin-promo-dry-run">
+            <input
+              type="checkbox"
+              checked={promoDryRun}
+              onChange={(e) => setPromoDryRun(e.target.checked)}
+            />
+            Solo simular (sin enviar)
+          </label>
+          <div className="clinic-admin-promo-actions">
+            <Button type="button" variant="outline" disabled={promoLoading} onClick={handlePromoPreview}>
+              {promoLoading ? "Cargando…" : "Vista previa"}
+            </Button>
+            <Button type="button" disabled={promoSending} onClick={handlePromoSend}>
+              {promoSending ? "Procesando…" : promoDryRun ? "Simular envío" : "Enviar promociones"}
+            </Button>
+          </div>
+        </div>
+        {promoPreview && (
+          <div className="clinic-admin-promo-preview">
+            <p>
+              <strong>{promoPreview.recipient_count ?? 0}</strong> destinatarios ·{" "}
+              {promoPreview.with_email ?? 0} con email · {promoPreview.with_phone ?? 0} con teléfono
+            </p>
+            {promoPreview.offer?.headline && (
+              <p className="clinic-muted">{promoPreview.offer.headline}</p>
+            )}
+            {promoPreview.image_url && (
+              <img
+                src={promoPreview.image_url}
+                alt="Vista previa oferta"
+                className="clinic-admin-promo-preview-img"
+              />
+            )}
+            {promoPreview.image_error && (
+              <p className="clinic-muted">Imagen: {promoPreview.image_source} — {promoPreview.image_error}</p>
+            )}
+          </div>
+        )}
+        {promoCampaigns.length > 0 && (
+          <div className="clinic-table-wrap">
+            <table className="clinic-table clinic-admin-support-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Campaña</th>
+                  <th>Segmento</th>
+                  <th>Estado</th>
+                  <th>Resultado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {promoCampaigns.slice(0, 10).map((campaign) => (
+                  <tr key={campaign.id}>
+                    <td>{formatDateTime(campaign.created_at)}</td>
+                    <td>{campaign.name || "—"}</td>
+                    <td>{campaign.segment}</td>
+                    <td>{campaign.dry_run ? "Simulación" : campaign.status}</td>
+                    <td>
+                      {campaign.stats
+                        ? `✓ ${campaign.stats.sent ?? 0} · ✗ ${campaign.stats.failed ?? 0}`
+                        : "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

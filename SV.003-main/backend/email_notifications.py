@@ -80,7 +80,13 @@ def get_email_config_status() -> dict:
     }
 
 
-def _send_resend(to_addrs: List[str], subject: str, html: str, text: str) -> Optional[str]:
+def _send_resend(
+    to_addrs: List[str],
+    subject: str,
+    html: str,
+    text: str,
+    extra_headers: Optional[dict] = None,
+) -> Optional[str]:
     api_key = os.getenv("RESEND_API_KEY", "").strip()
     if not api_key or httpx is None:
         return "Resend no configurado"
@@ -95,6 +101,8 @@ def _send_resend(to_addrs: List[str], subject: str, html: str, text: str) -> Opt
     reply_to = _reply_to()
     if reply_to:
         payload["reply_to"] = reply_to
+    if extra_headers:
+        payload["headers"] = extra_headers
     try:
         response = httpx.post(
             "https://api.resend.com/emails",
@@ -152,14 +160,20 @@ def _send_smtp(to_addrs: List[str], subject: str, html: str, text: str) -> Optio
         return str(exc)
 
 
-def send_email(to_addrs: List[str], subject: str, html: str, text: str) -> Optional[str]:
+def send_email(
+    to_addrs: List[str],
+    subject: str,
+    html: str,
+    text: str,
+    extra_headers: Optional[dict] = None,
+) -> Optional[str]:
     """Envía email. Devuelve mensaje de error o None si OK."""
     recipients = [e.strip() for e in to_addrs if e and e.strip()]
     if not recipients:
         return "Sin destinatarios"
 
     if os.getenv("RESEND_API_KEY", "").strip():
-        err = _send_resend(recipients, subject, html, text)
+        err = _send_resend(recipients, subject, html, text, extra_headers=extra_headers)
         if not err:
             return None
 
@@ -705,4 +719,70 @@ def notify_user_2fa_code(profile: dict, code: str) -> None:
     err = send_email([user_email], email_subject, html, text)
     if err:
         print(f"[WARN] Email 2FA: {err}")
+
+
+def send_promotional_email(
+    to_addr: str,
+    nombre: str,
+    offer: dict,
+    image_url: Optional[str] = None,
+    segment: str = "promo",
+) -> Optional[str]:
+    """Email promocional con imagen de oferta y enlace de baja."""
+    email = (to_addr or "").strip()
+    if not email:
+        return "Sin email"
+
+    frontend = _frontend_url()
+    headline = (offer.get("headline") or "Oferta GUIAA").strip()
+    message = (offer.get("message") or "").strip()
+    promo = (offer.get("promo_code") or "").strip()
+    plan = (offer.get("plan_name") or "Premium").strip()
+    membership_url = f"{frontend}/app/membership?utm_source=email&utm_campaign=promo_{segment}"
+    if promo:
+        membership_url += f"&promo={promo}"
+
+    unsubscribe_url = f"{frontend}/app/settings/marketing-unsubscribe?email={email}"
+    subject = f"GUIAA — {headline}"
+
+    img_block = ""
+    if image_url:
+        img_block = f'<p style="text-align:center;margin:24px 0;"><img src="{image_url}" alt="Oferta GUIAA" style="max-width:100%;border-radius:12px;" /></p>'
+
+    promo_line = f"<p><strong>Cupón:</strong> {promo}</p>" if promo else ""
+
+    text = (
+        f"Hola {nombre},\n\n"
+        f"{headline}\n\n"
+        f"{message}\n\n"
+        f"Plan: {plan}\n"
+        + (f"Cupón: {promo}\n" if promo else "")
+        + f"\nContratar: {membership_url}\n\n"
+        f"Para dejar de recibir promociones: {unsubscribe_url}\n"
+    )
+    html = f"""
+    <div style="font-family:system-ui,sans-serif;color:#0c2d4d;max-width:560px;margin:0 auto;">
+      <p>Hola {nombre},</p>
+      <h2 style="color:#265B93;margin:16px 0;">{headline}</h2>
+      <p>{message}</p>
+      {img_block}
+      <p><strong>Plan {plan}</strong></p>
+      {promo_line}
+      <p style="margin:28px 0;">
+        <a href="{membership_url}" style="background:#265B93;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">
+          Ver oferta en GUIAA
+        </a>
+      </p>
+      <p style="color:#64748b;font-size:12px;margin-top:32px;">
+        Recibes este correo porque estás registrado en GUIAA.
+        <a href="{unsubscribe_url}">Darme de baja de promociones</a>
+      </p>
+    </div>
+    """
+
+    headers = {
+        "List-Unsubscribe": f"<{unsubscribe_url}>",
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    }
+    return send_email([email], subject, html, text, extra_headers=headers)
 

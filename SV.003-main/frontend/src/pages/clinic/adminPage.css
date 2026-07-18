@@ -233,3 +233,45 @@
     width: 100%;
   }
 }
+
+.clinic-admin-promo-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.clinic-admin-promo-channels .clinic-admin-promo-channel-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.clinic-admin-promo-dry-run {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.clinic-admin-promo-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.clinic-admin-promo-preview {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(38, 91, 147, 0.04);
+}
+
+.clinic-admin-promo-preview-img {
+  max-width: 320px;
+  width: 100%;
+  border-radius: 12px;
+  margin-top: 12px;
+  display: block;
+}

@@ -42,6 +42,7 @@ import meta_capi
 import password_auth
 import rate_limit
 import trial_survey
+import promotions_service
 from membership_catalog import (
     CONSULTATION_CREDIT_PACKAGES,
     FEATURED_PLAN_KEY,
@@ -2286,6 +2287,20 @@ async def create_consultation(
         if err_prof:
             # No abortamos la consulta ya creada; solo avisamos
             print(f"[WARN] No se pudo actualizar remaining: {err_prof}")
+        elif (
+            not has_unlimited
+            and not membership_type
+            and remaining > 0
+            and new_remaining <= 0
+        ):
+            updated_profile = {**profile, "consultations_remaining": new_remaining}
+            asyncio.create_task(
+                _email_background(
+                    promotions_service.maybe_send_trial_exhausted_promo,
+                    updated_profile,
+                    remaining,
+                )
+            )
 
     serialized = _serialize_consultation(inserted or new_row)
     trial_survey_due = (
