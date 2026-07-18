@@ -78,6 +78,7 @@ from pydantic import BaseModel, Field
 from supabase_client import (
     SupabaseConfigError,
     count_consultations_by_user,
+    debit_profile_consultation_credit,
     get_consultation_by_id,
     get_payment_transaction_by_session_id,
     get_profile,
@@ -93,6 +94,7 @@ from supabase_client import (
     list_medical_images,
     list_medical_images_for_consultation,
     list_profiles,
+    restore_profile_consultation_credit,
     update_consultation,
     update_payment_transaction,
     update_profile,
@@ -2265,27 +2267,39 @@ async def create_consultation(
     if payload.appointment_id:
         new_row["appointment_id"] = payload.appointment_id
 
+    # Reservar el crédito antes de crear el borrador. La actualización condicional
+    # evita que dos solicitudes simultáneas gasten el mismo saldo leído del perfil.
+    new_remaining = remaining
+    debited_credit = False
+    if not has_unlimited and (has_trial_consultations or (membership_type and membership_type != "premium")):
+        new_remaining, err_prof = debit_profile_consultation_credit(vet_id, int(remaining or 0))
+        if err_prof:
+            status_code = 403 if err_prof == "no_consultations_remaining" else 409
+            raise HTTPException(
+                status_code=status_code,
+                detail=(
+                    "No tienes consultas disponibles."
+                    if status_code == 403
+                    else "No se pudo reservar la consulta por un cambio concurrente. Intenta de nuevo."
+                ),
+            )
+        debited_credit = True
+
     inserted, err_ins = insert_consultation(new_row)
     if err_ins and any(k in err_ins for k in ("organization_id", "client_id", "patient_id", "appointment_id")):
         for key in ("organization_id", "client_id", "patient_id", "appointment_id"):
             new_row.pop(key, None)
         inserted, err_ins = insert_consultation(new_row)
     if err_ins:
+        if debited_credit:
+            restore_err = restore_profile_consultation_credit(
+                vet_id,
+                int(new_remaining or 0),
+                int(remaining or 0),
+            )
+            if restore_err:
+                print(f"[ERROR] No se pudo restaurar crédito de consulta: {restore_err}")
         raise HTTPException(status_code=500, detail=f"Error guardando consulta: {err_ins}")
-
-    # Descontar crédito si no es premium y no tiene consultas ilimitadas (las consultas de prueba también se descuentan)
-    # Si tiene consultas ilimitadas, no descontar
-    # Usar update_profile (no upsert): un upsert parcial falla por NOT NULL en email y no descuenta.
-    new_remaining = remaining
-    if not has_unlimited and (has_trial_consultations or (membership_type and membership_type != "premium")):
-        new_remaining = max(0, remaining - 1)
-        err_prof = update_profile(
-            vet_id,
-            {"consultations_remaining": new_remaining},
-        )
-        if err_prof:
-            # No abortamos la consulta ya creada; solo avisamos
-            print(f"[WARN] No se pudo actualizar remaining: {err_prof}")
 
     serialized = _serialize_consultation(inserted or new_row)
     trial_survey_due = (
