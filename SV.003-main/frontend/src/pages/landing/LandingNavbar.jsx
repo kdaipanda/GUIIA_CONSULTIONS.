@@ -83,7 +83,7 @@ export function LandingNavbar({ setView, hero = false }) {
     const isActive = activeSection === sectionId;
     if (hero) {
       return `relative text-sm font-semibold transition-colors duration-150 hover:text-white ${
-        isActive ? "text-white" : "text-white/78"
+        isActive ? "text-white" : "text-white/95"
       }`;
     }
     return `relative landing-eyebrow transition-colors duration-150 hover:text-guiaa-brand-navy ${
@@ -157,7 +157,7 @@ export function LandingNavbar({ setView, hero = false }) {
             onClick={() => setView("login")}
             className={`landing-nav-mobile-cta rounded-lg px-3 py-2.5 text-xs font-semibold ${
               hero
-                ? "text-white/90 hover:bg-white/10"
+                ? "text-white hover:bg-white/10"
                 : "text-guiaa-brand-navy/80 hover:bg-guiaa-brand-navy/5"
             }`}
           >
@@ -179,7 +179,8 @@ export function LandingNavbar({ setView, hero = false }) {
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
           >
-            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+            {mobileOpen ? <X size={22} aria-hidden /> : <Menu size={22} aria-hidden />}
+            <span className="sr-only">{mobileOpen ? "Cerrar menú" : "Abrir menú"}</span>
           </button>
         </div>
       </div>
@@ -211,7 +212,7 @@ export function LandingNavbar({ setView, hero = false }) {
                       ? "bg-white/12 text-white"
                       : "bg-guiaa-sky-soft/60 text-guiaa-brand-navy"
                     : hero
-                      ? "text-white/85"
+                      ? "text-white"
                       : "text-guiaa-brand-navy/80"
                 }`}
                 aria-current={activeSection === sectionId ? "true" : undefined}

@@ -22,7 +22,7 @@ function resolveLogoSrc(tone = "auto") {
   return isDark ? LOGO_SRC_ON_DARK : LOGO_SRC;
 }
 
-export function GuiaaLogoImg({ className, tone = "auto" }) {
+export function GuiaaLogoImg({ className, tone = "auto", alt = "GUIAA" }) {
   const [src, setSrc] = useState(() => resolveLogoSrc(tone));
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export function GuiaaLogoImg({ className, tone = "auto" }) {
     return () => observer.disconnect();
   }, [tone]);
 
-  return <img src={src} alt="GUIAA" className={className} decoding="async" />;
+  return <img src={src} alt={alt} className={className} decoding="async" />;
 }
 
 export function GuiaaBrandLockup({
@@ -72,14 +72,18 @@ export function GuiaaBrandLockup({
     .filter(Boolean)
     .join(" ");
 
+  const homeLabel = showTaglines
+    ? `GUIAA. ${GUIAA_TAGLINE_PRIMARY} ${GUIAA_TAGLINE_SECONDARY}`
+    : "GUIAA, ir al inicio";
+
   if (isHeader) {
     const inner = (
       <div
         className={`guiaa-brand-lockup guiaa-brand-lockup--header flex min-w-0 items-center gap-3 sm:gap-4 ${className}`}
       >
-        <GuiaaLogoImg className={logoClasses} tone={resolvedTone} />
+        <GuiaaLogoImg className={logoClasses} tone={resolvedTone} alt={onClick ? "" : "GUIAA"} />
         {showTaglines && (
-          <div className="nav-brand-text">
+          <div className="nav-brand-text" aria-hidden={Boolean(onClick)}>
             <span className="nav-brand-subtitle">{GUIAA_TAGLINE_PRIMARY}</span>
             <span className="nav-brand-subsubtitle">{GUIAA_TAGLINE_SECONDARY}</span>
           </div>
@@ -89,7 +93,12 @@ export function GuiaaBrandLockup({
 
     if (onClick) {
       return (
-        <button type="button" onClick={onClick} className="nav-brand-button min-w-0 text-left">
+        <button
+          type="button"
+          onClick={onClick}
+          className="nav-brand-button min-w-0 text-left"
+          aria-label={homeLabel}
+        >
           {inner}
         </button>
       );
@@ -128,9 +137,9 @@ export function GuiaaBrandLockup({
 
   const inner = (
     <div className={`${wrapperClasses} ${className}`}>
-      <GuiaaLogoImg className={logoClasses} tone={resolvedTone} />
+      <GuiaaLogoImg className={logoClasses} tone={resolvedTone} alt={onClick ? "" : "GUIAA"} />
       {showTaglines && (
-        <div className={taglineClasses}>
+        <div className={taglineClasses} aria-hidden={Boolean(onClick)}>
           <p className={primaryClasses}>{GUIAA_TAGLINE_PRIMARY}</p>
           <p className={secondaryClasses}>{GUIAA_TAGLINE_SECONDARY}</p>
         </div>
@@ -140,7 +149,7 @@ export function GuiaaBrandLockup({
 
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} className="min-w-0 text-left">
+      <button type="button" onClick={onClick} className="min-w-0 text-left" aria-label={homeLabel}>
         {inner}
       </button>
     );

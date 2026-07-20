@@ -36,7 +36,7 @@ export function LandingVideoModal({ open, onClose }) {
       className="landing-video-modal"
       role="dialog"
       aria-modal="true"
-      aria-label="Video de presentación GUIAA"
+      aria-labelledby="landing-video-modal-title"
       onClick={onClose}
     >
       <div className="landing-video-modal-panel" onClick={(e) => e.stopPropagation()}>
@@ -47,6 +47,7 @@ export function LandingVideoModal({ open, onClose }) {
           aria-label="Cerrar video"
         >
           <X size={20} aria-hidden />
+          <span className="sr-only">Cerrar video</span>
         </button>
         <video
           ref={videoRef}
@@ -58,7 +59,7 @@ export function LandingVideoModal({ open, onClose }) {
           <source src={LANDING_HERO_VIDEO} type="video/mp4" />
           Tu navegador no reproduce video HTML5.
         </video>
-        <p className="landing-video-modal-caption">
+        <p id="landing-video-modal-title" className="landing-video-modal-caption">
           Doctor Plumitas te presenta GUIAA: software clínico veterinario con CDS L4·L5.
         </p>
       </div>

@@ -134,9 +134,10 @@ export function LandingHero({ setView }) {
                   type="button"
                   className="landing-petpal-cta-play"
                   onClick={() => setVideoOpen(true)}
-                  aria-label="Reproducir video de presentación"
+                  aria-label="Ver video de presentación"
                 >
                   <Play size={18} fill="currentColor" aria-hidden />
+                  <span className="sr-only">Ver video de presentación</span>
                 </button>
               </div>
 

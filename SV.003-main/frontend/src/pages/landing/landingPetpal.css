@@ -49,7 +49,7 @@
 
 .landing-nav-hero .landing-eyebrow,
 .landing-nav-hero .landing-btn-ghost {
-  color: rgba(255, 255, 255, 0.88) !important;
+  color: #ffffff !important;
 }
 
 .landing-nav-hero .landing-eyebrow:hover,
@@ -77,12 +77,14 @@
 }
 
 .landing-nav-hero .nav-brand-subtitle,
-.landing-nav-hero .nav-brand-subsubtitle {
-  color: rgba(255, 255, 255, 0.92) !important;
+.landing-nav-hero .nav-brand-subsubtitle,
+.landing-nav-hero .guiaa-brand-lockup--navbar p {
+  color: #ffffff !important;
 }
 
-.landing-nav-hero .nav-brand-subsubtitle {
-  color: rgba(255, 255, 255, 0.72) !important;
+.landing-nav-hero .nav-brand-subsubtitle,
+.landing-nav-hero .guiaa-brand-lockup--navbar p + p {
+  color: #ffffff !important;
 }
 
 .landing-nav-hero .sm\:border-guiaa-brand-navy\/12 {
@@ -145,7 +147,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.82);
+  color: #ffffff;
 }
 
 .landing-petpal-title {
@@ -159,14 +161,18 @@
 }
 
 .landing-petpal-accent {
-  color: #ffd4c8;
+  color: #ffffff;
+  text-decoration: underline;
+  text-decoration-color: #ffd4c8;
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.18em;
 }
 
 .landing-petpal-lead {
   margin-top: 1rem;
   font-size: 0.95rem;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.88);
+  color: #ffffff;
 }
 
 @media (min-width: 640px) {
@@ -225,7 +231,7 @@
 .landing-petpal-scroll-hint {
   display: none;
   margin-top: 2.5rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 @media (min-width: 1024px) {
@@ -308,7 +314,8 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  opacity: 0.85;
+  color: #ffffff;
+  opacity: 1;
 }
 
 .landing-petpal-glass-value {
@@ -491,6 +498,6 @@
   margin: 0;
   padding: 0.85rem 1rem;
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.82);
+  color: #ffffff;
   text-align: center;
 }

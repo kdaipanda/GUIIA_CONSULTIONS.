@@ -155,9 +155,10 @@ export function LandingHeroVideo({ onFailed }) {
           type="button"
           className="landing-hero-video-play-overlay"
           onClick={startMobile}
-          aria-label="Reproducir video de presentación"
+          aria-label="Reproducir video en el panel"
         >
           <Play size={22} fill="currentColor" aria-hidden />
+          <span className="sr-only">Reproducir video en el panel</span>
         </button>
       )}
 
@@ -166,9 +167,10 @@ export function LandingHeroVideo({ onFailed }) {
           type="button"
           className="landing-hero-video-play-overlay landing-hero-video-play-overlay--desktop"
           onClick={handleManualPlay}
-          aria-label="Reproducir video de presentación"
+          aria-label="Reproducir video en el panel"
         >
           <Play size={22} fill="currentColor" aria-hidden />
+          <span className="sr-only">Reproducir video en el panel</span>
         </button>
       )}
     </div>

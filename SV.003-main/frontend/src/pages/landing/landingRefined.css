@@ -84,8 +84,8 @@
   gap: 0.4rem;
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
-  background: rgba(61, 155, 143, 0.1);
-  color: #2f857a;
+  background: rgba(61, 155, 143, 0.14);
+  color: #0c2d4d;
   letter-spacing: 0.1em;
 }
 
@@ -375,12 +375,12 @@
 }
 
 .landing-cta-panel-v2 .landing-lead {
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .landing-cta-panel-v2 .landing-eyebrow {
-  background: rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 .landing-cta-panel-v2 .landing-btn-primary {

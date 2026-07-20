@@ -19,7 +19,7 @@ export function LandingCta({ setView }) {
             <button
               type="button"
               onClick={() => scrollToLandingSection("#faq")}
-              className="landing-cta-faq-link mt-5 inline-flex min-h-11 items-center text-sm font-medium text-white/75 transition hover:text-white"
+              className="landing-cta-faq-link mt-5 inline-flex min-h-11 items-center text-sm font-medium text-white transition hover:text-white"
             >
               Ver preguntas frecuentes
             </button>

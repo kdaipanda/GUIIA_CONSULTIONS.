@@ -251,7 +251,7 @@
   margin-top: 0.65rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.78);
+  color: #ffffff;
 }
 
 .landing-petpal-demo-link {
@@ -259,7 +259,7 @@
   margin-top: 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.82);
+  color: #ffffff;
   text-decoration: underline;
   text-underline-offset: 3px;
   transition: color 0.2s ease;

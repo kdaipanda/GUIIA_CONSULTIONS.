@@ -36,6 +36,7 @@ export function LandingSocialRail() {
               aria-label={label}
             >
               <Icon size={18} aria-hidden />
+              <span className="sr-only">{label}</span>
             </a>
           ) : (
             <button
@@ -46,6 +47,7 @@ export function LandingSocialRail() {
               aria-label={label}
             >
               <Icon size={18} aria-hidden />
+              <span className="sr-only">{label}</span>
             </button>
           ),
         )}

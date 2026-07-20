@@ -137,7 +137,7 @@ export function LandingProductShowcase() {
               })}
             </div>
 
-            <p className="mt-4 text-sm text-guiaa-brand-ink-subtle">{activeShot.caption}</p>
+            <p className="mt-4 text-sm text-guiaa-brand-ink-muted">{activeShot.caption}</p>
           </div>
 
           <div className="landing-device-mockup">
