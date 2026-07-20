@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 
 export function LandingReveal({ children, className = "", delay = 0, as: Tag = "div" }) {
   const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const [visible, setVisible] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
 
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setReducedMotion(prefersReduced);
     const node = ref.current;
     if (!node) return undefined;
 
@@ -33,7 +33,7 @@ export function LandingReveal({ children, className = "", delay = 0, as: Tag = "
     <Tag
       ref={ref}
       className={`landing-reveal ${visible ? "is-visible" : ""} ${className}`.trim()}
-      style={reducedMotion ? undefined : { transitionDelay: `${delay}ms` }}
+      style={visible ? undefined : { transitionDelay: `${delay}ms` }}
     >
       {children}
     </Tag>

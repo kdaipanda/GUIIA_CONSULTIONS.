@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, startTransition } from "react";
 
 import "../styles/consultationFlow.css";
 import "./landing/landingPreview.css";
@@ -40,14 +40,21 @@ export function LandingPage({ setView }) {
   useEffect(() => {
     trackMetaPageView();
   }, []);
+
+  const setViewDeferred = useCallback((view) => {
+    startTransition(() => {
+      setView(view);
+    });
+  }, [setView]);
+
   return (
     <div className="landing-shell landing-shell--page min-h-screen p-3 pb-5 antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
       <LandingSeo />
 
       <div className="landing-page-card mx-auto max-w-[82rem]">
         <div className="landing-petpal-top">
-          <LandingNavbar setView={setView} hero />
-          <LandingHero setView={setView} />
+          <LandingNavbar setView={setViewDeferred} hero />
+          <LandingHero setView={setViewDeferred} />
         </div>
 
         <LandingHeroStats />
@@ -56,7 +63,7 @@ export function LandingPage({ setView }) {
           <LandingVetAnimations variant="body" />
           <main className="relative">
             <LandingReveal>
-              <LandingHowItWorks setView={setView} />
+              <LandingHowItWorks setView={setViewDeferred} />
             </LandingReveal>
 
             <LandingReveal delay={15}>
@@ -92,15 +99,15 @@ export function LandingPage({ setView }) {
             </LandingReveal>
 
             <LandingReveal delay={40}>
-              <LandingPricing setView={setView} />
+              <LandingPricing setView={setViewDeferred} />
             </LandingReveal>
 
             <LandingReveal delay={50}>
-              <LandingFaq setView={setView} />
+              <LandingFaq setView={setViewDeferred} />
             </LandingReveal>
 
             <LandingReveal>
-              <LandingCta setView={setView} />
+              <LandingCta setView={setViewDeferred} />
             </LandingReveal>
 
             <LandingReveal delay={20}>

@@ -10,8 +10,8 @@ const TILT_STRENGTH = 12;
 
 function Hero3DPanel({ children }) {
   const panelRef = useRef(null);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
-  const [isTilting, setIsTilting] = useState(false);
+  const frameRef = useRef(0);
+  const pendingTiltRef = useRef(null);
   const [tiltEnabled, setTiltEnabled] = useState(true);
 
   useEffect(() => {
@@ -20,6 +20,20 @@ function Hero3DPanel({ children }) {
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    },
+    [],
+  );
+
+  const applyTilt = useCallback((rx, ry, tilting) => {
+    const node = panelRef.current;
+    if (!node) return;
+    node.style.transform = `rotateX(${BASE_TILT.rx + rx}deg) rotateY(${BASE_TILT.ry + ry}deg)`;
+    node.classList.toggle("is-tilting", tilting);
   }, []);
 
   const handlePointerMove = useCallback(
@@ -31,22 +45,30 @@ function Hero3DPanel({ children }) {
       const rect = node.getBoundingClientRect();
       const px = (event.clientX - rect.left) / rect.width - 0.5;
       const py = (event.clientY - rect.top) / rect.height - 0.5;
-
-      setIsTilting(true);
-      setTilt({
+      pendingTiltRef.current = {
         rx: py * -TILT_STRENGTH,
         ry: px * TILT_STRENGTH,
+      };
+
+      if (frameRef.current) return;
+      frameRef.current = requestAnimationFrame(() => {
+        frameRef.current = 0;
+        const next = pendingTiltRef.current;
+        if (!next) return;
+        applyTilt(next.rx, next.ry, true);
       });
     },
-    [tiltEnabled],
+    [applyTilt, tiltEnabled],
   );
 
   const resetTilt = useCallback(() => {
-    setIsTilting(false);
-    setTilt({ rx: 0, ry: 0 });
-  }, []);
-
-  const transform = `rotateX(${BASE_TILT.rx + tilt.rx}deg) rotateY(${BASE_TILT.ry + tilt.ry}deg)`;
+    if (frameRef.current) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = 0;
+    }
+    pendingTiltRef.current = null;
+    applyTilt(0, 0, false);
+  }, [applyTilt]);
 
   return (
     <div className="landing-hero-3d-scene">
@@ -56,8 +78,10 @@ function Hero3DPanel({ children }) {
 
       <div
         ref={panelRef}
-        className={`landing-hero-3d-panel landing-petpal-media-ring${isTilting ? " is-tilting" : ""}`}
-        style={{ transform }}
+        className="landing-hero-3d-panel landing-petpal-media-ring"
+        style={{
+          transform: `rotateX(${BASE_TILT.rx}deg) rotateY(${BASE_TILT.ry}deg)`,
+        }}
         onPointerMove={tiltEnabled ? handlePointerMove : undefined}
         onPointerLeave={tiltEnabled ? resetTilt : undefined}
         onPointerCancel={tiltEnabled ? resetTilt : undefined}

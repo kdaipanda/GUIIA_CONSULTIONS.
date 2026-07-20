@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { LandingBrandLockup } from "./LandingBrandLockup";
 import { scrollToLandingProduct } from "./landingScroll";
@@ -11,23 +11,46 @@ const NAV_LINKS = [
   { href: "#faq", label: "FAQ", sectionId: "faq" },
 ];
 
+const SPY_SECTIONS = ["product", "features", "pricing", "faq"];
+
 export function LandingNavbar({ setView, hero = false }) {
   const [scrolled, setScrolled] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const activeSection = useLandingScrollSpy(["product", "features", "pricing", "faq"]);
+  const progressRef = useRef(null);
+  const scrolledRef = useRef(false);
+  const frameRef = useRef(0);
+  const activeSection = useLandingScrollSpy(SPY_SECTIONS);
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 16);
-      const doc = document.documentElement;
-      const scrollable = doc.scrollHeight - doc.clientHeight;
-      setScrollProgress(scrollable > 0 ? window.scrollY / scrollable : 0);
+    const updateScrollUi = () => {
+      frameRef.current = 0;
+      const y = window.scrollY;
+      const nextScrolled = y > 16;
+      if (nextScrolled !== scrolledRef.current) {
+        scrolledRef.current = nextScrolled;
+        setScrolled(nextScrolled);
+      }
+
+      const progressNode = progressRef.current;
+      if (progressNode) {
+        const doc = document.documentElement;
+        const scrollable = doc.scrollHeight - doc.clientHeight;
+        const progress = scrollable > 0 ? y / scrollable : 0;
+        progressNode.style.transform = `scaleX(${Math.min(1, Math.max(0, progress))})`;
+      }
     };
 
-    onScroll();
+    const onScroll = () => {
+      if (frameRef.current) return;
+      frameRef.current = requestAnimationFrame(updateScrollUi);
+    };
+
+    updateScrollUi();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -59,23 +82,23 @@ export function LandingNavbar({ setView, hero = false }) {
   const navLinkClass = (sectionId) => {
     const isActive = activeSection === sectionId;
     if (hero) {
-      return `relative text-sm font-semibold transition hover:text-white ${
+      return `relative text-sm font-semibold transition-colors duration-150 hover:text-white ${
         isActive ? "text-white" : "text-white/78"
       }`;
     }
-    return `relative landing-eyebrow transition hover:text-guiaa-brand-navy ${
+    return `relative landing-eyebrow transition-colors duration-150 hover:text-guiaa-brand-navy ${
       isActive ? "text-guiaa-brand-navy" : "text-guiaa-brand-navy/75"
     }`;
   };
 
   return (
     <header
-      className={`sticky top-0 z-40 border-b transition-all duration-300 ${
+      className={`sticky top-0 z-40 border-b transition-[background-color,border-color] duration-200 ${
         hero
           ? `landing-nav-hero ${scrolled ? "landing-nav-scrolled" : "border-transparent"}`
           : scrolled
             ? "landing-nav-scrolled border-transparent"
-            : "border-guiaa-brand-navy/6 bg-white/40 backdrop-blur-sm"
+            : "border-guiaa-brand-navy/6 bg-white/40"
       }`}
     >
       <div className="landing-container flex min-h-[4.75rem] items-center justify-between gap-3 py-2 sm:min-h-[5rem] sm:gap-4">
@@ -162,17 +185,17 @@ export function LandingNavbar({ setView, hero = false }) {
       </div>
 
       <div
-        className="absolute bottom-0 left-0 h-0.5 bg-guiaa-brand-green/80 transition-[width] duration-150 ease-out"
-        style={{ width: `${scrollProgress * 100}%` }}
+        ref={progressRef}
+        className="landing-nav-progress absolute bottom-0 left-0 h-0.5 w-full origin-left bg-guiaa-brand-green/80"
         aria-hidden
       />
 
       {mobileOpen && (
         <div
-          className={`border-t backdrop-blur-md sm:hidden ${
+          className={`border-t sm:hidden ${
             hero
-              ? "border-white/15 bg-[#0c2d4d]/90"
-              : "border-guiaa-brand-navy/10 bg-white/95"
+              ? "border-white/15 bg-[#0c2d4d]/94"
+              : "border-guiaa-brand-navy/10 bg-white/97"
           }`}
         >
           <div className="landing-container py-4">

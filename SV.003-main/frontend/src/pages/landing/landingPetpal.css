@@ -42,9 +42,9 @@
 }
 
 .landing-nav-hero.landing-nav-scrolled {
-  background: rgba(12, 45, 77, 0.35) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(12, 45, 77, 0.72) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .landing-nav-hero .landing-eyebrow,

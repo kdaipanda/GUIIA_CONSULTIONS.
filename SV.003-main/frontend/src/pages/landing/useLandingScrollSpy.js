@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 
 export function useLandingScrollSpy(sectionIds, { rootMargin = "-24% 0px -58% 0px" } = {}) {
   const [activeId, setActiveId] = useState(null);
+  const sectionKey = Array.isArray(sectionIds) ? sectionIds.join("|") : "";
 
   useEffect(() => {
-    const elements = sectionIds
+    const ids = sectionKey ? sectionKey.split("|") : [];
+    const elements = ids
       .map((id) => document.getElementById(id))
       .filter(Boolean);
 
@@ -16,8 +18,9 @@ export function useLandingScrollSpy(sectionIds, { rootMargin = "-24% 0px -58% 0p
           .filter((entry) => entry.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
 
-        if (visible[0]) {
-          setActiveId(visible[0].target.id);
+        const nextId = visible[0]?.target?.id || null;
+        if (nextId) {
+          setActiveId((prev) => (prev === nextId ? prev : nextId));
         }
       },
       { rootMargin, threshold: [0, 0.15, 0.35, 0.55] },
@@ -25,7 +28,7 @@ export function useLandingScrollSpy(sectionIds, { rootMargin = "-24% 0px -58% 0p
 
     elements.forEach((element) => observer.observe(element));
     return () => observer.disconnect();
-  }, [sectionIds, rootMargin]);
+  }, [sectionKey, rootMargin]);
 
   return activeId;
 }

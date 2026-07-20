@@ -2,6 +2,7 @@
 
 .landing-shell {
   background: linear-gradient(165deg, #0a2540 0%, #0c2d4d 38%, #1e5280 100%);
+  contain: paint;
 }
 
 .landing-shell-inner {
@@ -9,6 +10,18 @@
   box-shadow:
     0 24px 80px -12px rgba(12, 45, 77, 0.35),
     0 0 0 1px rgba(12, 45, 77, 0.06) inset;
+}
+
+.landing-body-wrap {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 3200px;
+}
+
+.landing-nav-progress {
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+  pointer-events: none;
 }
 
 .landing-eyebrow {
