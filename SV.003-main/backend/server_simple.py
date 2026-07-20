@@ -3638,21 +3638,15 @@ async def interpret_medical_image(
 
     except ValueError as e:
         print(f"[ERROR] ValueError: {str(e)}")
-        analysis_text = f"Error: {str(e)}"
-        findings = []
-        recommendations = []
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except RuntimeError as e:
         print(f"[ERROR] RuntimeError: {str(e)}")
-        analysis_text = f"Error al analizar imagen: {str(e)}"
-        findings = []
-        recommendations = []
+        raise HTTPException(status_code=502, detail=f"Error al analizar estudio: {str(e)}") from e
     except Exception as e:
         import traceback
         print(f"[ERROR] Exception: {str(e)}")
         print(f"[ERROR] Traceback: {traceback.format_exc()}")
-        analysis_text = f"Error al analizar imagen: {str(e)}"
-        findings = []
-        recommendations = []
+        raise HTTPException(status_code=500, detail=f"Error al analizar estudio: {str(e)}") from e
 
     # No se suben imágenes - solo se analizan datos de texto pegados
     public_url = None
