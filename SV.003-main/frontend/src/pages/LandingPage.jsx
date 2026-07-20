@@ -34,16 +34,22 @@ import { LandingSocialRail } from "./landing/LandingSocialRail";
 import { LandingReveal } from "./landing/LandingReveal";
 import { LandingSeo } from "./landing/LandingSeo";
 import { LandingVetAnimations } from "./landing/LandingVetAnimations";
+import { useLandingInteractionQuiet } from "./landing/useLandingInteractionQuiet";
 import { trackMetaPageView } from "../lib/metaPixel";
 
 export function LandingPage({ setView }) {
+  useLandingInteractionQuiet();
+
   useEffect(() => {
     trackMetaPageView();
   }, []);
 
   const setViewDeferred = useCallback((view) => {
-    startTransition(() => {
-      setView(view);
+    // Yield one frame so the click paint (pressed state) lands before the route swap.
+    requestAnimationFrame(() => {
+      startTransition(() => {
+        setView(view);
+      });
     });
   }, [setView]);
 

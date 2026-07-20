@@ -5,6 +5,14 @@
   contain: paint;
 }
 
+/* Pause decorative motion during input so next paint isn't blocked (INP / body). */
+html.landing-inp-quiet .landing-vet-anim,
+html.landing-inp-quiet .landing-hero-3d-glow,
+html.landing-inp-quiet .landing-hero-3d-orbit,
+html.landing-inp-quiet .landing-hero-3d-scanline {
+  animation-play-state: paused !important;
+}
+
 .landing-shell-inner {
   border: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow:
