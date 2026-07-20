@@ -1478,11 +1478,13 @@ async def admin_overview(x_veterinarian_id: str = Header(None)):
 async def admin_list_users(
     search: str = "",
     plan_filter: str = "all",
-    limit: int = 100,
+    limit: int = 500,
     x_veterinarian_id: str = Header(None),
 ):
+    """Lista usuarios registrados. Busca/filtra sobre el catálogo completo, luego pagina."""
     await _require_platform_admin(_require_vet_id(x_veterinarian_id))
-    profiles, err = list_profiles(limit=min(limit, 500))
+    # Cargar todos los perfiles para que búsqueda/filtro no se limiten a los N más recientes.
+    profiles, err = list_profiles(limit=5000)
     if err:
         raise HTTPException(status_code=500, detail=err)
     consultation_counts, counts_err = count_consultations_by_users(
@@ -1493,7 +1495,8 @@ async def admin_list_users(
     q = search.lower().strip()
     pf = (plan_filter or "all").lower().strip()
     paid_plans = {"basic", "professional", "premium"}
-    rows = []
+    page_limit = max(1, min(int(limit or 500), 1000))
+    matched = []
     for profile in profiles:
         membership = (profile.get("membership_type") or "").lower().strip()
         if pf == "paid" and membership not in paid_plans:
@@ -1506,11 +1509,12 @@ async def admin_list_users(
                     profile.get("email") or "",
                     profile.get("nombre") or "",
                     profile.get("membership_type") or "",
+                    profile.get("cedula_profesional") or "",
                 ]
             ).lower()
             if q not in haystack:
                 continue
-        rows.append(
+        matched.append(
             {
                 "id": profile.get("id"),
                 "email": profile.get("email"),
@@ -1528,9 +1532,14 @@ async def admin_list_users(
                 "cedula_verification_error": profile.get("cedula_verification_error"),
             }
         )
-        if len(rows) >= limit:
-            break
-    return {"users": rows, "plan_filter": pf, "count": len(rows)}
+    rows = matched[:page_limit]
+    return {
+        "users": rows,
+        "plan_filter": pf,
+        "count": len(rows),
+        "total_matching": len(matched),
+        "total_registered": len(profiles),
+    }
 
 
 @clinic_router.get("/admin/trial-surveys")

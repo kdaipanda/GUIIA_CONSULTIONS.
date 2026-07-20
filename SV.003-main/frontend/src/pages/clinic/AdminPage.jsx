@@ -199,6 +199,8 @@ export function AdminPage() {
   const [overview, setOverview] = useState(null);
   const [users, setUsers] = useState([]);
   const [userCount, setUserCount] = useState(0);
+  const [usersTotalMatching, setUsersTotalMatching] = useState(0);
+  const [usersTotalRegistered, setUsersTotalRegistered] = useState(0);
   const [organizations, setOrganizations] = useState([]);
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
@@ -268,6 +270,12 @@ export function AdminPage() {
       setOverview(ov.overview || null);
       setUsers(usersData.users || []);
       setUserCount(usersData.count ?? usersData.users?.length ?? 0);
+      setUsersTotalMatching(
+        usersData.total_matching ?? usersData.count ?? usersData.users?.length ?? 0,
+      );
+      setUsersTotalRegistered(
+        usersData.total_registered ?? ov.overview?.users_total ?? usersData.users?.length ?? 0,
+      );
       setOrganizations(orgsData.organizations || []);
 
       setSupportLoading(true);
@@ -983,9 +991,12 @@ export function AdminPage() {
 
       <section className="clinic-settings-card">
         <div className="clinic-admin-users-head">
-          <h2>Usuarios</h2>
+          <h2>Usuarios registrados</h2>
           <span className="clinic-muted clinic-admin-users-count">
-            Mostrando {userCount} registro{userCount === 1 ? "" : "s"}
+            {usersTotalMatching} coincidencia{usersTotalMatching === 1 ? "" : "s"}
+            {" · "}
+            {usersTotalRegistered} registrados en total
+            {userCount !== usersTotalMatching ? ` · mostrando ${userCount}` : ""}
           </span>
         </div>
         <div className="clinic-admin-users-toolbar">
