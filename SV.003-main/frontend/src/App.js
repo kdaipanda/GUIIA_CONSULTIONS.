@@ -675,6 +675,13 @@ const Router = () => {
         }
         return;
       }
+      // Recuperar pantalla de cédula tras refresh (flujo en sessionStorage).
+      const pendingCedulaFlow = loadCedulaFlow();
+      if (pendingCedulaFlow?.veterinarian_id) {
+        setCurrentView("cedula-verification");
+        setIsInitialized(true);
+        return;
+      }
       setCurrentView("landing");
       setIsInitialized(false);
     }
@@ -1400,6 +1407,10 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
           message: vetData?.message,
           cedula_skip_count: vetData?.cedula_skip_count,
           can_skip: vetData?.can_skip,
+          // Solo en memoria (no se persiste en sessionStorage) para finalizar el flujo.
+          login_password: legacyLogin
+            ? undefined
+            : normalizePasswordInput(formData.password),
         });
         setView("cedula-verification");
         return;
@@ -1684,7 +1695,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
   const email = cedulaFlow?.email;
 
   useEffect(() => {
-    if (!vetId || matricula) return;
+    if (!vetId) return;
     let cancelled = false;
     (async () => {
       try {
@@ -1694,20 +1705,29 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
         if (!resp.ok || cancelled) return;
         const profile = await resp.json();
         const profileMatricula = (profile?.cedula_profesional || "").trim();
-        if (!profileMatricula) return;
-        setMatricula(profileMatricula);
+        const hasDocument = Boolean(profile?.cedula_document_url);
         setCedulaFlow?.((prev) =>
           prev
             ? {
                 ...prev,
-                cedula_profesional: profileMatricula,
+                cedula_profesional: profileMatricula || prev.cedula_profesional,
                 expected_nombre: prev.expected_nombre || profile?.nombre || "",
                 email: prev.email || profile?.email || "",
+                // Tras refresh el File se pierde: exigir re-subida si aún no hay documento en servidor.
+                needs_upload: !hasDocument,
+                verification_status:
+                  profile?.cedula_verification_status || prev.verification_status,
               }
             : prev,
         );
+        if (profileMatricula) {
+          setMatricula((current) => current || profileMatricula);
+        }
         if (!nombre?.trim() && profile?.nombre) {
           setNombre(profile.nombre);
+        }
+        if (profile?.cedula_verification_status) {
+          setVerificationStatus(profile.cedula_verification_status);
         }
       } catch {
         /* perfil opcional si aún no hay sesión */
@@ -1716,7 +1736,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
     return () => {
       cancelled = true;
     };
-  }, [vetId, matricula, nombre, setCedulaFlow]);
+  }, [vetId, setCedulaFlow]);
 
   if (!cedulaFlow?.veterinarian_id) {
     return (
@@ -1809,6 +1829,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
           cedula_profesional,
           veterinarian_id: vetId,
           login_password: cedulaFlow?.login_password,
+          authPayload: verifyData?.access_token ? verifyData : undefined,
         });
         if (vetData?.status === "requires_cedula_flow") {
           throw new Error(vetData?.message || "Tu registro aún no está verificado.");
@@ -1948,6 +1969,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                       cedula_profesional,
                       veterinarian_id: vetId,
                       login_password: cedulaFlow?.login_password,
+                      authPayload: skipData?.access_token ? skipData : undefined,
                     });
                     
                     if (vetData?.status === "requires_cedula_flow") {
@@ -1962,6 +1984,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                         ...cedulaFlow,
                         cedula_skip_count: skipData.cedula_skip_count,
                         can_skip: skipData.remaining_skips > 0,
+                        login_password: cedulaFlow?.login_password,
                       });
                       setInfo(skipData.message);
                       setLoading(false);

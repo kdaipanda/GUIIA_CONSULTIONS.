@@ -546,6 +546,32 @@ ALLOWED_CEDULA_CONTENT_TYPES = {
     "image/png": ".png",
 }
 
+
+def _resolve_cedula_upload_media_type(file: UploadFile, data: bytes) -> str:
+    """Normaliza MIME del documento; algunos navegadores envían vacío u octet-stream."""
+    media_type = (file.content_type or "").strip().lower()
+    if media_type in ALLOWED_CEDULA_CONTENT_TYPES:
+        return media_type
+
+    filename = (file.filename or "").strip().lower()
+    if filename.endswith(".pdf"):
+        return "application/pdf"
+    if filename.endswith(".png"):
+        return "image/png"
+    if filename.endswith(".jpg") or filename.endswith(".jpeg"):
+        return "image/jpeg"
+
+    # Magic bytes
+    if data.startswith(b"%PDF"):
+        return "application/pdf"
+    if data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if data.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+
+    return media_type
+
+
 # Profesiones aceptadas para veterinarios (normalizadas / tolerantes)
 ALLOWED_VET_PROFESSIONS = {
     "MEDICO VETERINARIO ZOOTECNISTA",
@@ -594,6 +620,13 @@ class CedulaVerifyResponse(BaseModel):
     sep_nombre: Optional[str] = None
     sep_profesion: Optional[str] = None
     message: Optional[str] = None
+    access_token: Optional[str] = None
+    token_type: Optional[str] = None
+    expires_in: Optional[int] = None
+    id: Optional[str] = None
+    email: Optional[str] = None
+    nombre: Optional[str] = None
+    veterinarian_id: Optional[str] = None
 
 
 async def _sep_dgp_lookup(cedula: str) -> Dict[str, Optional[str]]:
@@ -1610,8 +1643,9 @@ async def login_veterinarian(credentials: VeterinarianLogin, request: Request):
             return _cedula_flow_response(
                 veterinarian,
                 message=msg,
-                needs_upload=False,
+                needs_upload=True,
                 verification_status=ced_status,
+                can_skip=False,
             )
 
         # Sin documento / sin enviar: primera vez → flujo cédula; tras posponer → acceso temporal
@@ -1877,13 +1911,6 @@ async def upload_cedula_document(
 ):
     vet_id = _require_vet_id(x_veterinarian_id)
 
-    media_type = (file.content_type or "").strip().lower()
-    if media_type not in ALLOWED_CEDULA_CONTENT_TYPES:
-        raise HTTPException(
-            status_code=400,
-            detail="Tipo de archivo no permitido. Sube PDF, JPG o PNG.",
-        )
-
     max_bytes = DEFAULT_CEDULA_MAX_BYTES
     try:
         env_max = os.getenv("CEDULA_MAX_BYTES", "").strip()
@@ -1897,6 +1924,13 @@ async def upload_cedula_document(
         raise HTTPException(status_code=400, detail="Archivo vacío")
     if len(data) > max_bytes:
         raise HTTPException(status_code=413, detail="Archivo demasiado grande")
+
+    media_type = _resolve_cedula_upload_media_type(file, data)
+    if media_type not in ALLOWED_CEDULA_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail="Tipo de archivo no permitido. Sube PDF, JPG o PNG.",
+        )
 
     ext = ALLOWED_CEDULA_CONTENT_TYPES[media_type]
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -1961,13 +1995,28 @@ async def verify_cedula(
     if not result.get("ok"):
         raise HTTPException(status_code=400, detail=result.get("error") or "Error de verificación")
 
-    return CedulaVerifyResponse(
+    verification_status = result.get("verification_status") or CEDULA_STATUS_PENDING
+    response = CedulaVerifyResponse(
         status="ok",
-        verification_status=result.get("verification_status") or CEDULA_STATUS_PENDING,
+        verification_status=verification_status,
         sep_nombre=result.get("sep_nombre"),
         sep_profesion=result.get("sep_profesion"),
         message=result.get("message") or "Verificación procesada.",
     )
+
+    # Tras verify pendiente/aprobado: emitir JWT para entrar sin re-login frágil.
+    if verification_status in (CEDULA_STATUS_VERIFIED, CEDULA_STATUS_PENDING):
+        fresh, _ = get_profile(vet_id)
+        token_payload = auth_security.attach_auth_tokens(fresh or profile)
+        response.access_token = token_payload.get("access_token")
+        response.token_type = token_payload.get("token_type")
+        response.expires_in = token_payload.get("expires_in")
+        response.id = token_payload.get("id") or vet_id
+        response.email = token_payload.get("email")
+        response.nombre = token_payload.get("nombre")
+        response.veterinarian_id = vet_id
+
+    return response
 
 
 @app.post("/api/cedula/skip")
@@ -2006,13 +2055,27 @@ async def skip_cedula_verification(
 
     if cedula_verification.profile_needs_cedula_document(profile):
         cedula_verification.maybe_send_cedula_upload_reminder(profile, force=True)
-    
-    return {
+
+    payload = {
         "status": "ok",
         "cedula_skip_count": new_skip_count,
         "remaining_skips": 3 - new_skip_count,
         "message": f"Puedes verificar tu registro después. Te quedan {3 - new_skip_count} posposiciones restantes." if new_skip_count < 3 else "Esta fue tu última posposición. Debes completar la verificación la próxima vez.",
     }
+
+    # Con 1–2 skips el login permite entrar; emitir JWT aquí evita fallar sin contraseña en memoria.
+    if new_skip_count < 3:
+        fresh, _ = get_profile(vet_id)
+        token_payload = auth_security.attach_auth_tokens(fresh or profile)
+        payload["access_token"] = token_payload.get("access_token")
+        payload["token_type"] = token_payload.get("token_type")
+        payload["expires_in"] = token_payload.get("expires_in")
+        payload["id"] = token_payload.get("id") or vet_id
+        payload["email"] = token_payload.get("email")
+        payload["nombre"] = token_payload.get("nombre")
+        payload["veterinarian_id"] = vet_id
+
+    return payload
 
 
 # ============================================

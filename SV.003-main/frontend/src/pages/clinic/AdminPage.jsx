@@ -21,7 +21,6 @@ import {
   adminVerifyUserCedula,
   adminReviewUserCedula,
   fetchAdminUserConsultations,
-  fetchAdminUserCedulaDocument,
   fetchAdminUserCedulaDocumentBlob,
   fetchAdminSupportTickets,
   fetchAdminSupportTicket,
@@ -125,7 +124,10 @@ function formatRegisteredAt(iso) {
   });
 }
 
-function cedulaDocKind(url) {
+function cedulaDocKind(url, blobType = "") {
+  const type = (blobType || "").toLowerCase();
+  if (type.includes("pdf")) return "pdf";
+  if (type.startsWith("image/")) return "image";
   if (!url) return null;
   const path = url.split("?")[0].toLowerCase();
   if (path.endsWith(".pdf")) return "pdf";
@@ -211,6 +213,7 @@ export function AdminPage() {
   const [cedulaPreview, setCedulaPreview] = useState(null);
   const [cedulaPreviewUrl, setCedulaPreviewUrl] = useState("");
   const [cedulaPreviewObjectUrl, setCedulaPreviewObjectUrl] = useState("");
+  const [cedulaPreviewKind, setCedulaPreviewKind] = useState(null);
   const [cedulaPreviewLoading, setCedulaPreviewLoading] = useState(false);
   const [historyUser, setHistoryUser] = useState(null);
   const [historyConsultations, setHistoryConsultations] = useState([]);
@@ -472,28 +475,26 @@ export function AdminPage() {
     setCedulaPreview(null);
     setCedulaPreviewUrl("");
     setCedulaPreviewObjectUrl("");
+    setCedulaPreviewKind(null);
     setCedulaPreviewLoading(false);
   };
 
   const openCedulaPreview = async (user) => {
     setCedulaPreview(user);
     setCedulaPreviewUrl("");
+    setCedulaPreviewKind(null);
     if (cedulaPreviewObjectUrl) {
       URL.revokeObjectURL(cedulaPreviewObjectUrl);
     }
     setCedulaPreviewObjectUrl("");
     setCedulaPreviewLoading(true);
     try {
-      const docKind = cedulaDocKind(user.cedula_document_url);
-      if (docKind === "pdf") {
-        const blob = await fetchAdminUserCedulaDocumentBlob(veterinarian.id, user.id);
-        const objectUrl = URL.createObjectURL(blob);
-        setCedulaPreviewObjectUrl(objectUrl);
-        setCedulaPreviewUrl(objectUrl);
-      } else {
-        const data = await fetchAdminUserCedulaDocument(veterinarian.id, user.id);
-        setCedulaPreviewUrl(data.url || "");
-      }
+      // Siempre vía blob (API) para evitar bloqueo CSP/X-Frame de URLs externas (PDF e imagen).
+      const blob = await fetchAdminUserCedulaDocumentBlob(veterinarian.id, user.id);
+      const objectUrl = URL.createObjectURL(blob);
+      setCedulaPreviewObjectUrl(objectUrl);
+      setCedulaPreviewUrl(objectUrl);
+      setCedulaPreviewKind(cedulaDocKind(user.cedula_document_url, blob.type));
     } catch (err) {
       notifyError(err.message);
     } finally {
@@ -1221,7 +1222,9 @@ export function AdminPage() {
                   <p className="clinic-muted">Cargando documento...</p>
                 )}
                 {!cedulaPreviewLoading && cedulaPreviewUrl && (
-                  cedulaDocKind(cedulaPreview.cedula_document_url) === "pdf" ? (
+                  cedulaPreviewKind === "pdf" ||
+                  (cedulaPreviewKind !== "image" &&
+                    cedulaDocKind(cedulaPreview.cedula_document_url) === "pdf") ? (
                     <iframe
                       title={`Cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
                       src={cedulaPreviewUrl}

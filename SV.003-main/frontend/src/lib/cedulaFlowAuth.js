@@ -1,17 +1,30 @@
 import { BACKEND_URL } from "./backendUrl";
-import { getAccessToken, getAuthHeaders } from "./authHeaders";
+import { getAccessToken, getAuthHeaders, persistAuthFromResponse } from "./authHeaders";
 import { formatApiErrorDetail } from "./friendlyFetchError";
 
 /**
  * Entra a la app tras el flujo de cédula: reutiliza JWT si existe,
- * o hace login con contraseña / matrícula legacy.
+ * acepta tokens del verify/skip, o hace login con contraseña / matrícula legacy.
  */
 export async function finalizeCedulaFlowEntry({
   email,
   cedula_profesional,
   veterinarian_id,
   login_password,
+  authPayload,
 }) {
+  if (authPayload?.access_token) {
+    const profile = persistAuthFromResponse(authPayload);
+    return {
+      ...profile,
+      access_token: authPayload.access_token,
+      token_type: authPayload.token_type || "bearer",
+      id: authPayload.id || profile?.id || veterinarian_id,
+      email: authPayload.email || profile?.email || email,
+      nombre: authPayload.nombre || profile?.nombre,
+    };
+  }
+
   const token = getAccessToken();
   if (token && veterinarian_id) {
     const profileResp = await fetch(`${BACKEND_URL}/api/auth/profile`, {

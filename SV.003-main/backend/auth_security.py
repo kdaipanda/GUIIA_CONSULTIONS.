@@ -13,7 +13,6 @@ from jose import JWTError, jwt
 
 _current_vet_id: ContextVar[Optional[str]] = ContextVar("current_vet_id", default=None)
 
-_cedula_flow_store: Dict[str, Dict[str, Any]] = {}
 CEDULA_FLOW_TTL_SECONDS = 30 * 60
 
 ALGORITHM = "HS256"
@@ -117,25 +116,32 @@ def get_request_vet_id() -> Optional[str]:
 
 
 def _purge_expired_cedula_flow_nonces() -> None:
-    now = datetime.now(timezone.utc).timestamp()
-    expired = [
-        nonce
-        for nonce, entry in _cedula_flow_store.items()
-        if entry.get("exp", 0) < now
-    ]
-    for nonce in expired:
-        _cedula_flow_store.pop(nonce, None)
+    """Compat no-op: los nonces de cédula ahora son JWT firmados (stateless)."""
+    return
 
 
 def create_cedula_flow_nonce(vet_id: str) -> str:
-    """Nonce temporal para flujo de cédula (sin JWT de sesión completa)."""
-    _purge_expired_cedula_flow_nonces()
-    nonce = str(uuid.uuid4())
-    _cedula_flow_store[nonce] = {
-        "vet_id": str(vet_id),
-        "exp": datetime.now(timezone.utc).timestamp() + CEDULA_FLOW_TTL_SECONDS,
+    """Token firmado de corta vida para /api/cedula/* (válido en multi-réplica)."""
+    try:
+        secret = _jwt_secret()
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Autenticación no disponible: falta JWT_SECRET en el servidor. "
+                "Contacta soporte o al administrador de la plataforma."
+            ),
+        ) from exc
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(seconds=CEDULA_FLOW_TTL_SECONDS)
+    payload = {
+        "sub": str(vet_id),
+        "iat": int(now.timestamp()),
+        "exp": int(expire.timestamp()),
+        "type": "cedula_flow",
+        "jti": str(uuid.uuid4()),
     }
-    return nonce
+    return jwt.encode(payload, secret, algorithm=ALGORITHM)
 
 
 def verify_cedula_flow_nonce(
@@ -143,23 +149,21 @@ def verify_cedula_flow_nonce(
 ) -> Optional[str]:
     if not nonce or not vet_id:
         return None
-    _purge_expired_cedula_flow_nonces()
-    key = nonce.strip()
-    entry = _cedula_flow_store.get(key)
-    if not entry:
+    try:
+        payload = jwt.decode(nonce.strip(), _jwt_secret(), algorithms=[ALGORITHM])
+    except JWTError:
         return None
-    if entry.get("exp", 0) < datetime.now(timezone.utc).timestamp():
-        _cedula_flow_store.pop(key, None)
+    if payload.get("type") != "cedula_flow" or not payload.get("sub"):
         return None
     expected = str(vet_id).strip()
-    if entry.get("vet_id") != expected:
+    if str(payload.get("sub")).strip() != expected:
         return None
     return expected
 
 
 def invalidate_cedula_flow_nonce(nonce: Optional[str]) -> None:
-    if nonce:
-        _cedula_flow_store.pop(nonce.strip(), None)
+    """JWT de cédula no se revoca en servidor; expira solo (TTL 30 min)."""
+    return
 
 
 def try_authenticate_cedula_flow_request(request: Request) -> Optional[str]:
