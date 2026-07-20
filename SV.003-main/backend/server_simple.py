@@ -802,7 +802,7 @@ ANIMAL_CATEGORIES = {
 class VeterinarianRegister(BaseModel):
     nombre: str
     email: str
-    telefono: str
+    telefono: str = Field(..., min_length=8)
     cedula_profesional: str
     profesional_pais: str = "MX"
     especialidad: str
@@ -1511,6 +1511,14 @@ async def register_veterinarian(vet: VeterinarianRegister, request: Request):
 
     rate_limit.check_rate_limit(request, "register", vet.email)
 
+    phone = (vet.telefono or "").strip()
+    phone_digits = re.sub(r"\D", "", phone)
+    if len(phone_digits) < 8:
+        raise HTTPException(
+            status_code=400,
+            detail="Ingresa un número de teléfono válido (mínimo 8 dígitos).",
+        )
+
     # Verificar si ya existe por email
     existing, _ = get_profile_by_email(vet.email)
     if existing:
@@ -1550,7 +1558,7 @@ async def register_veterinarian(vet: VeterinarianRegister, request: Request):
         "id": str(uuid.uuid4()),
         "nombre": vet.nombre,
         "email": vet.email,
-        "telefono": vet.telefono,
+        "telefono": phone,
         "cedula_profesional": cedula_norm,
         "cedula_profesional_key": professional_id_key(cedula_norm),
         "profesional_pais": pais,

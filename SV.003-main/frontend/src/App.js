@@ -970,6 +970,11 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
       );
       return;
     }
+    const phoneDigits = String(formData.telefono || "").replace(/\D/g, "");
+    if (phoneDigits.length < 8) {
+      notifyError("Ingresa un número de teléfono válido (mínimo 8 dígitos, con código de país).");
+      return;
+    }
     if (!cedulaFile) {
       notifyError("Debes subir el documento de tu registro profesional (PDF/JPG/PNG).");
       return;
@@ -1075,6 +1080,29 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
 
             <div className="form-row">
               <div className="form-group">
+                <Label htmlFor="reg-telefono">Número de teléfono / WhatsApp *</Label>
+                <Input
+                  id="reg-telefono"
+                  type="tel"
+                  required
+                  autoComplete="tel"
+                  inputMode="tel"
+                  value={formData.telefono}
+                  onChange={(e) =>
+                    setFormData({ ...formData, telefono: e.target.value })
+                  }
+                  placeholder="+52 55 1234 5678"
+                  className="mt-1.5 h-11 min-h-11 bg-background"
+                  aria-describedby="reg-telefono-hint"
+                />
+                <p id="reg-telefono-hint" className="mt-1.5 text-xs text-muted-foreground">
+                  Incluye código de país. Lo usamos para soporte y avisos de tu cuenta.
+                </p>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
                 <Label htmlFor="reg-password">Contraseña *</Label>
                 <Input
                   id="reg-password"
@@ -1154,24 +1182,6 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                     })
                   }
                   placeholder="Ej. 12345678, MVZ-2024-001"
-                  className="mt-1.5 h-11 min-h-11 bg-background"
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <Label htmlFor="reg-telefono">Teléfono *</Label>
-                <Input
-                  id="reg-telefono"
-                  type="tel"
-                  required
-                  autoComplete="tel"
-                  value={formData.telefono}
-                  onChange={(e) =>
-                    setFormData({ ...formData, telefono: e.target.value })
-                  }
-                  placeholder="+52 555 123 4567"
                   className="mt-1.5 h-11 min-h-11 bg-background"
                 />
               </div>
