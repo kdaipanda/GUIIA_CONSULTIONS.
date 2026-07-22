@@ -85,6 +85,14 @@ Este endpoint te dirá específicamente si la API key de Claude está configurad
 - `META_CAPI_TEST_EVENT_CODE` - (opcional) Código de prueba para ver eventos en Events Manager → Test Events
 - `GUIAA_SITE_URL` - (opcional) URL pública del sitio para `event_source_url` (default: `https://guiaa.vet`)
 
+**Google Ads** (solo frontend — variables en Vercel, no en Railway):
+
+- `REACT_APP_GOOGLE_ADS_ID` - ID `AW-XXXXXXXXX` de la etiqueta global
+- `REACT_APP_GOOGLE_ADS_REGISTRATION_LABEL` - Etiqueta de conversión para registro MVZ
+- `REACT_APP_GOOGLE_ADS_CHECKOUT_LABEL` - (opcional) Inicio de checkout
+- `REACT_APP_GOOGLE_ADS_PURCHASE_LABEL` - (opcional) Compra completada
+- Ver `GOOGLE_ADS_LAUNCH_PLAN.md` para estructura de campaña y verificación
+
 ## Notas Importantes
 
 1. **Nunca subas el archivo `.env` a Git** - Está en `.gitignore` por seguridad

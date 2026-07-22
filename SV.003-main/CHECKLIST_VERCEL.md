@@ -24,6 +24,10 @@ Necesitas estas variables para que el frontend funcione correctamente:
 - `REACT_APP_META_PIXEL_ID` - ID del Meta Pixel para campañas de Facebook/Instagram Ads
   - **¿Dónde obtener?**: Meta Events Manager → Data Sources → tu Pixel → Settings
   - **Backend (Railway)**: configura también `META_PIXEL_ID` (mismo valor) y `META_CAPI_ACCESS_TOKEN` para Conversions API
+- `REACT_APP_GOOGLE_ADS_ID` - ID de conversión de Google Ads (`AW-XXXXXXXXX`)
+  - **¿Dónde obtener?**: Google Ads → Objetivos → Conversiones → etiqueta global del sitio
+  - **Etiquetas opcionales**: `REACT_APP_GOOGLE_ADS_REGISTRATION_LABEL`, `REACT_APP_GOOGLE_ADS_CHECKOUT_LABEL`, `REACT_APP_GOOGLE_ADS_PURCHASE_LABEL`
+  - **Guía de campaña**: ver `GOOGLE_ADS_LAUNCH_PLAN.md`
 
 ---
 

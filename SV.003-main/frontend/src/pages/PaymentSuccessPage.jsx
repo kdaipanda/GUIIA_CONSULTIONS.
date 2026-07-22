@@ -7,6 +7,7 @@ import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
 import { getAuthHeaders } from "../lib/authHeaders";
 import { trackMetaPurchaseOnce } from "../lib/metaPixel";
+import { trackGoogleAdsPurchaseOnce } from "../lib/googleAds";
 import "./membershipPage.css";
 
 export function PaymentSuccessPage({ setView }) {
@@ -59,6 +60,12 @@ export function PaymentSuccessPage({ setView }) {
         trackMetaPurchaseOnce(sessionId, {
           purchaseType: data.purchase_type,
           packageId: data.package,
+          value:
+            data.amount ??
+            (data.amount_total != null ? data.amount_total / 100 : undefined),
+          currency: (data.currency || "mxn").toUpperCase(),
+        });
+        trackGoogleAdsPurchaseOnce(sessionId, {
           value:
             data.amount ??
             (data.amount_total != null ? data.amount_total / 100 : undefined),
