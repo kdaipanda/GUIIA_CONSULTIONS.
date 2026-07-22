@@ -1,0 +1,27 @@
+# === Promociones GUIAA — copiar a Railway Variables ===
+# Guía completa: CONFIGURAR_PROMOCIONES_RAILWAY_CANVA.md
+
+# --- Email (normalmente ya existe) ---
+# RESEND_API_KEY=
+# RESEND_FROM=GUIAA <soporte@guiaa.vet>
+# FRONTEND_URL=https://guiaa.vet
+
+# --- Fallback de imagen (funciona YA, sin Canva) ---
+PROMO_OFFER_IMAGE_URL=https://guiaa.vet/promotions/premium-offer-1080.png
+
+# --- Automatización al agotar 3 consultas de prueba ---
+PROMO_AUTO_TRIAL_EXHAUSTED=true
+# Empieza solo con email; añade whatsapp cuando la plantilla Meta esté Approved
+PROMO_AUTO_TRIAL_CHANNELS=email
+
+# --- WhatsApp Cloud API ---
+# WHATSAPP_BUSINESS_ACCOUNT_ID=
+# WHATSAPP_PHONE_NUMBER_ID=
+# WHATSAPP_ACCESS_TOKEN=
+WHATSAPP_PROMO_TEMPLATE=guiaa_promo_oferta
+
+# --- Canva Connect API (opcional; si falta se usa PROMO_OFFER_IMAGE_URL) ---
+# CANVA_CLIENT_ID=
+# CANVA_CLIENT_SECRET=
+# CANVA_REFRESH_TOKEN=
+# CANVA_OFFER_TEMPLATE_ID=

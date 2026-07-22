@@ -21,7 +21,7 @@ python3 scripts/apply_supabase_migration.py --sql supabase_migrations/20260708b_
 
 1. Abre [Railway Dashboard](https://railway.app) → proyecto GUIAA → servicio **backend** (API).
 2. Pestaña **Variables** → **Raw Editor** o añade una a una.
-3. Copia el bloque de `backend/.env.promotions.example` y pega tus valores reales.
+3. Copia el bloque de `backend/promotions.railway.vars.example` y pega tus valores reales.
 4. Redeploy del servicio (Railway lo hace solo al guardar variables).
 
 ### Mínimo para empezar YA (sin Canva ni WhatsApp)
