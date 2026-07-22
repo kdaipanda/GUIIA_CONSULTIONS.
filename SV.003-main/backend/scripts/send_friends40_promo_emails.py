@@ -48,12 +48,12 @@ IMAGE_CANDIDATES = [
     / "frontend"
     / "public"
     / "email"
+    / "oferta-friends40-whatsapp.png",
+    Path(__file__).resolve().parents[2]
+    / "frontend"
+    / "public"
+    / "email"
     / "oferta-friends40.png",
-    Path(
-        r"C:\Users\kdaip\.cursor\projects\f-Versiones-SV-003-main\assets"
-        r"\c__Users_kdaip_AppData_Roaming_Cursor_User_workspaceStorage_"
-        r"c3cb2fe860770f94c174d6f2de474a57_images_Oferta-98dfa42e-d006-43d0-8dff-67a36ed23791.png"
-    ),
 ]
 
 

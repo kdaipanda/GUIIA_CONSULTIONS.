@@ -15,6 +15,7 @@ import auth_security
 import email_notifications
 import presence
 import trial_survey
+import whatsapp_promo
 from membership_access import require_feature_for_profile
 from supabase_client import (
     count_consultations_by_users,
@@ -32,6 +33,7 @@ from supabase_client import (
     get_support_ticket,
     list_support_messages,
     update_support_ticket,
+    upload_bytes_to_storage,
 )
 
 clinic_router = APIRouter(prefix="/api", tags=["clinic"])
@@ -1458,6 +1460,64 @@ async def presence_heartbeat(x_veterinarian_id: str = Header(None)):
     }
 
 
+@clinic_router.get("/admin/whatsapp-promo")
+async def admin_whatsapp_promo(x_veterinarian_id: str = Header(None)):
+    """Destinatarios y enlaces wa.me para recordar el cupón FRIENDS40."""
+    await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    profiles, err = list_profiles(limit=5000)
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+
+    recipients = []
+    for profile in profiles or []:
+        row = whatsapp_promo.build_recipient(profile)
+        if row:
+            recipients.append(row)
+    recipients.sort(key=lambda r: (0 if r.get("has_whatsapp") else 1, r.get("email") or ""))
+
+    with_phone = sum(1 for r in recipients if r.get("has_whatsapp"))
+    return {
+        "coupon": whatsapp_promo.COUPON,
+        "image_url": whatsapp_promo.offer_image_url(),
+        "image_path": whatsapp_promo.OFFER_IMAGE_PUBLIC_PATH,
+        "message_template": whatsapp_promo.build_promo_message("colega"),
+        "recipients": recipients,
+        "count": len(recipients),
+        "with_whatsapp": with_phone,
+        "without_whatsapp": len(recipients) - with_phone,
+    }
+
+
+@clinic_router.post("/admin/whatsapp-promo/ensure-image")
+async def admin_whatsapp_promo_ensure_image(x_veterinarian_id: str = Header(None)):
+    """Sube la imagen de oferta a Storage público (CDN estable para compartir)."""
+    await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    from pathlib import Path
+
+    candidates = [
+        Path(__file__).resolve().parents[1] / "frontend" / "public" / "email" / "oferta-friends40-whatsapp.png",
+        Path(__file__).resolve().parents[1].parent / "frontend" / "public" / "email" / "oferta-friends40-whatsapp.png",
+    ]
+    # Ruta real del monorepo: backend/ está junto a frontend/
+    candidates.insert(
+        0,
+        Path(__file__).resolve().parent.parent / "frontend" / "public" / "email" / "oferta-friends40-whatsapp.png",
+    )
+    image_path = next((p for p in candidates if p.is_file()), None)
+    if not image_path:
+        raise HTTPException(status_code=404, detail="No se encontró oferta-friends40-whatsapp.png")
+    data = image_path.read_bytes()
+    public_url, up_err = upload_bytes_to_storage(
+        "uploads",
+        whatsapp_promo.OFFER_STORAGE_PATH,
+        data,
+        "image/png",
+    )
+    if up_err or not public_url:
+        raise HTTPException(status_code=500, detail=up_err or "No se pudo subir la imagen")
+    return {"ok": True, "image_url": public_url.rstrip("?")}
+
+
 @clinic_router.get("/admin/overview")
 async def admin_overview(x_veterinarian_id: str = Header(None)):
     await _require_platform_admin(_require_vet_id(x_veterinarian_id))
@@ -1547,6 +1607,7 @@ async def admin_list_users(
             "id": profile.get("id"),
             "email": profile.get("email"),
             "nombre": profile.get("nombre"),
+            "telefono": profile.get("telefono"),
             "membership_type": profile.get("membership_type"),
             "consultations_remaining": profile.get("consultations_remaining"),
             "consultations_used": consultation_counts.get(str(profile.get("id") or ""), 0),
@@ -1560,6 +1621,14 @@ async def admin_list_users(
             "cedula_verification_error": profile.get("cedula_verification_error"),
         }
         row.update(presence.presence_fields(profile, now=now))
+        phone_digits = whatsapp_promo.normalize_whatsapp_number(profile.get("telefono"))
+        row["whatsapp_number"] = phone_digits
+        row["has_whatsapp"] = bool(phone_digits)
+        if phone_digits:
+            msg = whatsapp_promo.build_promo_message(row.get("nombre") or "")
+            row["whatsapp_promo_url"] = whatsapp_promo.whatsapp_deeplink(phone_digits, msg)
+        else:
+            row["whatsapp_promo_url"] = None
         matched.append(row)
     # En línea primero; dentro de cada grupo, last_seen más reciente
     epoch = datetime.min.replace(tzinfo=timezone.utc)

@@ -63,6 +63,16 @@ export async function sendPresenceHeartbeat(veterinarianId) {
   });
 }
 
+export async function fetchAdminWhatsappPromo(veterinarianId) {
+  return clinicFetch("/api/admin/whatsapp-promo", veterinarianId);
+}
+
+export async function ensureAdminWhatsappPromoImage(veterinarianId) {
+  return clinicFetch("/api/admin/whatsapp-promo/ensure-image", veterinarianId, {
+    method: "POST",
+  });
+}
+
 export async function fetchAdminOverview(veterinarianId) {
   return clinicFetch("/api/admin/overview", veterinarianId);
 }

@@ -79,6 +79,54 @@
   font-size: 0.75rem;
 }
 
+.clinic-admin-whatsapp-promo .clinic-admin-users-head h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clinic-admin-wa-layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.clinic-admin-wa-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.clinic-admin-wa-preview img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(38, 91, 147, 0.14);
+  background: #0c2d4d;
+}
+
+.clinic-admin-wa-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.clinic-admin-wa-table-wrap {
+  max-height: 28rem;
+  overflow: auto;
+}
+
+.clinic-admin-wa-row-opened td {
+  background: rgba(61, 155, 143, 0.06);
+}
+
+@media (max-width: 900px) {
+  .clinic-admin-wa-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 .clinic-admin-consultation-usage {
   display: flex;
   flex-direction: column;

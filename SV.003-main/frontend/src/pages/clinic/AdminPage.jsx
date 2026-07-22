@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox, Star, Stethoscope, Circle } from "lucide-react";
+import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox, Star, Stethoscope, Circle, MessageCircle } from "lucide-react";
 import "./clinicPageShared.css";
 import "./adminPage.css";
 import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
@@ -29,6 +29,8 @@ import {
   fetchAdminGuiaConsultasLeads,
   updateAdminGuiaConsultasLead,
   fetchAdminTrialSurveys,
+  fetchAdminWhatsappPromo,
+  ensureAdminWhatsappPromoImage,
 } from "../../lib/clinicApi";
 import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
@@ -260,6 +262,10 @@ export function AdminPage() {
   const [trialSurveySearch, setTrialSurveySearch] = useState("");
   const [trialSurveysLoading, setTrialSurveysLoading] = useState(false);
   const [selectedSurvey, setSelectedSurvey] = useState(null);
+  const [waPromo, setWaPromo] = useState(null);
+  const [waPromoLoading, setWaPromoLoading] = useState(false);
+  const [waPromoActing, setWaPromoActing] = useState(false);
+  const [waOpenedIds, setWaOpenedIds] = useState(() => new Set());
 
   useEffect(() => {
     return () => {
@@ -342,6 +348,16 @@ export function AdminPage() {
         setTrialSurveysCount(0);
       } finally {
         setTrialSurveysLoading(false);
+      }
+
+      setWaPromoLoading(true);
+      try {
+        const promo = await fetchAdminWhatsappPromo(veterinarian.id);
+        setWaPromo(promo);
+      } catch {
+        setWaPromo(null);
+      } finally {
+        setWaPromoLoading(false);
       }
 
       setAllowed(true);
@@ -464,6 +480,46 @@ export function AdminPage() {
       notifyError(err.message);
     } finally {
       setCedulaActingId(null);
+    }
+  };
+
+  const openWhatsappPromo = (recipient) => {
+    const url = recipient?.whatsapp_url || recipient?.whatsapp_promo_url;
+    if (!url) {
+      notifyError("Este usuario no tiene un número de WhatsApp válido.");
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+    const id = recipient.id || recipient.email;
+    if (id) {
+      setWaOpenedIds((prev) => {
+        const next = new Set(prev);
+        next.add(id);
+        return next;
+      });
+    }
+  };
+
+  const copyWhatsappMessage = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text || waPromo?.message_template || "");
+      notifySuccess("Mensaje copiado. Pégalo en WhatsApp si hace falta.");
+    } catch {
+      notifyError("No se pudo copiar el mensaje.");
+    }
+  };
+
+  const ensureWhatsappImage = async () => {
+    if (!veterinarian?.id) return;
+    setWaPromoActing(true);
+    try {
+      const data = await ensureAdminWhatsappPromoImage(veterinarian.id);
+      setWaPromo((prev) => (prev ? { ...prev, image_url: data.image_url || prev.image_url } : prev));
+      notifySuccess("Imagen de oferta lista para compartir.");
+    } catch (err) {
+      notifyError(err.message || "No se pudo preparar la imagen.");
+    } finally {
+      setWaPromoActing(false);
     }
   };
 
@@ -1010,6 +1066,118 @@ export function AdminPage() {
         )}
       </section>
 
+      <section className="clinic-settings-card clinic-admin-whatsapp-promo">
+        <div className="clinic-admin-users-head">
+          <h2>
+            <MessageCircle size={18} aria-hidden />
+            {" "}
+            Oferta WhatsApp · FRIENDS40
+          </h2>
+          <span className="clinic-muted clinic-admin-users-count">
+            {waPromoLoading
+              ? "Cargando…"
+              : `${waPromo?.with_whatsapp ?? 0} con WhatsApp · ${waPromo?.without_whatsapp ?? 0} sin número`}
+          </span>
+        </div>
+        <p className="clinic-muted clinic-tools-desc">
+          Abre un chat de WhatsApp con el recordatorio del cupón. Adjunta la imagen de la oferta
+          en el chat (WhatsApp Web / móvil). No envía mensajes masivos automáticos.
+        </p>
+        <div className="clinic-admin-wa-layout">
+          <div className="clinic-admin-wa-preview">
+            <img
+              src={waPromo?.image_url || "/email/oferta-friends40-whatsapp.png"}
+              alt="Oferta GUIAA Plan Premium cupón FRIENDS40"
+              width={280}
+              height={280}
+            />
+            <div className="clinic-admin-wa-preview-actions">
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() => copyWhatsappMessage(waPromo?.message_template)}
+                disabled={!waPromo?.message_template}
+              >
+                Copiar mensaje
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                asChild
+              >
+                <a
+                  href={waPromo?.image_url || "/email/oferta-friends40-whatsapp.png"}
+                  download="oferta-friends40-whatsapp.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FileDown size={14} aria-hidden />
+                  Descargar imagen
+                </a>
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                disabled={waPromoActing}
+                onClick={ensureWhatsappImage}
+              >
+                Preparar imagen CDN
+              </Button>
+            </div>
+          </div>
+          <div className="clinic-table-wrap clinic-admin-wa-table-wrap">
+            {waPromoLoading ? (
+              <ClinicTableSkeleton rows={4} cols={4} />
+            ) : !waPromo?.recipients?.length ? (
+              <p className="clinic-muted">No hay destinatarios de campaña.</p>
+            ) : (
+              <table className="clinic-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>WhatsApp</th>
+                    <th>Email</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {waPromo.recipients.map((r) => {
+                    const opened = waOpenedIds.has(r.id) || waOpenedIds.has(r.email);
+                    return (
+                      <tr key={r.id || r.email} className={opened ? "clinic-admin-wa-row-opened" : undefined}>
+                        <td>{r.nombre}</td>
+                        <td className="clinic-mono">
+                          {r.has_whatsapp ? `+${r.whatsapp_number}` : (
+                            <span className="clinic-muted">{r.telefono || "Sin número"}</span>
+                          )}
+                        </td>
+                        <td>{r.email}</td>
+                        <td>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={opened ? "secondary" : "default"}
+                            disabled={!r.has_whatsapp}
+                            onClick={() => openWhatsappPromo(r)}
+                            title={r.has_whatsapp ? "Abrir WhatsApp con el mensaje" : "Sin número válido"}
+                          >
+                            <MessageCircle size={14} aria-hidden />
+                            {opened ? "Reabrir" : "WhatsApp"}
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </section>
+
       <section className="clinic-settings-card">
         <h2>Acciones</h2>
         <p className="clinic-muted clinic-tools-desc">
@@ -1165,6 +1333,18 @@ export function AdminPage() {
                       </td>
                       <td>
                         <div className="clinic-admin-row-actions">
+                          {u.whatsapp_promo_url && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => openWhatsappPromo(u)}
+                              title="Recordar oferta FRIENDS40 por WhatsApp"
+                            >
+                              <MessageCircle size={14} aria-hidden />
+                              WA
+                            </Button>
+                          )}
                           <Button
                             type="button"
                             size="sm"
