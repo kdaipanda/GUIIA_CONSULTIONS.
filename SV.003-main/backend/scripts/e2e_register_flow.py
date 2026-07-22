@@ -96,7 +96,7 @@ def main() -> int:
 
     def check(label: str, ok: bool, detail: str = "") -> None:
         nonlocal failures
-        print(f"  [{'OK' if ok else 'FAIL'}] {label}" + (f" — {detail}" if detail else ""))
+        print(f"  [{'OK' if ok else 'FAIL'}] {label}" + (f" -- {detail}" if detail else ""))
         if not ok:
             failures += 1
 
@@ -161,7 +161,7 @@ def main() -> int:
     )
     flow = login_pw.get("status") if isinstance(login_pw, dict) else None
     check(
-        "3. Login con contraseña → requires_cedula_flow",
+        "3. Login con contrasena -> requires_cedula_flow",
         code == 200 and flow == "requires_cedula_flow",
         flow or str(code),
     )

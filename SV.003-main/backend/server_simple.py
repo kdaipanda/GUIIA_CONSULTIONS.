@@ -1734,6 +1734,14 @@ async def login_veterinarian(credentials: VeterinarianLogin, request: Request):
     rate_limit.reset_rate_limit(request, "login", email)
     if isinstance(veterinarian, dict):
         veterinarian.pop("_id", None)
+        try:
+            import presence as presence_mod
+
+            last_seen, _ = presence_mod.touch_last_seen(str(veterinarian.get("id") or ""))
+            if last_seen:
+                veterinarian["last_seen"] = last_seen
+        except Exception:  # noqa: BLE001
+            pass
     return auth_security.attach_auth_tokens(veterinarian)
 
 

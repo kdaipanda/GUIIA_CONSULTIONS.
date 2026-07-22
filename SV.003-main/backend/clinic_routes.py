@@ -13,6 +13,7 @@ import clinic_db
 import cedula_verification
 import auth_security
 import email_notifications
+import presence
 import trial_survey
 from membership_access import require_feature_for_profile
 from supabase_client import (
@@ -1443,6 +1444,20 @@ async def admin_access(x_veterinarian_id: str = Header(None)):
     return {"platform_admin": _is_platform_admin(profile)}
 
 
+@clinic_router.post("/presence/heartbeat")
+async def presence_heartbeat(x_veterinarian_id: str = Header(None)):
+    """Marca al usuario autenticado como activo (en línea)."""
+    vet_id = _require_vet_id(x_veterinarian_id)
+    last_seen, err = presence.touch_last_seen(vet_id)
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    return {
+        "ok": True,
+        "last_seen": last_seen,
+        "online_window_seconds": presence.ONLINE_WINDOW_SECONDS,
+    }
+
+
 @clinic_router.get("/admin/overview")
 async def admin_overview(x_veterinarian_id: str = Header(None)):
     await _require_platform_admin(_require_vet_id(x_veterinarian_id))
@@ -1459,9 +1474,14 @@ async def admin_overview(x_veterinarian_id: str = Header(None)):
     premium = sum(1 for p in profiles if (p.get("membership_type") or "").lower() == "premium")
     trial = sum(1 for p in profiles if not p.get("membership_type") and (p.get("consultations_remaining") or 0) > 0)
     trial_surveys = len(trial_survey.list_trial_survey_responses(profiles))
+    now = presence.utc_now()
+    users_online = sum(1 for p in profiles if presence.is_online(p.get("last_seen"), now=now))
+    users_offline = max(0, len(profiles) - users_online)
     return {
         "overview": {
             "users_total": len(profiles),
+            "users_online": users_online,
+            "users_offline": users_offline,
             "organizations_total": len(orgs),
             "premium_users": premium,
             "trial_users": trial,
@@ -1470,6 +1490,7 @@ async def admin_overview(x_veterinarian_id: str = Header(None)):
             "patients_total": patients_count,
             "appointments_total": appts_count,
             "consultations_total": consultations_count,
+            "online_window_seconds": presence.ONLINE_WINDOW_SECONDS,
         }
     }
 
@@ -1478,6 +1499,7 @@ async def admin_overview(x_veterinarian_id: str = Header(None)):
 async def admin_list_users(
     search: str = "",
     plan_filter: str = "all",
+    presence_filter: str = "all",
     limit: int = 500,
     x_veterinarian_id: str = Header(None),
 ):
@@ -1494,14 +1516,21 @@ async def admin_list_users(
         raise HTTPException(status_code=500, detail=f"Error contando consultas: {counts_err}")
     q = search.lower().strip()
     pf = (plan_filter or "all").lower().strip()
+    prf = (presence_filter or "all").lower().strip()
     paid_plans = {"basic", "professional", "premium"}
     page_limit = max(1, min(int(limit or 500), 1000))
+    now = presence.utc_now()
     matched = []
     for profile in profiles:
         membership = (profile.get("membership_type") or "").lower().strip()
         if pf == "paid" and membership not in paid_plans:
             continue
         if pf == "trial" and membership in paid_plans:
+            continue
+        online = presence.is_online(profile.get("last_seen"), now=now)
+        if prf == "online" and not online:
+            continue
+        if prf == "offline" and online:
             continue
         if q:
             haystack = " ".join(
@@ -1514,31 +1543,41 @@ async def admin_list_users(
             ).lower()
             if q not in haystack:
                 continue
-        matched.append(
-            {
-                "id": profile.get("id"),
-                "email": profile.get("email"),
-                "nombre": profile.get("nombre"),
-                "membership_type": profile.get("membership_type"),
-                "consultations_remaining": profile.get("consultations_remaining"),
-                "consultations_used": consultation_counts.get(str(profile.get("id") or ""), 0),
-                "created_at": profile.get("created_at"),
-                "cedula_profesional": profile.get("cedula_profesional"),
-                "profesional_pais": profile.get("profesional_pais"),
-                "cedula_verification_status": profile.get("cedula_verification_status"),
-                "cedula_document_url": profile.get("cedula_document_url"),
-                "cedula_sep_nombre": profile.get("cedula_sep_nombre"),
-                "cedula_sep_profesion": profile.get("cedula_sep_profesion"),
-                "cedula_verification_error": profile.get("cedula_verification_error"),
-            }
-        )
+        row = {
+            "id": profile.get("id"),
+            "email": profile.get("email"),
+            "nombre": profile.get("nombre"),
+            "membership_type": profile.get("membership_type"),
+            "consultations_remaining": profile.get("consultations_remaining"),
+            "consultations_used": consultation_counts.get(str(profile.get("id") or ""), 0),
+            "created_at": profile.get("created_at"),
+            "cedula_profesional": profile.get("cedula_profesional"),
+            "profesional_pais": profile.get("profesional_pais"),
+            "cedula_verification_status": profile.get("cedula_verification_status"),
+            "cedula_document_url": profile.get("cedula_document_url"),
+            "cedula_sep_nombre": profile.get("cedula_sep_nombre"),
+            "cedula_sep_profesion": profile.get("cedula_sep_profesion"),
+            "cedula_verification_error": profile.get("cedula_verification_error"),
+        }
+        row.update(presence.presence_fields(profile, now=now))
+        matched.append(row)
+    # En línea primero; dentro de cada grupo, last_seen más reciente
+    epoch = datetime.min.replace(tzinfo=timezone.utc)
+
+    def _presence_sort_key(u: dict) -> tuple:
+        seen = presence.parse_last_seen(u.get("last_seen")) or epoch
+        return (0 if u.get("is_online") else 1, -seen.timestamp())
+
+    matched.sort(key=_presence_sort_key)
     rows = matched[:page_limit]
     return {
         "users": rows,
         "plan_filter": pf,
+        "presence_filter": prf,
         "count": len(rows),
         "total_matching": len(matched),
         "total_registered": len(profiles),
+        "online_window_seconds": presence.ONLINE_WINDOW_SECONDS,
     }
 
 

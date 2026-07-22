@@ -19,7 +19,7 @@ import {
 import { Header } from "../components/Header";
 import { NotificationBell } from "../components/clinic/NotificationBell";
 import { dispatchOpenSupport } from "../lib/supportReadState";
-import { fetchAdminSupportTickets, fetchAppointmentRequests, fetchInventorySummary } from "../lib/clinicApi";
+import { fetchAdminSupportTickets, fetchAppointmentRequests, fetchInventorySummary, sendPresenceHeartbeat } from "../lib/clinicApi";
 import { useClinic } from "../context/ClinicContext";
 import { useVet } from "../context/VetContext";
 import { clinicNavIsHero, clinicNavThemeStyle } from "../lib/clinicNavTheme";
@@ -137,6 +137,32 @@ export function ClinicShell({ children, setView }) {
     }, 60 * 1000);
     return () => clearInterval(interval);
   }, [loadAdminSupportCount, loadPendingAgendaRequests, loadLowStockCount]);
+
+  useEffect(() => {
+    if (!veterinarian?.id) return undefined;
+
+    let cancelled = false;
+    const beat = async () => {
+      if (cancelled || document.visibilityState === "hidden") return;
+      try {
+        await sendPresenceHeartbeat(veterinarian.id);
+      } catch {
+        // Silencioso: no interrumpir la sesión clínica
+      }
+    };
+
+    beat();
+    const interval = setInterval(beat, 60 * 1000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") beat();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [veterinarian?.id]);
 
   useEffect(() => {
     if (!veterinarian?.id || orgLoading) return undefined;

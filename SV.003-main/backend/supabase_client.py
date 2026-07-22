@@ -197,6 +197,11 @@ def format_supabase_error(err: str) -> str:
                 "Falta la migración de encuesta post-prueba en Supabase "
                 "(20260707_trial_survey.sql). Avísanos para aplicarla en el proyecto."
             )
+        if "last_seen" in lower:
+            return (
+                "Falta la migración de presencia en Supabase "
+                "(20260722_profiles_last_seen.sql). Ejecútala en el SQL Editor."
+            )
         return (
             "Falta una actualización en la base de datos (columna no encontrada). "
             "Recarga el schema de PostgREST en Supabase o aplica la migración pendiente."

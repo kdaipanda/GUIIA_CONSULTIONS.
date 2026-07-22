@@ -57,14 +57,27 @@ export async function fetchAdminAccess(veterinarianId) {
   return clinicFetch("/api/admin/access", veterinarianId);
 }
 
+export async function sendPresenceHeartbeat(veterinarianId) {
+  return clinicFetch("/api/presence/heartbeat", veterinarianId, {
+    method: "POST",
+  });
+}
+
 export async function fetchAdminOverview(veterinarianId) {
   return clinicFetch("/api/admin/overview", veterinarianId);
 }
 
-export async function fetchAdminUsers(veterinarianId, search = "", planFilter = "all", limit = 500) {
+export async function fetchAdminUsers(
+  veterinarianId,
+  search = "",
+  planFilter = "all",
+  limit = 500,
+  presenceFilter = "all",
+) {
   const params = new URLSearchParams();
   if (search) params.set("search", search);
   if (planFilter && planFilter !== "all") params.set("plan_filter", planFilter);
+  if (presenceFilter && presenceFilter !== "all") params.set("presence_filter", presenceFilter);
   if (limit) params.set("limit", String(limit));
   const q = params.toString() ? `?${params}` : "";
   return clinicFetch(`/api/admin/users${q}`, veterinarianId);

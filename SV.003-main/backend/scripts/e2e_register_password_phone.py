@@ -70,7 +70,7 @@ def main() -> int:
 
     def check(label: str, ok: bool, detail: str = "") -> None:
         nonlocal failures
-        print(f"  [{'OK' if ok else 'FAIL'}] {label}" + (f" — {detail}" if detail else ""))
+        print(f"  [{'OK' if ok else 'FAIL'}] {label}" + (f" -- {detail}" if detail else ""))
         if not ok:
             failures += 1
 
@@ -94,7 +94,7 @@ def main() -> int:
         },
     )
     check(
-        "1. Contraseña inválida → HTTP 4xx",
+        "1. Contrasena invalida -> HTTP 4xx",
         code in (400, 422),
         f"{code} {bad.get('detail')}",
     )
@@ -116,7 +116,7 @@ def main() -> int:
         },
     )
     check(
-        "2. Teléfono inválido → HTTP 4xx",
+        "2. Telefono invalido -> HTTP 4xx",
         code in (400, 422),
         f"{code} {bad_phone.get('detail')}",
     )
@@ -179,7 +179,7 @@ def main() -> int:
         "/api/auth/login",
         body={"email": email, "password": "Wrong99"},
     )
-    check("5. Login contraseña incorrecta → 401", code == 401, str(code))
+    check("5. Login contrasena incorrecta -> 401", code == 401, str(code))
 
     # 6) Cleanup
     cleanup = cleanup_user(email)

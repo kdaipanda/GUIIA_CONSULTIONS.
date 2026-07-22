@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox, Star, Stethoscope } from "lucide-react";
+import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox, Star, Stethoscope, Circle } from "lucide-react";
 import "./clinicPageShared.css";
 import "./adminPage.css";
 import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
@@ -48,6 +48,12 @@ const PLAN_FILTERS = [
   { id: "all", label: "Todos" },
   { id: "trial", label: "Solo prueba" },
   { id: "paid", label: "Con plan de pago" },
+];
+
+const PRESENCE_FILTERS = [
+  { id: "all", label: "Todos" },
+  { id: "online", label: "En línea" },
+  { id: "offline", label: "Fuera de línea" },
 ];
 
 const SUPPORT_FILTERS = [
@@ -118,9 +124,21 @@ function formatPlanLabel(user) {
 function formatRegisteredAt(iso) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "short",
     year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function formatLastSeen(iso) {
+  if (!iso) return "Sin actividad";
+  const dt = new Date(iso);
+  if (Number.isNaN(dt.getTime())) return "Sin actividad";
+  return dt.toLocaleString("es-MX", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -206,6 +224,7 @@ export function AdminPage() {
   const [organizations, setOrganizations] = useState([]);
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
+  const [presenceFilter, setPresenceFilter] = useState("all");
   const [deleteEmail, setDeleteEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [acting, setActing] = useState(false);
@@ -250,10 +269,13 @@ export function AdminPage() {
     };
   }, [cedulaPreviewObjectUrl]);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (opts = {}) => {
+    const soft = !!opts.soft;
     if (!veterinarian?.id) return;
-    setLoading(true);
-    setLoadError("");
+    if (!soft) {
+      setLoading(true);
+      setLoadError("");
+    }
     try {
       let allowedUser = platformAdmin;
       if (!allowedUser) {
@@ -267,7 +289,7 @@ export function AdminPage() {
 
       const [ov, usersData, orgsData] = await Promise.all([
         fetchAdminOverview(veterinarian.id),
-        fetchAdminUsers(veterinarian.id, search, planFilter),
+        fetchAdminUsers(veterinarian.id, search, planFilter, 500, presenceFilter),
         fetchAdminOrganizations(veterinarian.id),
       ]);
       setOverview(ov.overview || null);
@@ -280,6 +302,11 @@ export function AdminPage() {
         usersData.total_registered ?? ov.overview?.users_total ?? usersData.users?.length ?? 0,
       );
       setOrganizations(orgsData.organizations || []);
+
+      if (soft) {
+        setAllowed(true);
+        return;
+      }
 
       setSupportLoading(true);
       try {
@@ -326,13 +353,21 @@ export function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [veterinarian?.id, search, planFilter, supportFilter, guiaLeadFilter, trialSurveySearch, platformAdmin]);
+  }, [veterinarian?.id, search, planFilter, presenceFilter, supportFilter, guiaLeadFilter, trialSurveySearch, platformAdmin]);
 
   useEffect(() => {
     if (vetLoading || !veterinarian?.id) return undefined;
     const t = setTimeout(load, search ? 300 : 0);
     return () => clearTimeout(t);
-  }, [load, search, vetLoading, veterinarian?.id, planFilter, supportFilter, guiaLeadFilter, trialSurveySearch]);
+  }, [load, search, vetLoading, veterinarian?.id, planFilter, presenceFilter, supportFilter, guiaLeadFilter, trialSurveySearch]);
+
+  useEffect(() => {
+    if (!allowed || !veterinarian?.id) return undefined;
+    const interval = setInterval(() => {
+      load({ soft: true });
+    }, 30 * 1000);
+    return () => clearInterval(interval);
+  }, [allowed, veterinarian?.id, load]);
 
   const handleDeleteUser = async (e) => {
     e.preventDefault();
@@ -693,6 +728,20 @@ export function AdminPage() {
           </div>
           <div className="clinic-report-kpi-value">{stats.users_total ?? 0}</div>
         </div>
+        <div className="clinic-report-kpi clinic-admin-kpi-online">
+          <div className="clinic-report-kpi-head">
+            <span className="clinic-report-kpi-icon"><Circle size={18} aria-hidden /></span>
+            <span className="clinic-report-kpi-label">En línea</span>
+          </div>
+          <div className="clinic-report-kpi-value">{stats.users_online ?? 0}</div>
+        </div>
+        <div className="clinic-report-kpi clinic-admin-kpi-offline">
+          <div className="clinic-report-kpi-head">
+            <span className="clinic-report-kpi-icon"><Circle size={18} aria-hidden /></span>
+            <span className="clinic-report-kpi-label">Fuera de línea</span>
+          </div>
+          <div className="clinic-report-kpi-value">{stats.users_offline ?? 0}</div>
+        </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><Building2 size={18} aria-hidden /></span>
@@ -1021,11 +1070,25 @@ export function AdminPage() {
               </Button>
             ))}
           </div>
+          <div className="clinic-admin-plan-filters" aria-label="Filtro de presencia">
+            {PRESENCE_FILTERS.map((opt) => (
+              <Button
+                key={opt.id}
+                type="button"
+                variant={presenceFilter === opt.id ? "default" : "secondary"}
+                size="sm"
+                onClick={() => setPresenceFilter(opt.id)}
+              >
+                {opt.label}
+              </Button>
+            ))}
+          </div>
         </div>
         <div className="clinic-table-wrap clinic-admin-users-table-wrap">
           <table className="clinic-table">
             <thead>
               <tr>
+                <th>Presencia</th>
                 <th>Nombre</th>
                 <th>Email</th>
                 <th>Registro</th>
@@ -1040,7 +1103,7 @@ export function AdminPage() {
             <tbody>
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="clinic-muted" style={{ textAlign: "center" }}>
+                  <td colSpan={10} className="clinic-muted" style={{ textAlign: "center" }}>
                     No hay usuarios con este filtro.
                   </td>
                 </tr>
@@ -1048,8 +1111,18 @@ export function AdminPage() {
                 users.map((u) => {
                   const busy = cedulaActingId === u.id;
                   const cedulaStatus = (u.cedula_verification_status || "unsubmitted").toLowerCase();
+                  const online = !!u.is_online;
                   return (
                     <tr key={u.id}>
+                      <td>
+                        <div className={`clinic-admin-presence${online ? " is-online" : " is-offline"}`}>
+                          <span className="clinic-admin-presence-dot" aria-hidden />
+                          <div className="clinic-admin-presence-text">
+                            <strong>{online ? "En línea" : "Fuera de línea"}</strong>
+                            <span className="clinic-muted">{formatLastSeen(u.last_seen)}</span>
+                          </div>
+                        </div>
+                      </td>
                       <td>{u.nombre || "—"}</td>
                       <td>{u.email || "—"}</td>
                       <td>{formatRegisteredAt(u.created_at)}</td>
