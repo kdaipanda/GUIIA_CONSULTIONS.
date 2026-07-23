@@ -53,3 +53,24 @@ En **agency-agents**: `specialized/guiaa-field-sales-rep.md`
 6. Salir con checklist-fisico.md
 7. Bitácora al final del día + follow-ups WA
 ```
+
+
+## PDFs listos para imprimir
+
+Carpeta: [`pdf/`](./pdf/)
+
+| Archivo | Contenido |
+|---------|-----------|
+| **`GUIAA-kit-visitas-clinicas-COMPLETO.pdf`** | Todo el kit en un solo PDF |
+| `00`–`11` | Playbook, scripts, ICP, QR, compliance |
+| `12-one-pager-imprimible.pdf` | Hoja A4 para dejar en clínica |
+| `13-tarjeta-leave-behind.pdf` | 4 tarjetas con QR por hoja |
+| `14`–`15` | Plantilla de ruta y bitácora |
+
+Regenerar:
+
+```bash
+cd SV.003-main/field-kit/clinic-visits
+python3 scripts/build_pdfs.py
+```
+
