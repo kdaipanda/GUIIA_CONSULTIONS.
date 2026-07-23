@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>GUIAA — Tarjeta leave-behind</title>
+  <style>
+    @page { size: letter; margin: 10mm; }
+    :root {
+      --navy: #0c2d4d;
+      --blue: #265B93;
+      --green: #3d9b8f;
+    }
+    body {
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      color: #fff;
+    }
+    .sheet {
+      display: grid;
+      grid-template-columns: repeat(2, 85mm);
+      gap: 8mm;
+      justify-content: center;
+      padding: 8mm;
+    }
+    .card {
+      width: 85mm;
+      height: 50mm;
+      background: linear-gradient(145deg, var(--navy), var(--blue));
+      border-radius: 6mm;
+      padding: 5mm;
+      display: grid;
+      grid-template-columns: 1fr 28mm;
+      gap: 3mm;
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::after {
+      content: "";
+      position: absolute;
+      right: -10mm;
+      bottom: -10mm;
+      width: 30mm;
+      height: 30mm;
+      border-radius: 50%;
+      background: rgba(61, 155, 143, 0.25);
+    }
+    .brand {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+    .brand span { color: #9fd0c8; }
+    .line {
+      font-size: 10px;
+      line-height: 1.35;
+      opacity: 0.95;
+      margin-top: 3mm;
+      max-width: 48mm;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 3mm;
+      background: var(--green);
+      color: var(--navy);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1.5mm 2.5mm;
+      border-radius: 3mm;
+    }
+    .qr {
+      text-align: center;
+      z-index: 1;
+    }
+    .qr img {
+      width: 24mm;
+      height: 24mm;
+      background: #fff;
+      border-radius: 2mm;
+      padding: 1mm;
+    }
+    .qr small {
+      display: block;
+      font-size: 8px;
+      margin-top: 1.5mm;
+      opacity: 0.9;
+    }
+    .noprint {
+      text-align: center;
+      color: #5a6f82;
+      font-size: 13px;
+      margin: 10px;
+    }
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .noprint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <p class="noprint">Imprime a color. 4 tarjetas por hoja. Genera el QR antes (`python3 scripts/generate_qr.py`).</p>
+  <div class="sheet">
+    <!-- 4 identical cards for cut -->
+    <div class="card">
+      <div>
+        <div class="brand">GUI<span>AA</span></div>
+        <div class="line">Software clínico veterinario. 3 consultas de prueba gratis.</div>
+        <div class="badge">guiaa.vet</div>
+      </div>
+      <div class="qr">
+        <img src="../qr/generated/register.png" alt="QR" />
+        <small>Regístrate</small>
+      </div>
+    </div>
+    <div class="card">
+      <div>
+        <div class="brand">GUI<span>AA</span></div>
+        <div class="line">Software clínico veterinario. 3 consultas de prueba gratis.</div>
+        <div class="badge">guiaa.vet</div>
+      </div>
+      <div class="qr">
+        <img src="../qr/generated/register.png" alt="QR" />
+        <small>Regístrate</small>
+      </div>
+    </div>
+    <div class="card">
+      <div>
+        <div class="brand">GUI<span>AA</span></div>
+        <div class="line">Software clínico veterinario. 3 consultas de prueba gratis.</div>
+        <div class="badge">guiaa.vet</div>
+      </div>
+      <div class="qr">
+        <img src="../qr/generated/register.png" alt="QR" />
+        <small>Regístrate</small>
+      </div>
+    </div>
+    <div class="card">
+      <div>
+        <div class="brand">GUI<span>AA</span></div>
+        <div class="line">Software clínico veterinario. 3 consultas de prueba gratis.</div>
+        <div class="badge">guiaa.vet</div>
+      </div>
+      <div class="qr">
+        <img src="../qr/generated/register.png" alt="QR" />
+        <small>Regístrate</small>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
