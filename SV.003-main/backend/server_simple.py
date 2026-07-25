@@ -1952,15 +1952,21 @@ async def upload_cedula_document(
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     path = f"user-{vet_id}/cedula/cedula-{ts}{ext}"
 
-    public_url, err_up = upload_bytes_to_storage("uploads", path, data, media_type)
-    if err_up or not public_url:
+    document_url, err_up = upload_bytes_to_storage(
+        "cedula-documents",
+        path,
+        data,
+        media_type,
+        public=False,
+    )
+    if err_up or not document_url:
         raise HTTPException(status_code=500, detail=f"Error subiendo archivo: {err_up or 'desconocido'}")
 
     now = datetime.now(timezone.utc).isoformat()
     err = update_profile(
         vet_id,
         {
-            "cedula_document_url": public_url,
+            "cedula_document_url": document_url,
             "cedula_document_uploaded_at": now,
             "cedula_verification_status": CEDULA_STATUS_PENDING,
             "cedula_verification_error": None,
@@ -1971,7 +1977,7 @@ async def upload_cedula_document(
 
     return CedulaUploadResponse(
         status="ok",
-        cedula_document_url=public_url,
+        cedula_document_url=document_url,
         message="Documento recibido. Continúa con la verificación de tu registro profesional.",
     )
 

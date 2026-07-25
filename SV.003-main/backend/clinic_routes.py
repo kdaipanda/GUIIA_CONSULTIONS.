@@ -1512,6 +1512,7 @@ async def admin_whatsapp_promo_ensure_image(x_veterinarian_id: str = Header(None
         whatsapp_promo.OFFER_STORAGE_PATH,
         data,
         "image/png",
+        public=True,
     )
     if up_err or not public_url:
         raise HTTPException(status_code=500, detail=up_err or "No se pudo subir la imagen")
