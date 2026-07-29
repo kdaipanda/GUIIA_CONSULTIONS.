@@ -12,6 +12,7 @@ sys.path.insert(0, str(BACKEND_DIR))
 
 os.environ.setdefault("JWT_SECRET", "test-jwt-secret-for-cedula-tests")
 os.environ.setdefault("ENVIRONMENT", "development")
+os.environ.setdefault("ALLOW_INSECURE_VET_HEADER", "true")
 
 import server_simple  # noqa: E402
 
