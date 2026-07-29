@@ -712,17 +712,29 @@ def update_payment_transaction(session_id: str, fields: Dict[str, Any]) -> Optio
 
 def list_profiles(limit: int = 1000) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     """
-    Obtiene todos los perfiles (para uso administrativo).
+    Obtiene perfiles (uso administrativo).
+    Pagina hasta ``limit`` para no truncar por el tope típico de PostgREST (~1000).
     """
     client = get_supabase_client()
+    page_size = 1000
+    target = max(1, int(limit or 1000))
+    out: List[Dict[str, Any]] = []
     try:
-        resp = (
-            client.table("profiles")
-            .select("*")
-            .order("created_at", desc=True)
-            .limit(limit)
-            .execute()
-        )
-        return (resp.data or [], None)
+        offset = 0
+        while len(out) < target:
+            take = min(page_size, target - len(out))
+            resp = (
+                client.table("profiles")
+                .select("*")
+                .order("created_at", desc=True)
+                .range(offset, offset + take - 1)
+                .execute()
+            )
+            rows = resp.data or []
+            out.extend(rows)
+            if len(rows) < take:
+                break
+            offset += take
+        return (out, None)
     except Exception as exc:  # noqa: BLE001
         return ([], str(exc))

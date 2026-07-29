@@ -1572,8 +1572,10 @@ async def admin_list_users(
     consultation_counts, counts_err = count_consultations_by_users(
         [str(profile.get("id") or "") for profile in profiles]
     )
+    # No tumbar el listado de usuarios si falla el conteo de consultas
     if counts_err:
-        raise HTTPException(status_code=500, detail=f"Error contando consultas: {counts_err}")
+        print(f"[WARN] admin/users consultas: {counts_err}")
+        consultation_counts = consultation_counts or {}
     q = search.lower().strip()
     pf = (plan_filter or "all").lower().strip()
     prf = (presence_filter or "all").lower().strip()
@@ -1599,6 +1601,7 @@ async def admin_list_users(
                     profile.get("nombre") or "",
                     profile.get("membership_type") or "",
                     profile.get("cedula_profesional") or "",
+                    profile.get("telefono") or "",
                 ]
             ).lower()
             if q not in haystack:

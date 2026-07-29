@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox, Star, Stethoscope, Circle, MessageCircle } from "lucide-react";
 import "./clinicPageShared.css";
 import "./adminPage.css";
@@ -266,6 +266,8 @@ export function AdminPage() {
   const [waPromoLoading, setWaPromoLoading] = useState(false);
   const [waPromoActing, setWaPromoActing] = useState(false);
   const [waOpenedIds, setWaOpenedIds] = useState(() => new Set());
+  const loadSeqRef = useRef(0);
+  const hasLoadedOnceRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -278,14 +280,19 @@ export function AdminPage() {
   const load = useCallback(async (opts = {}) => {
     const soft = !!opts.soft;
     if (!veterinarian?.id) return;
+    const seq = ++loadSeqRef.current;
+    const isStale = () => seq !== loadSeqRef.current;
+
+    // Skeleton completo solo en la primera carga; luego loading indica “actualizando…”
     if (!soft) {
       setLoading(true);
-      setLoadError("");
+      if (!hasLoadedOnceRef.current) setLoadError("");
     }
     try {
       let allowedUser = platformAdmin;
       if (!allowedUser) {
         const access = await fetchAdminAccess(veterinarian.id);
+        if (isStale()) return;
         allowedUser = !!access.platform_admin;
       }
       if (!allowedUser) {
@@ -298,6 +305,8 @@ export function AdminPage() {
         fetchAdminUsers(veterinarian.id, search, planFilter, 500, presenceFilter),
         fetchAdminOrganizations(veterinarian.id),
       ]);
+      if (isStale()) return;
+
       setOverview(ov.overview || null);
       setUsers(usersData.users || []);
       setUserCount(usersData.count ?? usersData.users?.length ?? 0);
@@ -308,66 +317,85 @@ export function AdminPage() {
         usersData.total_registered ?? ov.overview?.users_total ?? usersData.users?.length ?? 0,
       );
       setOrganizations(orgsData.organizations || []);
+      setAllowed(true);
+      hasLoadedOnceRef.current = true;
 
       if (soft) {
-        setAllowed(true);
         return;
       }
 
       setSupportLoading(true);
       try {
         const supportData = await fetchAdminSupportTickets(veterinarian.id, supportFilter);
-        setSupportTickets(supportData.tickets || []);
-        setSupportOpenCount(supportData.open_count ?? 0);
+        if (!isStale()) {
+          setSupportTickets(supportData.tickets || []);
+          setSupportOpenCount(supportData.open_count ?? 0);
+        }
       } catch {
-        setSupportTickets([]);
-        setSupportOpenCount(0);
+        if (!isStale()) {
+          setSupportTickets([]);
+          setSupportOpenCount(0);
+        }
       } finally {
-        setSupportLoading(false);
+        if (!isStale()) setSupportLoading(false);
       }
 
       setGuiaLeadsLoading(true);
       try {
         const leadsData = await fetchAdminGuiaConsultasLeads(veterinarian.id, guiaLeadFilter);
-        setGuiaLeads(leadsData.leads || []);
-        setGuiaLeadsNewCount(leadsData.new_count ?? 0);
+        if (!isStale()) {
+          setGuiaLeads(leadsData.leads || []);
+          setGuiaLeadsNewCount(leadsData.new_count ?? 0);
+        }
       } catch {
-        setGuiaLeads([]);
-        setGuiaLeadsNewCount(0);
+        if (!isStale()) {
+          setGuiaLeads([]);
+          setGuiaLeadsNewCount(0);
+        }
       } finally {
-        setGuiaLeadsLoading(false);
+        if (!isStale()) setGuiaLeadsLoading(false);
       }
 
       setTrialSurveysLoading(true);
       try {
         const surveysData = await fetchAdminTrialSurveys(veterinarian.id, trialSurveySearch);
-        setTrialSurveys(surveysData.surveys || []);
-        setTrialSurveysCount(surveysData.count ?? surveysData.surveys?.length ?? 0);
+        if (!isStale()) {
+          setTrialSurveys(surveysData.surveys || []);
+          setTrialSurveysCount(surveysData.count ?? surveysData.surveys?.length ?? 0);
+        }
       } catch {
-        setTrialSurveys([]);
-        setTrialSurveysCount(0);
+        if (!isStale()) {
+          setTrialSurveys([]);
+          setTrialSurveysCount(0);
+        }
       } finally {
-        setTrialSurveysLoading(false);
+        if (!isStale()) setTrialSurveysLoading(false);
       }
 
       setWaPromoLoading(true);
       try {
         const promo = await fetchAdminWhatsappPromo(veterinarian.id);
-        setWaPromo(promo);
+        if (!isStale()) setWaPromo(promo);
       } catch {
-        setWaPromo(null);
+        if (!isStale()) setWaPromo(null);
       } finally {
-        setWaPromoLoading(false);
+        if (!isStale()) setWaPromoLoading(false);
       }
-
-      setAllowed(true);
     } catch (err) {
+      if (isStale()) return;
       const message = err.message || "No se pudo cargar el panel de administración";
+      // Soft refresh: no tumbar el panel ni spamear toasts cada 30s
+      if (soft && hasLoadedOnceRef.current) {
+        console.warn("[admin] soft refresh failed:", message);
+        return;
+      }
       setLoadError(message);
       notifyError(message);
-      setAllowed(platformAdmin ? null : false);
+      if (!hasLoadedOnceRef.current) {
+        setAllowed(false);
+      }
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   }, [veterinarian?.id, search, planFilter, presenceFilter, supportFilter, guiaLeadFilter, trialSurveySearch, platformAdmin]);
 
@@ -701,7 +729,9 @@ export function AdminPage() {
   };
 
   const showSkeleton =
-    vetLoading || loading || (allowed === null && !!veterinarian?.id);
+    vetLoading ||
+    (loading && !hasLoadedOnceRef.current) ||
+    (allowed === null && !!veterinarian?.id && !hasLoadedOnceRef.current);
 
   if (showSkeleton) {
     return (
@@ -1215,6 +1245,7 @@ export function AdminPage() {
             {" · "}
             {usersTotalRegistered} registrados en total
             {userCount !== usersTotalMatching ? ` · mostrando ${userCount}` : ""}
+            {loading && hasLoadedOnceRef.current ? " · actualizando…" : ""}
           </span>
         </div>
         <div className="clinic-admin-users-toolbar">
