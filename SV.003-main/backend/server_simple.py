@@ -1523,6 +1523,11 @@ async def register_veterinarian(vet: VeterinarianRegister, request: Request):
     existing, _ = get_profile_by_email(vet.email)
     if existing:
         raise HTTPException(status_code=400, detail="Email ya registrado")
+    if auth_security.is_reserved_platform_admin_email(vet.email):
+        raise HTTPException(
+            status_code=403,
+            detail="Este email requiere alta administrativa. Contacta soporte.",
+        )
 
     cedula_norm = normalize_professional_id(vet.cedula_profesional)
     if len(cedula_norm) < 3:
