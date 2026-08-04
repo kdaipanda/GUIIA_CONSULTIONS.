@@ -122,7 +122,7 @@ export async function adminReviewUserCedula(veterinarianId, profileId, action, n
   });
 }
 
-export async function fetchAdminUserConsultations(veterinarianId, profileId, limit = 50) {
+export async function fetchAdminUserConsultations(veterinarianId, profileId, limit = 200) {
   const params = new URLSearchParams();
   if (limit) params.set("limit", String(limit));
   const q = params.toString() ? `?${params}` : "";

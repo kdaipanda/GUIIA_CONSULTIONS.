@@ -238,6 +238,8 @@ export function AdminPage() {
   const [cedulaPreviewLoading, setCedulaPreviewLoading] = useState(false);
   const [historyUser, setHistoryUser] = useState(null);
   const [historyConsultations, setHistoryConsultations] = useState([]);
+  const [historyTotal, setHistoryTotal] = useState(0);
+  const [historyTruncated, setHistoryTruncated] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyPdfLoading, setHistoryPdfLoading] = useState(false);
   const [expandedConsultationId, setExpandedConsultationId] = useState(null);
@@ -554,10 +556,27 @@ export function AdminPage() {
   const openConsultationHistory = async (user) => {
     setHistoryUser(user);
     setHistoryConsultations([]);
+    setHistoryTotal(user.consultations_used ?? 0);
+    setHistoryTruncated(false);
     setHistoryLoading(true);
     try {
-      const data = await fetchAdminUserConsultations(veterinarian.id, user.id, 50);
+      const data = await fetchAdminUserConsultations(veterinarian.id, user.id, 500);
       setHistoryConsultations(data.consultations || []);
+      setHistoryTotal(
+        data.total ?? data.count ?? data.consultations?.length ?? user.consultations_used ?? 0,
+      );
+      setHistoryTruncated(!!data.truncated);
+      // Mantener alineado el contador de la fila si el total real difiere
+      if (typeof data.total === "number" && data.total !== user.consultations_used) {
+        setUsers((prev) =>
+          prev.map((row) =>
+            row.id === user.id ? { ...row, consultations_used: data.total } : row,
+          ),
+        );
+        setHistoryUser((prev) =>
+          prev && prev.id === user.id ? { ...prev, consultations_used: data.total } : prev,
+        );
+      }
     } catch (err) {
       notifyError(err.message);
     } finally {
@@ -568,6 +587,8 @@ export function AdminPage() {
   const closeConsultationHistory = () => {
     setHistoryUser(null);
     setHistoryConsultations([]);
+    setHistoryTotal(0);
+    setHistoryTruncated(false);
     setHistoryLoading(false);
     setHistoryPdfLoading(false);
     setExpandedConsultationId(null);
@@ -855,6 +876,12 @@ export function AdminPage() {
             <span className="clinic-report-kpi-label">Consultas CDS usadas</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.consultations_total ?? 0}</div>
+          {stats.consultations_by_registered_users != null &&
+            stats.consultations_by_registered_users !== stats.consultations_total && (
+              <div className="clinic-muted clinic-admin-kpi-sub">
+                {stats.consultations_by_registered_users} de usuarios actuales
+              </div>
+            )}
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
@@ -1558,7 +1585,13 @@ export function AdminPage() {
                       {historyUser.nombre || historyUser.email}
                       {historyUser.email && historyUser.nombre ? ` · ${historyUser.email}` : ""}
                       {!historyLoading
-                        ? ` · ${historyConsultations.length} consulta${historyConsultations.length === 1 ? "" : "s"}`
+                        ? ` · ${historyTotal} consulta${historyTotal === 1 ? "" : "s"} usada${historyTotal === 1 ? "" : "s"}`
+                        : ""}
+                      {!historyLoading && historyUser.consultations_remaining != null
+                        ? ` · ${historyUser.consultations_remaining} disponible${historyUser.consultations_remaining === 1 ? "" : "s"}`
+                        : ""}
+                      {!historyLoading && historyTruncated
+                        ? ` · mostrando ${historyConsultations.length}`
                         : ""}
                     </DialogDescription>
                   </div>

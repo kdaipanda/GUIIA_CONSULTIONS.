@@ -19,6 +19,7 @@ import whatsapp_promo
 from membership_access import require_feature_for_profile
 from supabase_client import (
     count_consultations_by_users,
+    count_consultations_by_user,
     get_profile,
     get_profile_by_email,
     list_profiles,
@@ -1537,6 +1538,10 @@ async def admin_overview(x_veterinarian_id: str = Header(None)):
     now = presence.utc_now()
     users_online = sum(1 for p in profiles if presence.is_online(p.get("last_seen"), now=now))
     users_offline = max(0, len(profiles) - users_online)
+    consultation_counts, _ = count_consultations_by_users(
+        [str(profile.get("id") or "") for profile in profiles]
+    )
+    consultations_by_registered = sum(consultation_counts.values())
     return {
         "overview": {
             "users_total": len(profiles),
@@ -1550,6 +1555,7 @@ async def admin_overview(x_veterinarian_id: str = Header(None)):
             "patients_total": patients_count,
             "appointments_total": appts_count,
             "consultations_total": consultations_count,
+            "consultations_by_registered_users": consultations_by_registered,
             "online_window_seconds": presence.ONLINE_WINDOW_SECONDS,
         }
     }
@@ -1722,7 +1728,7 @@ async def admin_review_user_cedula(
 @clinic_router.get("/admin/users/{profile_id}/consultations")
 async def admin_user_consultations(
     profile_id: str,
-    limit: int = 50,
+    limit: int = 200,
     x_veterinarian_id: str = Header(None),
 ):
     await _require_platform_admin(_require_vet_id(x_veterinarian_id))
@@ -1731,7 +1737,11 @@ async def admin_user_consultations(
         raise HTTPException(status_code=500, detail=err)
     if not profile:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    rows, list_err = list_consultations(profile_id, limit=min(limit, 100))
+    page_limit = max(1, min(int(limit or 200), 500))
+    total_used, total_err = count_consultations_by_user(profile_id)
+    if total_err:
+        raise HTTPException(status_code=500, detail=total_err)
+    rows, list_err = list_consultations(profile_id, limit=page_limit)
     if list_err:
         raise HTTPException(status_code=500, detail=list_err)
     return {
@@ -1739,9 +1749,14 @@ async def admin_user_consultations(
             "id": profile.get("id"),
             "email": profile.get("email"),
             "nombre": profile.get("nombre"),
+            "consultations_remaining": profile.get("consultations_remaining"),
+            "membership_type": profile.get("membership_type"),
         },
         "consultations": [_serialize_consultation_row(r) for r in rows],
         "count": len(rows),
+        "total": total_used,
+        "limit": page_limit,
+        "truncated": total_used > len(rows),
     }
 
 

@@ -26,6 +26,12 @@
   color: var(--admin-navy);
 }
 
+.clinic-admin-kpi-sub {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
 .clinic-admin-kpi-online .clinic-report-kpi-icon {
   background: rgba(61, 155, 143, 0.12);
   color: var(--admin-green);
