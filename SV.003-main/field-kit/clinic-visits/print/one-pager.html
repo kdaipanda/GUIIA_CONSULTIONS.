@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>GUIAA — One-pager visitas clínicas</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    :root {
+      --navy: #0c2d4d;
+      --blue: #265B93;
+      --green: #3d9b8f;
+      --ink: #0c2d4d;
+      --muted: #5a6f82;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background: #fff;
+    }
+    .sheet {
+      width: 182mm;
+      min-height: 260mm;
+      margin: 0 auto;
+      padding: 8mm 0;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 3px solid var(--navy);
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+    }
+    .brand {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--navy);
+    }
+    .brand span { color: var(--blue); }
+    .tag {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .qr-box {
+      text-align: center;
+      width: 38mm;
+    }
+    .qr-box img {
+      width: 34mm;
+      height: 34mm;
+      border: 1px solid #d7e0ea;
+    }
+    .qr-box small { display: block; font-size: 9px; color: var(--muted); margin-top: 4px; }
+    h1 {
+      font-size: 22px;
+      line-height: 1.25;
+      margin: 0 0 10px;
+      color: var(--navy);
+    }
+    .lead {
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--muted);
+      margin: 0 0 18px;
+      max-width: 140mm;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .card {
+      border-left: 4px solid var(--green);
+      padding: 8px 10px;
+      background: #f4f8fb;
+    }
+    .card h3 {
+      margin: 0 0 4px;
+      font-size: 13px;
+      color: var(--blue);
+    }
+    .card p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .offer {
+      background: var(--navy);
+      color: #fff;
+      padding: 14px 16px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 18px 0;
+    }
+    .offer strong { font-size: 16px; }
+    .offer p { margin: 4px 0 0; font-size: 12px; opacity: 0.9; }
+    .cta {
+      background: var(--green);
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    ol {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    footer {
+      margin-top: 20px;
+      border-top: 1px solid #d7e0ea;
+      padding-top: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .noprint { display: none; }
+    }
+    .noprint {
+      max-width: 182mm;
+      margin: 12px auto;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <p class="noprint">Abrir en el navegador → Imprimir → Guardar como PDF (A4). Sustituye el QR en <code>qr/generated/register.png</code>.</p>
+  <div class="sheet">
+    <header>
+      <div>
+        <div class="brand">GUI<span>AA</span></div>
+        <div class="tag">Software clínico para médicos veterinarios · guiaa.vet</div>
+      </div>
+      <div class="qr-box">
+        <img src="../qr/generated/register.png" alt="QR registro GUIAA" />
+        <small>Escanea · 3 consultas gratis</small>
+      </div>
+    </header>
+
+    <h1>Consulta más clara. Historial en orden. Apoyo clínico cuando lo necesitas.</h1>
+    <p class="lead">
+      GUIAA ayuda a MVZ en Latinoamérica a documentar consultas multiespecie,
+      organizar pacientes y agenda, y usar apoyo a la decisión clínica (CDS)
+      sin perder el criterio profesional.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Consulta multiespecie</h3>
+        <p>Flujo pensado para la práctica real, no solo perro y gato.</p>
+      </div>
+      <div class="card">
+        <h3>Apoyo a la decisión</h3>
+        <p>Sugerencias clínicas; la responsabilidad sigue siendo del veterinario.</p>
+      </div>
+      <div class="card">
+        <h3>Clínica en un lugar</h3>
+        <p>Pacientes, citas, inventario y ventas según tu plan.</p>
+      </div>
+      <div class="card">
+        <h3>Hecho para LATAM</h3>
+        <p>Español claro, tono profesional, listo para el consultorio.</p>
+      </div>
+    </div>
+
+    <div class="offer">
+      <div>
+        <strong>Prueba gratis: 3 consultas</strong>
+        <p>Regístrate en guiaa.vet y pruébalo con casos reales de tu clínica.</p>
+      </div>
+      <div class="cta">guiaa.vet</div>
+    </div>
+
+    <h3 style="font-size:14px;margin:0 0 8px;color:var(--blue);">Cómo empezar hoy</h3>
+    <ol>
+      <li>Escanea el QR o entra a <strong>guiaa.vet</strong></li>
+      <li>Crea tu cuenta de veterinario</li>
+      <li>Completa tu primera consulta de prueba</li>
+      <li>Si te sirve, elige el plan que se ajuste a tu consultorio</li>
+    </ol>
+
+    <footer>
+      <span>Preciso · Confiable · Humano</span>
+      <span>WhatsApp / web: guiaa.vet · Campaña visitas clínicas</span>
+    </footer>
+  </div>
+</body>
+</html>
