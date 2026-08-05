@@ -33,10 +33,9 @@ export const VetProvider = ({ children }) => {
     if (storedVet) {
       try {
         const parsedVet = JSON.parse(storedVet);
-        const isDevCarlos =
-          parsedVet?.id === "dev-carlos-hernandez" ||
-          parsedVet?.email === "carlos.hernandez@vetmed.com";
-        if (isDevCarlos) {
+        // Solo limpia el stub local histórico; no tocar la cuenta real de producción
+        const isLegacyDevStub = parsedVet?.id === "dev-carlos-hernandez";
+        if (isLegacyDevStub) {
           localStorage.removeItem("veterinarian");
         } else {
           setVeterinarian(parsedVet);
@@ -95,7 +94,8 @@ export const VetProvider = ({ children }) => {
           };
           setVeterinarian(vetFromSupabase);
           localStorage.setItem("veterinarian", JSON.stringify(vetFromSupabase));
-        } else {
+        } else if (event === "SIGNED_OUT") {
+          // No limpiar en INITIAL_SESSION sin user: eso borraría la sesión JWT de GUIAA.
           setVeterinarian(null);
           localStorage.removeItem("veterinarian");
           clearAccessToken();
