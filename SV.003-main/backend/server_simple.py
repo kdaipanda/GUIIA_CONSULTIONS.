@@ -2001,11 +2001,9 @@ async def verify_cedula(
     if stored_key != professional_id_key(cedula):
         raise HTTPException(status_code=400, detail="El registro no coincide con el perfil")
 
-    expected_name = (payload.expected_nombre or profile.get("nombre") or "").strip()
+    expected_name = (profile.get("nombre") or "").strip()
     if not expected_name:
         raise HTTPException(status_code=400, detail="Nombre requerido para validar")
-    if expected_name != (profile.get("nombre") or "").strip():
-        update_profile(vet_id, {"nombre": expected_name})
 
     result = await cedula_verification.verify_profile_cedula(vet_id)
     if not result.get("ok"):
