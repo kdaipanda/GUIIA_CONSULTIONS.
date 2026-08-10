@@ -30,6 +30,14 @@ function isLocalBackendUrl(url) {
   }
 }
 
+function clearStoredBackendUrl() {
+  try {
+    localStorage.removeItem("backend_url");
+  } catch {
+    /* ignore */
+  }
+}
+
 function localApiUrl(hostname) {
   if (hostname === "localhost" || hostname === "127.0.0.1") {
     return LOCAL_API;
@@ -106,21 +114,14 @@ export function getBackendUrl() {
     }
 
     if (hostname.endsWith("vercel.app")) {
-      const paramUrl = readParamBackendUrl(true);
-      if (paramUrl) {
-        localStorage.setItem("backend_url", paramUrl);
-        return paramUrl;
-      }
-      const stored = readStoredBackendUrl(true);
-      if (stored) return stored;
+      clearStoredBackendUrl();
       if (typeof window !== "undefined" && window.location?.origin) {
         return window.location.origin.replace(/\/$/, "");
       }
       return PRODUCTION_API;
     }
 
-    const stored = readStoredBackendUrl(true);
-    if (stored) return stored;
+    clearStoredBackendUrl();
   } catch {
     /* ignore */
   }
