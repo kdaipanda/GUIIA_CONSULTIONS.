@@ -15,14 +15,30 @@ export async function finalizeCedulaFlowEntry({
 }) {
   if (authPayload?.access_token) {
     const profile = persistAuthFromResponse(authPayload);
-    return {
+    const vetId = authPayload.id || profile?.id || veterinarian_id;
+    const tokenProfile = {
       ...profile,
       access_token: authPayload.access_token,
       token_type: authPayload.token_type || "bearer",
-      id: authPayload.id || profile?.id || veterinarian_id,
+      id: vetId,
       email: authPayload.email || profile?.email || email,
       nombre: authPayload.nombre || profile?.nombre,
     };
+    if (vetId) {
+      const profileResp = await fetch(`${BACKEND_URL}/api/auth/profile`, {
+        headers: getAuthHeaders(vetId),
+      });
+      if (profileResp.ok) {
+        const fullProfile = await profileResp.json();
+        return {
+          ...fullProfile,
+          access_token: authPayload.access_token,
+          token_type: authPayload.token_type || "bearer",
+          expires_in: authPayload.expires_in,
+        };
+      }
+    }
+    return tokenProfile;
   }
 
   const token = getAccessToken();
