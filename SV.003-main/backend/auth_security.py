@@ -230,6 +230,21 @@ def platform_admin_emails_from_env() -> Set[str]:
     return {e.strip().lower() for e in raw.split(",") if e.strip()}
 
 
+def is_reserved_platform_admin_email(email: str) -> bool:
+    """Emails admin no pueden auto-provisionarse desde el registro público."""
+    normalized = (email or "").strip().lower()
+    if not normalized:
+        return False
+    if normalized in platform_admin_emails_from_env():
+        return True
+    try:
+        from supabase_client import is_platform_admin_in_db
+
+        return is_platform_admin_in_db("", normalized)
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def is_platform_admin_profile(profile: Optional[dict]) -> bool:
     if not profile:
         return False
