@@ -398,11 +398,31 @@ def list_medical_images_for_consultation(
         return ([], str(exc))
 
 
-def upload_bytes_to_storage(bucket: str, path: str, data: bytes, content_type: str) -> Tuple[Optional[str], Optional[str]]:
+def _storage_object_url(bucket: str, path: str, *, public: bool) -> Optional[str]:
+    base = (os.getenv("SUPABASE_URL") or "").strip().rstrip("/")
+    if not base:
+        return None
+    visibility = "public" if public else "authenticated"
+    return f"{base}/storage/v1/object/{visibility}/{bucket}/{path.lstrip('/')}"
+
+
+def upload_bytes_to_storage(
+    bucket: str,
+    path: str,
+    data: bytes,
+    content_type: str,
+    *,
+    public: bool = True,
+) -> Tuple[Optional[str], Optional[str]]:
     """
     Sube bytes al bucket y devuelve public URL.
     """
-    ensure_storage_bucket_public(bucket)
+    if public:
+        ensure_storage_bucket_public(bucket)
+    else:
+        err = ensure_storage_bucket_private(bucket)
+        if err:
+            return (None, err)
     client = get_supabase_client()
     try:
         client.storage.from_(bucket).upload(
@@ -411,6 +431,8 @@ def upload_bytes_to_storage(bucket: str, path: str, data: bytes, content_type: s
             # Nota: supabase-py espera strings en headers/opciones; usar bool puede romper con "'bool' object has no attribute 'encode'"
             file_options={"content-type": content_type, "upsert": "true"},
         )
+        if not public:
+            return (_storage_object_url(bucket, path, public=False), None)
         url_resp = client.storage.from_(bucket).get_public_url(path)
         # Dependiendo de la versión, get_public_url puede devolver dict o string.
         if isinstance(url_resp, str):
@@ -458,6 +480,28 @@ def ensure_storage_bucket_public(bucket: str) -> Optional[str]:
         return str(exc)
 
 
+def ensure_storage_bucket_private(bucket: str) -> Optional[str]:
+    """Crea el bucket si falta y lo deja privado."""
+    client = get_supabase_client()
+    try:
+        existing = client.storage.get_bucket(bucket)
+        is_public = getattr(existing, "public", False)
+        if isinstance(existing, dict):
+            is_public = existing.get("public", False)
+        if is_public:
+            client.storage.update_bucket(bucket, options={"public": False})
+        return None
+    except Exception as exc:  # noqa: BLE001
+        err = str(exc).lower()
+        if "not found" in err or "404" in err:
+            try:
+                client.storage.create_bucket(bucket, options={"public": False})
+                return None
+            except Exception as create_exc:  # noqa: BLE001
+                return str(create_exc)
+        return str(exc)
+
+
 def get_storage_signed_url(
     bucket: str, path: str, expires_in: int = 3600
 ) -> Tuple[Optional[str], Optional[str]]:
@@ -481,7 +525,6 @@ def resolve_cedula_document_url(stored_url: str) -> Tuple[Optional[str], Optiona
     if not parsed:
         return (stored_url, None)
     bucket, path = parsed
-    ensure_storage_bucket_public(bucket)
     signed, err = get_storage_signed_url(bucket, path)
     if signed:
         return (signed, None)
