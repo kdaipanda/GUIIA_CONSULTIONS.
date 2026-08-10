@@ -187,6 +187,54 @@ def update_profile(profile_id: str, fields: Dict[str, Any]) -> Optional[str]:
         return format_supabase_error(str(exc))
 
 
+def debit_profile_consultation_credit(
+    profile_id: str,
+    expected_remaining: int,
+) -> Tuple[Optional[int], Optional[str]]:
+    """Reserva un crédito solo si nadie cambió el saldo desde que se leyó el perfil."""
+    if expected_remaining <= 0:
+        return (None, "no_consultations_remaining")
+
+    client = get_supabase_client()
+    new_remaining = expected_remaining - 1
+    try:
+        resp = (
+            client.table("profiles")
+            .update({"consultations_remaining": new_remaining}, returning="representation")
+            .eq("id", profile_id)
+            .eq("consultations_remaining", expected_remaining)
+            .execute()
+        )
+        rows = resp.data or []
+        if not rows:
+            return (None, "consultations_remaining_conflict")
+        return (int(rows[0].get("consultations_remaining", new_remaining)), None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, format_supabase_error(str(exc)))
+
+
+def restore_profile_consultation_credit(
+    profile_id: str,
+    expected_current: int,
+    restored_remaining: int,
+) -> Optional[str]:
+    """Revierte una reserva si la consulta no se pudo insertar."""
+    client = get_supabase_client()
+    try:
+        resp = (
+            client.table("profiles")
+            .update({"consultations_remaining": restored_remaining}, returning="representation")
+            .eq("id", profile_id)
+            .eq("consultations_remaining", expected_current)
+            .execute()
+        )
+        if not (resp.data or []):
+            return "consultations_remaining_restore_conflict"
+        return None
+    except Exception as exc:  # noqa: BLE001
+        return format_supabase_error(str(exc))
+
+
 def format_supabase_error(err: str) -> str:
     """Traduce errores típicos de PostgREST/Supabase a mensajes accionables."""
     raw = (err or "").strip()
