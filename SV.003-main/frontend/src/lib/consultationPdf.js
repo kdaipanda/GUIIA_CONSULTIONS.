@@ -1,10 +1,12 @@
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, StandardFonts } from "pdf-lib";
 import { buildClinicalTimeline, getLabStudyLabel } from "./clinicalTimeline";
 import {
   drawPdfBrandHeader,
   embedGuiaaLogo,
   PDF_BRAND_COLOR,
   PDF_LINE_COLOR,
+  PDF_MUTED_COLOR,
+  PDF_TAGLINE_COLOR,
 } from "./pdfLogo";
 
 const PAGE = { width: 595.28, height: 841.89 };
@@ -212,7 +214,7 @@ class PdfWriter {
     const {
       size = 11,
       font = "regular",
-      color = rgb(0.12, 0.16, 0.22),
+      color = PDF_MUTED_COLOR,
       indent = 0,
       lineHeight = size + 4,
     } = options;
@@ -265,7 +267,7 @@ class PdfWriter {
       y: this.y,
       size,
       font: labelFont,
-      color: rgb(0.25, 0.32, 0.42),
+      color: PDF_BRAND_COLOR,
     });
 
     valueLines.forEach((line, index) => {
@@ -274,7 +276,7 @@ class PdfWriter {
         y: this.y - index * (size + 3),
         size,
         font: valueFont,
-        color: rgb(0.12, 0.16, 0.22),
+        color: PDF_MUTED_COLOR,
       });
     });
     this.y -= blockHeight;
@@ -296,7 +298,7 @@ class PdfWriter {
   }
 }
 
-function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
+export function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
   const formData = consultation?.form_data || {};
   const patientName =
     formData.nombre_mascota || consultation.nombre_mascota || "Mascota";
@@ -315,7 +317,7 @@ function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
   if (veterinarian?.nombre || veterinarian?.email) {
     writer.drawLine(
       `Veterinario: ${veterinarian.nombre || "—"}${veterinarian.email ? ` (${veterinarian.email})` : ""}`,
-      { size: 10.5, color: rgb(0.35, 0.42, 0.52) },
+      { size: 10.5, color: PDF_MUTED_COLOR },
     );
   }
 
@@ -327,7 +329,7 @@ function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
   } else {
     writer.drawLine("Sin datos estructurados registrados.", {
       size: 10.5,
-      color: rgb(0.45, 0.5, 0.58),
+      color: PDF_TAGLINE_COLOR,
     });
   }
 
@@ -360,11 +362,32 @@ function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
     writer.drawLine(analysis, { size: 10, lineHeight: 13.5 });
   }
 
+  const linkedStudies = Array.isArray(consultation.linked_studies)
+    ? consultation.linked_studies
+    : [];
+  if (linkedStudies.length) {
+    writer.drawSectionTitle("Interpretaciones de laboratorio vinculadas");
+    linkedStudies.forEach((study, index) => {
+      writer.drawLine(
+        `${index + 1}. ${getLabStudyLabel(study)} — ${formatDate(study.created_at)}`,
+        { size: 10.5, font: "bold" },
+      );
+      const studyAnalysis = cleanAnalysisText(study.analysis);
+      if (studyAnalysis) {
+        writer.drawLine(studyAnalysis, {
+          size: 9.5,
+          lineHeight: 12.5,
+          indent: 12,
+        });
+      }
+    });
+  }
+
   if (consultation.rating) {
     writer.y -= 4;
     writer.drawLine(`Calificación del caso: ${consultation.rating}/5`, {
       size: 10,
-      color: rgb(0.35, 0.42, 0.52),
+      color: PDF_MUTED_COLOR,
     });
   }
 }
@@ -373,11 +396,11 @@ function appendPdfFooter(writer) {
   writer.ensureSpace(24);
   writer.drawLine(`Documento generado el ${formatDate(new Date().toISOString())}`, {
     size: 9,
-    color: rgb(0.5, 0.55, 0.62),
+    color: PDF_TAGLINE_COLOR,
   });
   writer.drawLine("Plataforma GUIAA — Uso exclusivo del profesional veterinario.", {
     size: 9,
-    color: rgb(0.5, 0.55, 0.62),
+    color: PDF_TAGLINE_COLOR,
   });
 }
 
@@ -445,12 +468,12 @@ export async function downloadUserConsultationsHistoryPdf(
   writer.drawLine(`Email: ${user.email || "—"}`, { size: 11 });
   writer.drawLine(`Consultas registradas: ${sorted.length}`, {
     size: 10.5,
-    color: rgb(0.35, 0.42, 0.52),
+    color: PDF_MUTED_COLOR,
   });
   if (generatedBy?.nombre || generatedBy?.email) {
     writer.drawLine(
       `Exportado por: ${generatedBy.nombre || "—"}${generatedBy.email ? ` (${generatedBy.email})` : ""}`,
-      { size: 10, color: rgb(0.35, 0.42, 0.52) },
+      { size: 10, color: PDF_MUTED_COLOR },
     );
   }
 
@@ -460,7 +483,7 @@ export async function downloadUserConsultationsHistoryPdf(
     writer.drawSectionTitle("Consultas");
     writer.drawLine("Este usuario no tiene consultas registradas.", {
       size: 10.5,
-      color: rgb(0.45, 0.5, 0.58),
+      color: PDF_TAGLINE_COLOR,
     });
   } else {
     sorted.forEach((consultation, index) => {
@@ -500,12 +523,12 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
   }
   writer.drawLine(`Consultas CDS: ${(consultations || []).length}`, {
     size: 10.5,
-    color: rgb(0.35, 0.42, 0.52),
+    color: PDF_MUTED_COLOR,
   });
   if (medicalImages.length) {
     writer.drawLine(`Interpretaciones de laboratorio: ${medicalImages.length}`, {
       size: 10.5,
-      color: rgb(0.35, 0.42, 0.52),
+      color: PDF_MUTED_COLOR,
     });
   }
 
@@ -517,7 +540,7 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
   if (!timeline.length) {
     writer.drawLine("No hay registros clínicos vinculados a esta mascota.", {
       size: 10.5,
-      color: rgb(0.45, 0.5, 0.58),
+      color: PDF_TAGLINE_COLOR,
     });
   } else {
     timeline.forEach((item, index) => {
@@ -544,19 +567,19 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
         if (analysisPreview) {
           writer.drawLine(
             `Diagnóstico / análisis: ${toPdfSafeText(analysisPreview)}${consultation.analysis?.length > 280 ? "…" : ""}`,
-            { size: 10, lineHeight: 12.5, color: rgb(0.35, 0.42, 0.52) },
+            { size: 10, lineHeight: 12.5, color: PDF_MUTED_COLOR },
           );
         }
         item.linkedStudies.forEach((study) => {
           writer.drawLine(
             `  ↳ ${getLabStudyLabel(study)} — ${formatDate(study.created_at)}`,
-            { size: 10, font: "bold", color: rgb(0.28, 0.38, 0.52) },
+            { size: 10, font: "bold", color: PDF_MUTED_COLOR },
           );
           if (study.analysis) {
             writer.drawLine(`    ${toPdfSafeText(String(study.analysis).slice(0, 220))}`, {
               size: 9.5,
               lineHeight: 12,
-              color: rgb(0.35, 0.42, 0.52),
+              color: PDF_MUTED_COLOR,
             });
           }
         });
@@ -570,7 +593,7 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
           writer.drawLine(toPdfSafeText(String(study.analysis).slice(0, 240)), {
             size: 10,
             lineHeight: 12.5,
-            color: rgb(0.35, 0.42, 0.52),
+            color: PDF_MUTED_COLOR,
           });
         }
       }
@@ -582,18 +605,18 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
     writer.y -= 4;
     writer.drawLine(
       `Veterinario: ${veterinarian.nombre || "—"}${veterinarian.email ? ` (${veterinarian.email})` : ""}`,
-      { size: 10, color: rgb(0.35, 0.42, 0.52) },
+      { size: 10, color: PDF_MUTED_COLOR },
     );
   }
 
   writer.ensureSpace(24);
   writer.drawLine(`Documento generado el ${formatDate(new Date().toISOString())}`, {
     size: 9,
-    color: rgb(0.5, 0.55, 0.62),
+    color: PDF_TAGLINE_COLOR,
   });
   writer.drawLine("Plataforma GUIAA — Uso exclusivo del profesional veterinario.", {
     size: 9,
-    color: rgb(0.5, 0.55, 0.62),
+    color: PDF_TAGLINE_COLOR,
   });
 
   const pdfBytes = await pdfDoc.save();
