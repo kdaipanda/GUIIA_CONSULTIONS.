@@ -77,6 +77,19 @@ export function canCreateConsultation(veterinarian, options = {}) {
   return false;
 }
 
+/** ¿Puede generar la síntesis CDS de una consulta ya iniciada? */
+export function canAnalyzeConsultation(veterinarian, options = {}) {
+  if (options.platformAdmin) return true;
+  if (!veterinarian) return false;
+
+  const membershipType = veterinarian.membership_type?.toLowerCase();
+  const remaining = veterinarian.consultations_remaining ?? 0;
+
+  if (["basic", "professional", "premium"].includes(membershipType)) return true;
+  if (!membershipType && remaining > 0) return true;
+  return false;
+}
+
 export function isTrialExhausted(veterinarian, options = {}) {
   if (options.platformAdmin) return false;
   if (!veterinarian) return false;
