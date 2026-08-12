@@ -805,6 +805,47 @@ def list_stock_movements(
         return ([], err)
 
 
+def _delete_stock_movement(movement_id: str, organization_id: str) -> Optional[str]:
+    try:
+        _table("stock_movements").delete().eq("id", movement_id).eq("organization_id", organization_id).execute()
+        return None
+    except Exception as exc:  # noqa: BLE001
+        return str(exc)
+
+
+def _delete_invoice_records(invoice_id: str, organization_id: str) -> Optional[str]:
+    try:
+        _table("clinical_invoice_items").delete().eq("invoice_id", invoice_id).execute()
+        _table("clinical_invoices").delete().eq("id", invoice_id).eq("organization_id", organization_id).execute()
+        return None
+    except Exception as exc:  # noqa: BLE001
+        return str(exc)
+
+
+def _rollback_invoice_stock_deductions(
+    organization_id: str,
+    invoice_number: str,
+    deducted_items: List[Dict[str, Any]],
+    created_by: Optional[str],
+) -> Optional[str]:
+    errors: List[str] = []
+    for item in reversed(deducted_items):
+        product_id = item.get("product_id")
+        if not product_id:
+            continue
+        _, err = insert_stock_movement(
+            organization_id,
+            product_id,
+            "in",
+            item["quantity"],
+            f"Reverso recibo {invoice_number}",
+            created_by,
+        )
+        if err:
+            errors.append(f"{product_id}: {err}")
+    return "; ".join(errors) if errors else None
+
+
 def list_invoices(
     organization_id: str, status: Optional[str] = None, limit: int = 100
 ) -> Tuple[List[Dict[str, Any]], Optional[str]]:
@@ -954,11 +995,12 @@ def create_invoice_with_items(
         _table("clinical_invoice_items").insert(normalized_items).execute()
 
         if should_deduct:
+            deducted_items: List[Dict[str, Any]] = []
             for item in normalized_items:
                 product_id = item.get("product_id")
                 if not product_id:
                     continue
-                _, mov_err = insert_stock_movement(
+                movement, mov_err = insert_stock_movement(
                     organization_id,
                     product_id,
                     "out",
@@ -967,7 +1009,28 @@ def create_invoice_with_items(
                     created_by,
                 )
                 if mov_err:
-                    print(f"[WARN] Recibo {invoice_number}: no se descontó stock ({mov_err})")
+                    if movement and movement.get("id"):
+                        delete_movement_err = _delete_stock_movement(movement["id"], organization_id)
+                        if delete_movement_err:
+                            print(
+                                f"[WARN] Recibo {invoice_number}: no se pudo eliminar movimiento fallido "
+                                f"{movement['id']} ({delete_movement_err})"
+                            )
+                    rollback_err = _rollback_invoice_stock_deductions(
+                        organization_id,
+                        invoice_number,
+                        deducted_items,
+                        created_by,
+                    )
+                    delete_invoice_err = _delete_invoice_records(invoice_id, organization_id)
+                    cleanup_errors = [err for err in (rollback_err, delete_invoice_err) if err]
+                    if cleanup_errors:
+                        print(
+                            f"[WARN] Recibo {invoice_number}: rollback incompleto tras fallo de stock "
+                            f"({'; '.join(cleanup_errors)})"
+                        )
+                    return (None, f"No se pudo descontar stock para el recibo {invoice_number}: {mov_err}")
+                deducted_items.append(item)
 
         full, err = get_invoice(invoice_id, organization_id)
         return (full, err)
