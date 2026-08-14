@@ -15,15 +15,18 @@ os.environ.setdefault("JWT_SECRET", "test-jwt-secret-for-auth-tests")
 os.environ.setdefault("ENVIRONMENT", "development")
 
 import auth_security  # noqa: E402
+import server_simple  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
 def _reset_request_context():
     auth_security.set_request_vet_id(None)
-    auth_security._cedula_flow_store.clear()
+    if hasattr(auth_security, "_cedula_flow_store"):
+        auth_security._cedula_flow_store.clear()
     yield
     auth_security.set_request_vet_id(None)
-    auth_security._cedula_flow_store.clear()
+    if hasattr(auth_security, "_cedula_flow_store"):
+        auth_security._cedula_flow_store.clear()
 
 
 def test_resolve_authenticated_vet_id_uses_jwt_sub():
@@ -53,3 +56,29 @@ def test_checkout_status_not_public():
     assert auth_security.is_public_api_route(
         "GET", "/api/payments/checkout/status/cs_test_123"
     ) is False
+
+
+def test_rejected_cedula_flow_is_blocked():
+    profile = {"cedula_verification_status": server_simple.CEDULA_STATUS_REJECTED}
+
+    with pytest.raises(HTTPException) as exc:
+        server_simple._require_cedula_flow_not_rejected(profile)
+
+    assert exc.value.status_code == 403
+    assert "rechazado" in exc.value.detail
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        server_simple.CEDULA_STATUS_UNSUBMITTED,
+        server_simple.CEDULA_STATUS_PENDING,
+        server_simple.CEDULA_STATUS_VERIFIED,
+        "",
+        None,
+    ],
+)
+def test_non_rejected_cedula_flow_is_allowed(status):
+    profile = {"cedula_verification_status": status}
+
+    server_simple._require_cedula_flow_not_rejected(profile)

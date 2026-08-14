@@ -1920,12 +1920,34 @@ def _name_matches(expected: str, actual: str) -> bool:
     return e_tokens.issubset(a_tokens) or a_tokens.issubset(e_tokens)
 
 
+def _require_cedula_flow_not_rejected(profile: dict) -> None:
+    """Un rechazo manual de admin no puede reabrirse desde el flujo self-service."""
+    status = (
+        (profile.get("cedula_verification_status") or "").strip()
+        or CEDULA_STATUS_UNSUBMITTED
+    )
+    if status == CEDULA_STATUS_REJECTED:
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Tu registro profesional fue rechazado. "
+                "Contacta soporte para habilitar un nuevo intento de verificación."
+            ),
+        )
+
+
 @app.post("/api/cedula/upload", response_model=CedulaUploadResponse)
 async def upload_cedula_document(
     file: UploadFile = File(...),
     x_veterinarian_id: str = Header(None),
 ):
     vet_id = _require_vet_id(x_veterinarian_id)
+    profile, err = get_profile(vet_id)
+    if err:
+        raise HTTPException(status_code=500, detail=f"Error perfil: {err}")
+    if not profile:
+        raise HTTPException(status_code=404, detail="Veterinario no encontrado")
+    _require_cedula_flow_not_rejected(profile)
 
     max_bytes = DEFAULT_CEDULA_MAX_BYTES
     try:
@@ -1990,6 +2012,7 @@ async def verify_cedula(
         raise HTTPException(status_code=500, detail=f"Error perfil: {err}")
     if not profile:
         raise HTTPException(status_code=404, detail="Veterinario no encontrado")
+    _require_cedula_flow_not_rejected(profile)
 
     cedula = normalize_professional_id(payload.cedula_profesional or "")
     if not cedula:
@@ -2047,6 +2070,7 @@ async def skip_cedula_verification(
         raise HTTPException(status_code=500, detail=f"Error perfil: {err}")
     if not profile:
         raise HTTPException(status_code=404, detail="Veterinario no encontrado")
+    _require_cedula_flow_not_rejected(profile)
     
     skip_count = profile.get("cedula_skip_count", 0)
     
