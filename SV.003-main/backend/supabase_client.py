@@ -67,6 +67,15 @@ def insert_consultation(row: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], 
         return (None, str(exc))
 
 
+def delete_consultation(consultation_id: str) -> Optional[str]:
+    client = get_supabase_client()
+    try:
+        client.table("consultations").delete().eq("id", consultation_id).execute()
+        return None
+    except Exception as exc:  # noqa: BLE001
+        return str(exc)
+
+
 def list_consultations(user_id: str, limit: int = 20) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     """
     Obtiene consultas de un usuario.

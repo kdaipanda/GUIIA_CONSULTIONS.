@@ -11,8 +11,44 @@ import { parseJsonResponse } from "../lib/friendlyFetchError";
 import { getAuthHeaders, clearAccessToken, clearCedulaFlowNonce, persistAuthFromResponse } from "../lib/authHeaders";
 
 const DEV_AUTO_LOGIN = false;
+const LEGACY_DEV_VET_ID = "dev-carlos-hernandez";
 
 const VetContext = createContext();
+
+const readStoredVeterinarian = () => {
+  const storedVet = localStorage.getItem("veterinarian");
+  if (!storedVet) return null;
+  try {
+    const parsedVet = JSON.parse(storedVet);
+    // Solo limpia el stub local histórico; no tocar la cuenta real de producción
+    if (parsedVet?.id === LEGACY_DEV_VET_ID) {
+      localStorage.removeItem("veterinarian");
+      return null;
+    }
+    return parsedVet;
+  } catch {
+    localStorage.removeItem("veterinarian");
+    return null;
+  }
+};
+
+const buildSupabaseVeterinarian = (user) => ({
+  id: user.id,
+  nombre: user.email?.split("@")[0] || "usuario",
+  email: user.email,
+  membership_type: "basic",
+});
+
+const applySupabaseVeterinarian = (user, setVeterinarian) => {
+  const vetFromSupabase = buildSupabaseVeterinarian(user);
+  setVeterinarian((prev) => {
+    if (prev?.id) return prev;
+    const storedVet = readStoredVeterinarian();
+    if (storedVet?.id) return storedVet;
+    localStorage.setItem("veterinarian", JSON.stringify(vetFromSupabase));
+    return vetFromSupabase;
+  });
+};
 
 export const useVet = () => {
   const context = useContext(VetContext);
@@ -29,23 +65,12 @@ export const VetProvider = ({ children }) => {
   const [platformAdmin, setPlatformAdmin] = useState(false);
 
   useEffect(() => {
-    const storedVet = localStorage.getItem("veterinarian");
+    const storedVet = readStoredVeterinarian();
     if (storedVet) {
-      try {
-        const parsedVet = JSON.parse(storedVet);
-        // Solo limpia el stub local histórico; no tocar la cuenta real de producción
-        const isLegacyDevStub = parsedVet?.id === "dev-carlos-hernandez";
-        if (isLegacyDevStub) {
-          localStorage.removeItem("veterinarian");
-        } else {
-          setVeterinarian(parsedVet);
-        }
-      } catch {
-        localStorage.removeItem("veterinarian");
-      }
+      setVeterinarian(storedVet);
     } else if (DEV_AUTO_LOGIN) {
       const devVet = {
-        id: "dev-carlos-hernandez",
+        id: LEGACY_DEV_VET_ID,
         nombre: "Carlos Hernandez",
         email: "carlos.hernandez@vetmed.com",
         telefono: "5555555555",
@@ -68,15 +93,8 @@ export const VetProvider = ({ children }) => {
       if (!mounted) return;
       const sessionUser = data.session?.user;
       if (sessionUser) {
-        const vetFromSupabase = {
-          id: sessionUser.id,
-          nombre: sessionUser.email?.split("@")[0] || "usuario",
-          email: sessionUser.email,
-          membership_type: "basic",
-        };
         setAuthUser(sessionUser);
-        setVeterinarian((prev) => prev || vetFromSupabase);
-        localStorage.setItem("veterinarian", JSON.stringify(vetFromSupabase));
+        applySupabaseVeterinarian(sessionUser, setVeterinarian);
       }
       setLoading(false);
     });
@@ -86,14 +104,7 @@ export const VetProvider = ({ children }) => {
         const user = session?.user || null;
         setAuthUser(user);
         if (user) {
-          const vetFromSupabase = {
-            id: user.id,
-            nombre: user.email?.split("@")[0] || "usuario",
-            email: user.email,
-            membership_type: "basic",
-          };
-          setVeterinarian(vetFromSupabase);
-          localStorage.setItem("veterinarian", JSON.stringify(vetFromSupabase));
+          applySupabaseVeterinarian(user, setVeterinarian);
         } else if (event === "SIGNED_OUT") {
           // No limpiar en INITIAL_SESSION sin user: eso borraría la sesión JWT de GUIAA.
           setVeterinarian(null);
