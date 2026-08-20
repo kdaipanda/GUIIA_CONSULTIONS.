@@ -86,6 +86,7 @@ from supabase_client import (
     get_profile_by_credentials,
     normalize_professional_id,
     professional_id_key,
+    delete_consultation,
     insert_consultation,
     insert_medical_image,
     insert_payment_transaction,
@@ -2363,8 +2364,16 @@ async def create_consultation(
             {"consultations_remaining": new_remaining},
         )
         if err_prof:
-            # No abortamos la consulta ya creada; solo avisamos
-            print(f"[WARN] No se pudo actualizar remaining: {err_prof}")
+            rollback_err = delete_consultation(consultation_id)
+            if rollback_err:
+                print(
+                    "[ERROR] No se pudo revertir consulta tras fallar descuento "
+                    f"{consultation_id}: {rollback_err}"
+                )
+            raise HTTPException(
+                status_code=500,
+                detail="No se pudo reservar el crédito de consulta. Intenta nuevamente.",
+            )
 
     serialized = _serialize_consultation(inserted or new_row)
     trial_survey_due = (
