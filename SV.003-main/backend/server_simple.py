@@ -3090,20 +3090,9 @@ async def stripe_webhook(request: Request):
             credits = int(transaction.get("credits") or metadata.get("credits") or 0)
             veterinarian, err = get_profile(veterinarian_id)
             if veterinarian and not err:
-                membership_type = veterinarian.get("membership_type")
                 current = int(veterinarian.get("consultations_remaining") or 0)
-                
-                # Validar límite para usuarios sin membresía
-                if not membership_type:
-                    if current + credits > 3:
-                        # Limitar a 3 máximo
-                        new_remaining = 3
-                        print(f"[WARN] Usuario sin membresía limitado a 3 consultas. Tenía {current}, intentó agregar {credits}")
-                    else:
-                        new_remaining = current + credits
-                else:
-                    new_remaining = current + credits
-                
+                new_remaining = current + credits
+
                 err_upd = update_profile(
                     veterinarian_id,
                     {"consultations_remaining": new_remaining},
