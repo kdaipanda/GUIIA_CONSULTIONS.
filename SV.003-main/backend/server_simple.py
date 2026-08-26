@@ -77,6 +77,7 @@ from starlette.responses import Response
 from pydantic import BaseModel, Field
 from supabase_client import (
     SupabaseConfigError,
+    claim_payment_transaction_fulfillment,
     count_consultations_by_user,
     get_consultation_by_id,
     get_payment_transaction_by_session_id,
@@ -3087,40 +3088,72 @@ async def stripe_webhook(request: Request):
 
     if transaction_type == "consultation_credits" and veterinarian_id:
         if not transaction.get("credits_applied"):
-            credits = int(transaction.get("credits") or metadata.get("credits") or 0)
+            applied_at = datetime.now(timezone.utc).isoformat()
+            claimed_transaction, claim_err = claim_payment_transaction_fulfillment(
+                session_id,
+                "credits_applied",
+                {"credits_applied_at": applied_at},
+            )
+            if claim_err:
+                print(f"[ERROR] Error reclamando créditos de pago: {claim_err}")
+                claimed_transaction = None
+            if not claimed_transaction:
+                return {"received": True}
+
+            credits = int(
+                claimed_transaction.get("credits")
+                or transaction.get("credits")
+                or metadata.get("credits")
+                or 0
+            )
             veterinarian, err = get_profile(veterinarian_id)
-            if veterinarian and not err:
-                membership_type = veterinarian.get("membership_type")
-                current = int(veterinarian.get("consultations_remaining") or 0)
-                
-                # Validar límite para usuarios sin membresía
-                if not membership_type:
-                    if current + credits > 3:
-                        # Limitar a 3 máximo
-                        new_remaining = 3
-                        print(f"[WARN] Usuario sin membresía limitado a 3 consultas. Tenía {current}, intentó agregar {credits}")
-                    else:
-                        new_remaining = current + credits
+            if err or not veterinarian:
+                print(
+                    "[ERROR] Error obteniendo perfil para aplicar créditos: "
+                    f"{err or 'perfil no encontrado'}"
+                )
+                update_payment_transaction(
+                    session_id,
+                    {"credits_applied": False, "credits_applied_at": None},
+                )
+                return {"received": True}
+
+            membership_type = veterinarian.get("membership_type")
+            current = int(veterinarian.get("consultations_remaining") or 0)
+
+            # Validar límite para usuarios sin membresía
+            if not membership_type:
+                if current + credits > 3:
+                    # Limitar a 3 máximo
+                    new_remaining = 3
+                    print(
+                        "[WARN] Usuario sin membresía limitado a 3 consultas. "
+                        f"Tenía {current}, intentó agregar {credits}"
+                    )
                 else:
                     new_remaining = current + credits
-                
-                err_upd = update_profile(
-                    veterinarian_id,
-                    {"consultations_remaining": new_remaining},
+            else:
+                new_remaining = current + credits
+
+            err_upd = update_profile(
+                veterinarian_id,
+                {"consultations_remaining": new_remaining},
+            )
+            if err_upd:
+                print(f"[ERROR] Error actualizando perfil: {err_upd}")
+                update_payment_transaction(
+                    session_id,
+                    {"credits_applied": False, "credits_applied_at": None},
                 )
-                if err_upd:
-                    print(f"[ERROR] Error actualizando perfil: {err_upd}")
-                else:
-                    err_tx = update_payment_transaction(
-                        session_id,
-                        {
-                            "credits_applied": True,
-                            "credits_applied_at": datetime.now(timezone.utc).isoformat(),
-                            "consultations_remaining_after": new_remaining,
-                        },
-                    )
-                    if err_tx:
-                        print(f"[ERROR] Error actualizando transacción: {err_tx}")
+            else:
+                err_tx = update_payment_transaction(
+                    session_id,
+                    {
+                        "consultations_remaining_after": new_remaining,
+                    },
+                )
+                if err_tx:
+                    print(f"[ERROR] Error actualizando transacción: {err_tx}")
 
     if transaction_type == "membership" and veterinarian_id:
         if not transaction.get("membership_activated"):
@@ -3316,52 +3349,124 @@ async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(N
 
         if transaction_type == "consultation_credits" and veterinarian_id:
             if not transaction.get("credits_applied"):
-                credits = int(transaction.get("credits") or 0)
-                veterinarian, err = get_profile(veterinarian_id)
-                if veterinarian and not err:
+                applied_at = datetime.now(timezone.utc).isoformat()
+                claimed_transaction, claim_err = claim_payment_transaction_fulfillment(
+                    session_id,
+                    "credits_applied",
+                    {"credits_applied_at": applied_at},
+                )
+                if claim_err:
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Error reclamando créditos de pago: {claim_err}",
+                    )
+                if not claimed_transaction:
+                    updated_veterinarian, _ = get_profile(veterinarian_id)
+                    refreshed_transaction, _ = get_payment_transaction_by_session_id(session_id)
+                    transaction = refreshed_transaction or transaction
+                else:
+                    credits = int(claimed_transaction.get("credits") or transaction.get("credits") or 0)
+                    veterinarian, err = get_profile(veterinarian_id)
+                    if err or not veterinarian:
+                        update_payment_transaction(
+                            session_id,
+                            {"credits_applied": False, "credits_applied_at": None},
+                        )
+                        raise HTTPException(
+                            status_code=500 if err else 404,
+                            detail=err or "Perfil no encontrado para aplicar créditos",
+                        )
                     current = int(veterinarian.get("consultations_remaining") or 0)
                     new_remaining = current + credits
                     err_upd = update_profile(
                         veterinarian_id,
                         {"consultations_remaining": new_remaining},
                     )
-                    if not err_upd:
-                        err_tx = update_payment_transaction(
+                    if err_upd:
+                        update_payment_transaction(
                             session_id,
-                            {
-                                "credits_applied": True,
-                                "credits_applied_at": datetime.now(timezone.utc).isoformat(),
-                                "consultations_remaining_after": new_remaining,
-                            },
+                            {"credits_applied": False, "credits_applied_at": None},
                         )
-                        if not err_tx:
-                            updated_veterinarian, _ = get_profile(veterinarian_id)
+                        raise HTTPException(
+                            status_code=500,
+                            detail=f"Error actualizando créditos de pago: {err_upd}",
+                        )
+                    err_tx = update_payment_transaction(
+                        session_id,
+                        {"consultations_remaining_after": new_remaining},
+                    )
+                    if err_tx:
+                        print(f"[ERROR] Error actualizando transacción: {err_tx}")
+                    updated_veterinarian, _ = get_profile(veterinarian_id)
         elif transaction_type == "membership" and veterinarian_id:
             if not transaction.get("membership_activated"):
-                package = MEMBERSHIP_PACKAGES.get(transaction.get("package") or "")
-                if package:
-                    billing_cycle = transaction.get("billing_cycle") or "monthly"
+                activated_at = datetime.now(timezone.utc).isoformat()
+                claimed_transaction, claim_err = claim_payment_transaction_fulfillment(
+                    session_id,
+                    "membership_activated",
+                    {"membership_activated_at": activated_at},
+                )
+                if claim_err:
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Error reclamando membresía pagada: {claim_err}",
+                    )
+                if not claimed_transaction:
+                    updated_veterinarian, _ = get_profile(veterinarian_id)
+                    refreshed_transaction, _ = get_payment_transaction_by_session_id(session_id)
+                    transaction = refreshed_transaction or transaction
+                else:
+                    package_key = (
+                        claimed_transaction.get("package")
+                        or transaction.get("package")
+                        or ""
+                    )
+                    package = MEMBERSHIP_PACKAGES.get(package_key)
+                    if not package:
+                        update_payment_transaction(
+                            session_id,
+                            {"membership_activated": False, "membership_activated_at": None},
+                        )
+                        raise HTTPException(
+                            status_code=500,
+                            detail="Paquete de membresía no encontrado para activar pago",
+                        )
+                    veterinarian, profile_err = get_profile(veterinarian_id)
+                    if profile_err or not veterinarian:
+                        update_payment_transaction(
+                            session_id,
+                            {"membership_activated": False, "membership_activated_at": None},
+                        )
+                        raise HTTPException(
+                            status_code=500 if profile_err else 404,
+                            detail=profile_err or "Perfil no encontrado para activar membresía",
+                        )
+                    billing_cycle = (
+                        claimed_transaction.get("billing_cycle")
+                        or transaction.get("billing_cycle")
+                        or "monthly"
+                    )
                     consultations = get_membership_consultations(package, billing_cycle)
                     days = 30 if billing_cycle == "monthly" else 365
                     expires = datetime.now(timezone.utc) + timedelta(days=days)
                     err_upd = update_profile(
                         veterinarian_id,
                         {
-                            "membership_type": transaction.get("package"),
+                            "membership_type": package_key,
                             "consultations_remaining": consultations,
                             "membership_expires": expires.isoformat(),
                         },
                     )
-                    if not err_upd:
-                        err_tx = update_payment_transaction(
+                    if err_upd:
+                        update_payment_transaction(
                             session_id,
-                            {
-                                "membership_activated": True,
-                                "membership_activated_at": datetime.now(timezone.utc).isoformat(),
-                            },
+                            {"membership_activated": False, "membership_activated_at": None},
                         )
-                        if not err_tx:
-                            updated_veterinarian, _ = get_profile(veterinarian_id)
+                        raise HTTPException(
+                            status_code=500,
+                            detail=f"Error activando membresía pagada: {err_upd}",
+                        )
+                    updated_veterinarian, _ = get_profile(veterinarian_id)
 
         if veterinarian_id and updated_veterinarian is None:
             updated_veterinarian, _ = get_profile(veterinarian_id)
