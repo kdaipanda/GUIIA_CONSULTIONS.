@@ -710,6 +710,38 @@ def update_payment_transaction(session_id: str, fields: Dict[str, Any]) -> Optio
         return str(exc)
 
 
+PAYMENT_FULFILLMENT_FLAGS = {"credits_applied", "membership_activated"}
+
+
+def claim_payment_transaction_fulfillment(
+    session_id: str,
+    flag_field: str,
+    fields: Dict[str, Any],
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    """
+    Marca una transacción como tomada para fulfillment solo si aún no fue aplicada.
+
+    El update condicional evita que el webhook de Stripe y el polling del frontend
+    lean ambos el flag en falso y apliquen la misma compra dos veces.
+    """
+    if flag_field not in PAYMENT_FULFILLMENT_FLAGS:
+        return (None, "Flag de fulfillment inválido")
+
+    client = get_supabase_client()
+    try:
+        updates = {**fields, flag_field: True}
+        resp = (
+            client.table("payment_transactions")
+            .update(updates)
+            .eq("session_id", session_id)
+            .or_(f"{flag_field}.is.null,{flag_field}.eq.false")
+            .execute()
+        )
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
 def list_profiles(limit: int = 1000) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     """
     Obtiene perfiles (uso administrativo).

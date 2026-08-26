@@ -774,7 +774,23 @@ def insert_stock_movement(
         movement = resp.data[0] if resp.data else None
         _, up_err = update_product(product_id, organization_id, {"stock_qty": new_stock})
         if up_err:
-            return (movement, up_err)
+            movement_id = movement.get("id") if isinstance(movement, dict) else None
+            if movement_id:
+                try:
+                    (
+                        _table("stock_movements")
+                        .delete()
+                        .eq("id", movement_id)
+                        .eq("organization_id", organization_id)
+                        .eq("product_id", product_id)
+                        .execute()
+                    )
+                except Exception as cleanup_exc:  # noqa: BLE001
+                    return (
+                        None,
+                        f"{up_err}; no se pudo revertir movimiento de stock: {cleanup_exc}",
+                    )
+            return (None, up_err)
         return (movement, None)
     except Exception as exc:  # noqa: BLE001
         err = str(exc)
