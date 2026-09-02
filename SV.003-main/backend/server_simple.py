@@ -921,6 +921,12 @@ def is_dev_user(email: str) -> bool:
     return email.lower().strip() in DEV_EMAILS
 
 
+def _legacy_cedula_login_allowed(email: str) -> bool:
+    """Compatibilidad temporal solo para cuentas internas o migraciones explícitas."""
+    flag = (os.getenv("ENABLE_LEGACY_CEDULA_LOGIN") or "").strip().lower()
+    return is_dev_user(email) or flag in {"1", "true", "yes", "on"}
+
+
 async def _email_background(fn, *args, **kwargs) -> None:
     try:
         await asyncio.to_thread(fn, *args, **kwargs)
@@ -1463,7 +1469,7 @@ def _require_payment_session_owned(transaction: dict, vet_id: str) -> None:
 
 
 def _authenticate_login_profile(credentials: VeterinarianLogin) -> dict:
-    """Valida email+contraseña o login legacy email+matrícula."""
+    """Valida email+contraseña; limita el login legacy email+matrícula."""
     email = (credentials.email or "").strip().lower()
     if not email:
         raise HTTPException(status_code=400, detail="Email requerido")
@@ -1486,6 +1492,15 @@ def _authenticate_login_profile(credentials: VeterinarianLogin) -> dict:
         if not password_auth.verify_password(password, stored_hash):
             raise HTTPException(status_code=401, detail="Credenciales inválidas")
         return profile
+
+    if not _legacy_cedula_login_allowed(email):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Esta cuenta necesita configurar una contraseña antes de iniciar sesión. "
+                "Contacta a soporte GUIAA para activar el acceso."
+            ),
+        )
 
     cedula = normalize_professional_id(credentials.cedula_profesional or "")
     if not cedula:
