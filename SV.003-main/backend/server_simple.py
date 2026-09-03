@@ -918,6 +918,13 @@ UNLIMITED_CONSULTATIONS_EMAILS = {
 
 def is_dev_user(email: str) -> bool:
     """Verifica si un email pertenece a un usuario de desarrollo"""
+    env = os.getenv("ENVIRONMENT", os.getenv("NODE_ENV", "development")).lower()
+    if env in ("production", "prod") and os.getenv("ALLOW_DEV_ACCOUNT_SHORTCUTS", "").lower() not in (
+        "1",
+        "true",
+        "yes",
+    ):
+        return False
     return email.lower().strip() in DEV_EMAILS
 
 
