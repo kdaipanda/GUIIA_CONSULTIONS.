@@ -86,6 +86,13 @@ def maybe_send_cedula_upload_reminder(profile: dict, *, force: bool = False) -> 
 
 
 def is_dev_user(email: str) -> bool:
+    env = os.getenv("ENVIRONMENT", os.getenv("NODE_ENV", "development")).lower()
+    if env in ("production", "prod") and os.getenv("ALLOW_DEV_ACCOUNT_SHORTCUTS", "").lower() not in (
+        "1",
+        "true",
+        "yes",
+    ):
+        return False
     return (email or "").strip().lower() in DEV_EMAILS
 
 
