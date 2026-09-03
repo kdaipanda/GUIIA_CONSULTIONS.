@@ -907,14 +907,35 @@ async def api_update_appointment_request(
     if not current:
         raise HTTPException(status_code=404, detail="Solicitud no encontrada")
 
-    fields = body.model_dump(exclude_none=True, exclude={"starts_at", "ends_at"})
-    updated, err = clinic_db.update_appointment_request(
-        request_id, ctx["organization_id"], fields
-    )
-    if err:
-        raise HTTPException(status_code=500, detail=err)
-
     if body.status == "approved" and current.get("status") == "pending":
+        # Validate and create the scheduled appointment before marking the
+        # public request as approved; otherwise a validation/insert failure
+        # would hide the request from the pending queue without a real booking.
+        fields = body.model_dump(exclude_none=True, exclude={"starts_at", "ends_at"})
+        start_dt = None
+        end_dt = None
+        if body.starts_at:
+            try:
+                start_dt = datetime.fromisoformat(body.starts_at.replace("Z", "+00:00"))
+            except (ValueError, TypeError) as exc:
+                raise HTTPException(status_code=400, detail="Fecha de inicio inválida") from exc
+        preferred = current.get("preferred_starts_at")
+        if start_dt is None and preferred:
+            try:
+                start_dt = datetime.fromisoformat(preferred.replace("Z", "+00:00"))
+            except (ValueError, TypeError):
+                start_dt = None
+        if start_dt is None:
+            start_dt = datetime.now(timezone.utc) + timedelta(days=1)
+            start_dt = start_dt.replace(hour=10, minute=0, second=0, microsecond=0)
+        if body.ends_at:
+            try:
+                end_dt = datetime.fromisoformat(body.ends_at.replace("Z", "+00:00"))
+            except (ValueError, TypeError) as exc:
+                raise HTTPException(status_code=400, detail="Fecha de fin inválida") from exc
+        if end_dt is None:
+            end_dt = start_dt + timedelta(minutes=30)
+
         client_name = current.get("client_name") or "Cliente"
         existing_clients, _ = clinic_db.list_clients(ctx["organization_id"], search=client_name, limit=10)
         client_id = None
@@ -946,30 +967,6 @@ async def api_update_appointment_request(
         if p_err or not created_patient:
             raise HTTPException(status_code=500, detail=f"No se pudo crear paciente: {p_err}")
 
-        start_dt = None
-        end_dt = None
-        if body.starts_at:
-            try:
-                start_dt = datetime.fromisoformat(body.starts_at.replace("Z", "+00:00"))
-            except (ValueError, TypeError) as exc:
-                raise HTTPException(status_code=400, detail="Fecha de inicio inválida") from exc
-        preferred = current.get("preferred_starts_at")
-        if start_dt is None and preferred:
-            try:
-                start_dt = datetime.fromisoformat(preferred.replace("Z", "+00:00"))
-            except (ValueError, TypeError):
-                start_dt = None
-        if start_dt is None:
-            start_dt = datetime.now(timezone.utc) + timedelta(days=1)
-            start_dt = start_dt.replace(hour=10, minute=0, second=0, microsecond=0)
-        if body.ends_at:
-            try:
-                end_dt = datetime.fromisoformat(body.ends_at.replace("Z", "+00:00"))
-            except (ValueError, TypeError) as exc:
-                raise HTTPException(status_code=400, detail="Fecha de fin inválida") from exc
-        if end_dt is None:
-            end_dt = start_dt + timedelta(minutes=30)
-
         appt, a_err = clinic_db.insert_appointment(
             {
                 "organization_id": ctx["organization_id"],
@@ -985,6 +982,12 @@ async def api_update_appointment_request(
         )
         if a_err:
             raise HTTPException(status_code=500, detail=f"Cita no creada: {a_err}")
+
+        updated, err = clinic_db.update_appointment_request(
+            request_id, ctx["organization_id"], fields
+        )
+        if err:
+            raise HTTPException(status_code=500, detail=err)
         updated = updated or {}
         updated["appointment"] = appt
 
@@ -996,6 +999,14 @@ async def api_update_appointment_request(
             "approved",
             start_dt.isoformat(),
         )
+        return {"request": updated}
+
+    fields = body.model_dump(exclude_none=True, exclude={"starts_at", "ends_at"})
+    updated, err = clinic_db.update_appointment_request(
+        request_id, ctx["organization_id"], fields
+    )
+    if err:
+        raise HTTPException(status_code=500, detail=err)
 
     if body.status == "rejected" and current.get("status") == "pending":
         org, _ = clinic_db.get_organization(ctx["organization_id"])
