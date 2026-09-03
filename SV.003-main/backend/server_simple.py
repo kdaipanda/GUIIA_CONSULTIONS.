@@ -1455,7 +1455,12 @@ def _require_consultation_owned(consultation_id: str, vet_id: str) -> dict:
 
 def _require_payment_session_owned(transaction: dict, vet_id: str) -> None:
     owner = (transaction.get("veterinarian_id") or "").strip()
-    if owner and owner != vet_id.strip():
+    if not owner:
+        raise HTTPException(
+            status_code=403,
+            detail="Transacción de pago sin propietario",
+        )
+    if owner != vet_id.strip():
         raise HTTPException(
             status_code=403,
             detail="No autorizado para esta transacción de pago",
@@ -3299,6 +3304,11 @@ async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(N
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error verificando Stripe: {str(e)}")
     else:
+        if str(session_id).startswith("cs_"):
+            raise HTTPException(
+                status_code=503,
+                detail="Stripe no está disponible para verificar esta sesión de pago.",
+            )
         status_value = "complete"
         payment_status = "paid"
         err_upd = update_payment_transaction(
