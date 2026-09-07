@@ -1324,8 +1324,14 @@ async def send_support_chat_message(
 
 
 @app.post("/api/support/chat", response_model=SupportChatResponse)
-async def support_chat(payload: SupportChatRequest):
+async def support_chat(payload: SupportChatRequest, request: Request):
     """Chatbot de soporte para dudas de la aplicación."""
+    rate_limit.check_rate_limit(
+        request,
+        "support-chat",
+        max_attempts=_get_int_env("SUPPORT_CHAT_RATE_LIMIT_MAX", 20),
+        window_seconds=_get_int_env("SUPPORT_CHAT_RATE_LIMIT_WINDOW_SEC", 900),
+    )
     try:
         answer = await send_support_chat_message(
             message=payload.message,
