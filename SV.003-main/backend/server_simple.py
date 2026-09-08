@@ -68,6 +68,7 @@ from membership_access import (
     require_feature_for_profile,
     validate_consultation_category,
 )
+from payment_fulfillment import fulfill_paid_transaction, sync_transaction_status
 from lab_pdf_converter import convert_pdf_bytes_to_markdown
 from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from starlette.requests import Request
@@ -3042,7 +3043,7 @@ async def stripe_webhook(request: Request):
     if err:
         print(f"[ERROR] Error obteniendo transacción: {err}")
         return {"received": True}
-    
+
     if not transaction:
         transaction_data = {
             "session_id": session_id,
@@ -3064,13 +3065,10 @@ async def stripe_webhook(request: Request):
             print(f"[ERROR] Error insertando transacción: {err}")
             return {"received": True}
     else:
-        err = update_payment_transaction(
+        err = sync_transaction_status(
             session_id,
-            {
-                "status": status_value,
-                "payment_status": payment_status,
-                "updated_at": datetime.now(timezone.utc).isoformat(),
-            },
+            status=status_value,
+            payment_status=payment_status,
         )
         if err:
             print(f"[ERROR] Error actualizando transacción: {err}")
@@ -3078,81 +3076,13 @@ async def stripe_webhook(request: Request):
     if payment_status != "paid":
         return {"received": True}
 
-    transaction_type = transaction.get("type") or metadata.get("type")
-    veterinarian_id = (
-        transaction.get("veterinarian_id")
-        or metadata.get("veterinarian_id")
-        or ""
-    ).strip()
+    _, fulfill_err, _ = fulfill_paid_transaction(transaction, metadata)
+    if fulfill_err:
+        print(f"[ERROR] Error activando beneficio del pago {session_id}: {fulfill_err}")
 
-    if transaction_type == "consultation_credits" and veterinarian_id:
-        if not transaction.get("credits_applied"):
-            credits = int(transaction.get("credits") or metadata.get("credits") or 0)
-            veterinarian, err = get_profile(veterinarian_id)
-            if veterinarian and not err:
-                membership_type = veterinarian.get("membership_type")
-                current = int(veterinarian.get("consultations_remaining") or 0)
-                
-                # Validar límite para usuarios sin membresía
-                if not membership_type:
-                    if current + credits > 3:
-                        # Limitar a 3 máximo
-                        new_remaining = 3
-                        print(f"[WARN] Usuario sin membresía limitado a 3 consultas. Tenía {current}, intentó agregar {credits}")
-                    else:
-                        new_remaining = current + credits
-                else:
-                    new_remaining = current + credits
-                
-                err_upd = update_profile(
-                    veterinarian_id,
-                    {"consultations_remaining": new_remaining},
-                )
-                if err_upd:
-                    print(f"[ERROR] Error actualizando perfil: {err_upd}")
-                else:
-                    err_tx = update_payment_transaction(
-                        session_id,
-                        {
-                            "credits_applied": True,
-                            "credits_applied_at": datetime.now(timezone.utc).isoformat(),
-                            "consultations_remaining_after": new_remaining,
-                        },
-                    )
-                    if err_tx:
-                        print(f"[ERROR] Error actualizando transacción: {err_tx}")
-
-    if transaction_type == "membership" and veterinarian_id:
-        if not transaction.get("membership_activated"):
-            package_key = (transaction.get("package") or metadata.get("package") or "").strip()
-            billing_cycle = (transaction.get("billing_cycle") or metadata.get("billing_cycle") or "monthly").strip()
-            package = MEMBERSHIP_PACKAGES.get(package_key)
-            if package:
-                consultations = get_membership_consultations(package, billing_cycle)
-                days = 30 if billing_cycle == "monthly" else 365
-                expires = datetime.now(timezone.utc) + timedelta(days=days)
-                await update_one_db(
-                    "veterinarians",
-                    {"id": veterinarian_id},
-                    {
-                        "membership_type": package_key,
-                        "consultations_remaining": consultations,
-                        "membership_expires": expires.isoformat(),
-                    },
-                )
-                await update_one_db(
-                    "payment_transactions",
-                    {"session_id": session_id},
-                    {
-                        "membership_activated": True,
-                        "membership_activated_at": datetime.now(timezone.utc).isoformat(),
-                    },
-                )
-
-    if payment_status == "paid":
-        refreshed_transaction, _ = get_payment_transaction_by_session_id(session_id)
-        if refreshed_transaction:
-            await _send_meta_purchase_if_needed(refreshed_transaction, session_id)
+    refreshed_transaction, _ = get_payment_transaction_by_session_id(session_id)
+    if refreshed_transaction:
+        await _send_meta_purchase_if_needed(refreshed_transaction, session_id)
 
     return {"received": True}
 
@@ -3286,13 +3216,10 @@ async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(N
             session = stripe.checkout.Session.retrieve(session_id)
             status_value = session.status
             payment_status = session.payment_status
-            err_upd = update_payment_transaction(
+            err_upd = sync_transaction_status(
                 session_id,
-                {
-                    "status": status_value,
-                    "payment_status": payment_status,
-                    "updated_at": datetime.now(timezone.utc).isoformat(),
-                },
+                status=status_value,
+                payment_status=payment_status,
             )
             if err_upd:
                 print(f"[ERROR] Error actualizando transacción: {err_upd}")
@@ -3301,9 +3228,10 @@ async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(N
     else:
         status_value = "complete"
         payment_status = "paid"
-        err_upd = update_payment_transaction(
+        err_upd = sync_transaction_status(
             session_id,
-            {"status": status_value, "payment_status": payment_status},
+            status=status_value,
+            payment_status=payment_status,
         )
         if err_upd:
             print(f"[ERROR] Error actualizando transacción: {err_upd}")
@@ -3311,60 +3239,13 @@ async def get_checkout_status(session_id: str, x_veterinarian_id: str = Header(N
     updated_veterinarian = None
 
     if payment_status == "paid":
-        transaction_type = transaction.get("type")
-        veterinarian_id = transaction.get("veterinarian_id") or vet_id
-
-        if transaction_type == "consultation_credits" and veterinarian_id:
-            if not transaction.get("credits_applied"):
-                credits = int(transaction.get("credits") or 0)
-                veterinarian, err = get_profile(veterinarian_id)
-                if veterinarian and not err:
-                    current = int(veterinarian.get("consultations_remaining") or 0)
-                    new_remaining = current + credits
-                    err_upd = update_profile(
-                        veterinarian_id,
-                        {"consultations_remaining": new_remaining},
-                    )
-                    if not err_upd:
-                        err_tx = update_payment_transaction(
-                            session_id,
-                            {
-                                "credits_applied": True,
-                                "credits_applied_at": datetime.now(timezone.utc).isoformat(),
-                                "consultations_remaining_after": new_remaining,
-                            },
-                        )
-                        if not err_tx:
-                            updated_veterinarian, _ = get_profile(veterinarian_id)
-        elif transaction_type == "membership" and veterinarian_id:
-            if not transaction.get("membership_activated"):
-                package = MEMBERSHIP_PACKAGES.get(transaction.get("package") or "")
-                if package:
-                    billing_cycle = transaction.get("billing_cycle") or "monthly"
-                    consultations = get_membership_consultations(package, billing_cycle)
-                    days = 30 if billing_cycle == "monthly" else 365
-                    expires = datetime.now(timezone.utc) + timedelta(days=days)
-                    err_upd = update_profile(
-                        veterinarian_id,
-                        {
-                            "membership_type": transaction.get("package"),
-                            "consultations_remaining": consultations,
-                            "membership_expires": expires.isoformat(),
-                        },
-                    )
-                    if not err_upd:
-                        err_tx = update_payment_transaction(
-                            session_id,
-                            {
-                                "membership_activated": True,
-                                "membership_activated_at": datetime.now(timezone.utc).isoformat(),
-                            },
-                        )
-                        if not err_tx:
-                            updated_veterinarian, _ = get_profile(veterinarian_id)
-
-        if veterinarian_id and updated_veterinarian is None:
-            updated_veterinarian, _ = get_profile(veterinarian_id)
+        updated_veterinarian, fulfill_err, _ = fulfill_paid_transaction(transaction)
+        if fulfill_err:
+            print(f"[ERROR] Error activando beneficio del pago {session_id}: {fulfill_err}")
+        if updated_veterinarian is None:
+            veterinarian_id = transaction.get("veterinarian_id") or vet_id
+            if veterinarian_id:
+                updated_veterinarian, _ = get_profile(veterinarian_id)
 
         refreshed_transaction, _ = get_payment_transaction_by_session_id(session_id)
         if refreshed_transaction:
