@@ -214,7 +214,10 @@ export function ClinicShell({ children, setView }) {
   }, []);
 
   const navItems = useMemo(() => {
-    const items = BASE_NAV_ITEMS.map((item) => {
+    const items = BASE_NAV_ITEMS.filter((item) => {
+      if (role === "receptionist" && item.view === "new-consultation") return false;
+      return true;
+    }).map((item) => {
       if (!item.feature) return item;
       const allowed = canAccessFeature(veterinarian, item.feature, { platformAdmin });
       return { ...item, locked: !allowed };
@@ -228,7 +231,7 @@ export function ClinicShell({ children, setView }) {
       });
     }
     return items;
-  }, [platformAdmin, veterinarian]);
+  }, [platformAdmin, veterinarian, role]);
 
   const handleBrandNav = (view) => {
     if (setView) setView(view);

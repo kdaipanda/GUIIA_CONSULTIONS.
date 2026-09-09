@@ -66,6 +66,7 @@ export function getFeatureUpgradeMessage(feature) {
 /** ¿Puede iniciar una nueva consulta CDS? (trial, plan activo o premium) */
 export function canCreateConsultation(veterinarian, options = {}) {
   if (options.platformAdmin) return true;
+  if (options.orgRole === "receptionist") return false;
   if (!veterinarian) return false;
 
   const membershipType = veterinarian.membership_type?.toLowerCase();

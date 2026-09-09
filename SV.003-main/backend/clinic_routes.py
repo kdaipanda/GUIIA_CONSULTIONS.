@@ -66,6 +66,11 @@ class MemberAdd(BaseModel):
     role: str = "veterinarian"
 
 
+class OrganizationInviteCreate(BaseModel):
+    email: str
+    role: str = "veterinarian"
+
+
 class AdminDeleteUserBody(BaseModel):
     email: str
 
@@ -389,6 +394,112 @@ async def add_organization_member(body: MemberAdd, x_veterinarian_id: str = Head
         },
         "message": f"{profile.get('nombre') or email} agregado al equipo.",
     }
+
+
+@clinic_router.get("/organization/invites")
+async def list_organization_invites(x_veterinarian_id: str = Header(None)):
+    vet_id = _require_vet_id(x_veterinarian_id)
+    ctx = await _resolve_org_context(vet_id)
+    if ctx["role"] not in ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="Solo el propietario o un administrador pueden ver invitaciones.")
+    invites, err = clinic_db.list_organization_invites(ctx["organization_id"])
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    return {"invites": invites}
+
+
+@clinic_router.post("/organization/invites")
+async def create_organization_invite(body: OrganizationInviteCreate, x_veterinarian_id: str = Header(None)):
+    """Si el email ya tiene cuenta GUIAA, lo agrega al equipo. Si no, crea invitación con link."""
+    vet_id = _require_vet_id(x_veterinarian_id)
+    ctx = await _resolve_org_context(vet_id)
+    if ctx["role"] not in ADMIN_ROLES:
+        raise HTTPException(
+            status_code=403,
+            detail="Solo el propietario o un administrador pueden invitar al equipo.",
+        )
+
+    email = (body.email or "").strip().lower()
+    role = (body.role or "veterinarian").strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="Email requerido")
+    if role not in clinic_db.INVITE_ROLES:
+        raise HTTPException(status_code=400, detail="Rol no válido")
+
+    profile, err = get_profile_by_email(email)
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+
+    if profile:
+        member, add_err = clinic_db.add_organization_member(
+            ctx["organization_id"],
+            profile["id"],
+            role,
+        )
+        if add_err:
+            raise HTTPException(status_code=400, detail=add_err)
+        return {
+            "mode": "added",
+            "member": {
+                **member,
+                "nombre": profile.get("nombre"),
+                "email": profile.get("email"),
+            },
+            "message": f"{profile.get('nombre') or email} agregado al equipo.",
+        }
+
+    invite, inv_err, raw_token = clinic_db.create_organization_invite(
+        ctx["organization_id"],
+        email,
+        role,
+        invited_by=vet_id,
+    )
+    if inv_err:
+        detail = inv_err
+        if "organization_invites" in inv_err.lower() or "does not exist" in inv_err.lower():
+            detail = (
+                "Falta aplicar la migración de invitaciones en Supabase "
+                "(20260909_organization_invites.sql)."
+            )
+        raise HTTPException(status_code=500, detail=detail)
+
+    invite_url = f"{email_notifications._frontend_url()}/registro?invite={raw_token}"
+    org_name = (ctx.get("organization") or {}).get("name") or "tu consultorio"
+    inviter_name = (ctx.get("profile") or {}).get("nombre") or ""
+    await _email_background(
+        email_notifications.notify_organization_invite,
+        {
+            "email": email,
+            "role": role,
+            "organization_name": org_name,
+            "inviter_name": inviter_name,
+            "invite_url": invite_url,
+            "requires_license": role not in clinic_db.STAFF_INVITE_ROLES,
+        },
+    )
+    return {
+        "mode": "invited",
+        "invite": invite,
+        "invite_url": invite_url,
+        "message": (
+            f"Invitación enviada a {email}. "
+            "Si no llega el correo, copia el enlace desde Configuración."
+        ),
+    }
+
+
+@clinic_router.delete("/organization/invites/{invite_id}")
+async def revoke_organization_invite(invite_id: str, x_veterinarian_id: str = Header(None)):
+    vet_id = _require_vet_id(x_veterinarian_id)
+    ctx = await _resolve_org_context(vet_id)
+    if ctx["role"] not in ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="Solo el propietario o un administrador pueden cancelar invitaciones.")
+    ok, err = clinic_db.revoke_organization_invite(ctx["organization_id"], invite_id)
+    if err:
+        raise HTTPException(status_code=400, detail=err)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Invitación no encontrada")
+    return {"ok": True, "message": "Invitación cancelada."}
 
 
 @clinic_router.delete("/organization/members/{member_id}")

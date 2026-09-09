@@ -110,7 +110,7 @@ function SectionSkeleton() {
 export function ClinicDashboardPage({ setView, onStartConsultation }) {
   const navigate = useNavigate();
   const { veterinarian, platformAdmin } = useVet();
-  const { organization } = useClinic();
+  const { organization, role } = useClinic();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [membershipPackages, setMembershipPackages] = useState(DEFAULT_PACKAGES);
@@ -159,7 +159,10 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
     [veterinarian, membershipPackages],
   );
 
-  const accessOptions = useMemo(() => ({ platformAdmin }), [platformAdmin]);
+  const accessOptions = useMemo(
+    () => ({ platformAdmin, orgRole: role }),
+    [platformAdmin, role],
+  );
   const canUseInventory = canAccessFeature(
     veterinarian,
     MEMBERSHIP_FEATURES.inventory,

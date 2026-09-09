@@ -289,6 +289,50 @@ def notify_admins_new_registration(profile: dict) -> None:
         print(f"[WARN] Email admins (nuevo registro): {err}")
 
 
+_ROLE_LABELS_ES = {
+    "admin": "Administrador",
+    "veterinarian": "Veterinario",
+    "receptionist": "Recepción",
+}
+
+
+def notify_organization_invite(payload: dict) -> None:
+    """Envía el link de invitación al colega (recepción / admin / veterinario)."""
+    email = (payload.get("email") or "").strip().lower()
+    if not email:
+        return
+    org_name = (payload.get("organization_name") or "").strip() or "un consultorio en GUIAA"
+    inviter = (payload.get("inviter_name") or "").strip()
+    role = (payload.get("role") or "veterinarian").strip().lower()
+    role_label = _ROLE_LABELS_ES.get(role, role)
+    invite_url = (payload.get("invite_url") or "").strip()
+    requires_license = bool(payload.get("requires_license"))
+
+    who = f"{inviter} te invitó" if inviter else "Te invitaron"
+    email_subject = f"Invitación a {org_name} en GUIAA"
+    license_note = (
+        "Necesitarás tu cédula o matrícula profesional para completar el alta."
+        if requires_license
+        else "No necesitas cédula: es una cuenta de equipo (recepción o administración)."
+    )
+    text = (
+        f"{who} a unirte a {org_name} en GUIAA como {role_label}.\n\n"
+        f"{license_note}\n\n"
+        f"Acepta la invitación aquí:\n{invite_url}\n\n"
+        f"El enlace vence en 14 días. Si no pediste esto, ignora este correo.\n"
+    )
+    html = f"""
+    <h2>Invitación a GUIAA</h2>
+    <p>{who} a unirte a <strong>{org_name}</strong> como <strong>{role_label}</strong>.</p>
+    <p>{license_note}</p>
+    <p><a href="{invite_url}">Aceptar invitación y crear cuenta</a></p>
+    <p style="color:#666;font-size:13px">El enlace vence en 14 días. Si no pediste esto, ignora este correo.</p>
+    """
+    err = send_email([email], email_subject, html, text)
+    if err:
+        print(f"[WARN] Email invitación equipo: {err}")
+
+
 def notify_admins_user_message(ticket: dict, message: str) -> None:
     admins = support_notify_emails()
     if not admins:

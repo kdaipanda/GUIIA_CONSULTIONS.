@@ -45,6 +45,7 @@ CLINIC_MIGRATION_ORDER = [
     "20260702_meta_capi_purchase_sent.sql",
     "20260707_password_hash.sql",
     "20260707_trial_survey.sql",
+    "20260909_organization_invites.sql",
     "optimize_rls_policies.sql",
 ]
 

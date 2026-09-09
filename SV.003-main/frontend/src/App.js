@@ -6,7 +6,7 @@
 } from "react";
 import { BarChart3, CalendarDays, Gem, Sun, Cloud, CloudRain, CloudSun, Thermometer, Plus, ClipboardList, FlaskConical, Crown, Moon, Brain, FileDown, User } from "lucide-react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import "./App.css";
 import "./Custom.css";
 import "./ThemeEnhancements.css";
@@ -76,6 +76,7 @@ import {
 } from "./lib/membershipAccess";
 import { MembershipFeatureGate } from "./components/MembershipFeatureGate";
 import { GuiaaBrandLockup } from "./components/GuiaaBrandLockup";
+import { InviteRegisterPage } from "./pages/InviteRegisterPage";
 import { Header } from "./components/Header";
 import { AppShell } from "./layout/AppShell";
 import { AuthPageShell } from "./layout/AuthPageShell";
@@ -743,7 +744,11 @@ const Router = () => {
     landing: <LandingPage setView={handleSetView} />,
     register: (
       <AppShell fullBleed>
-        <RegisterPage setView={handleSetView} setCedulaFlow={setCedulaFlow} />
+        <RegisterEntryPage
+          setView={handleSetView}
+          setCedulaFlow={setCedulaFlow}
+          onAuthSuccess={completeAuthAndEnter}
+        />
       </AppShell>
     ),
     login: (
@@ -938,6 +943,22 @@ const Router = () => {
 };
 
 // Register Page
+
+const RegisterEntryPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
+  const [searchParams] = useSearchParams();
+  const inviteToken = (searchParams.get("invite") || "").trim();
+  if (inviteToken) {
+    return (
+      <InviteRegisterPage
+        setView={setView}
+        setCedulaFlow={setCedulaFlow}
+        onAuthSuccess={onAuthSuccess}
+      />
+    );
+  }
+  return <RegisterPage setView={setView} setCedulaFlow={setCedulaFlow} />;
+};
+
 const RegisterPage = ({ setView, setCedulaFlow }) => {
   const [formData, setFormData] = useState({
     nombre: "",

@@ -32,6 +32,17 @@ class ResolveAddMemberAction(unittest.TestCase):
             "reassign",
         )
 
+    def test_reassigns_solo_org_even_with_clinical_data(self):
+        self.assertEqual(
+            resolve_add_member_action(
+                {"organization_id": "org-b"},
+                "org-a",
+                source_member_count=1,
+                source_has_clinical_data=True,
+            ),
+            "reassign",
+        )
+
     def test_blocks_org_with_other_members(self):
         self.assertEqual(
             resolve_add_member_action(
@@ -52,17 +63,6 @@ class ResolveAddMemberAction(unittest.TestCase):
                 source_has_clinical_data=False,
             ),
             "reassign",
-        )
-
-    def test_blocks_org_with_clinical_data(self):
-        self.assertEqual(
-            resolve_add_member_action(
-                {"organization_id": "org-b"},
-                "org-a",
-                source_member_count=1,
-                source_has_clinical_data=True,
-            ),
-            "conflict_data",
         )
 
 

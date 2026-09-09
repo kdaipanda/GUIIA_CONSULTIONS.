@@ -47,6 +47,23 @@ export async function addOrganizationMember(veterinarianId, email, role) {
   });
 }
 
+export async function createOrganizationInvite(veterinarianId, email, role) {
+  return clinicFetch("/api/organization/invites", veterinarianId, {
+    method: "POST",
+    body: JSON.stringify({ email, role }),
+  });
+}
+
+export async function fetchOrganizationInvites(veterinarianId) {
+  return clinicFetch("/api/organization/invites", veterinarianId);
+}
+
+export async function revokeOrganizationInvite(veterinarianId, inviteId) {
+  return clinicFetch(`/api/organization/invites/${inviteId}`, veterinarianId, {
+    method: "DELETE",
+  });
+}
+
 export async function removeOrganizationMember(veterinarianId, memberId) {
   return clinicFetch(`/api/organization/members/${memberId}`, veterinarianId, {
     method: "DELETE",

@@ -813,6 +813,19 @@ class VeterinarianRegister(BaseModel):
     password: str = Field(..., min_length=6)
 
 
+class InviteRegister(BaseModel):
+    token: str
+    nombre: str
+    telefono: str = Field(..., min_length=8)
+    password: str = Field(..., min_length=6)
+    # Solo veterinario (invite role=veterinarian)
+    cedula_profesional: Optional[str] = None
+    profesional_pais: str = "MX"
+    especialidad: Optional[str] = None
+    años_experiencia: Optional[int] = None
+    institucion: Optional[str] = None
+
+
 class VeterinarianLogin(BaseModel):
     email: str
     password: Optional[str] = None
@@ -1602,6 +1615,170 @@ async def register_veterinarian(vet: VeterinarianRegister, request: Request):
     return result_data
 
 
+@app.get("/api/auth/invite/{token}")
+async def get_organization_invite(token: str):
+    """Vista previa pública de una invitación de equipo."""
+    import clinic_db as _clinic_db
+
+    invite, err = _clinic_db.get_invite_by_raw_token(token)
+    if err or not invite:
+        raise HTTPException(status_code=404, detail=err or "Invitación no encontrada")
+    public = {k: v for k, v in invite.items() if not k.startswith("_")}
+    return {"invite": public}
+
+
+@app.post("/api/auth/register-invite")
+async def register_with_organization_invite(body: InviteRegister, request: Request):
+    """Alta vía invitación: staff sin cédula, o veterinario con cédula, directo al consultorio."""
+    import clinic_db as _clinic_db
+
+    rate_limit.check_rate_limit(request, "register", body.token[:32])
+
+    invite, inv_err = _clinic_db.get_invite_by_raw_token(body.token)
+    if inv_err or not invite:
+        raise HTTPException(status_code=400, detail=inv_err or "Invitación no válida")
+
+    email = (invite.get("email") or "").strip().lower()
+    role = (invite.get("role") or "veterinarian").strip().lower()
+    org_id = invite.get("organization_id")
+    invite_id = invite.get("id")
+    requires_license = role not in _clinic_db.STAFF_INVITE_ROLES
+
+    existing, _ = get_profile_by_email(email)
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Ese email ya tiene cuenta. Inicia sesión y pide al dueño que te agregue "
+                "desde Configuración → Equipo."
+            ),
+        )
+
+    phone = (body.telefono or "").strip()
+    phone_digits = re.sub(r"\D", "", phone)
+    if len(phone_digits) < 8:
+        raise HTTPException(
+            status_code=400,
+            detail="Ingresa un número de teléfono válido (mínimo 8 dígitos).",
+        )
+
+    try:
+        password_hash = password_auth.hash_password(body.password)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=400,
+            detail=password_auth.PASSWORD_HASH_ERROR_MESSAGE,
+        ) from exc
+
+    profile_id = str(uuid.uuid4())
+    pais = (body.profesional_pais or "MX").strip().upper()[:2]
+
+    if requires_license:
+        cedula_norm = normalize_professional_id(body.cedula_profesional or "")
+        if len(cedula_norm) < 3:
+            raise HTTPException(
+                status_code=400,
+                detail="Ingresa un número de matrícula, licencia o registro profesional válido.",
+            )
+        existing_cedula, _ = get_profile_by_cedula(cedula_norm)
+        if existing_cedula:
+            raise HTTPException(status_code=400, detail="Este registro profesional ya está registrado")
+        if not (body.especialidad or "").strip():
+            raise HTTPException(status_code=400, detail="Selecciona una especialidad.")
+        years = int(body.años_experiencia or 0)
+        institucion = (body.institucion or "").strip()
+        if not institucion:
+            raise HTTPException(status_code=400, detail="Ingresa tu institución.")
+        is_dev = is_dev_user(email)
+        initial_status = CEDULA_STATUS_VERIFIED if is_dev else CEDULA_STATUS_UNSUBMITTED
+        vet_data = {
+            "id": profile_id,
+            "nombre": (body.nombre or "").strip(),
+            "email": email,
+            "telefono": phone,
+            "cedula_profesional": cedula_norm,
+            "cedula_profesional_key": professional_id_key(cedula_norm),
+            "profesional_pais": pais,
+            "especialidad": body.especialidad.strip(),
+            "años_experiencia": years,
+            "institucion": institucion,
+            "membership_type": None,
+            "consultations_remaining": 3,
+            "membership_expires": None,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "two_factor_enabled": False,
+            "cedula_verification_status": initial_status,
+            "cedula_document_url": None,
+            "cedula_document_uploaded_at": datetime.now(timezone.utc).isoformat() if is_dev else None,
+            "cedula_verification_checked_at": datetime.now(timezone.utc).isoformat() if is_dev else None,
+            "cedula_verification_error": None,
+            "cedula_sep_nombre": body.nombre if is_dev else None,
+            "cedula_sep_profesion": "Médico Veterinario Zootecnista" if is_dev else None,
+            "cedula_skip_count": 0,
+            "password_hash": password_hash,
+        }
+    else:
+        vet_data = {
+            "id": profile_id,
+            "nombre": (body.nombre or "").strip(),
+            "email": email,
+            "telefono": phone,
+            "cedula_profesional": None,
+            "cedula_profesional_key": None,
+            "profesional_pais": pais,
+            "especialidad": None,
+            "años_experiencia": 0,
+            "institucion": None,
+            "membership_type": None,
+            "consultations_remaining": 0,
+            "membership_expires": None,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "two_factor_enabled": False,
+            "cedula_verification_status": CEDULA_STATUS_VERIFIED,
+            "cedula_document_url": None,
+            "cedula_document_uploaded_at": datetime.now(timezone.utc).isoformat(),
+            "cedula_verification_checked_at": datetime.now(timezone.utc).isoformat(),
+            "cedula_verification_error": None,
+            "cedula_sep_nombre": None,
+            "cedula_sep_profesion": None,
+            "cedula_skip_count": 0,
+            "password_hash": password_hash,
+        }
+
+    result, err = upsert_profile(vet_data)
+    if err:
+        raise HTTPException(status_code=500, detail=f"Error guardando perfil: {err}")
+
+    member, mem_err = _clinic_db.insert_organization_member_direct(org_id, profile_id, role)
+    if mem_err:
+        raise HTTPException(status_code=500, detail=f"No se pudo unir al consultorio: {mem_err}")
+
+    mark_err = _clinic_db.mark_invite_accepted(invite_id, profile_id)
+    if mark_err:
+        print(f"[WARN] No se pudo marcar invitación aceptada: {mark_err}")
+
+    saved = result or vet_data
+    result_data = auth_security.attach_auth_tokens(saved)
+    result_data["invite"] = {
+        "organization_id": org_id,
+        "role": role,
+        "requires_license": requires_license,
+        "organization_name": invite.get("organization_name") or "",
+    }
+    result_data["membership"] = member
+
+    if requires_license and not is_dev_user(email):
+        cedula_verification.maybe_send_cedula_upload_reminder(saved, force=True)
+        asyncio.create_task(
+            _email_background(email_notifications.notify_admins_new_registration, saved)
+        )
+
+    rate_limit.reset_rate_limit(request, "register", body.token[:32])
+    return result_data
+
+
 @app.post("/api/auth/login")
 async def login_veterinarian(credentials: VeterinarianLogin, request: Request):
     """Login de veterinario"""
@@ -2229,6 +2406,21 @@ async def create_consultation(
     membership_type = profile.get("membership_type")
     remaining = int(profile.get("consultations_remaining") or 0)
     user_email = profile.get("email", "")
+
+    # Recepción no crea consultas CDS
+    try:
+        import clinic_db as _clinic_db
+
+        org_member, _ = _clinic_db.get_member_by_profile(vet_id)
+        if org_member and (org_member.get("role") or "") == "receptionist":
+            raise HTTPException(
+                status_code=403,
+                detail="El rol de recepción no puede crear consultas CDS. Usa agenda, dueños y pacientes.",
+            )
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] No se pudo validar rol org en consulta: {exc}")
     
     # Verificar si el usuario tiene consultas ilimitadas
     has_unlimited = has_unlimited_consultations(user_email) if user_email else False

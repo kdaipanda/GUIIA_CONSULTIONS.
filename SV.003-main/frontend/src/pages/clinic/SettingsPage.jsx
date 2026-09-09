@@ -13,7 +13,9 @@ import { useClinic } from "../../context/ClinicContext";
 import {
   fetchOrganization,
   updateOrganization,
-  addOrganizationMember,
+  createOrganizationInvite,
+  fetchOrganizationInvites,
+  revokeOrganizationInvite,
   removeOrganizationMember,
 } from "../../lib/clinicApi";
 import { notifyError, notifySuccess } from "../../lib/appToast";
@@ -37,34 +39,34 @@ const ROLE_LABELS = {
 
 const INVITE_ROLES = [
   {
-    value: "veterinarian",
-    label: "Veterinario",
-    hint: "Consultas CDS, expediente, pacientes y agenda.",
-  },
-  {
     value: "receptionist",
     label: "Recepción",
-    hint: "Agenda, dueños y pacientes. Sin consultas CDS.",
+    hint: "Agenda, dueños y pacientes. Sin consultas CDS. Alta sin cédula.",
   },
   {
     value: "admin",
     label: "Administrador",
-    hint: "Todo lo del veterinario, más configurar el consultorio y el equipo.",
+    hint: "Configurar el consultorio y el equipo. Alta sin cédula.",
+  },
+  {
+    value: "veterinarian",
+    label: "Veterinario",
+    hint: "Consultas CDS, expediente, pacientes y agenda. Requiere cédula.",
   },
 ];
 
 const TEAM_STEPS = [
   {
-    title: "Se da de alta",
-    body: "En guiaa.vet: su nombre, SU cédula (la de esa persona, no la tuya) y el email que vas a usar aquí.",
+    title: "Elige el rol",
+    body: "Recepción o Administrador: alta corta sin cédula. Veterinario: se registra con su propia cédula.",
   },
   {
-    title: "Tú lo vinculas",
-    body: "Cuando ya pueda entrar, escribe ese mismo email abajo y elige su rol.",
+    title: "Envía la invitación",
+    body: "Escribe el email abajo. Si ya tiene cuenta GUIAA, entra al equipo al instante; si no, le mandamos un link.",
   },
   {
-    title: "Entra de nuevo",
-    body: "Pulsa Agregar al equipo. Que cierre sesión y vuelva a entrar: verá este consultorio.",
+    title: "Entra al consultorio",
+    body: "Al aceptar el link (o al agregarlo), que cierre sesión y vuelva a entrar: verá este consultorio.",
   },
 ];
 
@@ -74,9 +76,10 @@ export function SettingsPage() {
   const { confirm, dialogProps } = useConfirmAction();
   const [org, setOrg] = useState(null);
   const [members, setMembers] = useState([]);
+  const [pendingInvites, setPendingInvites] = useState([]);
   const [form, setForm] = useState({ name: "", timezone: "America/Mexico_City" });
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState("veterinarian");
+  const [inviteRole, setInviteRole] = useState("receptionist");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [inviting, setInviting] = useState(false);
@@ -87,9 +90,13 @@ export function SettingsPage() {
     if (!veterinarian?.id) return;
     setLoading(true);
     try {
-      const data = await fetchOrganization(veterinarian.id);
+      const [data, invitesData] = await Promise.all([
+        fetchOrganization(veterinarian.id),
+        fetchOrganizationInvites(veterinarian.id).catch(() => ({ invites: [] })),
+      ]);
       setOrg(data.organization || null);
       setMembers(data.members || []);
+      setPendingInvites(invitesData.invites || []);
       setForm({
         name: data.organization?.name || "",
         timezone: data.organization?.timezone || "America/Mexico_City",
@@ -125,18 +132,43 @@ export function SettingsPage() {
     if (!inviteEmail.trim()) return;
     setInviting(true);
     try {
-      const data = await addOrganizationMember(
+      const data = await createOrganizationInvite(
         veterinarian.id,
         inviteEmail.trim().toLowerCase(),
         inviteRole,
       );
-      notifySuccess(data.message || "Miembro agregado.");
+      notifySuccess(data.message || "Invitación enviada.");
+      if (data.mode === "invited" && data.invite_url) {
+        try {
+          await navigator.clipboard.writeText(data.invite_url);
+          notifySuccess("Enlace de invitación copiado al portapapeles.");
+        } catch {
+          /* clipboard opcional */
+        }
+      }
       setInviteEmail("");
       load();
     } catch (err) {
       notifyError(err.message);
     } finally {
       setInviting(false);
+    }
+  };
+
+  const handleRevokeInvite = async (invite) => {
+    const ok = await confirm({
+      title: "Cancelar invitación",
+      description: `¿Cancelar la invitación a ${invite.email}?`,
+      confirmLabel: "Cancelar",
+      destructive: true,
+    });
+    if (!ok) return;
+    try {
+      await revokeOrganizationInvite(veterinarian.id, invite.id);
+      notifySuccess("Invitación cancelada.");
+      load();
+    } catch (err) {
+      notifyError(err.message);
     }
   };
 
@@ -198,7 +230,7 @@ export function SettingsPage() {
         <div>
           <p className="clinic-page-eyebrow">Consultorio</p>
           <h1>Configuración del consultorio</h1>
-          <p>Datos de la clínica, cómo agregar veterinarios al equipo y el portal de citas.</p>
+          <p>Datos de la clínica, cómo invitar al equipo y el portal de citas.</p>
         </div>
       </div>
 
@@ -259,10 +291,10 @@ export function SettingsPage() {
             </h2>
             <div className="clinic-team-guide">
               <p className="clinic-team-lead">
-                No enviamos un correo de invitación. Cada colega se da de alta con su propia
-                cédula y tú lo agregas a este consultorio con el mismo email.
+                Invita por email. Si aún no tienen cuenta, reciben un enlace para darse de alta.
+                Recepción y administrador no necesitan cédula.
               </p>
-              <ol className="clinic-team-steps" aria-label="Pasos para agregar al equipo">
+              <ol className="clinic-team-steps" aria-label="Pasos para invitar al equipo">
                 {TEAM_STEPS.map((step, index) => (
                   <li key={step.title} className="clinic-team-step">
                     <span className="clinic-team-step-num" aria-hidden>
@@ -276,17 +308,17 @@ export function SettingsPage() {
                 ))}
               </ol>
               <p className="clinic-team-callout">
-                La cédula es única: no se puede registrar dos veces. Si ya abrió GUIAA, se le
-                crea un consultorio vacío y lo pasamos al tuyo. No se puede unir si ya tiene
-                pacientes o citas en su propia clínica.
+                Una cuenta pertenece a un solo consultorio. Si alguien ya está solo en otra clínica,
+                lo movemos aquí (con pacientes). Si ya trabaja en un equipo con más gente, primero
+                debe salir de esa organización.
               </p>
             </div>
 
             <div className="clinic-team-add">
-              <h3>Agregar colega</h3>
+              <h3>Invitar colega</h3>
               <form onSubmit={handleInvite} className="clinic-invite-form">
                 <div className="form-group">
-                  <Label htmlFor="invite-email">Email de registro en GUIAA</Label>
+                  <Label htmlFor="invite-email">Email del colega</Label>
                   <Input
                     id="invite-email"
                     type="email"
@@ -317,22 +349,64 @@ export function SettingsPage() {
                 </div>
                 <Button type="submit" disabled={inviting || !inviteEmail.trim()}>
                   <UserPlus size={16} aria-hidden />
-                  {inviting ? "Agregando..." : "Agregar al equipo"}
+                  {inviting ? "Enviando..." : "Enviar invitación"}
                 </Button>
               </form>
             </div>
+
+            {pendingInvites.length > 0 ? (
+              <div className="clinic-team-pending">
+                <h3>Invitaciones pendientes</h3>
+                <div className="clinic-table-wrap">
+                  <table className="clinic-table">
+                    <thead>
+                      <tr>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Vence</th>
+                        <th aria-label="Acciones" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pendingInvites.map((invite) => (
+                        <tr key={invite.id}>
+                          <td>{invite.email}</td>
+                          <td>{ROLE_LABELS[invite.role] || invite.role}</td>
+                          <td>
+                            {invite.expires_at
+                              ? new Date(invite.expires_at).toLocaleDateString("es-MX")
+                              : "—"}
+                          </td>
+                          <td>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRevokeInvite(invite)}
+                              aria-label="Cancelar invitación"
+                            >
+                              <Trash2 size={16} aria-hidden />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
 
             {members.length === 0 ? (
               <ClinicEmptyState
                 icon={Users}
                 title="Aún no hay colegas en el equipo"
-                description="Cuando tu colega ya tenga cuenta GUIAA, agrégalo con su email de registro."
+                description="Invita por email. Recepción y admin pueden darse de alta sin cédula."
               />
             ) : (
               <>
                 {extraMembers.length === 0 && (
                   <p className="clinic-team-note">
-                    Tú eres el propietario. Agrega a tus colegas con el formulario de arriba.
+                    Tú eres el propietario. Invita a tus colegas con el formulario de arriba.
                   </p>
                 )}
                 <div className="clinic-table-wrap">

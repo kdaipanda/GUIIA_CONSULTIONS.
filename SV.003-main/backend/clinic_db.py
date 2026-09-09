@@ -3,14 +3,30 @@ CRUD Supabase para módulo clínico (Fase 1 PMS).
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
+import hashlib
+import secrets
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from supabase_client import get_supabase_client
 
+INVITE_ROLES = frozenset({"admin", "veterinarian", "receptionist"})
+STAFF_INVITE_ROLES = frozenset({"admin", "receptionist"})
+INVITE_TTL_DAYS = 14
+
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _hash_invite_token(raw_token: str) -> str:
+    return hashlib.sha256((raw_token or "").encode("utf-8")).hexdigest()
+
+
+def new_invite_token() -> Tuple[str, str]:
+    """Returns (raw_token, token_hash)."""
+    raw = secrets.token_urlsafe(32)
+    return raw, _hash_invite_token(raw)
 
 
 def _table(name: str):
@@ -85,8 +101,7 @@ _ADD_MEMBER_MESSAGES = {
         "Debe salir de su organización actual (o usar otro email) antes de unirse a la tuya."
     ),
     "conflict_data": (
-        "Esa cuenta ya tiene su propio consultorio con pacientes, citas o historial. "
-        "No se puede mover automáticamente; pide que use otro email o contacta a soporte."
+        "No se pudo mover esa cuenta a tu consultorio. Pide que use otro email o contacta a soporte."
     ),
 }
 
@@ -96,6 +111,7 @@ _CLINIC_ACTIVITY_TABLES = (
     "appointments",
     "consultations",
     "products",
+    "stock_movements",
     "clinical_invoices",
     "appointment_requests",
 )
@@ -108,11 +124,12 @@ def resolve_add_member_action(
     source_has_clinical_data: bool = False,
 ) -> str:
     """already_here | insert | reassign | conflict_team | conflict_data"""
+    del source_has_clinical_data  # solo-owner orgs are moved, with or without clinical rows
     if not existing:
         return "insert"
     if existing.get("organization_id") == dest_organization_id:
         return "already_here"
-    if source_member_count == 1 and not source_has_clinical_data:
+    if source_member_count == 1:
         return "reassign"
     if source_member_count > 1:
         return "conflict_team"
@@ -160,6 +177,32 @@ def _primary_branch_id(organization_id: str) -> Optional[str]:
         return None
 
 
+def _move_clinical_data(
+    source_org_id: str,
+    dest_org_id: str,
+    dest_branch_id: Optional[str],
+) -> Optional[str]:
+    try:
+        source_branches = (
+            _table("branches")
+            .select("id")
+            .eq("organization_id", source_org_id)
+            .execute()
+        )
+        source_branch_ids = [row.get("id") for row in (source_branches.data or []) if row.get("id")]
+        for table in _CLINIC_ACTIVITY_TABLES:
+            _table(table).update({"organization_id": dest_org_id}).eq(
+                "organization_id", source_org_id
+            ).execute()
+        if dest_branch_id and source_branch_ids:
+            _table("appointments").update({"branch_id": dest_branch_id}).in_(
+                "branch_id", source_branch_ids
+            ).execute()
+        return None
+    except Exception as exc:  # noqa: BLE001
+        return str(exc)
+
+
 def _reassign_member_to_organization(
     existing: Dict[str, Any],
     dest_organization_id: str,
@@ -167,6 +210,10 @@ def _reassign_member_to_organization(
 ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     source_org_id = existing.get("organization_id")
     branch_id = _primary_branch_id(dest_organization_id)
+    if source_org_id:
+        move_err = _move_clinical_data(source_org_id, dest_organization_id, branch_id)
+        if move_err:
+            return (None, move_err)
     try:
         resp = (
             _table("organization_members")
@@ -206,22 +253,17 @@ def add_organization_member(
         return (None, err)
 
     source_member_count = 0
-    source_has_clinical_data = False
     if existing and existing.get("organization_id") != organization_id:
         source_org_id = existing.get("organization_id")
         peers, peers_err = list_members(source_org_id)
         if peers_err:
             return (None, _ADD_MEMBER_MESSAGES["conflict_team"])
         source_member_count = len(peers or [])
-        source_has_clinical_data, data_err = organization_has_clinical_data(source_org_id)
-        if data_err:
-            return (None, _ADD_MEMBER_MESSAGES["conflict_data"])
 
     action = resolve_add_member_action(
         existing,
         organization_id,
         source_member_count,
-        source_has_clinical_data,
     )
     if action == "already_here":
         return (None, _ADD_MEMBER_MESSAGES[action])
@@ -353,6 +395,24 @@ def ensure_organization_for_profile(
             },
             None,
         )
+    # Cuentas de equipo (sin cédula) no deben crear consultorio propio.
+    try:
+        pref = (
+            _table("profiles")
+            .select("cedula_profesional")
+            .eq("id", profile_id)
+            .limit(1)
+            .execute()
+        )
+        cedula = ((pref.data or [{}])[0].get("cedula_profesional") or "").strip()
+        if not cedula:
+            return (
+                None,
+                "Esta cuenta de equipo no tiene consultorio. Pide una nueva invitación al propietario.",
+            )
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
     result, err = create_organization_with_owner(profile_id, default_name)
     if err:
         return (None, err)
@@ -363,6 +423,201 @@ def ensure_organization_for_profile(
         },
         None,
     )
+
+
+def _invite_public_row(row: Dict[str, Any], org_name: str = "") -> Dict[str, Any]:
+    role = row.get("role") or "veterinarian"
+    return {
+        "id": row.get("id"),
+        "email": (row.get("email") or "").strip().lower(),
+        "role": role,
+        "status": row.get("status"),
+        "expires_at": row.get("expires_at"),
+        "organization_id": row.get("organization_id"),
+        "organization_name": org_name or "",
+        "requires_license": role not in STAFF_INVITE_ROLES,
+        "created_at": row.get("created_at"),
+    }
+
+
+def list_organization_invites(
+    organization_id: str,
+) -> Tuple[List[Dict[str, Any]], Optional[str]]:
+    try:
+        resp = (
+            _table("organization_invites")
+            .select("*")
+            .eq("organization_id", organization_id)
+            .eq("status", "pending")
+            .order("created_at", desc=True)
+            .execute()
+        )
+        now = datetime.now(timezone.utc)
+        rows: List[Dict[str, Any]] = []
+        for row in resp.data or []:
+            expires = row.get("expires_at")
+            if expires:
+                try:
+                    exp_dt = datetime.fromisoformat(str(expires).replace("Z", "+00:00"))
+                    if exp_dt < now:
+                        _table("organization_invites").update({"status": "expired"}).eq(
+                            "id", row["id"]
+                        ).execute()
+                        continue
+                except ValueError:
+                    pass
+            rows.append(_invite_public_row(row))
+        return (rows, None)
+    except Exception as exc:  # noqa: BLE001
+        return ([], str(exc))
+
+
+def revoke_organization_invite(
+    organization_id: str, invite_id: str
+) -> Tuple[bool, Optional[str]]:
+    try:
+        resp = (
+            _table("organization_invites")
+            .update({"status": "revoked"})
+            .eq("id", invite_id)
+            .eq("organization_id", organization_id)
+            .eq("status", "pending")
+            .execute()
+        )
+        if not resp.data:
+            return (False, "Invitación no encontrada o ya no está pendiente")
+        return (True, None)
+    except Exception as exc:  # noqa: BLE001
+        return (False, str(exc))
+
+
+def create_organization_invite(
+    organization_id: str,
+    email: str,
+    role: str,
+    invited_by: Optional[str] = None,
+) -> Tuple[Optional[Dict[str, Any]], Optional[str], Optional[str]]:
+    """
+    Returns (invite_public_with_raw_token_fields, error, raw_token).
+    raw_token is only available at creation time.
+    """
+    email_norm = (email or "").strip().lower()
+    if not email_norm or "@" not in email_norm:
+        return (None, "Email inválido", None)
+    if role not in INVITE_ROLES:
+        return (None, "Rol no válido para invitación", None)
+
+    raw_token, token_hash = new_invite_token()
+    expires_at = (datetime.now(timezone.utc) + timedelta(days=INVITE_TTL_DAYS)).isoformat()
+
+    try:
+        # Revocar pendientes previas del mismo email en esta org
+        _table("organization_invites").update({"status": "revoked"}).eq(
+            "organization_id", organization_id
+        ).eq("email", email_norm).eq("status", "pending").execute()
+
+        resp = (
+            _table("organization_invites")
+            .insert(
+                {
+                    "organization_id": organization_id,
+                    "email": email_norm,
+                    "role": role,
+                    "token_hash": token_hash,
+                    "invited_by": invited_by,
+                    "status": "pending",
+                    "expires_at": expires_at,
+                },
+                returning="representation",
+            )
+            .execute()
+        )
+        row = resp.data[0] if resp.data else None
+        if not row:
+            return (None, "No se pudo crear la invitación", None)
+        public = _invite_public_row(row)
+        return (public, None, raw_token)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc), None)
+
+
+def get_invite_by_raw_token(
+    raw_token: str,
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    token = (raw_token or "").strip()
+    if len(token) < 16:
+        return (None, "Invitación no válida")
+    token_hash = _hash_invite_token(token)
+    try:
+        resp = (
+            _table("organization_invites")
+            .select("*, organizations(id, name)")
+            .eq("token_hash", token_hash)
+            .limit(1)
+            .execute()
+        )
+        row = resp.data[0] if resp.data else None
+        if not row:
+            return (None, "Invitación no encontrada")
+        if row.get("status") != "pending":
+            return (None, "Esta invitación ya no está disponible")
+        expires = row.get("expires_at")
+        if expires:
+            try:
+                exp_dt = datetime.fromisoformat(str(expires).replace("Z", "+00:00"))
+                if exp_dt < datetime.now(timezone.utc):
+                    _table("organization_invites").update({"status": "expired"}).eq(
+                        "id", row["id"]
+                    ).execute()
+                    return (None, "Esta invitación expiró. Pide una nueva al consultorio.")
+            except ValueError:
+                pass
+        org = row.get("organizations") or {}
+        public = _invite_public_row(row, org_name=org.get("name") or "")
+        public["_raw"] = row
+        return (public, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def mark_invite_accepted(invite_id: str, profile_id: str) -> Optional[str]:
+    try:
+        _table("organization_invites").update(
+            {
+                "status": "accepted",
+                "accepted_at": _now_iso(),
+                "accepted_profile_id": profile_id,
+            }
+        ).eq("id", invite_id).execute()
+        return None
+    except Exception as exc:  # noqa: BLE001
+        return str(exc)
+
+
+def insert_organization_member_direct(
+    organization_id: str,
+    profile_id: str,
+    role: str,
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    if role not in INVITE_ROLES and role != "owner":
+        return (None, "Rol no válido")
+    try:
+        resp = (
+            _table("organization_members")
+            .insert(
+                {
+                    "organization_id": organization_id,
+                    "profile_id": profile_id,
+                    "role": role,
+                    "branch_id": _primary_branch_id(organization_id),
+                },
+                returning="representation",
+            )
+            .execute()
+        )
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
 
 
 def list_clients(
