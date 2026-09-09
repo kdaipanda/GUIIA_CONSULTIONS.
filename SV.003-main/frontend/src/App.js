@@ -446,7 +446,7 @@ function App() {
 
 // Router Component
 const Router = () => {
-  const { veterinarian, loading, platformAdmin, refreshProfile, patchVeterinarian } = useVet();
+  const { veterinarian, loading, platformAdmin, refreshProfile, patchVeterinarian, logout } = useVet();
   const navigate = useNavigate();
   const location = useLocation();
   const [currentView, setCurrentView] = useState(
@@ -468,7 +468,10 @@ const Router = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [trialSurveyOfferOpen, setTrialSurveyOfferOpen] = useState(false);
   const [trialSurveyOffer, setTrialSurveyOffer] = useState(null);
-  const trialSurveyRequired = shouldShowTrialSurvey(veterinarian);
+  // No mostrar encuesta por cache local: solo si el API confirma show_survey.
+  const [trialSurveyConfirmed, setTrialSurveyConfirmed] = useState(false);
+  const localSurveyHint = shouldShowTrialSurvey(veterinarian);
+  const trialSurveyRequired = localSurveyHint && trialSurveyConfirmed;
   const trialSurveyVisible = trialSurveyRequired || trialSurveyOfferOpen;
 
   const portalOrganizationId = (() => {
@@ -477,22 +480,68 @@ const Router = () => {
   })();
 
   useEffect(() => {
-    if (!trialSurveyVisible || !veterinarian?.id) return;
+    if (!veterinarian?.id) {
+      setTrialSurveyConfirmed(false);
+      return;
+    }
+    if (!localSurveyHint) {
+      setTrialSurveyConfirmed(false);
+      return;
+    }
+
     let cancelled = false;
-    fetch(`${BACKEND_URL}/api/trial-survey/status`, {
-      headers: getAuthHeaders(veterinarian.id),
-    })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.offer) {
-          setTrialSurveyOffer(data.offer);
+    setTrialSurveyConfirmed(false);
+
+    (async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/trial-survey/status`, {
+          headers: getAuthHeaders(veterinarian.id),
+        });
+        if (cancelled) return;
+
+        if (response.status === 401) {
+          // Token viejo: salir en lugar de atrapar al usuario en la encuesta.
+          await logout?.();
+          return;
         }
-      })
-      .catch(() => {});
+
+        if (!response.ok) {
+          setTrialSurveyConfirmed(false);
+          return;
+        }
+
+        const data = await response.json();
+        if (cancelled) return;
+        if (data?.offer) setTrialSurveyOffer(data.offer);
+
+        if (data?.show_survey) {
+          setTrialSurveyConfirmed(true);
+          return;
+        }
+
+        // Plan heredado / encuesta ya no aplica: sincronizar perfil y cerrar.
+        setTrialSurveyConfirmed(false);
+        try {
+          await refreshProfile?.();
+        } catch {
+          /* ignore */
+        }
+        if (data?.completed_at) {
+          patchVeterinarian?.({ trial_survey_completed_at: data.completed_at });
+        } else {
+          patchVeterinarian?.({
+            trial_survey_completed_at: new Date().toISOString(),
+          });
+        }
+      } catch {
+        if (!cancelled) setTrialSurveyConfirmed(false);
+      }
+    })();
+
     return () => {
       cancelled = true;
     };
-  }, [trialSurveyVisible, veterinarian?.id]);
+  }, [veterinarian?.id, localSurveyHint, logout, refreshProfile, patchVeterinarian]);
 
   const handleTrialSurveyCompleted = async (data) => {
     if (data?.completed_at) {
@@ -502,6 +551,7 @@ const Router = () => {
       setTrialSurveyOffer(data.offer);
     }
     setTrialSurveyOfferOpen(true);
+    setTrialSurveyConfirmed(false);
     try {
       await refreshProfile?.();
     } catch {
@@ -933,6 +983,9 @@ const Router = () => {
           veterinarian={veterinarian}
           offer={trialSurveyOffer}
           onCompleted={handleTrialSurveyCompleted}
+          onSessionExpired={async () => {
+            await logout?.();
+          }}
           onGoMembership={() => navigateSetView("membership")}
         />
       ) : null}

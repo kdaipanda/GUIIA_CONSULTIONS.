@@ -29,6 +29,7 @@ export function TrialSurveyModal({
   veterinarian,
   offer,
   onCompleted,
+  onSessionExpired,
   onGoMembership,
 }) {
   const [rating, setRating] = useState(0);
@@ -73,7 +74,15 @@ export function TrialSurveyModal({
       setPhase("offer");
       onCompleted?.(data);
     } catch (err) {
-      setError(err.message || "No se pudo enviar la encuesta.");
+      const msg = err.message || "No se pudo enviar la encuesta.";
+      const sessionDead =
+        err.status === 401 ||
+        /sesi[oó]n inv[aá]lida|sesi[oó]n requerida|expirada/i.test(msg);
+      if (sessionDead) {
+        await onSessionExpired?.();
+        return;
+      }
+      setError(msg);
     } finally {
       setSubmitting(false);
     }

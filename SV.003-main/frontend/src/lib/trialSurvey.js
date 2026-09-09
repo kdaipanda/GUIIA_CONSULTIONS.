@@ -27,7 +27,9 @@ export async function fetchTrialSurveyStatus(veterinarianId, headers) {
   });
   const data = await parseJsonResponse(response, {});
   if (!response.ok) {
-    throw new Error(trialSurveyApiError(data, "No se pudo cargar la encuesta"));
+    const err = new Error(trialSurveyApiError(data, "No se pudo cargar la encuesta"));
+    err.status = response.status;
+    throw err;
   }
   return data;
 }
@@ -43,7 +45,9 @@ export async function submitTrialSurvey(veterinarianId, headers, { rating, comme
   });
   const data = await parseJsonResponse(response, {});
   if (!response.ok) {
-    throw new Error(trialSurveyApiError(data, "No se pudo enviar la encuesta"));
+    const err = new Error(trialSurveyApiError(data, "No se pudo enviar la encuesta"));
+    err.status = response.status;
+    throw err;
   }
   return data;
 }
