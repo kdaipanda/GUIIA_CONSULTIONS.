@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Header, HTTPException
 from fastapi.responses import Response
@@ -1727,6 +1727,7 @@ async def admin_list_users(
     if counts_err:
         print(f"[WARN] admin/users consultas: {counts_err}")
         consultation_counts = consultation_counts or {}
+    team_index = clinic_db.build_admin_team_index(profiles)
     q = search.lower().strip()
     pf = (plan_filter or "all").lower().strip()
     prf = (presence_filter or "all").lower().strip()
@@ -1735,10 +1736,17 @@ async def admin_list_users(
     now = presence.utc_now()
     matched = []
     for profile in profiles:
-        membership = (profile.get("membership_type") or "").lower().strip()
-        if pf == "paid" and membership not in paid_plans:
+        team = team_index.get(str(profile.get("id") or "")) or {}
+        # Plan efectivo: miembros de equipo ven el del dueño
+        membership = (
+            team.get("effective_membership_type")
+            if team.get("membership_source") == "organization"
+            else profile.get("membership_type")
+        )
+        membership_l = (membership or "").lower().strip()
+        if pf == "paid" and membership_l not in paid_plans:
             continue
-        if pf == "trial" and membership in paid_plans:
+        if pf == "trial" and membership_l in paid_plans:
             continue
         online = presence.is_online(profile.get("last_seen"), now=now)
         if prf == "online" and not online:
@@ -1751,19 +1759,29 @@ async def admin_list_users(
                     profile.get("email") or "",
                     profile.get("nombre") or "",
                     profile.get("membership_type") or "",
+                    membership or "",
                     profile.get("cedula_profesional") or "",
                     profile.get("telefono") or "",
+                    team.get("organization_name") or "",
+                    team.get("org_role") or "",
+                    team.get("membership_owner_email") or "",
+                    team.get("membership_owner_nombre") or "",
+                    "equipo" if team.get("team_shared") else "",
+                    "shared" if team.get("team_shared") else "",
                 ]
             ).lower()
             if q not in haystack:
                 continue
+        remaining = profile.get("consultations_remaining")
+        if team.get("membership_source") == "organization" and "effective_consultations_remaining" in team:
+            remaining = team.get("effective_consultations_remaining")
         row = {
             "id": profile.get("id"),
             "email": profile.get("email"),
             "nombre": profile.get("nombre"),
             "telefono": profile.get("telefono"),
-            "membership_type": profile.get("membership_type"),
-            "consultations_remaining": profile.get("consultations_remaining"),
+            "membership_type": membership,
+            "consultations_remaining": remaining,
             "consultations_used": consultation_counts.get(str(profile.get("id") or ""), 0),
             "consultations_unlimited": has_unlimited_consultations(profile.get("email")),
             "created_at": profile.get("created_at"),
@@ -1774,6 +1792,15 @@ async def admin_list_users(
             "cedula_sep_nombre": profile.get("cedula_sep_nombre"),
             "cedula_sep_profesion": profile.get("cedula_sep_profesion"),
             "cedula_verification_error": profile.get("cedula_verification_error"),
+            "organization_id": team.get("organization_id"),
+            "organization_name": team.get("organization_name"),
+            "org_role": team.get("org_role"),
+            "team_shared": bool(team.get("team_shared")),
+            "team_member_count": team.get("team_member_count") or 0,
+            "membership_source": team.get("membership_source"),
+            "membership_owner_id": team.get("membership_owner_id"),
+            "membership_owner_nombre": team.get("membership_owner_nombre"),
+            "membership_owner_email": team.get("membership_owner_email"),
         }
         row.update(presence.presence_fields(profile, now=now))
         phone_digits = whatsapp_promo.normalize_whatsapp_number(profile.get("telefono"))
@@ -1968,7 +1995,82 @@ async def admin_list_organizations(x_veterinarian_id: str = Header(None)):
     orgs, err = clinic_db.list_organizations(limit=500)
     if err:
         raise HTTPException(status_code=500, detail=err)
-    return {"organizations": orgs}
+    team_index = clinic_db.build_admin_team_index()
+    # Conteos por org a partir del índice de miembros
+    counts: Dict[str, int] = {}
+    owners: Dict[str, str] = {}
+    for entry in team_index.values():
+        oid = entry.get("organization_id")
+        if not oid:
+            continue
+        counts[oid] = int(entry.get("team_member_count") or counts.get(oid) or 0)
+        if entry.get("org_role") == "owner":
+            # El índice no guarda email del owner en la entry del owner; se rellena abajo
+            pass
+    # Owner email/nombre: buscar entries donde role owner - need profile from members
+    # Simpler: for each org, find any entry with that org_id and owner_profile_id
+    owner_by_org: Dict[str, Dict[str, Any]] = {}
+    for pid, entry in team_index.items():
+        oid = entry.get("organization_id")
+        if not oid:
+            continue
+        if entry.get("org_role") == "owner":
+            owner_by_org[oid] = {"owner_profile_id": pid}
+        elif entry.get("membership_owner_id") and oid not in owner_by_org:
+            owner_by_org[oid] = {
+                "owner_profile_id": entry.get("membership_owner_id"),
+                "owner_nombre": entry.get("membership_owner_nombre"),
+                "owner_email": entry.get("membership_owner_email"),
+            }
+
+    enriched = []
+    for org in orgs or []:
+        oid = str(org.get("id") or "")
+        member_count = counts.get(oid) or 0
+        owner_info = owner_by_org.get(oid) or {}
+        enriched.append(
+            {
+                **org,
+                "member_count": member_count,
+                "team_shared": member_count > 1,
+                "owner_profile_id": owner_info.get("owner_profile_id"),
+                "owner_nombre": owner_info.get("owner_nombre"),
+                "owner_email": owner_info.get("owner_email"),
+            }
+        )
+    # Completar owner nombre/email si falta (dueños solo)
+    missing = [
+        o["owner_profile_id"]
+        for o in enriched
+        if o.get("owner_profile_id") and not o.get("owner_email")
+    ]
+    if missing:
+        try:
+            from supabase_client import get_supabase_client
+
+            client = get_supabase_client()
+            uniq = list(dict.fromkeys(missing))
+            by_id = {}
+            for i in range(0, len(uniq), 100):
+                chunk = uniq[i : i + 100]
+                resp = (
+                    client.table("profiles")
+                    .select("id, nombre, email")
+                    .in_("id", chunk)
+                    .execute()
+                )
+                for row in resp.data or []:
+                    by_id[str(row["id"])] = row
+            for o in enriched:
+                oid_owner = o.get("owner_profile_id")
+                if oid_owner and oid_owner in by_id:
+                    o["owner_nombre"] = by_id[oid_owner].get("nombre")
+                    o["owner_email"] = by_id[oid_owner].get("email")
+        except Exception as exc:  # noqa: BLE001
+            print(f"[WARN] admin orgs owners: {exc}")
+
+    enriched.sort(key=lambda o: (0 if o.get("team_shared") else 1, (o.get("name") or "").lower()))
+    return {"organizations": enriched}
 
 
 @clinic_router.post("/support/tickets")

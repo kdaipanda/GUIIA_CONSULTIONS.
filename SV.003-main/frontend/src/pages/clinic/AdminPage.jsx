@@ -33,6 +33,7 @@ import {
   ensureAdminWhatsappPromoImage,
 } from "../../lib/clinicApi";
 import { notifyError, notifySuccess } from "../../lib/appToast";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -45,64 +46,26 @@ import {
 } from "../../components/ui/dialog";
 import { cleanClinicalDisplayText, downloadUserConsultationsHistoryPdf } from "../../lib/consultationPdf";
 import { countryLabel } from "../../lib/latamCountries";
+import i18n from "../../i18n";
 
-const PLAN_FILTERS = [
-  { id: "all", label: "Todos" },
-  { id: "trial", label: "Solo prueba" },
-  { id: "paid", label: "Con plan de pago" },
-];
+const PLAN_FILTER_IDS = ["all", "trial", "paid"];
+const PRESENCE_FILTER_IDS = ["all", "online", "offline"];
+const SUPPORT_FILTER_IDS = ["", "open", "in_progress", "resolved", "closed"];
+const LEAD_FILTER_IDS = ["", "new", "contacted", "closed"];
 
-const PRESENCE_FILTERS = [
-  { id: "all", label: "Todos" },
-  { id: "online", label: "En línea" },
-  { id: "offline", label: "Fuera de línea" },
-];
-
-const SUPPORT_FILTERS = [
-  { id: "", label: "Todos" },
-  { id: "open", label: "Abiertos" },
-  { id: "in_progress", label: "En progreso" },
-  { id: "resolved", label: "Resueltos" },
-  { id: "closed", label: "Cerrados" },
-];
-
-const LEAD_FILTERS = [
-  { id: "", label: "Todas" },
-  { id: "new", label: "Nuevas" },
-  { id: "contacted", label: "Contactadas" },
-  { id: "closed", label: "Cerradas" },
-];
-
-const LEAD_STATUS_LABELS = {
-  new: "Nueva",
-  contacted: "Contactada",
-  closed: "Cerrada",
-};
-
-const SUPPORT_STATUS_LABELS = {
-  open: "Abierto",
-  in_progress: "En progreso",
-  resolved: "Resuelto",
-  closed: "Cerrado",
-};
-
-const PLAN_LABELS = {
-  basic: "Básica",
-  professional: "Profesional",
-  premium: "Premium",
-  trial: "Prueba",
-};
-
-const CEDULA_STATUS_LABELS = {
-  unsubmitted: "Sin enviar",
-  pending: "En revisión",
-  verified: "Verificada",
-  rejected: "Rechazada",
-};
+function clinicT(key, options) {
+  return i18n.t(key, { ns: "clinic", ...options });
+}
 
 function formatCedulaStatus(status) {
   const key = (status || "unsubmitted").toLowerCase();
-  return CEDULA_STATUS_LABELS[key] || key;
+  const map = {
+    unsubmitted: "admin.cedulaUnsubmitted",
+    pending: "admin.cedulaPending",
+    verified: "admin.cedulaVerified",
+    rejected: "admin.cedulaRejected",
+  };
+  return map[key] ? clinicT(map[key]) : key;
 }
 
 function cedulaStatusClass(status) {
@@ -115,17 +78,52 @@ function cedulaStatusClass(status) {
 
 function formatPlanLabel(user) {
   const type = (user.membership_type || "").toLowerCase();
-  if (type && PLAN_LABELS[type]) return PLAN_LABELS[type];
+  const planMap = {
+    basic: "admin.planBasic",
+    professional: "admin.planProfessional",
+    premium: "admin.planPremium",
+    trial: "admin.planTrial",
+  };
+  if (type && planMap[type]) return clinicT(planMap[type]);
   if (!type) {
     const remaining = user.consultations_remaining ?? 0;
-    return remaining > 0 ? "Prueba (sin plan)" : "Sin plan";
+    return remaining > 0 ? clinicT("admin.planTrialNoPlan") : clinicT("admin.planNone");
   }
   return user.membership_type;
 }
 
-function formatRegisteredAt(iso) {
+function formatOrgRole(role) {
+  const map = {
+    owner: "admin.roleOwner",
+    admin: "admin.roleAdmin",
+    veterinarian: "admin.roleVeterinarian",
+    receptionist: "admin.roleReceptionist",
+  };
+  return map[role] ? clinicT(map[role]) : role || "—";
+}
+
+function supportStatusLabel(status) {
+  const map = {
+    open: "admin.ticketOpen",
+    in_progress: "admin.ticketInProgress",
+    resolved: "admin.ticketResolved",
+    closed: "admin.ticketClosed",
+  };
+  return map[status] ? clinicT(map[status]) : status;
+}
+
+function leadStatusLabel(status) {
+  const map = {
+    new: "admin.leadNew",
+    contacted: "admin.leadContacted",
+    closed: "admin.leadClosed",
+  };
+  return map[status] ? clinicT(map[status]) : status;
+}
+
+function formatRegisteredAt(iso, locale = "es-MX") {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("es-MX", {
+  return new Date(iso).toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -133,10 +131,11 @@ function formatRegisteredAt(iso) {
 }
 
 function formatLastSeen(iso) {
-  if (!iso) return "Sin actividad";
+  if (!iso) return i18n.t("admin.noActivity", { ns: "clinic" });
   const dt = new Date(iso);
-  if (Number.isNaN(dt.getTime())) return "Sin actividad";
-  return dt.toLocaleString("es-MX", {
+  if (Number.isNaN(dt.getTime())) return i18n.t("admin.noActivity", { ns: "clinic" });
+  const locale = i18n.language?.startsWith("en") ? "en-US" : "es-MX";
+  return dt.toLocaleString(locale, {
     day: "numeric",
     month: "short",
     hour: "2-digit",
@@ -155,16 +154,15 @@ function cedulaDocKind(url, blobType = "") {
   return "unknown";
 }
 
-const CONSULTATION_STATUS_LABELS = {
-  completed: "Completada",
-  in_progress: "En progreso",
-  draft: "Borrador",
-  registered: "Registrada",
-};
-
 function formatConsultationStatus(status) {
   const key = (status || "registered").toLowerCase();
-  return CONSULTATION_STATUS_LABELS[key] || key;
+  const map = {
+    completed: "consultationStatus.completed",
+    in_progress: "consultationStatus.in_progress",
+    draft: "consultationStatus.draft",
+    registered: "admin.consultRegistered",
+  };
+  return i18n.t(map[key] || key, { ns: "clinic", defaultValue: key });
 }
 
 function consultationStatusClass(status) {
@@ -215,7 +213,44 @@ function consultationField(consultation, key) {
 }
 
 export function AdminPage() {
+  const { t, i18n } = useTranslation("clinic");
+  const locale = (i18n.language || "en").startsWith("es") ? "es-MX" : "en-US";
   const { veterinarian, loading: vetLoading, platformAdmin } = useVet();
+
+  const PLAN_FILTERS = [
+    { id: "all", label: t("admin.filterAll") },
+    { id: "trial", label: t("admin.filterTrial") },
+    { id: "paid", label: t("admin.filterPaid") },
+  ];
+  const PRESENCE_FILTERS = [
+    { id: "all", label: t("admin.presenceAll") },
+    { id: "online", label: t("admin.presenceOnline") },
+    { id: "offline", label: t("admin.presenceOffline") },
+  ];
+  const SUPPORT_FILTERS = [
+    { id: "", label: t("admin.filterAll") },
+    { id: "open", label: t("admin.supportOpen") },
+    { id: "in_progress", label: t("admin.supportInProgress") },
+    { id: "resolved", label: t("admin.supportResolved") },
+    { id: "closed", label: t("admin.supportClosed") },
+  ];
+  const LEAD_FILTERS = [
+    { id: "", label: t("admin.leadsAll") },
+    { id: "new", label: t("admin.leadsNew") },
+    { id: "contacted", label: t("admin.leadsContacted") },
+    { id: "closed", label: t("admin.leadsClosed") },
+  ];
+  const SUPPORT_STATUS_ENTRIES = [
+    ["open", t("admin.ticketOpen")],
+    ["in_progress", t("admin.ticketInProgress")],
+    ["resolved", t("admin.ticketResolved")],
+    ["closed", t("admin.ticketClosed")],
+  ];
+  const LEAD_STATUS_ENTRIES = [
+    ["new", t("admin.leadNew")],
+    ["contacted", t("admin.leadContacted")],
+    ["closed", t("admin.leadClosed")],
+  ];
   const { confirm, dialogProps } = useConfirmAction();
   const [allowed, setAllowed] = useState(null);
   const [overview, setOverview] = useState(null);
@@ -327,65 +362,53 @@ export function AdminPage() {
       }
 
       setSupportLoading(true);
-      try {
-        const supportData = await fetchAdminSupportTickets(veterinarian.id, supportFilter);
-        if (!isStale()) {
-          setSupportTickets(supportData.tickets || []);
-          setSupportOpenCount(supportData.open_count ?? 0);
-        }
-      } catch {
-        if (!isStale()) {
+      setGuiaLeadsLoading(true);
+      setTrialSurveysLoading(true);
+      setWaPromoLoading(true);
+
+      const [supportResult, leadsResult, surveysResult, promoResult] = await Promise.allSettled([
+        fetchAdminSupportTickets(veterinarian.id, supportFilter),
+        fetchAdminGuiaConsultasLeads(veterinarian.id, guiaLeadFilter),
+        fetchAdminTrialSurveys(veterinarian.id, trialSurveySearch),
+        fetchAdminWhatsappPromo(veterinarian.id),
+      ]);
+
+      if (!isStale()) {
+        if (supportResult.status === "fulfilled") {
+          setSupportTickets(supportResult.value.tickets || []);
+          setSupportOpenCount(supportResult.value.open_count ?? 0);
+        } else {
           setSupportTickets([]);
           setSupportOpenCount(0);
         }
-      } finally {
-        if (!isStale()) setSupportLoading(false);
-      }
 
-      setGuiaLeadsLoading(true);
-      try {
-        const leadsData = await fetchAdminGuiaConsultasLeads(veterinarian.id, guiaLeadFilter);
-        if (!isStale()) {
-          setGuiaLeads(leadsData.leads || []);
-          setGuiaLeadsNewCount(leadsData.new_count ?? 0);
-        }
-      } catch {
-        if (!isStale()) {
+        if (leadsResult.status === "fulfilled") {
+          setGuiaLeads(leadsResult.value.leads || []);
+          setGuiaLeadsNewCount(leadsResult.value.new_count ?? 0);
+        } else {
           setGuiaLeads([]);
           setGuiaLeadsNewCount(0);
         }
-      } finally {
-        if (!isStale()) setGuiaLeadsLoading(false);
-      }
 
-      setTrialSurveysLoading(true);
-      try {
-        const surveysData = await fetchAdminTrialSurveys(veterinarian.id, trialSurveySearch);
-        if (!isStale()) {
-          setTrialSurveys(surveysData.surveys || []);
-          setTrialSurveysCount(surveysData.count ?? surveysData.surveys?.length ?? 0);
-        }
-      } catch {
-        if (!isStale()) {
+        if (surveysResult.status === "fulfilled") {
+          setTrialSurveys(surveysResult.value.surveys || []);
+          setTrialSurveysCount(
+            surveysResult.value.count ?? surveysResult.value.surveys?.length ?? 0,
+          );
+        } else {
           setTrialSurveys([]);
           setTrialSurveysCount(0);
         }
-      } finally {
-        if (!isStale()) setTrialSurveysLoading(false);
-      }
 
-      setWaPromoLoading(true);
-      try {
-        const promo = await fetchAdminWhatsappPromo(veterinarian.id);
-        if (!isStale()) setWaPromo(promo);
-      } catch {
-        if (!isStale()) setWaPromo(null);
-      } finally {
-        if (!isStale()) setWaPromoLoading(false);
+        setWaPromo(promoResult.status === "fulfilled" ? promoResult.value : null);
+        setSupportLoading(false);
+        setGuiaLeadsLoading(false);
+        setTrialSurveysLoading(false);
+        setWaPromoLoading(false);
       }
     } catch (err) {
       if (isStale()) return;
-      const message = err.message || "No se pudo cargar el panel de administración";
+      const message = err.message || t("admin.loadPanelError");
       // Soft refresh: no tumbar el panel ni spamear toasts cada 30s
       if (soft && hasLoadedOnceRef.current) {
         console.warn("[admin] soft refresh failed:", message);
@@ -399,7 +422,7 @@ export function AdminPage() {
     } finally {
       if (!isStale()) setLoading(false);
     }
-  }, [veterinarian?.id, search, planFilter, presenceFilter, supportFilter, guiaLeadFilter, trialSurveySearch, platformAdmin]);
+  }, [veterinarian?.id, search, planFilter, presenceFilter, supportFilter, guiaLeadFilter, trialSurveySearch, platformAdmin, t]);
 
   useEffect(() => {
     if (vetLoading || !veterinarian?.id) return undefined;
@@ -419,9 +442,9 @@ export function AdminPage() {
     e.preventDefault();
     if (!deleteEmail.trim()) return;
     const ok = await confirm({
-      title: "Eliminar usuario",
-      description: `¿Eliminar permanentemente a ${deleteEmail}? Se borrarán perfil, consultas, imágenes, tickets y pagos asociados en Supabase.`,
-      confirmLabel: "Eliminar",
+      title: t("admin.deleteUserTitle"),
+      description: t("admin.deleteUserDesc", { email: deleteEmail }),
+      confirmLabel: t("admin.deleteUser"),
       destructive: true,
     });
     if (!ok) return;
@@ -433,7 +456,7 @@ export function AdminPage() {
         .filter(([, count]) => Number(count) > 0)
         .map(([key, count]) => `${key}: ${count}`);
       const summary = parts.length ? ` (${parts.join(", ")})` : "";
-      notifySuccess((data.message || "Usuario eliminado.") + summary);
+      notifySuccess((data.message || t("admin.deleteUserSuccess")) + summary);
       setDeleteEmail("");
       load();
     } catch (err) {
@@ -449,9 +472,9 @@ export function AdminPage() {
     try {
       const data = await adminLookupUser(veterinarian.id, deleteEmail.trim());
       if (data.exists) {
-        notifyError(`El email sigue registrado: ${data.nombre || data.email} (${data.id})`);
+        notifyError(t("admin.lookupExists", { name: data.nombre || data.email, id: data.id }));
       } else {
-        notifySuccess(`No hay usuario con el email ${deleteEmail.trim()} en Supabase.`);
+        notifySuccess(t("admin.lookupMissing", { email: deleteEmail.trim() }));
       }
     } catch (err) {
       notifyError(err.message);
@@ -462,15 +485,15 @@ export function AdminPage() {
 
   const handleVerifyCedula = async (user) => {
     const ok = await confirm({
-      title: "Validación SEP",
-      description: `¿Intentar validación automática SEP para ${user.nombre} (México)?`,
-      confirmLabel: "Validar",
+      title: t("admin.sepTitle"),
+      description: t("admin.sepDesc", { name: user.nombre }),
+      confirmLabel: t("admin.sepConfirm"),
     });
     if (!ok) return;
     setCedulaActingId(user.id);
     try {
       const data = await adminVerifyUserCedula(veterinarian.id, user.id);
-      notifySuccess(data.message || "Verificación completada.");
+      notifySuccess(data.message || t("admin.sepSuccess"));
       load();
     } catch (err) {
       notifyError(err.message);
@@ -481,15 +504,15 @@ export function AdminPage() {
 
   const handleApproveCedula = async (user) => {
     const ok = await confirm({
-      title: "Aprobar registro",
-      description: `¿Aprobar el documento profesional de ${user.nombre}?`,
-      confirmLabel: "Aprobar",
+      title: t("admin.approveTitle"),
+      description: t("admin.approveDesc", { name: user.nombre }),
+      confirmLabel: t("admin.approveConfirm"),
     });
     if (!ok) return;
     setCedulaActingId(user.id);
     try {
       const data = await adminReviewUserCedula(veterinarian.id, user.id, "approve");
-      notifySuccess(data.message || "Registro profesional aprobado.");
+      notifySuccess(data.message || t("admin.approveSuccess"));
       load();
     } catch (err) {
       notifyError(err.message);
@@ -499,12 +522,12 @@ export function AdminPage() {
   };
 
   const handleRejectCedula = async (user) => {
-    const note = window.prompt(`Motivo de rechazo para ${user.nombre} (opcional):`, "");
+    const note = window.prompt(t("admin.rejectPrompt", { name: user.nombre }), "");
     if (note === null) return;
     setCedulaActingId(user.id);
     try {
       const data = await adminReviewUserCedula(veterinarian.id, user.id, "reject", note);
-      notifySuccess(data.message || "Registro profesional rechazado.");
+      notifySuccess(data.message || t("admin.rejectSuccess"));
       load();
     } catch (err) {
       notifyError(err.message);
@@ -516,7 +539,7 @@ export function AdminPage() {
   const openWhatsappPromo = (recipient) => {
     const url = recipient?.whatsapp_url || recipient?.whatsapp_promo_url;
     if (!url) {
-      notifyError("Este usuario no tiene un número de WhatsApp válido.");
+      notifyError(t("admin.whatsappInvalid"));
       return;
     }
     window.open(url, "_blank", "noopener,noreferrer");
@@ -533,9 +556,9 @@ export function AdminPage() {
   const copyWhatsappMessage = async (text) => {
     try {
       await navigator.clipboard.writeText(text || waPromo?.message_template || "");
-      notifySuccess("Mensaje copiado. Pégalo en WhatsApp si hace falta.");
+      notifySuccess(t("admin.waCopied"));
     } catch {
-      notifyError("No se pudo copiar el mensaje.");
+      notifyError(t("admin.waCopyError"));
     }
   };
 
@@ -545,9 +568,9 @@ export function AdminPage() {
     try {
       const data = await ensureAdminWhatsappPromoImage(veterinarian.id);
       setWaPromo((prev) => (prev ? { ...prev, image_url: data.image_url || prev.image_url } : prev));
-      notifySuccess("Imagen de oferta lista para compartir.");
+      notifySuccess(t("admin.waImageReady"));
     } catch (err) {
-      notifyError(err.message || "No se pudo preparar la imagen.");
+      notifyError(err.message || t("admin.waImageError"));
     } finally {
       setWaPromoActing(false);
     }
@@ -566,17 +589,31 @@ export function AdminPage() {
         data.total ?? data.count ?? data.consultations?.length ?? user.consultations_used ?? 0,
       );
       setHistoryTruncated(!!data.truncated);
-      // Mantener alineado el contador de la fila si el total real difiere
-      if (typeof data.total === "number" && data.total !== user.consultations_used) {
-        setUsers((prev) =>
-          prev.map((row) =>
-            row.id === user.id ? { ...row, consultations_used: data.total } : row,
-          ),
-        );
-        setHistoryUser((prev) =>
-          prev && prev.id === user.id ? { ...prev, consultations_used: data.total } : prev,
-        );
-      }
+      const nextUsed = typeof data.total === "number" ? data.total : user.consultations_used;
+      const nextRemaining = data.user?.consultations_remaining ?? user.consultations_remaining;
+      const nextUnlimited = data.user?.consultations_unlimited ?? user.consultations_unlimited;
+      setUsers((prev) =>
+        prev.map((row) =>
+          row.id === user.id
+            ? {
+                ...row,
+                consultations_used: nextUsed,
+                consultations_remaining: nextRemaining,
+                consultations_unlimited: nextUnlimited,
+              }
+            : row,
+        ),
+      );
+      setHistoryUser((prev) =>
+        prev && prev.id === user.id
+          ? {
+              ...prev,
+              consultations_used: nextUsed,
+              consultations_remaining: nextRemaining,
+              consultations_unlimited: nextUnlimited,
+            }
+          : prev,
+      );
     } catch (err) {
       notifyError(err.message);
     } finally {
@@ -602,7 +639,7 @@ export function AdminPage() {
         generatedBy: veterinarian,
       });
     } catch (err) {
-      notifyError(err.message || "No se pudo generar el PDF");
+      notifyError(err.message || t("admin.pdfError"));
     } finally {
       setHistoryPdfLoading(false);
     }
@@ -673,7 +710,7 @@ export function AdminPage() {
       const supportData = await fetchAdminSupportTickets(veterinarian.id, supportFilter);
       setSupportTickets(supportData.tickets || []);
       setSupportOpenCount(supportData.open_count ?? 0);
-      notifySuccess("Estado del ticket actualizado.");
+      notifySuccess(t("admin.ticketUpdated"));
     } catch (err) {
       notifyError(err.message);
     } finally {
@@ -693,7 +730,7 @@ export function AdminPage() {
       const supportData = await fetchAdminSupportTickets(veterinarian.id, supportFilter);
       setSupportTickets(supportData.tickets || []);
       setSupportOpenCount(supportData.open_count ?? 0);
-      notifySuccess("Respuesta enviada al usuario.");
+      notifySuccess(t("admin.replySent"));
     } catch (err) {
       notifyError(err.message);
     } finally {
@@ -720,7 +757,7 @@ export function AdminPage() {
       setGuiaLeads(leadsData.leads || []);
       setGuiaLeadsNewCount(leadsData.new_count ?? 0);
       setSelectedLead((prev) => (prev ? { ...prev, status } : prev));
-      notifySuccess("Estado actualizado.");
+      notifySuccess(t("admin.statusUpdated"));
     } catch (err) {
       notifyError(err.message);
     } finally {
@@ -741,7 +778,7 @@ export function AdminPage() {
       const leadsData = await fetchAdminGuiaConsultasLeads(veterinarian.id, guiaLeadFilter);
       setGuiaLeads(leadsData.leads || []);
       setGuiaLeadsNewCount(leadsData.new_count ?? 0);
-      notifySuccess("Notas guardadas.");
+      notifySuccess(t("admin.notesSaved"));
     } catch (err) {
       notifyError(err.message);
     } finally {
@@ -759,20 +796,20 @@ export function AdminPage() {
       <div className="clinic-page clinic-page-guiaa clinic-admin-page clinic-admin-page-guiaa">
         <div className="clinic-page-header">
           <div>
-            <p className="clinic-page-eyebrow">Plataforma</p>
+            <p className="clinic-page-eyebrow">{t("admin.eyebrow")}</p>
             <h1>
               <Shield size={22} aria-hidden />
-              Administración GUIAA
+              {t("admin.title")}
             </h1>
-            <p>Usuarios, clínicas y operaciones de la plataforma.</p>
+            <p>{t("admin.lead")}</p>
           </div>
         </div>
         {loadError ? (
           <ClinicEmptyState
             icon={Shield}
-            title="No se pudo cargar el panel"
+            title={t("admin.loadError")}
             description={loadError}
-            actionLabel="Reintentar"
+            actionLabel={t("admin.retry")}
             onAction={load}
           />
         ) : (
@@ -782,7 +819,7 @@ export function AdminPage() {
               <ClinicTableSkeleton rows={8} cols={5} />
             </div>
             <p className="clinic-muted clinic-admin-loading-hint">
-              Cargando datos de administración… esto puede tardar unos segundos.
+              {t("admin.loadingHint")}
             </p>
           </>
         )}
@@ -795,18 +832,18 @@ export function AdminPage() {
       <div className="clinic-page clinic-page-guiaa clinic-admin-page clinic-admin-page-guiaa">
         <div className="clinic-page-header">
           <div>
-            <p className="clinic-page-eyebrow">Plataforma</p>
+            <p className="clinic-page-eyebrow">{t("admin.eyebrow")}</p>
             <h1>
               <Shield size={22} aria-hidden />
-              Administración GUIAA
+              {t("admin.title")}
             </h1>
-            <p>Acceso restringido a administradores de plataforma.</p>
+            <p>{t("admin.restrictedLead")}</p>
           </div>
         </div>
         <ClinicEmptyState
           icon={Shield}
-          title="Sin acceso de administrador"
-          description="Tu cuenta no tiene permisos para gestionar la plataforma GUIAA."
+          title={t("admin.noAccessTitle")}
+          description={t("admin.noAccessDesc")}
         />
       </div>
     );
@@ -818,12 +855,12 @@ export function AdminPage() {
     <div className="clinic-page clinic-page-guiaa clinic-admin-page clinic-admin-page-guiaa">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">Plataforma</p>
+          <p className="clinic-page-eyebrow">{t("admin.eyebrow")}</p>
           <h1>
             <Shield size={22} aria-hidden />
-            Administración GUIAA
+            {t("admin.title")}
           </h1>
-          <p>Usuarios registrados en Supabase (tabla profiles), clínicas y operaciones.</p>
+          <p>{t("admin.leadProfiles")}</p>
         </div>
       </div>
 
@@ -831,76 +868,76 @@ export function AdminPage() {
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><Users size={18} aria-hidden /></span>
-            <span className="clinic-report-kpi-label">Usuarios</span>
+            <span className="clinic-report-kpi-label">{t("admin.kpiUsers")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.users_total ?? 0}</div>
         </div>
         <div className="clinic-report-kpi clinic-admin-kpi-online">
           <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><Circle size={18} aria-hidden /></span>
-            <span className="clinic-report-kpi-label">En línea</span>
+            <span className="clinic-report-kpi-label">{t("admin.kpiOnline")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.users_online ?? 0}</div>
         </div>
         <div className="clinic-report-kpi clinic-admin-kpi-offline">
           <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><Circle size={18} aria-hidden /></span>
-            <span className="clinic-report-kpi-label">Fuera de línea</span>
+            <span className="clinic-report-kpi-label">{t("admin.kpiOffline")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.users_offline ?? 0}</div>
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><Building2 size={18} aria-hidden /></span>
-            <span className="clinic-report-kpi-label">Clínicas</span>
+            <span className="clinic-report-kpi-label">{t("admin.kpiClinics")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.organizations_total ?? 0}</div>
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><Gem size={18} aria-hidden /></span>
-            <span className="clinic-report-kpi-label">Premium</span>
+            <span className="clinic-report-kpi-label">{t("admin.kpiPremium")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.premium_users ?? 0}</div>
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><PawPrint size={18} aria-hidden /></span>
-            <span className="clinic-report-kpi-label">Mascotas</span>
+            <span className="clinic-report-kpi-label">{t("admin.kpiPets")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.patients_total ?? 0}</div>
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><Stethoscope size={18} aria-hidden /></span>
-            <span className="clinic-report-kpi-label">Consultas CDS usadas</span>
+            <span className="clinic-report-kpi-label">{t("admin.kpiCdsUsed")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.consultations_total ?? 0}</div>
           {stats.consultations_by_registered_users != null &&
             stats.consultations_by_registered_users !== stats.consultations_total && (
               <div className="clinic-muted clinic-admin-kpi-sub">
-                {stats.consultations_by_registered_users} de usuarios actuales
+                {t("admin.kpiCdsFromCurrent", { count: stats.consultations_by_registered_users })}
               </div>
             )}
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><MessageSquare size={18} aria-hidden /></span>
-            <span className="clinic-report-kpi-label">Soporte abierto</span>
+            <span className="clinic-report-kpi-label">{t("admin.kpiSupportOpen")}</span>
           </div>
           <div className="clinic-report-kpi-value">{supportOpenCount}</div>
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><Inbox size={18} aria-hidden /></span>
-            <span className="clinic-report-kpi-label">ADSGuiaa</span>
+            <span className="clinic-report-kpi-label">{t("admin.kpiAdsGuiaa")}</span>
           </div>
           <div className="clinic-report-kpi-value">{guiaLeadsNewCount}</div>
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
             <span className="clinic-report-kpi-icon"><Star size={18} aria-hidden /></span>
-            <span className="clinic-report-kpi-label">Encuestas prueba</span>
+            <span className="clinic-report-kpi-label">{t("admin.kpiTrialSurveys")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.trial_surveys_total ?? trialSurveysCount}</div>
         </div>
@@ -910,18 +947,17 @@ export function AdminPage() {
         <div className="clinic-admin-users-head">
           <h2>
             <Star size={18} aria-hidden />
-            Encuestas post-prueba
+            {t("admin.surveysTitle")}
           </h2>
-          <span className="clinic-admin-users-count">{trialSurveysCount} respuestas</span>
+          <span className="clinic-admin-users-count">{t("admin.surveysCount", { count: trialSurveysCount })}</span>
         </div>
         <p className="clinic-muted clinic-tools-desc">
-          Opiniones de veterinarios que agotaron sus 3 consultas de prueba y completaron la
-          encuesta obligatoria.
+          {t("admin.surveysLead")}
         </p>
         <div className="clinic-admin-users-toolbar">
           <div className="clinic-search clinic-admin-search">
             <Input
-              placeholder="Buscar por nombre, email o comentario..."
+              placeholder={t("admin.surveysSearch")}
               value={trialSurveySearch}
               onChange={(e) => setTrialSurveySearch(e.target.value)}
             />
@@ -932,19 +968,19 @@ export function AdminPage() {
         ) : trialSurveys.length === 0 ? (
           <ClinicEmptyState
             icon={Star}
-            title="Sin encuestas todavía"
-            description="Cuando un usuario complete la encuesta al terminar su prueba, aparecerá aquí."
+            title={t("admin.surveysEmptyTitle")}
+            description={t("admin.surveysEmptyDesc")}
           />
         ) : (
           <div className="clinic-table-wrap">
             <table className="clinic-table clinic-admin-support-table">
               <thead>
                 <tr>
-                  <th>Fecha</th>
-                  <th>Usuario</th>
-                  <th>Calificación</th>
-                  <th>Comentario</th>
-                  <th>Plan actual</th>
+                  <th>{t("admin.colDate")}</th>
+                  <th>{t("admin.colUser")}</th>
+                  <th>{t("admin.colRating")}</th>
+                  <th>{t("admin.colComment")}</th>
+                  <th>{t("admin.colCurrentPlan")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -982,13 +1018,12 @@ export function AdminPage() {
         <div className="clinic-admin-users-head">
           <h2>
             <Inbox size={18} aria-hidden />
-            ADSGuiaa — solicitudes de publicidad
+            {t("admin.adsTitle")}
           </h2>
-          <span className="clinic-admin-users-count">{guiaLeads.length} solicitudes</span>
+          <span className="clinic-admin-users-count">{t("admin.adsCount", { count: guiaLeads.length })}</span>
         </div>
         <p className="clinic-muted clinic-tools-desc">
-          Marcas y laboratorios interesados en anunciarse en Guía Consultas (momento de decisión
-          clínica) desde la landing pública.
+          {t("admin.adsLead")}
         </p>
         <div className="clinic-admin-plan-filters">
           {LEAD_FILTERS.map((f) => (
@@ -1008,19 +1043,19 @@ export function AdminPage() {
         ) : guiaLeads.length === 0 ? (
           <ClinicEmptyState
             icon={Inbox}
-            title="Sin solicitudes"
-            description="Aún no hay solicitudes de ADSGuiaa con el filtro seleccionado."
+            title={t("admin.adsEmptyTitle")}
+            description={t("admin.adsEmptyDesc")}
           />
         ) : (
           <div className="clinic-table-wrap">
             <table className="clinic-table clinic-admin-support-table">
               <thead>
                 <tr>
-                  <th>Fecha</th>
-                  <th>Nombre</th>
-                  <th>Contacto</th>
-                  <th>Mensaje</th>
-                  <th>Estado</th>
+                  <th>{t("admin.colDate")}</th>
+                  <th>{t("admin.colName")}</th>
+                  <th>{t("admin.colContact")}</th>
+                  <th>{t("admin.colMessage")}</th>
+                  <th>{t("admin.colStatus")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1042,7 +1077,7 @@ export function AdminPage() {
                     </td>
                     <td>
                       <span className={`clinic-admin-support-status status-${lead.status}`}>
-                        {LEAD_STATUS_LABELS[lead.status] || lead.status}
+                        {leadStatusLabel(lead.status)}
                       </span>
                     </td>
                   </tr>
@@ -1079,42 +1114,42 @@ export function AdminPage() {
         ) : supportTickets.length === 0 ? (
           <ClinicEmptyState
             icon={MessageSquare}
-            title="Sin tickets"
-            description="No hay tickets de soporte con el filtro seleccionado."
+            title={t("admin.supportEmptyTitle")}
+            description={t("admin.supportEmptyDesc")}
           />
         ) : (
           <div className="clinic-table-wrap">
             <table className="clinic-table clinic-admin-support-table">
               <thead>
                 <tr>
-                  <th>Fecha</th>
-                  <th>Usuario</th>
-                  <th>Asunto</th>
-                  <th>Estado</th>
-                  <th>Prioridad</th>
+                  <th>{t("admin.colDate")}</th>
+                  <th>{t("admin.colUser")}</th>
+                  <th>{t("admin.colSubject")}</th>
+                  <th>{t("admin.colStatus")}</th>
+                  <th>{t("admin.colPriority")}</th>
                 </tr>
               </thead>
               <tbody>
-                {supportTickets.map((t) => (
+                {supportTickets.map((ticket) => (
                   <tr
-                    key={t.id}
+                    key={ticket.id}
                     className="clinic-admin-support-row"
-                    onClick={() => openSupportTicket(t)}
+                    onClick={() => openSupportTicket(ticket)}
                   >
                     <td className="clinic-admin-history-date">
-                      {formatDateTime(t.created_at)}
+                      {formatDateTime(ticket.created_at)}
                     </td>
                     <td>
-                      <div>{t.user_name || "—"}</div>
-                      <div className="clinic-muted clinic-admin-support-email">{t.user_email}</div>
+                      <div>{ticket.user_name || "—"}</div>
+                      <div className="clinic-muted clinic-admin-support-email">{ticket.user_email}</div>
                     </td>
-                    <td>{t.subject}</td>
+                    <td>{ticket.subject}</td>
                     <td>
-                      <span className={`clinic-admin-support-status status-${t.status}`}>
-                        {SUPPORT_STATUS_LABELS[t.status] || t.status}
+                      <span className={`clinic-admin-support-status status-${ticket.status}`}>
+                        {supportStatusLabel(ticket.status)}
                       </span>
                     </td>
-                    <td>{t.priority === "high" ? "Alta" : "Normal"}</td>
+                    <td>{ticket.priority === "high" ? "Alta" : "Normal"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1132,7 +1167,7 @@ export function AdminPage() {
           </h2>
           <span className="clinic-muted clinic-admin-users-count">
             {waPromoLoading
-              ? "Cargando…"
+              ? t("admin.loadingShort")
               : `${waPromo?.with_whatsapp ?? 0} con WhatsApp · ${waPromo?.without_whatsapp ?? 0} sin número`}
           </span>
         </div>
@@ -1189,15 +1224,15 @@ export function AdminPage() {
             {waPromoLoading ? (
               <ClinicTableSkeleton rows={4} cols={4} />
             ) : !waPromo?.recipients?.length ? (
-              <p className="clinic-muted">No hay destinatarios de campaña.</p>
+              <p className="clinic-muted">{t("admin.campaignEmpty")}</p>
             ) : (
               <table className="clinic-table">
                 <thead>
                   <tr>
-                    <th>Nombre</th>
-                    <th>WhatsApp</th>
-                    <th>Email</th>
-                    <th>Acción</th>
+                    <th>{t("admin.colName")}</th>
+                    <th>{t("admin.colWhatsapp")}</th>
+                    <th>{t("admin.colEmail")}</th>
+                    <th>{t("admin.colAction")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1208,7 +1243,7 @@ export function AdminPage() {
                         <td>{r.nombre}</td>
                         <td className="clinic-mono">
                           {r.has_whatsapp ? `+${r.whatsapp_number}` : (
-                            <span className="clinic-muted">{r.telefono || "Sin número"}</span>
+                            <span className="clinic-muted">{r.telefono || t("admin.noPhone")}</span>
                           )}
                         </td>
                         <td>{r.email}</td>
@@ -1219,7 +1254,7 @@ export function AdminPage() {
                             variant={opened ? "secondary" : "default"}
                             disabled={!r.has_whatsapp}
                             onClick={() => openWhatsappPromo(r)}
-                            title={r.has_whatsapp ? "Abrir WhatsApp con el mensaje" : "Sin número válido"}
+                            title={r.has_whatsapp ? t("admin.openWhatsapp") : t("admin.noValidNumber")}
                           >
                             <MessageCircle size={14} aria-hidden />
                             {opened ? "Reabrir" : "WhatsApp"}
@@ -1236,29 +1271,28 @@ export function AdminPage() {
       </section>
 
       <section className="clinic-settings-card">
-        <h2>Acciones</h2>
+        <h2>{t("admin.actionsTitle")}</h2>
         <p className="clinic-muted clinic-tools-desc">
-          Elimina el perfil y datos asociados en Supabase (consultas, laboratorio, pagos,
-          tickets de soporte). Tras borrar, usa «Verificar email» para confirmar que ya no existe.
+          {t("admin.actionsLead")}
         </p>
         <div className="clinic-admin-actions">
           <form onSubmit={handleDeleteUser} className="clinic-admin-delete-form">
             <div className="form-group">
-              <Label htmlFor="delete-email">Eliminar usuario por email</Label>
+              <Label htmlFor="delete-email">{t("admin.deleteByEmail")}</Label>
               <Input
                 id="delete-email"
                 type="email"
-                placeholder="usuario@ejemplo.com"
+                placeholder={t("admin.deleteEmailPlaceholder")}
                 value={deleteEmail}
                 onChange={(e) => setDeleteEmail(e.target.value)}
               />
             </div>
             <Button type="button" variant="secondary" disabled={acting || !deleteEmail.trim()} onClick={handleLookupUser}>
-              Verificar email
+              {t("admin.verifyEmail")}
             </Button>
             <Button type="submit" variant="secondary" disabled={acting || !deleteEmail.trim()}>
               <Trash2 size={16} aria-hidden />
-              Eliminar
+              {t("admin.deleteUser")}
             </Button>
           </form>
         </div>
@@ -1266,19 +1300,23 @@ export function AdminPage() {
 
       <section className="clinic-settings-card">
         <div className="clinic-admin-users-head">
-          <h2>Usuarios registrados</h2>
+          <h2>{t("admin.usersTitle")}</h2>
           <span className="clinic-muted clinic-admin-users-count">
-            {usersTotalMatching} coincidencia{usersTotalMatching === 1 ? "" : "s"}
+            {t(usersTotalMatching === 1 ? "admin.usersMatches" : "admin.usersMatches_plural", {
+              count: usersTotalMatching,
+            })}
             {" · "}
-            {usersTotalRegistered} registrados en total
-            {userCount !== usersTotalMatching ? ` · mostrando ${userCount}` : ""}
-            {loading && hasLoadedOnceRef.current ? " · actualizando…" : ""}
+            {t("admin.usersRegisteredTotal", { count: usersTotalRegistered })}
+            {userCount !== usersTotalMatching
+              ? ` · ${t("admin.usersShowing", { count: userCount })}`
+              : ""}
+            {loading && hasLoadedOnceRef.current ? ` · ${t("admin.usersUpdating")}` : ""}
           </span>
         </div>
         <div className="clinic-admin-users-toolbar">
           <div className="clinic-search clinic-admin-search">
             <Input
-              placeholder="Buscar por nombre, email o plan..."
+              placeholder={t("admin.usersSearch")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -1296,7 +1334,7 @@ export function AdminPage() {
               </Button>
             ))}
           </div>
-          <div className="clinic-admin-plan-filters" aria-label="Filtro de presencia">
+          <div className="clinic-admin-plan-filters" aria-label={t("admin.presenceFilterAria")}>
             {PRESENCE_FILTERS.map((opt) => (
               <Button
                 key={opt.id}
@@ -1314,23 +1352,24 @@ export function AdminPage() {
           <table className="clinic-table">
             <thead>
               <tr>
-                <th>Presencia</th>
-                <th>Nombre</th>
-                <th>Email</th>
-                <th>Registro</th>
-                <th>País</th>
-                <th>Nº profesional</th>
-                <th>Estado</th>
-                <th>Plan</th>
-                <th>Uso de consultas</th>
-                <th>Acciones</th>
+                <th>{t("admin.colPresence")}</th>
+                <th>{t("admin.colName")}</th>
+                <th>{t("admin.colEmail")}</th>
+                <th>{t("admin.colRegistered")}</th>
+                <th>{t("admin.colCountry")}</th>
+                <th>{t("admin.colLicense")}</th>
+                <th>{t("admin.colStatus")}</th>
+                <th>{t("admin.colPlan")}</th>
+                <th>{t("admin.colTeam")}</th>
+                <th>{t("admin.colUsage")}</th>
+                <th>{t("admin.colActions")}</th>
               </tr>
             </thead>
             <tbody>
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="clinic-muted" style={{ textAlign: "center" }}>
-                    No hay usuarios con este filtro.
+                  <td colSpan={11} className="clinic-muted" style={{ textAlign: "center" }}>
+                    {t("admin.usersEmptyFilter")}
                   </td>
                 </tr>
               ) : (
@@ -1344,7 +1383,7 @@ export function AdminPage() {
                         <div className={`clinic-admin-presence${online ? " is-online" : " is-offline"}`}>
                           <span className="clinic-admin-presence-dot" aria-hidden />
                           <div className="clinic-admin-presence-text">
-                            <strong>{online ? "En línea" : "Fuera de línea"}</strong>
+                            <strong>{online ? t("admin.online") : t("admin.offline")}</strong>
                             <span className="clinic-muted">{formatLastSeen(u.last_seen)}</span>
                           </div>
                         </div>
@@ -1377,16 +1416,50 @@ export function AdminPage() {
                         >
                           {formatPlanLabel(u)}
                         </span>
+                        {u.membership_source === "organization" ? (
+                          <div className="clinic-muted clinic-admin-team-plan-note">
+                            {t("admin.teamSharedPlan")}
+                          </div>
+                        ) : null}
+                      </td>
+                      <td>
+                        {u.team_shared ? (
+                          <div className="clinic-admin-team-cell">
+                            <span className="clinic-admin-team-badge">{t("admin.teamShared")}</span>
+                            <strong>{formatOrgRole(u.org_role)}</strong>
+                            <span className="clinic-muted">
+                              {u.organization_name || t("admin.teamOrgFallback")}
+                            </span>
+                            <span className="clinic-muted">
+                              {t("admin.teamMembersCount", { count: u.team_member_count || 0 })}
+                            </span>
+                            {u.org_role !== "owner" && (u.membership_owner_nombre || u.membership_owner_email) ? (
+                              <span className="clinic-muted">
+                                {t("admin.teamQuotaOwner", {
+                                  name: u.membership_owner_nombre || u.membership_owner_email,
+                                })}
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : (
+                          <span className="clinic-muted">{t("admin.teamSolo")}</span>
+                        )}
                       </td>
                       <td>
                         <div
                           className="clinic-admin-consultation-usage"
                           aria-label={`${u.consultations_used ?? 0} consultas usadas; ${
-                            u.consultations_remaining ?? 0
-                          } disponibles`}
+                            u.consultations_unlimited
+                              ? "ilimitadas"
+                              : `${u.consultations_remaining ?? 0} disponibles`
+                          }`}
                         >
                           <strong>{u.consultations_used ?? 0} usadas</strong>
-                          <span>{u.consultations_remaining ?? 0} disponibles</span>
+                          <span>
+                            {u.consultations_unlimited
+                              ? "Ilimitadas"
+                              : `${u.consultations_remaining ?? 0} disponibles`}
+                          </span>
                         </div>
                       </td>
                       <td>
@@ -1397,7 +1470,7 @@ export function AdminPage() {
                               size="sm"
                               variant="secondary"
                               onClick={() => openWhatsappPromo(u)}
-                              title="Recordar oferta FRIENDS40 por WhatsApp"
+                              title={t("admin.remindOffer")}
                             >
                               <MessageCircle size={14} aria-hidden />
                               WA
@@ -1408,7 +1481,7 @@ export function AdminPage() {
                             size="sm"
                             variant="secondary"
                             onClick={() => openConsultationHistory(u)}
-                            title="Ver historial de consultas"
+                            title={t("admin.viewHistory")}
                           >
                             <ClipboardList size={14} aria-hidden />
                             Historial
@@ -1419,7 +1492,7 @@ export function AdminPage() {
                               size="sm"
                               variant="secondary"
                               onClick={() => openCedulaPreview(u)}
-                              title="Ver documento profesional"
+                              title={t("admin.viewLicenseDoc")}
                             >
                               <Eye size={14} aria-hidden />
                               Ver
@@ -1432,7 +1505,7 @@ export function AdminPage() {
                               variant="secondary"
                               disabled={busy || !u.cedula_profesional}
                               onClick={() => handleVerifyCedula(u)}
-                              title="Intentar validación automática SEP (México)"
+                              title={t("admin.trySep")}
                             >
                               <RefreshCw size={14} aria-hidden />
                               SEP
@@ -1445,7 +1518,7 @@ export function AdminPage() {
                               variant="secondary"
                               disabled={busy}
                               onClick={() => handleApproveCedula(u)}
-                              title="Aprobar manualmente"
+                              title={t("admin.approveManualTitle")}
                             >
                               <CheckCircle size={14} aria-hidden />
                             </Button>
@@ -1474,20 +1547,40 @@ export function AdminPage() {
       </section>
 
       <section className="clinic-settings-card">
-        <h2>Organizaciones / clínicas</h2>
+        <h2>{t("admin.orgsTitle")}</h2>
         <div className="clinic-table-wrap">
           <table className="clinic-table">
             <thead>
               <tr>
-                <th>Nombre</th>
-                <th>Zona horaria</th>
-                <th>Alta</th>
+                <th>{t("admin.colName")}</th>
+                <th>{t("admin.colTeam")}</th>
+                <th>{t("admin.colOwner")}</th>
+                <th>{t("admin.colTimezone")}</th>
+                <th>{t("admin.colJoined")}</th>
               </tr>
             </thead>
             <tbody>
               {organizations.map((o) => (
                 <tr key={o.id}>
                   <td>{o.name}</td>
+                  <td>
+                    {o.team_shared ? (
+                      <div className="clinic-admin-team-cell">
+                        <span className="clinic-admin-team-badge">{t("admin.teamShared")}</span>
+                        <span className="clinic-muted">
+                          {t("admin.teamMembersCount", { count: o.member_count || 0 })}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="clinic-muted">
+                        {t("admin.teamMembersCount", { count: o.member_count || 1 })}
+                      </span>
+                    )}
+                  </td>
+                  <td>
+                    <div>{o.owner_nombre || "—"}</div>
+                    <div className="clinic-muted">{o.owner_email || ""}</div>
+                  </td>
                   <td>{o.timezone || "—"}</td>
                   <td>{formatRegisteredAt(o.created_at)}</td>
                 </tr>
@@ -1587,9 +1680,11 @@ export function AdminPage() {
                       {!historyLoading
                         ? ` · ${historyTotal} consulta${historyTotal === 1 ? "" : "s"} usada${historyTotal === 1 ? "" : "s"}`
                         : ""}
-                      {!historyLoading && historyUser.consultations_remaining != null
-                        ? ` · ${historyUser.consultations_remaining} disponible${historyUser.consultations_remaining === 1 ? "" : "s"}`
-                        : ""}
+                      {!historyLoading && historyUser.consultations_unlimited
+                        ? " · cupo ilimitado"
+                        : !historyLoading && historyUser.consultations_remaining != null
+                          ? ` · ${historyUser.consultations_remaining} disponible${historyUser.consultations_remaining === 1 ? "" : "s"}`
+                          : ""}
                       {!historyLoading && historyTruncated
                         ? ` · mostrando ${historyConsultations.length}`
                         : ""}
@@ -1604,7 +1699,7 @@ export function AdminPage() {
                       onClick={handleDownloadHistoryPdf}
                     >
                       <FileDown size={14} aria-hidden />
-                      {historyPdfLoading ? "Generando PDF..." : "Descargar PDF completo"}
+                      {historyPdfLoading ? t("admin.generatingPdf") : t("admin.downloadPdf")}
                     </Button>
                   )}
                 </div>
@@ -1620,7 +1715,7 @@ export function AdminPage() {
                   <div className="clinic-admin-history-list">
                     {historyConsultations.map((c) => {
                       const patient =
-                        consultationField(c, "nombre_mascota") || "Sin nombre";
+                        consultationField(c, "nombre_mascota") || t("admin.noName");
                       const owner =
                         consultationField(c, "nombre_dueño") ||
                         consultationField(c, "nombre_dueno") ||
@@ -1638,7 +1733,7 @@ export function AdminPage() {
                         { label: "Motivo", value: reason !== "—" ? reason : "" },
                         { label: "Síntomas", value: symptoms },
                         {
-                          label: "Detalle de la mascota",
+                          label: t("admin.petDetail"),
                           value: c.detalle_paciente || consultationField(c, "detalle_paciente"),
                         },
                         { label: "Notas", value: c.notas_adicionales },
@@ -1714,8 +1809,8 @@ export function AdminPage() {
                               ) : (
                                 <p className="clinic-muted clinic-admin-history-no-analysis">
                                   {status === "completed"
-                                    ? "Consulta completada sin análisis registrado."
-                                    : "Consulta sin análisis clínico todavía."}
+                                    ? t("admin.consultDoneNoAnalysis")
+                                    : t("admin.consultNoAnalysis")}
                                 </p>
                               )}
                             </div>
@@ -1755,7 +1850,7 @@ export function AdminPage() {
                 <>
                   <div className="clinic-admin-support-actions">
                     <span className={`clinic-admin-support-status status-${ticketDetail.status}`}>
-                      {SUPPORT_STATUS_LABELS[ticketDetail.status] || ticketDetail.status}
+                      {supportStatusLabel(ticketDetail.status)}
                     </span>
                     <select
                       className="clinic-admin-support-select"
@@ -1763,7 +1858,7 @@ export function AdminPage() {
                       disabled={ticketActing}
                       onChange={(e) => handleTicketStatusChange(e.target.value)}
                     >
-                      {Object.entries(SUPPORT_STATUS_LABELS).map(([k, label]) => (
+                      {SUPPORT_STATUS_ENTRIES.map(([k, label]) => (
                         <option key={k} value={k}>
                           {label}
                         </option>
@@ -1778,9 +1873,9 @@ export function AdminPage() {
                       >
                         <div className="clinic-admin-support-msg-meta">
                           {msg.author_role === "admin"
-                            ? "Soporte GUIAA"
+                            ? t("admin.supportGuiaa")
                             : msg.author_role === "assistant"
-                              ? "Asistente"
+                              ? t("admin.assistant")
                               : "Usuario"}
                           · {formatDateTime(msg.created_at)}
                         </div>
@@ -1796,7 +1891,7 @@ export function AdminPage() {
                       rows={4}
                       value={ticketReply}
                       onChange={(e) => setTicketReply(e.target.value)}
-                      placeholder="Escribe tu respuesta..."
+                      placeholder={t("admin.replyPlaceholder")}
                       maxLength={4000}
                     />
                     <Button type="submit" disabled={ticketActing || !ticketReply.trim()}>
@@ -1828,7 +1923,7 @@ export function AdminPage() {
 
               <div className="clinic-admin-support-actions">
                 <span className={`clinic-admin-support-status status-${selectedLead.status}`}>
-                  {LEAD_STATUS_LABELS[selectedLead.status] || selectedLead.status}
+                  {leadStatusLabel(selectedLead.status)}
                 </span>
                 <select
                   className="clinic-admin-support-select"
@@ -1836,7 +1931,7 @@ export function AdminPage() {
                   disabled={leadActing}
                   onChange={(e) => handleLeadStatusChange(e.target.value)}
                 >
-                  {Object.entries(LEAD_STATUS_LABELS).map(([k, label]) => (
+                  {LEAD_STATUS_ENTRIES.map(([k, label]) => (
                     <option key={k} value={k}>
                       {label}
                     </option>
@@ -1868,7 +1963,7 @@ export function AdminPage() {
                   rows={3}
                   value={leadNotes}
                   onChange={(e) => setLeadNotes(e.target.value)}
-                  placeholder="Seguimiento, llamada programada, etc."
+                  placeholder={t("admin.notesPlaceholder")}
                   maxLength={2000}
                 />
                 <Button type="submit" disabled={leadActing}>

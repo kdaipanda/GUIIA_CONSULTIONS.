@@ -127,6 +127,110 @@ def resolve_consultation_billing_profile_id(profile: Dict[str, Any]) -> str:
     return str(profile.get("id") or "")
 
 
+def build_admin_team_index(
+    profiles: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Dict[str, Any]]:
+    """
+    Mapa profile_id -> resumen de equipo para Admin GUIAA.
+    Marca consultorios con 2+ miembros como team_shared (cuentas compartidas).
+    """
+    try:
+        resp = (
+            _table("organization_members")
+            .select("profile_id, role, organization_id, organizations(id, name)")
+            .execute()
+        )
+        rows = resp.data or []
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] build_admin_team_index: {exc}")
+        return {}
+
+    by_org: Dict[str, List[Dict[str, Any]]] = {}
+    for row in rows:
+        org_id = row.get("organization_id")
+        if not org_id:
+            continue
+        by_org.setdefault(str(org_id), []).append(row)
+
+    profile_by_id: Dict[str, Dict[str, Any]] = {}
+    for profile in profiles or []:
+        pid = str(profile.get("id") or "")
+        if pid:
+            profile_by_id[pid] = profile
+
+    missing_owner_ids = []
+    org_meta: Dict[str, Dict[str, Any]] = {}
+    for org_id, members in by_org.items():
+        owner_row = next(
+            (m for m in members if (m.get("role") or "").strip().lower() == "owner"),
+            None,
+        )
+        owner_id = str((owner_row or {}).get("profile_id") or "") or None
+        org_name = ""
+        if owner_row and isinstance(owner_row.get("organizations"), dict):
+            org_name = owner_row["organizations"].get("name") or ""
+        elif members and isinstance(members[0].get("organizations"), dict):
+            org_name = members[0]["organizations"].get("name") or ""
+        if owner_id and owner_id not in profile_by_id:
+            missing_owner_ids.append(owner_id)
+        org_meta[org_id] = {
+            "organization_id": org_id,
+            "organization_name": org_name,
+            "member_count": len(members),
+            "team_shared": len(members) > 1,
+            "owner_profile_id": owner_id,
+        }
+
+    if missing_owner_ids:
+        try:
+            from supabase_client import get_supabase_client
+
+            client = get_supabase_client()
+            # Supabase .in_ batches
+            uniq = list(dict.fromkeys(missing_owner_ids))
+            for i in range(0, len(uniq), 100):
+                chunk = uniq[i : i + 100]
+                resp = (
+                    client.table("profiles")
+                    .select("id, nombre, email, membership_type, consultations_remaining, membership_expires")
+                    .in_("id", chunk)
+                    .execute()
+                )
+                for row in resp.data or []:
+                    profile_by_id[str(row["id"])] = row
+        except Exception as exc:  # noqa: BLE001
+            print(f"[WARN] admin team owner profiles: {exc}")
+
+    index: Dict[str, Dict[str, Any]] = {}
+    for org_id, members in by_org.items():
+        meta = org_meta[org_id]
+        owner_id = meta.get("owner_profile_id")
+        owner = profile_by_id.get(owner_id or "") or {}
+        for member in members:
+            pid = str(member.get("profile_id") or "")
+            if not pid:
+                continue
+            role = (member.get("role") or "").strip().lower() or "veterinarian"
+            entry: Dict[str, Any] = {
+                "organization_id": org_id,
+                "organization_name": meta.get("organization_name") or "",
+                "org_role": role,
+                "team_member_count": meta.get("member_count") or 1,
+                "team_shared": bool(meta.get("team_shared")),
+                "membership_source": "organization" if role != "owner" and meta.get("team_shared") else None,
+            }
+            if role != "owner" and owner_id:
+                entry["membership_source"] = "organization"
+                entry["membership_owner_id"] = owner_id
+                entry["membership_owner_nombre"] = owner.get("nombre") or ""
+                entry["membership_owner_email"] = owner.get("email") or ""
+                # Plan/cupo efectivo del dueño (pool compartido)
+                entry["effective_membership_type"] = owner.get("membership_type")
+                entry["effective_consultations_remaining"] = owner.get("consultations_remaining")
+            index[pid] = entry
+    return index
+
+
 def list_members(organization_id: str) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     try:
         resp = (

@@ -10650,6 +10650,32 @@ html {
   color: #92400e;
 }
 
+.clinic-admin-team-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 9.5rem;
+  line-height: 1.25;
+}
+
+.clinic-admin-team-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: #e8f1fb;
+  color: #1e4f7a;
+}
+
+.clinic-admin-team-plan-note {
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+}
+
 .clinic-admin-users-table-wrap {
   overflow-x: auto;
 }
@@ -11734,10 +11760,19 @@ html {
 .portal-page {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 24px;
+  position: relative;
   background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 100%);
+}
+
+.portal-lang {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
 }
 
 .portal-card {
