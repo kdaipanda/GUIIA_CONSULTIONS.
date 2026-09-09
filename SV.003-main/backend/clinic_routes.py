@@ -368,8 +368,9 @@ async def add_organization_member(body: MemberAdd, x_veterinarian_id: str = Head
         raise HTTPException(
             status_code=404,
             detail=(
-                "No hay cuenta GUIAA con ese email. Pídele a tu colega que se registre en "
-                "guiaa.vet con este mismo correo y, cuando termine, vuelve a agregarlo aquí."
+                "No hay cuenta GUIAA con ese email. Pídele que se dé de alta en guiaa.vet "
+                "con su propia cédula (no la tuya) y este mismo correo. Cuando ya pueda "
+                "entrar, vuelve a agregarlo aquí."
             ),
         )
 

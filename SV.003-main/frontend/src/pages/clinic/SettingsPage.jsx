@@ -55,16 +55,16 @@ const INVITE_ROLES = [
 
 const TEAM_STEPS = [
   {
-    title: "Se registra",
-    body: "Nombre, cédula y el email que vas a usar, en guiaa.vet.",
+    title: "Se da de alta",
+    body: "En guiaa.vet: su nombre, SU cédula (la de esa persona, no la tuya) y el email que vas a usar aquí.",
   },
   {
     title: "Tú lo vinculas",
-    body: "Cuando ya pueda entrar, escribe ese email abajo y elige su rol.",
+    body: "Cuando ya pueda entrar, escribe ese mismo email abajo y elige su rol.",
   },
   {
     title: "Entra de nuevo",
-    body: "Pulsa Agregar al equipo. Que cierre sesión y vuelva a entrar.",
+    body: "Pulsa Agregar al equipo. Que cierre sesión y vuelva a entrar: verá este consultorio.",
   },
 ];
 
@@ -259,8 +259,8 @@ export function SettingsPage() {
             </h2>
             <div className="clinic-team-guide">
               <p className="clinic-team-lead">
-                No enviamos un correo de invitación. Tu colega crea su cuenta; tú lo agregas aquí
-                con el mismo email.
+                No enviamos un correo de invitación. Cada colega se da de alta con su propia
+                cédula y tú lo agregas a este consultorio con el mismo email.
               </p>
               <ol className="clinic-team-steps" aria-label="Pasos para agregar al equipo">
                 {TEAM_STEPS.map((step, index) => (
@@ -276,8 +276,9 @@ export function SettingsPage() {
                 ))}
               </ol>
               <p className="clinic-team-callout">
-                Si ya abrió GUIAA, se le crea un consultorio vacío y lo pasamos al tuyo. No se
-                puede unir si ya tiene pacientes o citas en su propia clínica.
+                La cédula es única: no se puede registrar dos veces. Si ya abrió GUIAA, se le
+                crea un consultorio vacío y lo pasamos al tuyo. No se puede unir si ya tiene
+                pacientes o citas en su propia clínica.
               </p>
             </div>
 

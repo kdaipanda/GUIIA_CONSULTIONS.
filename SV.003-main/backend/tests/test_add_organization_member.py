@@ -43,6 +43,17 @@ class ResolveAddMemberAction(unittest.TestCase):
             "conflict_team",
         )
 
+    def test_second_empty_colleague_still_reassigns(self):
+        self.assertEqual(
+            resolve_add_member_action(
+                {"organization_id": "org-c"},
+                "org-a",
+                source_member_count=1,
+                source_has_clinical_data=False,
+            ),
+            "reassign",
+        )
+
     def test_blocks_org_with_clinical_data(self):
         self.assertEqual(
             resolve_add_member_action(
