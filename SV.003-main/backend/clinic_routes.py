@@ -466,7 +466,7 @@ async def create_organization_invite(body: OrganizationInviteCreate, x_veterinar
     invite_url = f"{email_notifications._frontend_url()}/registro?invite={raw_token}"
     org_name = (ctx.get("organization") or {}).get("name") or "tu consultorio"
     inviter_name = (ctx.get("profile") or {}).get("nombre") or ""
-    await _email_background(
+    email_err = await asyncio.to_thread(
         email_notifications.notify_organization_invite,
         {
             "email": email,
@@ -477,14 +477,23 @@ async def create_organization_invite(body: OrganizationInviteCreate, x_veterinar
             "requires_license": role not in clinic_db.STAFF_INVITE_ROLES,
         },
     )
+    email_sent = not bool(email_err)
+    if email_sent:
+        message = (
+            f"Invitación enviada a {email}. "
+            "Si no llega el correo (revisa spam), usa el enlace que aparece abajo."
+        )
+    else:
+        message = (
+            f"Invitación creada para {email}, pero el correo no se pudo enviar. "
+            "Copia y comparte el enlace de abajo (WhatsApp o correo manual)."
+        )
     return {
         "mode": "invited",
-        "invite": invite,
+        "invite": {**invite, "organization_name": org_name},
         "invite_url": invite_url,
-        "message": (
-            f"Invitación enviada a {email}. "
-            "Si no llega el correo, copia el enlace desde Configuración."
-        ),
+        "email_sent": email_sent,
+        "message": message,
     }
 
 

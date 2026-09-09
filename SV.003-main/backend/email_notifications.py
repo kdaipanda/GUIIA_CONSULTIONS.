@@ -296,11 +296,11 @@ _ROLE_LABELS_ES = {
 }
 
 
-def notify_organization_invite(payload: dict) -> None:
-    """Envía el link de invitación al colega (recepción / admin / veterinario)."""
+def notify_organization_invite(payload: dict) -> Optional[str]:
+    """Envía el link de invitación al colega. Devuelve error o None si OK."""
     email = (payload.get("email") or "").strip().lower()
     if not email:
-        return
+        return "Sin destinatario"
     org_name = (payload.get("organization_name") or "").strip() or "un consultorio en GUIAA"
     inviter = (payload.get("inviter_name") or "").strip()
     role = (payload.get("role") or "veterinarian").strip().lower()
@@ -331,6 +331,7 @@ def notify_organization_invite(payload: dict) -> None:
     err = send_email([email], email_subject, html, text)
     if err:
         print(f"[WARN] Email invitación equipo: {err}")
+    return err
 
 
 def notify_admins_user_message(ticket: dict, message: str) -> None:

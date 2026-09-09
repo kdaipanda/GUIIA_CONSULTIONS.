@@ -83,6 +83,8 @@ export function SettingsPage() {
   const [form, setForm] = useState({ name: "", timezone: "America/Mexico_City" });
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("receptionist");
+  const [lastInviteUrl, setLastInviteUrl] = useState("");
+  const [lastInviteEmail, setLastInviteEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [inviting, setInviting] = useState(false);
@@ -142,12 +144,17 @@ export function SettingsPage() {
       );
       notifySuccess(data.message || "Invitación enviada.");
       if (data.mode === "invited" && data.invite_url) {
+        setLastInviteUrl(data.invite_url);
+        setLastInviteEmail(inviteEmail.trim().toLowerCase());
         try {
           await navigator.clipboard.writeText(data.invite_url);
           notifySuccess("Enlace de invitación copiado al portapapeles.");
         } catch {
-          /* clipboard opcional */
+          /* el enlace queda visible abajo */
         }
+      } else {
+        setLastInviteUrl("");
+        setLastInviteEmail("");
       }
       setInviteEmail("");
       load();
@@ -155,6 +162,16 @@ export function SettingsPage() {
       notifyError(err.message);
     } finally {
       setInviting(false);
+    }
+  };
+
+  const copyLastInvite = async () => {
+    if (!lastInviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(lastInviteUrl);
+      notifySuccess("Enlace de invitación copiado al portapapeles.");
+    } catch {
+      notifyError("No se pudo copiar. Selecciona el enlace y cópialo manualmente.");
     }
   };
 
@@ -356,6 +373,23 @@ export function SettingsPage() {
                 </Button>
               </form>
             </div>
+
+            {lastInviteUrl ? (
+              <div className="clinic-team-callout" style={{ marginTop: "1rem" }}>
+                <p className="clinic-team-step-title">Enlace de la última invitación</p>
+                <p className="clinic-team-step-body">
+                  Compártelo con {lastInviteEmail || "tu colega"} si el correo no llega (revisa
+                  spam). Solo se muestra esta vez.
+                </p>
+                <div className="clinic-settings-portal" style={{ marginTop: "0.75rem" }}>
+                  <Input readOnly value={lastInviteUrl} />
+                  <Button type="button" variant="secondary" onClick={copyLastInvite}>
+                    <Copy size={16} aria-hidden />
+                    Copiar
+                  </Button>
+                </div>
+              </div>
+            ) : null}
 
             {pendingInvites.length > 0 ? (
               <div className="clinic-team-pending">
