@@ -56,6 +56,73 @@ def get_member_by_profile(profile_id: str) -> Tuple[Optional[Dict[str, Any]], Op
         return (None, str(exc))
 
 
+def get_organization_owner_profile_id(organization_id: str) -> Tuple[Optional[str], Optional[str]]:
+    try:
+        resp = (
+            _table("organization_members")
+            .select("profile_id")
+            .eq("organization_id", organization_id)
+            .eq("role", "owner")
+            .limit(1)
+            .execute()
+        )
+        if not resp.data:
+            return (None, None)
+        return (resp.data[0].get("profile_id"), None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def apply_team_membership_overlay(profile: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Si el perfil es miembro (no owner) de un consultorio cuyo dueño tiene plan pago,
+    expone la membresía del dueño para UI y cupos CDS.
+    """
+    if not profile or not profile.get("id"):
+        return profile or {}
+    out = dict(profile)
+    member, _ = get_member_by_profile(profile["id"])
+    if not member:
+        return out
+    role = (member.get("role") or "").strip().lower()
+    if role in ("", "owner"):
+        return out
+    org_id = member.get("organization_id")
+    if not org_id:
+        return out
+    owner_id, _ = get_organization_owner_profile_id(org_id)
+    if not owner_id or owner_id == profile["id"]:
+        return out
+    try:
+        from supabase_client import get_profile
+
+        owner, err = get_profile(owner_id)
+    except Exception:  # noqa: BLE001
+        return out
+    if err or not owner:
+        return out
+    owner_plan = (owner.get("membership_type") or "").strip()
+    if not owner_plan:
+        return out
+    out["membership_type"] = owner.get("membership_type")
+    out["consultations_remaining"] = owner.get("consultations_remaining")
+    out["membership_expires"] = owner.get("membership_expires")
+    out["unlimited_consultations"] = owner.get("unlimited_consultations")
+    out["membership_source"] = "organization"
+    out["membership_owner_id"] = owner_id
+    out["membership_owner_nombre"] = owner.get("nombre")
+    return out
+
+
+def resolve_consultation_billing_profile_id(profile: Dict[str, Any]) -> str:
+    """A quién descontar el cupo CDS (dueño del consultorio si aplica overlay)."""
+    overlay = apply_team_membership_overlay(profile)
+    bill_to = overlay.get("membership_owner_id")
+    if overlay.get("membership_source") == "organization" and bill_to:
+        return str(bill_to)
+    return str(profile.get("id") or "")
+
+
 def list_members(organization_id: str) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     try:
         resp = (

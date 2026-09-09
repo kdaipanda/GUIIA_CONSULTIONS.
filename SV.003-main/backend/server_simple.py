@@ -1910,6 +1910,7 @@ async def login_veterinarian(credentials: VeterinarianLogin, request: Request):
                 veterinarian["last_seen"] = last_seen
         except Exception:  # noqa: BLE001
             pass
+        veterinarian = _with_team_membership(veterinarian)
     return auth_security.attach_auth_tokens(veterinarian)
 
 
@@ -2011,7 +2012,7 @@ async def get_current_profile(x_veterinarian_id: str = Header(None)):
     if isinstance(profile, dict):
         profile = password_auth.strip_sensitive_profile_fields(profile)
 
-    return profile
+    return _with_team_membership(profile)
 
 
 @app.get("/api/trial-survey/status")
@@ -2023,7 +2024,7 @@ async def get_trial_survey_status(x_veterinarian_id: str = Header(None)):
         raise HTTPException(status_code=500, detail=f"Error obteniendo perfil: {err}")
     if not profile:
         raise HTTPException(status_code=404, detail="Perfil no encontrado")
-    return trial_survey.build_trial_survey_status(profile)
+    return trial_survey.build_trial_survey_status(_with_team_membership(profile))
 
 
 @app.post("/api/trial-survey")
@@ -2262,6 +2263,28 @@ async def skip_cedula_verification(
     return payload
 
 
+def _with_team_membership(profile: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Aplica membresía del dueño del consultorio a miembros del equipo."""
+    if not profile:
+        return {}
+    try:
+        import clinic_db as _clinic_db
+
+        return _clinic_db.apply_team_membership_overlay(profile)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] overlay membresía equipo: {exc}")
+        return dict(profile)
+
+
+def _consultation_bill_to_id(profile: Dict[str, Any]) -> str:
+    try:
+        import clinic_db as _clinic_db
+
+        return _clinic_db.resolve_consultation_billing_profile_id(profile)
+    except Exception:  # noqa: BLE001
+        return str(profile.get("id") or "")
+
+
 # ============================================
 # ANIMAL CATEGORIES
 # ============================================
@@ -2291,7 +2314,7 @@ async def get_animal_categories(x_veterinarian_id: str = Header(None)):
     has_unlimited = has_unlimited_consultations(user_email) if user_email else False
     filtered_categories = filter_categories_for_plan(
         all_categories,
-        profile,
+        _with_team_membership(profile),
         has_unlimited=has_unlimited,
         is_platform_admin=auth_security.is_platform_admin_profile(profile),
     )
@@ -2402,11 +2425,6 @@ async def create_consultation(
                 detail="No tienes una cuenta. Por favor, regístrate primero para usar el servicio."
             )
 
-    # Verificar membresía o consultas de prueba
-    membership_type = profile.get("membership_type")
-    remaining = int(profile.get("consultations_remaining") or 0)
-    user_email = profile.get("email", "")
-
     # Recepción no crea consultas CDS
     try:
         import clinic_db as _clinic_db
@@ -2421,6 +2439,14 @@ async def create_consultation(
         raise
     except Exception as exc:  # noqa: BLE001
         print(f"[WARN] No se pudo validar rol org en consulta: {exc}")
+
+    billing_profile = _with_team_membership(profile)
+    bill_to_id = _consultation_bill_to_id(profile)
+
+    # Verificar membresía o consultas de prueba (cupo del consultorio si es equipo)
+    membership_type = billing_profile.get("membership_type")
+    remaining = int(billing_profile.get("consultations_remaining") or 0)
+    user_email = profile.get("email", "")
     
     # Verificar si el usuario tiene consultas ilimitadas
     has_unlimited = has_unlimited_consultations(user_email) if user_email else False
@@ -2446,7 +2472,7 @@ async def create_consultation(
     # Si tiene membresía, verificar que no esté expirada (excepto si tiene consultas ilimitadas)
     if membership_type and not has_unlimited:
         membership_type = membership_type.lower()
-        membership_expires = profile.get("membership_expires")
+        membership_expires = billing_profile.get("membership_expires")
         if membership_expires:
             try:
                 if isinstance(membership_expires, str):
@@ -2466,7 +2492,7 @@ async def create_consultation(
         membership_type = membership_type.lower()
 
     validate_consultation_category(
-        profile,
+        billing_profile,
         payload.category,
         has_unlimited=has_unlimited,
         is_platform_admin=auth_security.is_platform_admin_profile(profile),
@@ -2530,11 +2556,12 @@ async def create_consultation(
 
     # Descontar 1 consulta del cupo (prueba, básica, profesional y premium).
     # Usar update_profile (no upsert): un upsert parcial falla por NOT NULL en email.
+    # En equipo, el cupo se descuenta del dueño del consultorio.
     new_remaining = remaining
     if not has_unlimited:
         new_remaining = max(0, int(remaining or 0) - 1)
         err_prof = update_profile(
-            vet_id,
+            bill_to_id or vet_id,
             {"consultations_remaining": new_remaining},
         )
         if err_prof:
@@ -2546,7 +2573,8 @@ async def create_consultation(
         not has_unlimited
         and not membership_type
         and new_remaining <= 0
-        and not profile.get("trial_survey_completed_at")
+        and not billing_profile.get("trial_survey_completed_at")
+        and billing_profile.get("membership_source") != "organization"
     )
     if isinstance(serialized, dict):
         serialized["trial_survey_due"] = trial_survey_due
