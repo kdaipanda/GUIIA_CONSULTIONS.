@@ -265,6 +265,9 @@ def is_public_api_route(method: str, path: str) -> bool:
         ("GET", "/api/stripe/promo-status"),
         ("GET", "/api/membership/packages"),
         ("GET", "/api/consultations/credit-packages"),
+        # Soft-auth: permite cerrar encuesta fantasma con token muerto si ya hay plan/equipo.
+        ("GET", "/api/trial-survey/status"),
+        ("POST", "/api/trial-survey"),
     }
     if (m, p) in public_exact:
         return True

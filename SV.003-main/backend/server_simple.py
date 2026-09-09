@@ -1443,6 +1443,28 @@ def _require_vet_id(x_veterinarian_id: Optional[str] = None) -> str:
     return auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
 
 
+def _resolve_trial_survey_vet_id(
+    x_veterinarian_id: Optional[str] = None,
+    *,
+    with_flag: bool = False,
+):
+    """
+    Resuelve vet para encuesta trial.
+    Si el JWT está muerto, permite x-veterinarian-id para liberar cuentas con plan/equipo.
+    """
+    try:
+        vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
+        return (vet_id, True) if with_flag else vet_id
+    except HTTPException:
+        header_id = (x_veterinarian_id or "").strip()
+        if not header_id:
+            raise HTTPException(
+                status_code=401,
+                detail="Sesión inválida o expirada",
+            )
+        return (header_id, False) if with_flag else header_id
+
+
 def _require_consultation_owned(consultation_id: str, vet_id: str) -> dict:
     cons, err = get_consultation_by_id(consultation_id)
     if err:
@@ -2030,7 +2052,7 @@ async def get_current_profile(x_veterinarian_id: str = Header(None)):
 @app.get("/api/trial-survey/status")
 async def get_trial_survey_status(x_veterinarian_id: str = Header(None)):
     """Estado de la encuesta post-prueba y oferta Premium con cupón."""
-    vet_id = _require_vet_id(x_veterinarian_id)
+    vet_id = _resolve_trial_survey_vet_id(x_veterinarian_id)
     profile, err = get_profile(vet_id)
     if err:
         raise HTTPException(status_code=500, detail=f"Error obteniendo perfil: {err}")
@@ -2045,7 +2067,7 @@ async def submit_trial_survey(
     x_veterinarian_id: str = Header(None),
 ):
     """Guarda encuesta al agotar las 3 consultas de prueba."""
-    vet_id = _require_vet_id(x_veterinarian_id)
+    vet_id, session_ok = _resolve_trial_survey_vet_id(x_veterinarian_id, with_flag=True)
     profile, err = get_profile(vet_id)
     if err:
         raise HTTPException(status_code=500, detail=f"Error obteniendo perfil: {err}")
@@ -2055,12 +2077,15 @@ async def submit_trial_survey(
     effective = _with_team_membership(profile)
 
     if effective.get("trial_survey_completed_at") or profile.get("trial_survey_completed_at"):
+        status = trial_survey.build_trial_survey_status(effective)
         return {
-            **trial_survey.build_trial_survey_status(effective),
+            **status,
             "message": "Ya habías completado la encuesta.",
+            "completed_at": status.get("completed_at")
+            or profile.get("trial_survey_completed_at"),
         }
 
-    # Miembros con plan del consultorio no deben quedar bloqueados por la encuesta trial.
+    # Miembros con plan del consultorio / plan activo: no bloquear aunque el JWT esté muerto.
     if effective.get("membership_source") == "organization" or (
         effective.get("membership_type") or ""
     ).strip():
@@ -2076,11 +2101,20 @@ async def submit_trial_survey(
                 detail=f"Error guardando encuesta: {err_upd}",
             )
         updated = {**effective, **fields}
+        status = trial_survey.build_trial_survey_status(updated)
         return {
-            **trial_survey.build_trial_survey_status(updated),
+            **status,
             "message": "Cuenta de equipo: encuesta no requerida.",
             "skipped": True,
+            "completed_at": fields["trial_survey_completed_at"],
+            "membership_type": updated.get("membership_type"),
+            "consultations_remaining": updated.get("consultations_remaining"),
+            "membership_source": updated.get("membership_source"),
         }
+
+    # Encuesta real de trial: sí requiere sesión válida.
+    if not session_ok:
+        raise HTTPException(status_code=401, detail="Sesión inválida o expirada")
 
     if not trial_survey.trial_survey_pending(effective):
         raise HTTPException(
@@ -2102,9 +2136,11 @@ async def submit_trial_survey(
         )
 
     updated = {**effective, **fields}
+    status = trial_survey.build_trial_survey_status(updated)
     return {
-        **trial_survey.build_trial_survey_status(updated),
+        **status,
         "message": "Gracias por tu retroalimentación.",
+        "completed_at": fields.get("trial_survey_completed_at"),
     }
 
 
