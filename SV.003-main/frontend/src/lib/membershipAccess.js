@@ -81,6 +81,7 @@ export function canCreateConsultation(veterinarian, options = {}) {
 export function isTrialExhausted(veterinarian, options = {}) {
   if (options.platformAdmin) return false;
   if (!veterinarian) return false;
+  if (veterinarian.membership_source === "organization") return false;
   if (veterinarian.membership_type) return false;
   return (veterinarian.consultations_remaining ?? 0) <= 0;
 }

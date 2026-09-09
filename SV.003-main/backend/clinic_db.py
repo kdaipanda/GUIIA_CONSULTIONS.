@@ -75,8 +75,8 @@ def get_organization_owner_profile_id(organization_id: str) -> Tuple[Optional[st
 
 def apply_team_membership_overlay(profile: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     """
-    Si el perfil es miembro (no owner) de un consultorio cuyo dueño tiene plan pago,
-    expone la membresía del dueño para UI y cupos CDS.
+    Si el perfil es miembro (no owner) de un consultorio, expone la membresía y
+    el cupo CDS del dueño (pool compartido del plan del consultorio).
     """
     if not profile or not profile.get("id"):
         return profile or {}
@@ -101,9 +101,6 @@ def apply_team_membership_overlay(profile: Optional[Dict[str, Any]]) -> Dict[str
         return out
     if err or not owner:
         return out
-    owner_plan = (owner.get("membership_type") or "").strip()
-    if not owner_plan:
-        return out
     out["membership_type"] = owner.get("membership_type")
     out["consultations_remaining"] = owner.get("consultations_remaining")
     out["membership_expires"] = owner.get("membership_expires")
@@ -115,7 +112,14 @@ def apply_team_membership_overlay(profile: Optional[Dict[str, Any]]) -> Dict[str
 
 
 def resolve_consultation_billing_profile_id(profile: Dict[str, Any]) -> str:
-    """A quién descontar el cupo CDS (dueño del consultorio si aplica overlay)."""
+    """A quién descontar el cupo CDS (siempre el dueño si es miembro del equipo)."""
+    member, _ = get_member_by_profile(str(profile.get("id") or ""))
+    if member:
+        role = (member.get("role") or "").strip().lower()
+        if role and role != "owner":
+            owner_id, _ = get_organization_owner_profile_id(member.get("organization_id") or "")
+            if owner_id:
+                return str(owner_id)
     overlay = apply_team_membership_overlay(profile)
     bill_to = overlay.get("membership_owner_id")
     if overlay.get("membership_source") == "organization" and bill_to:
@@ -306,6 +310,27 @@ def _reassign_member_to_organization(
     return (resp.data[0] if resp.data else {**existing, "organization_id": dest_organization_id, "role": role}, None)
 
 
+def _clear_personal_membership_for_team_member(profile_id: str) -> None:
+    """El cupo CDS vive en el dueño; el miembro no debe tener plan/cupo paralelo."""
+    try:
+        from datetime import datetime, timezone
+
+        from supabase_client import update_profile
+
+        update_profile(
+            profile_id,
+            {
+                "membership_type": None,
+                "consultations_remaining": 0,
+                "membership_expires": None,
+                # Evita bloqueo por encuesta trial al unirse a un consultorio con plan.
+                "trial_survey_completed_at": datetime.now(timezone.utc).isoformat(),
+            },
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] No se pudo limpiar membresía personal de {profile_id}: {exc}")
+
+
 def add_organization_member(
     organization_id: str,
     profile_id: str,
@@ -337,7 +362,10 @@ def add_organization_member(
     if action in {"conflict_team", "conflict_data"}:
         return (None, _ADD_MEMBER_MESSAGES[action])
     if action == "reassign":
-        return _reassign_member_to_organization(existing, organization_id, role)
+        member, re_err = _reassign_member_to_organization(existing, organization_id, role)
+        if not re_err and member:
+            _clear_personal_membership_for_team_member(profile_id)
+        return (member, re_err)
 
     try:
         resp = (
@@ -353,7 +381,10 @@ def add_organization_member(
             )
             .execute()
         )
-        return (resp.data[0] if resp.data else None, None)
+        member = resp.data[0] if resp.data else None
+        if member:
+            _clear_personal_membership_for_team_member(profile_id)
+        return (member, None)
     except Exception as exc:  # noqa: BLE001
         return (None, str(exc))
 
@@ -682,7 +713,10 @@ def insert_organization_member_direct(
             )
             .execute()
         )
-        return (resp.data[0] if resp.data else None, None)
+        member = resp.data[0] if resp.data else None
+        if member and role != "owner":
+            _clear_personal_membership_for_team_member(profile_id)
+        return (member, None)
     except Exception as exc:  # noqa: BLE001
         return (None, str(exc))
 

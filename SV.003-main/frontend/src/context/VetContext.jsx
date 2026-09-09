@@ -179,6 +179,16 @@ export const VetProvider = ({ children }) => {
           setVeterinarian(updatedProfile);
           localStorage.setItem("veterinarian", JSON.stringify(updatedProfile));
         }
+        return;
+      }
+
+      // Token viejo/inválido: forzar re-login (evita encuesta trial fantasma).
+      if (response.status === 401) {
+        clearAccessToken();
+        clearCedulaFlowNonce();
+        setVeterinarian(null);
+        localStorage.removeItem("veterinarian");
+        setPlatformAdmin(false);
       }
     } catch (error) {
       console.error("Error refrescando perfil:", error);

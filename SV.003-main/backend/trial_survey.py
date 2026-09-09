@@ -18,6 +18,9 @@ def trial_survey_pending(profile: Optional[Dict[str, Any]]) -> bool:
     """True si agotó la prueba y aún no envía la encuesta."""
     if not profile:
         return False
+    # Plan heredado del dueño del consultorio: no aplica encuesta de trial.
+    if profile.get("membership_source") == "organization":
+        return False
     if (profile.get("membership_type") or "").strip():
         return False
     remaining = int(profile.get("consultations_remaining") or 0)

@@ -1994,6 +1994,17 @@ async def verify_2fa(verification: TwoFactorVerify, request: Request):
         raise HTTPException(status_code=404, detail="Veterinario no encontrado")
 
     rate_limit.reset_rate_limit(request, "verify-2fa", verification.nonce)
+    if isinstance(veterinarian, dict):
+        veterinarian.pop("_id", None)
+        try:
+            import presence as presence_mod
+
+            last_seen, _ = presence_mod.touch_last_seen(str(veterinarian.get("id") or ""))
+            if last_seen:
+                veterinarian["last_seen"] = last_seen
+        except Exception:  # noqa: BLE001
+            pass
+        veterinarian = _with_team_membership(veterinarian)
     return auth_security.attach_auth_tokens(veterinarian)
 
 
@@ -2040,13 +2051,37 @@ async def submit_trial_survey(
     if not profile:
         raise HTTPException(status_code=404, detail="Perfil no encontrado")
 
-    if profile.get("trial_survey_completed_at"):
+    effective = _with_team_membership(profile)
+
+    if effective.get("trial_survey_completed_at") or profile.get("trial_survey_completed_at"):
         return {
-            **trial_survey.build_trial_survey_status(profile),
+            **trial_survey.build_trial_survey_status(effective),
             "message": "Ya habías completado la encuesta.",
         }
 
-    if not trial_survey.trial_survey_pending(profile):
+    # Miembros con plan del consultorio no deben quedar bloqueados por la encuesta trial.
+    if effective.get("membership_source") == "organization" or (
+        effective.get("membership_type") or ""
+    ).strip():
+        from datetime import datetime, timezone
+
+        fields = {
+            "trial_survey_completed_at": datetime.now(timezone.utc).isoformat(),
+        }
+        err_upd = update_profile(vet_id, fields)
+        if err_upd:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error guardando encuesta: {err_upd}",
+            )
+        updated = {**effective, **fields}
+        return {
+            **trial_survey.build_trial_survey_status(updated),
+            "message": "Cuenta de equipo: encuesta no requerida.",
+            "skipped": True,
+        }
+
+    if not trial_survey.trial_survey_pending(effective):
         raise HTTPException(
             status_code=403,
             detail="La encuesta solo está disponible al agotar tus 3 consultas de prueba.",
@@ -2065,7 +2100,7 @@ async def submit_trial_survey(
             detail=f"Error guardando encuesta: {err_upd}",
         )
 
-    updated = {**profile, **fields}
+    updated = {**effective, **fields}
     return {
         **trial_survey.build_trial_survey_status(updated),
         "message": "Gracias por tu retroalimentación.",
@@ -2846,9 +2881,10 @@ async def analyze_consultation(
             status_code=403,
             detail="No se pudo verificar tu membresía. La síntesis clínica CDS L5 solo está disponible para miembros Premium.",
         )
-    
-    membership_type = profile.get("membership_type")
-    remaining = profile.get("consultations_remaining", 0)
+
+    billing_profile = _with_team_membership(profile)
+    membership_type = billing_profile.get("membership_type")
+    remaining = billing_profile.get("consultations_remaining", 0)
     user_email = profile.get("email", "")
     
     # Verificar si el usuario tiene consultas ilimitadas

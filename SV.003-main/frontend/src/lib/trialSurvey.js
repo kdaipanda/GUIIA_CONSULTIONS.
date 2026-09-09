@@ -9,6 +9,7 @@ import {
 
 export function shouldShowTrialSurvey(veterinarian) {
   if (!veterinarian) return false;
+  if (veterinarian.membership_source === "organization") return false;
   if (veterinarian.membership_type) return false;
   if ((veterinarian.consultations_remaining ?? 0) > 0) return false;
   if (veterinarian.trial_survey_completed_at) return false;

@@ -21,6 +21,18 @@ def test_trial_survey_not_pending_with_membership():
     assert trial_survey_pending(profile) is False
 
 
+def test_trial_survey_not_pending_with_org_membership():
+    profile = {
+        "membership_type": "basic",
+        "consultations_remaining": 30,
+        "membership_source": "organization",
+    }
+    assert trial_survey_pending(profile) is False
+    assert trial_survey_pending(
+        {"membership_source": "organization", "membership_type": None, "consultations_remaining": 0}
+    ) is False
+
+
 def test_trial_survey_not_pending_with_remaining():
     profile = {"membership_type": None, "consultations_remaining": 1}
     assert trial_survey_pending(profile) is False
