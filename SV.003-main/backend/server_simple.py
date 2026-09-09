@@ -65,6 +65,7 @@ from stripe_checkout_config import (
 )
 from membership_access import (
     filter_categories_for_plan,
+    has_unlimited_consultations,
     require_feature_for_profile,
     validate_consultation_category,
 )
@@ -911,12 +912,6 @@ DEV_EMAILS = {
     "premium@guiaa.vet",
 }
 
-# Usuarios con consultas ilimitadas
-UNLIMITED_CONSULTATIONS_EMAILS = {
-    "carlos.hernandez@vetmed.com",
-}
-
-
 def is_dev_user(email: str) -> bool:
     """Verifica si un email pertenece a un usuario de desarrollo"""
     return email.lower().strip() in DEV_EMAILS
@@ -927,11 +922,6 @@ async def _email_background(fn, *args, **kwargs) -> None:
         await asyncio.to_thread(fn, *args, **kwargs)
     except Exception as exc:  # noqa: BLE001
         print(f"[WARN] Notificación email: {exc}")
-
-
-def has_unlimited_consultations(email: str) -> bool:
-    """Verifica si un email tiene consultas ilimitadas"""
-    return email.lower().strip() in UNLIMITED_CONSULTATIONS_EMAILS
 
 
 def validate_trial_consultations_limit(membership_type: Optional[str], consultations_remaining: int) -> bool:
@@ -2237,7 +2227,7 @@ async def create_consultation(
 
     # Verificar membresía o consultas de prueba
     membership_type = profile.get("membership_type")
-    remaining = profile.get("consultations_remaining", 0)
+    remaining = int(profile.get("consultations_remaining") or 0)
     user_email = profile.get("email", "")
     
     # Verificar si el usuario tiene consultas ilimitadas
@@ -2290,25 +2280,18 @@ async def create_consultation(
         is_platform_admin=auth_security.is_platform_admin_profile(profile),
     )
 
-    # Verificar consultas disponibles
-    # Si tiene consultas ilimitadas o es premium, no verificar límites
-    if has_unlimited or membership_type == "premium":
-        # Usuario con consultas ilimitadas o premium: no verificar límites
-        pass
-    elif has_trial_consultations:
-        # Usuario con consultas de prueba: permitir como premium
-        if remaining <= 0:
+    # Verificar consultas disponibles. Premium también tiene cupo (150/mes);
+    # solo la allowlist interna es ilimitada.
+    if not has_unlimited and remaining <= 0:
+        if has_trial_consultations or not membership_type:
             raise HTTPException(
                 status_code=403,
                 detail="Has agotado tus 3 consultas de prueba. Por favor, suscríbete a un plan de membresía para continuar usando el servicio."
             )
-    else:
-        # Usuario con membresía pero no premium: verificar consultas
-        if remaining <= 0:
-            raise HTTPException(
-                status_code=403,
-                detail="No tienes consultas disponibles. Por favor, renueva tu membresía o compra créditos adicionales."
-            )
+        raise HTTPException(
+            status_code=403,
+            detail="No tienes consultas disponibles. Por favor, renueva tu membresía o compra créditos adicionales."
+        )
 
     consultation_id = str(uuid.uuid4())
     created_at = datetime.now(timezone.utc).isoformat()
@@ -2353,19 +2336,18 @@ async def create_consultation(
     if err_ins:
         raise HTTPException(status_code=500, detail=f"Error guardando consulta: {err_ins}")
 
-    # Descontar crédito si no es premium y no tiene consultas ilimitadas (las consultas de prueba también se descuentan)
-    # Si tiene consultas ilimitadas, no descontar
-    # Usar update_profile (no upsert): un upsert parcial falla por NOT NULL en email y no descuenta.
+    # Descontar 1 consulta del cupo (prueba, básica, profesional y premium).
+    # Usar update_profile (no upsert): un upsert parcial falla por NOT NULL en email.
     new_remaining = remaining
-    if not has_unlimited and (has_trial_consultations or (membership_type and membership_type != "premium")):
-        new_remaining = max(0, remaining - 1)
+    if not has_unlimited:
+        new_remaining = max(0, int(remaining or 0) - 1)
         err_prof = update_profile(
             vet_id,
             {"consultations_remaining": new_remaining},
         )
         if err_prof:
-            # No abortamos la consulta ya creada; solo avisamos
             print(f"[WARN] No se pudo actualizar remaining: {err_prof}")
+            new_remaining = remaining
 
     serialized = _serialize_consultation(inserted or new_row)
     trial_survey_due = (
@@ -2676,7 +2658,6 @@ async def analyze_consultation(
 
     if (
         not has_unlimited
-        and membership_type != "premium"
         and remaining <= 0
         and not credit_already_used
     ):

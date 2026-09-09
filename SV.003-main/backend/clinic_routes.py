@@ -16,7 +16,7 @@ import email_notifications
 import presence
 import trial_survey
 import whatsapp_promo
-from membership_access import require_feature_for_profile
+from membership_access import has_unlimited_consultations, require_feature_for_profile
 from supabase_client import (
     count_consultations_by_users,
     count_consultations_by_user,
@@ -469,6 +469,24 @@ async def api_list_patients(
     if err:
         raise HTTPException(status_code=500, detail=err)
     return {"patients": patients}
+
+
+@clinic_router.get("/clinic-registry")
+async def api_clinic_registry(
+    limit: int = 200,
+    x_veterinarian_id: str = Header(None),
+):
+    """Dueños + mascotas en una sola petición (evita doble resolución de organización)."""
+    vet_id = _require_vet_id(x_veterinarian_id)
+    ctx = await _resolve_org_context(vet_id)
+    org_id = ctx["organization_id"]
+    clients, err_clients = clinic_db.list_clients(org_id, limit=limit)
+    if err_clients:
+        raise HTTPException(status_code=500, detail=err_clients)
+    patients, err_patients = clinic_db.list_patients(org_id, limit=limit)
+    if err_patients:
+        raise HTTPException(status_code=500, detail=err_patients)
+    return {"clients": clients, "patients": patients}
 
 
 @clinic_router.post("/patients")
@@ -1620,6 +1638,7 @@ async def admin_list_users(
             "membership_type": profile.get("membership_type"),
             "consultations_remaining": profile.get("consultations_remaining"),
             "consultations_used": consultation_counts.get(str(profile.get("id") or ""), 0),
+            "consultations_unlimited": has_unlimited_consultations(profile.get("email")),
             "created_at": profile.get("created_at"),
             "cedula_profesional": profile.get("cedula_profesional"),
             "profesional_pais": profile.get("profesional_pais"),
@@ -1750,6 +1769,7 @@ async def admin_user_consultations(
             "email": profile.get("email"),
             "nombre": profile.get("nombre"),
             "consultations_remaining": profile.get("consultations_remaining"),
+            "consultations_unlimited": has_unlimited_consultations(profile.get("email")),
             "membership_type": profile.get("membership_type"),
         },
         "consultations": [_serialize_consultation_row(r) for r in rows],

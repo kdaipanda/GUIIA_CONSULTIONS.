@@ -11,6 +11,7 @@ sys.path.insert(0, BACKEND_DIR)
 from membership_access import (  # noqa: E402
     can_access_feature,
     filter_categories_for_plan,
+    has_unlimited_consultations,
     resolve_effective_plan,
     validate_consultation_category,
 )
@@ -125,6 +126,14 @@ class TrialConsultationLimit(unittest.TestCase):
         with self.assertRaises(HTTPException) as ctx:
             validate_trial_consultations_limit(None, 4)
         self.assertEqual(ctx.exception.status_code, 400)
+
+
+class UnlimitedConsultations(unittest.TestCase):
+    def test_allowlist_only(self):
+        self.assertTrue(has_unlimited_consultations("carlos.hernandez@vetmed.com"))
+        self.assertFalse(has_unlimited_consultations("gonzalezpardoceleste@gmail.com"))
+        self.assertFalse(has_unlimited_consultations("premium@guiaa.vet"))
+        self.assertFalse(has_unlimited_consultations(""))
 
 
 class MembershipConsultations(unittest.TestCase):

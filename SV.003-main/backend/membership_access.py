@@ -32,6 +32,19 @@ FEATURE_ACCESS = {
     "medical_images": frozenset({"premium"}),
 }
 
+# Cuentas internas que no consumen cupo (el resto de planes sí descuenta).
+UNLIMITED_CONSULTATIONS_EMAILS = {
+    "carlos.hernandez@vetmed.com",
+}
+
+
+def has_unlimited_consultations(email: Optional[str]) -> bool:
+    """True solo para allowlist interna, no para el plan Premium comercial."""
+    if not email:
+        return False
+    return email.lower().strip() in UNLIMITED_CONSULTATIONS_EMAILS
+
+
 FEATURE_UPGRADE_MESSAGES = {
     "inventory": "El inventario requiere membresía Profesional o Premium.",
     "billing": "Ventas y facturación requieren membresía Profesional o Premium.",
