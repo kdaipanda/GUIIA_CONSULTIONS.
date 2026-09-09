@@ -33,6 +33,22 @@ def test_trial_survey_not_pending_with_org_membership():
     ) is False
 
 
+def test_trial_survey_not_pending_org_even_without_type():
+    """Miembro limpiado (sin plan personal) no debe ver encuesta si hereda org."""
+    assert (
+        trial_survey_pending(
+            {
+                "id": "m1",
+                "membership_source": "organization",
+                "membership_type": "basic",
+                "consultations_remaining": 12,
+                "trial_survey_completed_at": None,
+            }
+        )
+        is False
+    )
+
+
 def test_trial_survey_not_pending_with_remaining():
     profile = {"membership_type": None, "consultations_remaining": 1}
     assert trial_survey_pending(profile) is False

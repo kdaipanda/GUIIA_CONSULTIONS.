@@ -3,12 +3,19 @@ import React, {
   useContext,
   useEffect,
   useState,
+  useRef,
 } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { getBackendUrl } from "../lib/backendUrl";
 import { fetchWithTimeout } from "../lib/fetchWithTimeout";
 import { parseJsonResponse } from "../lib/friendlyFetchError";
-import { getAuthHeaders, clearAccessToken, clearCedulaFlowNonce, persistAuthFromResponse } from "../lib/authHeaders";
+import {
+  getAuthHeaders,
+  clearAccessToken,
+  clearCedulaFlowNonce,
+  persistAuthFromResponse,
+  getAccessToken,
+} from "../lib/authHeaders";
 
 const DEV_AUTO_LOGIN = false;
 
@@ -22,18 +29,38 @@ export const useVet = () => {
   return context;
 };
 
+function buildSupabaseVetStub(user) {
+  return {
+    id: user.id,
+    nombre: user.email?.split("@")[0] || "usuario",
+    email: user.email,
+    membership_type: "basic",
+  };
+}
+
+/** No pisar sesión GUIAA (JWT + perfil real) con un stub de Supabase Auth. */
+function shouldKeepExistingProfile(prev, user) {
+  if (!prev?.id) return false;
+  if (getAccessToken()) return true;
+  if (prev.membership_type && prev.membership_type !== "basic") return true;
+  if (prev.membership_source === "organization") return true;
+  if (prev.cedula_profesional || prev.consultations_remaining != null) return true;
+  if (user && prev.id === user.id && (prev.nombre || prev.especialidad)) return true;
+  return false;
+}
+
 export const VetProvider = ({ children }) => {
   const [veterinarian, setVeterinarian] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authUser, setAuthUser] = useState(null);
   const [platformAdmin, setPlatformAdmin] = useState(false);
+  const profileSyncedRef = useRef(false);
 
   useEffect(() => {
     const storedVet = localStorage.getItem("veterinarian");
     if (storedVet) {
       try {
         const parsedVet = JSON.parse(storedVet);
-        // Solo limpia el stub local histórico; no tocar la cuenta real de producción
         const isLegacyDevStub = parsedVet?.id === "dev-carlos-hernandez";
         if (isLegacyDevStub) {
           localStorage.removeItem("veterinarian");
@@ -68,15 +95,13 @@ export const VetProvider = ({ children }) => {
       if (!mounted) return;
       const sessionUser = data.session?.user;
       if (sessionUser) {
-        const vetFromSupabase = {
-          id: sessionUser.id,
-          nombre: sessionUser.email?.split("@")[0] || "usuario",
-          email: sessionUser.email,
-          membership_type: "basic",
-        };
         setAuthUser(sessionUser);
-        setVeterinarian((prev) => prev || vetFromSupabase);
-        localStorage.setItem("veterinarian", JSON.stringify(vetFromSupabase));
+        setVeterinarian((prev) => {
+          if (shouldKeepExistingProfile(prev, sessionUser)) return prev;
+          const stub = buildSupabaseVetStub(sessionUser);
+          localStorage.setItem("veterinarian", JSON.stringify(stub));
+          return stub;
+        });
       }
       setLoading(false);
     });
@@ -86,16 +111,13 @@ export const VetProvider = ({ children }) => {
         const user = session?.user || null;
         setAuthUser(user);
         if (user) {
-          const vetFromSupabase = {
-            id: user.id,
-            nombre: user.email?.split("@")[0] || "usuario",
-            email: user.email,
-            membership_type: "basic",
-          };
-          setVeterinarian(vetFromSupabase);
-          localStorage.setItem("veterinarian", JSON.stringify(vetFromSupabase));
-        } else if (event === "SIGNED_OUT") {
-          // No limpiar en INITIAL_SESSION sin user: eso borraría la sesión JWT de GUIAA.
+          setVeterinarian((prev) => {
+            if (shouldKeepExistingProfile(prev, user)) return prev;
+            const stub = buildSupabaseVetStub(user);
+            localStorage.setItem("veterinarian", JSON.stringify(stub));
+            return stub;
+          });
+        } else if (event === "SIGNED_OUT" && !getAccessToken()) {
           setVeterinarian(null);
           localStorage.removeItem("veterinarian");
           clearAccessToken();
@@ -109,60 +131,6 @@ export const VetProvider = ({ children }) => {
       subscription?.subscription?.unsubscribe();
     };
   }, []);
-
-  useEffect(() => {
-    if (!veterinarian?.id) {
-      setPlatformAdmin(false);
-      return;
-    }
-    const backendUrl = getBackendUrl();
-    fetchWithTimeout(
-      `${backendUrl}/api/admin/access`,
-      { headers: getAuthHeaders(veterinarian.id) },
-      { timeoutMs: 20000, retries: 2 },
-    )
-      .then(async (response) => {
-        if (!response.ok) return { platform_admin: false };
-        return parseJsonResponse(response, { platform_admin: false });
-      })
-      .then((data) => setPlatformAdmin(!!data.platform_admin))
-      .catch(() => setPlatformAdmin(false));
-  }, [veterinarian?.id]);
-
-  const login = (vetData) => {
-    persistAuthFromResponse(vetData);
-    const { access_token, token_type, expires_in, cedula_flow_nonce, cedula_flow_expires_in, ...profile } =
-      vetData || {};
-    const nextProfile = profile.id || profile.email ? profile : vetData;
-    setVeterinarian(nextProfile);
-    localStorage.setItem("veterinarian", JSON.stringify(nextProfile));
-  };
-
-  const logout = async () => {
-    await supabase.auth.signOut();
-    setVeterinarian(null);
-    localStorage.removeItem("veterinarian");
-    clearAccessToken();
-    clearCedulaFlowNonce();
-  };
-
-  const loginWithEmailPassword = async (email, password) => {
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw error;
-    return data?.user;
-  };
-
-  const loginWithMagicLink = async (email) => {
-    const { error, data } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: true },
-    });
-    if (error) throw error;
-    return data;
-  };
 
   const refreshProfile = async () => {
     if (!veterinarian?.id) return;
@@ -188,11 +156,77 @@ export const VetProvider = ({ children }) => {
         clearCedulaFlowNonce();
         setVeterinarian(null);
         localStorage.removeItem("veterinarian");
+        profileSyncedRef.current = false;
         setPlatformAdmin(false);
       }
     } catch (error) {
       console.error("Error refrescando perfil:", error);
     }
+  };
+
+  // Tras login o al recargar: sincronizar plan/cupo heredado del consultorio.
+  useEffect(() => {
+    if (profileSyncedRef.current || !veterinarian?.id || !getAccessToken()) return;
+    profileSyncedRef.current = true;
+    void refreshProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [veterinarian?.id]);
+
+  useEffect(() => {
+    if (!veterinarian?.id || !getAccessToken()) {
+      setPlatformAdmin(false);
+      return;
+    }
+    const backendUrl = getBackendUrl();
+    fetchWithTimeout(
+      `${backendUrl}/api/admin/access`,
+      { headers: getAuthHeaders(veterinarian.id) },
+      { timeoutMs: 20000, retries: 2 },
+    )
+      .then(async (response) => {
+        if (!response.ok) return { platform_admin: false };
+        return parseJsonResponse(response, { platform_admin: false });
+      })
+      .then((data) => setPlatformAdmin(!!data.platform_admin))
+      .catch(() => setPlatformAdmin(false));
+  }, [veterinarian?.id]);
+
+  const login = (vetData) => {
+    persistAuthFromResponse(vetData);
+    const { access_token, token_type, expires_in, cedula_flow_nonce, cedula_flow_expires_in, ...profile } =
+      vetData || {};
+    const nextProfile = profile.id || profile.email ? profile : vetData;
+    setVeterinarian(nextProfile);
+    localStorage.setItem("veterinarian", JSON.stringify(nextProfile));
+    profileSyncedRef.current = true;
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setVeterinarian(null);
+    localStorage.removeItem("veterinarian");
+    clearAccessToken();
+    clearCedulaFlowNonce();
+    profileSyncedRef.current = false;
+    setPlatformAdmin(false);
+  };
+
+  const loginWithEmailPassword = async (email, password) => {
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+    return data?.user;
+  };
+
+  const loginWithMagicLink = async (email) => {
+    const { error, data } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true },
+    });
+    if (error) throw error;
+    return data;
   };
 
   const patchVeterinarian = (partial) => {

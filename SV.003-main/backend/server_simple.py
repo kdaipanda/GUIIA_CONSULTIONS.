@@ -1760,7 +1760,8 @@ async def register_with_organization_invite(body: InviteRegister, request: Reque
         print(f"[WARN] No se pudo marcar invitación aceptada: {mark_err}")
 
     saved = result or vet_data
-    result_data = auth_security.attach_auth_tokens(saved)
+    # Heredar plan/cupo del dueño del consultorio al unirse por invitación.
+    result_data = auth_security.attach_auth_tokens(_with_team_membership(saved))
     result_data["invite"] = {
         "organization_id": org_id,
         "role": role,
@@ -2227,7 +2228,9 @@ async def verify_cedula(
     # Tras verify pendiente/aprobado: emitir JWT para entrar sin re-login frágil.
     if verification_status in (CEDULA_STATUS_VERIFIED, CEDULA_STATUS_PENDING):
         fresh, _ = get_profile(vet_id)
-        token_payload = auth_security.attach_auth_tokens(fresh or profile)
+        token_payload = auth_security.attach_auth_tokens(
+            _with_team_membership(fresh or profile)
+        )
         response.access_token = token_payload.get("access_token")
         response.token_type = token_payload.get("token_type")
         response.expires_in = token_payload.get("expires_in")
@@ -2286,7 +2289,9 @@ async def skip_cedula_verification(
     # Con 1–2 skips el login permite entrar; emitir JWT aquí evita fallar sin contraseña en memoria.
     if new_skip_count < 3:
         fresh, _ = get_profile(vet_id)
-        token_payload = auth_security.attach_auth_tokens(fresh or profile)
+        token_payload = auth_security.attach_auth_tokens(
+            _with_team_membership(fresh or profile)
+        )
         payload["access_token"] = token_payload.get("access_token")
         payload["token_type"] = token_payload.get("token_type")
         payload["expires_in"] = token_payload.get("expires_in")
@@ -2971,7 +2976,9 @@ Por favor, genera un análisis clínico completo."""
         profile_after, _ = get_profile(vet_id)
         return {
             "analysis": analysis_text,
-            "trial_survey_due": trial_survey.trial_survey_pending(profile_after or profile),
+            "trial_survey_due": trial_survey.trial_survey_pending(
+                _with_team_membership(profile_after or profile)
+            ),
         }
 
     except ValueError as e:
