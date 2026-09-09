@@ -58,15 +58,18 @@ const INVITE_ROLES = [
 const TEAM_STEPS = [
   {
     title: "Elige el rol",
-    body: "Recepción o Administrador: alta corta sin cédula. Veterinario: se registra con su propia cédula.",
+    body:
+      "Recepción: agenda, dueños y pacientes (sin consultas CDS). Administrador: configura el consultorio y el equipo. Veterinario: consultas CDS y expediente. Recepción y admin no necesitan cédula; el veterinario sí, con la suya (no la tuya).",
   },
   {
-    title: "Envía la invitación",
-    body: "Escribe el email abajo. Si ya tiene cuenta GUIAA, entra al equipo al instante; si no, le mandamos un link.",
+    title: "Escribe el email y envía",
+    body:
+      "Pon el correo de tu colega abajo y pulsa «Enviar invitación». Si ya tiene cuenta GUIAA, entra a tu equipo al momento. Si no, le mandamos un correo con un enlace (también se copia al portapapeles por si no llega).",
   },
   {
-    title: "Entra al consultorio",
-    body: "Al aceptar el link (o al agregarlo), que cierre sesión y vuelva a entrar: verá este consultorio.",
+    title: "Tu colega completa el alta",
+    body:
+      "Abre el enlace, crea su contraseña y acepta. Recepción/admin: formulario corto. Veterinario: cédula y documento. Al terminar, que cierre sesión y vuelva a entrar: verá este consultorio.",
   },
 ];
 
@@ -291,8 +294,8 @@ export function SettingsPage() {
             </h2>
             <div className="clinic-team-guide">
               <p className="clinic-team-lead">
-                Invita por email. Si aún no tienen cuenta, reciben un enlace para darse de alta.
-                Recepción y administrador no necesitan cédula.
+                Así agregas a tu equipo en GUIAA. No hace falta que se den de alta solos primero:
+                tú los invitas y ellos terminan el registro con el enlace.
               </p>
               <ol className="clinic-team-steps" aria-label="Pasos para invitar al equipo">
                 {TEAM_STEPS.map((step, index) => (
@@ -308,9 +311,9 @@ export function SettingsPage() {
                 ))}
               </ol>
               <p className="clinic-team-callout">
-                Una cuenta pertenece a un solo consultorio. Si alguien ya está solo en otra clínica,
-                lo movemos aquí (con pacientes). Si ya trabaja en un equipo con más gente, primero
-                debe salir de esa organización.
+                Importante: una cuenta solo puede estar en un consultorio. Si tu colega ya abrió
+                GUIAA solo, lo pasamos a tu clínica (con dueños y pacientes si tenía). Si ya
+                pertenece a otro equipo con más gente, primero debe salir de esa organización.
               </p>
             </div>
 
