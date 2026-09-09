@@ -257,6 +257,7 @@ def is_public_api_route(method: str, path: str) -> bool:
     public_exact: Set[Tuple[str, str]] = {
         ("POST", "/api/auth/login"),
         ("POST", "/api/auth/register"),
+        ("POST", "/api/auth/register-invite"),
         ("POST", "/api/auth/verify-2fa"),
         ("POST", "/api/support/chat"),
         ("POST", "/api/payments/stripe/webhook"),
@@ -266,6 +267,8 @@ def is_public_api_route(method: str, path: str) -> bool:
         ("GET", "/api/consultations/credit-packages"),
     }
     if (m, p) in public_exact:
+        return True
+    if m == "GET" and p.startswith("/api/auth/invite/"):
         return True
     return False
 
