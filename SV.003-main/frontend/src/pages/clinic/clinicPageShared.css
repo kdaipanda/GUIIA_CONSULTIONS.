@@ -706,6 +706,34 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   margin-bottom: 16px;
 }
 
+.clinic-page-guiaa .clinic-team-howto {
+  margin: 0 0 12px;
+  padding: 0 0 0 1.2rem;
+  max-width: 42rem;
+  color: #16324a;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.clinic-page-guiaa .clinic-team-howto li + li {
+  margin-top: 0.45rem;
+}
+
+.clinic-page-guiaa .clinic-team-note {
+  margin: 0 0 12px;
+  max-width: 42rem;
+  color: #16324a;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.clinic-page-guiaa .clinic-team-role-hint {
+  margin: 6px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: #2b4458;
+}
+
 @media (max-width: 768px) {
   .clinic-page-guiaa .clinic-invite-form {
     grid-template-columns: 1fr;

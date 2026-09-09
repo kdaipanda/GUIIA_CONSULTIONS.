@@ -78,6 +78,120 @@ def list_members_enriched(organization_id: str) -> Tuple[List[Dict[str, Any]], O
         return (members, str(exc))
 
 
+_ADD_MEMBER_MESSAGES = {
+    "already_here": "Este usuario ya está en tu equipo. No hace falta agregarlo de nuevo.",
+    "conflict_team": (
+        "Esa cuenta ya pertenece a otro consultorio con más de un integrante. "
+        "Debe salir de su organización actual (o usar otro email) antes de unirse a la tuya."
+    ),
+    "conflict_data": (
+        "Esa cuenta ya tiene su propio consultorio con pacientes, citas o historial. "
+        "No se puede mover automáticamente; pide que use otro email o contacta a soporte."
+    ),
+}
+
+_CLINIC_ACTIVITY_TABLES = (
+    "clients",
+    "patients",
+    "appointments",
+    "consultations",
+    "products",
+    "clinical_invoices",
+    "appointment_requests",
+)
+
+
+def resolve_add_member_action(
+    existing: Optional[Dict[str, Any]],
+    dest_organization_id: str,
+    source_member_count: int = 0,
+    source_has_clinical_data: bool = False,
+) -> str:
+    """already_here | insert | reassign | conflict_team | conflict_data"""
+    if not existing:
+        return "insert"
+    if existing.get("organization_id") == dest_organization_id:
+        return "already_here"
+    if source_member_count == 1 and not source_has_clinical_data:
+        return "reassign"
+    if source_member_count > 1:
+        return "conflict_team"
+    return "conflict_data"
+
+
+def organization_has_clinical_data(organization_id: str) -> Tuple[bool, Optional[str]]:
+    try:
+        for table in _CLINIC_ACTIVITY_TABLES:
+            resp = (
+                _table(table)
+                .select("id")
+                .eq("organization_id", organization_id)
+                .limit(1)
+                .execute()
+            )
+            if resp.data:
+                return (True, None)
+        return (False, None)
+    except Exception as exc:  # noqa: BLE001
+        return (True, str(exc))
+
+
+def _primary_branch_id(organization_id: str) -> Optional[str]:
+    try:
+        resp = (
+            _table("branches")
+            .select("id")
+            .eq("organization_id", organization_id)
+            .eq("is_primary", True)
+            .limit(1)
+            .execute()
+        )
+        if resp.data:
+            return resp.data[0].get("id")
+        resp = (
+            _table("branches")
+            .select("id")
+            .eq("organization_id", organization_id)
+            .limit(1)
+            .execute()
+        )
+        return resp.data[0].get("id") if resp.data else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _reassign_member_to_organization(
+    existing: Dict[str, Any],
+    dest_organization_id: str,
+    role: str,
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    source_org_id = existing.get("organization_id")
+    branch_id = _primary_branch_id(dest_organization_id)
+    try:
+        resp = (
+            _table("organization_members")
+            .update(
+                {
+                    "organization_id": dest_organization_id,
+                    "role": role,
+                    "branch_id": branch_id,
+                }
+            )
+            .eq("id", existing["id"])
+            .execute()
+        )
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+    if source_org_id:
+        try:
+            _table("organizations").delete().eq("id", source_org_id).execute()
+        except Exception as exc:  # noqa: BLE001
+            print(f"[WARN] No se pudo borrar consultorio vacío {source_org_id}: {exc}")
+
+    return (resp.data[0] if resp.data else {**existing, "organization_id": dest_organization_id, "role": role}, None)
+
+
 def add_organization_member(
     organization_id: str,
     profile_id: str,
@@ -90,10 +204,31 @@ def add_organization_member(
     existing, err = get_member_by_profile(profile_id)
     if err:
         return (None, err)
-    if existing:
-        if existing.get("organization_id") == organization_id:
-            return (None, "Este usuario ya pertenece al consultorio")
-        return (None, "El usuario ya pertenece a otra organización")
+
+    source_member_count = 0
+    source_has_clinical_data = False
+    if existing and existing.get("organization_id") != organization_id:
+        source_org_id = existing.get("organization_id")
+        peers, peers_err = list_members(source_org_id)
+        if peers_err:
+            return (None, _ADD_MEMBER_MESSAGES["conflict_team"])
+        source_member_count = len(peers or [])
+        source_has_clinical_data, data_err = organization_has_clinical_data(source_org_id)
+        if data_err:
+            return (None, _ADD_MEMBER_MESSAGES["conflict_data"])
+
+    action = resolve_add_member_action(
+        existing,
+        organization_id,
+        source_member_count,
+        source_has_clinical_data,
+    )
+    if action == "already_here":
+        return (None, _ADD_MEMBER_MESSAGES[action])
+    if action in {"conflict_team", "conflict_data"}:
+        return (None, _ADD_MEMBER_MESSAGES[action])
+    if action == "reassign":
+        return _reassign_member_to_organization(existing, organization_id, role)
 
     try:
         resp = (
@@ -103,6 +238,7 @@ def add_organization_member(
                     "organization_id": organization_id,
                     "profile_id": profile_id,
                     "role": role,
+                    "branch_id": _primary_branch_id(organization_id),
                 },
                 returning="representation",
             )

@@ -352,7 +352,10 @@ async def add_organization_member(body: MemberAdd, x_veterinarian_id: str = Head
     vet_id = _require_vet_id(x_veterinarian_id)
     ctx = await _resolve_org_context(vet_id)
     if ctx["role"] not in ADMIN_ROLES:
-        raise HTTPException(status_code=403, detail="Solo administradores pueden invitar miembros")
+        raise HTTPException(
+            status_code=403,
+            detail="Solo el propietario o un administrador pueden agregar veterinarios al equipo.",
+        )
 
     email = (body.email or "").strip().lower()
     if not email:
@@ -364,7 +367,10 @@ async def add_organization_member(body: MemberAdd, x_veterinarian_id: str = Head
     if not profile:
         raise HTTPException(
             status_code=404,
-            detail="No hay cuenta GUIAA con ese email. El usuario debe registrarse primero.",
+            detail=(
+                "No hay cuenta GUIAA con ese email. Pídele a tu colega que se registre en "
+                "guiaa.vet con este mismo correo y, cuando termine, vuelve a agregarlo aquí."
+            ),
         )
 
     member, add_err = clinic_db.add_organization_member(

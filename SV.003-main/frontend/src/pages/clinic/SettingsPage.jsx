@@ -36,9 +36,21 @@ const ROLE_LABELS = {
 };
 
 const INVITE_ROLES = [
-  { value: "veterinarian", label: "Veterinario" },
-  { value: "receptionist", label: "Recepción" },
-  { value: "admin", label: "Administrador" },
+  {
+    value: "veterinarian",
+    label: "Veterinario",
+    hint: "Consultas CDS, expediente, pacientes y agenda.",
+  },
+  {
+    value: "receptionist",
+    label: "Recepción",
+    hint: "Agenda, dueños y pacientes. Sin consultas CDS.",
+  },
+  {
+    value: "admin",
+    label: "Administrador",
+    hint: "Todo lo del veterinario, más configurar el consultorio y el equipo.",
+  },
 ];
 
 export function SettingsPage() {
@@ -100,7 +112,7 @@ export function SettingsPage() {
     try {
       const data = await addOrganizationMember(
         veterinarian.id,
-        inviteEmail.trim(),
+        inviteEmail.trim().toLowerCase(),
         inviteRole,
       );
       notifySuccess(data.message || "Miembro agregado.");
@@ -142,6 +154,8 @@ export function SettingsPage() {
     notifySuccess("Enlace del portal copiado.");
   };
 
+  const extraMembers = members.filter((m) => m.role !== "owner");
+
   if (!isOrgAdmin) {
     return (
       <div className="clinic-page clinic-page-guiaa">
@@ -156,7 +170,7 @@ export function SettingsPage() {
         <ClinicEmptyState
           icon={ShieldAlert}
           title="Configuración del consultorio"
-          description="Solo administradores del consultorio pueden editar datos de la clínica e invitar miembros."
+          description="Solo el propietario o un administrador pueden agregar veterinarios. Pídeles que te den de alta en Configuración → Equipo."
         />
         <ConfirmActionDialog {...dialogProps} />
       </div>
@@ -169,7 +183,7 @@ export function SettingsPage() {
         <div>
           <p className="clinic-page-eyebrow">Consultorio</p>
           <h1>Configuración del consultorio</h1>
-          <p>Datos de la clínica, equipo y portal de citas.</p>
+          <p>Datos de la clínica, cómo agregar veterinarios al equipo y el portal de citas.</p>
         </div>
       </div>
 
@@ -190,16 +204,16 @@ export function SettingsPage() {
                 <Input
                   id="org-name"
                   value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                   required
                 />
               </div>
               <div className="form-group">
-                <Label htmlFor="org-tz">Zona horaria</Label>
+                <Label htmlFor="org-timezone">Zona horaria</Label>
                 <Input
-                  id="org-tz"
+                  id="org-timezone"
                   value={form.timezone}
-                  onChange={(e) => setForm({ ...form, timezone: e.target.value })}
+                  onChange={(e) => setForm((prev) => ({ ...prev, timezone: e.target.value }))}
                 />
               </div>
             </div>
@@ -211,7 +225,7 @@ export function SettingsPage() {
 
           <section className="clinic-settings-card">
             <h2>Portal de solicitud de citas</h2>
-            <p className="clinic-muted clinic-tools-desc">
+            <p className="clinic-team-note">
               Comparte este enlace con los dueños para que soliciten cita sin iniciar sesión.
             </p>
             <div className="clinic-settings-portal">
@@ -228,13 +242,33 @@ export function SettingsPage() {
               <Users size={18} aria-hidden />
               Equipo
             </h2>
-            <p className="clinic-muted clinic-tools-desc">
-              Invita veterinarios o recepción que ya tengan cuenta en GUIAA (mismo email de registro).
+            <p className="clinic-team-note">
+              GUIAA no envía un correo de invitación. Primero tu colega crea su propia cuenta;
+              después tú lo vinculas a este consultorio con el mismo email.
+            </p>
+            <ol className="clinic-team-howto">
+              <li>
+                Pídele que se registre en guiaa.vet (nombre, cédula y el email que vas a usar
+                aquí).
+              </li>
+              <li>
+                Cuando ya pueda iniciar sesión (aunque se le cree un consultorio vacío), escribe
+                ese email abajo y elige su rol.
+              </li>
+              <li>
+                Pulsa Agregar al equipo. Pídele que cierre sesión y entre de nuevo: verá este
+                consultorio, no el suyo vacío.
+              </li>
+            </ol>
+            <p className="clinic-team-note">
+              Si tu colega ya abrió GUIAA, se le crea un consultorio vacío. Al agregarlo lo
+              movemos al tuyo. Si ya tiene pacientes o citas en su propia clínica, no se puede
+              unir con ese email.
             </p>
 
             <form onSubmit={handleInvite} className="clinic-invite-form">
               <div className="form-group">
-                <Label htmlFor="invite-email">Email del usuario</Label>
+                <Label htmlFor="invite-email">Email de registro en GUIAA</Label>
                 <Input
                   id="invite-email"
                   type="email"
@@ -242,22 +276,26 @@ export function SettingsPage() {
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   required
+                  autoComplete="off"
                 />
               </div>
               <div className="form-group">
-                <Label htmlFor="invite-role">Rol</Label>
+                <Label htmlFor="invite-role">Rol en el consultorio</Label>
                 <Select value={inviteRole} onValueChange={setInviteRole}>
                   <SelectTrigger id="invite-role">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {INVITE_ROLES.map((r) => (
-                      <SelectItem key={r.value} value={r.value}>
-                        {r.label}
+                    {INVITE_ROLES.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="clinic-team-role-hint">
+                  {INVITE_ROLES.find((item) => item.value === inviteRole)?.hint}
+                </p>
               </div>
               <Button type="submit" disabled={inviting || !inviteEmail.trim()}>
                 <UserPlus size={16} aria-hidden />
@@ -268,50 +306,57 @@ export function SettingsPage() {
             {members.length === 0 ? (
               <ClinicEmptyState
                 icon={Users}
-                title="Sin miembros adicionales"
-                description="Invita colegas con su email de registro en GUIAA."
+                title="Aún no hay colegas en el equipo"
+                description="Cuando tu colega ya tenga cuenta GUIAA, agrégalo con su email de registro."
               />
             ) : (
-              <div className="clinic-table-wrap">
-                <table className="clinic-table">
-                  <thead>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Email</th>
-                      <th>Rol</th>
-                      <th>Alta</th>
-                      <th aria-label="Acciones" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {members.map((m) => (
-                      <tr key={m.id}>
-                        <td>{m.nombre || "—"}</td>
-                        <td>{m.email || "—"}</td>
-                        <td>{ROLE_LABELS[m.role] || m.role}</td>
-                        <td>
-                          {m.created_at
-                            ? new Date(m.created_at).toLocaleDateString("es-MX")
-                            : "—"}
-                        </td>
-                        <td>
-                          {m.role !== "owner" && m.profile_id !== veterinarian?.id && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRemoveMember(m)}
-                              aria-label="Quitar miembro"
-                            >
-                              <Trash2 size={16} aria-hidden />
-                            </Button>
-                          )}
-                        </td>
+              <>
+                {extraMembers.length === 0 && (
+                  <p className="clinic-team-note">
+                    Tú eres el propietario. Agrega a tus colegas con el formulario de arriba.
+                  </p>
+                )}
+                <div className="clinic-table-wrap">
+                  <table className="clinic-table">
+                    <thead>
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Alta</th>
+                        <th aria-label="Acciones" />
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {members.map((member) => (
+                        <tr key={member.id}>
+                          <td>{member.nombre || "—"}</td>
+                          <td>{member.email || "—"}</td>
+                          <td>{ROLE_LABELS[member.role] || member.role}</td>
+                          <td>
+                            {member.created_at
+                              ? new Date(member.created_at).toLocaleDateString("es-MX")
+                              : "—"}
+                          </td>
+                          <td>
+                            {member.role !== "owner" && member.profile_id !== veterinarian?.id && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveMember(member)}
+                                aria-label="Quitar miembro"
+                              >
+                                <Trash2 size={16} aria-hidden />
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </section>
         </>
