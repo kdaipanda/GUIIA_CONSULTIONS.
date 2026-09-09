@@ -703,28 +703,96 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   grid-template-columns: 1fr auto auto;
   gap: 12px;
   align-items: end;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
-.clinic-page-guiaa .clinic-team-howto {
-  margin: 0 0 12px;
-  padding: 0 0 0 1.2rem;
-  max-width: 42rem;
-  color: #16324a;
-  font-size: 0.9375rem;
-  line-height: 1.55;
+.clinic-page-guiaa .clinic-team-guide {
+  margin: 0 0 20px;
 }
 
-.clinic-page-guiaa .clinic-team-howto li + li {
-  margin-top: 0.45rem;
-}
-
+.clinic-page-guiaa .clinic-team-lead,
 .clinic-page-guiaa .clinic-team-note {
-  margin: 0 0 12px;
-  max-width: 42rem;
+  margin: 0 0 16px;
+  max-width: 46rem;
   color: #16324a;
   font-size: 0.9375rem;
-  line-height: 1.55;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.clinic-page-guiaa .clinic-team-steps {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+
+.clinic-page-guiaa .clinic-team-step {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.clinic-page-guiaa .clinic-team-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--clinic-navy);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.clinic-page-guiaa .clinic-team-step-title {
+  margin: 3px 0 4px;
+  color: var(--clinic-navy);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.clinic-page-guiaa .clinic-team-step-body {
+  margin: 0;
+  color: #16324a;
+  font-size: 13px;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.clinic-page-guiaa .clinic-team-callout {
+  margin: 0;
+  padding: 12px 14px;
+  max-width: 46rem;
+  border-radius: 10px;
+  border: 1px solid rgba(38, 91, 147, 0.16);
+  background: rgba(232, 244, 252, 0.85);
+  color: #16324a;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.clinic-page-guiaa .clinic-team-add {
+  padding-top: 18px;
+  margin-bottom: 18px;
+  border-top: 1px solid rgba(38, 91, 147, 0.12);
+}
+
+.clinic-page-guiaa .clinic-team-add h3 {
+  margin: 0 0 12px;
+  color: var(--clinic-navy);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .clinic-page-guiaa .clinic-team-role-hint {
@@ -737,6 +805,11 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 @media (max-width: 768px) {
   .clinic-page-guiaa .clinic-invite-form {
     grid-template-columns: 1fr;
+  }
+
+  .clinic-page-guiaa .clinic-team-steps {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 }
 
@@ -1263,5 +1336,41 @@ html.dark .clinic-page-guiaa .clinic-search input {
 [data-theme="dark"] .clinic-page-guiaa .clinic-search input::placeholder,
 html.dark .clinic-page-guiaa .clinic-search input::placeholder {
   color: var(--text-tertiary) !important;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-team-lead,
+[data-theme="dark"] .clinic-page-guiaa .clinic-team-note,
+[data-theme="dark"] .clinic-page-guiaa .clinic-team-step-body,
+[data-theme="dark"] .clinic-page-guiaa .clinic-team-role-hint,
+html.dark .clinic-page-guiaa .clinic-team-lead,
+html.dark .clinic-page-guiaa .clinic-team-note,
+html.dark .clinic-page-guiaa .clinic-team-step-body,
+html.dark .clinic-page-guiaa .clinic-team-role-hint {
+  color: #d5e2ee;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-team-step-title,
+[data-theme="dark"] .clinic-page-guiaa .clinic-team-add h3,
+html.dark .clinic-page-guiaa .clinic-team-step-title,
+html.dark .clinic-page-guiaa .clinic-team-add h3 {
+  color: #f1f6fb;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-team-step-num,
+html.dark .clinic-page-guiaa .clinic-team-step-num {
+  background: #7eb3d6;
+  color: #0c2d4d;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-team-callout,
+html.dark .clinic-page-guiaa .clinic-team-callout {
+  border-color: rgba(126, 179, 214, 0.28);
+  background: rgba(38, 91, 147, 0.28);
+  color: #e8f1f8;
+}
+
+[data-theme="dark"] .clinic-page-guiaa .clinic-team-add,
+html.dark .clinic-page-guiaa .clinic-team-add {
+  border-top-color: rgba(126, 179, 214, 0.2);
 }
 

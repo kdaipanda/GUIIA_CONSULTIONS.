@@ -53,6 +53,21 @@ const INVITE_ROLES = [
   },
 ];
 
+const TEAM_STEPS = [
+  {
+    title: "Se registra",
+    body: "Nombre, cédula y el email que vas a usar, en guiaa.vet.",
+  },
+  {
+    title: "Tú lo vinculas",
+    body: "Cuando ya pueda entrar, escribe ese email abajo y elige su rol.",
+  },
+  {
+    title: "Entra de nuevo",
+    body: "Pulsa Agregar al equipo. Que cierre sesión y vuelva a entrar.",
+  },
+];
+
 export function SettingsPage() {
   const { veterinarian } = useVet();
   const { role } = useClinic();
@@ -242,66 +257,69 @@ export function SettingsPage() {
               <Users size={18} aria-hidden />
               Equipo
             </h2>
-            <p className="clinic-team-note">
-              GUIAA no envía un correo de invitación. Primero tu colega crea su propia cuenta;
-              después tú lo vinculas a este consultorio con el mismo email.
-            </p>
-            <ol className="clinic-team-howto">
-              <li>
-                Pídele que se registre en guiaa.vet (nombre, cédula y el email que vas a usar
-                aquí).
-              </li>
-              <li>
-                Cuando ya pueda iniciar sesión (aunque se le cree un consultorio vacío), escribe
-                ese email abajo y elige su rol.
-              </li>
-              <li>
-                Pulsa Agregar al equipo. Pídele que cierre sesión y entre de nuevo: verá este
-                consultorio, no el suyo vacío.
-              </li>
-            </ol>
-            <p className="clinic-team-note">
-              Si tu colega ya abrió GUIAA, se le crea un consultorio vacío. Al agregarlo lo
-              movemos al tuyo. Si ya tiene pacientes o citas en su propia clínica, no se puede
-              unir con ese email.
-            </p>
+            <div className="clinic-team-guide">
+              <p className="clinic-team-lead">
+                No enviamos un correo de invitación. Tu colega crea su cuenta; tú lo agregas aquí
+                con el mismo email.
+              </p>
+              <ol className="clinic-team-steps" aria-label="Pasos para agregar al equipo">
+                {TEAM_STEPS.map((step, index) => (
+                  <li key={step.title} className="clinic-team-step">
+                    <span className="clinic-team-step-num" aria-hidden>
+                      {index + 1}
+                    </span>
+                    <div>
+                      <p className="clinic-team-step-title">{step.title}</p>
+                      <p className="clinic-team-step-body">{step.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <p className="clinic-team-callout">
+                Si ya abrió GUIAA, se le crea un consultorio vacío y lo pasamos al tuyo. No se
+                puede unir si ya tiene pacientes o citas en su propia clínica.
+              </p>
+            </div>
 
-            <form onSubmit={handleInvite} className="clinic-invite-form">
-              <div className="form-group">
-                <Label htmlFor="invite-email">Email de registro en GUIAA</Label>
-                <Input
-                  id="invite-email"
-                  type="email"
-                  placeholder="colega@ejemplo.com"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  required
-                  autoComplete="off"
-                />
-              </div>
-              <div className="form-group">
-                <Label htmlFor="invite-role">Rol en el consultorio</Label>
-                <Select value={inviteRole} onValueChange={setInviteRole}>
-                  <SelectTrigger id="invite-role">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {INVITE_ROLES.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="clinic-team-role-hint">
-                  {INVITE_ROLES.find((item) => item.value === inviteRole)?.hint}
-                </p>
-              </div>
-              <Button type="submit" disabled={inviting || !inviteEmail.trim()}>
-                <UserPlus size={16} aria-hidden />
-                {inviting ? "Agregando..." : "Agregar al equipo"}
-              </Button>
-            </form>
+            <div className="clinic-team-add">
+              <h3>Agregar colega</h3>
+              <form onSubmit={handleInvite} className="clinic-invite-form">
+                <div className="form-group">
+                  <Label htmlFor="invite-email">Email de registro en GUIAA</Label>
+                  <Input
+                    id="invite-email"
+                    type="email"
+                    placeholder="colega@ejemplo.com"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    required
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="form-group">
+                  <Label htmlFor="invite-role">Rol en el consultorio</Label>
+                  <Select value={inviteRole} onValueChange={setInviteRole}>
+                    <SelectTrigger id="invite-role">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INVITE_ROLES.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="clinic-team-role-hint">
+                    {INVITE_ROLES.find((item) => item.value === inviteRole)?.hint}
+                  </p>
+                </div>
+                <Button type="submit" disabled={inviting || !inviteEmail.trim()}>
+                  <UserPlus size={16} aria-hidden />
+                  {inviting ? "Agregando..." : "Agregar al equipo"}
+                </Button>
+              </form>
+            </div>
 
             {members.length === 0 ? (
               <ClinicEmptyState
