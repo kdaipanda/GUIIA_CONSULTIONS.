@@ -114,6 +114,9 @@ def apply_team_membership_overlay(profile: Optional[Dict[str, Any]]) -> Dict[str
     out["membership_source"] = "organization"
     out["membership_owner_id"] = owner_id
     out["membership_owner_nombre"] = owner.get("nombre")
+    # Grant personal de features Premium del dueño NO se hereda al equipo.
+    out["premium_features_until"] = None
+    out["premium_features_active"] = False
     return out
 
 

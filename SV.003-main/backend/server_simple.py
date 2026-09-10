@@ -2254,11 +2254,19 @@ def _with_team_membership(profile: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         return {}
     try:
         import clinic_db as _clinic_db
+        from membership_access import annotate_premium_features_flag
 
-        return _clinic_db.apply_team_membership_overlay(profile)
+        return annotate_premium_features_flag(
+            _clinic_db.apply_team_membership_overlay(profile)
+        )
     except Exception as exc:  # noqa: BLE001
         print(f"[WARN] overlay membresía equipo: {exc}")
-        return dict(profile)
+        try:
+            from membership_access import annotate_premium_features_flag
+
+            return annotate_premium_features_flag(dict(profile))
+        except Exception:  # noqa: BLE001
+            return dict(profile)
 
 
 def _consultation_bill_to_id(profile: Dict[str, Any]) -> str:
@@ -2833,30 +2841,16 @@ async def analyze_consultation(
         )
 
     billing_profile = _with_team_membership(profile)
-    membership_type = billing_profile.get("membership_type")
-    remaining = billing_profile.get("consultations_remaining", 0)
     user_email = profile.get("email", "")
-    
-    # Verificar si el usuario tiene consultas ilimitadas
     has_unlimited = has_unlimited_consultations(user_email) if user_email else False
-    
-    # Si tiene consultas ilimitadas, tratarlo como premium
-    if has_unlimited:
-        membership_type = "premium"
-    
-    # Si tiene consultas de prueba (sin membership_type pero con consultas), permitir como premium
-    has_trial_consultations = not membership_type and remaining > 0
+    remaining = billing_profile.get("consultations_remaining", 0) or 0
 
-    if membership_type:
-        membership_type = membership_type.lower()
-    else:
-        membership_type = "trial" if has_trial_consultations else "basic"
-    
-    if membership_type not in ["premium", "trial"]:
-        raise HTTPException(
-            status_code=403,
-            detail=f"La síntesis clínica CDS L5 solo está disponible para miembros Premium. Tu plan actual es: {membership_type.capitalize()}. Por favor, actualiza tu membresía para acceder a esta función."
-        )
+    # Features (incl. grant temporal) — independiente del cupo CDS.
+    require_feature_for_profile(
+        billing_profile,
+        "advanced_analysis",
+        has_unlimited=has_unlimited,
+    )
     
     # Validar que tenga consultas restantes (solo para usuarios no premium y sin consultas ilimitadas)
     consultation_status = (consultation.get("status") or "draft").lower()

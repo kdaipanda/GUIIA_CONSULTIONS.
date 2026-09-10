@@ -35,16 +35,39 @@ export const TRIAL_CONSULTATION_LIMIT = 3;
 export const TRIAL_EXHAUSTED_MESSAGE =
   "Has agotado tus 3 consultas de prueba. Suscríbete a un plan de membresía para continuar usando GUIAA.";
 
-export function getEffectivePlan(veterinarian, { platformAdmin = false } = {}) {
-  if (platformAdmin) return "premium";
-  if (!veterinarian) return "basic";
+function parseGrantUntil(value) {
+  if (!value) return null;
+  const dt = new Date(value);
+  return Number.isNaN(dt.getTime()) ? null : dt;
+}
 
+/** Grant personal de features Premium; no aplica a miembros con overlay de org. */
+export function hasActivePremiumFeaturesGrant(veterinarian) {
+  if (!veterinarian) return false;
+  if ((veterinarian.membership_source || "").toLowerCase() === "organization") return false;
+  if (veterinarian.premium_features_active === true) return true;
+  if (veterinarian.premium_features_active === false) return false;
+  const until = parseGrantUntil(veterinarian.premium_features_until);
+  if (!until) return false;
+  return until.getTime() > Date.now();
+}
+
+/** Plan real de cupo/billing (ignora grant de features). */
+export function getBillingPlan(veterinarian) {
+  if (!veterinarian) return "basic";
   const membershipType = veterinarian.membership_type?.toLowerCase();
   const remaining = veterinarian.consultations_remaining ?? 0;
-
   if (membershipType) return membershipType;
   if (remaining > 0) return "trial";
   return "basic";
+}
+
+/** Plan efectivo para FEATURES (puede elevarse con premium_features_until). */
+export function getEffectivePlan(veterinarian, { platformAdmin = false } = {}) {
+  if (platformAdmin) return "premium";
+  if (!veterinarian) return "basic";
+  if (hasActivePremiumFeaturesGrant(veterinarian)) return "premium";
+  return getBillingPlan(veterinarian);
 }
 
 export function canAccessFeature(veterinarian, feature, options = {}) {
@@ -63,7 +86,14 @@ export function getFeatureUpgradeMessage(feature) {
   return FEATURE_UPGRADE_MESSAGES[feature] || "Tu plan no incluye esta función.";
 }
 
-/** ¿Puede iniciar una nueva consulta CDS? (trial, plan activo o premium) */
+export function getTrialExhaustedMessage() {
+  return TRIAL_EXHAUSTED_MESSAGE;
+}
+
+/**
+ * ¿Puede iniciar una nueva consulta CDS?
+ * Usa membership_type + cupo reales (NO el grant de features).
+ */
 export function canCreateConsultation(veterinarian, options = {}) {
   if (options.platformAdmin) return true;
   if (options.orgRole === "receptionist") return false;
@@ -72,7 +102,7 @@ export function canCreateConsultation(veterinarian, options = {}) {
   const membershipType = veterinarian.membership_type?.toLowerCase();
   const remaining = veterinarian.consultations_remaining ?? 0;
 
-  if (membershipType === "premium") return true;
+  // Cupo real: incluso Premium comercial descuenta; no tratar grant como ilimitado.
   if (membershipType && remaining > 0) return true;
   if (!membershipType && remaining > 0) return true;
   return false;

@@ -11,7 +11,9 @@ sys.path.insert(0, BACKEND_DIR)
 from membership_access import (  # noqa: E402
     can_access_feature,
     filter_categories_for_plan,
+    has_active_premium_features_grant,
     has_unlimited_consultations,
+    resolve_billing_plan,
     resolve_effective_plan,
     validate_consultation_category,
 )
@@ -126,6 +128,50 @@ class TrialConsultationLimit(unittest.TestCase):
         with self.assertRaises(HTTPException) as ctx:
             validate_trial_consultations_limit(None, 4)
         self.assertEqual(ctx.exception.status_code, 400)
+
+
+class PremiumFeaturesGrant(unittest.TestCase):
+    def test_basic_with_active_grant_gets_premium_features_not_billing_plan(self):
+        from datetime import datetime, timedelta, timezone
+
+        until = (datetime.now(timezone.utc) + timedelta(days=15)).isoformat()
+        p = {
+            "email": "gonzalezpardoceleste@gmail.com",
+            "membership_type": "basic",
+            "consultations_remaining": 30,
+            "premium_features_until": until,
+        }
+        self.assertTrue(has_active_premium_features_grant(p))
+        self.assertEqual(resolve_billing_plan(p), "basic")
+        self.assertEqual(resolve_effective_plan(p), "premium")
+        self.assertTrue(can_access_feature(p, "inventory"))
+        self.assertTrue(can_access_feature(p, "expert_mode"))
+        self.assertTrue(can_access_feature(p, "advanced_analysis"))
+        self.assertTrue(can_access_feature(p, "medical_images"))
+        self.assertTrue(can_access_feature(p, "multiespecies"))
+
+    def test_expired_grant_keeps_basic(self):
+        p = {
+            "membership_type": "basic",
+            "consultations_remaining": 30,
+            "premium_features_until": "2020-01-01T00:00:00+00:00",
+        }
+        self.assertFalse(has_active_premium_features_grant(p))
+        self.assertEqual(resolve_effective_plan(p), "basic")
+        self.assertFalse(can_access_feature(p, "inventory"))
+
+    def test_org_overlay_does_not_inherit_owner_grant(self):
+        from datetime import datetime, timedelta, timezone
+
+        until = (datetime.now(timezone.utc) + timedelta(days=15)).isoformat()
+        member = {
+            "membership_type": "basic",
+            "consultations_remaining": 30,
+            "membership_source": "organization",
+            "premium_features_until": until,  # no debería contar
+        }
+        self.assertFalse(has_active_premium_features_grant(member))
+        self.assertEqual(resolve_effective_plan(member), "basic")
 
 
 class UnlimitedConsultations(unittest.TestCase):

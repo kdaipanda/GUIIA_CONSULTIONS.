@@ -3,6 +3,7 @@ Control de acceso por membresía — alineado con membership_catalog.py.
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Optional
 
 import auth_security
@@ -56,27 +57,67 @@ FEATURE_UPGRADE_MESSAGES = {
 }
 
 
+def _parse_iso_dt(value) -> Optional[datetime]:
+    if value is None or value == "":
+        return None
+    if isinstance(value, datetime):
+        dt = value
+    else:
+        raw = str(value).strip()
+        if not raw:
+            return None
+        try:
+            dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
+def has_active_premium_features_grant(profile: Optional[dict]) -> bool:
+    """
+    Override temporal solo de FEATURES (no de cupo CDS).
+    No se hereda al equipo: se lee del perfil del actor, no del owner overlay.
+    """
+    if not profile:
+        return False
+    # Miembros de org no deben heredar el grant personal del dueño.
+    if (profile.get("membership_source") or "").strip().lower() == "organization":
+        return False
+    until = _parse_iso_dt(profile.get("premium_features_until"))
+    if not until:
+        return False
+    return until > datetime.now(timezone.utc)
+
+
+def resolve_billing_plan(profile: Optional[dict]) -> str:
+    """Plan real para cupo/billing (ignora grant de features)."""
+    if not profile:
+        return "basic"
+    membership_type = profile.get("membership_type")
+    remaining = profile.get("consultations_remaining") or 0
+    if membership_type:
+        return str(membership_type).lower()
+    if remaining > 0:
+        return "trial"
+    return "basic"
+
+
 def resolve_effective_plan(
     profile: Optional[dict],
     *,
     has_unlimited: bool = False,
     is_platform_admin: bool = False,
 ) -> str:
+    """Plan efectivo para FEATURES (puede elevarse con premium_features_until)."""
     if is_platform_admin:
         return "premium"
     if has_unlimited:
         return "premium"
-    if not profile:
-        return "basic"
-
-    membership_type = profile.get("membership_type")
-    remaining = profile.get("consultations_remaining") or 0
-
-    if membership_type:
-        return str(membership_type).lower()
-    if remaining > 0:
-        return "trial"
-    return "basic"
+    if has_active_premium_features_grant(profile):
+        return "premium"
+    return resolve_billing_plan(profile)
 
 
 def can_access_feature(
@@ -164,3 +205,13 @@ def require_feature_for_profile(profile: Optional[dict], feature: str, *, has_un
         has_unlimited=has_unlimited,
         is_platform_admin=auth_security.is_platform_admin_profile(profile),
     )
+
+
+def annotate_premium_features_flag(profile: Optional[dict]) -> Optional[dict]:
+    """Marca runtime para UI: premium_features_active sin tocar cupo."""
+    if not profile:
+        return profile
+    out = dict(profile)
+    active = has_active_premium_features_grant(out)
+    out["premium_features_active"] = active
+    return out
