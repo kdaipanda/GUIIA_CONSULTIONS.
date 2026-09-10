@@ -169,7 +169,6 @@ export const VetProvider = ({ children }) => {
     if (profileSyncedRef.current || !veterinarian?.id || !getAccessToken()) return;
     profileSyncedRef.current = true;
     void refreshProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [veterinarian?.id]);
 
   useEffect(() => {
