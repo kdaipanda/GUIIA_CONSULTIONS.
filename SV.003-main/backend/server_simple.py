@@ -826,6 +826,15 @@ class InviteRegister(BaseModel):
     institucion: Optional[str] = None
 
 
+class InviteRegisterVerify(BaseModel):
+    nonce: str
+    code: str = Field(..., min_length=4, max_length=12)
+
+
+class InviteRegisterResend(BaseModel):
+    nonce: str
+
+
 class VeterinarianLogin(BaseModel):
     email: str
     password: Optional[str] = None
@@ -1651,155 +1660,55 @@ async def get_organization_invite(token: str):
 
 @app.post("/api/auth/register-invite")
 async def register_with_organization_invite(body: InviteRegister, request: Request):
-    """Alta vía invitación: staff sin cédula, o veterinario con cédula, directo al consultorio."""
-    import clinic_db as _clinic_db
+    """Paso 1: valida formulario + invita, envía OTP al email (aún no crea cuenta)."""
+    import invite_registration as _invite_reg
 
     rate_limit.check_rate_limit(request, "register", body.token[:32])
+    return await _invite_reg.start_invite_registration(
+        body=body,
+        get_profile_by_email=get_profile_by_email,
+        is_dev_user=is_dev_user,
+        normalize_professional_id=normalize_professional_id,
+        professional_id_key=professional_id_key,
+        get_profile_by_cedula=get_profile_by_cedula,
+        generate_2fa_code=generate_2fa_code,
+    )
 
-    invite, inv_err = _clinic_db.get_invite_by_raw_token(body.token)
-    if inv_err or not invite:
-        raise HTTPException(status_code=400, detail=inv_err or "Invitación no válida")
 
-    email = (invite.get("email") or "").strip().lower()
-    role = (invite.get("role") or "veterinarian").strip().lower()
-    org_id = invite.get("organization_id")
-    invite_id = invite.get("id")
-    requires_license = role not in _clinic_db.STAFF_INVITE_ROLES
+@app.post("/api/auth/register-invite/verify")
+async def verify_organization_invite_registration(
+    body: InviteRegisterVerify, request: Request
+):
+    """Paso 2: OTP correcto → crea perfil, une al org y emite JWT."""
+    import invite_registration as _invite_reg
 
-    existing, _ = get_profile_by_email(email)
-    if existing:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "Ese email ya tiene cuenta. Inicia sesión y pide al dueño que te agregue "
-                "desde Configuración → Equipo."
-            ),
-        )
+    rate_limit.check_rate_limit(request, "register", (body.nonce or "")[:32] or "invite-verify")
+    result = await _invite_reg.complete_invite_registration(
+        nonce=body.nonce,
+        code=body.code,
+        get_profile_by_email=get_profile_by_email,
+        get_profile=get_profile,
+        upsert_profile=upsert_profile,
+        is_dev_user=is_dev_user,
+        with_team_membership=_with_team_membership,
+        email_background=_email_background,
+    )
+    rate_limit.reset_rate_limit(request, "register", (body.nonce or "")[:32] or "invite-verify")
+    return result
 
-    phone = (body.telefono or "").strip()
-    phone_digits = re.sub(r"\D", "", phone)
-    if len(phone_digits) < 8:
-        raise HTTPException(
-            status_code=400,
-            detail="Ingresa un número de teléfono válido (mínimo 8 dígitos).",
-        )
 
-    try:
-        password_hash = password_auth.hash_password(body.password)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except Exception as exc:  # noqa: BLE001
-        raise HTTPException(
-            status_code=400,
-            detail=password_auth.PASSWORD_HASH_ERROR_MESSAGE,
-        ) from exc
+@app.post("/api/auth/register-invite/resend-code")
+async def resend_organization_invite_registration_code(
+    body: InviteRegisterResend, request: Request
+):
+    """Reenvía OTP y rota el nonce de verificación."""
+    import invite_registration as _invite_reg
 
-    profile_id = str(uuid.uuid4())
-    pais = (body.profesional_pais or "MX").strip().upper()[:2]
-
-    if requires_license:
-        cedula_norm = normalize_professional_id(body.cedula_profesional or "")
-        if len(cedula_norm) < 3:
-            raise HTTPException(
-                status_code=400,
-                detail="Ingresa un número de matrícula, licencia o registro profesional válido.",
-            )
-        existing_cedula, _ = get_profile_by_cedula(cedula_norm)
-        if existing_cedula:
-            raise HTTPException(status_code=400, detail="Este registro profesional ya está registrado")
-        if not (body.especialidad or "").strip():
-            raise HTTPException(status_code=400, detail="Selecciona una especialidad.")
-        years = int(body.años_experiencia or 0)
-        institucion = (body.institucion or "").strip()
-        if not institucion:
-            raise HTTPException(status_code=400, detail="Ingresa tu institución.")
-        is_dev = is_dev_user(email)
-        initial_status = CEDULA_STATUS_VERIFIED if is_dev else CEDULA_STATUS_UNSUBMITTED
-        vet_data = {
-            "id": profile_id,
-            "nombre": (body.nombre or "").strip(),
-            "email": email,
-            "telefono": phone,
-            "cedula_profesional": cedula_norm,
-            "cedula_profesional_key": professional_id_key(cedula_norm),
-            "profesional_pais": pais,
-            "especialidad": body.especialidad.strip(),
-            "años_experiencia": years,
-            "institucion": institucion,
-            "membership_type": None,
-            "consultations_remaining": 3,
-            "membership_expires": None,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "two_factor_enabled": False,
-            "cedula_verification_status": initial_status,
-            "cedula_document_url": None,
-            "cedula_document_uploaded_at": datetime.now(timezone.utc).isoformat() if is_dev else None,
-            "cedula_verification_checked_at": datetime.now(timezone.utc).isoformat() if is_dev else None,
-            "cedula_verification_error": None,
-            "cedula_sep_nombre": body.nombre if is_dev else None,
-            "cedula_sep_profesion": "Médico Veterinario Zootecnista" if is_dev else None,
-            "cedula_skip_count": 0,
-            "password_hash": password_hash,
-        }
-    else:
-        vet_data = {
-            "id": profile_id,
-            "nombre": (body.nombre or "").strip(),
-            "email": email,
-            "telefono": phone,
-            "cedula_profesional": None,
-            "cedula_profesional_key": None,
-            "profesional_pais": pais,
-            "especialidad": None,
-            "años_experiencia": 0,
-            "institucion": None,
-            "membership_type": None,
-            "consultations_remaining": 0,
-            "membership_expires": None,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "two_factor_enabled": False,
-            "cedula_verification_status": CEDULA_STATUS_VERIFIED,
-            "cedula_document_url": None,
-            "cedula_document_uploaded_at": datetime.now(timezone.utc).isoformat(),
-            "cedula_verification_checked_at": datetime.now(timezone.utc).isoformat(),
-            "cedula_verification_error": None,
-            "cedula_sep_nombre": None,
-            "cedula_sep_profesion": None,
-            "cedula_skip_count": 0,
-            "password_hash": password_hash,
-        }
-
-    result, err = upsert_profile(vet_data)
-    if err:
-        raise HTTPException(status_code=500, detail=f"Error guardando perfil: {err}")
-
-    member, mem_err = _clinic_db.insert_organization_member_direct(org_id, profile_id, role)
-    if mem_err:
-        raise HTTPException(status_code=500, detail=f"No se pudo unir al consultorio: {mem_err}")
-
-    mark_err = _clinic_db.mark_invite_accepted(invite_id, profile_id)
-    if mark_err:
-        print(f"[WARN] No se pudo marcar invitación aceptada: {mark_err}")
-
-    saved = result or vet_data
-    # Heredar plan/cupo del dueño del consultorio al unirse por invitación.
-    result_data = auth_security.attach_auth_tokens(_with_team_membership(saved))
-    result_data["invite"] = {
-        "organization_id": org_id,
-        "role": role,
-        "requires_license": requires_license,
-        "organization_name": invite.get("organization_name") or "",
-    }
-    result_data["membership"] = member
-
-    if requires_license and not is_dev_user(email):
-        cedula_verification.maybe_send_cedula_upload_reminder(saved, force=True)
-        asyncio.create_task(
-            _email_background(email_notifications.notify_admins_new_registration, saved)
-        )
-
-    rate_limit.reset_rate_limit(request, "register", body.token[:32])
-    return result_data
+    rate_limit.check_rate_limit(request, "register", (body.nonce or "")[:32] or "invite-resend")
+    return await _invite_reg.resend_invite_registration_code(
+        nonce=body.nonce,
+        generate_2fa_code=generate_2fa_code,
+    )
 
 
 @app.post("/api/auth/login")

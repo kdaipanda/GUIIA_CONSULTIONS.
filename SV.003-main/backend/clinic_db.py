@@ -12,7 +12,9 @@ from supabase_client import get_supabase_client
 
 INVITE_ROLES = frozenset({"admin", "veterinarian", "receptionist"})
 STAFF_INVITE_ROLES = frozenset({"admin", "receptionist"})
-INVITE_TTL_DAYS = 14
+INVITE_TTL_DAYS = 7  # Antes 14; enlace de alta más corto
+INVITE_EMAIL_CODE_TTL_SECONDS = 15 * 60
+INVITE_REGISTER_PENDING_TTL_SECONDS = 15 * 60
 
 
 def _now_iso() -> str:
@@ -21,6 +23,10 @@ def _now_iso() -> str:
 
 def _hash_invite_token(raw_token: str) -> str:
     return hashlib.sha256((raw_token or "").encode("utf-8")).hexdigest()
+
+
+def hash_invite_email_code(code: str) -> str:
+    return hashlib.sha256((code or "").strip().encode("utf-8")).hexdigest()
 
 
 def new_invite_token() -> Tuple[str, str]:
@@ -783,14 +789,23 @@ def get_invite_by_raw_token(
 
 
 def mark_invite_accepted(invite_id: str, profile_id: str) -> Optional[str]:
+    """Marca invitación aceptada solo si sigue pendiente (anti carrera)."""
     try:
-        _table("organization_invites").update(
-            {
-                "status": "accepted",
-                "accepted_at": _now_iso(),
-                "accepted_profile_id": profile_id,
-            }
-        ).eq("id", invite_id).execute()
+        resp = (
+            _table("organization_invites")
+            .update(
+                {
+                    "status": "accepted",
+                    "accepted_at": _now_iso(),
+                    "accepted_profile_id": profile_id,
+                }
+            )
+            .eq("id", invite_id)
+            .eq("status", "pending")
+            .execute()
+        )
+        if not resp.data:
+            return "La invitación ya fue usada o ya no está pendiente"
         return None
     except Exception as exc:  # noqa: BLE001
         return str(exc)

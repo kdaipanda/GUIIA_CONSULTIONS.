@@ -14,6 +14,7 @@ from jose import JWTError, jwt
 _current_vet_id: ContextVar[Optional[str]] = ContextVar("current_vet_id", default=None)
 
 CEDULA_FLOW_TTL_SECONDS = 30 * 60
+INVITE_REGISTER_PENDING_TTL_SECONDS = 15 * 60
 
 ALGORITHM = "HS256"
 DEFAULT_TOKEN_HOURS = 24
@@ -191,6 +192,56 @@ def cedula_flow_fields(vet_id: str) -> Dict[str, Any]:
     }
 
 
+def create_invite_register_pending_token(
+    *,
+    invite_id: str,
+    invite_token_hash: str,
+    email: str,
+    code_hash: str,
+    profile_payload: Dict[str, Any],
+) -> str:
+    """JWT de corta vida con el alta pendiente + hash del OTP (multi-réplica)."""
+    try:
+        secret = _jwt_secret()
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Autenticación no disponible: falta JWT_SECRET en el servidor. "
+                "Contacta soporte o al administrador de la plataforma."
+            ),
+        ) from exc
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(seconds=INVITE_REGISTER_PENDING_TTL_SECONDS)
+    payload = {
+        "sub": str(invite_id),
+        "email": (email or "").lower().strip(),
+        "invite_token_hash": invite_token_hash,
+        "code_hash": code_hash,
+        "profile": profile_payload,
+        "iat": int(now.timestamp()),
+        "exp": int(expire.timestamp()),
+        "type": "invite_register",
+        "jti": str(uuid.uuid4()),
+    }
+    return jwt.encode(payload, secret, algorithm=ALGORITHM)
+
+
+def verify_invite_register_pending_token(token: Optional[str]) -> Dict[str, Any]:
+    if not token:
+        raise HTTPException(status_code=401, detail="Sesión de verificación expirada")
+    try:
+        payload = jwt.decode(token.strip(), _jwt_secret(), algorithms=[ALGORITHM])
+    except JWTError as exc:
+        raise HTTPException(
+            status_code=401,
+            detail="Código o sesión de verificación inválidos. Solicita un código nuevo.",
+        ) from exc
+    if payload.get("type") != "invite_register" or not payload.get("sub"):
+        raise HTTPException(status_code=401, detail="Sesión de verificación inválida")
+    return payload
+
+
 def resolve_authenticated_vet_id(x_veterinarian_id: Optional[str]) -> str:
     """Resuelve el ID del veterinario autenticado (JWT middleware o header legacy)."""
     auth_id = get_request_vet_id()
@@ -258,6 +309,8 @@ def is_public_api_route(method: str, path: str) -> bool:
         ("POST", "/api/auth/login"),
         ("POST", "/api/auth/register"),
         ("POST", "/api/auth/register-invite"),
+        ("POST", "/api/auth/register-invite/verify"),
+        ("POST", "/api/auth/register-invite/resend-code"),
         ("POST", "/api/auth/verify-2fa"),
         ("POST", "/api/support/chat"),
         ("POST", "/api/payments/stripe/webhook"),

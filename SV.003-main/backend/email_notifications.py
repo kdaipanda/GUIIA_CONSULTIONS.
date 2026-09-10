@@ -751,3 +751,69 @@ def notify_user_2fa_code(profile: dict, code: str) -> None:
     if err:
         print(f"[WARN] Email 2FA: {err}")
 
+
+def notify_invite_email_code(
+    *,
+    email: str,
+    nombre: str,
+    code: str,
+    organization_name: str = "",
+) -> Optional[str]:
+    """OTP para confirmar posesión del email al aceptar invitación de equipo."""
+    user_email = (email or "").strip()
+    if not user_email or not code:
+        return "Email o código vacío"
+    user_name = (nombre or "").strip() or "colega"
+    org = (organization_name or "").strip() or "un consultorio en GUIAA"
+    email_subject = "[GUIAA] Confirma tu email para unirte al equipo"
+    text = (
+        f"Hola {user_name},\n\n"
+        f"Para completar tu alta en {org}, usa este código: {code}\n\n"
+        f"Válido por 15 minutos. Si no solicitaste unirte a GUIAA, ignora este mensaje.\n\n"
+        f"— Equipo GUIAA\n"
+    )
+    html = f"""
+    <h2>Confirma tu email</h2>
+    <p>Hola {user_name},</p>
+    <p>Para unirte a <strong>{org}</strong> en GUIAA, ingresa este código:</p>
+    <p style="font-size:28px;font-weight:700;letter-spacing:6px;margin:24px 0;">{code}</p>
+    <p style="color:#64748b;font-size:13px;">Válido por 15 minutos. Si no fuiste tú, ignora este correo.</p>
+    <p style="color:#64748b;font-size:12px;">— Equipo GUIAA</p>
+    """
+    err = send_email([user_email], email_subject, html, text)
+    if err:
+        print(f"[WARN] Email invite OTP ({user_email}): {err}")
+    return err
+
+
+def notify_organization_invite_accepted(payload: dict) -> Optional[str]:
+    """Avisa al invitador que alguien aceptó la invitación."""
+    inviter_email = (payload.get("inviter_email") or "").strip()
+    if not inviter_email:
+        return None
+    member_name = (payload.get("member_nombre") or "").strip() or "Un colega"
+    member_email = (payload.get("member_email") or "").strip()
+    role = (payload.get("role") or "miembro").strip()
+    org = (payload.get("organization_name") or "").strip() or "tu consultorio"
+    email_subject = f"[GUIAA] {member_name} se unió a {org}"
+    text = (
+        f"Hola,\n\n"
+        f"{member_name} ({member_email}) aceptó la invitación y se unió a {org} "
+        f"con el rol {role}.\n\n"
+        f"Si no reconoces este acceso, revoca la cuenta desde Configuración → Equipo.\n\n"
+        f"— Equipo GUIAA\n"
+    )
+    html = f"""
+    <h2>Nuevo miembro en el equipo</h2>
+    <p><strong>{member_name}</strong> ({member_email}) se unió a <strong>{org}</strong>
+    como <strong>{role}</strong>.</p>
+    <p style="color:#64748b;font-size:13px;">
+      Si no reconoces este acceso, revócalo en Configuración → Equipo.
+    </p>
+    <p style="color:#64748b;font-size:12px;">— Equipo GUIAA</p>
+    """
+    err = send_email([inviter_email], email_subject, html, text)
+    if err:
+        print(f"[WARN] Email invite accepted ({inviter_email}): {err}")
+    return err
+
