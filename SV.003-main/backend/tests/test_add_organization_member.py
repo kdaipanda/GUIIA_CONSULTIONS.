@@ -134,6 +134,38 @@ class AddOrganizationMember(unittest.TestCase):
         reassign_mock.assert_called_once_with(existing, "org-a", "veterinarian")
         clear_mock.assert_called_once_with("vet-1")
 
+    def test_clear_personal_membership_preserves_paid_entitlement(self):
+        paid_profile = {
+            "id": "vet-1",
+            "membership_type": "professional",
+            "consultations_remaining": 35,
+            "membership_expires": "2026-10-01T00:00:00+00:00",
+        }
+        with mock.patch(
+            "supabase_client.get_profile",
+            return_value=(paid_profile, None),
+        ), mock.patch("supabase_client.update_profile") as update_mock:
+            clinic_db._clear_personal_membership_for_team_member("vet-1")
+
+        update_mock.assert_not_called()
+
+    def test_clear_personal_membership_clears_empty_new_invitee(self):
+        empty_profile = {
+            "id": "vet-1",
+            "membership_type": None,
+            "consultations_remaining": 0,
+            "membership_expires": None,
+        }
+        with mock.patch(
+            "supabase_client.get_profile",
+            return_value=(empty_profile, None),
+        ), mock.patch("supabase_client.update_profile", return_value=None) as update_mock:
+            clinic_db._clear_personal_membership_for_team_member("vet-1")
+
+        update_mock.assert_called_once()
+        self.assertEqual(update_mock.call_args.args[0], "vet-1")
+        self.assertEqual(update_mock.call_args.args[1]["membership_type"], None)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -428,7 +428,18 @@ def _clear_personal_membership_for_team_member(profile_id: str) -> None:
     try:
         from datetime import datetime, timezone
 
-        from supabase_client import update_profile
+        from supabase_client import get_profile, update_profile
+
+        profile, err = get_profile(profile_id)
+        if err:
+            print(f"[WARN] No se pudo revisar membresía personal de {profile_id}: {err}")
+            return
+        if profile and (
+            profile.get("membership_type")
+            or int(profile.get("consultations_remaining") or 0) > 0
+            or profile.get("membership_expires")
+        ):
+            return
 
         update_profile(
             profile_id,

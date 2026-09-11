@@ -16,6 +16,23 @@ from supabase_client import (
 )
 
 
+def _resolve_benefit_profile_id(veterinarian_id: str) -> Tuple[str, Optional[str]]:
+    """Team purchases must fund the same owner pool that CDS later debits."""
+    try:
+        profile, err = get_profile(veterinarian_id)
+    except Exception as exc:  # noqa: BLE001
+        return (veterinarian_id, str(exc))
+    if err or not profile:
+        return (veterinarian_id, err or "Veterinario no encontrado")
+    try:
+        import clinic_db
+
+        benefit_id = clinic_db.resolve_consultation_billing_profile_id(profile)
+    except Exception as exc:  # noqa: BLE001
+        return (veterinarian_id, str(exc))
+    return ((benefit_id or veterinarian_id).strip() or veterinarian_id, None)
+
+
 def sync_transaction_status(
     session_id: str,
     *,
@@ -152,9 +169,12 @@ def fulfill_paid_transaction(
     ).strip()
     if not veterinarian_id:
         return (None, "La transacción no tiene veterinarian_id", False)
+    benefit_profile_id, benefit_err = _resolve_benefit_profile_id(veterinarian_id)
+    if benefit_err:
+        return (None, benefit_err, False)
 
     if tx_type == "membership":
-        return _apply_membership(transaction, meta, veterinarian_id)
+        return _apply_membership(transaction, meta, benefit_profile_id)
     if tx_type == "consultation_credits":
-        return _apply_credits(transaction, meta, veterinarian_id)
+        return _apply_credits(transaction, meta, benefit_profile_id)
     return (None, f"Tipo de transacción no soportado: {tx_type or '(vacío)'}", False)
