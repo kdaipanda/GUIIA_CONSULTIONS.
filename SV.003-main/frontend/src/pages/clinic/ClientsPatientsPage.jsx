@@ -9,8 +9,10 @@ import {
   Zap,
   Users,
   FlaskConical,
+  FolderOpen,
 } from "lucide-react";
 import "./clinicPageShared.css";
+import "./helpCenterPage.css";
 import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
 import { useConfirmAction } from "../../hooks/useConfirmAction";
 import {
@@ -19,21 +21,28 @@ import {
   ClinicStatPill,
   clinicDialogClass,
 } from "../../components/clinic/ClinicPageUi";
+import { ModuleHelpTip } from "../../components/clinic/ModuleHelpTip";
 import { useVet } from "../../context/VetContext";
 import {
-  fetchPatients,
-  fetchClients,
+  fetchPatient,
   createPatient,
   updatePatient,
   deletePatient,
-  fetchPatient,
   createClient,
   updateClient,
   deleteClient,
 } from "../../lib/clinicApi";
+import {
+  loadClinicRegistry,
+  invalidateClinicRegistryCache,
+  readClinicRegistryCache,
+  writeClinicRegistryCache,
+} from "../../lib/clinicRegistryCache";
+import { fetchClinicRegistry } from "../../lib/clinicApi";
 import { downloadConsultationPdf, downloadPatientHistoryPdf } from "../../lib/consultationPdf";
 import { ClinicalTimelineList } from "../../components/clinical/ClinicalTimelineList";
 import { notifyError, notifySuccess } from "../../lib/appToast";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -81,13 +90,18 @@ export function ClientsPatientsPage({
   onStartConsultation,
   onStartLabAnalysis,
   onViewConsultation,
+  onOpenPatientChart,
 }) {
+  const { t } = useTranslation("clinic");
+  const { t: tSpecies } = useTranslation("speciesForms");
+  const speciesLabel = (value) =>
+    value ? tSpecies(`categories.${value}`, { defaultValue: value }) : t("common.emDash");
   const { veterinarian } = useVet();
   const { confirm, dialogProps } = useConfirmAction();
-  const [clients, setClients] = useState([]);
-  const [patients, setPatients] = useState([]);
+  const [clients, setClients] = useState(() => readClinicRegistryCache(veterinarian?.id)?.clients || []);
+  const [patients, setPatients] = useState(() => readClinicRegistryCache(veterinarian?.id)?.patients || []);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !readClinicRegistryCache(veterinarian?.id));
   const [quickDialogOpen, setQuickDialogOpen] = useState(false);
 
   const [clientDialogOpen, setClientDialogOpen] = useState(false);
@@ -106,22 +120,49 @@ export function ClientsPatientsPage({
   const [pdfLoadingId, setPdfLoadingId] = useState(null);
   const [historyPdfLoading, setHistoryPdfLoading] = useState(false);
 
-  const load = useCallback(async () => {
-    if (!veterinarian?.id) return;
-    setLoading(true);
+  const applyRegistry = useCallback((data) => {
+    setClients(data?.clients || []);
+    setPatients(data?.patients || []);
+  }, []);
+
+  const load = useCallback(async ({ force = false, silent = false } = {}) => {
+    if (!veterinarian?.id) {
+      setLoading(false);
+      return;
+    }
+
+    const cached = !force ? readClinicRegistryCache(veterinarian.id) : null;
+    if (cached) {
+      applyRegistry(cached);
+      setLoading(false);
+      try {
+        const fresh = await fetchClinicRegistry(veterinarian.id);
+        writeClinicRegistryCache(veterinarian.id, fresh);
+        applyRegistry(fresh);
+      } catch (err) {
+        if (!cached?.clients?.length && !cached?.patients?.length) {
+          notifyError(err.message);
+        }
+      }
+      return;
+    }
+
+    if (!silent) setLoading(true);
     try {
-      const [clientsData, patientsData] = await Promise.all([
-        fetchClients(veterinarian.id),
-        fetchPatients(veterinarian.id),
-      ]);
-      setClients(clientsData.clients || []);
-      setPatients(patientsData.patients || []);
+      const data = await loadClinicRegistry(veterinarian.id, { force: true });
+      applyRegistry(data);
     } catch (err) {
       notifyError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [veterinarian?.id]);
+  }, [applyRegistry, veterinarian?.id]);
+
+  const reloadRegistry = useCallback(async () => {
+    if (!veterinarian?.id) return;
+    invalidateClinicRegistryCache(veterinarian.id);
+    await load({ force: true, silent: true });
+  }, [load, veterinarian?.id]);
 
   useEffect(() => {
     load();
@@ -208,13 +249,13 @@ export function ClientsPatientsPage({
     try {
       if (clientEditing) {
         await updateClient(veterinarian.id, clientEditing.id, clientForm);
-        notifySuccess("Dueño actualizado");
+        notifySuccess(t("clients.ownerUpdated"));
       } else {
         await createClient(veterinarian.id, clientForm);
-        notifySuccess("Dueño registrado");
+        notifySuccess(t("clients.ownerCreated"));
       }
       setClientDialogOpen(false);
-      load();
+      reloadRegistry();
     } catch (err) {
       notifyError(err.message);
     } finally {
@@ -224,16 +265,16 @@ export function ClientsPatientsPage({
 
   const handleDeleteClient = async (client) => {
     const ok = await confirm({
-      title: "Eliminar dueño",
-      description: `¿Eliminar a "${client.name}" y sus datos asociados? Esta acción no se puede deshacer.`,
-      confirmLabel: "Eliminar",
+      title: t("clients.deleteOwnerTitle"),
+      description: t("clients.deleteOwnerDesc", { name: client.name }),
+      confirmLabel: t("clients.deleteConfirm"),
       destructive: true,
     });
     if (!ok) return;
     try {
       await deleteClient(veterinarian.id, client.id);
-      notifySuccess("Dueño eliminado");
-      load();
+      notifySuccess(t("clients.ownerDeleted"));
+      reloadRegistry();
     } catch (err) {
       notifyError(err.message);
     }
@@ -290,13 +331,13 @@ export function ClientsPatientsPage({
     try {
       if (patientEditing) {
         await updatePatient(veterinarian.id, patientEditing.id, payload);
-        notifySuccess("Mascota actualizada");
+        notifySuccess(t("clients.petUpdated"));
       } else {
         await createPatient(veterinarian.id, payload);
-        notifySuccess("Mascota registrada");
+        notifySuccess(t("clients.petCreated"));
       }
       setPatientDialogOpen(false);
-      load();
+      reloadRegistry();
     } catch (err) {
       notifyError(err.message);
     } finally {
@@ -306,16 +347,16 @@ export function ClientsPatientsPage({
 
   const handleDeletePatient = async (patient) => {
     const ok = await confirm({
-      title: "Eliminar mascota",
-      description: `¿Eliminar a "${patient.name}" del expediente? Esta acción no se puede deshacer.`,
-      confirmLabel: "Eliminar",
+      title: t("clients.deletePetTitle"),
+      description: t("clients.deletePetDesc", { name: patient.name }),
+      confirmLabel: t("clients.deleteConfirm"),
       destructive: true,
     });
     if (!ok) return;
     try {
       await deletePatient(veterinarian.id, patient.id);
-      notifySuccess("Mascota eliminada");
-      load();
+      notifySuccess(t("clients.petDeleted"));
+      reloadRegistry();
     } catch (err) {
       notifyError(err.message);
     }
@@ -326,7 +367,7 @@ export function ClientsPatientsPage({
     try {
       await downloadConsultationPdf(consultation, { veterinarian });
     } catch (err) {
-      notifyError(err.message || "No se pudo generar el PDF");
+      notifyError(err.message || t("common.pdfError"));
     } finally {
       setPdfLoadingId(null);
     }
@@ -341,7 +382,7 @@ export function ClientsPatientsPage({
         medicalImages: detail.medical_images || [],
       });
     } catch (err) {
-      notifyError(err.message || "No se pudo generar el historial PDF");
+      notifyError(err.message || t("common.historyPdfError"));
     } finally {
       setHistoryPdfLoading(false);
     }
@@ -351,13 +392,16 @@ export function ClientsPatientsPage({
     <div className="clinic-page clinic-page-guiaa">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">Consultorio</p>
-          <h1>Dueños y mascotas</h1>
-          <p>Tutores, fichas clínicas e historial en un solo lugar.</p>
+          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
+          <div className="clinic-page-title-row">
+            <h1>{t("clients.title")}</h1>
+            <ModuleHelpTip topicId="clients" />
+          </div>
+          <p>{t("clients.lead")}</p>
         </div>
         <div className="clinic-header-actions">
           <Button type="button" onClick={() => setQuickDialogOpen(true)}>
-            <Zap size={16} className="mr-1" /> Nuevo registro
+            <Zap size={16} className="mr-1" /> {t("clients.newRecord")}
           </Button>
         </div>
       </div>
@@ -366,7 +410,7 @@ export function ClientsPatientsPage({
         <div className="clinic-search">
           <Search size={16} />
           <Input
-            placeholder="Buscar dueño, teléfono, mascota o especie..."
+            placeholder={t("clients.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -375,9 +419,9 @@ export function ClientsPatientsPage({
 
       {!loading && clients.length > 0 && (
         <div className="clinic-stats-row">
-          <ClinicStatPill value={stats.owners} label="Dueños" />
-          <ClinicStatPill value={stats.pets} label="Mascotas" />
-          <ClinicStatPill value={stats.species} label="Especies" />
+          <ClinicStatPill value={stats.owners} label={t("clients.statOwners")} />
+          <ClinicStatPill value={stats.pets} label={t("clients.statPets")} />
+          <ClinicStatPill value={stats.species} label={t("clients.statSpecies")} />
         </div>
       )}
 
@@ -386,15 +430,15 @@ export function ClientsPatientsPage({
       ) : clients.length === 0 ? (
         <ClinicEmptyState
           mascot={<DoctorPlumitas size="sm" badge />}
-          title="Sin dueños registrados"
-          description="Usa registro rápido para crear dueño y mascota en un solo paso."
-          actionLabel="Nuevo registro"
+          title={t("clients.emptyTitle")}
+          description={t("clients.emptyDesc")}
+          actionLabel={t("clients.newRecord")}
           onAction={() => setQuickDialogOpen(true)}
         />
       ) : visibleClients.length === 0 ? (
         <ClinicEmptyState
-          title="Sin resultados"
-          description="Prueba con otro nombre, teléfono o mascota."
+          title={t("common.noResults")}
+          description={t("clients.noResultsDesc")}
         />
       ) : (
         <div className="clinic-owner-list">
@@ -409,7 +453,7 @@ export function ClientsPatientsPage({
                   <div className="clinic-owner-card-info">
                     <strong>{client.name}</strong>
                     <span>
-                      {[client.phone, client.email].filter(Boolean).join(" · ") || "Sin contacto"}
+                      {[client.phone, client.email].filter(Boolean).join(" · ") || t("clients.noContact")}
                     </span>
                   </div>
                   <div className="clinic-table-actions">
@@ -417,7 +461,7 @@ export function ClientsPatientsPage({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      title="Agregar mascota"
+                      title={t("clients.addPet")}
                       onClick={() => openCreatePatient(client.id)}
                     >
                       <PawPrint size={14} />
@@ -433,9 +477,9 @@ export function ClientsPatientsPage({
 
                 {pets.length === 0 ? (
                   <p className="clinic-owner-empty">
-                    Sin mascotas.{" "}
+                    {t("clients.noPets")}{" "}
                     <button type="button" className="clinic-link-btn" onClick={() => openCreatePatient(client.id)}>
-                      Agregar mascota
+                      {t("clients.addPet")}
                     </button>
                   </p>
                 ) : (
@@ -443,25 +487,25 @@ export function ClientsPatientsPage({
                     <table className="clinic-table">
                       <thead>
                         <tr>
-                          <th>Mascota</th>
-                          <th>Especie</th>
-                          <th>Raza</th>
-                          <th aria-label="Acciones" />
+                          <th>{t("clients.colPet")}</th>
+                          <th>{t("clients.colSpecies")}</th>
+                          <th>{t("clients.colBreed")}</th>
+                          <th aria-label={t("common.actionsAria")} />
                         </tr>
                       </thead>
                       <tbody>
                         {pets.map((p) => (
                           <tr key={p.id} className="clinic-table-row-click" onClick={() => openDetail(p)}>
                             <td><strong>{p.name}</strong></td>
-                            <td>{p.species || "—"}</td>
-                            <td>{p.breed || "—"}</td>
+                            <td>{speciesLabel(p.species)}</td>
+                            <td>{p.breed || t("common.emDash")}</td>
                             <td className="clinic-table-actions" onClick={(e) => e.stopPropagation()}>
                               {onStartConsultation && (
                                 <Button
                                   type="button"
                                   variant="ghost"
                                   size="sm"
-                                  title="Iniciar consulta"
+                                  title={t("clients.startConsultation")}
                                   onClick={() =>
                                     onStartConsultation({
                                       patientId: p.id,
@@ -495,12 +539,12 @@ export function ClientsPatientsPage({
       <Dialog open={clientDialogOpen} onOpenChange={setClientDialogOpen}>
         <DialogContent className={clinicDialogClass("max-w-md")}>
           <DialogHeader>
-            <DialogTitle>{clientEditing ? "Editar dueño" : "Nuevo dueño"}</DialogTitle>
+            <DialogTitle>{clientEditing ? t("clients.editOwner") : t("clients.newOwner")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSaveClient} className="clinic-form">
             <div className="clinic-form-grid-2">
               <div className="form-group">
-                <Label htmlFor="client-name">Nombre *</Label>
+                <Label htmlFor="client-name">{t("clients.nameRequired")}</Label>
                 <Input
                   id="client-name"
                   value={clientForm.name}
@@ -510,7 +554,7 @@ export function ClientsPatientsPage({
                 />
               </div>
               <div className="form-group">
-                <Label htmlFor="client-phone">Teléfono</Label>
+                <Label htmlFor="client-phone">{t("clients.phone")}</Label>
                 <Input
                   id="client-phone"
                   value={clientForm.phone}
@@ -524,13 +568,13 @@ export function ClientsPatientsPage({
                 className="clinic-link-btn"
                 onClick={() => setShowFullClientForm(true)}
               >
-                + Email, dirección y notas
+                {t("clients.expandOwnerFields")}
               </button>
             )}
             {(clientEditing || showFullClientForm) && (
               <>
                 <div className="form-group">
-                  <Label htmlFor="client-email">Email</Label>
+                  <Label htmlFor="client-email">{t("clients.email")}</Label>
                   <Input
                     id="client-email"
                     type="email"
@@ -539,7 +583,7 @@ export function ClientsPatientsPage({
                   />
                 </div>
                 <div className="form-group">
-                  <Label htmlFor="client-address">Dirección</Label>
+                  <Label htmlFor="client-address">{t("clients.address")}</Label>
                   <Input
                     id="client-address"
                     value={clientForm.address}
@@ -547,7 +591,7 @@ export function ClientsPatientsPage({
                   />
                 </div>
                 <div className="form-group">
-                  <Label htmlFor="client-notes">Notas</Label>
+                  <Label htmlFor="client-notes">{t("clients.notes")}</Label>
                   <Textarea
                     id="client-notes"
                     value={clientForm.notes}
@@ -559,10 +603,10 @@ export function ClientsPatientsPage({
             )}
             <DialogFooter>
               <Button type="button" variant="secondary" onClick={() => setClientDialogOpen(false)}>
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={saving}>
-                {saving ? "Guardando..." : "Guardar"}
+                {saving ? t("common.saving") : t("common.save")}
               </Button>
             </DialogFooter>
           </form>
@@ -572,16 +616,16 @@ export function ClientsPatientsPage({
       <Dialog open={patientDialogOpen} onOpenChange={setPatientDialogOpen}>
         <DialogContent className={clinicDialogClass("max-w-md")}>
           <DialogHeader>
-            <DialogTitle>{patientEditing ? "Editar mascota" : "Nueva mascota"}</DialogTitle>
+            <DialogTitle>{patientEditing ? t("clients.editPet") : t("clients.newPet")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSavePatient} className="clinic-form">
             <div className="form-group">
-              <Label>Dueño *</Label>
+              <Label>{t("clients.ownerRequired")}</Label>
               <Select
                 value={patientForm.client_id}
                 onValueChange={(v) => setPatientForm({ ...patientForm, client_id: v })}
               >
-                <SelectTrigger><SelectValue placeholder="Seleccionar dueño" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("clients.selectOwner")} /></SelectTrigger>
                 <SelectContent>
                   {clients.map((c) => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -590,7 +634,7 @@ export function ClientsPatientsPage({
               </Select>
             </div>
             <div className="form-group">
-              <Label>Nombre *</Label>
+              <Label>{t("clients.nameRequired")}</Label>
               <Input
                 value={patientForm.name}
                 onChange={(e) => setPatientForm({ ...patientForm, name: e.target.value })}
@@ -601,6 +645,7 @@ export function ClientsPatientsPage({
             <SpeciesChipPicker
               value={patientForm.species || "perros"}
               onChange={(species) => setPatientForm({ ...patientForm, species })}
+              label={t("clients.colSpecies")}
             />
             {!patientEditing && !showFullPetForm && (
               <button
@@ -608,34 +653,34 @@ export function ClientsPatientsPage({
                 className="clinic-link-btn"
                 onClick={() => setShowFullPetForm(true)}
               >
-                + Raza, sexo y más datos
+                {t("clients.expandPetFields")}
               </button>
             )}
             {(patientEditing || showFullPetForm) && (
               <>
                 <div className="form-group">
-                  <Label>Raza</Label>
+                  <Label>{t("clients.breed")}</Label>
                   <Input
                     value={patientForm.breed}
                     onChange={(e) => setPatientForm({ ...patientForm, breed: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
-                  <Label>Especie (lista completa)</Label>
+                  <Label>{t("clients.speciesFull")}</Label>
                   <Select
                     value={patientForm.species}
                     onValueChange={(v) => setPatientForm({ ...patientForm, species: v })}
                   >
-                    <SelectTrigger><SelectValue placeholder="Especie" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={t("clients.speciesPlaceholder")} /></SelectTrigger>
                     <SelectContent>
                       {SPECIES.map((s) => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                        <SelectItem key={s} value={s}>{speciesLabel(s)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="form-group">
-                  <Label>Notas</Label>
+                  <Label>{t("clients.notes")}</Label>
                   <Textarea
                     value={patientForm.notes}
                     onChange={(e) => setPatientForm({ ...patientForm, notes: e.target.value })}
@@ -646,10 +691,10 @@ export function ClientsPatientsPage({
             )}
             <DialogFooter>
               <Button type="button" variant="secondary" onClick={() => setPatientDialogOpen(false)}>
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={saving}>
-                {saving ? "Guardando..." : "Guardar"}
+                {saving ? t("common.saving") : t("common.save")}
               </Button>
             </DialogFooter>
           </form>
@@ -660,7 +705,7 @@ export function ClientsPatientsPage({
         open={quickDialogOpen}
         onOpenChange={setQuickDialogOpen}
         veterinarianId={veterinarian?.id}
-        onSuccess={load}
+        onSuccess={reloadRegistry}
         onOwnerOnly={() => {
           setQuickDialogOpen(false);
           openCreateClient();
@@ -675,17 +720,29 @@ export function ClientsPatientsPage({
           {detail?.patient && (
             <div className="clinic-detail">
               <div className="clinic-detail-grid">
-                <p><strong>Dueño:</strong> {detail.patient.clients?.name}</p>
-                <p><strong>Especie:</strong> {detail.patient.species || "—"}</p>
-                <p><strong>Raza:</strong> {detail.patient.breed || "—"}</p>
-                <p><strong>Registros clínicos:</strong> {(detail.consultations?.length || 0) + (detail.medical_images?.length || 0)}</p>
+                <p><strong>{t("clients.detailOwner")}</strong> {detail.patient.clients?.name}</p>
+                <p><strong>{t("clients.detailSpecies")}</strong> {speciesLabel(detail.patient.species)}</p>
+                <p><strong>{t("clients.detailBreed")}</strong> {detail.patient.breed || t("common.emDash")}</p>
+                <p><strong>{t("clients.detailRecords")}</strong> {(detail.consultations?.length || 0) + (detail.medical_images?.length || 0)}</p>
                 <p className="clinic-muted clinic-timeline-summary">
-                  {detail.consultations?.length || 0} consulta{(detail.consultations?.length || 0) !== 1 ? "s" : ""} CDS ·{" "}
-                  {detail.medical_images?.length || 0} interpretación{(detail.medical_images?.length || 0) !== 1 ? "es" : ""} de laboratorio
+                  {t("clients.consultationCount", { count: detail.consultations?.length || 0 })} ·{" "}
+                  {t("clients.labCount", { count: detail.medical_images?.length || 0 })}
                 </p>
               </div>
 
               <div className="clinic-detail-actions">
+                {onOpenPatientChart && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      setDetailOpen(false);
+                      onOpenPatientChart(detail.patient.id);
+                    }}
+                  >
+                    <FolderOpen size={16} className="mr-1" /> {t("clients.openChart")}
+                  </Button>
+                )}
                 {onStartConsultation && (
                   <Button
                     type="button"
@@ -698,7 +755,7 @@ export function ClientsPatientsPage({
                       });
                     }}
                   >
-                    <Stethoscope size={16} className="mr-1" /> Iniciar consulta
+                    <Stethoscope size={16} className="mr-1" /> {t("clients.startConsultation")}
                   </Button>
                 )}
                 {onStartLabAnalysis && (
@@ -714,7 +771,7 @@ export function ClientsPatientsPage({
                       });
                     }}
                   >
-                    <FlaskConical size={16} className="mr-1" /> Interpretar estudio
+                    <FlaskConical size={16} className="mr-1" /> {t("clients.interpretStudy")}
                   </Button>
                 )}
                 {(detail.consultations?.length || detail.medical_images?.length) > 0 && (
@@ -725,15 +782,15 @@ export function ClientsPatientsPage({
                     onClick={handleDownloadHistoryPdf}
                   >
                     <FileDown size={16} className="mr-1" />
-                    {historyPdfLoading ? "Generando..." : "Descargar historial PDF"}
+                    {historyPdfLoading ? t("clients.generatingPdf") : t("clients.downloadHistoryPdf")}
                   </Button>
                 )}
               </div>
 
               <div className="clinic-timeline clinic-timeline-unified">
-                <h3>Historial clínico</h3>
+                <h3>{t("clients.clinicalHistory")}</h3>
                 <p className="clinic-muted clinic-timeline-hint">
-                  Consultas CDS e interpretaciones de laboratorio en orden cronológico.
+                  {t("clients.clinicalHistoryHint")}
                 </p>
                 <ClinicalTimelineList
                   consultations={detail.consultations || []}

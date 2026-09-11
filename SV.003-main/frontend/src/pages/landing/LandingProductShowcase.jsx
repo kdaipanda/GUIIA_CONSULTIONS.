@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { LANDING_SCREENSHOTS } from "./landingPreviewData";
 import { LANDING_PREVIEW_MAP } from "./LandingAppPreview";
 import {
@@ -7,6 +8,7 @@ import {
   setLandingProductTabHash,
   subscribeLandingProductTab,
 } from "./landingScroll";
+
 function PreviewFrame({ previewId }) {
   const Preview = LANDING_PREVIEW_MAP[previewId];
   if (!Preview) return null;
@@ -20,12 +22,12 @@ function PreviewFrame({ previewId }) {
   );
 }
 
-function ScreenshotPanel({ shot, useFallback, onFallback }) {
+function ScreenshotPanel({ shot, alt, useFallback, onFallback }) {
   if (!useFallback) {
     return (
       <img
         src={shot.src}
-        alt={shot.alt}
+        alt={alt}
         className="block h-full w-full object-cover object-top"
         loading="lazy"
         decoding="async"
@@ -38,6 +40,7 @@ function ScreenshotPanel({ shot, useFallback, onFallback }) {
 }
 
 export function LandingProductShowcase() {
+  const { t } = useTranslation("landing");
   const [activeId, setActiveId] = useState(() => parseProductTabFromHash());
   const [fallbackIds, setFallbackIds] = useState(() => new Set());
 
@@ -51,6 +54,10 @@ export function LandingProductShowcase() {
 
   const activeShot =
     LANDING_SCREENSHOTS.find((shot) => shot.id === activeId) || LANDING_SCREENSHOTS[0];
+  const activeLabel = t(`product.shots.${activeShot.id}.label`);
+  const activeCaption = t(`product.shots.${activeShot.id}.caption`);
+  const activeAlt = t(`product.shots.${activeShot.id}.alt`);
+  const bullets = t("product.bullets", { returnObjects: true });
 
   const markFallback = (id) => {
     setFallbackIds((prev) => {
@@ -66,20 +73,13 @@ export function LandingProductShowcase() {
       <div className="landing-container">
         <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
           <div className="lg:sticky lg:top-24">
-            <p className="landing-eyebrow">Interfaz veterinaria</p>
+            <p className="landing-eyebrow">{t("product.eyebrow")}</p>
             <h2 className="landing-section-title mt-3 text-2xl text-guiaa-brand-navy sm:text-3xl">
-              La misma pantalla que usas con cada paciente
+              {t("product.title")}
             </h2>
-            <p className="landing-lead mt-4 text-sm sm:text-base">
-              Capturas del flujo real: selección de especie, consulta clínica y panel del
-              MVZ en consultorio.
-            </p>
+            <p className="landing-lead mt-4 text-sm sm:text-base">{t("product.lead")}</p>
             <ul className="mt-6 space-y-3 text-sm text-guiaa-brand-ink-muted">
-              {[
-                "Selector multiespecie con formularios veterinarios por categoría",
-                "Stepper clínico: paciente → anamnesis → examen → plan terapéutico",
-                "Panel con consultas recientes e indicadores de tu práctica",
-              ].map((item) => (
+              {(Array.isArray(bullets) ? bullets : []).map((item) => (
                 <li key={item} className="flex items-start gap-2.5">
                   <ChevronRight
                     size={16}
@@ -94,7 +94,7 @@ export function LandingProductShowcase() {
             <div
               className="landing-product-tabs mt-8 flex gap-2"
               role="tablist"
-              aria-label="Vistas del producto"
+              aria-label={t("product.tabsAria")}
               onKeyDown={(event) => {
                 const index = LANDING_SCREENSHOTS.findIndex((shot) => shot.id === activeId);
                 if (index < 0) return;
@@ -131,13 +131,13 @@ export function LandingProductShowcase() {
                     }}
                     className={`landing-tab landing-product-tab ${isActive ? "is-active" : ""}`}
                   >
-                    {shot.label}
+                    {t(`product.shots.${shot.id}.label`)}
                   </button>
                 );
               })}
             </div>
 
-            <p className="mt-4 text-sm text-guiaa-brand-ink-muted">{activeShot.caption}</p>
+            <p className="mt-4 text-sm text-guiaa-brand-ink-muted">{activeCaption}</p>
           </div>
 
           <div className="landing-device-mockup">
@@ -148,7 +148,7 @@ export function LandingProductShowcase() {
                   <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
                   <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
                   <span className="landing-kicker ml-3 truncate normal-case">
-                    GUIAA · {activeShot.label}
+                    GUIAA · {activeLabel}
                   </span>
                 </div>
 
@@ -161,6 +161,7 @@ export function LandingProductShowcase() {
                   <div key={activeShot.id} className="landing-product-panel-enter h-full">
                     <ScreenshotPanel
                       shot={activeShot}
+                      alt={activeAlt}
                       useFallback={fallbackIds.has(activeShot.id)}
                       onFallback={() => markFallback(activeShot.id)}
                     />

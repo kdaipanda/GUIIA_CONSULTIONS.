@@ -1,28 +1,30 @@
 /**
  * Tarjetas de precios de la landing — una por cada membresía del catálogo.
  */
+import i18n from "../i18n";
 import {
   DEFAULT_CREDIT_PACKAGES,
   DEFAULT_PACKAGES,
   FEATURED_PLAN_KEY,
   getPlanFeatureList,
+  getPlanDisplayName,
+  getCreditPackageDisplayName,
 } from "./membershipPlans";
 
 /** Orden comercial en la landing */
 export const LANDING_PLAN_ORDER = ["basic", "professional", "premium"];
 
-const PLAN_DESCRIPTIONS = {
-  basic:
-    "Consultorio de pequeñas especies: CDS estructurado, expediente y agenda para perros y gatos.",
-  professional:
-    "Práctica multiespecie activa con inventario, ventas y reportes clínicos integrados.",
-  premium:
-    "Alto volumen de consultas con Manejo Experto y onboarding guiado prioritario.",
-};
+function landingT(key, options) {
+  return i18n.t(`pricing.${key}`, { ns: "landing", ...options });
+}
+
+function priceLocale() {
+  return i18n.language?.startsWith("en") ? "en-US" : "es-MX";
+}
 
 function formatMxPrice(amount, suffix = "") {
-  if (amount == null || Number.isNaN(Number(amount))) return "Consultar";
-  return `$${Number(amount).toLocaleString("es-MX")}${suffix}`;
+  if (amount == null || Number.isNaN(Number(amount))) return landingT("askPrice");
+  return `$${Number(amount).toLocaleString(priceLocale())}${suffix}`;
 }
 
 function buildPlanCard(planKey, pkg, featuredKey) {
@@ -33,22 +35,31 @@ function buildPlanCard(planKey, pkg, featuredKey) {
 
   const speciesNote = pkg.species_scope ? `${pkg.species_scope}` : "";
   const annualHint = pkg.price_annual
-    ? `Anual ${formatMxPrice(pkg.price_annual)}`
+    ? `${landingT("annual")} ${formatMxPrice(pkg.price_annual)}`
     : null;
-  const priceNote = [speciesNote, annualHint, "facturación mensual o anual"]
+  const priceNote = [speciesNote, annualHint, landingT("billingNote")]
     .filter(Boolean)
     .join(" · ");
 
+  const descriptionKey = `planDescriptions.${planKey}`;
+  const description = i18n.exists(descriptionKey, { ns: "landing" })
+    ? landingT(descriptionKey)
+    : pkg.description || "";
+
   return {
     key: planKey,
-    name: pkg.name,
-    price: formatMxPrice(pkg.price_monthly, "/mes"),
+    name: getPlanDisplayName(planKey, pkg),
+    price: formatMxPrice(pkg.price_monthly, landingT("pricePerMonth")),
     priceNote,
-    description: PLAN_DESCRIPTIONS[planKey] || pkg.description || "",
+    description,
     highlighted: isFeatured,
-    badge: isFeatured ? "Más usado" : pkg.consultations ? `${pkg.consultations} consultas/mes` : null,
+    badge: isFeatured
+      ? landingT("badgeFeatured")
+      : pkg.consultations
+        ? landingT("badgeConsultations", { count: pkg.consultations })
+        : null,
     features,
-    cta: isFeatured ? "Comenzar registro" : "Contratar plan",
+    cta: isFeatured ? landingT("ctaRegister") : landingT("ctaPlan"),
     action: isFeatured ? "register" : "membership",
   };
 }
@@ -75,11 +86,10 @@ export function buildLandingPricingPlans(catalog) {
 
   const creditAddon = credits10
     ? {
-        name: credits10.name || "Recarga de consultas",
+        name: getCreditPackageDisplayName("credits_10", credits10),
         price: formatMxPrice(credits10.price),
         description:
-          credits10.description ||
-          "Consultas CDS adicionales sin cambiar de plan. Se suman a tu saldo actual.",
+          credits10.description || landingT("creditAddonDesc"),
         credits: credits10.credits,
       }
     : null;

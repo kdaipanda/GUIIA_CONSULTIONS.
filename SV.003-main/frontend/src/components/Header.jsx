@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useVet } from "../context/VetContext";
+import { getPlanDisplayName } from "../lib/membershipPlans";
 import { GuiaaBrandLockup } from "./GuiaaBrandLockup";
 import "./headerToolbar.css";
 
 export function Header({ setView, showAuth = true, actions }) {
+  const { t } = useTranslation("clinic");
   const { veterinarian, logout } = useVet();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
+
+  const membershipLabel = veterinarian?.membership_type
+    ? getPlanDisplayName(veterinarian.membership_type.toLowerCase())
+    : t("header.planFallback");
 
   useEffect(() => {
     const getScrollY = () =>
@@ -96,7 +103,7 @@ export function Header({ setView, showAuth = true, actions }) {
                       onClick={toggleUserMenu}
                       aria-expanded={isUserMenuOpen}
                       aria-haspopup="menu"
-                      aria-label={`Cuenta de ${veterinarian.nombre}`}
+                      aria-label={t("header.accountAria", { name: veterinarian.nombre })}
                     >
                       <div className="user-avatar">
                         {veterinarian.nombre.charAt(0).toUpperCase()}
@@ -117,7 +124,7 @@ export function Header({ setView, showAuth = true, actions }) {
                               {veterinarian.email}
                             </span>
                             <span className="user-dropdown-membership">
-                              Plan: {veterinarian.membership_type || "Básica"}
+                              {t("header.plan", { plan: membershipLabel })}
                             </span>
                           </div>
                         </div>
@@ -131,7 +138,7 @@ export function Header({ setView, showAuth = true, actions }) {
                           className="user-dropdown-item"
                         >
                           <span className="dropdown-icon">👤</span>
-                          Mi Perfil
+                          {t("header.myProfile")}
                         </button>
                         <button
                           onClick={() => {
@@ -142,7 +149,7 @@ export function Header({ setView, showAuth = true, actions }) {
                           className="user-dropdown-item"
                         >
                           <span className="dropdown-icon">⭐</span>
-                          Mi Membresía
+                          {t("header.myMembership")}
                         </button>
                         <div className="user-dropdown-divider"></div>
                         <button
@@ -155,7 +162,7 @@ export function Header({ setView, showAuth = true, actions }) {
                           className="user-dropdown-item logout-item"
                         >
                           <span className="dropdown-icon">🚪</span>
-                          Cerrar Sesión
+                          {t("header.logout")}
                         </button>
                       </div>
                     )}
@@ -172,7 +179,9 @@ export function Header({ setView, showAuth = true, actions }) {
               className="menu-toggle"
               onClick={toggleMenu}
               aria-expanded={isMenuOpen}
-              aria-label={isMenuOpen ? "Cerrar menú de usuario" : "Abrir menú de usuario"}
+              aria-label={
+                isMenuOpen ? t("header.closeUserMenu") : t("header.openUserMenu")
+              }
             >
               {isMenuOpen ? "✕" : "☰"}
             </button>
@@ -187,7 +196,7 @@ export function Header({ setView, showAuth = true, actions }) {
                     }}
                     className="nav-link"
                   >
-                    Iniciar Sesión
+                    {t("header.login")}
                   </button>
                   <button
                     onClick={() => {
@@ -196,7 +205,7 @@ export function Header({ setView, showAuth = true, actions }) {
                     }}
                     className="btn btn-primary"
                   >
-                    Registrarse
+                    {t("header.register")}
                   </button>
             </nav>
             )}

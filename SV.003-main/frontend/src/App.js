@@ -3,6 +3,8 @@
   useEffect,
   useRef,
   useCallback,
+  lazy,
+  Suspense,
 } from "react";
 import { BarChart3, CalendarDays, Gem, Sun, Cloud, CloudRain, CloudSun, Thermometer, Plus, ClipboardList, FlaskConical, Crown, Moon, Brain, FileDown, User } from "lucide-react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -26,6 +28,10 @@ import {
 } from "./lib/supabaseApi";
 import { BACKEND_URL, getBackendUrl } from "./lib/backendUrl";
 import { friendlyFetchError, friendlyDatabaseError, formatApiErrorDetail } from "./lib/friendlyFetchError";
+import { normalizePetSex } from "./lib/petSex";
+import { hydrateFormDataFromChart } from "./lib/clinicalChartSync";
+import { fetchPatient } from "./lib/clinicApi";
+import { preloadAppNamespaces } from "./lib/loadI18nNamespace";
 import { finalizeCedulaFlowEntry } from "./lib/cedulaFlowAuth";
 import { loadCedulaFlow, saveCedulaFlow } from "./lib/cedulaFlowStorage";
 import { fetchWithTimeout, fetchJsonWithRetry } from "./lib/fetchWithTimeout";
@@ -38,6 +44,7 @@ import {
 } from "./lib/guiaaOnboarding";
 import { notifyError, notifySuccess, notifyQuotaError } from "./lib/appToast";
 import { getPasswordValidationError, PASSWORD_RULES_ATTR, normalizePasswordInput } from "./lib/passwordPolicy";
+import { useTranslation } from "react-i18next";
 import { PasswordRequirementsHint } from "./components/PasswordRequirementsHint";
 import {
   trackMetaLead,
@@ -51,15 +58,10 @@ import { TrialSurveyModal } from "./components/TrialSurveyModal";
 import { SupportChatWidget } from "./components/SupportChatWidget";
 import { VetProvider, useVet } from "./context/VetContext";
 import { LoadingScreen } from "./components/LoadingScreen";
+import { LazySpeciesForm } from "./components/forms/LazySpeciesForm";
 import { PrivacyModal } from "./components/PrivacyModal";
 import { TermsAndConditionsModal } from "./components/TermsAndConditionsModal";
-import { LandingPage } from "./pages/LandingPage";
 import { LandingScreenshotCapturePage } from "./pages/LandingScreenshotCapturePage";
-import { MembershipPage } from "./pages/MembershipPage";
-import { PaymentSuccessPage } from "./pages/PaymentSuccessPage";
-import { ProfilePage } from "./pages/ProfilePage";
-import { ConsultationHistoryPage } from "./pages/ConsultationHistoryPage";
-import { MedicalImagesPage } from "./pages/MedicalImagesPage";
 import { DashboardActivitySection } from "./components/dashboard/DashboardActivitySection";
 import {
   DEFAULT_PACKAGES,
@@ -72,7 +74,7 @@ import {
   MEMBERSHIP_FEATURES,
   canCreateConsultation,
   isTrialExhausted,
-  TRIAL_EXHAUSTED_MESSAGE,
+  getTrialExhaustedMessage,
 } from "./lib/membershipAccess";
 import { MembershipFeatureGate } from "./components/MembershipFeatureGate";
 import { GuiaaBrandLockup } from "./components/GuiaaBrandLockup";
@@ -82,17 +84,10 @@ import { AppShell } from "./layout/AppShell";
 import { AuthPageShell } from "./layout/AuthPageShell";
 import { ClinicShell } from "./layout/ClinicShell";
 import { ClinicProvider } from "./context/ClinicContext";
-import { ClientsPatientsPage } from "./pages/clinic/ClientsPatientsPage";
-import { AgendaPage } from "./pages/clinic/AgendaPage";
-import { InventoryPage } from "./pages/clinic/InventoryPage";
-import { BillingPage } from "./pages/clinic/BillingPage";
-import { ReportsPage } from "./pages/clinic/ReportsPage";
-import { SettingsPage } from "./pages/clinic/SettingsPage";
-import { AdminPage } from "./pages/clinic/AdminPage";
-import { ClinicDashboardPage } from "./pages/clinic/ClinicDashboardPage";
 import { AppointmentRequestPortal } from "./pages/clinic/AppointmentRequestPortal";
 import { PatientSelector } from "./components/clinic/PatientSelector";
 import { PatientAntecedents } from "./components/clinic/PatientAntecedents";
+import { ModuleHelpTip } from "./components/clinic/ModuleHelpTip";
 import { Button } from "./components/ui/button";
 import { Card } from "./components/ui/card";
 import { Input } from "./components/ui/input";
@@ -106,6 +101,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./components/ui/select";
+import { Toaster } from "./components/ui/sonner";
 
 const isPremiumMember = (vet) =>
   canAccessFeature(vet, MEMBERSHIP_FEATURES.expertMode);
@@ -126,6 +122,8 @@ const VIEW_TO_PATH = {
   "medical-images": "/app/imagenes",
   membership: "/app/membresia",
   profile: "/app/perfil",
+  help: "/app/ayuda",
+  "payment-success": "/payment-success",
 };
 
 const PATH_TO_VIEW = {
@@ -139,16 +137,40 @@ const PATH_TO_VIEW = {
 };
 
 const AUTH_REDIRECT_KEY = "guiaa_auth_redirect";
+const CHECKOUT_SESSION_KEY = "guiaa_checkout_session_id";
+
+function storeCheckoutSessionId(sessionId) {
+  const value = (sessionId || "").trim();
+  if (!value) return;
+  try {
+    sessionStorage.setItem(CHECKOUT_SESSION_KEY, value);
+  } catch {
+    /* ignore */
+  }
+}
+
+function readCheckoutSessionId() {
+  try {
+    return sessionStorage.getItem(CHECKOUT_SESSION_KEY) || "";
+  } catch {
+    return "";
+  }
+}
 
 function isProtectedAppPath(pathname) {
   return pathname === "/app" || pathname.startsWith("/app/");
 }
 
+function isPatientChartPath(pathname) {
+  return /^\/app\/pacientes\/[^/]+$/.test(pathname || "");
+}
+
 function readAuthRedirect() {
   try {
     const stored = sessionStorage.getItem(AUTH_REDIRECT_KEY);
-    if (!stored || !PATH_TO_VIEW[stored]) return null;
-    return stored;
+    if (!stored) return null;
+    if (PATH_TO_VIEW[stored] || isPatientChartPath(stored)) return stored;
+    return null;
   } catch {
     return null;
   }
@@ -174,23 +196,57 @@ function consumeAuthRedirect() {
   return path;
 }
 
-// Importar formularios de especies
-import {
-  PerrosForm,
-  GatosForm,
-  TortugasForm,
-  ErizosForm,
-  HuronesForm,
-  IguanasForm,
-  HamstersForm,
-  PatosPollosForm,
-  AvesForm,
-  ConejosForm,
-  CuyosForm,
-} from "./components/forms";
 
-import { Toaster } from "./components/ui/sonner";
+const LandingPage = lazy(() =>
+  import("./pages/LandingPage").then((m) => ({ default: m.LandingPage })),
+);
+const ClinicDashboardPage = lazy(() =>
+  import("./pages/clinic/ClinicDashboardPage").then((m) => ({ default: m.ClinicDashboardPage })),
+);
+const ClientsPatientsPage = lazy(() =>
+  import("./pages/clinic/ClientsPatientsPage").then((m) => ({ default: m.ClientsPatientsPage })),
+);
+const PatientClinicalChartPage = lazy(() =>
+  import("./pages/clinic/PatientClinicalChartPage"),
+);
+const AgendaPage = lazy(() =>
+  import("./pages/clinic/AgendaPage").then((m) => ({ default: m.AgendaPage })),
+);
+const InventoryPage = lazy(() =>
+  import("./pages/clinic/InventoryPage").then((m) => ({ default: m.InventoryPage })),
+);
+const BillingPage = lazy(() =>
+  import("./pages/clinic/BillingPage").then((m) => ({ default: m.BillingPage })),
+);
+const ReportsPage = lazy(() =>
+  import("./pages/clinic/ReportsPage").then((m) => ({ default: m.ReportsPage })),
+);
+const SettingsPage = lazy(() =>
+  import("./pages/clinic/SettingsPage").then((m) => ({ default: m.SettingsPage })),
+);
+const AdminPage = lazy(() =>
+  import("./pages/clinic/AdminPage").then((m) => ({ default: m.AdminPage })),
+);
+const MembershipPage = lazy(() =>
+  import("./pages/MembershipPage").then((m) => ({ default: m.MembershipPage })),
+);
+const PaymentSuccessPage = lazy(() =>
+  import("./pages/PaymentSuccessPage").then((m) => ({ default: m.PaymentSuccessPage })),
+);
+const ProfilePage = lazy(() =>
+  import("./pages/ProfilePage").then((m) => ({ default: m.ProfilePage })),
+);
+const ConsultationHistoryPage = lazy(() =>
+  import("./pages/ConsultationHistoryPage").then((m) => ({ default: m.ConsultationHistoryPage })),
+);
+const MedicalImagesPage = lazy(() =>
+  import("./pages/MedicalImagesPage").then((m) => ({ default: m.MedicalImagesPage })),
+);
+const HelpCenterPage = lazy(() =>
+  import("./pages/clinic/HelpCenterPage").then((m) => ({ default: m.HelpCenterPage })),
+);
 const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, veterinarian }) => {
+  const { t } = useTranslation("clinic");
   const { platformAdmin } = useVet();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -199,32 +255,32 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
   const commands = [
     {
       id: "dashboard",
-      title: "Dashboard",
-      description: "Resumen operativo del consultorio",
+      title: t("commandPalette.dashboardTitle"),
+      description: t("commandPalette.dashboardDesc"),
       icon: "📊",
       shortcut: "",
       action: () => setView("dashboard"),
     },
     {
       id: "clients",
-      title: "Dueños y mascotas",
-      description: "Tutores, fichas clínicas e historial",
+      title: t("commandPalette.clientsTitle"),
+      description: t("commandPalette.clientsDesc"),
       icon: "🐾",
       shortcut: "",
       action: () => setView("clients"),
     },
     {
       id: "agenda",
-      title: "Agenda",
-      description: "Citas y solicitudes",
+      title: t("commandPalette.agendaTitle"),
+      description: t("commandPalette.agendaDesc"),
       icon: "📅",
       shortcut: "",
       action: () => setView("agenda"),
     },
     {
       id: "inventory",
-      title: "Inventario",
-      description: "Productos y stock",
+      title: t("commandPalette.inventoryTitle"),
+      description: t("commandPalette.inventoryDesc"),
       icon: "📦",
       shortcut: "",
       feature: MEMBERSHIP_FEATURES.inventory,
@@ -232,8 +288,8 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     },
     {
       id: "billing",
-      title: "Ventas",
-      description: "Recibos y cobros clínicos",
+      title: t("commandPalette.billingTitle"),
+      description: t("commandPalette.billingDesc"),
       icon: "🧾",
       shortcut: "",
       feature: MEMBERSHIP_FEATURES.billing,
@@ -241,8 +297,8 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     },
     {
       id: "reports",
-      title: "Reportes",
-      description: "KPIs e indicadores",
+      title: t("commandPalette.reportsTitle"),
+      description: t("commandPalette.reportsDesc"),
       icon: "📈",
       shortcut: "",
       feature: MEMBERSHIP_FEATURES.reports,
@@ -250,32 +306,40 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     },
     {
       id: "settings",
-      title: "Configuración",
-      description: "Consultorio, equipo y portal de citas",
+      title: t("commandPalette.settingsTitle"),
+      description: t("commandPalette.settingsDesc"),
       icon: "⚙️",
       shortcut: "",
       action: () => setView("settings"),
     },
     {
+      id: "help",
+      title: t("commandPalette.helpTitle"),
+      description: t("commandPalette.helpDesc"),
+      icon: "❓",
+      shortcut: "",
+      action: () => setView("help"),
+    },
+    {
       id: "new-consultation",
-      title: "GUIAA Diagnóstico",
-      description: "Soporte a la decisión clínica CDS L4 · L5",
+      title: t("commandPalette.diagnosisTitle"),
+      description: t("commandPalette.diagnosisDesc"),
       icon: "🩺",
       shortcut: "N",
       action: () => setView("new-consultation"),
     },
     {
       id: "consultation-history",
-      title: "Historial",
-      description: "Consultas CDS e interpretaciones de laboratorio",
+      title: t("commandPalette.historyTitle"),
+      description: t("commandPalette.historyDesc"),
       icon: "📋",
       shortcut: "H",
       action: () => setView("consultation-history"),
     },
     {
       id: "medical-images",
-      title: "Laboratorio",
-      description: "Premium · Interpretar PDF o resultados de laboratorio",
+      title: t("commandPalette.labTitle"),
+      description: t("commandPalette.labDesc"),
       icon: "🔬",
       shortcut: "",
       feature: MEMBERSHIP_FEATURES.medicalImages,
@@ -283,16 +347,16 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     },
     {
       id: "membership",
-      title: "Membresía",
-      description: "Gestionar tu membresía",
+      title: t("commandPalette.membershipTitle"),
+      description: t("commandPalette.membershipDesc"),
       icon: "⭐",
       shortcut: "M",
       action: () => setView("membership"),
     },
     {
       id: "profile",
-      title: "Perfil",
-      description: "Ver y editar tu perfil",
+      title: t("commandPalette.profileTitle"),
+      description: t("commandPalette.profileDesc"),
       icon: "👤",
       shortcut: "P",
       action: () => setView("profile"),
@@ -302,8 +366,8 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
   if (platformAdmin) {
     commands.splice(9, 0, {
       id: "admin",
-      title: "Admin GUIAA",
-      description: "Administración de plataforma",
+      title: t("commandPalette.adminTitle"),
+      description: t("commandPalette.adminDesc"),
       icon: "🛡️",
       shortcut: "",
       action: () => setView("admin"),
@@ -315,8 +379,8 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
     const insertAt = consultIdx >= 0 ? consultIdx + 1 : commands.length;
     commands.splice(insertAt, 0, {
       id: "expert-consultation",
-      title: "Manejo Experto",
-      description: "Ir directo al motivo de consulta; completa los datos de la mascota después (Premium)",
+      title: t("commandPalette.expertTitle"),
+      description: t("commandPalette.expertDesc"),
       icon: "🧠",
       shortcut: "E",
       action: () => openExpertConsultation?.(),
@@ -377,7 +441,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
             ref={inputRef}
             type="text"
             className="command-palette-input"
-            placeholder="Buscar comandos..."
+            placeholder={t("commandPalette.searchPlaceholder")}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -446,7 +510,7 @@ function App() {
 
 // Router Component
 const Router = () => {
-  const { veterinarian, loading, platformAdmin, refreshProfile, patchVeterinarian, logout } = useVet();
+  const { veterinarian, loading, platformAdmin, refreshProfile, patchVeterinarian } = useVet();
   const navigate = useNavigate();
   const location = useLocation();
   const [currentView, setCurrentView] = useState(
@@ -456,6 +520,7 @@ const Router = () => {
   const [selectedConsultationId, setSelectedConsultationId] = useState(null);
   const [consultationEntryMode, setConsultationEntryMode] = useState("standard");
   const [clinicalContext, setClinicalContext] = useState(null);
+  const [chartPatientId, setChartPatientId] = useState(null);
   const [cedulaFlow, setCedulaFlowRaw] = useState(() => loadCedulaFlow());
   const setCedulaFlow = useCallback((flowOrUpdater) => {
     setCedulaFlowRaw((prev) => {
@@ -468,10 +533,7 @@ const Router = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [trialSurveyOfferOpen, setTrialSurveyOfferOpen] = useState(false);
   const [trialSurveyOffer, setTrialSurveyOffer] = useState(null);
-  // No mostrar encuesta por cache local: solo si el API confirma show_survey.
-  const [trialSurveyConfirmed, setTrialSurveyConfirmed] = useState(false);
-  const localSurveyHint = shouldShowTrialSurvey(veterinarian);
-  const trialSurveyRequired = localSurveyHint && trialSurveyConfirmed;
+  const trialSurveyRequired = shouldShowTrialSurvey(veterinarian);
   const trialSurveyVisible = trialSurveyRequired || trialSurveyOfferOpen;
 
   const portalOrganizationId = (() => {
@@ -480,68 +542,28 @@ const Router = () => {
   })();
 
   useEffect(() => {
-    if (!veterinarian?.id) {
-      setTrialSurveyConfirmed(false);
-      return;
-    }
-    if (!localSurveyHint) {
-      setTrialSurveyConfirmed(false);
-      return;
-    }
-
+    if (!trialSurveyVisible || !veterinarian?.id) return;
     let cancelled = false;
-    setTrialSurveyConfirmed(false);
-
-    (async () => {
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/trial-survey/status`, {
-          headers: getAuthHeaders(veterinarian.id),
-        });
-        if (cancelled) return;
-
-        if (response.status === 401) {
-          // Token viejo: salir en lugar de atrapar al usuario en la encuesta.
-          await logout?.();
-          return;
+    fetch(`${BACKEND_URL}/api/trial-survey/status`, {
+      headers: getAuthHeaders(veterinarian.id),
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.offer) {
+          setTrialSurveyOffer(data.offer);
         }
-
-        if (!response.ok) {
-          setTrialSurveyConfirmed(false);
-          return;
-        }
-
-        const data = await response.json();
-        if (cancelled) return;
-        if (data?.offer) setTrialSurveyOffer(data.offer);
-
-        if (data?.show_survey) {
-          setTrialSurveyConfirmed(true);
-          return;
-        }
-
-        // Plan heredado / encuesta ya no aplica: sincronizar perfil y cerrar.
-        setTrialSurveyConfirmed(false);
-        try {
-          await refreshProfile?.();
-        } catch {
-          /* ignore */
-        }
-        if (data?.completed_at) {
-          patchVeterinarian?.({ trial_survey_completed_at: data.completed_at });
-        } else {
-          patchVeterinarian?.({
-            trial_survey_completed_at: new Date().toISOString(),
-          });
-        }
-      } catch {
-        if (!cancelled) setTrialSurveyConfirmed(false);
-      }
-    })();
-
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [veterinarian?.id, localSurveyHint, logout, refreshProfile, patchVeterinarian]);
+  }, [trialSurveyVisible, veterinarian?.id]);
+
+  useEffect(() => {
+    if (veterinarian?.id) {
+      void preloadAppNamespaces();
+    }
+  }, [veterinarian?.id]);
 
   const handleTrialSurveyCompleted = async (data) => {
     if (data?.completed_at) {
@@ -551,7 +573,6 @@ const Router = () => {
       setTrialSurveyOffer(data.offer);
     }
     setTrialSurveyOfferOpen(true);
-    setTrialSurveyConfirmed(false);
     try {
       await refreshProfile?.();
     } catch {
@@ -580,7 +601,7 @@ const Router = () => {
       onAllowed();
       return;
     }
-    notifyQuotaError(TRIAL_EXHAUSTED_MESSAGE, () => navigateSetView("membership"));
+    notifyQuotaError(getTrialExhaustedMessage(), () => navigateSetView("membership"));
   };
 
   const openConsultationWithPatient = (ctx) => {
@@ -654,10 +675,26 @@ const Router = () => {
     (freshVetData) => {
       setCedulaFlow(null);
 
+      const pendingCheckout = readCheckoutSessionId();
+      if (pendingCheckout) {
+        setCurrentView("payment-success");
+        setIsInitialized(true);
+        navigate(`/payment-success?session_id=${encodeURIComponent(pendingCheckout)}`);
+        return;
+      }
+
       const redirectPath = consumeAuthRedirect();
       if (redirectPath && PATH_TO_VIEW[redirectPath]) {
         const view = PATH_TO_VIEW[redirectPath];
         setCurrentView(view);
+        setIsInitialized(true);
+        navigate(redirectPath);
+        return;
+      }
+      if (redirectPath && isPatientChartPath(redirectPath)) {
+        const match = redirectPath.match(/^\/app\/pacientes\/([^/]+)$/);
+        setChartPatientId(match?.[1] || null);
+        setCurrentView("patient-chart");
         setIsInitialized(true);
         navigate(redirectPath);
         return;
@@ -681,6 +718,12 @@ const Router = () => {
       setCurrentView("appointment-request");
       return;
     }
+    const chartMatch = location.pathname.match(/^\/app\/pacientes\/([^/]+)$/);
+    if (chartMatch) {
+      setChartPatientId(chartMatch[1]);
+      setCurrentView("patient-chart");
+      return;
+    }
     if (location.pathname === "/app/pacientes") {
       navigate(VIEW_TO_PATH.clients, { replace: true });
       return;
@@ -699,6 +742,9 @@ const Router = () => {
     }
     if (location.pathname === "/login") setCurrentView("login");
     if (location.pathname === "/registro") setCurrentView("register");
+    if (location.pathname === "/payment-success") {
+      setCurrentView(veterinarian ? "payment-success" : "login");
+    }
   }, [location.pathname, veterinarian, navigate, portalOrganizationId]);
 
   // Command Palette (Ctrl/Cmd+K)
@@ -747,16 +793,11 @@ const Router = () => {
     const view = urlParams.get("view");
 
     if (sessionId) {
-      // Solo redirigir a payment-success si el usuario está autenticado
+      storeCheckoutSessionId(sessionId);
       if (veterinarian) {
-      setCurrentView("payment-success");
+        setCurrentView("payment-success");
         setIsInitialized(true);
       } else {
-        // Si no está autenticado pero hay session_id, limpiar la URL y redirigir al login
-        urlParams.delete("session_id");
-        const query = urlParams.toString();
-        const newUrl = `${window.location.pathname}${query ? `?${query}` : ""}`;
-        window.history.replaceState(null, "", newUrl);
         setCurrentView("login");
         setIsInitialized(true);
       }
@@ -785,10 +826,6 @@ const Router = () => {
       setIsInitialized(true);
     }
   }, []); // Solo ejecutar una vez al montar, no cuando cambia veterinarian
-
-  if (loading) {
-    return <LoadingScreen />;
-  }
 
   const views = {
     landing: <LandingPage setView={handleSetView} />,
@@ -844,12 +881,24 @@ const Router = () => {
           onStartConsultation={openConsultationWithPatient}
           onStartLabAnalysis={openLabAnalysisWithPatient}
           onViewConsultation={openConsultation}
+          onOpenPatientChart={(patientId) => navigate(`/app/pacientes/${patientId}`)}
         />
       </ClinicShell>
     ),
     patients: (
       <ClinicShell setView={navigateSetView}>
         <ClientsPatientsPage
+          onStartConsultation={openConsultationWithPatient}
+          onStartLabAnalysis={openLabAnalysisWithPatient}
+          onViewConsultation={openConsultation}
+          onOpenPatientChart={(patientId) => navigate(`/app/pacientes/${patientId}`)}
+        />
+      </ClinicShell>
+    ),
+    "patient-chart": (
+      <ClinicShell setView={navigateSetView}>
+        <PatientClinicalChartPage
+          patientId={chartPatientId}
           onStartConsultation={openConsultationWithPatient}
           onStartLabAnalysis={openLabAnalysisWithPatient}
           onViewConsultation={openConsultation}
@@ -884,12 +933,17 @@ const Router = () => {
     ),
     tools: (
       <ClinicShell setView={navigateSetView}>
-        <SettingsPage />
+        <SettingsPage setView={navigateSetView} />
       </ClinicShell>
     ),
     settings: (
       <ClinicShell setView={navigateSetView}>
-        <SettingsPage />
+        <SettingsPage setView={navigateSetView} />
+      </ClinicShell>
+    ),
+    help: (
+      <ClinicShell setView={navigateSetView}>
+        <HelpCenterPage setView={navigateSetView} />
       </ClinicShell>
     ),
     admin: (
@@ -913,6 +967,7 @@ const Router = () => {
         <ConsultationHistoryPage
           setView={navigateSetView}
           openConsultation={openConsultation}
+          onOpenPatientChart={(patientId) => navigate(`/app/pacientes/${patientId}`)}
         />
       </ClinicShell>
     ),
@@ -962,7 +1017,9 @@ const Router = () => {
             <AppointmentRequestPortal organizationId={portalOrganizationId} />
           </AppShell>
         ) : (
-          views[currentView] || <LandingPage setView={handleSetView} />
+          <Suspense fallback={<LoadingScreen />}>
+            {views[currentView] || <LandingPage setView={handleSetView} />}
+          </Suspense>
         )}
       </main>
       <SupportChatWidget currentView={currentView} />
@@ -983,9 +1040,6 @@ const Router = () => {
           veterinarian={veterinarian}
           offer={trialSurveyOffer}
           onCompleted={handleTrialSurveyCompleted}
-          onSessionExpired={async () => {
-            await logout?.();
-          }}
           onGoMembership={() => navigateSetView("membership")}
         />
       ) : null}
@@ -996,7 +1050,6 @@ const Router = () => {
 };
 
 // Register Page
-
 const RegisterEntryPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
   const [searchParams] = useSearchParams();
   const inviteToken = (searchParams.get("invite") || "").trim();
@@ -1013,6 +1066,7 @@ const RegisterEntryPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
 };
 
 const RegisterPage = ({ setView, setCedulaFlow }) => {
+  const { t } = useTranslation("auth");
   const [formData, setFormData] = useState({
     nombre: "",
     email: "",
@@ -1039,22 +1093,20 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
     e.preventDefault();
 
     if (!acceptedTerms) {
-      notifyError(
-        "Debes aceptar los términos y la política de privacidad para registrarte.",
-      );
+      notifyError(t("register.errors.terms"));
       return;
     }
     const phoneDigits = String(formData.telefono || "").replace(/\D/g, "");
     if (phoneDigits.length < 8) {
-      notifyError("Ingresa un número de teléfono válido (mínimo 8 dígitos, con código de país).");
+      notifyError(t("register.errors.phone"));
       return;
     }
     if (!cedulaFile) {
-      notifyError("Debes subir el documento de tu registro profesional (PDF/JPG/PNG).");
+      notifyError(t("register.errors.licenseFile"));
       return;
     }
     if (!formData.especialidad?.trim()) {
-      notifyError("Selecciona una especialidad.");
+      notifyError(t("register.errors.specialty"));
       return;
     }
     const passwordError = getPasswordValidationError(formData.password);
@@ -1065,7 +1117,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
     const password = normalizePasswordInput(formData.password);
     const passwordConfirm = normalizePasswordInput(formData.password_confirm);
     if (password !== passwordConfirm) {
-      notifyError("Las contraseñas no coinciden.");
+      notifyError(t("register.errors.passwordMismatch"));
       return;
     }
 
@@ -1085,7 +1137,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || "Error en el registro");
+        throw new Error(errorData.detail || t("register.errors.registerFailed"));
       }
 
       const vetData = await response.json();
@@ -1115,13 +1167,13 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
     <>
       <AuthPageShell setView={setView} wide>
           <GuiaaBrandLockup variant="auth" className="mb-6" />
-          <h2>Registro Profesional</h2>
-          <p>Complete sus datos profesionales para acceder a la plataforma</p>
+          <h2>{t("register.title")}</h2>
+          <p>{t("register.subtitle")}</p>
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-row">
               <div className="form-group">
-                <Label htmlFor="reg-nombre">Nombre Completo *</Label>
+                <Label htmlFor="reg-nombre">{t("register.name")}</Label>
                 <Input
                   id="reg-nombre"
                   type="text"
@@ -1131,12 +1183,12 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, nombre: e.target.value })
                   }
-                  placeholder="Dr. Juan Pérez"
+                  placeholder={t("register.namePlaceholder")}
                   className="mt-1.5 h-11 min-h-11 bg-background"
                 />
               </div>
               <div className="form-group">
-                <Label htmlFor="reg-email">Email *</Label>
+                <Label htmlFor="reg-email">{t("register.email")}</Label>
                 <Input
                   id="reg-email"
                   type="email"
@@ -1146,7 +1198,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  placeholder="juan.perez@email.com"
+                  placeholder={t("register.emailPlaceholder")}
                   className="mt-1.5 h-11 min-h-11 bg-background"
                 />
               </div>
@@ -1154,7 +1206,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <Label htmlFor="reg-telefono">Número de teléfono / WhatsApp *</Label>
+                <Label htmlFor="reg-telefono">{t("register.phone")}</Label>
                 <Input
                   id="reg-telefono"
                   type="tel"
@@ -1165,19 +1217,19 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, telefono: e.target.value })
                   }
-                  placeholder="+52 55 1234 5678"
+                  placeholder={t("register.phonePlaceholder")}
                   className="mt-1.5 h-11 min-h-11 bg-background"
                   aria-describedby="reg-telefono-hint"
                 />
                 <p id="reg-telefono-hint" className="mt-1.5 text-xs text-muted-foreground">
-                  Incluye código de país. Lo usamos para soporte y avisos de tu cuenta.
+                  {t("register.phoneHint")}
                 </p>
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <Label htmlFor="reg-password">Contraseña *</Label>
+                <Label htmlFor="reg-password">{t("register.password")}</Label>
                 <Input
                   id="reg-password"
                   type="password"
@@ -1189,7 +1241,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  placeholder="Ej. Vet2024"
+                  placeholder={t("register.passwordPlaceholder")}
                   className="mt-1.5 h-11 min-h-11 bg-background"
                   aria-describedby="reg-password-hint"
                 />
@@ -1201,7 +1253,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                 />
               </div>
               <div className="form-group">
-                <Label htmlFor="reg-password-confirm">Confirmar contraseña *</Label>
+                <Label htmlFor="reg-password-confirm">{t("register.passwordConfirm")}</Label>
                 <Input
                   id="reg-password-confirm"
                   type="password"
@@ -1212,7 +1264,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, password_confirm: e.target.value })
                   }
-                  placeholder="Repite tu contraseña"
+                  placeholder={t("register.passwordConfirmPlaceholder")}
                   className="mt-1.5 h-11 min-h-11 bg-background"
                 />
               </div>
@@ -1220,7 +1272,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <Label htmlFor="reg-pais">País de ejercicio *</Label>
+                <Label htmlFor="reg-pais">{t("register.country")}</Label>
                 <Select
                   value={formData.profesional_pais}
                   onValueChange={(v) =>
@@ -1231,7 +1283,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                     id="reg-pais"
                     className="auth-select-trigger mt-1.5 h-11 w-full bg-background"
                   >
-                    <SelectValue placeholder="Selecciona tu país" />
+                    <SelectValue placeholder={t("register.countryPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {LATAM_COUNTRIES.map((c) => (
@@ -1243,7 +1295,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                 </Select>
               </div>
               <div className="form-group">
-                <Label htmlFor="reg-cedula">Nº matrícula / licencia / registro *</Label>
+                <Label htmlFor="reg-cedula">{t("register.license")}</Label>
                 <Input
                   id="reg-cedula"
                   type="text"
@@ -1255,14 +1307,14 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                       cedula_profesional: e.target.value,
                     })
                   }
-                  placeholder="Ej. 12345678, MVZ-2024-001"
+                  placeholder={t("register.licensePlaceholder")}
                   className="mt-1.5 h-11 min-h-11 bg-background"
                 />
               </div>
             </div>
 
             <div className="form-group">
-              <Label htmlFor="reg-cedula-file">Documento profesional (PDF/JPG/PNG) *</Label>
+              <Label htmlFor="reg-cedula-file">{t("register.licenseFile")}</Label>
               <Input
                 id="reg-cedula-file"
                 type="file"
@@ -1272,12 +1324,12 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                 onChange={(e) => setCedulaFile(e.target.files?.[0] || null)}
               />
               <p className="mt-2 text-xs text-muted-foreground">
-                Título universitario, matrícula colegiada o licencia de ejercicio. Máx. 10MB.
+                {t("register.licenseFileHint")}
               </p>
             </div>
 
             <div className="form-group">
-              <Label htmlFor="reg-especialidad">Especialidad *</Label>
+              <Label htmlFor="reg-especialidad">{t("register.specialty")}</Label>
               <Select
                 value={formData.especialidad || undefined}
                 onValueChange={(v) =>
@@ -1288,26 +1340,26 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   id="reg-especialidad"
                   className="auth-select-trigger mt-1.5 h-11 w-full bg-background"
                 >
-                  <SelectValue placeholder="Seleccione una especialidad" />
+                  <SelectValue placeholder={t("register.specialtyPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Pequeñas Especies">
-                    Pequeñas Especies
+                    {t("register.specialties.small")}
                   </SelectItem>
                   <SelectItem value="Animales de Producción">
-                    Animales de Producción
+                    {t("register.specialties.production")}
                   </SelectItem>
-                  <SelectItem value="Equinos">Equinos</SelectItem>
+                  <SelectItem value="Equinos">{t("register.specialties.equine")}</SelectItem>
                   <SelectItem value="Animales Exóticos">
-                    Animales Exóticos
+                    {t("register.specialties.exotic")}
                   </SelectItem>
                   <SelectItem value="Medicina Preventiva">
-                    Medicina Preventiva
+                    {t("register.specialties.preventive")}
                   </SelectItem>
-                  <SelectItem value="Patología">Patología</SelectItem>
-                  <SelectItem value="Cirugía">Cirugía</SelectItem>
+                  <SelectItem value="Patología">{t("register.specialties.pathology")}</SelectItem>
+                  <SelectItem value="Cirugía">{t("register.specialties.surgery")}</SelectItem>
                   <SelectItem value="Medicina Interna">
-                    Medicina Interna
+                    {t("register.specialties.internal")}
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -1315,7 +1367,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <Label htmlFor="reg-experiencia">Años de Experiencia *</Label>
+                <Label htmlFor="reg-experiencia">{t("register.experience")}</Label>
                 <Input
                   id="reg-experiencia"
                   type="number"
@@ -1335,7 +1387,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                 />
               </div>
               <div className="form-group">
-                <Label htmlFor="reg-institucion">Institución *</Label>
+                <Label htmlFor="reg-institucion">{t("register.institution")}</Label>
                 <Input
                   id="reg-institucion"
                   type="text"
@@ -1344,7 +1396,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, institucion: e.target.value })
                   }
-                  placeholder="Hospital Veterinario ABC"
+                  placeholder={t("register.institutionPlaceholder")}
                   className="mt-1.5 h-11 min-h-11 bg-background"
                 />
               </div>
@@ -1371,7 +1423,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                   id="reg-terms-desc"
                   className="cursor-pointer text-sm font-normal leading-relaxed"
                 >
-                  He leído y acepto los{" "}
+                  {t("register.termsBefore")}{" "}
                   <button
                     type="button"
                     className="font-medium text-primary underline underline-offset-4 hover:no-underline"
@@ -1380,9 +1432,9 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
                       setShowTermsModal(true);
                     }}
                   >
-                    Términos y Condiciones de Uso
+                    {t("register.termsLink")}
                   </button>{" "}
-                  de la Plataforma GUIAA
+                  {t("register.termsAfter")}
                   {acceptedTerms && (
                     <span className="ml-2 text-green-600 dark:text-green-400" aria-hidden>
                       ✓
@@ -1397,14 +1449,14 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
               disabled={loading || !acceptedTerms}
               className="w-full"
             >
-              {loading ? "Registrando..." : "Registrarse"}
+              {loading ? t("register.submitting") : t("register.submit")}
             </Button>
           </form>
 
           <div className="auth-footer">
-            ¿Ya tienes una cuenta?{" "}
+            {t("register.haveAccount")}{" "}
             <button onClick={() => setView("login")} className="link-btn">
-              Inicia Sesión
+              {t("register.loginLink")}
             </button>
           </div>
       </AuthPageShell>
@@ -1420,6 +1472,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
 
 // Login Page
 const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
+  const { t } = useTranslation("auth");
   const { login, loginWithEmailPassword, loginWithMagicLink } = useVet();
   const [formData, setFormData] = useState({
     email: "",
@@ -1521,9 +1574,7 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
   const handleVerify2FA = async (e) => {
     e.preventDefault();
     if (!challengeNonce) {
-      notifyError(
-        "No se encontró el reto de 2FA. Intenta iniciar sesión de nuevo.",
-      );
+      notifyError(t("loginErrors.twoFactorChallenge"));
       return;
     }
 
@@ -1546,7 +1597,7 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
         const detail =
           errorData?.detail ||
           (raw ? raw.slice(0, 140) : null) ||
-          `Error del servidor: ${response.status}`;
+          t("loginErrors.serverError", { status: response.status });
         throw new Error(detail);
       }
 
@@ -1556,7 +1607,7 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
         vetData = raw ? JSON.parse(raw) : null;
       } catch (e) {}
       if (!vetData) {
-        throw new Error("Respuesta inválida del servidor");
+        throw new Error(t("loginErrors.invalidServerResponse"));
       }
       login(vetData);
       if (onAuthSuccess) {
@@ -1584,16 +1635,16 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
     notifyError("");
     setSupaInfo("");
     if (!supaEmail || !supaPassword) {
-      notifyError("Ingresa email y contraseña");
+      notifyError(t("loginErrors.emailPasswordRequired"));
       return;
     }
     try {
       setLoading(true);
       await loginWithEmailPassword(supaEmail, supaPassword);
-      setSupaInfo("Login con Supabase exitoso");
+      setSupaInfo(t("loginErrors.supabaseSuccess"));
       setView("dashboard");
     } catch (err) {
-      notifyError(err.message || "Error al iniciar sesión con Supabase");
+      notifyError(err.message || t("loginErrors.supabaseLogin"));
     } finally {
       setLoading(false);
     }
@@ -1603,15 +1654,15 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
     notifyError("");
     setSupaInfo("");
     if (!supaEmail) {
-      notifyError("Ingresa el email para enviar el magic link");
+      notifyError(t("loginErrors.magicLinkEmail"));
       return;
     }
     try {
       setLoading(true);
       await loginWithMagicLink(supaEmail);
-      setSupaInfo("Revisa tu correo: se envió un enlace de acceso.");
+      setSupaInfo(t("loginErrors.magicLinkSent"));
     } catch (err) {
-      notifyError(err.message || "Error al enviar magic link");
+      notifyError(err.message || t("loginErrors.magicLinkError"));
     } finally {
       setLoading(false);
     }
@@ -1621,17 +1672,17 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
     <>
       <AuthPageShell setView={setView}>
           <GuiaaBrandLockup variant="auth" className="mb-6" />
-          <h2>Iniciar Sesión</h2>
+          <h2>{t("login.title")}</h2>
           <p>
             {legacyLogin
-              ? "Cuenta anterior: usa email y matrícula profesional"
-              : "Ingresa con tu email y contraseña"}
+              ? t("login.subtitleLegacy")
+              : t("login.subtitlePassword")}
           </p>
 
           {!pending2FA ? (
             <form onSubmit={handleSubmit} className="auth-form">
               <div className="form-group">
-                <Label htmlFor="login-email">Email</Label>
+                <Label htmlFor="login-email">{t("login.email")}</Label>
                 <Input
                   id="login-email"
                   type="email"
@@ -1641,14 +1692,14 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  placeholder="tu.email@ejemplo.com"
+                  placeholder={t("login.emailPlaceholder")}
                   className="mt-1.5 h-11 min-h-11 bg-background"
                 />
               </div>
 
               {!legacyLogin ? (
                 <div className="form-group">
-                  <Label htmlFor="login-password">Contraseña</Label>
+                  <Label htmlFor="login-password">{t("login.password")}</Label>
                   <Input
                     id="login-password"
                     type="password"
@@ -1658,13 +1709,13 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
                     onChange={(e) =>
                       setFormData({ ...formData, password: e.target.value })
                     }
-                    placeholder="Tu contraseña"
+                    placeholder={t("login.passwordPlaceholder")}
                     className="mt-1.5 h-11 min-h-11 bg-background"
                   />
                 </div>
               ) : (
                 <div className="form-group">
-                  <Label htmlFor="login-cedula">Matrícula / licencia / registro</Label>
+                  <Label htmlFor="login-cedula">{t("login.license")}</Label>
                   <Input
                     id="login-cedula"
                     type="text"
@@ -1677,7 +1728,7 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
                         cedula_profesional: e.target.value,
                       })
                     }
-                    placeholder="Ej. 12345678 o MVZ-2024-001"
+                    placeholder={t("login.licensePlaceholder")}
                     className="mt-1.5 h-11 min-h-11 bg-background"
                   />
                 </div>
@@ -1688,7 +1739,7 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
                 disabled={loading}
                 className="w-full"
               >
-                {loading ? "Iniciando Sesión..." : "Iniciar Sesión"}
+                {loading ? t("login.submitting") : t("login.submit")}
               </Button>
 
               <button
@@ -1700,14 +1751,14 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
                 }}
               >
                 {legacyLogin
-                  ? "Usar email y contraseña"
-                  : "¿Cuenta anterior sin contraseña? Usa matrícula"}
+                  ? t("login.usePassword")
+                  : t("login.useLegacy")}
               </button>
             </form>
           ) : (
             <form onSubmit={handleVerify2FA} className="auth-form">
               <div className="form-group">
-                <Label htmlFor="login-2fa">Código de Verificación</Label>
+                <Label htmlFor="login-2fa">{t("twoFactor.label")}</Label>
                 <Input
                   id="login-2fa"
                   type="text"
@@ -1715,13 +1766,13 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
                   inputMode="numeric"
                   value={twoFactorCode}
                   onChange={(e) => setTwoFactorCode(e.target.value)}
-                  placeholder="Ingresa el código de 6 dígitos"
+                  placeholder={t("twoFactor.placeholder")}
                   maxLength={6}
                   autoFocus
                   className="mt-1.5 h-11 min-h-11 bg-background tracking-widest"
                 />
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Se ha enviado un código de verificación a tu email
+                  {t("twoFactor.hint")}
                 </p>
               </div>
 
@@ -1730,7 +1781,7 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
                 disabled={verifying2FA}
                 className="w-full"
               >
-                {verifying2FA ? "Verificando..." : "Verificar Código"}
+                {verifying2FA ? t("twoFactor.submitting") : t("twoFactor.submit")}
               </Button>
 
               <Button
@@ -1739,15 +1790,15 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
                 onClick={resetToLogin}
                 className="mt-2.5 w-full"
               >
-                Volver al Login
+                {t("twoFactor.back")}
               </Button>
             </form>
           )}
 
           <div className="auth-footer">
-            ¿No tienes una cuenta?{" "}
+            {t("login.noAccount")}{" "}
             <button onClick={() => setView("register")} className="link-btn">
-              Regístrate
+              {t("login.registerLink")}
             </button>
           </div>
       </AuthPageShell>
@@ -1758,6 +1809,7 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
 
 // Verificación de registro profesional (documento + revisión; SEP opcional MX)
 const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSuccess }) => {
+  const { t } = useTranslation("auth");
   const { login } = useVet();
   const [nombre, setNombre] = useState("");
   const [matricula, setMatricula] = useState("");
@@ -1826,10 +1878,10 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
     return (
       <AuthPageShell setView={setView}>
           <GuiaaBrandLockup variant="auth" className="mb-6" />
-          <h2>Verificación requerida</h2>
-          <p>No hay una sesión de verificación activa. Vuelve a iniciar sesión.</p>
+          <h2>{t("cedula.noSessionTitle")}</h2>
+          <p>{t("cedula.noSessionBody")}</p>
           <Button className="w-full" onClick={() => setView("login")}>
-            Ir a Login
+            {t("cedula.goLogin")}
           </Button>
       </AuthPageShell>
     );
@@ -1841,23 +1893,24 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
   const skipCount = cedulaFlow?.cedula_skip_count || 0;
   const remainingSkips = 3 - skipCount;
   const showMatriculaField = !cedula_profesional;
+  const verificationStatusLabel = verificationStatus
+    ? t(`cedula.status.${verificationStatus}`, { defaultValue: verificationStatus })
+    : "";
 
   const handleUploadAndVerify = async () => {
     notifyError("");
     setInfo("");
 
     if (!cedula_profesional) {
-      notifyError(
-        "Ingresa tu número de matrícula, licencia o registro profesional.",
-      );
+      notifyError(t("cedula.errors.licenseRequired"));
       return;
     }
     if (!nombre?.trim()) {
-      notifyError("Ingresa tu nombre completo tal como aparece en tu documento profesional.");
+      notifyError(t("cedula.errors.nameRequired"));
       return;
     }
     if (needsUpload && !file) {
-      notifyError("Debes subir tu documento profesional (PDF/JPG/PNG).");
+      notifyError(t("cedula.errors.fileRequired"));
       return;
     }
 
@@ -1875,7 +1928,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
         if (!up.ok) {
           const errorData = await up.json().catch(() => ({}));
           throw new Error(
-            formatApiErrorDetail(errorData.detail, "Error subiendo documento"),
+            formatApiErrorDetail(errorData.detail, t("cedula.errors.uploadFailed")),
           );
         }
       }
@@ -1893,20 +1946,18 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
       if (!vr.ok) {
         const errorData = await vr.json().catch(() => ({}));
         throw new Error(
-          formatApiErrorDetail(errorData.detail, "Error al enviar tu registro para revisión"),
+          formatApiErrorDetail(errorData.detail, t("cedula.errors.verifyFailed")),
         );
       }
       const verifyData = await vr.json().catch(() => ({}));
       const status = verifyData?.verification_status || "";
       setVerificationStatus(status);
-      setInfo(verifyData?.message || "Verificación procesada.");
+      setInfo(verifyData?.message || t("cedula.processed"));
 
       // 3) Si verified (o queda pending por caída SEP/DGP), entrar a la app
       if (status === "verified" || status === "pending") {
         if (status === "verified" && email) {
-          notifySuccess(
-            `¡Registro aprobado! Te enviamos un correo de confirmación a ${email}.`
-          );
+          notifySuccess(t("cedula.verifiedEmail", { email }));
         }
         const vetData = await finalizeCedulaFlowEntry({
           email,
@@ -1916,7 +1967,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
           authPayload: verifyData?.access_token ? verifyData : undefined,
         });
         if (vetData?.status === "requires_cedula_flow") {
-          throw new Error(vetData?.message || "Tu registro aún no está verificado.");
+          throw new Error(vetData?.message || t("cedula.errors.notVerified"));
         }
         login(vetData);
         if (onAuthSuccess) {
@@ -1936,10 +1987,9 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
   return (
     <AuthPageShell setView={setView} wide>
           <GuiaaBrandLockup variant="auth" className="mb-6" />
-          <h2>Verificación de registro profesional</h2>
+          <h2>{t("cedula.title")}</h2>
           <p className="text-sm text-muted-foreground">
-            Sube tu título, matrícula o licencia. Validamos veterinarios de Latinoamérica;
-            en México también intentamos verificación automática con SEP cuando está disponible.
+            {t("cedula.subtitle")}
           </p>
 
           <div className="cedula-flow-messages" aria-live="polite">
@@ -1959,14 +2009,14 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
             {showMatriculaField && (
               <div className="form-group">
                 <Label htmlFor="cedula-matricula">
-                  Número de matrícula / registro profesional *
+                  {t("cedula.licenseLabel")}
                 </Label>
                 <Input
                   id="cedula-matricula"
                   type="text"
                   value={matricula}
                   onChange={(e) => setMatricula(e.target.value)}
-                  placeholder="Ej. 12345678"
+                  placeholder={t("cedula.licensePlaceholder")}
                   autoComplete="off"
                   className="mt-1.5 h-11 min-h-11"
                 />
@@ -1975,14 +2025,14 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
 
             <div className="form-group">
               <Label htmlFor="cedula-nombre">
-                Nombre completo (como en tu documento) *
+                {t("cedula.nameLabel")}
               </Label>
               <Input
                 id="cedula-nombre"
                 type="text"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
-                placeholder="Ej. JUAN PEREZ LOPEZ"
+                placeholder={t("cedula.namePlaceholder")}
                 autoComplete="name"
                 className="mt-1.5 h-11 min-h-11"
               />
@@ -1990,7 +2040,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
 
             <div className="form-group">
               <Label htmlFor="cedula-archivo">
-                Documento profesional (PDF/JPG/PNG)
+                {t("cedula.fileLabel")}
                 {needsUpload ? " *" : ""}
               </Label>
               <Input
@@ -2001,15 +2051,14 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                 className="mt-1.5 h-auto min-h-10 cursor-pointer border-dashed py-2 file:mr-3 file:cursor-pointer"
               />
               <p className="mt-2 text-xs text-muted-foreground">
-                Puedes volver a subir el documento si fue rechazado. También puedes enviarlo
-                por correo a{" "}
+                {t("cedula.fileHint")}{" "}
                 <a
                   href="mailto:soporte@guiaa.vet"
                   className="inline-flex min-h-11 items-center font-medium text-primary underline-offset-2 hover:underline"
                 >
                   soporte@guiaa.vet
                 </a>{" "}
-                indicando el email con el que te registraste.
+                {t("cedula.fileHintEmail")}
               </p>
             </div>
 
@@ -2018,12 +2067,12 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
               onClick={handleUploadAndVerify}
               disabled={loading}
             >
-              {loading ? "Enviando..." : "Subir y enviar a revisión"}
+              {loading ? t("cedula.submitting") : t("cedula.submit")}
             </Button>
 
             {verificationStatus && (
               <p className="cedula-verification-status">
-                Estado actual: <strong>{verificationStatus}</strong>
+                {t("cedula.currentStatus")} <strong>{verificationStatusLabel}</strong>
               </p>
             )}
 
@@ -2043,7 +2092,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                     
                     if (!response.ok) {
                       const errorData = await response.json().catch(() => ({}));
-                      throw new Error(errorData.detail || "Error al posponer verificación");
+                      throw new Error(errorData.detail || t("cedula.errors.skipFailed"));
                     }
                     
                     const skipData = await response.json();
@@ -2059,7 +2108,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                     if (vetData?.status === "requires_cedula_flow") {
                       // Si aún requiere verificación pero ya usó los 3 skips, mostrar error
                       if (skipData.remaining_skips === 0) {
-                        notifyError("Has alcanzado el límite de 3 posposiciones. Debes completar la verificación ahora.");
+                        notifyError(t("cedula.errors.skipLimit"));
                         setLoading(false);
                         return;
                       }
@@ -2090,7 +2139,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                 }}
                 disabled={loading}
               >
-                {loading ? "Procesando..." : `Continuar a GUIAA Diagnóstico (${remainingSkips} posposiciones restantes)`}
+                {loading ? t("cedula.skipProcessing") : t("cedula.skipContinue", { count: remainingSkips })}
               </Button>
             )}
 
@@ -2103,7 +2152,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
                 setView("login");
               }}
             >
-              Volver al Login
+              {t("cedula.backLogin")}
             </Button>
           </div>
     </AuthPageShell>
@@ -2112,6 +2161,7 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
 
 // Dashboard
 const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded = false }) => {
+  const { t, i18n } = useTranslation("clinic");
   const { veterinarian, platformAdmin } = useVet();
   const [stats, setStats] = useState({ consultations: 0, thisMonth: 0, lastMonth: 0, today: 0 });
   const [recentConsultations, setRecentConsultations] = useState([]);
@@ -2337,7 +2387,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       setView("new-consultation");
       return;
     }
-    notifyQuotaError(TRIAL_EXHAUSTED_MESSAGE, () => setView("membership"));
+    notifyQuotaError(getTrialExhaustedMessage(), () => setView("membership"));
   };
 
   const vetName = veterinarian?.nombre || "Doctor/a";
@@ -2368,7 +2418,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       );
 
       if (!response.ok) {
-        throw new Error("Error creando sesión de pago");
+        throw new Error(t("dashLegacy.paymentSessionError"));
       }
 
       const data = await response.json();
@@ -2381,7 +2431,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
       window.location.href = data.checkout_url;
     } catch (error) {
       console.error("Error:", error);
-      notifyError("Error procesando el pago. Inténtalo de nuevo.");
+      notifyError(t("dashLegacy.paymentProcessError"));
     } finally {
       setBuyingConsultations(false);
     }
@@ -2390,24 +2440,30 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
   const timeOfDay =
     currentHour < 12 ? "morning" : currentHour < 19 ? "afternoon" : "night";
 
-  const todayLabel = new Date().toLocaleDateString("es-MX", {
-    weekday: "long",
-    day: "numeric",
-    month: "short",
-  });
+  const todayLabel = new Date().toLocaleDateString(
+    i18n.language?.startsWith("en") ? "en-US" : "es-MX",
+    {
+      weekday: "long",
+      day: "numeric",
+      month: "short",
+    },
+  );
 
   const shiftLabel =
     currentHour < 12
-      ? "Turno matutino"
+      ? t("dashLegacy.shiftMorning")
       : currentHour < 19
-        ? "Turno vespertino"
-        : "Turno nocturno";
+        ? t("dashLegacy.shiftAfternoon")
+        : t("dashLegacy.shiftNight");
 
   const membershipConsultationsLabel =
     !membershipStatus.maxConsultations ||
     membershipStatus.maxConsultations <= 0
-      ? "Sin consultas asignadas"
-      : `${membershipStatus.consultations}/${membershipStatus.maxConsultations} consultas restantes`;
+      ? t("dashLegacy.noConsultations")
+      : t("dashLegacy.consultationsBalance", {
+          current: membershipStatus.consultations,
+          max: membershipStatus.maxConsultations,
+        });
 
   const membershipBalancePct =
     membershipStatus.maxConsultations > 0
@@ -2423,10 +2479,10 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
   const greetingHour = new Date().getHours();
   const greetingText =
     greetingHour < 12
-      ? `Buenos días, ${vetName}`
+      ? t("dashLegacy.greetingMorning", { name: vetName })
       : greetingHour < 19
-        ? `Buenas tardes, ${vetName}`
-        : `Buenas noches, ${vetName}`;
+        ? t("dashLegacy.greetingAfternoon", { name: vetName })
+        : t("dashLegacy.greetingNight", { name: vetName });
   const GreetingIcon =
     greetingHour < 12 ? Sun : greetingHour < 19 ? CloudSun : Moon;
 
@@ -2487,16 +2543,16 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
         {embedded ? (
           <div className="clinic-dashboard-section-head clinic-dashboard-cds-head">
             <div>
-              <h2>Panel CDS y membresía</h2>
+              <h2>{t("dashLegacy.cdsPanelTitle")}</h2>
               <p className="clinic-dashboard-cds-sub">
-                Consultas clínicas, saldo del plan y accesos al flujo diagnóstico.
+                {t("dashLegacy.cdsPanelSub")}
               </p>
             </div>
             <button
               type="button"
               onClick={toggleTheme}
               className="clinic-dashboard-theme-btn"
-              aria-label={theme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
+              aria-label={theme === "dark" ? t("dashLegacy.themeLight") : t("dashLegacy.themeDark")}
             >
               {theme === "dark" ? <Sun size={18} aria-hidden /> : <Moon size={18} aria-hidden />}
             </button>
@@ -2515,15 +2571,15 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
               <div className="hero-summary">
                 <span className="hero-summary-item">
                   <BarChart3 className="icon" size={16} />
-                  {stats.consultations} consultas
+                  {t("dashLegacy.consultationsCount", { count: stats.consultations })}
                 </span>
                 <span className="hero-summary-divider">•</span>
                 <span className={`hero-badge ${membershipType === 'premium' ? 'premium' : 'basic'}`}>
                   {membershipType === 'premium'
-                    ? '⭐ Premium'
-                    : membershipStatus.status !== 'Sin membresía'
-                      ? `💎 ${membershipStatus.status}`
-                      : '💎 Sin plan'}
+                    ? t("dashLegacy.badgePremium")
+                    : membershipStatus.status !== t("dashLegacy.noMembershipStatus")
+                      ? t("dashLegacy.badgePlan", { status: membershipStatus.status })
+                      : t("dashLegacy.badgeNoPlan")}
                 </span>
                 {weatherData && (
                   <>
@@ -2538,13 +2594,13 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
             <div
               className="hero-actions dashboard-header-toolbar"
               role="toolbar"
-              aria-label="Acciones del panel"
+              aria-label={t("dashLegacy.toolbarAria")}
             >
               <button
                 type="button"
                 onClick={toggleTheme}
                 className="icon-btn"
-                aria-label={theme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
+                aria-label={theme === "dark" ? t("dashLegacy.themeLight") : t("dashLegacy.themeDark")}
               >
                 {theme === "dark" ? <Sun size={18} aria-hidden /> : <Moon size={18} aria-hidden />}
               </button>
@@ -2555,7 +2611,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
 
         <div className={`today-summary-panel${embedded ? " clinic-settings-card clinic-dashboard-summary" : ""}`}>
           <div className="today-summary-left">
-            <div className="today-title">Hoy en tu consulta</div>
+            <div className="today-title">{t("dashLegacy.todayTitle")}</div>
             <div className="today-subtitle">
               {todayLabel} · {shiftLabel}
             </div>
@@ -2566,7 +2622,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
               className="today-pill today-pill-btn"
               onClick={() => setView("consultation-history")}
             >
-              <span className="pill-label">Consultas hoy</span>
+              <span className="pill-label">{t("dashLegacy.pillToday")}</span>
               <span className="pill-value">{stats.today || 0}</span>
             </button>
             <button
@@ -2574,7 +2630,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
               className="today-pill today-pill-btn"
               onClick={() => setView("consultation-history")}
             >
-              <span className="pill-label">Este mes</span>
+              <span className="pill-label">{t("dashLegacy.pillMonth")}</span>
               <span className="pill-value">{stats.thisMonth}</span>
             </button>
             <button
@@ -2582,7 +2638,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
               className="today-pill today-pill-btn"
               onClick={() => setView("membership")}
             >
-              <span className="pill-label">Membresía</span>
+              <span className="pill-label">{t("dashLegacy.pillMembership")}</span>
               <span className="pill-value">
                 {embedded
                   ? membershipStatus.status
@@ -2595,14 +2651,13 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
         {membershipStatus.trialExhausted && !embedded && (
           <div className="dashboard-trial-banner" role="alert">
             <div className="dashboard-trial-banner-copy">
-              <strong>Prueba agotada</strong>
+              <strong>{t("dashLegacy.trialExhaustedTitle")}</strong>
               <p>
-                {TRIAL_EXHAUSTED_MESSAGE} Debes completar la encuesta obligatoria para
-                ver tu oferta Premium con cupón de descuento.
+                {t("dashLegacy.trialExhaustedBody", { message: getTrialExhaustedMessage() })}
               </p>
             </div>
             <Button type="button" variant="guiaaPrimary" size="sm" onClick={() => setView("membership")}>
-              Ver planes de membresía
+              {t("dashLegacy.viewMembershipPlans")}
             </Button>
           </div>
         )}
@@ -2616,7 +2671,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
             </div>
           ) : (
           <div className={`stats-cards${embedded ? " clinic-report-kpi-grid" : ""}`}>
-            <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip="Total de consultas realizadas">
+            <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip={t("dashLegacy.tipTotal")}>
               <div className="stat-icon"><BarChart3 /></div>
               <div className="stat-content">
                 <h3>
@@ -2627,18 +2682,18 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                     </span>
                   )}
                 </h3>
-                <p>Consultas Totales</p>
+                <p>{t("dashLegacy.kpiTotal")}</p>
                 <MiniAreaChart
                   data={weeklyActivity}
                   id="kpi-weekly-activity"
                   colorFrom="#265B93"
                   colorTo="#d4ebf7"
-                  ariaLabel="Actividad semanal de consultas"
+                  ariaLabel={t("dashLegacy.weeklyAria")}
                 />
               </div>
             </Card>
 
-            <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip="Consultas de este mes">
+            <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip={t("dashLegacy.tipMonth")}>
               <div className="stat-icon"><CalendarDays /></div>
               <div className="stat-content">
                 <h3>
@@ -2649,24 +2704,24 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                     </span>
                   )}
                 </h3>
-                <p>Este Mes</p>
+                <p>{t("dashLegacy.kpiMonth")}</p>
                 <MiniAreaChart
                   data={monthlyActivity}
                   id="kpi-monthly-activity"
                   colorFrom="#3d9b8f"
                   colorTo="#c8ebe6"
-                  ariaLabel="Actividad mensual de consultas"
+                  ariaLabel={t("dashLegacy.monthlyAria")}
                 />
                 <div className={`stat-trend ${stats.thisMonth - stats.lastMonth > 0 ? 'positive' : stats.thisMonth - stats.lastMonth < 0 ? 'negative' : ''}`}>
                   <span className="stat-trend-icon">{stats.thisMonth - stats.lastMonth > 0 ? '▲' : stats.thisMonth - stats.lastMonth < 0 ? '▼' : '•'}</span>
-                  <span className="stat-trend-percentage">{Math.abs(stats.thisMonth - stats.lastMonth)} vs mes anterior</span>
+                  <span className="stat-trend-percentage">{t("dashLegacy.vsPrevMonth", { count: Math.abs(stats.thisMonth - stats.lastMonth) })}</span>
                 </div>
               </div>
             </Card>
 
             <Card
               className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""} cursor-pointer transition hover:border-guiaa-brand-blue/20`}
-              data-tooltip="Tu plan de membresía actual — clic para administrar"
+              data-tooltip={t("dashLegacy.tipMembership")}
               role="button"
               tabIndex={0}
               onClick={() => setView("membership")}
@@ -2680,7 +2735,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
               <div className="stat-icon"><Gem /></div>
               <div className="stat-content">
                 <h3>{membershipStatus.consultations}</h3>
-                <p>Plan: {membershipStatus.status}</p>
+                <p>{t("dashLegacy.kpiPlan", { status: membershipStatus.status })}</p>
                 {membershipStatus.maxConsultations > 0 && (
                   <div className="membership-progress">
                     <div className="progress-bar">
@@ -2693,11 +2748,11 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                     </div>
                     <span className="progress-text">
                       {membershipStatus.consultations}/{membershipStatus.maxConsultations}{" "}
-                      consultas restantes
+                      {t("dashLegacy.consultationsLeft")}
                     </span>
                   </div>
                 )}
-                <div className="buy-consultations-label">Recargar consultas</div>
+                <div className="buy-consultations-label">{t("dashLegacy.reloadConsultations")}</div>
                 <div className="buy-consultations-group">
                   <Button
                     disabled={buyingConsultations}
@@ -2706,7 +2761,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                       handleBuyConsultations("credits_10");
                     }}
                   >
-                    {buyingConsultations ? "Procesando..." : "10 consultas - $350"}
+                    {buyingConsultations ? t("dashLegacy.processing") : t("dashLegacy.buy10")}
                   </Button>
                 </div>
               </div>
@@ -2716,7 +2771,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
               <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`}><div className="skeleton skeleton-card" style={{width:'100%'}}></div></Card>
             )}
             {weatherData && !weatherLoading && !embedded && (
-              <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip="Clima actual en tu zona">
+              <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip={t("dashLegacy.tipWeather")}>
                 <div className="stat-icon">
                   {weatherData.weather[0].main === 'Clear' ? <Sun /> :
                    weatherData.weather[0].main === 'Clouds' ? <Cloud /> :
@@ -2733,7 +2788,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
 
           <section className={`dashboard-block dashboard-block-actions${embedded ? " clinic-settings-card" : ""}`}>
           <div className={`quick-actions dashboard-quick-actions${embedded ? " clinic-dashboard-quick-section" : ""}`}>
-            <h2>Acciones rápidas</h2>
+            <h2>{t("dashLegacy.quickActions")}</h2>
             <div className={`action-cards${embedded ? " clinic-dashboard-quick-grid" : ""}`}>
               <Card
                 role="button"
@@ -2748,8 +2803,8 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 }}
               >
                 <div className="action-icon"><Plus /></div>
-                <h3>Nueva Consulta</h3>
-                <p>Iniciar análisis especializado</p>
+                <h3>{t("dashLegacy.newConsultation")}</h3>
+                <p>{t("dashLegacy.newConsultationDesc")}</p>
               </Card>
 
               <Card
@@ -2775,14 +2830,14 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 }}
               >
                 <div className="action-icon"><Brain /></div>
-                <h3>Manejo Experto</h3>
+                <h3>{t("dashLegacy.expertMode")}</h3>
                 <p>
                   {membershipType === "premium"
-                    ? "Ir al motivo de consulta y completar datos después"
-                    : "Disponible con membresía Premium"}
+                    ? t("dashLegacy.expertDesc")
+                    : t("dashLegacy.expertLocked")}
                 </p>
                 <span className={membershipType === "premium" ? "expert-badge" : "premium-badge"}>
-                  {membershipType === "premium" ? "RÁPIDO" : "PREMIUM"}
+                  {membershipType === "premium" ? t("dashLegacy.badgeFast") : t("dashLegacy.badgePremium")}
                 </span>
               </Card>
 
@@ -2799,8 +2854,8 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 }}
               >
                 <div className="action-icon"><ClipboardList /></div>
-                <h3>Ver Historial</h3>
-                <p>Consultas previas y resultados</p>
+                <h3>{t("dashLegacy.history")}</h3>
+                <p>{t("dashLegacy.historyDesc")}</p>
               </Card>
 
               <Card
@@ -2826,14 +2881,14 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 }}
               >
                 <div className="action-icon"><FlaskConical /></div>
-                <h3>Laboratorio</h3>
+                <h3>{t("dashLegacy.lab")}</h3>
                 <p>
                   {canUseLab
-                    ? "Interpretar PDF o resultados de laboratorio"
-                    : "Disponible con membresía Premium"}
+                    ? t("dashLegacy.labDesc")
+                    : t("dashLegacy.labLocked")}
                 </p>
                 <span className={canUseLab ? "expert-badge" : "premium-badge"}>
-                  {canUseLab ? "PDF" : "PREMIUM"}
+                  {canUseLab ? t("dashLegacy.badgePdf") : t("dashLegacy.badgePremium")}
                 </span>
               </Card>
 
@@ -2850,8 +2905,8 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 }}
               >
                 <div className="action-icon"><User /></div>
-                <h3>Perfil MVZ</h3>
-                <p>Datos profesionales y verificación</p>
+                <h3>{t("dashLegacy.profile")}</h3>
+                <p>{t("dashLegacy.profileDesc")}</p>
               </Card>
 
               <Card
@@ -2870,8 +2925,8 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 }}
               >
                 <div className="action-icon"><Crown /></div>
-                <h3>Membresía</h3>
-                <p>Actualizar plan o renovar</p>
+                <h3>{t("dashLegacy.membership")}</h3>
+                <p>{t("dashLegacy.membershipDesc")}</p>
               </Card>
             </div>
           </div>
@@ -3017,6 +3072,9 @@ const NewConsultation = ({
   clinicalContext = null,
   onClinicalContextChange,
 }) => {
+  const { t } = useTranslation("clinic");
+  const { t: tSpecies } = useTranslation("speciesForms");
+  const navigate = useNavigate();
   const { veterinarian, platformAdmin, refreshProfile } = useVet();
   const isExpertMode = entryMode === "expert";
   const [step, setStep] = useState(isExpertMode && !existingConsultationId ? 2 : 1);
@@ -3031,7 +3089,7 @@ const NewConsultation = ({
   const [loading, setLoading] = useState(false);
   const [info, setInfo] = useState(
     isExpertMode && !existingConsultationId
-      ? "Modo Manejo Experto: describe el caso clínico ahora. Podrás completar los datos de la mascota (paso 1) después."
+      ? t("consultation.expertBanner")
       : "",
   );
   const [pending2FA, setPending2FA] = useState(false);
@@ -3129,21 +3187,60 @@ const NewConsultation = ({
   }, [veterinarian?.id, veterinarian?.membership_type]);
 
   useEffect(() => {
-    if (!clinicalContext?.patient || existingConsultationId) return;
-    const p = clinicalContext.patient;
-    const owner = p.clients || {};
-    setFormData((prev) => ({
-      ...prev,
-      nombre_mascota: p.name || prev.nombre_mascota,
-      nombre_dueño: owner.name || prev.nombre_dueño,
-      raza: p.breed || prev.raza,
-      sexo: p.sex || prev.sexo,
-      peso: p.weight_kg != null ? String(p.weight_kg) : prev.peso,
-    }));
-    if (p.species) {
-      setSelectedCategory(p.species);
+    if (!clinicalContext?.patientId || existingConsultationId || !veterinarian?.id) {
+      if (!clinicalContext?.patient || existingConsultationId) return;
+      const p = clinicalContext.patient;
+      const owner = p.clients || {};
+      setFormData((prev) => ({
+        ...prev,
+        nombre_mascota: p.name || prev.nombre_mascota,
+        nombre_dueño: owner.name || prev.nombre_dueño,
+        raza: p.breed || prev.raza,
+        sexo: normalizePetSex(p.sex) || prev.sexo,
+        peso: p.weight_kg != null ? String(p.weight_kg) : prev.peso,
+      }));
+      if (p.species) setSelectedCategory(p.species);
+      return;
     }
-  }, [clinicalContext, existingConsultationId]);
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await fetchPatient(veterinarian.id, clinicalContext.patientId);
+        if (cancelled) return;
+        const patient = data?.patient || clinicalContext.patient;
+        const lastConsultation = (data?.consultations || [])[0] || null;
+        const hydrated = hydrateFormDataFromChart(
+          patient?.species || selectedCategory,
+          patient?.clinical_chart,
+          patient,
+          lastConsultation,
+        );
+        setFormData((prev) => ({
+          ...prev,
+          ...hydrated,
+          sexo: normalizePetSex(hydrated.sexo || patient?.sex) || prev.sexo,
+        }));
+        if (patient?.species) setSelectedCategory(patient.species);
+      } catch {
+        const p = clinicalContext.patient;
+        if (!p || cancelled) return;
+        const owner = p.clients || {};
+        setFormData((prev) => ({
+          ...prev,
+          nombre_mascota: p.name || prev.nombre_mascota,
+          nombre_dueño: owner.name || prev.nombre_dueño,
+          raza: p.breed || prev.raza,
+          sexo: normalizePetSex(p.sex) || prev.sexo,
+          peso: p.weight_kg != null ? String(p.weight_kg) : prev.peso,
+        }));
+        if (p.species) setSelectedCategory(p.species);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [clinicalContext, existingConsultationId, veterinarian?.id]);
 
   // Load existing consultation if ID is provided
   useEffect(() => {
@@ -3155,9 +3252,13 @@ const NewConsultation = ({
   const shouldRedirectToMembership = (status, errorDetail) =>
     status === 403 &&
     (errorDetail.includes("agotado") ||
+      errorDetail.includes("exhausted") ||
       errorDetail.includes("consultas de prueba") ||
+      errorDetail.includes("trial consultation") ||
       errorDetail.includes("consultas gratuitas") ||
+      errorDetail.includes("free consultation") ||
       errorDetail.includes("membresía activa") ||
+      errorDetail.includes("active membership") ||
       errorDetail.includes("TRIAL_EXHAUSTED"));
 
   const createStageOneConsultation = async () => {
@@ -3178,7 +3279,7 @@ const NewConsultation = ({
       const errorData = await response.json().catch(() => ({}));
       const errorDetail = friendlyDatabaseError(
         errorData.detail,
-        `Error del servidor: ${response.status}`,
+        t("loginErrors.serverError", { status: response.status }),
       );
       if (shouldRedirectToMembership(response.status, errorDetail)) {
         notifyQuotaError(errorDetail, () => setView("membership"));
@@ -3198,18 +3299,20 @@ const NewConsultation = ({
     }
   };
 
-  const renderCategorySelector = (title = "Categoría Animal") => {
+  const renderCategorySelector = (titleKey = "categoryTitle") => {
     const speciesCount = Object.keys(categories).length;
+    const heading = tSpecies(titleKey);
+    const defaultHeading = tSpecies("categoryTitle");
     return (
       <div className="form-section category-selector-glass-wrap">
         <div className="category-selector-glass-head">
-          {title !== "Categoría Animal" ? <h3>{title}</h3> : null}
+          {heading !== defaultHeading ? <h3>{heading}</h3> : null}
           <span className="category-selector-glass-badge">
-            Multiespecie veterinaria · {speciesCount} formularios clínicos
+            {tSpecies("categoryBadge", { count: speciesCount })}
           </span>
         </div>
         <div className="category-selector-glass-panel">
-          <div className="category-grid category-grid--liquid" role="listbox" aria-label="Especie">
+          <div className="category-grid category-grid--liquid" role="listbox" aria-label={tSpecies("categoryAria")}>
             {Object.entries(categories).map(([key, category]) => (
               <div
                 key={key}
@@ -3228,7 +3331,9 @@ const NewConsultation = ({
                 <span className="category-icon" aria-hidden>
                   {CONSULTATION_CATEGORY_ICONS[key] || "🐾"}
                 </span>
-                <span className="category-label">{category.name}</span>
+                <span className="category-label">
+                  {tSpecies(`categories.${key}`, { defaultValue: category.name })}
+                </span>
               </div>
             ))}
           </div>
@@ -3247,7 +3352,7 @@ const NewConsultation = ({
       if (response.ok) {
         const { data: consultation, text } = await safeReadJson(response);
         if (!consultation) {
-          throw new Error(text || `Respuesta inválida del servidor (${response.status})`);
+          throw new Error(text || t("loginErrors.invalidServerResponseStatus", { status: response.status }));
         }
         
         // Set consultation ID
@@ -3269,7 +3374,7 @@ const NewConsultation = ({
           edad: consultation.edad || formDataFromPayload.edad || "",
           peso: consultation.peso || formDataFromPayload.peso || "",
           condicion_corporal: consultation.condicion_corporal || formDataFromPayload.condicion_corporal || "3",
-          sexo: consultation.sexo || formDataFromPayload.sexo || "",
+          sexo: normalizePetSex(consultation.sexo || formDataFromPayload.sexo) || "",
           estado_reproductivo: consultation.estado_reproductivo || formDataFromPayload.estado_reproductivo || "",
           vacunas_vigentes: consultation.vacunas_vigentes || formDataFromPayload.vacunas_vigentes || "",
           vacunas_cual: consultation.vacunas_cual || formDataFromPayload.vacunas_cual || "",
@@ -3313,13 +3418,13 @@ const NewConsultation = ({
         notifyError(
           friendlyDatabaseError(
             errorData?.detail,
-            text || `Error cargando la consulta (${response.status})`,
+            text || t("consultation.loadErrorStatus", { status: response.status }),
           ),
         );
       }
     } catch (error) {
       console.error("Error loading consultation:", error);
-      notifyError("Error cargando la consulta: " + error.message);
+      notifyError(t("consultation.loadErrorDetail", { message: error.message }));
     } finally {
       setLoadingExisting(false);
     }
@@ -3374,52 +3479,22 @@ const NewConsultation = ({
       return (
         <div className="form-section">
           <p className="info-message">
-            Por favor, selecciona una categoría de animal para continuar.
+            {t("legacyAnimalForm.selectCategoryRequired")}
           </p>
         </div>
       );
     }
 
-    const formProps = {
-      formData,
-      setFormData,
-    };
-
-    switch (selectedCategory) {
-      case "perros":
-        return <PerrosForm {...formProps} />;
-      case "gatos":
-        return <GatosForm {...formProps} />;
-      case "tortugas":
-        return <TortugasForm {...formProps} />;
-      case "erizos":
-        return <ErizosForm {...formProps} />;
-      case "hurones":
-        return <HuronesForm {...formProps} />;
-      case "iguanas":
-        return <IguanasForm {...formProps} />;
-      case "hamsters":
-        return <HamstersForm {...formProps} />;
-      case "patos_pollos":
-      case "aves_corral":
-        return <PatosPollosForm {...formProps} />;
-      case "aves":
-      case "aves_ornamentales":
-        return <AvesForm {...formProps} />;
-      case "conejos":
-        return <ConejosForm {...formProps} />;
-      case "cuyos":
-        return <CuyosForm {...formProps} />;
-      default:
-        return (
-          <div className="form-section">
-            <p className="info-message">
-              Categoría no reconocida. Por favor, selecciona una categoría
-              válida.
-            </p>
-          </div>
-        );
-    }
+    return (
+      <LazySpeciesForm
+        category={selectedCategory}
+        formData={formData}
+        setFormData={setFormData}
+        unknownMessage={
+          <p className="info-message">{t("legacyAnimalForm.unknownCategory")}</p>
+        }
+      />
+    );
   };
 
   const handleSubmitStep1 = async (e) => {
@@ -3446,15 +3521,13 @@ const NewConsultation = ({
           throw new Error(
             friendlyDatabaseError(
               errorData?.detail,
-              text || `Error actualizando consulta: ${resp.status}`,
+              text || t("consultation.updateError", { status: resp.status }),
             ),
           );
         }
         setStep(2);
         if (isExpertMode) {
-          setInfo(
-            "Datos de la mascota guardados. Puedes continuar con el motivo de consulta o volver más tarde para completar campos faltantes.",
-          );
+          setInfo(t("consultation.petDataSavedExpert"));
         }
         return;
       }
@@ -3465,7 +3538,7 @@ const NewConsultation = ({
       await syncProfileAfterConsultation();
       setStep(2);
     } catch (err) {
-      notifyError(err.message || "Error al crear la consulta");
+      notifyError(err.message || t("consultation.createError"));
     } finally {
       setLoading(false);
     }
@@ -3481,7 +3554,7 @@ const NewConsultation = ({
       let activeConsultationId = consultationId;
       if (!activeConsultationId) {
         if (!selectedCategory) {
-          throw new Error("Selecciona la especie de la mascota para continuar.");
+          throw new Error(t("consultation.selectSpeciesRequired"));
         }
         const created = await createStageOneConsultation();
         if (!created) return;
@@ -3513,7 +3586,7 @@ const NewConsultation = ({
         throw new Error(
           friendlyDatabaseError(
             errorData?.detail,
-            text || `Error actualizando consulta: ${resp.status}`,
+            text || t("consultation.updateError", { status: resp.status }),
           ),
         );
       }
@@ -3521,11 +3594,11 @@ const NewConsultation = ({
       setStep(3);
       setInfo(
         isExpertMode
-          ? "Motivo de consulta guardado. Recuerda completar los datos de la mascota (paso 1) cuando puedas."
-          : "Observaciones guardadas",
+          ? t("consultation.reasonSavedExpert")
+          : t("consultation.observationsSaved"),
       );
     } catch (err) {
-      notifyError(err?.message || "Error guardando observaciones");
+      notifyError(err?.message || t("consultation.saveObservationsError"));
     } finally {
       setLoading(false);
     }
@@ -3551,13 +3624,13 @@ const NewConsultation = ({
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          friendlyDatabaseError(errorData.detail, "No se pudo guardar la calificación"),
+          friendlyDatabaseError(errorData.detail, t("consultation.ratingSaveError")),
         );
       }
 
       setRatingSaved(true);
     } catch (err) {
-      notifyError(err.message || "No se pudo guardar la calificación");
+      notifyError(err.message || t("consultation.ratingSaveError"));
       setRatingSaved(false);
     } finally {
       setSavingRating(false);
@@ -3566,20 +3639,20 @@ const NewConsultation = ({
 
   const handleAIAnalysis = async () => {
     if (!consultationId) {
-      notifyError("No hay consulta seleccionada");
+      notifyError(t("consultation.noConsultationSelected"));
       return;
     }
 
     // Verificar membresía Premium o trial (síntesis CDS L5)
     if (!canAccessFeature(veterinarian, MEMBERSHIP_FEATURES.advancedAnalysis, { platformAdmin })) {
       const membershipType = veterinarian?.membership_type?.toLowerCase();
-      let planName = "Sin membresía";
+      let planName = t("consultation.noMembership");
       if (membershipType) {
         planName = membershipType.charAt(0).toUpperCase() + membershipType.slice(1);
       }
 
       notifyQuotaError(
-        `La síntesis clínica CDS L5 solo está disponible para miembros Premium. Tu plan actual es: ${planName}. Por favor, actualiza tu membresía para acceder a esta función.`,
+        t("consultation.l5PremiumWithPlan", { plan: planName }),
         () => setView("membership"),
       );
       return;
@@ -3599,23 +3672,25 @@ const NewConsultation = ({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(friendlyDatabaseError(errorData.detail, "Error en análisis"));
+        throw new Error(
+          friendlyDatabaseError(errorData.detail, t("consultation.analysisError")),
+        );
       }
 
       const result = await response.json();
       setAiAnalysis(cleanClinicalDisplayText(result.analysis));
       await refreshProfile?.();
     } catch (err) {
-      notifyError(err.message || "Error generando análisis");
+      notifyError(err.message || t("consultation.analysisError"));
     } finally {
       setLoading(false);
     }
   };
 
   const steps = [
-    { number: 1, label: 'Datos', icon: '🐾' },
-    { number: 2, label: 'Motivo', icon: '📝' },
-    { number: 3, label: 'Diagnóstico', icon: '🔬' }
+    { number: 1, label: t("consultation.stepData"), icon: "🐾" },
+    { number: 2, label: t("consultation.stepReason"), icon: "📝" },
+    { number: 3, label: t("consultation.stepDiagnosis"), icon: "🔬" },
   ];
 
   const renderStepper = (currentStep) => (
@@ -3633,12 +3708,16 @@ const NewConsultation = ({
   );
 
   const renderConsultationContextBar = (currentStep) => {
-    const speciesName = selectedCategory ? categories[selectedCategory]?.name : "Sin especie";
-    const petLabel = formData.nombre_mascota?.trim() || "Mascota sin nombre";
+    const speciesName = selectedCategory
+      ? categories[selectedCategory]?.name
+      : t("consultation.noSpecies");
+    const petLabel = formData.nombre_mascota?.trim() || t("consultation.unnamedPet");
     return (
       <div className="consultation-mobile-context">
         <div className="consultation-mobile-context-row">
-          <span className="consultation-mobile-context-label">Paso {currentStep} de 3</span>
+          <span className="consultation-mobile-context-label">
+            {t("consultation.stepOf", { step: currentStep })}
+          </span>
           <span className="consultation-mobile-context-meta">
             {petLabel} · {speciesName}
           </span>
@@ -3649,7 +3728,7 @@ const NewConsultation = ({
           aria-valuenow={currentStep}
           aria-valuemin={1}
           aria-valuemax={3}
-          aria-label={`Progreso de consulta: paso ${currentStep} de 3`}
+          aria-label={t("consultation.progressAria", { step: currentStep })}
         >
           <div
             className="consultation-mobile-context-fill"
@@ -3666,12 +3745,12 @@ const NewConsultation = ({
         <div className="container">
           <div className="premium-required">
             <div className="premium-icon">🔒</div>
-            <h2>Manejo Experto — Premium</h2>
+            <h2>{t("consultation.expertPremiumTitle")}</h2>
             <p>
-              El modo Manejo Experto está disponible exclusivamente para miembros Premium.
+              {t("consultation.expertPremiumBody")}
             </p>
             <Button type="button" onClick={() => setView("membership")}>
-              Ver Planes Premium
+              {t("consultation.viewPremiumPlans")}
             </Button>
           </div>
         </div>
@@ -3688,10 +3767,10 @@ const NewConsultation = ({
         <div className="container">
           <div className="premium-required">
             <div className="premium-icon">🔒</div>
-            <h2>Consultas de prueba agotadas</h2>
-            <p>{TRIAL_EXHAUSTED_MESSAGE}</p>
+            <h2>{t("consultation.trialTitle")}</h2>
+            <p>{getTrialExhaustedMessage()}</p>
             <Button type="button" onClick={() => setView("membership")}>
-              Ver planes de membresía
+              {t("consultation.viewMembership")}
             </Button>
           </div>
         </div>
@@ -3708,13 +3787,18 @@ const NewConsultation = ({
             <div className="page-title-content">
               <div className="page-title-icon">🩺</div>
               <div className="page-title-text">
-                <h1>
-                  {isExpertMode ? "Completar datos de la mascota" : "Nueva Consulta Veterinaria"}
-                </h1>
+                <div className="clinic-page-title-row">
+                  <h1>
+                    {isExpertMode
+                      ? t("consultation.titleExpert")
+                      : t("consultation.title")}
+                  </h1>
+                  <ModuleHelpTip topicId="diagnosis" setView={setView} />
+                </div>
                 <p>
                   {isExpertMode
-                    ? "Completa los campos faltantes de la mascota. Puedes volver al motivo de consulta cuando termines."
-                    : "Complete la información de la mascota para iniciar el diagnóstico clínico"}
+                    ? t("consultation.leadExpert")
+                    : t("consultation.lead")}
                 </p>
               </div>
             </div>
@@ -3746,6 +3830,7 @@ const NewConsultation = ({
                       veterinarianId={veterinarian?.id}
                       patientId={clinicalContext.patientId}
                       patient={clinicalContext.patient}
+                      onOpenPatientChart={(id) => navigate(`/app/pacientes/${id}`)}
                     />
                   )}
                   {renderCategorySelector()}
@@ -3761,7 +3846,7 @@ const NewConsultation = ({
                       className="min-w-[140px]"
                       onClick={() => (isExpertMode ? setStep(2) : setView("dashboard"))}
                     >
-                      {isExpertMode ? "Volver al motivo" : "Cancelar"}
+                      {isExpertMode ? t("consultation.backToReason") : t("consultation.cancel")}
                     </Button>
                     <Button
                       type="submit"
@@ -3771,10 +3856,10 @@ const NewConsultation = ({
                       className="group min-w-[140px] gap-2"
                     >
                       {loading
-                        ? "Guardando..."
+                        ? t("consultation.saving")
                         : isExpertMode
-                          ? "Guardar y volver al motivo"
-                          : "Continuar al Paso 2"}
+                          ? t("consultation.saveAndBack")
+                          : t("consultation.continueStep2")}
                       {!loading && <span className="transition-transform group-hover:translate-x-1">→</span>}
                     </Button>
                   </div>
@@ -3784,21 +3869,21 @@ const NewConsultation = ({
 
             <aside className="consultation-sidebar">
               <div className="sidebar-section">
-                <div className="sidebar-label">Mascota</div>
+                <div className="sidebar-label">{t("consultation.pet")}</div>
                 <div className="sidebar-value">
-                  {formData.nombre_mascota || "Sin nombre"}
+                  {formData.nombre_mascota || t("consultation.noName")}
                 </div>
               </div>
               
               <div className="sidebar-section">
-                <div className="sidebar-label">Especie</div>
+                <div className="sidebar-label">{t("consultation.species")}</div>
                 <div className="sidebar-value">
-                  {selectedCategory ? categories[selectedCategory]?.name : "Seleccionar"}
+                  {selectedCategory ? categories[selectedCategory]?.name : t("consultation.select")}
                 </div>
               </div>
 
               <div className="sidebar-section">
-                <div className="sidebar-label">Progreso (1/3)</div>
+                <div className="sidebar-label">{t("consultation.progress13")}</div>
                 <div className="sidebar-progress-container">
                   <div className="sidebar-progress-bar" style={{ width: '33%' }}></div>
                 </div>
@@ -3811,7 +3896,7 @@ const NewConsultation = ({
                   className="w-full text-sm"
                   onClick={() => setView("dashboard")}
                 >
-                  Guardar como Borrador
+                  {t("consultation.saveDraft")}
                 </Button>
               </div>
             </aside>
@@ -3830,11 +3915,18 @@ const NewConsultation = ({
             <div className="page-title-content">
               <div className="page-title-icon">📝</div>
               <div className="page-title-text">
-                <h1>{isExpertMode ? "Manejo Experto" : "Motivo de Consulta"}</h1>
+                <div className="clinic-page-title-row">
+                  <h1>
+                    {isExpertMode
+                      ? t("consultation.expertTitle")
+                      : t("consultation.reasonTitle")}
+                  </h1>
+                  <ModuleHelpTip topicId="diagnosis" setView={setView} />
+                </div>
                 <p>
                   {isExpertMode
-                    ? "Describe el caso clínico ahora. Los datos estructurados de la mascota pueden completarse después."
-                    : "Describa detalladamente los síntomas y observaciones de la mascota"}
+                    ? t("consultation.expertLead")
+                    : t("consultation.reasonLead")}
                 </p>
               </div>
             </div>
@@ -3853,12 +3945,12 @@ const NewConsultation = ({
             {renderConsultationContextBar(2)}
 
             <form onSubmit={handleSubmitStep2} className="consultation-form">
-              {isExpertMode && renderCategorySelector("Especie de la mascota")}
+              {isExpertMode && renderCategorySelector("speciesTitle")}
               <div className="form-section">
-                <h3>Detalle de la mascota</h3>
+                <h3>{t("consultation.petDetailTitle")}</h3>
                 <div className="form-group">
                   <label>
-                    ANOTA CON EL MAYOR DETALLE LOS DATOS SOBRE LA MASCOTA.
+                    {t("consultation.detailLabel")}
                   </label>
                   <Textarea
                     required
@@ -3870,7 +3962,7 @@ const NewConsultation = ({
                         detalle_paciente: e.target.value,
                       })
                     }
-                    placeholder="Escriba aquí todos los detalles sobre la mascota, motivo de consulta, síntomas, observaciones clínicas, signos vitales, tratamientos previos, historia clínica, estudios realizados, comportamiento, y cualquier otra información relevante para el diagnóstico..."
+                    placeholder={t("consultation.detailPlaceholder")}
                     className="min-h-[400px] resize-y p-5 text-base leading-relaxed"
                   />
                 </div>
@@ -3884,7 +3976,9 @@ const NewConsultation = ({
                   className="mr-auto min-w-[140px]"
                   onClick={() => setStep(1)}
                 >
-                  {isExpertMode ? "← Completar datos de la mascota" : "← Volver"}
+                  {isExpertMode
+                    ? t("consultation.backExpert")
+                    : t("consultation.back")}
                 </Button>
                 <Button
                   type="submit"
@@ -3893,7 +3987,7 @@ const NewConsultation = ({
                   disabled={loading || (isExpertMode && !selectedCategory)}
                   className="group min-w-[140px] gap-2"
                 >
-                  {loading ? "Guardando..." : "Continuar al Análisis"}
+                  {loading ? t("consultation.saving") : t("consultation.continueAnalysis")}
                   {!loading && <span className="transition-transform group-hover:translate-x-1">→</span>}
                 </Button>
               </div>
@@ -3913,8 +4007,11 @@ const NewConsultation = ({
             <div className="page-title-content">
               <div className="page-title-icon">🔬</div>
               <div className="page-title-text">
-                <h1>Análisis Diagnóstico</h1>
-                <p>Resultados del análisis clínico especializado</p>
+                <div className="clinic-page-title-row">
+                  <h1>{t("consultation.analysisTitle")}</h1>
+                  <ModuleHelpTip topicId="diagnosis" setView={setView} />
+                </div>
+                <p>{t("consultation.analysisLead")}</p>
               </div>
             </div>
           </div>
@@ -3933,7 +4030,7 @@ const NewConsultation = ({
                     className="min-h-11"
                     onClick={() => setStep(1)}
                   >
-                    Completar datos de la mascota
+                    {t("consultation.completePet")}
                   </Button>
                 </div>
               )}
@@ -3948,18 +4045,21 @@ const NewConsultation = ({
               {!aiAnalysis ? (
                 <div className="analysis-prompt">
                   <div className="analysis-icon">📋</div>
-                  <h3>¿Listo para el análisis clínico?</h3>
+                  <h3>{t("consultation.readyTitle")}</h3>
                   <p>
-                    Nuestro sistema especializado en{" "}
-                    {categories[selectedCategory]?.name}{" "}
-                    procesará toda la información proporcionada para generar:
+                    {t("consultation.readyLead", {
+                      species:
+                        tSpecies(`categories.${selectedCategory}`, {
+                          defaultValue: categories[selectedCategory]?.name || "",
+                        }) || "",
+                    })}
                   </p>
                   <ul>
-                    <li>Análisis clínico detallado</li>
-                    <li>Plan de tratamiento detallado</li>
-                    <li>Estudios complementarios recomendados</li>
-                    <li>Pronóstico</li>
-                    <li>Referencias bibliográficas</li>
+                    <li>{t("consultation.readyItemAnalysis")}</li>
+                    <li>{t("consultation.readyItemPlan")}</li>
+                    <li>{t("consultation.readyItemStudies")}</li>
+                    <li>{t("consultation.readyItemPrognosis")}</li>
+                    <li>{t("consultation.readyItemRefs")}</li>
                   </ul>
 
                   {(veterinarian?.membership_type?.toLowerCase() === "premium" || 
@@ -3973,43 +4073,44 @@ const NewConsultation = ({
                       disabled={loading}
                       className="group gap-2.5"
                     >
-                      {loading ? "Procesando..." : "Generar síntesis CDS"}
+                      {loading ? t("consultation.processing") : t("consultation.generateCds")}
                     </Button>
                       {veterinarian?.membership_type?.toLowerCase() !== "premium" && 
                        (veterinarian?.consultations_remaining || 0) > 0 && (
                         <p className="consultation-trial-remaining">
-                          Consultas restantes: {veterinarian.consultations_remaining}
+                          {t("consultation.remainingConsultations", {
+                            count: veterinarian.consultations_remaining,
+                          })}
                         </p>
                       )}
                     </div>
                   ) : (
                     <div className="premium-required-message">
                       <div className="premium-required-icon" aria-hidden="true">⭐</div>
-                      <h4>Síntesis CDS L5 - Solo Premium</h4>
+                      <h4>{t("consultation.l5PremiumTitle")}</h4>
                       <p>
-                        La síntesis clínica estructurada (CDS L5) solo está disponible para miembros Premium.
-                        Actualiza tu plan para acceder a esta función.
+                        {t("consultation.l5PremiumBody")}
                       </p>
                       <Button
                         type="button"
                         onClick={() => setView("membership")}
                         className="mt-2.5"
                       >
-                        Ver Planes Premium
+                        {t("consultation.viewPremiumPlans")}
                       </Button>
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="analysis-result">
-                  <h3>Análisis Veterinario Especializado</h3>
+                  <h3>{t("consultation.specializedAnalysis")}</h3>
                   <div className="analysis-content">
                     <pre className="analysis-text">{aiAnalysis}</pre>
                   </div>
 
                   <div className="consultation-rating">
-                    <div className="consultation-rating-title">Califica la consulta</div>
-                    <div className="consultation-rating-paws" aria-label="Calificación">
+                    <div className="consultation-rating-title">{t("consultation.rateTitle")}</div>
+                    <div className="consultation-rating-paws" aria-label={t("consultation.rateAria")}>
                       {Array.from({ length: 5 }).map((_, idx) => {
                         const value = idx + 1;
                         const selected = (rating || 0) >= value;
@@ -4020,13 +4121,13 @@ const NewConsultation = ({
                             className={`paw-btn ${selected ? "selected" : ""}`}
                             onClick={() => handleSetRating(value)}
                             disabled={savingRating}
-                            aria-label={`Calificar ${value} de 5`}
+                            aria-label={t("consultation.rateValueAria", { value })}
                           >
                             🐾
                           </button>
                         );
                       })}
-                      {ratingSaved && <span className="consultation-rating-saved">Guardado</span>}
+                      {ratingSaved && <span className="consultation-rating-saved">{t("consultation.ratingSaved")}</span>}
                     </div>
                   </div>
 
@@ -4035,7 +4136,7 @@ const NewConsultation = ({
                       type="button"
                       onClick={() => setView("consultation-history")}
                     >
-                      Ver en Historial
+                      {t("consultation.viewInHistory")}
                     </Button>
                     <Button
                       type="button"

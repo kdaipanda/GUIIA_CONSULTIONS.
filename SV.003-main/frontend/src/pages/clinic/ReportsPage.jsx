@@ -13,32 +13,18 @@ import {
   ArrowRight,
 } from "lucide-react";
 import "./clinicPageShared.css";
+import "./helpCenterPage.css";
 import { ClinicReportsSkeleton } from "../../components/clinic/ClinicPageUi";
+import { ModuleHelpTip } from "../../components/clinic/ModuleHelpTip";
 import { useVet } from "../../context/VetContext";
 import { fetchReportsOverview } from "../../lib/clinicApi";
+import { clinicCacheKey, loadClinicData, readClinicDataCache } from "../../lib/clinicDataCache";
 import { notifyError } from "../../lib/appToast";
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 import { Button } from "../../components/ui/button";
 
-const PERIOD_OPTIONS = [
-  { id: "7d", label: "7 días" },
-  { id: "30d", label: "30 días" },
-  { id: "month", label: "Este mes" },
-];
-
-const APPT_STATUS = {
-  scheduled: "Programada",
-  confirmed: "Confirmada",
-  completed: "Completada",
-  cancelled: "Cancelada",
-  no_show: "No asistió",
-};
-
-const INVOICE_STATUS = {
-  draft: "Borrador",
-  issued: "Emitido",
-  paid: "Pagado",
-  cancelled: "Cancelado",
-};
+const PERIOD_IDS = ["7d", "30d", "month"];
 
 function getPeriodRange(periodId) {
   const now = new Date();
@@ -58,32 +44,33 @@ function getPeriodRange(periodId) {
   return { from: from.toISOString(), to: to.toISOString() };
 }
 
-function formatMoney(value) {
-  return new Intl.NumberFormat("es-MX", {
+function formatMoney(value, locale = "es-MX") {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "MXN",
     maximumFractionDigits: 0,
   }).format(value || 0);
 }
 
-function downloadReportCsv(overview, periodLabel) {
+function downloadReportCsv(overview, periodLabel, t) {
   if (!overview) return;
   const totals = overview.totals || {};
+  const locale = (i18n.language || "en").startsWith("es") ? "es-MX" : "en-US";
   const lines = [
-    ["Reporte GUIAA", periodLabel],
-    ["Generado", new Date().toLocaleString("es-MX")],
+    [t("reports.csvTitle"), periodLabel],
+    [t("reports.csvGenerated"), new Date().toLocaleString(locale)],
     [],
-    ["Métrica", "Valor"],
-    ["Citas en periodo", totals.appointments ?? 0],
-    ["Tasa completadas %", totals.occupancy_rate ?? 0],
-    ["Ingresos cobrados", totals.revenue_paid ?? 0],
-    ["Ingresos emitidos sin cobrar", (totals.revenue_issued ?? 0) - (totals.revenue_paid ?? 0)],
-    ["Consultas CDS", totals.consultations_ai ?? 0],
-    ["Dueño", totals.clients ?? 0],
-    ["Mascotas", totals.patients ?? 0],
-    ["Productos stock bajo", totals.low_stock_products ?? 0],
+    [t("reports.csvMetric"), t("reports.csvValue")],
+    [t("reports.csvAppointments"), totals.appointments ?? 0],
+    [t("reports.csvCompletedRate"), totals.occupancy_rate ?? 0],
+    [t("reports.csvRevenuePaid"), totals.revenue_paid ?? 0],
+    [t("reports.csvRevenueUncollected"), (totals.revenue_issued ?? 0) - (totals.revenue_paid ?? 0)],
+    [t("reports.csvCdsConsultations"), totals.consultations_ai ?? 0],
+    [t("reports.csvOwners"), totals.clients ?? 0],
+    [t("reports.csvPets"), totals.patients ?? 0],
+    [t("reports.csvLowStock"), totals.low_stock_products ?? 0],
     [],
-    ["Producto más vendido", "Cantidad", "Ingresos"],
+    [t("reports.csvTopProduct"), t("reports.csvQuantity"), t("reports.csvRevenue")],
     ...(overview.top_products || []).map((p) => [
       p.description,
       p.quantity,
@@ -147,7 +134,7 @@ function MiniAreaChart({ data, id, colorFrom, colorTo, ariaLabel }) {
   );
 }
 
-function KpiCard({ icon: Icon, label, value, hint, chart, chartId, colorFrom, colorTo }) {
+function KpiCard({ icon: Icon, label, value, hint, chart, chartId, colorFrom, colorTo, trendAria }) {
   return (
     <div className="clinic-report-kpi">
       <div className="clinic-report-kpi-head">
@@ -164,7 +151,7 @@ function KpiCard({ icon: Icon, label, value, hint, chart, chartId, colorFrom, co
           id={chartId}
           colorFrom={colorFrom}
           colorTo={colorTo}
-          ariaLabel={`Tendencia: ${label}`}
+          ariaLabel={trendAria}
         />
       )}
     </div>
@@ -172,22 +159,59 @@ function KpiCard({ icon: Icon, label, value, hint, chart, chartId, colorFrom, co
 }
 
 export function ReportsPage() {
+  const { t, i18n } = useTranslation("clinic");
+  const moneyLocale = (i18n.language || "en").startsWith("es") ? "es-MX" : "en-US";
   const navigate = useNavigate();
   const { veterinarian } = useVet();
   const [period, setPeriod] = useState("30d");
   const [overview, setOverview] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const periodOptions = useMemo(
+    () =>
+      PERIOD_IDS.map((id) => ({
+        id,
+        label:
+          id === "7d"
+            ? t("reports.period7")
+            : id === "30d"
+              ? t("reports.period30")
+              : t("reports.periodMonth"),
+      })),
+    [t],
+  );
+
+  const apptStatus = (status) =>
+    t(`appointmentStatus.${status}`, { defaultValue: status });
+  const invoiceStatus = (status) =>
+    t(`invoiceStatus.${status}`, { defaultValue: status });
 
   const load = useCallback(async () => {
-    if (!veterinarian?.id) return;
-    setLoading(true);
+    if (!veterinarian?.id) {
+      setLoading(false);
+      return;
+    }
+    const { from, to } = getPeriodRange(period);
+    const key = clinicCacheKey(veterinarian.id, "reports", period);
+    const cached = readClinicDataCache(key);
+    if (cached) {
+      setOverview(cached.overview || null);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     try {
-      const { from, to } = getPeriodRange(period);
-      const data = await fetchReportsOverview(veterinarian.id, from, to);
+      const data = await loadClinicData(
+        key,
+        () => fetchReportsOverview(veterinarian.id, from, to),
+        { ttlMs: 120_000 },
+      );
       setOverview(data.overview || null);
     } catch (err) {
-      notifyError(err.message);
-      setOverview(null);
+      if (!cached) {
+        notifyError(err.message);
+        setOverview(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -211,7 +235,7 @@ export function ReportsPage() {
     [overview],
   );
 
-  const periodLabel = PERIOD_OPTIONS.find((p) => p.id === period)?.label || period;
+  const periodLabel = periodOptions.find((p) => p.id === period)?.label || period;
 
   const go = (path) => navigate(path);
 
@@ -219,12 +243,15 @@ export function ReportsPage() {
     <div className="clinic-page clinic-page-guiaa clinic-reports-page">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">Consultorio</p>
-          <h1>Reportes</h1>
-          <p>Indicadores de operación clínica, ingresos y actividad CDS.</p>
+          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
+          <div className="clinic-page-title-row">
+            <h1>{t("reports.title")}</h1>
+            <ModuleHelpTip topicId="reports" />
+          </div>
+          <p>{t("reports.lead")}</p>
         </div>
         <div className="clinic-report-period clinic-reports-period">
-          {PERIOD_OPTIONS.map((opt) => (
+          {periodOptions.map((opt) => (
             <Button
               key={opt.id}
               type="button"
@@ -242,10 +269,10 @@ export function ReportsPage() {
             size="sm"
             className="min-h-11"
             disabled={!overview}
-            onClick={() => downloadReportCsv(overview, periodLabel)}
+            onClick={() => downloadReportCsv(overview, periodLabel, t)}
           >
             <FileDown size={14} className="mr-1" />
-            Exportar CSV
+            {t("reports.exportCsv")}
           </Button>
         </div>
       </div>
@@ -257,49 +284,62 @@ export function ReportsPage() {
           <div className="clinic-report-kpi-grid">
             <KpiCard
               icon={CalendarDays}
-              label="Citas en el periodo"
+              label={t("reports.kpiAppointments")}
               value={totals.appointments ?? 0}
-              hint={`${totals.occupancy_rate ?? 0}% completadas`}
+              hint={t("reports.kpiAppointmentsHint", {
+                pct: totals.occupancy_rate ?? 0,
+              })}
               chart={apptSeries}
               chartId="report-appts"
               colorFrom="#265b93"
               colorTo="#93c5e8"
+              trendAria={t("reports.chartTrendAria", { label: t("reports.kpiAppointments") })}
             />
             <KpiCard
               icon={DollarSign}
-              label="Ingresos cobrados"
-              value={formatMoney(totals.revenue_paid)}
-              hint={`${totals.invoices ?? 0} recibos en periodo`}
+              label={t("reports.kpiRevenue")}
+              value={formatMoney(totals.revenue_paid, moneyLocale)}
+              hint={t("reports.kpiRevenueHint", {
+                count: totals.invoices ?? 0,
+              })}
               chart={revenueSeries}
               chartId="report-revenue"
               colorFrom="#3d9b8f"
               colorTo="#a7e0d8"
+              trendAria={t("reports.chartTrendAria", { label: t("reports.kpiRevenue") })}
             />
             <KpiCard
               icon={Stethoscope}
-              label="Consultas CDS"
+              label={t("reports.kpiCds")}
               value={totals.consultations_ai ?? 0}
               chart={consSeries}
               chartId="report-cons"
               colorFrom="#0c2d4d"
               colorTo="#7ba3c4"
+              trendAria={t("reports.chartTrendAria", { label: t("reports.kpiCds") })}
             />
             <KpiCard
               icon={Users}
-              label="Dueños registrados"
+              label={t("reports.kpiOwners")}
               value={totals.clients ?? 0}
-              hint={`${totals.patients ?? 0} mascotas`}
+              hint={t("reports.kpiOwnersHint", {
+                count: totals.patients ?? 0,
+              })}
             />
             <KpiCard
               icon={PawPrint}
-              label="Mascotas activas"
+              label={t("reports.kpiPets")}
               value={totals.patients ?? 0}
             />
             <KpiCard
               icon={Package}
-              label="Productos bajo mínimo"
+              label={t("reports.kpiLowStock")}
               value={totals.low_stock_products ?? 0}
-              hint={totals.low_stock_products > 0 ? "Revisar inventario" : "Stock OK"}
+              hint={
+                totals.low_stock_products > 0
+                  ? t("reports.kpiLowHintWarn")
+                  : t("reports.kpiLowHintOk")
+              }
             />
           </div>
 
@@ -307,15 +347,15 @@ export function ReportsPage() {
             <section className="clinic-report-panel">
               <h2>
                 <TrendingUp size={18} aria-hidden />
-                Citas por estado
+                {t("reports.byStatus")}
               </h2>
               {Object.keys(overview?.appointments_by_status || {}).length === 0 ? (
-                <p className="clinic-report-empty">Sin citas en este periodo.</p>
+                <p className="clinic-report-empty">{t("reports.emptyAppointments")}</p>
               ) : (
                 <ul className="clinic-report-breakdown">
                   {Object.entries(overview.appointments_by_status).map(([status, count]) => (
                     <li key={status}>
-                      <span>{APPT_STATUS[status] || status}</span>
+                      <span>{apptStatus(status)}</span>
                       <strong>{count}</strong>
                     </li>
                   ))}
@@ -326,15 +366,15 @@ export function ReportsPage() {
             <section className="clinic-report-panel">
               <h2>
                 <BarChart3 size={18} aria-hidden />
-                Recibos por estado
+                {t("billing.statReceipts")}
               </h2>
               {Object.keys(overview?.invoices_by_status || {}).length === 0 ? (
-                <p className="clinic-report-empty">Sin recibos en este periodo.</p>
+                <p className="clinic-report-empty">{t("reports.emptyReceipts")}</p>
               ) : (
                 <ul className="clinic-report-breakdown">
                   {Object.entries(overview.invoices_by_status).map(([status, count]) => (
                     <li key={status}>
-                      <span>{INVOICE_STATUS[status] || status}</span>
+                      <span>{invoiceStatus(status)}</span>
                       <strong>{count}</strong>
                     </li>
                   ))}
@@ -342,7 +382,12 @@ export function ReportsPage() {
               )}
               {(totals.revenue_issued ?? 0) > (totals.revenue_paid ?? 0) && (
                 <p className="clinic-report-note">
-                  Emitido sin cobrar: {formatMoney((totals.revenue_issued || 0) - (totals.revenue_paid || 0))}
+                  {t("reports.issuedUncollected", {
+                    amount: formatMoney(
+                      (totals.revenue_issued || 0) - (totals.revenue_paid || 0),
+                      moneyLocale,
+                    ),
+                  })}
                 </p>
               )}
             </section>
@@ -353,21 +398,21 @@ export function ReportsPage() {
               <div className="clinic-report-panel-head">
                 <h2>
                   <Package size={18} aria-hidden />
-                  Productos más vendidos
+                  {t("reports.topProducts")}
                 </h2>
                 <Button type="button" variant="ghost" size="sm" onClick={() => go("/app/facturacion")}>
-                  Ventas <ArrowRight size={14} />
+                  {t("reports.salesLink")} <ArrowRight size={14} />
                 </Button>
               </div>
               {(overview?.top_products || []).length === 0 ? (
-                <p className="clinic-report-empty">Sin ventas registradas en este periodo.</p>
+                <p className="clinic-report-empty">{t("reports.emptySales")}</p>
               ) : (
                 <ul className="clinic-report-breakdown">
                   {overview.top_products.map((p, idx) => (
                     <li key={`${p.description}-${idx}`}>
                       <span>{p.description}</span>
                       <strong>
-                        {p.quantity} · {formatMoney(p.revenue)}
+                        {p.quantity} · {formatMoney(p.revenue, moneyLocale)}
                       </strong>
                     </li>
                   ))}
@@ -379,35 +424,39 @@ export function ReportsPage() {
               <div className="clinic-report-panel-head">
                 <h2>
                   <Package size={18} aria-hidden />
-                  Movimientos de inventario
+                  {t("reports.inventoryMovements")}
                 </h2>
                 <Button type="button" variant="ghost" size="sm" onClick={() => go("/app/inventario")}>
-                  Inventario <ArrowRight size={14} />
+                  {t("reports.inventoryLink")} <ArrowRight size={14} />
                 </Button>
               </div>
               <ul className="clinic-report-breakdown">
                 <li>
-                  <span>Entradas</span>
+                  <span>{t("reports.stockIn")}</span>
                   <strong>{overview?.stock_movements?.in ?? 0}</strong>
                 </li>
                 <li>
-                  <span>Salidas</span>
+                  <span>{t("reports.stockOut")}</span>
                   <strong>{overview?.stock_movements?.out ?? 0}</strong>
                 </li>
                 <li>
-                  <span>Ajustes</span>
+                  <span>{t("reports.stockAdjust")}</span>
                   <strong>{overview?.stock_movements?.adjustment ?? 0}</strong>
                 </li>
               </ul>
               {(overview?.low_stock_list || []).length > 0 && (
                 <>
-                  <h3 className="clinic-report-subtitle">Stock bajo actual</h3>
+                  <h3 className="clinic-report-subtitle">{t("reports.lowStockNow")}</h3>
                   <ul className="clinic-report-breakdown">
                     {overview.low_stock_list.map((p) => (
                       <li key={p.name}>
                         <span>{p.name}</span>
                         <strong>
-                          {p.stock_qty} / mín. {p.min_stock} {p.unit || "pza"}
+                          {t("reports.stockMin", {
+                            qty: p.stock_qty,
+                            min: p.min_stock,
+                            unit: p.unit || t("reports.unitPiece"),
+                          })}
                         </strong>
                       </li>
                     ))}

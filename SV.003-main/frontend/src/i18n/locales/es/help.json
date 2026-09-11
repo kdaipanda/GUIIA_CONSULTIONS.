@@ -1,0 +1,183 @@
+{
+  "navLabel": "Ayuda",
+  "title": "Centro de ayuda",
+  "eyebrow": "Aprende GUIAA",
+  "lead": "Guías cortas y claras para usar cada función de la plataforma sin perder tiempo.",
+  "searchPlaceholder": "Buscar una función…",
+  "openTour": "Ver tour de bienvenida",
+  "openGuide": "Ver guía completa",
+  "tipAria": "Cómo usar este módulo",
+  "tipCta": "Guía paso a paso",
+  "backToList": "Todas las guías",
+  "goToModule": "Ir al módulo",
+  "contactSupport": "Abrir chat de soporte",
+  "stepsLabel": "Pasos fáciles",
+  "emptySearch": "No hay guías con ese término. Prueba con “agenda”, “consulta” o “inventario”.",
+  "supportHint": "¿Sigues con dudas? Usa el chat de soporte (esquina inferior) o escribe a soporte@guiaa.vet.",
+  "restartTourHint": "Puedes repetir el tour cuando quieras desde aquí o desde Configuración.",
+  "settingsCardTitle": "Ayuda y aprendizaje",
+  "settingsCardLead": "Guías de cada módulo y el tour de bienvenida, cuando quieras repetirlos.",
+  "settingsOpenHelp": "Abrir centro de ayuda",
+  "topics": {
+    "getting-started": {
+      "title": "Primeros pasos",
+      "summary": "Lo esencial para empezar a trabajar en GUIAA el mismo día.",
+      "tip": "Empieza por el Dashboard, registra un dueño con su mascota y abre tu primera consulta en GUIAA Diagnóstico.",
+      "steps": [
+        "Entra con tu correo de MVZ verificado.",
+        "Revisa el Dashboard: citas del día y accesos rápidos.",
+        "Crea un dueño y una mascota en Dueños y mascotas.",
+        "Abre GUIAA Diagnóstico y completa la consulta paso a paso.",
+        "Usa Ctrl+K (⌘K en Mac) si no encuentras un módulo."
+      ]
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "summary": "Tu resumen del día: citas, actividad clínica y atajos.",
+      "tip": "Desde aquí saltas a consulta, agenda o membresía. Revisa alertas de stock y citas pendientes.",
+      "steps": [
+        "Mira las citas de hoy y el estado de tu plan.",
+        "Usa “Nueva consulta” o el registro rápido de dueño/mascota.",
+        "Baja al panel CDS si quieres continuar una consulta reciente.",
+        "Si ves alertas de inventario o agenda, ábrelas desde el menú."
+      ]
+    },
+    "diagnosis": {
+      "title": "GUIAA Diagnóstico",
+      "summary": "Consulta clínica con soporte CDS (no sustituye tu criterio).",
+      "tip": "Elige especie → captura datos y motivo → examina → documenta diagnóstico y plan. Al final puedes exportar PDF.",
+      "steps": [
+        "Selecciona o crea la mascota y la especie correcta.",
+        "Completa motivo de consulta, signos y examen físico.",
+        "Usa el flujo CDS para estructurar hipótesis y plan (L4/L5).",
+        "Guarda la consulta; queda en Historial y en la ficha del paciente.",
+        "En Premium, Manejo Experto permite describir el caso primero (urgencias)."
+      ]
+    },
+    "clients": {
+      "title": "Dueños y mascotas",
+      "summary": "Expediente de tutores y pacientes en un solo lugar.",
+      "tip": "Registra primero el dueño; luego agrega mascotas. Abre el expediente clínico para antecedentes, problemas y timeline.",
+      "steps": [
+        "Pulsa “Nuevo registro” para crear dueño + mascota juntos.",
+        "Busca por nombre, teléfono o mascota en la barra superior.",
+        "Abre la ficha y pulsa “Abrir expediente” para el chart clínico completo.",
+        "Edita alergias, vacunas, cirugías y problemas; el timeline muestra consultas y lab.",
+        "Inicia una consulta o interpretación de lab desde el paciente."
+      ]
+    },
+    "agenda": {
+      "title": "Agenda",
+      "summary": "Citas de la semana, estados y solicitudes en línea.",
+      "tip": "Crea citas, cambia su estado y comparte el enlace del portal para que dueños pidan cita.",
+      "steps": [
+        "Navega la semana con las flechas o ve a “Hoy”.",
+        "Pulsa “Nueva cita” y elige paciente, horario y notas.",
+        "Actualiza el estado: programada, confirmada, completada, etc.",
+        "Copia el enlace del portal para solicitudes de dueños.",
+        "Revisa solicitudes pendientes (badge en el menú) y acéptalas o recházalas."
+      ]
+    },
+    "inventory": {
+      "title": "Inventario",
+      "summary": "Productos, stock y alertas de existencias bajas (plan Profesional/Premium).",
+      "tip": "Alta de productos con unidad y stock mínimo. Las ventas pueden descontar inventario.",
+      "steps": [
+        "Agrega un producto (medicamento, insumo o servicio).",
+        "Define cantidad, unidad y umbral de stock bajo.",
+        "Revisa el resumen: total de productos y alertas.",
+        "Corrige stock con movimientos cuando recibas mercancía."
+      ]
+    },
+    "billing": {
+      "title": "Facturación / Ventas",
+      "summary": "Recibos clínicos vinculados a dueño, paciente e inventario (sin CFDI).",
+      "tip": "Crea una venta, agrega líneas de producto o servicio y guarda el recibo.",
+      "steps": [
+        "Pulsa “Nueva venta” y selecciona dueño/paciente si aplica.",
+        "Agrega productos del inventario o conceptos libres.",
+        "Indica método de pago y notas del recibo.",
+        "Guarda: el recibo queda en el listado y puede afectar stock."
+      ]
+    },
+    "reports": {
+      "title": "Reportes",
+      "summary": "KPIs del consultorio por periodo (plan Profesional/Premium).",
+      "tip": "Elige 7, 30 o 90 días para ver consultas, ingresos y productos top.",
+      "steps": [
+        "Selecciona el periodo en la parte superior.",
+        "Revisa KPIs de consultas, ventas e inventario.",
+        "Identifica productos más vendidos y tendencias.",
+        "Exporta CSV si necesitas llevar los números a Excel."
+      ]
+    },
+    "history": {
+      "title": "Historial de consultas",
+      "summary": "Todas tus consultas CDS anteriores, con filtros y enlace al expediente.",
+      "tip": "Filtra por estado, busca por paciente, reabre una consulta o salta al expediente de la mascota.",
+      "steps": [
+        "Usa los filtros de estado (todas, borrador, completadas…).",
+        "Busca por nombre de mascota o dueño.",
+        "Abre una consulta para ver el formulario por especie y el detalle CDS.",
+        "Si la consulta tiene paciente vinculado, usa “Expediente” para el chart clínico.",
+        "Inicia una nueva consulta desde el botón superior si lo necesitas."
+      ]
+    },
+    "lab": {
+      "title": "Imágenes / laboratorio",
+      "summary": "Interpreta estudios y guarda notas clínicas ligadas al paciente.",
+      "tip": "Elige paciente, tipo de estudio y pega o describe hallazgos. Puedes adjuntar contexto del PDF.",
+      "steps": [
+        "Selecciona o busca el paciente.",
+        "Indica el tipo de estudio (lab, imagen, etc.).",
+        "Pega el texto del resultado o escribe tu interpretación.",
+        "Guarda: queda en el historial de interpretaciones del módulo."
+      ]
+    },
+    "settings": {
+      "title": "Configuración",
+      "summary": "Datos del consultorio, equipo, portal de citas y contraseña.",
+      "tip": "Solo owner/admin editan la clínica. Invitá al equipo por correo con el rol adecuado.",
+      "steps": [
+        "Actualiza el nombre y la zona horaria del consultorio.",
+        "Copia el enlace del portal de citas para dueños.",
+        "Invita recepcionistas, veterinarios o admins por email.",
+        "Gestiona miembros pendientes y cambia tu contraseña de cuenta.",
+        "Desde aquí también puedes reabrir el tour de bienvenida."
+      ]
+    },
+    "membership": {
+      "title": "Membresía",
+      "summary": "Planes, cupo de consultas y funciones Premium.",
+      "tip": "Compara Básica, Profesional y Premium. El trial limita consultas; activa un plan para continuar.",
+      "steps": [
+        "Revisa tu plan actual y consultas restantes.",
+        "Compara qué módulos incluye cada plan.",
+        "Elige mensual o anual y completa el pago seguro.",
+        "Tras pagar, las funciones bloqueadas se desbloquean solas."
+      ]
+    },
+    "profile": {
+      "title": "Perfil",
+      "summary": "Tus datos profesionales y estado de verificación.",
+      "tip": "Confirma que nombre, cédula y contacto estén correctos; la verificación habilita el uso clínico.",
+      "steps": [
+        "Revisa tus datos de MVZ y especialidad.",
+        "Verifica el estado de tu cédula profesional.",
+        "Actualiza teléfono o datos si cambian.",
+        "Ve a Membresía si necesitas cambiar de plan."
+      ]
+    },
+    "shortcuts": {
+      "title": "Atajos y soporte",
+      "summary": "Navega más rápido y pide ayuda cuando la necesites.",
+      "tip": "Ctrl+K abre la paleta de comandos. El chat de soporte está abajo a la derecha.",
+      "steps": [
+        "Pulsa Ctrl+K (⌘K en Mac) y escribe el nombre del módulo.",
+        "En Diagnóstico, la tecla N también puede abrir consulta nueva (según contexto).",
+        "Abre el chat de soporte para login, pagos o uso de la plataforma.",
+        "Vuelve a este Centro de ayuda o al tour cuando quieras refrescar."
+      ]
+    }
+  }
+}

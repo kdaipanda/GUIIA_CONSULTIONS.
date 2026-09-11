@@ -1,32 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDown, Mail } from "lucide-react";
-
-const FAQ_ITEMS = [
-  {
-    q: "¿Quién puede registrarse en GUIAA?",
-    a: "Solo médicos veterinarios certificados. Durante el registro verificamos tu cédula profesional para garantizar un entorno clínico exclusivo.",
-  },
-  {
-    q: "¿Qué es CDS L4 y L5?",
-    a: "Son niveles de soporte a la decisión clínica: L4 ayuda a estructurar hipótesis diagnósticas; L5 extiende el razonamiento hacia planes terapéuticos basados en evidencia. Siempre bajo tu criterio profesional.",
-  },
-  {
-    q: "¿Qué especies cubre la plataforma?",
-    a: "Perros, gatos, conejos, aves, reptiles, hurones, erizos, hámsters, cuyos, iguanas y aves de corral. Cada especie activa un formulario veterinario adaptado en la consulta.",
-  },
-  {
-    q: "¿Mis datos clínicos están seguros?",
-    a: "Aplicamos buenas prácticas de seguridad y privacidad. Los expedientes y consultas se gestionan con controles de acceso por cuenta profesional.",
-  },
-  {
-    q: "¿Puedo usar GUIAA en consultorio y a domicilio?",
-    a: "Sí. Es una plataforma web: funciona en consultorio fijo o en visitas externas desde tablet o laptop con navegador moderno.",
-  },
-  {
-    q: "¿Necesito instalar algo?",
-    a: "No. Accedes desde el navegador. Solo necesitas conexión a internet y tu cuenta MVZ verificada.",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 function FaqItem({ id, q, a, isOpen, onToggle }) {
   const panelId = `${id}-panel`;
@@ -68,7 +42,9 @@ function FaqItem({ id, q, a, isOpen, onToggle }) {
 }
 
 export function LandingFaq({ setView }) {
+  const { t } = useTranslation("landing");
   const [openIndex, setOpenIndex] = useState(0);
+  const items = t("faq.items", { returnObjects: true }) || [];
 
   return (
     <section
@@ -78,51 +54,43 @@ export function LandingFaq({ setView }) {
       <div className="landing-container">
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <p className="landing-eyebrow">Antes de registrarte</p>
+            <p className="landing-eyebrow">{t("faq.eyebrow")}</p>
             <h2 className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl">
-              Preguntas frecuentes
+              {t("faq.title")}
             </h2>
             <p className="landing-lead mt-4 text-sm sm:text-base">
-              Dudas habituales sobre acceso, especies, seguridad y uso en consulta.
+              {t("faq.lead")}
             </p>
 
             <div className="landing-card mt-8 rounded-xl p-5">
               <p className="text-sm font-semibold text-guiaa-brand-navy">
-                ¿No encuentras tu respuesta?
+                {t("faq.moreTitle")}
               </p>
               <p className="mt-2 text-sm text-guiaa-brand-ink-muted">
-                Escríbenos y te orientamos antes del registro.
+                {t("faq.moreLead")}
               </p>
               <a
                 href="mailto:soporte@guiaa.vet"
                 className="landing-footer-link mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-guiaa-brand-blue transition hover:text-guiaa-brand-navy"
               >
                 <Mail size={15} aria-hidden />
-                soporte@guiaa.vet
+                {t("faq.emailCta")}
               </a>
-              {setView && (
-                <button
-                  type="button"
-                  onClick={() => setView("register")}
-                  className="landing-footer-link mt-4 block min-h-11 text-left text-sm font-semibold text-guiaa-brand-green-dark transition hover:text-guiaa-brand-green"
-                >
-                  Crear cuenta MVZ →
-                </button>
-              )}
             </div>
           </div>
 
-          <div className="space-y-2.5">
-            {FAQ_ITEMS.map(({ q, a }, index) => (
-              <FaqItem
-                key={q}
-                id={`landing-faq-${index}`}
-                q={q}
-                a={a}
-                isOpen={openIndex === index}
-                onToggle={() => setOpenIndex(openIndex === index ? -1 : index)}
-              />
-            ))}
+          <div className="flex flex-col gap-3">
+            {Array.isArray(items) &&
+              items.map((item, index) => (
+                <FaqItem
+                  key={item.q || index}
+                  id={`faq-item-${index}`}
+                  q={item.q}
+                  a={item.a}
+                  isOpen={openIndex === index}
+                  onToggle={() => setOpenIndex((prev) => (prev === index ? -1 : index))}
+                />
+              ))}
           </div>
         </div>
       </div>

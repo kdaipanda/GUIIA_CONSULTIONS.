@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import YesNoChips from '../ui/yes-no-chips';
+import { useSpeciesFormI18n } from '../../hooks/useSpeciesFormI18n';
+import { normalizePetSex } from '../../lib/petSex';
+import ReproductiveSexHint from './ReproductiveSexHint';
 
 const ConejosForm = ({ formData, setFormData }) => {
+  const { t, field, placeholder, section, title } = useSpeciesFormI18n('conejos');
+  const sexo = normalizePetSex(formData.sexo);
   const [activeSection, setActiveSection] = useState('conejos-info-basica');
 
-  const handleChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
+  const handleChange = (fieldName, value) => {
+    setFormData({ ...formData, [fieldName]: value });
   };
 
   const toggleSection = useCallback((e) => {
@@ -25,18 +30,18 @@ const ConejosForm = ({ formData, setFormData }) => {
   }, [formData]);
 
   const sections = [
-    { id: 'conejos-info-basica', label: 'Información Básica', icon: '📋' },
-    { id: 'conejos-vacunacion', label: 'Vacunación y Desparasitación', icon: '💉' },
-    { id: 'conejos-alimentacion', label: 'Alimentación', icon: '🥗' },
-    { id: 'conejos-ambiente', label: 'Ambiente', icon: '🏠' },
-    { id: 'conejos-examen-fisico', label: 'Examen Físico', icon: '🩺' },
-    { id: 'conejos-digestivo', label: 'Sistema Digestivo', icon: '🫃' },
-    { id: 'conejos-respiratorio', label: 'Sistema Respiratorio', icon: '🫁' },
-    { id: 'conejos-reproductivo', label: 'Sistema Reproductivo', icon: '🔬' },
-    { id: 'conejos-neurologico', label: 'Sistema Neurológico', icon: '🧠' },
-    { id: 'conejos-musculoesqueletico', label: 'Sistema Musculoesquelético', icon: '🦴' },
-    { id: 'conejos-cutaneo', label: 'Sistema Cutáneo', icon: '🐾' },
-    { id: 'conejos-ojos', label: 'Ojos', icon: '👁️' },
+    { id: 'conejos-info-basica', labelKey: 'info_basica', icon: '📋' },
+    { id: 'conejos-vacunacion', labelKey: 'vacunacion', icon: '💉' },
+    { id: 'conejos-alimentacion', labelKey: 'alimentacion', icon: '🥗' },
+    { id: 'conejos-ambiente', labelKey: 'ambiente', icon: '🏠' },
+    { id: 'conejos-examen-fisico', labelKey: 'examen_fisico', icon: '🩺' },
+    { id: 'conejos-digestivo', labelKey: 'digestivo', icon: '🫃' },
+    { id: 'conejos-respiratorio', labelKey: 'respiratorio', icon: '🫁' },
+    { id: 'conejos-reproductivo', labelKey: 'reproductivo', icon: '🔬' },
+    { id: 'conejos-neurologico', labelKey: 'neurologico', icon: '🧠' },
+    { id: 'conejos-musculoesqueletico', labelKey: 'musculoesqueletico', icon: '🦴' },
+    { id: 'conejos-cutaneo', labelKey: 'cutaneo', icon: '🐾' },
+    { id: 'conejos-ojos', labelKey: 'ojos', icon: '👁️' },
   ];
 
   useEffect(() => {
@@ -64,34 +69,34 @@ const ConejosForm = ({ formData, setFormData }) => {
 
   return (
     <div className="species-form">
-      <h2>Datos de la mascota - Conejo</h2>
+      <h2>{title('conejos')}</h2>
 
       <div className="species-form-progress">
         <div className="species-form-progress-header">
-          <span className="species-form-progress-label">Progreso del formulario</span>
+          <span className="species-form-progress-label">{t('chrome.progress')}</span>
           <span className="species-form-progress-percent">{progress}%</span>
         </div>
         <div className="species-form-progress-bar">
           <div className={`species-form-progress-fill ${progress === 100 ? 'complete' : ''}`} style={{ width: `${progress}%` }} />
         </div>
         <div className="species-form-progress-stats">
-          <span>{requiredFields.filter(f => formData[f] && formData[f] !== '').length} de {requiredFields.length} campos</span>
-          {progress === 100 && <span style={{ color: '#10b981', fontWeight: 600 }}>✓ Completo</span>}
+          <span>{t('chrome.fieldsCount', { filled: requiredFields.filter(f => formData[f] && formData[f] !== '').length, total: requiredFields.length })}</span>
+          {progress === 100 && <span style={{ color: '#10b981', fontWeight: 600 }}>✓ {t('chrome.complete')}</span>}
         </div>
       </div>
       
       <div className="species-form-layout">
         <aside className="species-form-nav">
-          <div className="species-form-nav-title">Secciones</div>
+          <div className="species-form-nav-title">{t('chrome.sections')}</div>
           <ul>
-            {sections.map((section) => (
-              <li key={section.id}>
+            {sections.map((sec) => (
+              <li key={sec.id}>
                 <button
                   type="button"
-                  className={`species-form-nav-link ${activeSection === section.id ? 'active' : ''}`}
-                  onClick={() => scrollToSection(section.id)}
+                  className={`species-form-nav-link ${activeSection === sec.id ? 'active' : ''}`}
+                  onClick={() => scrollToSection(sec.id)}
                 >
-                  <span className="nav-icon">{section.icon}</span> {section.label}
+                  <span className="nav-icon">{sec.icon}</span> {sec.label || section(sec.labelKey)}
                 </button>
               </li>
             ))}
@@ -102,51 +107,51 @@ const ConejosForm = ({ formData, setFormData }) => {
       
       {/* Información Básica */}
       <div id="conejos-info-basica" className="form-section">
-        <h3>Información Básica</h3>
+        <h3>{section('info_basica')}</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Nombre de la mascota *</label>
+            <label>{field('nombre_de_la_mascota')}</label>
             <input type="text" required value={formData.nombre_mascota || ''} onChange={(e) => handleChange('nombre_mascota', e.target.value)} />
           </div>
           <div className="form-group">
-            <label>Nombre del Dueño *</label>
+            <label>{field('nombre_dueño')}</label>
             <input type="text" required value={formData.nombre_dueño || ''} onChange={(e) => handleChange('nombre_dueño', e.target.value)} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Raza Exacta *</label>
+            <label>{field('raza_exacta')}</label>
             <select required value={formData.raza || ''} onChange={(e) => handleChange('raza', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="holandes">Holandés</option>
-              <option value="lionhead">Lionhead</option>
-              <option value="flemish_giant">Flemish Giant</option>
-              <option value="mixto">Mixto</option>
-              <option value="enano">Enano</option>
+              <option value="">{t('select')}</option>
+              <option value="holandes">{t('options.holandes')}</option>
+              <option value="lionhead">{t('options.lionhead')}</option>
+              <option value="flemish_giant">{t('options.flemish_giant')}</option>
+              <option value="mixto">{t('options.mixto')}</option>
+              <option value="enano">{t('options.enano')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Edad (años/meses) *</label>
+            <label>{field('edad_anos_meses')}</label>
             <input type="text" required value={formData.edad || ''} onChange={(e) => handleChange('edad', e.target.value)} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Sexo *</label>
-            <select required value={formData.sexo || ''} onChange={(e) => handleChange('sexo', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="macho">Macho</option>
-              <option value="hembra">Hembra</option>
+            <label>{field('sexo')}</label>
+            <select required value={sexo || ''} onChange={(e) => handleChange('sexo', e.target.value)}>
+              <option value="">{t('select')}</option>
+              <option value="macho">{t('options.macho')}</option>
+              <option value="hembra">{t('options.hembra')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Esterilizado *</label>
+            <label>{field('esterilizado')}</label>
             <select required value={formData.esterilizado || ''} onChange={(e) => handleChange('esterilizado', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="SI">Sí</option>
-              <option value="NO">No</option>
+              <option value="">{t('select')}</option>
+              <option value="SI">{t('yes')}</option>
+              <option value="NO">{t('no')}</option>
             </select>
           </div>
         </div>
@@ -154,7 +159,7 @@ const ConejosForm = ({ formData, setFormData }) => {
         {formData.esterilizado === 'SI' && (
           <div className="form-row">
             <div className="form-group">
-              <label>Fecha de esterilización</label>
+              <label>{field('fecha_de_esterilizacion')}</label>
               <input
                 type="date"
                 value={formData.esterilizacion_fecha || ''}
@@ -162,14 +167,14 @@ const ConejosForm = ({ formData, setFormData }) => {
               />
             </div>
             <div className="form-group">
-              <label>Tipo de esterilización</label>
+              <label>{field('tipo_de_esterilizacion')}</label>
               <select
                 value={formData.esterilizacion_tipo || ''}
                 onChange={(e) => handleChange('esterilizacion_tipo', e.target.value)}
               >
-                <option value="">Seleccionar</option>
-                <option value="quirurgico">Quirúrgico</option>
-                <option value="quimico">Químico</option>
+                <option value="">{t('select')}</option>
+                <option value="quirurgico">{t('options.quirurgico')}</option>
+                <option value="quimico">{t('options.quimico')}</option>
               </select>
             </div>
           </div>
@@ -177,66 +182,66 @@ const ConejosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Peso Actual (g/kg) *</label>
+            <label>{field('peso_actual_g_kg')}</label>
             <input type="text" required value={formData.peso || ''} onChange={(e) => handleChange('peso', e.target.value)} />
           </div>
           <div className="form-group">
-            <label>Índice de Condición Corporal *</label>
+            <label>{field('indice_de_condicion_corporal')}</label>
             <select required value={formData.condicion_corporal || ''} onChange={(e) => handleChange('condicion_corporal', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="1-3">1-3 (Emaciado)</option>
-              <option value="4-5">4-5 (Delgado)</option>
-              <option value="6-7">6-7 (Ideal)</option>
-              <option value="8-9">8-9 (Sobrepeso)</option>
+              <option value="">{t('select')}</option>
+              <option value="1-3">{t('options.n_1_3_emaciado')}</option>
+              <option value="4-5">{t('options.n_4_5_delgado')}</option>
+              <option value="6-7">{t('options.n_6_7_ideal')}</option>
+              <option value="8-9">{t('options.n_8_9_sobrepeso')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-group">
-          <label>Duración del Problema *</label>
+          <label>{field('duracion_del_problema')}</label>
           <select required value={formData.duracion_problema || ''} onChange={(e) => handleChange('duracion_problema', e.target.value)}>
-            <option value="">Seleccionar</option>
-            <option value="<12h">&lt; 12 horas</option>
-            <option value="12-24h">12-24 horas</option>
-            <option value="2-3dias">2-3 días</option>
-            <option value="4-7dias">4-7 días</option>
-            <option value=">1semana">&gt; 1 semana</option>
+            <option value="">{t('select')}</option>
+            <option value="<12h">{t('options.lt_12_horas')}</option>
+            <option value="12-24h">{t('options.n_12_24_horas')}</option>
+            <option value="2-3dias">{t('options.n_2_3_dias')}</option>
+            <option value="4-7dias">{t('options.n_4_7_dias')}</option>
+            <option value=">1semana">{t('options.gt_1_semana')}</option>
           </select>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Temperamento</label>
+            <label>{field('temperamento')}</label>
             <select
               value={formData.temperamento || ''}
               onChange={(e) => handleChange('temperamento', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="tranquilo">Tranquilo</option>
-              <option value="nervioso">Nervioso</option>
-              <option value="agresivo">Agresivo</option>
-              <option value="timido">Tímido</option>
-              <option value="destructivo">Destructivo</option>
+              <option value="">{t('select')}</option>
+              <option value="tranquilo">{t('options.tranquilo')}</option>
+              <option value="nervioso">{t('options.nervioso')}</option>
+              <option value="agresivo">{t('options.agresivo')}</option>
+              <option value="timido">{t('options.timido')}</option>
+              <option value="destructivo">{t('options.destructivo')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Progresión del problema</label>
+            <label>{field('progresion_del_problema')}</label>
             <select
               value={formData.progresion_problema || ''}
               onChange={(e) => handleChange('progresion_problema', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="mejora">Mejora</option>
-              <option value="estable">Estable</option>
-              <option value="empeora_rapido">Empeora rápidamente</option>
-              <option value="intermitente">Intermitente</option>
+              <option value="">{t('select')}</option>
+              <option value="mejora">{t('options.mejora')}</option>
+              <option value="estable">{t('options.estable')}</option>
+              <option value="empeora_rapido">{t('options.empeora_rapidamente')}</option>
+              <option value="intermitente">{t('options.intermitente')}</option>
             </select>
           </div>
         </div>
 
         {formData.tipo_heno === 'otro' && (
           <div className="form-group">
-            <label>Otro tipo de heno</label>
+            <label>{field('otro_tipo_de_heno')}</label>
             <input
               type="text"
               value={formData.tipo_heno_otro || ''}
@@ -248,10 +253,10 @@ const ConejosForm = ({ formData, setFormData }) => {
 
       {/* Vacunación y Desparasitación */}
       <div id="conejos-vacunacion" className="form-section">
-        <h3>Vacunación y Desparasitación</h3>
+        <h3>{section('vacunacion')}</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Mixomatosis *</label>
+            <label>{field('mixomatosis')}</label>
             <YesNoChips
               value={formData.vacuna_mixomatosis}
               onChange={(val) => handleChange('vacuna_mixomatosis', val)}
@@ -259,7 +264,7 @@ const ConejosForm = ({ formData, setFormData }) => {
           </div>
           {formData.vacuna_mixomatosis === 'SI' && (
             <div className="form-group">
-              <label>Fecha</label>
+              <label>{field('fecha_simple')}</label>
               <input type="date" value={formData.vacuna_mixomatosis_fecha || ''} onChange={(e) => handleChange('vacuna_mixomatosis_fecha', e.target.value)} />
             </div>
           )}
@@ -267,7 +272,7 @@ const ConejosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>VHS (Virus Hemorrágico) *</label>
+            <label>{field('vhs_virus_hemorragico')}</label>
             <YesNoChips
               value={formData.vacuna_vhs}
               onChange={(val) => handleChange('vacuna_vhs', val)}
@@ -275,7 +280,7 @@ const ConejosForm = ({ formData, setFormData }) => {
           </div>
           {formData.vacuna_vhs === 'SI' && (
             <div className="form-group">
-              <label>Fecha</label>
+              <label>{field('fecha_simple')}</label>
               <input type="date" value={formData.vacuna_vhs_fecha || ''} onChange={(e) => handleChange('vacuna_vhs_fecha', e.target.value)} />
             </div>
           )}
@@ -283,14 +288,14 @@ const ConejosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Desparasitación Interna *</label>
+            <label>{field('desparasitacion_interna')}</label>
             <YesNoChips
               value={formData.desparasitacion_interna}
               onChange={(val) => handleChange('desparasitacion_interna', val)}
             />
           </div>
           <div className="form-group">
-            <label>Desparasitación Externa *</label>
+            <label>{field('desparasitacion_externa')}</label>
             <YesNoChips
               value={formData.desparasitacion_externa}
               onChange={(val) => handleChange('desparasitacion_externa', val)}
@@ -301,7 +306,7 @@ const ConejosForm = ({ formData, setFormData }) => {
         {formData.desparasitacion_interna === 'SI' && (
           <div className="form-row">
             <div className="form-group">
-              <label>Última desparasitación interna (fecha)</label>
+              <label>{field('ultima_desparasitacion_interna_fecha')}</label>
               <input
                 type="date"
                 value={formData.desparasitacion_interna_fecha || ''}
@@ -309,7 +314,7 @@ const ConejosForm = ({ formData, setFormData }) => {
               />
             </div>
             <div className="form-group">
-              <label>Producto (interna)</label>
+              <label>{field('producto_interna')}</label>
               <input
                 type="text"
                 value={formData.desparasitacion_interna_producto || ''}
@@ -322,7 +327,7 @@ const ConejosForm = ({ formData, setFormData }) => {
         {formData.desparasitacion_externa === 'SI' && (
           <div className="form-row">
             <div className="form-group">
-              <label>Última desparasitación externa (fecha)</label>
+              <label>{field('ultima_desparasitacion_externa_fecha')}</label>
               <input
                 type="date"
                 value={formData.desparasitacion_externa_fecha || ''}
@@ -330,7 +335,7 @@ const ConejosForm = ({ formData, setFormData }) => {
               />
             </div>
             <div className="form-group">
-              <label>Producto (externa)</label>
+              <label>{field('producto_externa')}</label>
               <input
                 type="text"
                 value={formData.desparasitacion_externa_producto || ''}
@@ -343,74 +348,74 @@ const ConejosForm = ({ formData, setFormData }) => {
 
       {/* Alimentación */}
       <div id="conejos-alimentacion" className="form-section">
-        <h3>Alimentación</h3>
+        <h3>{section('alimentacion')}</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Tipo de Heno *</label>
+            <label>{field('tipo_de_heno')}</label>
             <select required value={formData.tipo_heno || ''} onChange={(e) => handleChange('tipo_heno', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="avena">Avena</option>
-              <option value="alfalfa">Alfalfa</option>
-              <option value="otro">Otro</option>
+              <option value="">{t('select')}</option>
+              <option value="avena">{t('options.avena')}</option>
+              <option value="alfalfa">{t('options.alfalfa')}</option>
+              <option value="otro">{t('options.otro')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Frecuencia de Heno *</label>
+            <label>{field('frecuencia_de_heno_2')}</label>
             <select required value={formData.frecuencia_heno || ''} onChange={(e) => handleChange('frecuencia_heno', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="ilimitado">Ilimitado</option>
-              <option value="limitado">Limitado</option>
-              <option value="intermitente">Intermitente</option>
+              <option value="">{t('select')}</option>
+              <option value="ilimitado">{t('options.ilimitado')}</option>
+              <option value="limitado">{t('options.limitado')}</option>
+              <option value="intermitente">{t('options.intermitente')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Pellets (Marca)</label>
+            <label>{field('pellets_marca')}</label>
             <input type="text" value={formData.pellets_marca || ''} onChange={(e) => handleChange('pellets_marca', e.target.value)} />
           </div>
           <div className="form-group">
-            <label>Cantidad Diaria (g)</label>
+            <label>{field('cantidad_diaria_g')}</label>
             <input type="text" value={formData.pellets_cantidad || ''} onChange={(e) => handleChange('pellets_cantidad', e.target.value)} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Verduras Frescas *</label>
+            <label>{field('verduras_frescas_2')}</label>
             <select required value={formData.verduras_frescas || ''} onChange={(e) => handleChange('verduras_frescas', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="SI">Sí</option>
-              <option value="NO">No</option>
+              <option value="">{t('select')}</option>
+              <option value="SI">{t('yes')}</option>
+              <option value="NO">{t('no')}</option>
             </select>
           </div>
           {formData.verduras_frescas === 'SI' && (
             <div className="form-group">
-              <label>¿Cuáles?</label>
+              <label>{field('cuales')}</label>
               <input type="text" value={formData.verduras_cuales || ''} onChange={(e) => handleChange('verduras_cuales', e.target.value)} />
             </div>
           )}
         </div>
 
         <div className="form-group">
-          <label>Suplementos</label>
-          <input type="text" value={formData.suplementos || ''} onChange={(e) => handleChange('suplementos', e.target.value)} placeholder="Vitaminas, Minerales, Otros" />
+          <label>{field('suplementos')}</label>
+          <input type="text" value={formData.suplementos || ''} onChange={(e) => handleChange('suplementos', e.target.value)} placeholder={placeholder('vitaminas_minerales_otros')} />
         </div>
         <div className="form-row">
           <div className="form-group">
-            <label>Dieta rica en carbohidratos</label>
+            <label>{field('dieta_rica_en_carbohidratos_2')}</label>
             <select
               value={formData.dieta_carbohidratos || 'NO'}
               onChange={(e) => handleChange('dieta_carbohidratos', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           {formData.dieta_carbohidratos === 'SI' && (
             <div className="form-group">
-              <label>Detalles (frutas, pan, cereales)</label>
+              <label>{field('detalles_frutas_pan_cereales')}</label>
               <input
                 type="text"
                 value={formData.dieta_carbohidratos_detalle || ''}
@@ -423,102 +428,102 @@ const ConejosForm = ({ formData, setFormData }) => {
 
       {/* Ambiente */}
       <div id="conejos-ambiente" className="form-section">
-        <h3>Ambiente</h3>
+        <h3>{section('ambiente')}</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Jaula/Vivienda *</label>
+            <label>{field('jaula_vivienda')}</label>
             <select required value={formData.vivienda || ''} onChange={(e) => handleChange('vivienda', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="interior">Interior</option>
-              <option value="exterior">Exterior</option>
-              <option value="mixto">Mixto</option>
+              <option value="">{t('select')}</option>
+              <option value="interior">{t('options.habitat_interior')}</option>
+              <option value="exterior">{t('options.habitat_exterior')}</option>
+              <option value="mixto">{t('options.mixto')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Tamaño de Espacio (m²)</label>
-            <input type="text" value={formData.tamano_espacio || ''} onChange={(e) => handleChange('tamano_espacio', e.target.value)} placeholder="Mínimo: 2.5 m² + área ejercicio" />
+            <label>{field('tamano_de_espacio_m')}</label>
+            <input type="text" value={formData.tamano_espacio || ''} onChange={(e) => handleChange('tamano_espacio', e.target.value)} placeholder={placeholder('minimo_2_5_m_area_ejercicio')} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Temperatura Ambiente (°C)</label>
-            <input type="text" value={formData.temperatura_ambiente || ''} onChange={(e) => handleChange('temperatura_ambiente', e.target.value)} placeholder="Ideal: 16-21°C" />
+            <label>{field('temperatura_ambiente_c_2')}</label>
+            <input type="text" value={formData.temperatura_ambiente || ''} onChange={(e) => handleChange('temperatura_ambiente', e.target.value)} placeholder={placeholder('ideal_16_21_c')} />
           </div>
           <div className="form-group">
-            <label>Humedad (%)</label>
-            <input type="text" value={formData.humedad || ''} onChange={(e) => handleChange('humedad', e.target.value)} placeholder="Ideal: 40-60%" />
+            <label>{field('humedad')}</label>
+            <input type="text" value={formData.humedad || ''} onChange={(e) => handleChange('humedad', e.target.value)} placeholder={placeholder('ideal_40_60')} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Superficie del Piso *</label>
+            <label>{field('superficie_del_piso_2')}</label>
             <select required value={formData.superficie_piso || ''} onChange={(e) => handleChange('superficie_piso', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="alambre">Alambre</option>
-              <option value="madera">Madera</option>
-              <option value="felpa">Felpa</option>
-              <option value="cemento">Cemento</option>
+              <option value="">{t('select')}</option>
+              <option value="alambre">{t('options.alambre')}</option>
+              <option value="madera">{t('options.madera')}</option>
+              <option value="felpa">{t('options.felpa')}</option>
+              <option value="cemento">{t('options.cemento')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Tiempo de Ejercicio Diario (horas)</label>
+            <label>{field('tiempo_de_ejercicio_diario_horas')}</label>
             <input type="text" value={formData.tiempo_ejercicio || ''} onChange={(e) => handleChange('tiempo_ejercicio', e.target.value)} />
           </div>
         </div>
         <div className="form-row">
           <div className="form-group">
-            <label>Tipo de ejercicio</label>
+            <label>{field('tipo_de_ejercicio')}</label>
             <select
               value={formData.tipo_ejercicio || ''}
               onChange={(e) => handleChange('tipo_ejercicio', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="libre_habitacion">Libre en habitación</option>
-              <option value="correa">Correa</option>
-              <option value="ninguno">Ninguno</option>
+              <option value="">{t('select')}</option>
+              <option value="libre_habitacion">{t('options.libre_en_habitacion')}</option>
+              <option value="correa">{t('options.correa')}</option>
+              <option value="ninguno">{t('options.ninguno')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Saltos frecuentes</label>
+            <label>{field('saltos_frecuentes_2')}</label>
             <select
               value={formData.saltos_frecuentes || 'NO'}
               onChange={(e) => handleChange('saltos_frecuentes', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Vive solo o en grupo</label>
+            <label>{field('vive_solo_o_en_grupo')}</label>
             <select
               value={formData.socializacion || ''}
               onChange={(e) => handleChange('socializacion', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="solo">Solo</option>
-              <option value="pareja">Pareja</option>
-              <option value="grupo">Grupo</option>
+              <option value="">{t('select')}</option>
+              <option value="solo">{t('options.solo')}</option>
+              <option value="pareja">{t('options.pareja')}</option>
+              <option value="grupo">{t('options.grupo')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Peleas recientes</label>
+            <label>{field('peleas_recientes_2')}</label>
             <select
               value={formData.peleas_recientes || 'NO'}
               onChange={(e) => handleChange('peleas_recientes', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
         {formData.peleas_recientes === 'SI' && (
           <div className="form-group">
-            <label>Lesiones por peleas</label>
+            <label>{field('lesiones_por_peleas')}</label>
             <input
               type="text"
               value={formData.peleas_lesiones || ''}
@@ -528,25 +533,25 @@ const ConejosForm = ({ formData, setFormData }) => {
         )}
 
         <div className="form-group">
-          <label>Limpieza de Jaula *</label>
+          <label>{field('limpieza_de_jaula_3')}</label>
           <select required value={formData.limpieza_jaula || ''} onChange={(e) => handleChange('limpieza_jaula', e.target.value)}>
-            <option value="">Seleccionar</option>
-            <option value="diaria">Diaria</option>
-            <option value="cada_2_dias">Cada 2 días</option>
-            <option value="semanal">Semanal</option>
+            <option value="">{t('select')}</option>
+            <option value="diaria">{t('options.diaria')}</option>
+            <option value="cada_2_dias">{t('options.cada_2_dias')}</option>
+            <option value="semanal">{t('options.semanal')}</option>
           </select>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Uso de productos químicos</label>
+            <label>{field('uso_de_productos_quimicos')}</label>
             <YesNoChips
               value={formData.uso_quimicos}
               onChange={(val) => handleChange('uso_quimicos', val)}
             />
           </div>
           <div className="form-group">
-            <label>Baños frecuentes</label>
+            <label>{field('banos_frecuentes')}</label>
             <YesNoChips
               value={formData.banos_frecuentes}
               onChange={(val) => handleChange('banos_frecuentes', val)}
@@ -555,7 +560,7 @@ const ConejosForm = ({ formData, setFormData }) => {
         </div>
         {formData.uso_quimicos === 'SI' && (
           <div className="form-group">
-            <label>¿Cuáles productos químicos?</label>
+            <label>{field('cuales_productos_quimicos')}</label>
             <input
               type="text"
               value={formData.quimicos_cuales || ''}
@@ -567,71 +572,71 @@ const ConejosForm = ({ formData, setFormData }) => {
 
       {/* Examen Físico */}
       <div id="conejos-examen-fisico" className="form-section">
-        <h3>Examen Físico</h3>
+        <h3>{section('examen_fisico')}</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Temperatura (°C)</label>
-            <input type="text" value={formData.temperatura || ''} onChange={(e) => handleChange('temperatura', e.target.value)} placeholder="Normal: 38.5-39.5°C" />
+            <label>{field('temperatura')}</label>
+            <input type="text" value={formData.temperatura || ''} onChange={(e) => handleChange('temperatura', e.target.value)} placeholder={placeholder('normal_38_5_39_5_c')} />
           </div>
           <div className="form-group">
-            <label>Frecuencia Cardíaca (lpm)</label>
-            <input type="text" value={formData.frecuencia_cardiaca || ''} onChange={(e) => handleChange('frecuencia_cardiaca', e.target.value)} placeholder="Normal: 180-250" />
+            <label>{field('frecuencia_cardiaca')}</label>
+            <input type="text" value={formData.frecuencia_cardiaca || ''} onChange={(e) => handleChange('frecuencia_cardiaca', e.target.value)} placeholder={placeholder('normal_180_250')} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Frecuencia Respiratoria (rpm)</label>
-            <input type="text" value={formData.frecuencia_respiratoria || ''} onChange={(e) => handleChange('frecuencia_respiratoria', e.target.value)} placeholder="Normal: 30-60" />
+            <label>{field('frecuencia_respiratoria')}</label>
+            <input type="text" value={formData.frecuencia_respiratoria || ''} onChange={(e) => handleChange('frecuencia_respiratoria', e.target.value)} placeholder={placeholder('normal_30_60')} />
           </div>
           <div className="form-group">
-            <label>Hidratación</label>
+            <label>{field('hidratacion')}</label>
             <select value={formData.hidratacion || ''} onChange={(e) => handleChange('hidratacion', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="5">5% (piel vuelve rápido)</option>
-              <option value="6-8">6-8% (piel lenta)</option>
-              <option value=">10">&gt;10% (piel no vuelve)</option>
+              <option value="">{t('select')}</option>
+              <option value="5">{t('options.n_5_piel_vuelve_rapido')}</option>
+              <option value="6-8">{t('options.n_6_8_piel_lenta')}</option>
+              <option value=">10%">{t('options.gt_10_piel_no_vuelve')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Color de Mucosas</label>
+            <label>{field('color_de_mucosas_2')}</label>
             <select value={formData.mucosas || ''} onChange={(e) => handleChange('mucosas', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="rosado">Rosado</option>
-              <option value="palido">Pálido</option>
-              <option value="icterico">Ictérico</option>
-              <option value="cianotico">Cianótico</option>
+              <option value="">{t('select')}</option>
+              <option value="rosado">{t('options.rosado')}</option>
+              <option value="palido">{t('options.palido')}</option>
+              <option value="icterico">{t('options.icterico')}</option>
+              <option value="cianotico">{t('options.cianotico')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Estado Dental</label>
+            <label>{field('estado_dental_2')}</label>
             <select value={formData.estado_dental || ''} onChange={(e) => handleChange('estado_dental', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="normal">Normal</option>
-              <option value="sobrecrecimiento">Sobrecrecimiento</option>
-              <option value="abscesos">Abscesos</option>
-              <option value="rotos">Dientes rotos</option>
+              <option value="">{t('select')}</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="sobrecrecimiento">{t('options.sobrecrecimiento')}</option>
+              <option value="abscesos">{t('options.dientes_abscesos')}</option>
+              <option value="rotos">{t('options.dientes_rotos')}</option>
             </select>
           </div>
         </div>
         <div className="form-row">
           <div className="form-group">
-            <label>Tiempo de relleno capilar (TRC)</label>
+            <label>{field('tiempo_de_relleno_capilar_trc')}</label>
             <input
               type="text"
               value={formData.trc || ''}
               onChange={(e) => handleChange('trc', e.target.value)}
-              placeholder="Normal: < 2 seg"
+              placeholder={placeholder('normal_2_seg')}
             />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Peso corporal (g/kg)</label>
+            <label>{field('peso_corporal_g_kg')}</label>
             <input
               type="text"
               value={formData.peso_corporal || ''}
@@ -639,7 +644,7 @@ const ConejosForm = ({ formData, setFormData }) => {
             />
           </div>
           <div className="form-group">
-            <label>% pérdida/ganancia de peso</label>
+            <label>{field('perdida_ganancia_de_peso')}</label>
             <input
               type="text"
               value={formData.peso_cambio_porcentaje || ''}
@@ -649,36 +654,36 @@ const ConejosForm = ({ formData, setFormData }) => {
         </div>
 
         <div className="form-group">
-          <label>Condición muscular</label>
+          <label>{field('condicion_muscular')}</label>
           <select
             value={formData.condicion_muscular || ''}
             onChange={(e) => handleChange('condicion_muscular', e.target.value)}
           >
-            <option value="">Seleccionar</option>
-            <option value="excelente">Excelente</option>
-            <option value="buena">Buena</option>
-            <option value="regular">Regular</option>
-            <option value="mala">Mala</option>
-            <option value="ausente">Ausente</option>
+            <option value="">{t('select')}</option>
+            <option value="excelente">{t('options.excelente')}</option>
+            <option value="buena">{t('options.buena')}</option>
+            <option value="regular">{t('options.regular')}</option>
+            <option value="mala">{t('options.mala')}</option>
+            <option value="ausente">{t('options.ausente')}</option>
           </select>
         </div>
       </div>
 
       {/* Sistema Digestivo */}
       <div id="conejos-digestivo" className="form-section">
-        <h3>Sistema Digestivo</h3>
+        <h3>{section('digestivo')}</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Apetito *</label>
+            <label>{field('apetito')}</label>
             <select required value={formData.apetito || 'normal'} onChange={(e) => handleChange('apetito', e.target.value)}>
-              <option value="normal">Normal</option>
-              <option value="anorexia_total">Totalmente anoréxico (&gt;12h)</option>
-              <option value="anorexia_parcial">Parcialmente anoréxico</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="anorexia_total">{t('options.totalmente_anorexico_gt_12h')}</option>
+              <option value="anorexia_parcial">{t('options.parcialmente_anorexico')}</option>
             </select>
           </div>
           {(formData.apetito === 'anorexia_total' || formData.apetito === 'anorexia_parcial') && (
             <div className="form-group">
-              <label>Tiempo sin comer (horas)</label>
+              <label>{field('tiempo_sin_comer_horas')}</label>
               <input type="text" value={formData.tiempo_sin_comer || ''} onChange={(e) => handleChange('tiempo_sin_comer', e.target.value)} />
             </div>
           )}
@@ -686,104 +691,104 @@ const ConejosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Come Heno *</label>
+            <label>{field('come_heno_2')}</label>
             <select required value={formData.come_heno || ''} onChange={(e) => handleChange('come_heno', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="SI">Sí</option>
-              <option value="NO">No</option>
+              <option value="">{t('select')}</option>
+              <option value="SI">{t('yes')}</option>
+              <option value="NO">{t('no')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Come Pellets *</label>
+            <label>{field('come_pellets')}</label>
             <select required value={formData.come_pellets || ''} onChange={(e) => handleChange('come_pellets', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="SI">Sí</option>
-              <option value="NO">No</option>
+              <option value="">{t('select')}</option>
+              <option value="SI">{t('yes')}</option>
+              <option value="NO">{t('no')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Come frutas y verduras?</label>
+            <label>{field('come_frutas_y_verduras')}</label>
             <select
               value={formData.come_frutas_verduras || ''}
               onChange={(e) => handleChange('come_frutas_verduras', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="SI">Sí</option>
-              <option value="NO">No</option>
+              <option value="">{t('select')}</option>
+              <option value="SI">{t('yes')}</option>
+              <option value="NO">{t('no')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>¿Mastica lentamente o deja comida sin masticar?</label>
+            <label>{field('mastica_lentamente_o_deja_comida_sin_masticar')}</label>
             <select
               value={formData.mastica_lento || 'NO'}
               onChange={(e) => handleChange('mastica_lento', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Heces *</label>
+            <label>{field('heces')}</label>
             <select required value={formData.heces || 'normales'} onChange={(e) => handleChange('heces', e.target.value)}>
-              <option value="normales">Normales</option>
-              <option value="ausentes">Ausentes (&gt;12h)</option>
-              <option value="pequenas_duras">Pequeñas y duras</option>
-              <option value="blandas">Blandas/pastosas</option>
-              <option value="en_racimo">En racimo</option>
+              <option value="normales">{t('options.normales')}</option>
+              <option value="ausentes">{t('options.ausentes_gt_12h')}</option>
+              <option value="pequenas_duras">{t('options.pequenas_y_duras')}</option>
+              <option value="blandas">{t('options.blandas_pastosas')}</option>
+              <option value="en_racimo">{t('options.en_racimo')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Frecuencia (veces/día)</label>
-            <input type="text" value={formData.heces_frecuencia || ''} onChange={(e) => handleChange('heces_frecuencia', e.target.value)} placeholder="Normal: 100-300 según tamaño" />
+            <label>{field('frecuencia_veces_dia')}</label>
+            <input type="text" value={formData.heces_frecuencia || ''} onChange={(e) => handleChange('heces_frecuencia', e.target.value)} placeholder={placeholder('normal_100_300_segun_tamano')} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Tamaño de las heces</label>
+            <label>{field('tamano_de_las_heces')}</label>
             <select
               value={formData.heces_tamano || ''}
               onChange={(e) => handleChange('heces_tamano', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="normal">Normal</option>
-              <option value="pequenas">Pequeñas</option>
-              <option value="ausentes">Ausentes</option>
+              <option value="">{t('select')}</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="pequenas">{t('options.pequenas')}</option>
+              <option value="ausentes">{t('options.ausentes')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Color de las heces</label>
+            <label>{field('color_de_las_heces')}</label>
             <select
               value={formData.heces_color || ''}
               onChange={(e) => handleChange('heces_color', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="marron_oscuro">Marrón oscuro</option>
-              <option value="verde">Verde</option>
-              <option value="amarillento">Amarillento</option>
-              <option value="blanco_moho">Blanco (moho)</option>
+              <option value="">{t('select')}</option>
+              <option value="marron_oscuro">{t('options.marron_oscuro')}</option>
+              <option value="verde">{t('options.verde')}</option>
+              <option value="amarillento">{t('options.amarillento')}</option>
+              <option value="blanco_moho">{t('options.blanco_moho')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Estómago/Abdomen *</label>
+            <label>{field('estomago_abdomen_2')}</label>
             <select required value={formData.abdomen || 'normal'} onChange={(e) => handleChange('abdomen', e.target.value)}>
-              <option value="normal">Normal</option>
-              <option value="distendido">Distendido</option>
-              <option value="doloroso">Doloroso al tacto</option>
-              <option value="ruidos_ausentes">Ruidos intestinales ausentes</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="distendido">{t('options.distendido')}</option>
+              <option value="doloroso">{t('options.doloroso_al_tacto')}</option>
+              <option value="ruidos_ausentes">{t('options.ruidos_intestinales_ausentes')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Regurgitación *</label>
+            <label>{field('regurgitacion_2')}</label>
             <YesNoChips
               value={formData.regurgitacion}
               onChange={(val) => handleChange('regurgitacion', val)}
@@ -793,7 +798,7 @@ const ConejosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Palpación de bolas de pelo</label>
+            <label>{field('palpacion_de_bolas_de_pelo')}</label>
             <YesNoChips
               value={formData.bolas_pelo}
               onChange={(val) => handleChange('bolas_pelo', val)}
@@ -801,7 +806,7 @@ const ConejosForm = ({ formData, setFormData }) => {
           </div>
           {formData.bolas_pelo === 'SI' && (
             <div className="form-group">
-              <label>Ubicación de bolas de pelo</label>
+              <label>{field('ubicacion_de_bolas_de_pelo')}</label>
               <input
                 type="text"
                 value={formData.bolas_pelo_ubicacion || ''}
@@ -813,14 +818,14 @@ const ConejosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Cambio reciente de dieta</label>
+            <label>{field('cambio_reciente_de_dieta')}</label>
             <YesNoChips
               value={formData.desencadenante_dieta}
               onChange={(val) => handleChange('desencadenante_dieta', val)}
             />
           </div>
           <div className="form-group">
-            <label>Estrés (mudanza/veterinario)</label>
+            <label>{field('estres_mudanza_veterinario')}</label>
             <YesNoChips
               value={formData.desencadenante_estres}
               onChange={(val) => handleChange('desencadenante_estres', val)}
@@ -830,23 +835,23 @@ const ConejosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Uso reciente de antibióticos</label>
+            <label>{field('uso_reciente_de_antibioticos')}</label>
             <select
               value={formData.desencadenante_antibioticos || 'NO'}
               onChange={(e) => handleChange('desencadenante_antibioticos', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Dolor no tratado</label>
+            <label>{field('dolor_no_tratado')}</label>
             <select
               value={formData.desencadenante_dolor || 'NO'}
               onChange={(e) => handleChange('desencadenante_dolor', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
@@ -854,25 +859,25 @@ const ConejosForm = ({ formData, setFormData }) => {
 
       {/* Sistema Respiratorio */}
       <div id="conejos-respiratorio" className="form-section">
-        <h3>Sistema Respiratorio</h3>
+        <h3>{section('respiratorio')}</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Secreción Nasal *</label>
+            <label>{field('secrecion_nasal')}</label>
             <select required value={formData.secrecion_nasal || 'NO'} onChange={(e) => handleChange('secrecion_nasal', e.target.value)}>
-              <option value="NO">No</option>
-              <option value="clara">Clara (moco)</option>
-              <option value="purulenta">Purulenta (amarilla/verde)</option>
-              <option value="sangre">Sangre</option>
-              <option value="caseosa">Caseosa</option>
+              <option value="NO">{t('no')}</option>
+              <option value="clara">{t('options.clara_moco')}</option>
+              <option value="purulenta">{t('options.purulenta_amarilla_verde')}</option>
+              <option value="sangre">{t('options.sangre')}</option>
+              <option value="caseosa">{t('options.caseosa')}</option>
             </select>
           </div>
           {formData.secrecion_nasal !== 'NO' && (
             <div className="form-group">
-              <label>Localización</label>
+              <label>{field('localizacion')}</label>
               <select value={formData.secrecion_localizacion || ''} onChange={(e) => handleChange('secrecion_localizacion', e.target.value)}>
-                <option value="">Seleccionar</option>
-                <option value="unilateral">Unilateral</option>
-                <option value="bilateral">Bilateral</option>
+                <option value="">{t('select')}</option>
+                <option value="unilateral">{t('options.unilateral')}</option>
+                <option value="bilateral">{t('options.bilateral')}</option>
               </select>
             </div>
           )}
@@ -880,58 +885,58 @@ const ConejosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Respiración *</label>
+            <label>{field('respiracion')}</label>
             <select required value={formData.respiracion || 'normal'} onChange={(e) => handleChange('respiracion', e.target.value)}>
-              <option value="normal">Normal</option>
-              <option value="ruidosa">Ruidosa</option>
-              <option value="dificultad_inhalar">Dificultad para inhalar</option>
-              <option value="dificultad_exhalar">Dificultad para exhalar</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="ruidosa">{t('options.ruidosa')}</option>
+              <option value="dificultad_inhalar">{t('options.dificultad_para_inhalar')}</option>
+              <option value="dificultad_exhalar">{t('options.dificultad_para_exhalar')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Estornudos *</label>
+            <label>{field('estornudos_2')}</label>
             <select required value={formData.estornudos || 'NO'} onChange={(e) => handleChange('estornudos', e.target.value)}>
-              <option value="NO">No</option>
-              <option value="aislados">Aislados</option>
-              <option value="frecuentes">Frecuentes</option>
-              <option value="con_secrecion">Con secreción</option>
-              <option value="sin_secrecion">Sin secreción</option>
+              <option value="NO">{t('no')}</option>
+              <option value="aislados">{t('options.aislados')}</option>
+              <option value="frecuentes">{t('options.frecuentes')}</option>
+              <option value="con_secrecion">{t('options.con_secrecion')}</option>
+              <option value="sin_secrecion">{t('options.sin_secrecion')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Ronquidos o estertores</label>
+            <label>{field('ronquidos_o_estertores')}</label>
             <select
               value={formData.ronquidos_estertores || 'NO'}
               onChange={(e) => handleChange('ronquidos_estertores', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>¿Mejora con limpieza nasal?</label>
+            <label>{field('mejora_con_limpieza_nasal')}</label>
             <select
               value={formData.mejora_limpieza_nasal || 'NO'}
               onChange={(e) => handleChange('mejora_limpieza_nasal', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Presencia de costras en nariz</label>
+            <label>{field('presencia_de_costras_en_nariz_2')}</label>
             <select
               value={formData.costras_nariz || 'NO'}
               onChange={(e) => handleChange('costras_nariz', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
@@ -939,59 +944,60 @@ const ConejosForm = ({ formData, setFormData }) => {
 
       {/* Sistema Reproductivo */}
       <div id="conejos-reproductivo" className="form-section">
-        <h3>Sistema Reproductivo</h3>
-        {formData.sexo === 'hembra' && (
+        <h3>{section('reproductivo')}</h3>
+                <ReproductiveSexHint sexo={sexo} />
+        {sexo === 'hembra' && (
           <>
             <div className="form-row">
               <div className="form-group">
-                <label>Último Celo/Parto (días atrás)</label>
+                <label>{field('ultimo_celo_parto_dias_atras_2')}</label>
                 <input type="text" value={formData.ultimo_celo || ''} onChange={(e) => handleChange('ultimo_celo', e.target.value)} />
               </div>
               <div className="form-group">
-                <label>Secreción Vaginal</label>
+                <label>{field('secrecion_vaginal_2')}</label>
                 <select value={formData.secrecion_vaginal || 'NO'} onChange={(e) => handleChange('secrecion_vaginal', e.target.value)}>
-                  <option value="NO">No</option>
-                  <option value="sanguinolenta">Sanguinolenta</option>
-                  <option value="purulenta">Purulenta</option>
-                  <option value="mucosa">Mucosa</option>
+                  <option value="NO">{t('no')}</option>
+                  <option value="sanguinolenta">{t('options.sanguinolenta')}</option>
+                  <option value="purulenta">{t('options.purulenta')}</option>
+                  <option value="mucosa">{t('options.mucosa')}</option>
                 </select>
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>Frecuencia de secreción</label>
+                <label>{field('frecuencia_de_secrecion')}</label>
                 <select
                   value={formData.secrecion_vaginal_frecuencia || ''}
                   onChange={(e) => handleChange('secrecion_vaginal_frecuencia', e.target.value)}
                 >
-                  <option value="">Seleccionar</option>
-                  <option value="intermitente">Intermitente</option>
-                  <option value="continua">Continua</option>
+                  <option value="">{t('select')}</option>
+                  <option value="intermitente">{t('options.intermitente')}</option>
+                  <option value="continua">{t('options.continua')}</option>
                 </select>
               </div>
               <div className="form-group">
-                <label>Relación con celo</label>
+                <label>{field('relacion_con_celo')}</label>
                 <select
                   value={formData.relacion_celo || ''}
                   onChange={(e) => handleChange('relacion_celo', e.target.value)}
                 >
-                  <option value="">Seleccionar</option>
-                  <option value="durante_celo">Durante celo</option>
-                  <option value="fuera_celo">Fuera de celo</option>
+                  <option value="">{t('select')}</option>
+                  <option value="durante_celo">{t('options.durante_celo')}</option>
+                  <option value="fuera_celo">{t('options.fuera_de_celo')}</option>
                 </select>
               </div>
             </div>
 
             <div className="form-group">
-              <label>Hinchazón Abdominal *</label>
+              <label>{field('hinchazon_abdominal_4')}</label>
               <select required value={formData.hinchazon_abdominal || 'NO'} onChange={(e) => handleChange('hinchazon_abdominal', e.target.value)}>
-                <option value="NO">No</option>
-                <option value="SI">Sí</option>
+                <option value="NO">{t('no')}</option>
+                <option value="SI">{t('yes')}</option>
               </select>
             </div>
             {formData.hinchazon_abdominal === 'SI' && (
               <div className="form-group">
-                <label>Tamaño de hinchazón abdominal</label>
+                <label>{field('tamano_de_hinchazon_abdominal')}</label>
                 <input
                   type="text"
                   value={formData.hinchazon_abdominal_tamano || ''}
@@ -1002,29 +1008,29 @@ const ConejosForm = ({ formData, setFormData }) => {
           </>
         )}
 
-        {formData.sexo === 'macho' && (
+        {sexo === 'macho' && (
           <>
             <div className="form-row">
               <div className="form-group">
-                <label>Testículos Descendidos *</label>
+                <label>{field('testiculos_descendidos_3')}</label>
                 <select required value={formData.testiculos_descendidos || ''} onChange={(e) => handleChange('testiculos_descendidos', e.target.value)}>
-                  <option value="">Seleccionar</option>
-                  <option value="SI">Sí</option>
-                  <option value="NO">No</option>
-                  <option value="uno">Uno solo</option>
+                  <option value="">{t('select')}</option>
+                  <option value="SI">{t('yes')}</option>
+                  <option value="NO">{t('no')}</option>
+                  <option value="uno">{t('options.uno_solo')}</option>
                 </select>
               </div>
               <div className="form-group">
-                <label>Hinchazón Escrotal *</label>
+                <label>{field('hinchazon_escrotal_2')}</label>
                 <select required value={formData.hinchazon_escrotal || 'NO'} onChange={(e) => handleChange('hinchazon_escrotal', e.target.value)}>
-                  <option value="NO">No</option>
-                  <option value="SI">Sí</option>
+                  <option value="NO">{t('no')}</option>
+                  <option value="SI">{t('yes')}</option>
                 </select>
               </div>
             </div>
             {formData.hinchazon_escrotal === 'SI' && (
               <div className="form-group">
-                <label>Características de la hinchazón escrotal</label>
+                <label>{field('caracteristicas_de_la_hinchazon_escrotal')}</label>
                 <input
                   type="text"
                   value={formData.hinchazon_escrotal_caracteristicas || ''}
@@ -1038,93 +1044,93 @@ const ConejosForm = ({ formData, setFormData }) => {
 
       {/* Sistema Neurológico */}
       <div id="conejos-neurologico" className="form-section">
-        <h3>Sistema Neurológico</h3>
+        <h3>{section('neurologico')}</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Inclinación de Cabeza *</label>
+            <label>{field('inclinacion_de_cabeza')}</label>
             <select required value={formData.inclinacion_cabeza || 'NO'} onChange={(e) => handleChange('inclinacion_cabeza', e.target.value)}>
-              <option value="NO">No</option>
-              <option value="leve">Leve (15°)</option>
-              <option value="moderada">Moderada (45°)</option>
-              <option value="severa">Severa (90°+)</option>
+              <option value="NO">{t('no')}</option>
+              <option value="leve">{t('options.leve_15')}</option>
+              <option value="moderada">{t('options.moderada_45')}</option>
+              <option value="severa">{t('options.severa_90')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Nistagmo</label>
+            <label>{field('nistagmo')}</label>
             <select value={formData.nistagmo || 'NO'} onChange={(e) => handleChange('nistagmo', e.target.value)}>
-              <option value="NO">No</option>
-              <option value="horizontal">Horizontal</option>
-              <option value="vertical">Vertical</option>
-              <option value="rotatorio">Rotatorio</option>
+              <option value="NO">{t('no')}</option>
+              <option value="horizontal">{t('options.horizontal')}</option>
+              <option value="vertical">{t('options.vertical')}</option>
+              <option value="rotatorio">{t('options.rotatorio')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Movimientos Anormales *</label>
+            <label>{field('movimientos_anormales')}</label>
             <select required value={formData.movimientos_anormales || 'NO'} onChange={(e) => handleChange('movimientos_anormales', e.target.value)}>
-              <option value="NO">No</option>
-              <option value="caidas">Caídas laterales</option>
-              <option value="rodar">Rodar sin control</option>
-              <option value="temblor">Temblor generalizado</option>
+              <option value="NO">{t('no')}</option>
+              <option value="caidas">{t('options.caidas_laterales')}</option>
+              <option value="rodar">{t('options.rodar_sin_control')}</option>
+              <option value="temblor">{t('options.temblor_generalizado')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Mejora con reposo?</label>
+            <label>{field('mejora_con_reposo')}</label>
             <select
               value={formData.mejora_reposo || 'NO'}
               onChange={(e) => handleChange('mejora_reposo', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>¿Desencadenado por movimiento?</label>
+            <label>{field('desencadenado_por_movimiento')}</label>
             <select
               value={formData.desencadenado_movimiento || 'NO'}
               onChange={(e) => handleChange('desencadenado_movimiento', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Cambios de comportamiento</label>
+            <label>{field('cambios_de_comportamiento')}</label>
             <select
               value={formData.cambios_comportamiento || 'NO'}
               onChange={(e) => handleChange('cambios_comportamiento', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="letargo_extremo">Letargo extremo</option>
-              <option value="agresividad_repentina">Agresividad repentina</option>
-              <option value="no_responde_estimul">No responde a estímulos</option>
+              <option value="NO">{t('no')}</option>
+              <option value="letargo_extremo">{t('options.letargo_extremo')}</option>
+              <option value="agresividad_repentina">{t('options.agresividad_repentina')}</option>
+              <option value="no_responde_estimul">{t('options.no_responde_a_estimulos')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Pérdida de visión</label>
+            <label>{field('perdida_de_vision')}</label>
             <select
               value={formData.perdida_vision || 'NO'}
               onChange={(e) => handleChange('perdida_vision', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
         {formData.perdida_vision === 'SI' && (
           <div className="form-group">
-            <label>¿Pérdida de visión confirmada por?</label>
+            <label>{field('perdida_de_vision_confirmada_por')}</label>
             <input
               type="text"
               value={formData.perdida_vision_confirmada || ''}
@@ -1136,54 +1142,54 @@ const ConejosForm = ({ formData, setFormData }) => {
 
       {/* Sistema Musculoesquelético */}
       <div id="conejos-musculoesqueletico" className="form-section">
-        <h3>Sistema Musculoesquelético</h3>
+        <h3>{section('musculoesqueletico')}</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Cojera/Movimiento *</label>
+            <label>{field('cojera_movimiento')}</label>
             <select required value={formData.cojera || 'normal'} onChange={(e) => handleChange('cojera', e.target.value)}>
-              <option value="normal">Normal</option>
-              <option value="no_saltar">No puede saltar</option>
-              <option value="evita_erectas">Evita posiciones erectas</option>
-              <option value="arrastra">Se arrastra</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="no_saltar">{t('options.no_puede_saltar')}</option>
+              <option value="evita_erectas">{t('options.evita_posiciones_erectas')}</option>
+              <option value="arrastra">{t('options.se_arrastra')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Localización</label>
+            <label>{field('localizacion')}</label>
             <select value={formData.cojera_localizacion || ''} onChange={(e) => handleChange('cojera_localizacion', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="patas_traseras">Patas traseras</option>
-              <option value="patas_delanteras">Patas delanteras</option>
-              <option value="ambas">Ambas</option>
+              <option value="">{t('select')}</option>
+              <option value="patas_traseras">{t('options.patas_traseras')}</option>
+              <option value="patas_delanteras">{t('options.patas_delanteras')}</option>
+              <option value="ambas">{t('options.ambas')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Patas *</label>
+            <label>{field('patas')}</label>
             <select required value={formData.patas || 'normales'} onChange={(e) => handleChange('patas', e.target.value)}>
-              <option value="normales">Normales</option>
-              <option value="ulceras">Úlceras en almohadillas</option>
-              <option value="perdida_pelo">Pérdida de pelo</option>
-              <option value="hinchazon">Hinchazón</option>
+              <option value="normales">{t('options.normales')}</option>
+              <option value="ulceras">{t('options.ulceras_en_almohadillas')}</option>
+              <option value="perdida_pelo">{t('options.perdida_de_pelo')}</option>
+              <option value="hinchazon">{t('options.hinchazon')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Dolor al manipular columna</label>
+            <label>{field('dolor_al_manipular_columna_2')}</label>
             <select
               value={formData.dolor_columna || 'NO'}
               onChange={(e) => handleChange('dolor_columna', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           {formData.dolor_columna === 'SI' && (
             <div className="form-group">
-              <label>Ubicación del dolor en columna</label>
+              <label>{field('ubicacion_del_dolor_en_columna')}</label>
               <input
                 type="text"
                 value={formData.dolor_columna_ubicacion || ''}
@@ -1195,7 +1201,7 @@ const ConejosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Gravedad (escala 1-4)</label>
+            <label>{field('gravedad_escala_1_4')}</label>
             <input
               type="text"
               value={formData.gravedad_musculoesqueletico || ''}
@@ -1207,50 +1213,50 @@ const ConejosForm = ({ formData, setFormData }) => {
 
       {/* Sistema Cutáneo */}
       <div id="conejos-cutaneo" className="form-section">
-        <h3>Sistema Cutáneo</h3>
+        <h3>{section('cutaneo')}</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Pelo/Piel *</label>
+            <label>{field('pelo_piel')}</label>
             <select required value={formData.pelo_piel || 'normal'} onChange={(e) => handleChange('pelo_piel', e.target.value)}>
-              <option value="normal">Normal</option>
-              <option value="alopecia_simetrica">Alopecia simétrica</option>
-              <option value="costras">Costras en cabeza/orejas</option>
-              <option value="ulceras">Úlceras faciales</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="alopecia_simetrica">{t('options.alopecia_simetrica')}</option>
+              <option value="costras">{t('options.costras_en_cabeza_orejas')}</option>
+              <option value="ulceras">{t('options.ulceras_faciales')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Prurito Intenso *</label>
+            <label>{field('prurito_intenso_2')}</label>
             <select required value={formData.prurito || 'ausente'} onChange={(e) => handleChange('prurito', e.target.value)}>
-              <option value="ausente">Ausente</option>
-              <option value="leve">Leve</option>
-              <option value="intenso">Intenso</option>
+              <option value="ausente">{t('options.ausente')}</option>
+              <option value="leve">{t('options.leve')}</option>
+              <option value="intenso">{t('options.intenso')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Mentón ("Barba Sucia") *</label>
+            <label>{field('menton_barba_sucia_2')}</label>
             <select required value={formData.barba_sucia || 'NO'} onChange={(e) => handleChange('barba_sucia', e.target.value)}>
-              <option value="NO">No</option>
-              <option value="costras">Presencia de costras</option>
-              <option value="hinchazon">Hinchazón</option>
-              <option value="secrecion">Secreción</option>
+              <option value="NO">{t('no')}</option>
+              <option value="costras">{t('options.presencia_de_costras')}</option>
+              <option value="hinchazon">{t('options.hinchazon')}</option>
+              <option value="secrecion">{t('options.secrecion')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Orejas</label>
+            <label>{field('orejas')}</label>
             <select value={formData.orejas || 'normales'} onChange={(e) => handleChange('orejas', e.target.value)}>
-              <option value="normales">Normales</option>
-              <option value="costras">Costras en interior</option>
-              <option value="secrecion">Secreción marrón</option>
-              <option value="mal_olor">Mal olor</option>
+              <option value="normales">{t('options.normales')}</option>
+              <option value="costras">{t('options.costras_en_interior')}</option>
+              <option value="secrecion">{t('options.secrecion_marron')}</option>
+              <option value="mal_olor">{t('options.mal_olor')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-group">
-          <label>Localización específica de lesiones</label>
+          <label>{field('localizacion_especifica_de_lesiones')}</label>
           <input
             type="text"
             value={formData.localizacion_cutanea || ''}
@@ -1260,18 +1266,18 @@ const ConejosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Ácaros visibles</label>
+            <label>{field('acaros_visibles_2')}</label>
             <select
               value={formData.acaros_visibles || 'NO'}
               onChange={(e) => handleChange('acaros_visibles', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           {formData.acaros_visibles === 'SI' && (
             <div className="form-group">
-              <label>Tipo de ácaros</label>
+              <label>{field('tipo_de_acaros')}</label>
               <input
                 type="text"
                 value={formData.acaros_tipo || ''}
@@ -1284,25 +1290,25 @@ const ConejosForm = ({ formData, setFormData }) => {
 
       {/* Ojos */}
       <div id="conejos-ojos" className="form-section">
-        <h3>Ojos</h3>
+        <h3>{section('ojos')}</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Secreción Ocular *</label>
+            <label>{field('secrecion_ocular')}</label>
             <select required value={formData.secrecion_ocular || 'NO'} onChange={(e) => handleChange('secrecion_ocular', e.target.value)}>
-              <option value="NO">No</option>
-              <option value="clara">Clara</option>
-              <option value="purulenta">Purulenta</option>
-              <option value="seca">Seca/costra</option>
-              <option value="sangre">Sangre</option>
+              <option value="NO">{t('no')}</option>
+              <option value="clara">{t('options.clara')}</option>
+              <option value="purulenta">{t('options.purulenta')}</option>
+              <option value="seca">{t('options.seca_costra')}</option>
+              <option value="sangre">{t('options.sangre')}</option>
             </select>
           </div>
           {formData.secrecion_ocular !== 'NO' && (
             <div className="form-group">
-              <label>Localización</label>
+              <label>{field('localizacion')}</label>
               <select value={formData.secrecion_ocular_localizacion || ''} onChange={(e) => handleChange('secrecion_ocular_localizacion', e.target.value)}>
-                <option value="">Seleccionar</option>
-                <option value="unilateral">Unilateral</option>
-                <option value="bilateral">Bilateral</option>
+                <option value="">{t('select')}</option>
+                <option value="unilateral">{t('options.unilateral')}</option>
+                <option value="bilateral">{t('options.bilateral')}</option>
               </select>
             </div>
           )}
@@ -1310,35 +1316,35 @@ const ConejosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Estado de Ojo(s) *</label>
+            <label>{field('estado_de_ojos')}</label>
             <select required value={formData.estado_ojos || 'normales'} onChange={(e) => handleChange('estado_ojos', e.target.value)}>
-              <option value="normales">Normales</option>
-              <option value="hinchazon">Hinchazón</option>
-              <option value="opacidad">Opacidad corneal</option>
-              <option value="exoftalmia">Exoftalmia (ojo salido)</option>
+              <option value="normales">{t('options.normales')}</option>
+              <option value="hinchazon">{t('options.hinchazon')}</option>
+              <option value="opacidad">{t('options.opacidad_corneal')}</option>
+              <option value="exoftalmia">{t('options.exoftalmia_ojo_salido')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Mejora con limpieza ocular?</label>
+            <label>{field('mejora_con_limpieza_ocular')}</label>
             <select
               value={formData.mejora_limpieza_ocular || 'NO'}
               onChange={(e) => handleChange('mejora_limpieza_ocular', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Dolor al tacto</label>
+            <label>{field('dolor_al_tacto_2')}</label>
             <select
               value={formData.dolor_ojos || 'NO'}
               onChange={(e) => handleChange('dolor_ojos', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>

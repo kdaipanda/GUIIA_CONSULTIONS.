@@ -1,6 +1,43 @@
 /** Catálogo de planes y funciones — alineado con backend (server_simple.py) y módulos GUIAA. */
 
+import i18n from "../i18n";
 import { TRIAL_CONSULTATION_LIMIT } from "./membershipAccess";
+
+function planT(key, options) {
+  return i18n.t(`membershipPlans.${key}`, { ns: "clinic", ...options });
+}
+
+export function getPlanDisplayName(planKey, pkg) {
+  const key = `planNames.${planKey}`;
+  if (i18n.exists(`membershipPlans.${key}`, { ns: "clinic" })) {
+    return planT(key);
+  }
+  return pkg?.name || planKey;
+}
+
+export function getCreditPackageDisplayName(packageKey, pkg) {
+  const key = `creditPackages.${packageKey}.name`;
+  if (i18n.exists(`membershipPlans.${key}`, { ns: "clinic" })) {
+    return planT(key);
+  }
+  return pkg?.name || packageKey;
+}
+
+export function getLocalizedInfoItems(items = MEMBERSHIP_INFO_ITEMS) {
+  return items.map((item) => {
+    const titleKey = `infoItems.${item.id}.title`;
+    const descKey = `infoItems.${item.id}.description`;
+    return {
+      id: item.id,
+      title: i18n.exists(`membershipPlans.${titleKey}`, { ns: "clinic" })
+        ? planT(titleKey)
+        : item.title,
+      description: i18n.exists(`membershipPlans.${descKey}`, { ns: "clinic" })
+        ? planT(descKey)
+        : item.description,
+    };
+  });
+}
 
 export const DEFAULT_PACKAGES = {
   basic: {
@@ -151,7 +188,17 @@ export function getPlanFeatureList(planKey, billingCycle = "monthly", pkg) {
     return apiFeatures;
   }
 
-  const base = annual ? PLAN_ANNUAL_FEATURES[planKey] : PLAN_FEATURES[planKey];
+  const cycleKey = annual ? "annual" : "monthly";
+  const i18nKey = `features.${planKey}.${cycleKey}`;
+  const localizedTail = i18n.exists(`membershipPlans.${i18nKey}`, { ns: "clinic" })
+    ? planT(i18nKey, { returnObjects: true })
+    : null;
+
+  const base = Array.isArray(localizedTail) && localizedTail.length > 0
+    ? localizedTail
+    : annual
+      ? PLAN_ANNUAL_FEATURES[planKey]
+      : PLAN_FEATURES[planKey];
   const resolved = pkg || DEFAULT_PACKAGES[planKey];
 
   if (!base?.length) {
@@ -159,9 +206,7 @@ export function getPlanFeatureList(planKey, billingCycle = "monthly", pkg) {
   }
 
   if (resolved?.consultations != null || resolved?.consultations_annual != null) {
-    const copy = [...base];
-    copy[0] = getConsultationsLabel(planKey, resolved, billingCycle);
-    return copy;
+    return [getConsultationsLabel(planKey, resolved, billingCycle), ...base];
   }
 
   return base;
@@ -169,7 +214,7 @@ export function getPlanFeatureList(planKey, billingCycle = "monthly", pkg) {
 
 export function getConsultationsLabel(planKey, pkg, billingCycle = "monthly") {
   if (pkg?.consultations === "unlimited") {
-    return "Consultas CDS ilimitadas";
+    return planT("consultationsUnlimited");
   }
 
   if (billingCycle === "annual") {
@@ -177,19 +222,12 @@ export function getConsultationsLabel(planKey, pkg, billingCycle = "monthly") {
       pkg?.consultations_annual ??
       ANNUAL_CONSULTATIONS[planKey] ??
       (pkg?.consultations || 0) * 10;
-    return `${annual} consultas CDS al año`;
+    return planT("consultationsAnnual", { count: annual });
   }
 
   const monthly = pkg?.consultations ?? DEFAULT_PACKAGES[planKey]?.consultations ?? 0;
-  return `${monthly} consultas CDS al mes`;
+  return planT("consultationsMonthly", { count: monthly });
 }
-
-const PLAN_STATUS_LABELS = {
-  basic: "Básica",
-  professional: "Profesional",
-  premium: "Premium",
-  trial: "Prueba gratuita",
-};
 
 export function getMembershipQuota(veterinarian, packages = DEFAULT_PACKAGES) {
   if (!veterinarian?.membership_type) {
@@ -197,8 +235,8 @@ export function getMembershipQuota(veterinarian, packages = DEFAULT_PACKAGES) {
     if (remaining > 0) {
       return {
         planKey: "trial",
-        status: "Periodo de prueba",
-        planName: PLAN_STATUS_LABELS.trial,
+        status: planT("quotaTrialPeriod"),
+        planName: planT("planNames.trial"),
         consultations: remaining,
         maxConsultations: TRIAL_CONSULTATION_LIMIT,
         progress: Math.min(
@@ -213,7 +251,7 @@ export function getMembershipQuota(veterinarian, packages = DEFAULT_PACKAGES) {
     }
     return {
       planKey: null,
-      status: "Prueba agotada",
+      status: planT("quotaTrialExhausted"),
       planName: null,
       consultations: 0,
       maxConsultations: TRIAL_CONSULTATION_LIMIT,
@@ -243,7 +281,7 @@ export function getMembershipQuota(veterinarian, packages = DEFAULT_PACKAGES) {
       ? Math.min(rawRemaining, maxConsultations)
       : rawRemaining || 0;
 
-  const planName = pkg?.name || PLAN_STATUS_LABELS[planKey] || veterinarian.membership_type;
+  const planName = getPlanDisplayName(planKey, pkg);
 
   const color =
     unlimited || maxConsultations === 0
@@ -274,7 +312,7 @@ export function getMembershipQuota(veterinarian, packages = DEFAULT_PACKAGES) {
 
 export function getMembershipStatusText(veterinarian, packages) {
   if (!veterinarian?.membership_type) {
-    return { text: "Sin membresía activa", tone: null };
+    return { text: planT("statusNoActive"), tone: null };
   }
 
   const expiry = veterinarian.membership_expires
@@ -282,22 +320,27 @@ export function getMembershipStatusText(veterinarian, packages) {
     : null;
 
   if (expiry && expiry < new Date()) {
-    return { text: "Membresía expirada", tone: "danger" };
+    return { text: planT("statusExpired"), tone: "danger" };
   }
 
   const planKey = veterinarian.membership_type.toLowerCase();
-  const packageName = packages[planKey]?.name || veterinarian.membership_type;
+  const packageName = getPlanDisplayName(planKey, packages[planKey]);
   const remaining = veterinarian.consultations_remaining ?? 0;
   const maxForPlan = packages[planKey]?.consultations;
   const maxDisplay =
     maxForPlan === "unlimited"
-      ? "ilimitadas"
+      ? planT("statusUnlimited")
       : planKey === "premium" && remaining >= 150
         ? "150"
         : String(remaining);
 
+  const detail =
+    maxForPlan === "unlimited"
+      ? planT("statusUnlimited")
+      : planT("statusRemaining", { count: maxDisplay });
+
   return {
-    text: `${packageName} · ${maxForPlan === "unlimited" ? "consultas ilimitadas" : `${maxDisplay} consultas restantes`}`,
+    text: planT("statusLine", { plan: packageName, detail }),
     tone:
       maxForPlan === "unlimited" || remaining > 5 || remaining >= 150
         ? "success"

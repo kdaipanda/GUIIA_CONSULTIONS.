@@ -10,6 +10,7 @@ import {
   getConsultationStatusLabel,
 } from "../../lib/consultationDisplay";
 import { getLabStudyLabel } from "../../lib/clinicalTimeline";
+import { ConsultationFormDataView } from "../clinical/ConsultationFormDataView";
 
 export function ConsultationDetailPanel({
   consultation,
@@ -17,6 +18,7 @@ export function ConsultationDetailPanel({
   onBack,
   onDownloadPdf,
   onContinue,
+  onOpenPatientChart,
 }) {
   const formData = consultation.form_data || {};
   const speciesIcon = getConsultationSpeciesIcon(consultation);
@@ -71,6 +73,27 @@ export function ConsultationDetailPanel({
         </div>
 
         <div className="clinical-file-content">
+          {onOpenPatientChart && consultation.patient_id && (
+            <div className="clinical-section" style={{ marginBottom: 12 }}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => onOpenPatientChart(consultation.patient_id)}
+              >
+                Abrir expediente
+              </Button>
+            </div>
+          )}
+
+          <div className="clinical-section">
+            <ConsultationFormDataView
+              category={consultation.category || consultation.especie}
+              formData={formData}
+              defaultOpen
+            />
+          </div>
+
           <div className="clinical-section">
             <div className="clinical-section-header">
               <span className="clinical-section-icon">🩺</span>

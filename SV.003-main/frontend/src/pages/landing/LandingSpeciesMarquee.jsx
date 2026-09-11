@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { CONSULTATION_CATEGORY_LIST } from "../../lib/consultationCategories";
 import { scrollToLandingProduct } from "./landingScroll";
 
@@ -20,6 +21,7 @@ function SpeciesChip({ icon, name, onClick, decorative = false }) {
 }
 
 export function LandingSpeciesMarquee() {
+  const { t } = useTranslation("landing");
   const speciesCount = CONSULTATION_CATEGORY_LIST.length;
   const loopItems = [...CONSULTATION_CATEGORY_LIST, ...CONSULTATION_CATEGORY_LIST];
 
@@ -33,18 +35,18 @@ export function LandingSpeciesMarquee() {
           id="landing-species-heading"
           className="category-selector-glass-badge landing-species-glass-badge inline-block w-fit"
         >
-          Multiespecie veterinaria · {speciesCount} formularios clínicos
+          {t("speciesMarquee.heading", { count: speciesCount })}
         </p>
       </div>
 
       <div className="category-selector-glass-panel landing-species-glass-panel landing-container">
         <div className="landing-marquee-viewport landing-marquee-fade relative">
-          <div className="landing-marquee-track" aria-label="Especies disponibles en consulta">
-            {loopItems.map(({ key, icon, name }, index) => (
+          <div className="landing-marquee-track" aria-label={t("speciesMarquee.aria")}>
+            {loopItems.map(({ key, icon }, index) => (
               <SpeciesChip
                 key={`${key}-${index}`}
                 icon={icon}
-                name={name}
+                name={t(`speciesMarquee.categories.${key}`, { defaultValue: key })}
                 decorative={index >= speciesCount}
                 onClick={() => scrollToLandingProduct("species")}
               />

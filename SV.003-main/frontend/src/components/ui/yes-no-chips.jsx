@@ -1,6 +1,8 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const YesNoChips = ({ value, onChange, disabled = false }) => {
+  const { t } = useTranslation("speciesForms");
   const current = value;
 
   const handleClick = (next) => {
@@ -16,7 +18,7 @@ const YesNoChips = ({ value, onChange, disabled = false }) => {
         onClick={() => handleClick("NO")}
         disabled={disabled}
       >
-        No
+        {t("no")}
       </button>
       <button
         type="button"
@@ -24,7 +26,7 @@ const YesNoChips = ({ value, onChange, disabled = false }) => {
         onClick={() => handleClick("SI")}
         disabled={disabled}
       >
-        Sí
+        {t("yes")}
       </button>
     </div>
   );

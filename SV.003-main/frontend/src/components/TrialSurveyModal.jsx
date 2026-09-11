@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -14,14 +15,6 @@ import { submitTrialSurvey } from "../lib/trialSurvey";
 import { trackMetaInitiateCheckout } from "../lib/metaPixel";
 import "../styles/trialSurvey.css";
 
-const STAR_LABELS = [
-  "Muy mala",
-  "Mala",
-  "Regular",
-  "Buena",
-  "Excelente",
-];
-
 export function TrialSurveyModal({
   open,
   mandatory = false,
@@ -29,9 +22,9 @@ export function TrialSurveyModal({
   veterinarian,
   offer,
   onCompleted,
-  onSessionExpired,
   onGoMembership,
 }) {
+  const { t } = useTranslation("clinic");
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -40,6 +33,11 @@ export function TrialSurveyModal({
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [error, setError] = useState("");
   const [localOffer, setLocalOffer] = useState(offer || null);
+
+  const starLabels = useMemo(
+    () => [1, 2, 3, 4, 5].map((value) => t(`trialSurvey.stars.${value}`)),
+    [t],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -55,11 +53,11 @@ export function TrialSurveyModal({
     e.preventDefault();
     if (!veterinarian?.id) return;
     if (rating < 1) {
-      setError("Selecciona una calificación de 1 a 5 estrellas.");
+      setError(t("trialSurvey.errors.rating"));
       return;
     }
     if ((comment || "").trim().length < 5) {
-      setError("Cuéntanos tu experiencia en al menos 5 caracteres.");
+      setError(t("trialSurvey.errors.comment"));
       return;
     }
 
@@ -74,15 +72,7 @@ export function TrialSurveyModal({
       setPhase("offer");
       onCompleted?.(data);
     } catch (err) {
-      const msg = err.message || "No se pudo enviar la encuesta.";
-      const sessionDead =
-        err.status === 401 ||
-        /sesi[oó]n inv[aá]lida|sesi[oó]n requerida|expirada/i.test(msg);
-      if (sessionDead) {
-        await onSessionExpired?.();
-        return;
-      }
-      setError(msg);
+      setError(err.message || t("trialSurvey.errors.submit"));
     } finally {
       setSubmitting(false);
     }
@@ -107,12 +97,12 @@ export function TrialSurveyModal({
 
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
-        throw new Error(payload.detail || "No se pudo iniciar el pago");
+        throw new Error(payload.detail || t("trialSurvey.errors.checkout"));
       }
 
       const data = await response.json();
       if (!data.checkout_url) {
-        throw new Error("No se recibió la URL de checkout.");
+        throw new Error(t("trialSurvey.errors.checkoutUrl"));
       }
 
       trackMetaInitiateCheckout({
@@ -122,7 +112,7 @@ export function TrialSurveyModal({
 
       window.location.href = data.checkout_url;
     } catch (err) {
-      setError(err.message || "Error al abrir el checkout.");
+      setError(err.message || t("trialSurvey.errors.checkoutOpen"));
       setCheckoutLoading(false);
     }
   };
@@ -146,14 +136,11 @@ export function TrialSurveyModal({
         {phase === "survey" ? (
           <form onSubmit={handleSubmitSurvey}>
             <DialogHeader>
-              <DialogTitle>Encuesta obligatoria — tu experiencia con GUIAA</DialogTitle>
-              <DialogDescription>
-                Completaste tus 3 consultas de prueba. Para seguir usando la plataforma,
-                cuéntanos cómo fue tu experiencia. Solo toma un minuto.
-              </DialogDescription>
+              <DialogTitle>{t("trialSurvey.surveyTitle")}</DialogTitle>
+              <DialogDescription>{t("trialSurvey.surveyDesc")}</DialogDescription>
             </DialogHeader>
 
-            <div className="trial-survey-stars" role="radiogroup" aria-label="Calificación">
+            <div className="trial-survey-stars" role="radiogroup" aria-label={t("trialSurvey.ratingAria")}>
               {[1, 2, 3, 4, 5].map((value) => (
                 <button
                   key={value}
@@ -162,7 +149,10 @@ export function TrialSurveyModal({
                   onClick={() => setRating(value)}
                   onMouseEnter={() => setHoverRating(value)}
                   onMouseLeave={() => setHoverRating(0)}
-                  aria-label={`${value} estrellas — ${STAR_LABELS[value - 1]}`}
+                  aria-label={t("trialSurvey.starAria", {
+                    value,
+                    label: starLabels[value - 1],
+                  })}
                   aria-pressed={rating === value}
                 >
                   ★
@@ -170,18 +160,18 @@ export function TrialSurveyModal({
               ))}
             </div>
             {displayRating > 0 ? (
-              <p className="trial-survey-star-label">{STAR_LABELS[displayRating - 1]}</p>
+              <p className="trial-survey-star-label">{starLabels[displayRating - 1]}</p>
             ) : null}
 
             <label className="trial-survey-label" htmlFor="trial-survey-comment">
-              Comentarios
+              {t("trialSurvey.comments")}
             </label>
             <textarea
               id="trial-survey-comment"
               className="trial-survey-textarea"
               rows={4}
               maxLength={2000}
-              placeholder="¿Qué te gustó? ¿Qué mejorarías? ¿Recomendarías GUIAA a colegas?"
+              placeholder={t("trialSurvey.commentPlaceholder")}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
@@ -190,22 +180,22 @@ export function TrialSurveyModal({
 
             <DialogFooter className="trial-survey-footer">
               <Button type="submit" disabled={submitting} className="w-full sm:w-auto">
-                {submitting ? "Enviando…" : "Enviar y continuar"}
+                {submitting ? t("trialSurvey.submitting") : t("trialSurvey.submit")}
               </Button>
             </DialogFooter>
           </form>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>¡Gracias por tu retroalimentación!</DialogTitle>
+              <DialogTitle>{t("trialSurvey.thanksTitle")}</DialogTitle>
               <DialogDescription asChild>
                 <div className="trial-survey-offer-copy">
                   <p>{activeOffer?.message}</p>
                   {promoCode ? (
-                    <div className="trial-survey-promo-pill" aria-label="Código promocional">
-                      Cupón: <strong>{promoCode}</strong>
+                    <div className="trial-survey-promo-pill" aria-label={t("trialSurvey.promoLabel")}>
+                      {t("trialSurvey.promoLabel")} <strong>{promoCode}</strong>
                       {activeOffer?.promo_auto_apply ? (
-                        <span className="trial-survey-promo-note"> · se aplica al pagar</span>
+                        <span className="trial-survey-promo-note">{t("trialSurvey.promoAuto")}</span>
                       ) : null}
                     </div>
                   ) : null}
@@ -222,7 +212,7 @@ export function TrialSurveyModal({
                 onClick={() => onOpenChange?.(false)}
                 disabled={checkoutLoading}
               >
-                Cerrar
+                {t("trialSurvey.close")}
               </Button>
               <Button
                 type="button"
@@ -233,14 +223,14 @@ export function TrialSurveyModal({
                 }}
                 disabled={checkoutLoading}
               >
-                Ver planes
+                {t("trialSurvey.viewPlans")}
               </Button>
               <Button
                 type="button"
                 onClick={handlePremiumCheckout}
                 disabled={checkoutLoading}
               >
-                {checkoutLoading ? "Abriendo pago…" : "Contratar Premium con descuento"}
+                {checkoutLoading ? t("trialSurvey.openingCheckout") : t("trialSurvey.premiumCheckout")}
               </Button>
             </DialogFooter>
           </>

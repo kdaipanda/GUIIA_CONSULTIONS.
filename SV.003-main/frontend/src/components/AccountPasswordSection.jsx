@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { KeyRound, Save } from "lucide-react";
 import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
@@ -11,6 +12,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
 export function AccountPasswordSection() {
+  const { t } = useTranslation("auth");
   const { veterinarian, refreshProfile } = useVet();
   const [hasPassword, setHasPassword] = useState(!!veterinarian?.has_password);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -45,11 +47,11 @@ export function AccountPasswordSection() {
       return;
     }
     if (password !== confirm) {
-      notifyError("Las contraseñas no coinciden.");
+      notifyError(t("password.account.mismatch"));
       return;
     }
     if (hasPassword && !currentPassword.trim()) {
-      notifyError("Ingresa tu contraseña actual.");
+      notifyError(t("password.account.currentRequired"));
       return;
     }
 
@@ -66,16 +68,16 @@ export function AccountPasswordSection() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.detail || "No se pudo guardar la contraseña");
+        throw new Error(data.detail || t("password.account.saveFailed"));
       }
-      notifySuccess(data.message || "Contraseña guardada.");
+      notifySuccess(data.message || t("password.account.saved"));
       setCurrentPassword("");
       setPassword("");
       setConfirm("");
       setHasPassword(true);
       refreshProfile?.();
     } catch (err) {
-      notifyError(err.message || "Error al guardar contraseña");
+      notifyError(err.message || t("password.account.saveError"));
     } finally {
       setSaving(false);
     }
@@ -87,16 +89,14 @@ export function AccountPasswordSection() {
     <form onSubmit={handleSubmit} className="clinic-settings-card clinic-form">
       <h2>
         <KeyRound size={18} aria-hidden />
-        Seguridad de tu cuenta
+        {t("password.account.title")}
       </h2>
       <p className="clinic-muted clinic-tools-desc">
-        {hasPassword
-          ? "Cambia la contraseña con la que inicias sesión en GUIAA."
-          : "Tu cuenta usa login con matrícula. Crea una contraseña para acceder de forma más segura."}
+        {hasPassword ? t("password.account.leadChange") : t("password.account.leadCreate")}
       </p>
       {hasPassword && (
         <div className="form-group">
-          <Label htmlFor="acct-current-pw">Contraseña actual</Label>
+          <Label htmlFor="acct-current-pw">{t("password.account.current")}</Label>
           <Input
             id="acct-current-pw"
             type="password"
@@ -109,7 +109,7 @@ export function AccountPasswordSection() {
       <div className="clinic-form-grid-2">
         <div className="form-group">
           <Label htmlFor="acct-new-pw">
-            {hasPassword ? "Nueva contraseña" : "Contraseña"}
+            {hasPassword ? t("password.account.new") : t("password.account.create")}
           </Label>
           <Input
             id="acct-new-pw"
@@ -119,14 +119,14 @@ export function AccountPasswordSection() {
             passwordrules={PASSWORD_RULES_ATTR}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Ej. Vet2024"
+            placeholder={t("password.account.placeholder")}
             required
             aria-describedby="acct-password-hint"
           />
           <PasswordRequirementsHint password={password} className="mt-2" id="acct-password-hint" />
         </div>
         <div className="form-group">
-          <Label htmlFor="acct-confirm-pw">Confirmar</Label>
+          <Label htmlFor="acct-confirm-pw">{t("password.account.confirm")}</Label>
           <Input
             id="acct-confirm-pw"
             type="password"
@@ -140,7 +140,11 @@ export function AccountPasswordSection() {
       </div>
       <Button type="submit" disabled={saving}>
         <Save size={16} aria-hidden />
-        {saving ? "Guardando..." : hasPassword ? "Actualizar contraseña" : "Crear contraseña"}
+        {saving
+          ? t("password.account.saving")
+          : hasPassword
+            ? t("password.account.update")
+            : t("password.account.createBtn")}
       </Button>
     </form>
   );

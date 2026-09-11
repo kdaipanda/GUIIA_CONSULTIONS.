@@ -1,33 +1,36 @@
 import React from "react";
 import { Mail, MessageCircle, Monitor } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { scrollToLandingProduct, scrollToLandingSection } from "./landingScroll";
 
-const DESKTOP_ITEMS = [
-  {
-    icon: Monitor,
-    label: "Producto",
-    onClick: () => scrollToLandingProduct("species"),
-  },
-  {
-    icon: MessageCircle,
-    label: "FAQ",
-    onClick: () => scrollToLandingSection("#faq"),
-  },
-  {
-    icon: Mail,
-    label: "Contacto",
-    href: "mailto:soporte@guiaa.vet",
-  },
-];
-
 export function LandingSocialRail() {
+  const { t } = useTranslation("landing");
+
+  const desktopItems = [
+    {
+      icon: Monitor,
+      label: t("socialRail.product"),
+      onClick: () => scrollToLandingProduct("species"),
+    },
+    {
+      icon: MessageCircle,
+      label: t("socialRail.faq"),
+      onClick: () => scrollToLandingSection("#faq"),
+    },
+    {
+      icon: Mail,
+      label: t("socialRail.contact"),
+      href: "mailto:soporte@guiaa.vet",
+    },
+  ];
+
   return (
     <>
       <aside
         className="landing-rail fixed right-3 top-1/2 z-50 hidden -translate-y-1/2 flex-col gap-3 rounded-full border px-2.5 py-4 backdrop-blur-md lg:flex xl:right-6"
-        aria-label="Accesos rápidos"
+        aria-label={t("socialRail.aria")}
       >
-        {DESKTOP_ITEMS.map(({ icon: Icon, label, href, onClick }) =>
+        {desktopItems.map(({ icon: Icon, label, href, onClick }) =>
           href ? (
             <a
               key={label}

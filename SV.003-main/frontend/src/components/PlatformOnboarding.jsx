@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -24,9 +25,12 @@ const VIEW_TO_PATH = {
   reports: "/app/reportes",
   "consultation-history": "/app/historial",
   membership: "/app/membresia",
+  profile: "/app/perfil",
+  help: "/app/ayuda",
 };
 
 export function PlatformOnboarding({ isOpen, onClose, veterinarianId, setView }) {
+  const { t } = useTranslation("clinic");
   const navigate = useNavigate();
   const [stepIndex, setStepIndex] = useState(0);
   const steps = PLATFORM_ONBOARDING_STEPS;
@@ -84,20 +88,20 @@ export function PlatformOnboarding({ isOpen, onClose, veterinarianId, setView })
             ))}
           </div>
           <p className="platform-onboarding-step-label">
-            Paso {stepIndex + 1} de {steps.length}
+            {t("onboarding.stepOf", { current: stepIndex + 1, total: steps.length })}
           </p>
           <DialogTitle className="platform-onboarding-title">
             <span className="platform-onboarding-icon" aria-hidden>
               {step.icon}
             </span>
-            {step.title}
+            {t(`onboarding.steps.${step.id}.title`)}
           </DialogTitle>
           <DialogDescription asChild>
             <div className="platform-onboarding-body">
-              <p>{step.body}</p>
+              <p>{t(`onboarding.steps.${step.id}.body`)}</p>
               {step.hint && (
                 <p className="platform-onboarding-hint">
-                  Atajo de teclado: <kbd>{step.hint}</kbd>
+                  {t("onboarding.keyboardHint")} <kbd>{step.hint}</kbd>
                 </p>
               )}
             </div>
@@ -108,21 +112,21 @@ export function PlatformOnboarding({ isOpen, onClose, veterinarianId, setView })
           <div className="platform-onboarding-footer-left">
             {!isFirst && (
               <Button type="button" variant="ghost" onClick={handleBack}>
-                Anterior
+                {t("onboarding.previous")}
               </Button>
             )}
             <Button type="button" variant="ghost" onClick={handleSkip}>
-              Omitir tour
+              {t("onboarding.skip")}
             </Button>
           </div>
           <div className="platform-onboarding-footer-right">
             {step.actionView && (
               <Button type="button" variant="secondary" onClick={goToAction}>
-                {step.actionLabel}
+                {t(`onboarding.steps.${step.id}.actionLabel`)}
               </Button>
             )}
             <Button type="button" onClick={handleNext}>
-              {isLast ? "Comenzar" : "Siguiente"}
+              {isLast ? t("onboarding.start") : t("onboarding.next")}
             </Button>
           </div>
         </DialogFooter>

@@ -32,6 +32,8 @@ export function ClinicalTimelineList({
   onDownloadConsultationPdf,
   pdfLoadingId,
   onCloseBeforeNavigate,
+  onSelectConsultation,
+  onOpenPatientChart,
 }) {
   const timeline = buildClinicalTimeline(consultations, medicalImages);
 
@@ -82,6 +84,16 @@ export function ClinicalTimelineList({
                 </ul>
               )}
               <div className="clinic-timeline-actions">
+                {onSelectConsultation && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onSelectConsultation(consultation)}
+                  >
+                    Formulario
+                  </Button>
+                )}
                 {onViewConsultation && (
                   <Button
                     type="button"
@@ -93,6 +105,19 @@ export function ClinicalTimelineList({
                     }}
                   >
                     <ExternalLink size={14} className="mr-1" /> Ver consulta
+                  </Button>
+                )}
+                {onOpenPatientChart && consultation.patient_id && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      onCloseBeforeNavigate?.();
+                      onOpenPatientChart(consultation.patient_id);
+                    }}
+                  >
+                    Expediente
                   </Button>
                 )}
                 {onDownloadConsultationPdf && (
@@ -125,6 +150,21 @@ export function ClinicalTimelineList({
             <p className="clinic-timeline-date">{formatConsultationDateShort(study.created_at)}</p>
             {study.analysis && (
               <p className="clinic-timeline-analysis">{truncateText(study.analysis, 200)}</p>
+            )}
+            {onOpenPatientChart && study.patient_id && (
+              <div className="clinic-timeline-actions">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    onCloseBeforeNavigate?.();
+                    onOpenPatientChart(study.patient_id);
+                  }}
+                >
+                  Expediente
+                </Button>
+              </div>
             )}
           </li>
         );

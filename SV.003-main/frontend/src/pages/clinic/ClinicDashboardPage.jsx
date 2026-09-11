@@ -17,59 +17,58 @@ import {
 import { useVet } from "../../context/VetContext";
 import { useClinic } from "../../context/ClinicContext";
 import { fetchDashboardOverview } from "../../lib/clinicApi";
+import { clinicCacheKey, loadClinicData, readClinicDataCache } from "../../lib/clinicDataCache";
+import { loadMembershipCatalog, readMembershipCatalogCache } from "../../lib/membershipCatalogCache";
+import { DEFAULT_PACKAGES, getMembershipQuota } from "../../lib/membershipPlans";
 import { notifyError, notifyQuotaError } from "../../lib/appToast";
-import { BACKEND_URL } from "../../lib/backendUrl";
-import {
-  DEFAULT_PACKAGES,
-  getMembershipQuota,
-  parseMembershipCatalogResponse,
-} from "../../lib/membershipPlans";
 import {
   canAccessFeature,
   MEMBERSHIP_FEATURES,
   canCreateConsultation,
-  TRIAL_EXHAUSTED_MESSAGE,
+  getTrialExhaustedMessage,
 } from "../../lib/membershipAccess";
 import { Button } from "../../components/ui/button";
 import { QuickClientPatientDialog } from "../../components/clinic/QuickClientPatientDialog";
+import { ModuleHelpTip } from "../../components/clinic/ModuleHelpTip";
+import { useTranslation } from "react-i18next";
 import "./clinicDashboardPage.css";
 import "./clinicPageShared.css";
+import "./helpCenterPage.css";
 
-const STATUS_LABELS = {
-  scheduled: "Programada",
-  confirmed: "Confirmada",
-};
+function localeTag(lang) {
+  return (lang || "en").startsWith("es") ? "es-MX" : "en-US";
+}
 
-function formatMoney(value) {
-  return new Intl.NumberFormat("es-MX", {
+function formatMoney(value, lang) {
+  return new Intl.NumberFormat(localeTag(lang), {
     style: "currency",
     currency: "MXN",
     maximumFractionDigits: 0,
   }).format(value || 0);
 }
 
-function formatTime(iso) {
+function formatTime(iso, lang) {
   if (!iso) return "—";
-  return new Date(iso).toLocaleTimeString("es-MX", {
+  return new Date(iso).toLocaleTimeString(localeTag(lang), {
     hour: "2-digit",
     minute: "2-digit",
   });
 }
 
-function formatDate(iso) {
+function formatDate(iso, lang) {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("es-MX", {
+  return new Date(iso).toLocaleDateString(localeTag(lang), {
     weekday: "short",
     day: "numeric",
     month: "short",
   });
 }
 
-function getTimeGreeting() {
+function getTimeGreeting(t) {
   const hour = new Date().getHours();
-  if (hour < 12) return "Buenos días";
-  if (hour < 19) return "Buenas tardes";
-  return "Buenas noches";
+  if (hour < 12) return t("dashboard.greetingMorning");
+  if (hour < 19) return t("dashboard.greetingAfternoon");
+  return t("dashboard.greetingEvening");
 }
 
 function scrollToCdsPanel() {
@@ -108,23 +107,39 @@ function SectionSkeleton() {
 }
 
 export function ClinicDashboardPage({ setView, onStartConsultation }) {
+  const { t, i18n } = useTranslation("clinic");
+  const lang = i18n.language;
   const navigate = useNavigate();
   const { veterinarian, platformAdmin } = useVet();
   const { organization, role } = useClinic();
-  const [dashboard, setDashboard] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [membershipPackages, setMembershipPackages] = useState(DEFAULT_PACKAGES);
+  const [dashboard, setDashboard] = useState(() => {
+    const cached = readClinicDataCache(clinicCacheKey(veterinarian?.id, "dashboard"));
+    return cached?.dashboard ?? null;
+  });
+  const [loading, setLoading] = useState(() => !readClinicDataCache(clinicCacheKey(veterinarian?.id, "dashboard")));
+  const [membershipPackages, setMembershipPackages] = useState(
+    () => readMembershipCatalogCache() || DEFAULT_PACKAGES,
+  );
   const [quickDialogOpen, setQuickDialogOpen] = useState(false);
 
   const load = useCallback(async () => {
-    if (!veterinarian?.id) return;
-    setLoading(true);
+    if (!veterinarian?.id) {
+      setLoading(false);
+      return;
+    }
+    const key = clinicCacheKey(veterinarian.id, "dashboard");
+    const cached = readClinicDataCache(key);
+    if (!cached) setLoading(true);
     try {
-      const data = await fetchDashboardOverview(veterinarian.id);
+      const data = await loadClinicData(key, () => fetchDashboardOverview(veterinarian.id), {
+        ttlMs: 90_000,
+      });
       setDashboard(data.dashboard || null);
     } catch (err) {
-      notifyError(err.message);
-      setDashboard(null);
+      if (!cached) {
+        notifyError(err.message);
+        setDashboard(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -136,19 +151,9 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
 
   useEffect(() => {
     let cancelled = false;
-
-    async function loadCatalog() {
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/membership/packages`);
-        if (!response.ok || cancelled) return;
-        const data = await response.json();
-        setMembershipPackages(parseMembershipCatalogResponse(data).packages);
-      } catch {
-        /* fallback */
-      }
-    }
-
-    loadCatalog();
+    void loadMembershipCatalog().then((packages) => {
+      if (!cancelled) setMembershipPackages(packages);
+    });
     return () => {
       cancelled = true;
     };
@@ -190,41 +195,51 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
   const pendingRequests = dashboard?.pending_requests || [];
   const lowStock = dashboard?.low_stock_products || [];
 
-  const greetingName = veterinarian?.nombre?.split(" ")[0] || "Doctor";
-  const todayLabel = new Date().toLocaleDateString("es-MX", {
+  const greetingName = veterinarian?.nombre?.split(" ")[0] || t("common.doctorFallback");
+  const todayLabel = new Date().toLocaleDateString(localeTag(lang), {
     weekday: "long",
     day: "numeric",
     month: "long",
   });
 
   const membershipPillLabel = membershipQuota.trialExhausted
-    ? "Prueba agotada — suscríbete"
+    ? t("dashboard.trialExhaustedPill")
     : membershipQuota.planKey && membershipQuota.maxConsultations > 0
-      ? `${membershipQuota.planName} · ${membershipQuota.consultations}/${membershipQuota.maxConsultations} CDS`
+      ? t("dashboard.planCds", {
+          plan: membershipQuota.planName,
+          used: membershipQuota.consultations,
+          max: membershipQuota.maxConsultations,
+        })
       : membershipQuota.planKey
         ? membershipQuota.planName
-        : "Sin plan activo";
+        : t("dashboard.noPlan");
 
   const startNewConsultation = () => {
     if (!canCreateConsultation(veterinarian, accessOptions)) {
-      notifyQuotaError(TRIAL_EXHAUSTED_MESSAGE, () => go("membership", "/app/membresia"));
+      notifyQuotaError(getTrialExhaustedMessage(), () => go("membership", "/app/membresia"));
       return;
     }
     go("new-consultation", "/app/consultas/nueva");
   };
 
+  const appointmentStatus = (status) =>
+    t(`appointmentStatus.${status}`, { defaultValue: status });
+
   return (
     <div className="clinic-page clinic-page-guiaa clinic-dashboard-page" aria-busy={loading}>
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">Consultorio</p>
-          <h1 className="clinic-dashboard-greeting">
-            {getTimeGreeting()}, {greetingName}
-          </h1>
+          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
+          <div className="clinic-page-title-row">
+            <h1 className="clinic-dashboard-greeting">
+              {getTimeGreeting(t)}, {greetingName}
+            </h1>
+            <ModuleHelpTip topicId="dashboard" setView={setView} />
+          </div>
           <p>
             {organization?.name
-              ? `Resumen operativo de ${organization.name}`
-              : "Resumen operativo de tu consultorio"}
+              ? t("dashboard.summaryNamed", { name: organization.name })
+              : t("dashboard.summaryDefault")}
           </p>
           <div className="clinic-dashboard-meta">
             <span className="clinic-dashboard-date-pill">
@@ -248,15 +263,15 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
         <div className="clinic-dashboard-actions">
           <Button type="button" variant="secondary" onClick={() => setQuickDialogOpen(true)}>
             <Zap size={16} aria-hidden />
-            Dueño + mascota
+            {t("dashboard.quickOwnerPet")}
           </Button>
           <Button type="button" onClick={() => go("agenda", "/app/agenda")}>
             <Plus size={16} aria-hidden />
-            Nueva cita
+            {t("dashboard.newAppointment")}
           </Button>
           <Button type="button" variant="secondary" onClick={startNewConsultation}>
             <Stethoscope size={16} aria-hidden />
-            Nueva consulta
+            {t("dashboard.newConsultation")}
           </Button>
         </div>
       </div>
@@ -264,14 +279,13 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
       {membershipQuota.trialExhausted && (
         <div className="clinic-dashboard-trial-banner" role="alert">
           <div>
-            <strong>Prueba CDS agotada</strong>
+            <strong>{t("dashboard.trialBannerTitle")}</strong>
             <p>
-              {TRIAL_EXHAUSTED_MESSAGE} Debes completar la encuesta obligatoria para
-              ver tu oferta Premium con cupón de descuento.
+              {t("dashboard.trialBannerBody", { message: getTrialExhaustedMessage() })}
             </p>
           </div>
           <Button type="button" size="sm" onClick={() => go("membership", "/app/membresia")}>
-            Ver planes
+            {t("dashboard.viewPlans")}
           </Button>
         </div>
       )}
@@ -288,17 +302,23 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
               type="button"
               className="clinic-report-kpi clinic-dashboard-kpi-btn"
               onClick={() => go("agenda", "/app/agenda")}
-              aria-label={`Citas hoy: ${today.appointments_upcoming ?? 0} próximas, ${today.appointments_total ?? 0} en total`}
+              aria-label={t("dashboard.kpiAppointmentsAria", {
+                upcoming: today.appointments_upcoming ?? 0,
+                total: today.appointments_total ?? 0,
+              })}
             >
               <div className="clinic-report-kpi-head">
                 <span className="clinic-report-kpi-icon">
                   <CalendarDays size={18} aria-hidden />
                 </span>
-                <span className="clinic-report-kpi-label">Citas hoy</span>
+                <span className="clinic-report-kpi-label">{t("dashboard.kpiAppointments")}</span>
               </div>
               <div className="clinic-report-kpi-value">{today.appointments_upcoming ?? 0}</div>
               <div className="clinic-report-kpi-hint">
-                {today.appointments_total ?? 0} en total · {week.appointments ?? 0} esta semana
+                {t("dashboard.kpiAppointmentsHint", {
+                  total: today.appointments_total ?? 0,
+                  week: week.appointments ?? 0,
+                })}
               </div>
             </button>
 
@@ -307,17 +327,21 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
               type="button"
               className="clinic-report-kpi clinic-dashboard-kpi-btn"
               onClick={() => go("billing", "/app/facturacion")}
-              aria-label={`Ingresos hoy: ${formatMoney(today.revenue_paid)}`}
+              aria-label={t("dashboard.kpiRevenueAria", {
+                amount: formatMoney(today.revenue_paid, lang),
+              })}
             >
               <div className="clinic-report-kpi-head">
                 <span className="clinic-report-kpi-icon">
                   <DollarSign size={18} aria-hidden />
                 </span>
-                <span className="clinic-report-kpi-label">Ingresos hoy</span>
+                <span className="clinic-report-kpi-label">{t("dashboard.kpiRevenue")}</span>
               </div>
-              <div className="clinic-report-kpi-value">{formatMoney(today.revenue_paid)}</div>
+              <div className="clinic-report-kpi-value">{formatMoney(today.revenue_paid, lang)}</div>
               <div className="clinic-report-kpi-hint">
-                {formatMoney(week.revenue_paid)} en 7 días
+                {t("dashboard.kpiRevenueHint", {
+                  week: formatMoney(week.revenue_paid, lang),
+                })}
               </div>
             </button>
             )}
@@ -328,17 +352,19 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
               onClick={() => {
                 scrollToCdsPanel();
               }}
-              aria-label={`Consultas CDS hoy: ${today.consultations ?? 0}`}
+              aria-label={t("dashboard.kpiCdsAria", {
+                count: today.consultations ?? 0,
+              })}
             >
               <div className="clinic-report-kpi-head">
                 <span className="clinic-report-kpi-icon">
                   <Stethoscope size={18} aria-hidden />
                 </span>
-                <span className="clinic-report-kpi-label">Consultas CDS hoy</span>
+                <span className="clinic-report-kpi-label">{t("dashboard.kpiCds")}</span>
               </div>
               <div className="clinic-report-kpi-value">{today.consultations ?? 0}</div>
               <div className="clinic-report-kpi-hint">
-                {week.consultations ?? 0} esta semana · ver panel CDS
+                {t("dashboard.kpiCdsHint", { week: week.consultations ?? 0 })}
               </div>
             </button>
 
@@ -362,14 +388,20 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                 <span className="clinic-report-kpi-icon">
                   <AlertCircle size={18} aria-hidden />
                 </span>
-                <span className="clinic-report-kpi-label">Pendientes</span>
+                <span className="clinic-report-kpi-label">{t("dashboard.kpiPending")}</span>
               </div>
               <div className="clinic-report-kpi-value">
                 {(today.pending_requests ?? 0) + (canUseInventory ? (today.low_stock_count ?? 0) : 0)}
               </div>
               <div className="clinic-report-kpi-hint">
-                {today.pending_requests ?? 0} solicitudes
-                {canUseInventory ? ` · ${today.low_stock_count ?? 0} stock bajo` : ""}
+                {t("dashboard.kpiPendingHint", {
+                  requests: today.pending_requests ?? 0,
+                  stock: canUseInventory
+                    ? t("dashboard.kpiPendingStock", {
+                        count: today.low_stock_count ?? 0,
+                      })
+                    : "",
+                })}
               </div>
             </button>
             )}
@@ -380,7 +412,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
               <div className="clinic-dashboard-section-head">
                 <h2>
                   <CalendarDays size={18} aria-hidden />
-                  Próximas citas de hoy
+                  {t("dashboard.upcomingTitle")}
                 </h2>
                 <Button
                   type="button"
@@ -388,18 +420,18 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   size="sm"
                   onClick={() => go("agenda", "/app/agenda")}
                 >
-                  Ver agenda
+                  {t("dashboard.viewAgenda")}
                   <ArrowRight size={14} aria-hidden />
                 </Button>
               </div>
               {upcoming.length === 0 ? (
-                <p className="clinic-dashboard-empty">No hay citas activas para hoy.</p>
+                <p className="clinic-dashboard-empty">{t("dashboard.noAppointments")}</p>
               ) : (
                 <ul className="clinic-dashboard-list">
                   {upcoming.map((appt) => (
                     <li key={appt.id} className="clinic-dashboard-list-item">
                       <div>
-                        <strong>{formatTime(appt.starts_at)}</strong>
+                        <strong>{formatTime(appt.starts_at, lang)}</strong>
                         <span>{appt.patient_name}</span>
                         {appt.client_name && (
                           <span className="clinic-muted"> · {appt.client_name}</span>
@@ -410,7 +442,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                       </div>
                       <div className="clinic-dashboard-list-actions">
                         <span className="clinic-badge">
-                          {STATUS_LABELS[appt.status] || appt.status}
+                          {appointmentStatus(appt.status)}
                         </span>
                         {onStartConsultation && appt.patient_id && (
                           <Button
@@ -424,7 +456,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                               })
                             }
                           >
-                            Consulta
+                            {t("dashboard.consultation")}
                           </Button>
                         )}
                       </div>
@@ -436,19 +468,19 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
 
             <section className="clinic-settings-card">
               <div className="clinic-dashboard-section-head">
-                <h2>Solicitudes de cita</h2>
+                <h2>{t("dashboard.requestsTitle")}</h2>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => go("agenda", "/app/agenda")}
                 >
-                  Gestionar
+                  {t("dashboard.manage")}
                   <ArrowRight size={14} aria-hidden />
                 </Button>
               </div>
               {pendingRequests.length === 0 ? (
-                <p className="clinic-dashboard-empty">No hay solicitudes pendientes.</p>
+                <p className="clinic-dashboard-empty">{t("dashboard.noRequests")}</p>
               ) : (
                 <ul className="clinic-dashboard-list">
                   {pendingRequests.map((req) => (
@@ -458,8 +490,8 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                         <span className="clinic-muted"> — {req.patient_name}</span>
                         {req.preferred_starts_at && (
                           <div className="clinic-muted">
-                            Prefiere: {formatDate(req.preferred_starts_at)}{" "}
-                            {formatTime(req.preferred_starts_at)}
+                            {t("dashboard.prefers")} {formatDate(req.preferred_starts_at, lang)}{" "}
+                            {formatTime(req.preferred_starts_at, lang)}
                           </div>
                         )}
                       </div>
@@ -474,7 +506,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
               <div className="clinic-dashboard-section-head">
                 <h2>
                   <Package size={18} aria-hidden />
-                  Stock bajo
+                  {t("dashboard.lowStockTitle")}
                 </h2>
                 <Button
                   type="button"
@@ -482,12 +514,12 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   size="sm"
                   onClick={() => go("inventory", "/app/inventario")}
                 >
-                  Inventario
+                  {t("dashboard.inventory")}
                   <ArrowRight size={14} aria-hidden />
                 </Button>
               </div>
               {lowStock.length === 0 ? (
-                <p className="clinic-dashboard-empty">Inventario dentro de niveles normales.</p>
+                <p className="clinic-dashboard-empty">{t("dashboard.stockOk")}</p>
               ) : (
                 <ul className="clinic-dashboard-list">
                   {lowStock.map((product) => (
@@ -495,7 +527,11 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                       <div>
                         <strong>{product.name}</strong>
                         <div className="clinic-muted">
-                          {product.stock_qty} / mín. {product.min_stock} {product.unit || "pza"}
+                          {t("dashboard.stockMin", {
+                            qty: product.stock_qty,
+                            min: product.min_stock,
+                            unit: product.unit || t("dashboard.unitDefault"),
+                          })}
                         </div>
                       </div>
                     </li>
@@ -506,7 +542,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
             )}
 
             <section className="clinic-settings-card clinic-dashboard-quick">
-              <h2>Accesos rápidos</h2>
+              <h2>{t("dashboard.quickAccess")}</h2>
               <div className="clinic-dashboard-quick-grid premium-stagger">
                 <button
                   type="button"
@@ -514,7 +550,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   onClick={() => setQuickDialogOpen(true)}
                 >
                   <Zap size={20} aria-hidden />
-                  Registro rápido
+                  {t("dashboard.quickRegister")}
                 </button>
                 <button
                   type="button"
@@ -522,7 +558,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   onClick={() => go("clients", "/app/clientes")}
                 >
                   <PawPrint size={20} aria-hidden />
-                  Dueños y mascotas
+                  {t("dashboard.quickClients")}
                 </button>
                 <button
                   type="button"
@@ -530,7 +566,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   onClick={() => go("agenda", "/app/agenda")}
                 >
                   <CalendarDays size={20} aria-hidden />
-                  Agenda
+                  {t("dashboard.quickAgenda")}
                 </button>
                 {canUseBilling && (
                 <button
@@ -539,7 +575,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   onClick={() => go("billing", "/app/facturacion")}
                 >
                   <DollarSign size={20} aria-hidden />
-                  Ventas
+                  {t("dashboard.quickBilling")}
                 </button>
                 )}
                 {canUseReports && (
@@ -549,7 +585,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   onClick={() => go("reports", "/app/reportes")}
                 >
                   <BarChart3 size={20} aria-hidden />
-                  Reportes
+                  {t("dashboard.quickReports")}
                 </button>
                 )}
                 <button
@@ -558,7 +594,7 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   onClick={() => go("profile", "/app/perfil")}
                 >
                   <User size={20} aria-hidden />
-                  Perfil
+                  {t("dashboard.quickProfile")}
                 </button>
               </div>
             </section>

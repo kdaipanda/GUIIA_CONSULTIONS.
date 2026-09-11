@@ -967,6 +967,32 @@ def update_patient(
         return (None, str(exc))
 
 
+def merge_patient_clinical_chart(
+    patient_id: str,
+    organization_id: str,
+    patch: Dict[str, Any],
+    *,
+    weight_kg: Optional[float] = None,
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    """Merge partial clinical_chart into patient row; optionally update weight_kg."""
+    try:
+        from clinical_chart_sync import merge_clinical_chart, normalize_chart
+    except Exception as exc:  # noqa: BLE001
+        return (None, f"clinical_chart_sync unavailable: {exc}")
+
+    patient, err = get_patient(patient_id, organization_id)
+    if err:
+        return (None, err)
+    if not patient:
+        return (None, None)
+
+    merged = merge_clinical_chart(patient.get("clinical_chart"), patch)
+    fields: Dict[str, Any] = {"clinical_chart": normalize_chart(merged)}
+    if weight_kg is not None:
+        fields["weight_kg"] = weight_kg
+    return update_patient(patient_id, organization_id, fields)
+
+
 def delete_patient(patient_id: str, organization_id: str) -> Optional[str]:
     try:
         _table("patients").delete().eq("id", patient_id).eq("organization_id", organization_id).execute()

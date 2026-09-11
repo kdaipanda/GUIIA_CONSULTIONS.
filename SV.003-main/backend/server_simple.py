@@ -2350,6 +2350,8 @@ def _serialize_consultation(row: Dict[str, Any]) -> Dict[str, Any]:
     result = {
         "id": row.get("id"),
         "veterinarian_id": row.get("user_id"),
+        "patient_id": row.get("patient_id"),
+        "client_id": row.get("client_id"),
         "category": payload.get("category"),
         "especie": payload.get("category"),  # Alias para compatibilidad
         "form_data": form_data,
@@ -2571,6 +2573,28 @@ async def create_consultation(
     )
     if isinstance(serialized, dict):
         serialized["trial_survey_due"] = trial_survey_due
+
+    # Sync clinical chart when consultation is linked to a patient
+    if payload.patient_id and org_id:
+        try:
+            import clinic_db as _cdb
+            from clinical_chart_sync import extract_chart_patch_from_form_data, extract_weight_kg
+
+            chart_patch = extract_chart_patch_from_form_data(
+                payload.category,
+                payload.consultation_data,
+                consultation_id=consultation_id,
+            )
+            weight = extract_weight_kg(payload.consultation_data)
+            _cdb.merge_patient_clinical_chart(
+                payload.patient_id,
+                org_id,
+                chart_patch,
+                weight_kg=weight,
+            )
+        except Exception as sync_exc:  # noqa: BLE001
+            print(f"[WARN] clinical_chart sync on create: {sync_exc}")
+
     return serialized
 
 
@@ -2771,6 +2795,31 @@ async def update_consultation_payload(
     )
     if err_upd:
         raise HTTPException(status_code=500, detail=f"Error actualizando consulta: {err_upd}")
+
+    # Sync clinical chart from updated form_data
+    patient_id = consultation.get("patient_id")
+    org_id = consultation.get("organization_id")
+    if patient_id and org_id and form_data:
+        try:
+            import clinic_db as _cdb
+            from clinical_chart_sync import extract_chart_patch_from_form_data, extract_weight_kg
+
+            chart_patch = extract_chart_patch_from_form_data(
+                category,
+                form_data,
+                consultation_id=consultation_id,
+            )
+            # Avoid spawning duplicate open problems on every payload save
+            chart_patch["problems"] = []
+            weight = extract_weight_kg(form_data)
+            _cdb.merge_patient_clinical_chart(
+                patient_id,
+                org_id,
+                chart_patch,
+                weight_kg=weight,
+            )
+        except Exception as sync_exc:  # noqa: BLE001
+            print(f"[WARN] clinical_chart sync on payload: {sync_exc}")
 
     # Releer para regresar el estado más reciente
     fresh, err2 = get_consultation_by_id(consultation_id)

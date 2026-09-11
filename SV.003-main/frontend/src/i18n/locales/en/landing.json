@@ -1,0 +1,448 @@
+{
+  "nav": {
+    "product": "Product",
+    "services": "Services",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "login": "Sign in",
+    "register": "Sign up",
+    "enter": "Sign in",
+    "registerShort": "Sign up",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "main": "Main"
+  },
+  "seo": {
+    "title": "GUIAA — Clinical CDS platform for veterinarians",
+    "description": "CDS L4 and L5 clinical decision support for licensed veterinarians. Multi-species, records, inventory, and sales across Latin America.",
+    "audience": "Licensed veterinarians"
+  },
+  "hero": {
+    "kicker": "Veterinary clinical software · GUIAA",
+    "titleBefore": "Connect with",
+    "titleAccent": "your practice",
+    "titleAfter": ", anytime",
+    "leadBefore": "Smooth communication between your practice and every clinical case. Simplified health management for",
+    "leadAccent": "every patient",
+    "leadAfter": " with multi-species history-taking and advanced CDS support.",
+    "ctaRegister": "Start vet registration",
+    "ctaHint": "MVZ registration in minutes · License verification included",
+    "explore": "Explore the interface without signing up →",
+    "playVideo": "Watch presentation video"
+  },
+  "heroStats": {
+    "aria": "GUIAA advantages",
+    "items": {
+      "species": {
+        "value": "11+ veterinary species",
+        "desc": "Clinical forms for dogs, cats, exotics, and more."
+      },
+      "record": {
+        "value": "Unified clinical record",
+        "desc": "Owners, pets, consultations, and sales in one practice."
+      },
+      "access": {
+        "value": "Verified vet access",
+        "desc": "Registration with professional license for veterinarians in LATAM."
+      }
+    }
+  },
+  "speciesMarquee": {
+    "heading": "Multi-species veterinary · {{count}} clinical forms",
+    "aria": "Species available in consultation",
+    "categories": {
+      "perros": "Dogs",
+      "gatos": "Cats",
+      "conejos": "Rabbits",
+      "aves": "Birds",
+      "hamsters": "Hamsters",
+      "cuyos": "Guinea pigs",
+      "hurones": "Ferrets",
+      "erizos": "Hedgehogs",
+      "tortugas": "Turtles",
+      "iguanas": "Iguanas",
+      "patos_pollos": "Ducks & chickens"
+    }
+  },
+  "socialRail": {
+    "aria": "Quick links",
+    "product": "Product",
+    "faq": "FAQ",
+    "contact": "Contact"
+  },
+  "preview": {
+    "multiSpeciesBadge": "Multi-species veterinary · {{count}} clinical forms",
+    "steps": {
+      "data": "Details",
+      "reason": "Chief complaint",
+      "diagnosis": "Diagnosis"
+    },
+    "sidebar": {
+      "pet": "Pet",
+      "species": "Species",
+      "progress": "Progress ({{current}}/{{total}})",
+      "dogs": "Dogs"
+    },
+    "speciesTitle": "New veterinary consultation",
+    "speciesLead": "Enter the pet's information to start the clinical diagnosis",
+    "basicInfo": "Basic information",
+    "petName": "Pet name",
+    "breed": "Breed",
+    "breedValue": "Mixed",
+    "reasonTitle": "Chief complaint",
+    "reasonLead": "Describe the pet's symptoms and observations in detail",
+    "petDetail": "Pet details",
+    "petDetailLabel": "RECORD THE PET'S DETAILS AS THOROUGHLY AS POSSIBLE.",
+    "petDetailSample": "Canine patient, 4 years old, 18 kg. Intermittent vomiting for 48 h, no diarrhea. Decreased appetite. Last meal last night.\n\nOn exam: Temp 39.2 °C, mild dehydration (5%), pale mucous membranes, mild epigastric abdominal pain.",
+    "dashboardGreeting": "Good morning, Dr. García",
+    "dashboardConsultations": "{{count}} consultations",
+    "statTotal": "Total consultations",
+    "statMonth": "This month",
+    "statMembership": "Membership"
+  },
+  "pricing": {
+    "eyebrow": "Vet membership",
+    "title": "Plans for your veterinary practice",
+    "lead": "Basic, Professional, and Premium — choose your CDS consultation volume and multi-species coverage. License verification included.",
+    "ctaRegister": "Start with this plan",
+    "ctaPlan": "Choose plan",
+    "billingNote": "monthly or annual billing",
+    "annual": "Annual",
+    "askPrice": "Contact us",
+    "pricePerMonth": "/mo",
+    "badgeFeatured": "Most popular",
+    "badgeConsultations": "{{count}} consultations/mo",
+    "creditAddonDesc": "Additional CDS consultations without changing your plan. Credits are added to your current balance.",
+    "trustNote": "Certified veterinarians only. Professional license verification is part of initial registration.",
+    "comparePlans": "Compare plans in detail →",
+    "planDescriptions": {
+      "basic": "Small-animal practice: structured CDS, records, and scheduling for dogs and cats.",
+      "professional": "Active multi-species practice with inventory, sales, and integrated clinical reports.",
+      "premium": "High consultation volume with Expert Mode and priority guided onboarding."
+    }
+  },
+  "faq": {
+    "eyebrow": "Before you register",
+    "title": "Frequently asked questions",
+    "lead": "Common questions about access, species, security, and in-clinic use.",
+    "moreTitle": "Can't find your answer?",
+    "moreLead": "Write to us and we'll help before you register.",
+    "emailCta": "Email support",
+    "items": [
+      {
+        "q": "Who can register on GUIAA?",
+        "a": "Only licensed veterinarians. During registration we verify your professional license to keep a clinical-only environment."
+      },
+      {
+        "q": "What are CDS L4 and L5?",
+        "a": "They are clinical decision support levels: L4 helps structure diagnostic hypotheses; L5 extends reasoning toward evidence-based treatment plans. Always under your professional judgment."
+      },
+      {
+        "q": "Which species does the platform cover?",
+        "a": "Dogs, cats, rabbits, birds, reptiles, ferrets, hedgehogs, hamsters, guinea pigs, iguanas, and poultry. Each species unlocks an adapted veterinary form in the consultation."
+      },
+      {
+        "q": "Are my clinical data secure?",
+        "a": "We apply security and privacy best practices. Records and consultations are managed with access controls per professional account."
+      },
+      {
+        "q": "Can I use GUIAA in-clinic and on house calls?",
+        "a": "Yes. It is a web platform: it works in a fixed clinic or on external visits from a tablet or laptop with a modern browser."
+      },
+      {
+        "q": "Do I need to install anything?",
+        "a": "No. You access it from the browser. You only need an internet connection and a verified veterinarian account."
+      }
+    ]
+  },
+  "cta": {
+    "eyebrow": "Professional vet registration",
+    "title": "Your veterinary practice, documented with clinical rigor",
+    "lead": "We verify your professional license. Start recording multi-species patients with CDS L4 and L5 support from day one.",
+    "faqLink": "See frequently asked questions",
+    "createAccount": "Create vet account",
+    "haveAccount": "I already have an account"
+  },
+  "footer": {
+    "eyebrow": "GUIAA community",
+    "headlineBefore": "Powering veterinary practice with",
+    "headlineAccent": "clinical intelligence",
+    "headlineAfter": "!",
+    "product": "Product",
+    "features": "Features",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "newsletterTitle": "Clinical updates",
+    "newsletterLead": "Product news and clinical tips for your practice.",
+    "newsletterPlaceholder": "your@email.com",
+    "newsletterSubmit": "Subscribe",
+    "newsletterError": "Enter a valid email",
+    "newsletterSent": "Opening your email app…",
+    "newsletterSubject": "GUIAA newsletter subscription",
+    "newsletterBody": "Hi GUIAA team,\n\nI would like to receive clinical and product updates.\n\nEmail: {{email}}\n",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "rights": "All rights reserved.",
+    "tagline": "Veterinary clinical software"
+  },
+  "features": {
+    "eyebrow": "Practice modules",
+    "title": "Clinic and operations in one place",
+    "lead": "Diagnosis, records, inventory, and sales — designed for the veterinarian's routine, not a generic dashboard.",
+    "viewProduct": "See product screenshots",
+    "seeInProduct": "View in product",
+    "primary": {
+      "diagnostico": {
+        "title": "GUIAA Diagnosis",
+        "description": "Guided history-taking, physical exam, and CDS L4/L5 support to document veterinary diagnostic reasoning."
+      },
+      "expediente": {
+        "title": "Clinical record",
+        "description": "Patient clinical history: prior visits, treatments, and progress between appointments."
+      },
+      "inventario": {
+        "title": "Inventory",
+        "description": "Medication and supply stock, reorder alerts, and traceability during consultation."
+      },
+      "ventas": {
+        "title": "Sales",
+        "description": "Bill services and products from the consult, linked to the patient's clinical act."
+      }
+    },
+    "secondary": {
+      "multiespecie": {
+        "title": "Multi-species",
+        "description": "11 categories with dedicated veterinary forms per species."
+      },
+      "panel": {
+        "title": "Clinical panel",
+        "description": "Consultation metrics, clinical activity, and a summary of your vet practice."
+      },
+      "integracion": {
+        "title": "Clinical integration",
+        "description": "Diagnosis, records, inventory, and sales in one context."
+      },
+      "onboarding": {
+        "title": "Initial training",
+        "description": "Guided walkthrough to master the platform from your first consultation."
+      }
+    }
+  },
+  "how": {
+    "eyebrow": "How it works",
+    "title": "From registration to a full record in three steps",
+    "lead": "No long learning curve: start documenting consultations from day one.",
+    "ctaRegister": "Start vet registration",
+    "ctaExplore": "Explore the interface without signing up",
+    "steps": {
+      "01": {
+        "title": "Vet registration",
+        "detail": "Create your account with a professional license. Verification included for LATAM."
+      },
+      "02": {
+        "title": "First consultation",
+        "detail": "Pick a species, register the patient, and document with CDS L4·L5 forms."
+      },
+      "03": {
+        "title": "Complete record",
+        "detail": "Owner, pet, sales, and clinical history connected in one place."
+      }
+    }
+  },
+  "trust": {
+    "aria": "GUIAA guarantees",
+    "items": {
+      "license": {
+        "text": "Verified veterinary professional license",
+        "sub": "Access exclusive to licensed veterinarians"
+      },
+      "species": {
+        "text": "Forms by veterinary species",
+        "sub": "Dogs, cats, birds, reptiles, and exotics"
+      },
+      "history": {
+        "text": "Longitudinal clinical history",
+        "sub": "Unified record per patient and owner"
+      }
+    }
+  },
+  "testimonials": {
+    "eyebrow": "Vet community",
+    "title": "What colleagues say",
+    "lead": "Fellow veterinarians share how they document consultations and reclaim clinical time with GUIAA.",
+    "listAria": "Colleague testimonials",
+    "caseOf": "Case of {{name}}",
+    "disclaimerMobile": "Swipe to see more testimonials · ",
+    "disclaimer": "Illustrative cases for demonstration. Testimonials represent typical vet consultation flows in GUIAA.",
+    "items": {
+      "ana": {
+        "quote": "The CDS structure helps me not skip steps in complex cases. My consultations are clearer.",
+        "role": "Small animals · Mexico City",
+        "petAlt": "Golden retriever seen in consultation",
+        "tags": ["CDS L4·L5", "Records"]
+      },
+      "carlos": {
+        "quote": "Connected records, inventory, and sales save time between patients.",
+        "role": "Mixed practice · Guadalajara",
+        "petAlt": "Cat seen in veterinary consultation",
+        "tags": ["Inventory", "Sales"]
+      },
+      "laura": {
+        "quote": "I use GUIAA for dogs, cats, and production visits with the same rigor.",
+        "role": "Production medicine · Monterrey",
+        "petAlt": "Puppy in multi-species consultation",
+        "tags": ["Multi-species", "Production"]
+      },
+      "patricia": {
+        "quote": "GUIAA mirrors how I work in clinic: patient data, clinical reasoning, and traceability without jumping between tools.",
+        "role": "Feline clinic · Querétaro",
+        "petAlt": "Corgi seen at a veterinary clinic",
+        "tags": ["History-taking", "Advanced CDS"]
+      },
+      "miguel": {
+        "quote": "Interpreting labs with the integrated PDF changed my flow. Owners get clearer explanations.",
+        "role": "Veterinary hospital · Puebla",
+        "petAlt": "Orange cat at a veterinary hospital",
+        "tags": ["Lab PDF", "Premium"]
+      },
+      "sofia": {
+        "quote": "Verified access with a professional license gives the whole clinical team confidence.",
+        "role": "Emergency · Lima",
+        "petAlt": "Cat in veterinary emergency care",
+        "tags": ["Vet registration", "LATAM"]
+      }
+    }
+  },
+  "useCases": {
+    "eyebrow": "Veterinary practice",
+    "title": "Real clinic scenarios",
+    "lead": "From a puppy's first visit to exotic patient follow-up — GUIAA supports every stage of the clinical act.",
+    "seeFlow": "See clinical flow",
+    "items": {
+      "first": {
+        "title": "First visit and history-taking",
+        "description": "Capture chief complaint, history, and referred signs with species-adapted fields — canine, feline, or exotic.",
+        "tag": "General practice"
+      },
+      "chronic": {
+        "title": "Chronic case follow-up",
+        "description": "Reopen the patient record, compare prior visits, and document progress without rebuilding the clinical history.",
+        "tag": "Internal medicine"
+      },
+      "exotic": {
+        "title": "Exotics and companion exotics",
+        "description": "Dedicated flows for birds, reptiles, ferrets, rodents, and more — with the same traceability as small animals.",
+        "tag": "Exotic medicine"
+      },
+      "house": {
+        "title": "House-call visits",
+        "description": "Same web platform on tablet or laptop during external visits, with clinical history synced to the clinic.",
+        "tag": "House call"
+      }
+    }
+  },
+  "workflow": {
+    "eyebrow": "Veterinary clinical flow",
+    "title": "From patient intake to a complete record",
+    "lead": "GUIAA mirrors how you work in clinic: patient data, clinical reasoning, and traceability — without jumping between disconnected tools.",
+    "ctaLive": "See live consultation",
+    "foot": "Each species unlocks different veterinary forms — dogs, cats, birds, reptiles, exotics, and more.",
+    "steps": {
+      "01": {
+        "title": "Patient and species",
+        "detail": "Owner, breed, weight, and history by veterinary category."
+      },
+      "02": {
+        "title": "History-taking",
+        "detail": "Chief complaint and referred signs with adapted fields."
+      },
+      "03": {
+        "title": "Physical exam",
+        "detail": "Clinical findings recorded in a structured sequence."
+      },
+      "04": {
+        "title": "CDS reasoning",
+        "detail": "Diagnostic hypotheses with L4 and L5 support under your judgment."
+      },
+      "05": {
+        "title": "Treatment plan",
+        "detail": "Therapy, follow-up, and recommendations for the owner."
+      },
+      "06": {
+        "title": "Record",
+        "detail": "Longitudinal history ready for the next visit."
+      }
+    }
+  },
+  "product": {
+    "eyebrow": "Veterinary interface",
+    "title": "The same screen you use with every patient",
+    "lead": "Real-flow screenshots: species selection, clinical consultation, and the vet panel in clinic.",
+    "tabsAria": "Product views",
+    "bullets": [
+      "Multi-species selector with veterinary forms per category",
+      "Clinical stepper: patient → history → exam → treatment plan",
+      "Panel with recent consultations and practice indicators"
+    ],
+    "shots": {
+      "species": {
+        "label": "Species selection",
+        "caption": "Multi-species flow with forms adapted by category.",
+        "alt": "New consultation screen with species selector in GUIAA"
+      },
+      "consultation": {
+        "label": "Clinical consultation",
+        "caption": "Structured history-taking with visible progress during the visit.",
+        "alt": "Chief complaint screen with clinical fields in GUIAA"
+      },
+      "dashboard": {
+        "label": "Vet panel",
+        "caption": "Consultation summary, membership, and quick clinic shortcuts.",
+        "alt": "Veterinarian clinical panel in GUIAA"
+      }
+    }
+  },
+  "brandBand": {
+    "aria": "GUIAA brand",
+    "title": "Doctor Plumitas joins you in consultation",
+    "lead": "GUIAA's mascot represents a clinical flow that feels close, clear, and built for the veterinarian's day-to-day."
+  },
+  "guiaConsultas": {
+    "badge": "ADSGuiaa",
+    "eyebrow": "Guía Consultas",
+    "title": "Advertise with us",
+    "lead": "Influence every veterinary consultation: place your brand at the exact moment of clinical decision, inside the software vets use every day.",
+    "props": {
+      "moment": {
+        "title": "Decision moment",
+        "text": "Your brand appears when the vet and owner evaluate treatment or product."
+      },
+      "intent": {
+        "title": "High intent",
+        "text": "Real clinical context — not generic banners on unrelated sites."
+      },
+      "reach": {
+        "title": "Vet reach",
+        "text": "Licensed veterinarians across Latin America."
+      }
+    },
+    "formTitle": "Information request",
+    "formSub": "Tell us about your brand or lab. We'll propose formats in Guía Consultas.",
+    "name": "Name or company",
+    "namePlaceholder": "VetLab Laboratory",
+    "email": "Email",
+    "emailPlaceholder": "contact@brand.com",
+    "phone": "Phone",
+    "phonePlaceholder": "+1 555 000 0000",
+    "message": "Product or brand to promote",
+    "messagePlaceholder": "Therapeutic food, vaccines, lab, equipment…",
+    "privacy": "I accept processing of my data to receive information about ADSGuiaa and advertising in Guía Consultas.",
+    "submit": "I want to advertise",
+    "submitting": "Sending…",
+    "sentTitle": "Request received",
+    "sentText": "The GUIAA team will review your message and contact you with advertising options on ADSGuiaa.",
+    "sentAgain": "Send another request",
+    "errorNameEmail": "Please complete name and email.",
+    "errorPrivacy": "You must accept personal data processing."
+  }
+}

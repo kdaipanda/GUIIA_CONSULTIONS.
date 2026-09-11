@@ -1,52 +1,24 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { LANDING_OG_IMAGE } from "./landingBrandAssets";
 
 const LANDING_URL = "https://guiaa.vet/";
-const LANDING_TITLE = "GUIAA — Plataforma clínica CDS para MVZ";
-const LANDING_DESCRIPTION =
-  "Soporte a la decisión clínica CDS L4 y L5 para médicos veterinarios certificados. Multiespecie, expediente, inventario y ventas en Latinoamérica.";
-
-const STRUCTURED_DATA = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": "https://guiaa.vet/#website",
-      url: LANDING_URL,
-      name: "GUIAA",
-      description: LANDING_DESCRIPTION,
-      inLanguage: "es",
-    },
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://guiaa.vet/#application",
-      name: "GUIAA",
-      applicationCategory: "HealthApplication",
-      operatingSystem: "Web",
-      description: LANDING_DESCRIPTION,
-      offers: {
-        "@type": "Offer",
-        availability: "https://schema.org/OnlineOnly",
-        eligibleCustomerType: "https://schema.org/MedicalOrganization",
-      },
-      audience: {
-        "@type": "Audience",
-        audienceType: "Médicos veterinarios certificados",
-      },
-    },
-  ],
-};
 
 export function LandingSeo() {
+  const { t, i18n } = useTranslation("landing");
+  const lang = (i18n.language || "en").startsWith("es") ? "es" : "en";
+
   useEffect(() => {
+    const title = t("seo.title");
+    const description = t("seo.description");
     const previousTitle = document.title;
-    document.title = LANDING_TITLE;
+    document.title = title;
 
     const descriptionTag = document.querySelector('meta[name="description"]');
     const previousDescription = descriptionTag?.getAttribute("content") ?? "";
 
     if (descriptionTag) {
-      descriptionTag.setAttribute("content", LANDING_DESCRIPTION);
+      descriptionTag.setAttribute("content", description);
     }
 
     const upsertMeta = (attr, key, value) => {
@@ -72,12 +44,12 @@ export function LandingSeo() {
     upsertMeta("property", "og:type", "website");
     upsertMeta("property", "og:url", LANDING_URL);
     upsertMeta("property", "og:image", LANDING_OG_IMAGE);
-    upsertMeta("property", "og:title", LANDING_TITLE);
-    upsertMeta("property", "og:description", LANDING_DESCRIPTION);
-    upsertMeta("property", "og:locale", "es_MX");
+    upsertMeta("property", "og:title", title);
+    upsertMeta("property", "og:description", description);
+    upsertMeta("property", "og:locale", lang === "es" ? "es_MX" : "en_US");
     upsertMeta("name", "twitter:card", "summary_large_image");
-    upsertMeta("name", "twitter:title", LANDING_TITLE);
-    upsertMeta("name", "twitter:description", LANDING_DESCRIPTION);
+    upsertMeta("name", "twitter:title", title);
+    upsertMeta("name", "twitter:description", description);
     upsertMeta("name", "twitter:image", LANDING_OG_IMAGE);
     upsertLink("canonical", LANDING_URL);
     upsertLink("preload", "/brand/doctor-plumitas-hub.png");
@@ -88,10 +60,42 @@ export function LandingSeo() {
       preloadTag.setAttribute("fetchpriority", "high");
     }
 
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://guiaa.vet/#website",
+          url: LANDING_URL,
+          name: "GUIAA",
+          description,
+          inLanguage: lang,
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://guiaa.vet/#application",
+          name: "GUIAA",
+          applicationCategory: "HealthApplication",
+          operatingSystem: "Web",
+          description,
+          offers: {
+            "@type": "Offer",
+            availability: "https://schema.org/OnlineOnly",
+            eligibleCustomerType: "https://schema.org/MedicalOrganization",
+          },
+          audience: {
+            "@type": "Audience",
+            audienceType: t("seo.audience"),
+          },
+        },
+      ],
+    };
+
+    document.querySelectorAll('script[data-landing-seo="true"]').forEach((node) => node.remove());
     const structuredDataScript = document.createElement("script");
     structuredDataScript.type = "application/ld+json";
     structuredDataScript.setAttribute("data-landing-seo", "true");
-    structuredDataScript.textContent = JSON.stringify(STRUCTURED_DATA);
+    structuredDataScript.textContent = JSON.stringify(structuredData);
     document.head.appendChild(structuredDataScript);
 
     return () => {
@@ -101,7 +105,7 @@ export function LandingSeo() {
       }
       structuredDataScript.remove();
     };
-  }, []);
+  }, [t, lang]);
 
   return null;
 }

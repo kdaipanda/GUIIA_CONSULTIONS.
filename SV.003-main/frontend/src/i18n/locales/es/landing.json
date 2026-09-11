@@ -1,0 +1,448 @@
+{
+  "nav": {
+    "product": "Producto",
+    "services": "Servicios",
+    "pricing": "Precios",
+    "faq": "FAQ",
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "enter": "Ingresar",
+    "registerShort": "Registro",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "main": "Principal"
+  },
+  "seo": {
+    "title": "GUIAA — Plataforma clínica CDS para MVZ",
+    "description": "Soporte a la decisión clínica CDS L4 y L5 para médicos veterinarios certificados. Multiespecie, expediente, inventario y ventas en Latinoamérica.",
+    "audience": "Médicos veterinarios certificados"
+  },
+  "hero": {
+    "kicker": "Software clínico veterinario · GUIAA",
+    "titleBefore": "Conecta con",
+    "titleAccent": "tu consulta",
+    "titleAfter": ", en cualquier momento",
+    "leadBefore": "Comunicación fluida entre tu práctica y cada caso clínico. Gestión de salud simplificada para",
+    "leadAccent": "cada paciente",
+    "leadAfter": " con anamnesis multiespecie y soporte CDS avanzado.",
+    "ctaRegister": "Comenzar registro MVZ",
+    "ctaHint": "Registro MVZ en minutos · Verificación de cédula incluida",
+    "explore": "Explorar interfaz sin registro →",
+    "playVideo": "Ver video de presentación"
+  },
+  "heroStats": {
+    "aria": "Ventajas de GUIAA",
+    "items": {
+      "species": {
+        "value": "11+ especies veterinarias",
+        "desc": "Formularios clínicos para perros, felinos, exóticos y más."
+      },
+      "record": {
+        "value": "Expediente unificado",
+        "desc": "Dueños, mascotas, consultas y ventas en un solo consultorio."
+      },
+      "access": {
+        "value": "Acceso MVZ verificado",
+        "desc": "Registro con cédula profesional para veterinarios en LATAM."
+      }
+    }
+  },
+  "speciesMarquee": {
+    "heading": "Multiespecie veterinaria · {{count}} formularios clínicos",
+    "aria": "Especies disponibles en consulta",
+    "categories": {
+      "perros": "Perros",
+      "gatos": "Gatos",
+      "conejos": "Conejos",
+      "aves": "Aves",
+      "hamsters": "Hámsters",
+      "cuyos": "Cuyos",
+      "hurones": "Hurones",
+      "erizos": "Erizos",
+      "tortugas": "Tortugas",
+      "iguanas": "Iguanas",
+      "patos_pollos": "Patos y Pollos"
+    }
+  },
+  "socialRail": {
+    "aria": "Accesos rápidos",
+    "product": "Producto",
+    "faq": "FAQ",
+    "contact": "Contacto"
+  },
+  "preview": {
+    "multiSpeciesBadge": "Multiespecie veterinaria · {{count}} formularios clínicos",
+    "steps": {
+      "data": "Datos",
+      "reason": "Motivo",
+      "diagnosis": "Diagnóstico"
+    },
+    "sidebar": {
+      "pet": "Mascota",
+      "species": "Especie",
+      "progress": "Progreso ({{current}}/{{total}})",
+      "dogs": "Perros"
+    },
+    "speciesTitle": "Nueva Consulta Veterinaria",
+    "speciesLead": "Complete la información de la mascota para iniciar el diagnóstico clínico",
+    "basicInfo": "Información básica",
+    "petName": "Nombre de la mascota",
+    "breed": "Raza",
+    "breedValue": "Mestizo",
+    "reasonTitle": "Motivo de Consulta",
+    "reasonLead": "Describa detalladamente los síntomas y observaciones de la mascota",
+    "petDetail": "Detalle de la mascota",
+    "petDetailLabel": "ANOTA CON EL MAYOR DETALLE LOS DATOS SOBRE LA MASCOTA.",
+    "petDetailSample": "Paciente canino, 4 años, 18 kg. Vómito intermitente desde hace 48 h, sin diarrea. Apetito disminuido. Última comida ayer por la noche.\n\nAl examen: T° 39.2 °C, deshidratación leve (5%), mucosas pálidas, dolor abdominal leve en epigastrio.",
+    "dashboardGreeting": "Buenos días, Dra. García",
+    "dashboardConsultations": "{{count}} consultas",
+    "statTotal": "Consultas Totales",
+    "statMonth": "Este Mes",
+    "statMembership": "Membresía"
+  },
+  "pricing": {
+    "eyebrow": "Membresía MVZ",
+    "title": "Planes para tu consultorio veterinario",
+    "lead": "Básica, Profesional y Premium — elige el volumen de consultas CDS y el alcance multiespecie que necesitas. Verificación de cédula incluida.",
+    "ctaRegister": "Empezar con este plan",
+    "ctaPlan": "Contratar plan",
+    "billingNote": "facturación mensual o anual",
+    "annual": "Anual",
+    "askPrice": "Consultar",
+    "pricePerMonth": "/mes",
+    "badgeFeatured": "Más usado",
+    "badgeConsultations": "{{count}} consultas/mes",
+    "creditAddonDesc": "Consultas CDS adicionales sin cambiar de plan. Se suman a tu saldo actual.",
+    "trustNote": "Solo médicos veterinarios certificados. La verificación de cédula es parte del registro inicial.",
+    "comparePlans": "Comparar planes en detalle →",
+    "planDescriptions": {
+      "basic": "Consultorio de pequeñas especies: CDS estructurado, expediente y agenda para perros y gatos.",
+      "professional": "Práctica multiespecie activa con inventario, ventas y reportes clínicos integrados.",
+      "premium": "Alto volumen de consultas con Manejo Experto y onboarding guiado prioritario."
+    }
+  },
+  "faq": {
+    "eyebrow": "Antes de registrarte",
+    "title": "Preguntas frecuentes",
+    "lead": "Dudas habituales sobre acceso, especies, seguridad y uso en consulta.",
+    "moreTitle": "¿No encuentras tu respuesta?",
+    "moreLead": "Escríbenos y te orientamos antes del registro.",
+    "emailCta": "Escribir a soporte",
+    "items": [
+      {
+        "q": "¿Quién puede registrarse en GUIAA?",
+        "a": "Solo médicos veterinarios certificados. Durante el registro verificamos tu cédula profesional para garantizar un entorno clínico exclusivo."
+      },
+      {
+        "q": "¿Qué es CDS L4 y L5?",
+        "a": "Son niveles de soporte a la decisión clínica: L4 ayuda a estructurar hipótesis diagnósticas; L5 extiende el razonamiento hacia planes terapéuticos basados en evidencia. Siempre bajo tu criterio profesional."
+      },
+      {
+        "q": "¿Qué especies cubre la plataforma?",
+        "a": "Perros, gatos, conejos, aves, reptiles, hurones, erizos, hámsters, cuyos, iguanas y aves de corral. Cada especie activa un formulario veterinario adaptado en la consulta."
+      },
+      {
+        "q": "¿Mis datos clínicos están seguros?",
+        "a": "Aplicamos buenas prácticas de seguridad y privacidad. Los expedientes y consultas se gestionan con controles de acceso por cuenta profesional."
+      },
+      {
+        "q": "¿Puedo usar GUIAA en consultorio y a domicilio?",
+        "a": "Sí. Es una plataforma web: funciona en consultorio fijo o en visitas externas desde tablet o laptop con navegador moderno."
+      },
+      {
+        "q": "¿Necesito instalar algo?",
+        "a": "No. Accedes desde el navegador. Solo necesitas conexión a internet y tu cuenta MVZ verificada."
+      }
+    ]
+  },
+  "cta": {
+    "eyebrow": "Registro profesional MVZ",
+    "title": "Tu consulta veterinaria, documentada con rigor clínico",
+    "lead": "Verificamos tu cédula profesional. Empieza a registrar pacientes multiespecie con soporte CDS L4 y L5 desde el primer día.",
+    "faqLink": "Ver preguntas frecuentes",
+    "createAccount": "Crear cuenta MVZ",
+    "haveAccount": "Ya tengo cuenta"
+  },
+  "footer": {
+    "eyebrow": "Comunidad GUIAA",
+    "headlineBefore": "¡Impulsando la práctica veterinaria con",
+    "headlineAccent": "inteligencia clínica",
+    "headlineAfter": "!",
+    "product": "Producto",
+    "features": "Características",
+    "pricing": "Precios",
+    "faq": "FAQ",
+    "newsletterTitle": "Novedades clínicas",
+    "newsletterLead": "Actualizaciones del producto y tips para tu práctica.",
+    "newsletterPlaceholder": "tu@email.com",
+    "newsletterSubmit": "Suscribirme",
+    "newsletterError": "Ingresa un email válido",
+    "newsletterSent": "Abriendo tu correo…",
+    "newsletterSubject": "Suscripción newsletter GUIAA",
+    "newsletterBody": "Hola equipo GUIAA,\n\nDeseo recibir novedades clínicas y del producto.\n\nCorreo: {{email}}\n",
+    "terms": "Términos",
+    "privacy": "Privacidad",
+    "rights": "Todos los derechos reservados.",
+    "tagline": "Software clínico veterinario"
+  },
+  "features": {
+    "eyebrow": "Módulos del consultorio",
+    "title": "Clínica y operación en un solo entorno",
+    "lead": "Diagnóstico, expediente, inventario y ventas — diseñados para la rutina del médico veterinario, no para un dashboard genérico.",
+    "viewProduct": "Ver capturas del producto",
+    "seeInProduct": "Ver en producto",
+    "primary": {
+      "diagnostico": {
+        "title": "GUIAA Diagnóstico",
+        "description": "Anamnesis guiada, examen físico y soporte CDS L4/L5 para documentar el razonamiento diagnóstico veterinario."
+      },
+      "expediente": {
+        "title": "Expediente clínico",
+        "description": "Historial clínico por paciente: consultas previas, tratamientos y evolución entre visitas."
+      },
+      "inventario": {
+        "title": "Inventario",
+        "description": "Stock de medicamentos e insumos clínicos, alertas de reorden y trazabilidad en consulta."
+      },
+      "ventas": {
+        "title": "Ventas",
+        "description": "Cobro de servicios y productos desde la consulta, vinculado al acto clínico del paciente."
+      }
+    },
+    "secondary": {
+      "multiespecie": {
+        "title": "Multiespecie",
+        "description": "11 categorías con formularios veterinarios dedicados por especie."
+      },
+      "panel": {
+        "title": "Panel clínico",
+        "description": "Indicadores de consultas, actividad clínica y resumen de tu práctica MVZ."
+      },
+      "integracion": {
+        "title": "Integración clínica",
+        "description": "Diagnóstico, expediente, inventario y ventas en un solo contexto."
+      },
+      "onboarding": {
+        "title": "Capacitación inicial",
+        "description": "Recorrido guiado para dominar la plataforma desde tu primera consulta."
+      }
+    }
+  },
+  "how": {
+    "eyebrow": "Cómo funciona",
+    "title": "De registro a expediente en tres pasos",
+    "lead": "Sin curva de aprendizaje larga: empiezas a documentar consultas desde el primer día.",
+    "ctaRegister": "Comenzar registro MVZ",
+    "ctaExplore": "Explorar interfaz sin registro",
+    "steps": {
+      "01": {
+        "title": "Registro MVZ",
+        "detail": "Crea tu cuenta con cédula profesional. Verificación incluida para LATAM."
+      },
+      "02": {
+        "title": "Primera consulta",
+        "detail": "Elige especie, registra al paciente y documenta con formularios CDS L4·L5."
+      },
+      "03": {
+        "title": "Expediente completo",
+        "detail": "Dueño, mascota, ventas e historial clínico conectados en un solo lugar."
+      }
+    }
+  },
+  "trust": {
+    "aria": "Garantías GUIAA",
+    "items": {
+      "license": {
+        "text": "Cédula profesional MVZ verificada",
+        "sub": "Acceso exclusivo para médicos veterinarios"
+      },
+      "species": {
+        "text": "Formularios por especie veterinaria",
+        "sub": "Perros, felinos, aves, reptiles y exóticos"
+      },
+      "history": {
+        "text": "Historia clínica longitudinal",
+        "sub": "Expediente unificado por paciente y dueño"
+      }
+    }
+  },
+  "testimonials": {
+    "eyebrow": "Comunidad MVZ",
+    "title": "Lo que dicen los colegas",
+    "lead": "Colegas MVZ comparten cómo documentan consultas y recuperan tiempo clínico con GUIAA.",
+    "listAria": "Testimonios de colegas MVZ",
+    "caseOf": "Caso de {{name}}",
+    "disclaimerMobile": "Desliza para ver más testimonios · ",
+    "disclaimer": "Casos ilustrativos con fines demostrativos. Los testimonios representan flujos típicos de consulta MVZ en GUIAA.",
+    "items": {
+      "ana": {
+        "quote": "La estructura CDS me ayuda a no omitir pasos en casos complejos. Mis consultas son más claras.",
+        "role": "Pequeñas especies · CDMX",
+        "petAlt": "Perro golden retriever atendido en consulta",
+        "tags": ["CDS L4·L5", "Expediente"]
+      },
+      "carlos": {
+        "quote": "Expediente, inventario y ventas conectados ahorran tiempo entre pacientes.",
+        "role": "Consulta mixta · GDL",
+        "petAlt": "Gata atendida en consulta veterinaria",
+        "tags": ["Inventario", "Ventas"]
+      },
+      "laura": {
+        "quote": "Uso GUIAA en perros, gatos y consultas de producción con el mismo rigor.",
+        "role": "Medicina de producción · MTY",
+        "petAlt": "Cachorro en consulta multiespecie",
+        "tags": ["Multiespecie", "Producción"]
+      },
+      "patricia": {
+        "quote": "GUIAA refleja cómo trabajo en consulta: datos del paciente, razonamiento clínico y trazabilidad sin saltar entre herramientas.",
+        "role": "Clínica felina · Querétaro",
+        "petAlt": "Corgi atendido en clínica veterinaria",
+        "tags": ["Anamnesis", "CDS avanzado"]
+      },
+      "miguel": {
+        "quote": "Interpretar laboratorios con el PDF integrado cambió mi flujo. Los tutores reciben explicaciones más claras.",
+        "role": "Hospital veterinario · Puebla",
+        "petAlt": "Gato naranja en hospital veterinario",
+        "tags": ["Laboratorio PDF", "Premium"]
+      },
+      "sofia": {
+        "quote": "El acceso verificado con cédula profesional da confianza a todo el equipo clínico.",
+        "role": "Emergencias · Lima",
+        "petAlt": "Gata en servicio de emergencias veterinarias",
+        "tags": ["Registro MVZ", "LATAM"]
+      }
+    }
+  },
+  "useCases": {
+    "eyebrow": "Práctica veterinaria",
+    "title": "Escenarios reales del consultorio",
+    "lead": "Desde la primera consulta del cachorro hasta el seguimiento del paciente exótico — GUIAA acompaña cada etapa del acto clínico.",
+    "seeFlow": "Ver flujo clínico",
+    "items": {
+      "first": {
+        "title": "Primera consulta y anamnesis",
+        "description": "Captura motivo de consulta, antecedentes y signos referidos con campos adaptados a la especie — caninos, felinos o exóticos.",
+        "tag": "Medicina general"
+      },
+      "chronic": {
+        "title": "Seguimiento de casos crónicos",
+        "description": "Retoma el expediente del paciente, compara visitas previas y documenta evolución sin reconstruir la historia clínica.",
+        "tag": "Medicina interna"
+      },
+      "exotic": {
+        "title": "Exóticos y NAC",
+        "description": "Flujos específicos para aves, reptiles, hurones, roedores y más — con la misma trazabilidad que en pequeñas especies.",
+        "tag": "Medicina de exóticos"
+      },
+      "house": {
+        "title": "Consulta domiciliaria",
+        "description": "Misma plataforma web en tablet o laptop durante visitas externas, con historial clínico sincronizado al consultorio.",
+        "tag": "Visita a domicilio"
+      }
+    }
+  },
+  "workflow": {
+    "eyebrow": "Flujo clínico veterinario",
+    "title": "De la recepción del paciente al expediente completo",
+    "lead": "GUIAA refleja cómo trabajas en consulta: datos del paciente, razonamiento clínico y trazabilidad — sin saltar entre herramientas desconectadas.",
+    "ctaLive": "Ver consulta en vivo",
+    "foot": "Cada especie activa formularios veterinarios distintos — perros, felinos, aves, reptiles, exóticos y más.",
+    "steps": {
+      "01": {
+        "title": "Paciente y especie",
+        "detail": "Dueño, raza, peso y antecedentes por categoría veterinaria."
+      },
+      "02": {
+        "title": "Anamnesis",
+        "detail": "Motivo de consulta y signos referidos con campos adaptados."
+      },
+      "03": {
+        "title": "Examen físico",
+        "detail": "Hallazgos clínicos registrados en secuencia estructurada."
+      },
+      "04": {
+        "title": "Razonamiento CDS",
+        "detail": "Hipótesis diagnósticas con soporte L4 y L5 bajo tu criterio."
+      },
+      "05": {
+        "title": "Plan terapéutico",
+        "detail": "Tratamiento, seguimiento y recomendaciones al propietario."
+      },
+      "06": {
+        "title": "Expediente",
+        "detail": "Historia longitudinal disponible en la siguiente visita."
+      }
+    }
+  },
+  "product": {
+    "eyebrow": "Interfaz veterinaria",
+    "title": "La misma pantalla que usas con cada paciente",
+    "lead": "Capturas del flujo real: selección de especie, consulta clínica y panel del MVZ en consultorio.",
+    "tabsAria": "Vistas del producto",
+    "bullets": [
+      "Selector multiespecie con formularios veterinarios por categoría",
+      "Stepper clínico: paciente → anamnesis → examen → plan terapéutico",
+      "Panel con consultas recientes e indicadores de tu práctica"
+    ],
+    "shots": {
+      "species": {
+        "label": "Selección de especie",
+        "caption": "Flujo multiespecie con formularios adaptados por categoría.",
+        "alt": "Pantalla de nueva consulta con selector de especie en GUIAA"
+      },
+      "consultation": {
+        "label": "Consulta clínica",
+        "caption": "Anamnesis estructurada con progreso visible durante la consulta.",
+        "alt": "Pantalla de motivo de consulta con campos clínicos en GUIAA"
+      },
+      "dashboard": {
+        "label": "Panel MVZ",
+        "caption": "Resumen de consultas, membresía y accesos rápidos del consultorio.",
+        "alt": "Panel clínico del veterinario en GUIAA"
+      }
+    }
+  },
+  "brandBand": {
+    "aria": "Marca GUIAA",
+    "title": "Doctor Plumitas te acompaña en consulta",
+    "lead": "La mascota de GUIAA representa un flujo clínico cercano, claro y pensado para el día a día del médico veterinario."
+  },
+  "guiaConsultas": {
+    "badge": "ADSGuiaa",
+    "eyebrow": "Guía Consultas",
+    "title": "Anúnciate con nosotros",
+    "lead": "Influye en cada consulta veterinaria: coloca tu marca en el momento exacto de la decisión clínica, dentro del software que usan los MVZ cada día.",
+    "props": {
+      "moment": {
+        "title": "Momento de decisión",
+        "text": "Tu marca aparece cuando el MVZ y el tutor evalúan tratamiento o producto."
+      },
+      "intent": {
+        "title": "Alta intención",
+        "text": "Contexto clínico real, no banners genéricos en sitios ajenos."
+      },
+      "reach": {
+        "title": "Alcance MVZ",
+        "text": "Médicos veterinarios certificados en Latinoamérica."
+      }
+    },
+    "formTitle": "Solicitud de información",
+    "formSub": "Cuéntanos tu marca o laboratorio. Te proponemos formatos en Guía Consultas.",
+    "name": "Nombre o empresa",
+    "namePlaceholder": "Laboratorio VetLab",
+    "email": "Email",
+    "emailPlaceholder": "contacto@marca.com",
+    "phone": "Teléfono",
+    "phonePlaceholder": "+52 55 0000 0000",
+    "message": "Producto o marca a promover",
+    "messagePlaceholder": "Alimento terapéutico, vacunas, laboratorio, equipamiento…",
+    "privacy": "Acepto el tratamiento de mis datos para recibir información sobre ADSGuiaa y publicidad en Guía Consultas.",
+    "submit": "Quiero anunciarme",
+    "submitting": "Enviando…",
+    "sentTitle": "Solicitud recibida",
+    "sentText": "El equipo GUIAA revisará tu mensaje y te contactará con opciones de publicidad en ADSGuiaa.",
+    "sentAgain": "Enviar otra solicitud",
+    "errorNameEmail": "Completa nombre y email.",
+    "errorPrivacy": "Debes aceptar el tratamiento de datos personales."
+  }
+}

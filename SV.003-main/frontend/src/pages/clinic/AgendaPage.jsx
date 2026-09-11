@@ -17,8 +17,6 @@ import {
   createAppointment,
   updateAppointment,
   deleteAppointment,
-  fetchPatients,
-  fetchClients,
   fetchAppointmentRequests,
   updateAppointmentRequest,
 } from "../../lib/clinicApi";
@@ -45,17 +43,25 @@ import "./agendaPage.css";
 import "./clinicPageShared.css";
 import { clinicDialogClass } from "../../components/clinic/ClinicPageUi";
 import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
+import { ModuleHelpTip } from "../../components/clinic/ModuleHelpTip";
 import { useConfirmAction } from "../../hooks/useConfirmAction";
+import { useTranslation } from "react-i18next";
+import {
+  loadClinicRegistry,
+  readClinicRegistryCache,
+} from "../../lib/clinicRegistryCache";
+import { clinicCacheKey, loadClinicData, readClinicDataCache } from "../../lib/clinicDataCache";
+import "./helpCenterPage.css";
 
-const STATUS_LABELS = {
-  scheduled: "Programada",
-  confirmed: "Confirmada",
-  completed: "Completada",
-  cancelled: "Cancelada",
-  no_show: "No asistió",
-};
+const APPOINTMENT_STATUS_KEYS = [
+  "scheduled",
+  "confirmed",
+  "completed",
+  "cancelled",
+  "no_show",
+];
 
-function AgendaAppointmentCard({ appointment, onEdit }) {
+function AgendaAppointmentCard({ appointment, onEdit, statusLabel, locale, defaultPetLabel }) {
   return (
     <button
       type="button"
@@ -63,13 +69,13 @@ function AgendaAppointmentCard({ appointment, onEdit }) {
       onClick={() => onEdit(appointment)}
     >
       <span className="clinic-agenda-time">
-        {new Date(appointment.starts_at).toLocaleTimeString("es-MX", {
+        {new Date(appointment.starts_at).toLocaleTimeString(locale, {
           hour: "2-digit",
           minute: "2-digit",
         })}
       </span>
       <span className="clinic-agenda-patient">
-        {appointment.patients?.name || "Mascota"}
+        {appointment.patients?.name || defaultPetLabel}
       </span>
       {appointment.clients?.name && (
         <span className="clinic-agenda-client">{appointment.clients.name}</span>
@@ -78,7 +84,7 @@ function AgendaAppointmentCard({ appointment, onEdit }) {
         <span className="clinic-agenda-reason">{appointment.reason}</span>
       )}
       <span className="clinic-agenda-status">
-        {STATUS_LABELS[appointment.status] || appointment.status}
+        {statusLabel || appointment.status}
       </span>
     </button>
   );
@@ -121,15 +127,19 @@ function toLocalInputValue(iso) {
 }
 
 export function AgendaPage({ onStartConsultation }) {
+  const { t, i18n } = useTranslation("clinic");
+  const locale = (i18n.language || "en").startsWith("es") ? "es-MX" : "en-US";
+  const statusLabel = (status) =>
+    t(`appointmentStatus.${status}`, { defaultValue: status });
   const { veterinarian } = useVet();
   const { organization } = useClinic();
   const { confirm, dialogProps } = useConfirmAction();
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [appointments, setAppointments] = useState([]);
   const [requests, setRequests] = useState([]);
-  const [patients, setPatients] = useState([]);
-  const [clients, setClients] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [patients, setPatients] = useState(() => readClinicRegistryCache(veterinarian?.id)?.patients || []);
+  const [clients, setClients] = useState(() => readClinicRegistryCache(veterinarian?.id)?.clients || []);
+  const [loading, setLoading] = useState(() => !readClinicRegistryCache(veterinarian?.id));
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({
@@ -169,24 +179,27 @@ export function AgendaPage({ onStartConsultation }) {
   }, [weekStart]);
 
   const load = useCallback(async () => {
-    if (!veterinarian?.id) return;
-    setLoading(true);
+    if (!veterinarian?.id) {
+      setLoading(false);
+      return;
+    }
+    const cachedRegistry = readClinicRegistryCache(veterinarian.id);
+    if (!cachedRegistry) setLoading(true);
     try {
-      const [apptData, patientsData, clientsData] = await Promise.all([
+      const requestsKey = clinicCacheKey(veterinarian.id, "appointment-requests", "pending");
+      const [apptData, registryData, requestsData] = await Promise.all([
         fetchAppointments(veterinarian.id, range.from, range.to),
-        fetchPatients(veterinarian.id),
-        fetchClients(veterinarian.id),
+        loadClinicRegistry(veterinarian.id),
+        loadClinicData(
+          requestsKey,
+          () => fetchAppointmentRequests(veterinarian.id, "pending"),
+          { ttlMs: 45_000 },
+        ).catch(() => ({ requests: [] })),
       ]);
       setAppointments(apptData.appointments || []);
-      setPatients(patientsData.patients || []);
-      setClients(clientsData.clients || []);
-
-      try {
-        const requestsData = await fetchAppointmentRequests(veterinarian.id, "pending");
-        setRequests(requestsData.requests || []);
-      } catch {
-        setRequests([]);
-      }
+      setPatients(registryData.patients || []);
+      setClients(registryData.clients || []);
+      setRequests(requestsData.requests || []);
     } catch (err) {
       notifyError(err.message);
     } finally {
@@ -266,10 +279,10 @@ export function AgendaPage({ onStartConsultation }) {
     try {
       if (editing) {
         await updateAppointment(veterinarian.id, editing.id, payload);
-        notifySuccess("Cita actualizada.");
+        notifySuccess(t("agenda.updated"));
       } else {
         await createAppointment(veterinarian.id, payload);
-        notifySuccess("Cita creada.");
+        notifySuccess(t("agenda.created"));
       }
       setDialogOpen(false);
       load();
@@ -283,15 +296,15 @@ export function AgendaPage({ onStartConsultation }) {
   const handleDelete = async () => {
     if (!editing) return;
     const ok = await confirm({
-      title: "Eliminar cita",
-      description: "Esta acción no se puede deshacer. ¿Eliminar la cita seleccionada?",
-      confirmLabel: "Eliminar",
+      title: t("agenda.deleteTitle"),
+      description: t("agenda.deleteDesc"),
+      confirmLabel: t("agenda.deleteConfirm"),
       destructive: true,
     });
     if (!ok) return;
     try {
       await deleteAppointment(veterinarian.id, editing.id);
-      notifySuccess("Cita eliminada.");
+      notifySuccess(t("agenda.deleted"));
       setDialogOpen(false);
       load();
     } catch (err) {
@@ -303,9 +316,9 @@ export function AgendaPage({ onStartConsultation }) {
     try {
       await updateAppointmentRequest(veterinarian.id, requestId, { status, ...extra });
       if (status === "approved") {
-        notifySuccess("Solicitud aprobada y cita creada.");
+        notifySuccess(t("agenda.requestApproved"));
       } else if (status === "rejected") {
-        notifySuccess("Solicitud rechazada.");
+        notifySuccess(t("agenda.requestRejected"));
       }
       setApproveOpen(false);
       setApprovingRequest(null);
@@ -361,11 +374,11 @@ export function AgendaPage({ onStartConsultation }) {
     const url = `${window.location.origin}/solicitar-cita/${organization.id}`;
     try {
       await navigator.clipboard.writeText(url);
-      notifySuccess("Enlace del portal copiado.");
+      notifySuccess(t("agenda.portalCopied"));
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2500);
     } catch {
-      window.prompt("Copia este enlace para los dueños:", url);
+      window.prompt(t("agenda.copyPrompt"), url);
     }
   };
 
@@ -373,31 +386,34 @@ export function AgendaPage({ onStartConsultation }) {
     <div className="clinic-page clinic-page-guiaa agenda-page-guiaa">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">Consultorio</p>
-          <h1>Agenda</h1>
-          <p>Citas semanales, solicitudes de dueños y acceso al portal público.</p>
+          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
+          <div className="clinic-page-title-row">
+            <h1>{t("agenda.title")}</h1>
+            <ModuleHelpTip topicId="agenda" />
+          </div>
+          <p>{t("agenda.lead")}</p>
         </div>
         <div className="clinic-agenda-nav">
           <Button type="button" variant="outline" size="sm" onClick={() => setWeekStart(startOfWeek(new Date()))}>
-            Hoy
+            {t("agenda.today")}
           </Button>
           <Button type="button" variant="outline" size="sm" onClick={() => setWeekStart(addDays(weekStart, -7))}>
             <ChevronLeft size={16} />
           </Button>
           <span className="clinic-agenda-range">
-            {weekDays[0].toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
+            {weekDays[0].toLocaleDateString(locale, { day: "numeric", month: "short" })}
             {" – "}
-            {weekDays[6].toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" })}
+            {weekDays[6].toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}
           </span>
           <Button type="button" variant="outline" size="sm" onClick={() => setWeekStart(addDays(weekStart, 7))}>
             <ChevronRight size={16} />
           </Button>
           <Button type="button" size="sm" onClick={() => openCreate(new Date())}>
-            <Plus size={16} className="mr-1" /> Nueva cita
+            <Plus size={16} className="mr-1" /> {t("agenda.newAppointment")}
           </Button>
           {organization?.id && (
             <Button type="button" variant="secondary" size="sm" onClick={copyPortalLink}>
-              <Link2 size={14} className="mr-1" /> {linkCopied ? "Enlace copiado" : "Portal dueños"}
+              <Link2 size={14} className="mr-1" /> {linkCopied ? t("agenda.linkCopiedShort") : t("agenda.portalOwners")}
             </Button>
           )}
         </div>
@@ -406,15 +422,15 @@ export function AgendaPage({ onStartConsultation }) {
       <div className="agenda-stats-row">
         <div className="agenda-stat-pill">
           <span className="agenda-stat-value">{stats.weekTotal}</span>
-          <span className="agenda-stat-label">Citas esta semana</span>
+          <span className="agenda-stat-label">{t("agenda.statWeek")}</span>
         </div>
         <div className="agenda-stat-pill">
           <span className="agenda-stat-value">{stats.todayTotal}</span>
-          <span className="agenda-stat-label">Citas hoy</span>
+          <span className="agenda-stat-label">{t("agenda.statToday")}</span>
         </div>
         <div className="agenda-stat-pill">
           <span className="agenda-stat-value">{stats.pendingRequests}</span>
-          <span className="agenda-stat-label">Solicitudes pendientes</span>
+          <span className="agenda-stat-label">{t("agenda.statPendingRequests")}</span>
         </div>
       </div>
 
@@ -426,7 +442,7 @@ export function AgendaPage({ onStartConsultation }) {
             onClick={() => setViewMode("week")}
           >
             <LayoutGrid size={15} aria-hidden />
-            Semana
+            {t("agenda.viewWeek")}
           </button>
           <button
             type="button"
@@ -434,14 +450,14 @@ export function AgendaPage({ onStartConsultation }) {
             onClick={() => setViewMode("list")}
           >
             <List size={15} aria-hidden />
-            Lista
+            {t("agenda.viewList")}
           </button>
         </div>
       </div>
 
       {requests.length > 0 && (
         <div className="clinic-requests-panel">
-          <h3>Solicitudes pendientes ({requests.length})</h3>
+          <h3>{t("agenda.pendingRequestsTitle", { count: requests.length })}</h3>
           <ul className="clinic-requests-list">
             {requests.map((req) => (
               <li key={req.id} className="clinic-requests-item">
@@ -450,16 +466,16 @@ export function AgendaPage({ onStartConsultation }) {
                   {req.reason && <p className="clinic-muted">{req.reason}</p>}
                   {req.preferred_starts_at && (
                     <p className="clinic-muted">
-                      Preferida: {new Date(req.preferred_starts_at).toLocaleString("es-MX")}
+                      {t("agenda.preferred")} {new Date(req.preferred_starts_at).toLocaleString(locale)}
                     </p>
                   )}
                 </div>
                 <div className="clinic-requests-actions">
                   <Button type="button" size="sm" onClick={() => openApproveDialog(req)}>
-                    <Check size={14} className="mr-1" /> Aprobar
+                    <Check size={14} className="mr-1" /> {t("agenda.approve")}
                   </Button>
                   <Button type="button" variant="secondary" size="sm" onClick={() => handleRequestAction(req.id, "rejected")}>
-                    <X size={14} className="mr-1" /> Rechazar
+                    <X size={14} className="mr-1" /> {t("agenda.reject")}
                   </Button>
                 </div>
               </li>
@@ -494,10 +510,17 @@ export function AgendaPage({ onStartConsultation }) {
                 </div>
                 <div className="agenda-list-section-body">
                   {dayAppts.length === 0 ? (
-                    <p className="clinic-agenda-empty">Sin citas programadas</p>
+                    <p className="clinic-agenda-empty">{t("agenda.emptyDay")}</p>
                   ) : (
                     dayAppts.map((a) => (
-                      <AgendaAppointmentCard key={a.id} appointment={a} onEdit={openEdit} />
+                      <AgendaAppointmentCard
+                        key={a.id}
+                        appointment={a}
+                        onEdit={openEdit}
+                        statusLabel={statusLabel(a.status)}
+                        locale={locale}
+                        defaultPetLabel={t("agenda.defaultPet")}
+                      />
                     ))
                   )}
                 </div>
@@ -522,10 +545,17 @@ export function AgendaPage({ onStartConsultation }) {
               </div>
               <div className="clinic-agenda-day-body">
                 {dayAppts.length === 0 ? (
-                  <p className="clinic-agenda-empty">Sin citas</p>
+                  <p className="clinic-agenda-empty">{t("agenda.emptySlot")}</p>
                 ) : (
                   dayAppts.map((a) => (
-                    <AgendaAppointmentCard key={a.id} appointment={a} onEdit={openEdit} />
+                    <AgendaAppointmentCard
+                      key={a.id}
+                      appointment={a}
+                      onEdit={openEdit}
+                      statusLabel={statusLabel(a.status)}
+                      locale={locale}
+                      defaultPetLabel={t("agenda.defaultPet")}
+                    />
                   ))
                 )}
               </div>
@@ -538,25 +568,25 @@ export function AgendaPage({ onStartConsultation }) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className={clinicDialogClass("max-w-md", "clinic-dialog", "clinic-agenda-dialog")}>
           <DialogHeader className="clinic-dialog-header">
-            <DialogTitle>{editing ? "Editar cita" : "Nueva cita"}</DialogTitle>
+            <DialogTitle>
+              {editing ? t("agenda.editAppointment") : t("agenda.newAppointment")}
+            </DialogTitle>
             <p className="clinic-dialog-subtitle">
-              {editing
-                ? "Actualiza horario, estado y notas de la cita."
-                : "Programa una cita vinculada a una mascota del consultorio."}
+              {editing ? t("agenda.dialogEditLead") : t("agenda.dialogCreateLead")}
             </p>
           </DialogHeader>
           <form onSubmit={handleSave} className="clinic-form clinic-form-product">
             <div className="clinic-form-scroll">
               <div className="form-group">
-                <Label htmlFor="agenda-patient">Mascota *</Label>
+                <Label htmlFor="agenda-patient">{t("agenda.patientRequired")}</Label>
                 <Select value={form.patient_id} onValueChange={onPatientChange}>
                   <SelectTrigger id="agenda-patient" className="clinic-field-control">
-                    <SelectValue placeholder="Seleccionar mascota" />
+                    <SelectValue placeholder={t("agenda.selectPet")} />
                   </SelectTrigger>
                   <SelectContent>
                     {patients.map((p) => (
                       <SelectItem key={p.id} value={p.id}>
-                        {p.name} ({p.clients?.name || "dueño"})
+                        {p.name} ({p.clients?.name || t("agenda.ownerFallback")})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -564,7 +594,7 @@ export function AgendaPage({ onStartConsultation }) {
               </div>
               <div className="clinic-form-grid-2">
                 <div className="form-group">
-                  <Label htmlFor="agenda-starts">Inicio *</Label>
+                  <Label htmlFor="agenda-starts">{t("agenda.startsAt")}</Label>
                   <Input
                     id="agenda-starts"
                     className="clinic-field-control"
@@ -575,7 +605,7 @@ export function AgendaPage({ onStartConsultation }) {
                   />
                 </div>
                 <div className="form-group">
-                  <Label htmlFor="agenda-ends">Fin *</Label>
+                  <Label htmlFor="agenda-ends">{t("agenda.endsAt")}</Label>
                   <Input
                     id="agenda-ends"
                     className="clinic-field-control"
@@ -587,34 +617,34 @@ export function AgendaPage({ onStartConsultation }) {
                 </div>
               </div>
               <div className="form-group">
-                <Label htmlFor="agenda-status">Estado</Label>
+                <Label htmlFor="agenda-status">{t("agenda.status")}</Label>
                 <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
                   <SelectTrigger id="agenda-status" className="clinic-field-control">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(STATUS_LABELS).map(([k, label]) => (
-                      <SelectItem key={k} value={k}>{label}</SelectItem>
+                    {APPOINTMENT_STATUS_KEYS.map((k) => (
+                      <SelectItem key={k} value={k}>{statusLabel(k)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="form-group">
-                <Label htmlFor="agenda-reason">Motivo</Label>
+                <Label htmlFor="agenda-reason">{t("agenda.reason")}</Label>
                 <Input
                   id="agenda-reason"
                   className="clinic-field-control"
-                  placeholder="Ej. control, vacunación, seguimiento"
+                  placeholder={t("agenda.reasonPlaceholder")}
                   value={form.reason}
                   onChange={(e) => setForm({ ...form, reason: e.target.value })}
                 />
               </div>
               <div className="form-group">
-                <Label htmlFor="agenda-notes">Notas</Label>
+                <Label htmlFor="agenda-notes">{t("agenda.notes")}</Label>
                 <Textarea
                   id="agenda-notes"
                   className="clinic-field-control clinic-field-control--textarea"
-                  placeholder="Indicaciones internas o recordatorios"
+                  placeholder={t("agenda.notesPlaceholder")}
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   rows={3}
@@ -623,7 +653,7 @@ export function AgendaPage({ onStartConsultation }) {
             </div>
             <DialogFooter className="clinic-dialog-footer gap-2 flex-wrap">
               {editing && (
-                <Button type="button" variant="destructive" onClick={handleDelete}>Eliminar</Button>
+                <Button type="button" variant="destructive" onClick={handleDelete}>{t("common.delete")}</Button>
               )}
               {editing && onStartConsultation && form.patient_id && (
                 <Button
@@ -640,11 +670,11 @@ export function AgendaPage({ onStartConsultation }) {
                     });
                   }}
                 >
-                  <Stethoscope size={14} className="mr-1" /> Consulta
+                  <Stethoscope size={14} className="mr-1" /> {t("agenda.consultation")}
                 </Button>
               )}
-              <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={saving}>{saving ? "Guardando..." : "Guardar"}</Button>
+              <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
+              <Button type="submit" disabled={saving}>{saving ? t("common.saving") : t("common.save")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -653,9 +683,9 @@ export function AgendaPage({ onStartConsultation }) {
       <Dialog open={approveOpen} onOpenChange={setApproveOpen}>
         <DialogContent className={clinicDialogClass("max-w-sm", "clinic-dialog", "clinic-agenda-dialog")}>
           <DialogHeader className="clinic-dialog-header">
-            <DialogTitle>Confirmar cita</DialogTitle>
+            <DialogTitle>{t("agenda.confirmTitle")}</DialogTitle>
             <p className="clinic-dialog-subtitle">
-              Define el horario definitivo antes de aprobar la solicitud.
+              {t("agenda.confirmLead")}
             </p>
           </DialogHeader>
           {approvingRequest && (
@@ -668,7 +698,7 @@ export function AgendaPage({ onStartConsultation }) {
                   <p className="clinic-agenda-approve-reason">{approvingRequest.reason}</p>
                 )}
                 <div className="form-group">
-                  <Label htmlFor="approve-starts">Inicio de la cita *</Label>
+                  <Label htmlFor="approve-starts">{t("agenda.approveStarts")}</Label>
                   <Input
                     id="approve-starts"
                     className="clinic-field-control"
@@ -679,7 +709,7 @@ export function AgendaPage({ onStartConsultation }) {
                   />
                 </div>
                 <div className="form-group">
-                  <Label htmlFor="approve-ends">Fin de la cita *</Label>
+                  <Label htmlFor="approve-ends">{t("agenda.approveEnds")}</Label>
                   <Input
                     id="approve-ends"
                     className="clinic-field-control"
@@ -692,10 +722,10 @@ export function AgendaPage({ onStartConsultation }) {
               </div>
               <DialogFooter className="clinic-dialog-footer gap-2">
                 <Button type="button" variant="secondary" onClick={() => setApproveOpen(false)}>
-                  Cancelar
+                  {t("common.cancel")}
                 </Button>
                 <Button type="submit" disabled={approving}>
-                  {approving ? "Creando cita..." : "Aprobar y crear cita"}
+                  {approving ? t("agenda.approving") : t("agenda.approveAndCreate")}
                 </Button>
               </DialogFooter>
             </form>

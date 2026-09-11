@@ -2,6 +2,11 @@ import { getBackendUrl } from "./backendUrl";
 import { friendlyFetchError, formatApiErrorDetail, parseJsonResponse } from "./friendlyFetchError";
 import { getAuthHeaders } from "./authHeaders";
 import { fetchWithTimeout } from "./fetchWithTimeout";
+import i18n from "../i18n";
+
+function apiFallback(key) {
+  return i18n.t(`api.${key}`, { ns: "clinic" });
+}
 
 function vetHeaders(veterinarianId, extra = {}) {
   return {
@@ -10,20 +15,20 @@ function vetHeaders(veterinarianId, extra = {}) {
   };
 }
 
-async function clinicFetch(path, veterinarianId, options = {}) {
+async function clinicFetch(path, veterinarianId, options = {}, fetchConfig = {}) {
   const response = await fetchWithTimeout(
     `${getBackendUrl()}${path}`,
     {
       ...options,
       headers: vetHeaders(veterinarianId, options.headers),
     },
-    { timeoutMs: 45000, retries: 2 },
+    { timeoutMs: 45000, retries: 2, ...fetchConfig },
   );
   if (!response.ok) {
     const data = await parseJsonResponse(response, {});
     throw new Error(
       formatApiErrorDetail(data.detail, friendlyFetchError(response.status, getBackendUrl())) ||
-        "Error de servidor",
+        apiFallback("serverError"),
     );
   }
   return parseJsonResponse(response, {});
@@ -162,7 +167,7 @@ export async function fetchAdminUserCedulaDocumentBlob(veterinarianId, profileId
     const data = await parseJsonResponse(response, {});
     throw new Error(
       formatApiErrorDetail(data.detail, friendlyFetchError(response.status, getBackendUrl())) ||
-        "Error de servidor",
+        apiFallback("serverError"),
     );
   }
   return response.blob();
@@ -224,6 +229,29 @@ export async function fetchClients(veterinarianId, search = "") {
   return clinicFetch(`/api/clients${q}`, veterinarianId);
 }
 
+export async function fetchClinicRegistry(veterinarianId) {
+  try {
+    return await clinicFetch("/api/clinic-registry", veterinarianId, {}, { timeoutMs: 20000, retries: 0 });
+  } catch (err) {
+    const message = String(err?.message || "");
+    const useLegacy =
+      message.includes("405") ||
+      message.includes("404") ||
+      /method not allowed/i.test(message) ||
+      /not found/i.test(message);
+    if (!useLegacy) throw err;
+
+    const [clientsData, patientsData] = await Promise.all([
+      fetchClients(veterinarianId),
+      fetchPatients(veterinarianId),
+    ]);
+    return {
+      clients: clientsData.clients || [],
+      patients: patientsData.patients || [],
+    };
+  }
+}
+
 export async function fetchClient(veterinarianId, clientId) {
   return clinicFetch(`/api/clients/${clientId}`, veterinarianId);
 }
@@ -269,6 +297,13 @@ export async function updatePatient(veterinarianId, patientId, data) {
   return clinicFetch(`/api/patients/${patientId}`, veterinarianId, {
     method: "PATCH",
     body: JSON.stringify(data),
+  });
+}
+
+export async function patchPatientClinicalChart(veterinarianId, patientId, patch) {
+  return clinicFetch(`/api/patients/${patientId}/clinical-chart`, veterinarianId, {
+    method: "PATCH",
+    body: JSON.stringify(patch),
   });
 }
 
@@ -321,7 +356,7 @@ export async function fetchPublicOrganization(organizationId) {
   const response = await fetch(`${getBackendUrl()}/api/public/organizations/${organizationId}`);
   const data = await parseJsonResponse(response, {});
   if (!response.ok) {
-    throw new Error(formatApiErrorDetail(data.detail, "Consultorio no encontrado"));
+    throw new Error(formatApiErrorDetail(data.detail, apiFallback("orgNotFound")));
   }
   return data;
 }
@@ -334,7 +369,7 @@ export async function submitAppointmentRequest(data) {
   });
   const body = await parseJsonResponse(response, {});
   if (!response.ok) {
-    throw new Error(formatApiErrorDetail(body.detail, "No se pudo enviar la solicitud"));
+    throw new Error(formatApiErrorDetail(body.detail, apiFallback("requestFailed")));
   }
   return body;
 }
@@ -347,7 +382,7 @@ export async function submitGuiaConsultasLead(data) {
   });
   const body = await parseJsonResponse(response, {});
   if (!response.ok) {
-    throw new Error(formatApiErrorDetail(body.detail, "No se pudo enviar la solicitud"));
+    throw new Error(formatApiErrorDetail(body.detail, apiFallback("requestFailed")));
   }
   return body;
 }

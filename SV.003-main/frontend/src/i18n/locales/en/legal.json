@@ -1,0 +1,83 @@
+{
+  "privacyModal": {
+    "title": "Privacy and Data Use",
+    "intro": "GUIAA is committed to protecting your privacy and that of your patients. By using this platform:",
+    "items": [
+      "Consultation data is stored securely and encrypted",
+      "Only you have access to your patients' information",
+      "We do not share information with third parties without your consent",
+      "We comply with all applicable data protection regulations",
+      "You may request deletion of your data at any time"
+    ],
+    "moreInfo": "For more information, see our",
+    "policyLink": "Privacy Policy",
+    "accept": "Got it"
+  },
+  "termsModal": {
+    "titleTerms": "Terms and Conditions",
+    "titlePrivacy": "Privacy Policy",
+    "subtitleTerms": "Terms of use of the GUIAA platform for licensed veterinarians.",
+    "subtitlePrivacy": "How we protect and process your professional and clinical data.",
+    "close": "Close",
+    "closeAria": "Close",
+    "cancel": "Cancel",
+    "accept": "I accept the Terms",
+    "scrollHint": "Scroll to read all terms"
+  },
+  "intro": {
+    "title": "GUIAA Platform — Clinical Decision Support (CDS)",
+    "grade": "Advanced L4 and L5 grade",
+    "privacyDoc": "Privacy and data processing document for veterinary professionals.",
+    "termsDoc": "Legal terms of use for certified veterinary professionals.",
+    "updated": "Last updated: December 28, 2025 · Effective January 1, 2026"
+  },
+  "privacyPolicy": {
+    "title": "Data protection and privacy",
+    "frameworkTitle": "Applicable legal framework",
+    "frameworkIntro": "The Platform complies with:",
+    "frameworkItems": [
+      "Mexican Federal Law on Protection of Personal Data Held by Private Parties (LFPDPPP)",
+      "General Data Protection Regulation (GDPR) for users in the European Union",
+      "Applicable health data protection regulations",
+      "International information security standards (ISO 27001, ISO 27799)"
+    ],
+    "collectedTitle": "Data collected",
+    "collectedIntro": "We collect:",
+    "collectedItems": [
+      "Professional identification data (name, country, license, institution)",
+      "Contact data (email, phone)",
+      "Platform usage data",
+      "Anonymized clinical data for system improvement"
+    ],
+    "useTitle": "Use of data",
+    "useIntro": "Data is used to:",
+    "useItems": [
+      "Provide and improve the service",
+      "Verify professional credentials",
+      "Statistical analysis and algorithm improvement",
+      "Compliance with legal obligations",
+      "Service-related communications"
+    ],
+    "securityTitle": "Security",
+    "securityIntro": "We implement security measures including:",
+    "securityItems": [
+      "Encryption of data in transit and at rest (TLS 1.3, AES-256)",
+      "Multi-factor authentication",
+      "Role-based access controls",
+      "Periodic security audits",
+      "Incident response protocols"
+    ],
+    "rightsTitle": "User rights",
+    "rightsIntro": "You have the right to:",
+    "rightsItems": [
+      "Access your personal data",
+      "Rectify inaccurate data",
+      "Cancel your account and data",
+      "Object to data processing",
+      "Data portability",
+      "Revoke granted consents"
+    ],
+    "contact": "To exercise your ARCO rights or privacy inquiries, email",
+    "copyright": "© 2026 GUIAA Platform. All rights reserved."
+  }
+}

@@ -1,0 +1,216 @@
+.patient-clinical-chart .patient-chart-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.patient-chart-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.patient-chart-summary {
+  margin-bottom: 20px;
+}
+
+.patient-chart-summary h2,
+.patient-chart-timeline h2 {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+  color: var(--clinic-navy, #0c2d4d);
+}
+
+.patient-chart-summary-meta {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: rgba(12, 45, 77, 0.75);
+}
+
+.patient-chart-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .patient-chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.patient-chart-panel {
+  border: 1px solid rgba(38, 91, 147, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 14px 16px;
+}
+
+.patient-chart-panel h3,
+.patient-chart-list-editor h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: var(--clinic-navy, #0c2d4d);
+}
+
+.patient-chart-list-editor + .patient-chart-list-editor {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(38, 91, 147, 0.08);
+}
+
+.patient-chart-chip-list,
+.patient-chart-problems,
+.patient-chart-vitals-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.patient-chart-chip-list li,
+.patient-chart-problems li,
+.patient-chart-vitals-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(38, 91, 147, 0.05);
+  font-size: 0.875rem;
+}
+
+.patient-chart-problems li.is-closed {
+  opacity: 0.65;
+  text-decoration: line-through;
+}
+
+.patient-chart-add-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.patient-chart-icon-btn {
+  border: none;
+  background: transparent;
+  color: rgba(12, 45, 77, 0.55);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.patient-chart-icon-btn:hover {
+  color: var(--clinic-navy, #0c2d4d);
+  background: rgba(38, 91, 147, 0.08);
+}
+
+.patient-chart-vitals-title {
+  margin-top: 20px !important;
+}
+
+.patient-chart-sparkline {
+  color: var(--clinic-green, #3d9b8f);
+  margin-bottom: 8px;
+}
+
+.patient-chart-timeline {
+  margin-top: 8px;
+}
+
+.patient-chart-consultation-detail {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(38, 91, 147, 0.12);
+  background: #fff;
+}
+
+.patient-chart-consultation-detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.patient-chart-consultation-detail-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.consultation-form-data-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: none;
+  background: rgba(38, 91, 147, 0.06);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--clinic-navy, #0c2d4d);
+}
+
+.consultation-form-data-species {
+  font-weight: 500;
+  color: rgba(12, 45, 77, 0.55);
+}
+
+.consultation-form-data-body {
+  margin-top: 10px;
+  display: grid;
+  gap: 12px;
+}
+
+.consultation-form-data-section h4 {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(12, 45, 77, 0.5);
+}
+
+.consultation-form-data-section dl {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.consultation-form-data-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.4fr) minmax(0, 1fr);
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+.consultation-form-data-row dt {
+  color: rgba(12, 45, 77, 0.55);
+  font-weight: 600;
+}
+
+.consultation-form-data-row dd {
+  margin: 0;
+  color: var(--clinic-navy, #0c2d4d);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  .consultation-form-data-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

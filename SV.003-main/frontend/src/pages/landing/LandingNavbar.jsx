@@ -1,25 +1,28 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 import { LandingBrandLockup } from "./LandingBrandLockup";
 import { scrollToLandingProduct } from "./landingScroll";
 import { useLandingScrollSpy } from "./useLandingScrollSpy";
 
-const NAV_LINKS = [
-  { href: "#product", label: "Producto", sectionId: "product", isProduct: true },
-  { href: "#features", label: "Servicios", sectionId: "features" },
-  { href: "#pricing", label: "Precios", sectionId: "pricing" },
-  { href: "#faq", label: "FAQ", sectionId: "faq" },
-];
-
 const SPY_SECTIONS = ["product", "features", "pricing", "faq"];
 
 export function LandingNavbar({ setView, hero = false }) {
+  const { t } = useTranslation("landing");
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const progressRef = useRef(null);
   const scrolledRef = useRef(false);
   const frameRef = useRef(0);
   const activeSection = useLandingScrollSpy(SPY_SECTIONS);
+
+  const navLinks = [
+    { href: "#product", label: t("nav.product"), sectionId: "product", isProduct: true },
+    { href: "#features", label: t("nav.services"), sectionId: "features" },
+    { href: "#pricing", label: t("nav.pricing"), sectionId: "pricing" },
+    { href: "#faq", label: t("nav.faq"), sectionId: "faq" },
+  ];
 
   useEffect(() => {
     const updateScrollUi = () => {
@@ -111,9 +114,9 @@ export function LandingNavbar({ setView, hero = false }) {
 
         <nav
           className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 lg:flex"
-          aria-label="Principal"
+          aria-label={t("nav.main")}
         >
-          {NAV_LINKS.map(({ href, label, sectionId, isProduct }) => (
+          {navLinks.map(({ href, label, sectionId, isProduct }) => (
             <button
               key={href}
               type="button"
@@ -135,23 +138,25 @@ export function LandingNavbar({ setView, hero = false }) {
         </nav>
 
         <div className="hidden items-center gap-3 sm:flex">
+          <LanguageSwitcher tone={hero ? "on-dark" : "default"} />
           <button
             type="button"
             onClick={() => setView("login")}
             className="landing-btn-ghost"
           >
-            Iniciar sesión
+            {t("nav.login")}
           </button>
           <button
             type="button"
             onClick={() => setView("register")}
             className="landing-btn-primary px-5 py-2.5"
           >
-            Registrarse
+            {t("nav.register")}
           </button>
         </div>
 
         <div className="flex items-center gap-1.5 sm:hidden">
+          <LanguageSwitcher tone={hero ? "on-dark" : "default"} />
           <button
             type="button"
             onClick={() => setView("login")}
@@ -161,14 +166,14 @@ export function LandingNavbar({ setView, hero = false }) {
                 : "text-guiaa-brand-navy/80 hover:bg-guiaa-brand-navy/5"
             }`}
           >
-            Ingresar
+            {t("nav.enter")}
           </button>
           <button
             type="button"
             onClick={() => setView("register")}
             className="landing-btn-primary landing-nav-mobile-cta px-3 py-2.5 text-xs"
           >
-            Registro
+            {t("nav.registerShort")}
           </button>
           <button
             type="button"
@@ -177,10 +182,10 @@ export function LandingNavbar({ setView, hero = false }) {
             }`}
             onClick={() => setMobileOpen((open) => !open)}
             aria-expanded={mobileOpen}
-            aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-label={mobileOpen ? t("nav.closeMenu") : t("nav.openMenu")}
           >
             {mobileOpen ? <X size={22} aria-hidden /> : <Menu size={22} aria-hidden />}
-            <span className="sr-only">{mobileOpen ? "Cerrar menú" : "Abrir menú"}</span>
+            <span className="sr-only">{mobileOpen ? t("nav.closeMenu") : t("nav.openMenu")}</span>
           </button>
         </div>
       </div>
@@ -201,7 +206,7 @@ export function LandingNavbar({ setView, hero = false }) {
         >
           <div className="landing-container py-4">
             <nav className="flex flex-col gap-1">
-            {NAV_LINKS.map(({ href, label, sectionId, isProduct }) => (
+            {navLinks.map(({ href, label, sectionId, isProduct }) => (
               <button
                 key={href}
                 type="button"

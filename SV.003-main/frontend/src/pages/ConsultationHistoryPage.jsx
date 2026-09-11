@@ -15,14 +15,12 @@ import { ConsultationHistoryCard } from "../components/consultation/Consultation
 import { ConsultationDetailPanel } from "../components/consultation/ConsultationDetailPanel";
 import { LabStudyHistoryCard } from "../components/clinical/LabStudyHistoryCard";
 import { notifyError } from "../lib/appToast";
+import { useTranslation } from "react-i18next";
+import { ModuleHelpTip } from "../components/clinic/ModuleHelpTip";
 import "./consultationHistoryPage.css";
+import "./clinic/helpCenterPage.css";
 
-const STATUS_FILTERS = [
-  { id: "all", label: "Todo" },
-  { id: "completed", label: "Completadas" },
-  { id: "in_progress", label: "En progreso" },
-  { id: "draft", label: "Borradores" },
-];
+const STATUS_FILTER_IDS = ["all", "completed", "in_progress", "draft"];
 
 function HistorySkeleton() {
   return (
@@ -39,7 +37,23 @@ function HistorySkeleton() {
   );
 }
 
-export function ConsultationHistoryPage({ setView, openConsultation }) {
+export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatientChart }) {
+  const { t } = useTranslation("clinic");
+  const statusFilters = useMemo(
+    () =>
+      STATUS_FILTER_IDS.map((id) => ({
+        id,
+        label:
+          id === "all"
+            ? t("history.filterAll")
+            : id === "completed"
+              ? t("history.filterCompleted")
+              : id === "in_progress"
+                ? t("history.filterInProgress")
+                : t("history.filterDrafts"),
+      })),
+    [t],
+  );
   const { veterinarian } = useVet();
   const [consultations, setConsultations] = useState([]);
   const [medicalImages, setMedicalImages] = useState([]);
@@ -166,6 +180,7 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
         onBack={() => setSelectedConsultation(null)}
         onDownloadPdf={handleDownloadPdf}
         onContinue={openConsultation}
+        onOpenPatientChart={onOpenPatientChart}
       />
     );
   }
@@ -175,21 +190,21 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
       <div className="container">
         <header className="history-page-header">
           <div>
-            <p className="history-page-eyebrow">Expediente clínico</p>
-            <h1>Historial clínico</h1>
-            <p>
-              Consultas CDS e interpretaciones de laboratorio en un solo lugar, con folio, estado y
-              exportación PDF.
-            </p>
+            <p className="history-page-eyebrow">{t("history.eyebrow")}</p>
+            <div className="clinic-page-title-row">
+              <h1>{t("history.title")}</h1>
+              <ModuleHelpTip topicId="history" setView={setView} />
+            </div>
+            <p>{t("history.lead")}</p>
           </div>
           <Button type="button" onClick={() => setView("new-consultation")}>
             <Plus size={16} aria-hidden />
-            Nueva consulta
+            {t("history.newConsultation")}
           </Button>
         </header>
 
-        <div className="history-stats-row" role="group" aria-label="Resumen del historial">
-          {STATUS_FILTERS.map(({ id, label }) => (
+        <div className="history-stats-row" role="group" aria-label={t("history.summaryAria")}>
+          {statusFilters.map(({ id, label }) => (
             <button
               key={id}
               type="button"
@@ -201,9 +216,9 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
               <span className="history-stat-label">{label}</span>
             </button>
           ))}
-          <div className="history-stat-pill history-stat-pill--info" aria-label="Interpretaciones de laboratorio">
+          <div className="history-stat-pill history-stat-pill--info" aria-label={t("history.labAria")}>
             <span className="history-stat-value">{stats.lab_studies}</span>
-            <span className="history-stat-label">Laboratorio</span>
+            <span className="history-stat-label">{t("history.lab")}</span>
           </div>
         </div>
 
@@ -212,26 +227,26 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
             <Search size={18} className="history-search-icon" aria-hidden />
             <input
               type="search"
-              placeholder="Buscar por folio, mascota, propietario, raza o estudio…"
+              placeholder={t("history.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="history-search-input"
-              aria-label="Buscar en historial clínico"
+              aria-label={t("history.searchAria")}
             />
             {searchQuery && (
               <button
                 type="button"
                 className="history-search-clear"
                 onClick={() => setSearchQuery("")}
-                aria-label="Limpiar búsqueda"
+                aria-label={t("history.clearSearch")}
               >
                 <X size={16} />
               </button>
             )}
           </div>
 
-          <div className="history-filter-tabs" role="tablist" aria-label="Filtrar por estado">
-            {STATUS_FILTERS.map(({ id, label }) => (
+          <div className="history-filter-tabs" role="tablist" aria-label={t("history.filterAria")}>
+            {statusFilters.map(({ id, label }) => (
               <button
                 key={id}
                 type="button"
@@ -283,6 +298,7 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
                       onView={handleViewConsultation}
                       onDownloadPdf={handleDownloadPdf}
                       onContinue={openConsultation}
+                      onOpenPatientChart={onOpenPatientChart}
                     />
                   );
                 }
@@ -301,23 +317,23 @@ export function ConsultationHistoryPage({ setView, openConsultation }) {
             </div>
             <h3>
               {searchQuery || statusFilter !== "all"
-                ? "No se encontraron registros"
-                : "Sin historial clínico aún"}
+                ? t("history.emptySearchTitle")
+                : t("history.emptyTitle")}
             </h3>
             <p>
               {searchQuery || statusFilter !== "all"
-                ? "Prueba otro término o cambia el filtro de estado."
-                : "Inicia una consulta CDS o interpreta un estudio de laboratorio."}
+                ? t("history.emptySearchDesc")
+                : t("history.emptyDesc")}
             </p>
             {!searchQuery && statusFilter === "all" && (
               <div className="history-empty-actions">
                 <Button type="button" variant="guiaaPrimary" onClick={() => setView("new-consultation")}>
                   <Stethoscope size={16} aria-hidden />
-                  Nueva consulta
+                  {t("history.newConsultation")}
                 </Button>
                 <Button type="button" variant="guiaaSoft" onClick={() => setView("medical-images")}>
                   <FlaskConical size={16} aria-hidden />
-                  Interpretar estudio
+                  {t("history.interpretStudy")}
                 </Button>
               </div>
             )}

@@ -1,6 +1,12 @@
 /**
  * fetch con timeout y reintento opcional en 502/503/504 (arranque en frío del backend).
  */
+import i18n from "../i18n";
+
+function tErr(key) {
+  return i18n.t(`errors.${key}`, { ns: "common" });
+}
+
 export async function fetchWithTimeout(url, options = {}, config = {}) {
   const {
     timeoutMs = 30000,
@@ -34,9 +40,7 @@ export async function fetchWithTimeout(url, options = {}, config = {}) {
       lastError = err;
       const aborted = err?.name === "AbortError";
       if (aborted) {
-        throw new Error(
-          "La solicitud tardó demasiado. El servidor puede estar iniciando; espera unos segundos e intenta de nuevo.",
-        );
+        throw new Error(tErr("requestTimeout"));
       }
       if (attempt < retries) {
         await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
@@ -48,7 +52,7 @@ export async function fetchWithTimeout(url, options = {}, config = {}) {
     }
   }
 
-  throw lastError || new Error("No se pudo completar la solicitud");
+  throw lastError || new Error(tErr("requestIncomplete"));
 }
 
 /**
@@ -88,7 +92,7 @@ export async function fetchJsonWithRetry(url, options = {}, config = {}) {
         }
         lastError = new Error(
           formatApiErrorDetail(detail, friendlyFetchError(response.status, url)) ||
-            `Error del servidor: ${response.status}`,
+            i18n.t("errors.serverStatus", { ns: "common", status: response.status }),
         );
         if (attempt < retries && [502, 503, 504].includes(response.status)) {
           continue;
@@ -97,9 +101,7 @@ export async function fetchJsonWithRetry(url, options = {}, config = {}) {
       }
 
       if (!text.trim()) {
-        lastError = new Error(
-          "El servidor no devolvió datos. Espera unos segundos e intenta de nuevo.",
-        );
+        lastError = new Error(tErr("emptyResponse"));
         if (attempt < retries) continue;
         throw lastError;
       }
@@ -107,9 +109,7 @@ export async function fetchJsonWithRetry(url, options = {}, config = {}) {
       try {
         return JSON.parse(text);
       } catch {
-        lastError = new Error(
-          "El servidor devolvió una respuesta inválida. Intenta de nuevo en unos segundos.",
-        );
+        lastError = new Error(tErr("invalidResponseRetry"));
         if (attempt < retries) continue;
         throw lastError;
       }
@@ -120,5 +120,5 @@ export async function fetchJsonWithRetry(url, options = {}, config = {}) {
     }
   }
 
-  throw lastError || new Error("No se pudo completar la solicitud");
+  throw lastError || new Error(tErr("requestIncomplete"));
 }

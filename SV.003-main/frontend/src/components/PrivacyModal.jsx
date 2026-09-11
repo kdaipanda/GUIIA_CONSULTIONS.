@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 
 export function PrivacyModal({ isOpen, onAccept }) {
+  const { t } = useTranslation("legal");
+  const items = t("privacyModal.items", { returnObjects: true });
+
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent
@@ -20,37 +24,23 @@ export function PrivacyModal({ isOpen, onAccept }) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span aria-hidden>🔒</span>
-            Privacidad y Uso de Datos
+            {t("privacyModal.title")}
           </DialogTitle>
           <DialogDescription asChild>
             <div className="text-left text-sm text-muted-foreground">
-              <p className="mb-3">
-                GUIAA se compromete a proteger tu privacidad y la de tus
-                mascotas. Al usar esta plataforma:
-              </p>
+              <p className="mb-3">{t("privacyModal.intro")}</p>
               <ul className="list-disc space-y-1 pl-4">
-                <li>
-                  Los datos de las consultas se almacenan de forma segura y
-                  encriptada
-                </li>
-                <li>Solo tú tienes acceso a la información de tus mascotas</li>
-                <li>
-                  No compartimos información con terceros sin tu consentimiento
-                </li>
-                <li>Cumplimos con todas las normativas de protección de datos</li>
-                <li>
-                  Puedes solicitar la eliminación de tus datos en cualquier
-                  momento
-                </li>
+                {Array.isArray(items) &&
+                  items.map((item) => <li key={item}>{item}</li>)}
               </ul>
               <p className="mt-3">
-                Para más información, consulta nuestra{" "}
+                {t("privacyModal.moreInfo")}{" "}
                 <a
                   href="#"
                   className="font-medium text-primary underline-offset-4 hover:underline"
                   onClick={(e) => e.preventDefault()}
                 >
-                  Política de Privacidad
+                  {t("privacyModal.policyLink")}
                 </a>
                 .
               </p>
@@ -59,7 +49,7 @@ export function PrivacyModal({ isOpen, onAccept }) {
         </DialogHeader>
         <DialogFooter>
           <Button type="button" onClick={onAccept}>
-            Entendido
+            {t("privacyModal.accept")}
           </Button>
         </DialogFooter>
       </DialogContent>

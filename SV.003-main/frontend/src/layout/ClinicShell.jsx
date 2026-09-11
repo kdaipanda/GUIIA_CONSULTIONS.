@@ -15,6 +15,7 @@ import {
   Shield,
   Menu,
   FlaskConical,
+  CircleHelp,
 } from "lucide-react";
 import { Header } from "../components/Header";
 import { NotificationBell } from "../components/clinic/NotificationBell";
@@ -25,55 +26,62 @@ import { useVet } from "../context/VetContext";
 import { clinicNavIsHero, clinicNavThemeStyle } from "../lib/clinicNavTheme";
 import { PlatformOnboarding } from "../components/PlatformOnboarding";
 import { hasCompletedPlatformOnboarding } from "../lib/platformOnboarding";
+import { OPEN_PLATFORM_ONBOARDING_EVENT } from "../lib/helpCenter";
 import { ClinicMobileNavDrawer } from "./ClinicMobileNavDrawer";
 import { PageEnter } from "../components/motion/PageEnter";
 import { canAccessFeature, MEMBERSHIP_FEATURES } from "../lib/membershipAccess";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "../components/LanguageSwitcher";
+import { warmClinicAppData } from "../lib/prefetchClinicApp";
+import { clinicCacheKey, loadClinicData, readClinicDataCache } from "../lib/clinicDataCache";
 
-const BASE_NAV_ITEMS = [
-  { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard, view: "dashboard" },
+const NAV_ITEM_DEFS = [
+  { to: "/app/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard, view: "dashboard" },
   {
     to: "/app/consultas/nueva",
-    label: "GUIAA Diagnóstico",
+    labelKey: "nav.diagnosis",
     icon: Stethoscope,
     view: "new-consultation",
   },
-  { to: "/app/clientes", label: "Dueños y mascotas", icon: PawPrint, view: "clients" },
-  { to: "/app/agenda", label: "Agenda", icon: CalendarDays, view: "agenda" },
+  { to: "/app/clientes", labelKey: "nav.clients", icon: PawPrint, view: "clients" },
+  { to: "/app/agenda", labelKey: "nav.agenda", icon: CalendarDays, view: "agenda" },
   {
     to: "/app/inventario",
-    label: "Inventario",
+    labelKey: "nav.inventory",
     icon: Package,
     view: "inventory",
     feature: MEMBERSHIP_FEATURES.inventory,
   },
   {
     to: "/app/facturacion",
-    label: "Ventas",
+    labelKey: "nav.billing",
     icon: Receipt,
     view: "billing",
     feature: MEMBERSHIP_FEATURES.billing,
   },
   {
     to: "/app/reportes",
-    label: "Reportes",
+    labelKey: "nav.reports",
     icon: BarChart3,
     view: "reports",
     feature: MEMBERSHIP_FEATURES.reports,
   },
   {
     to: "/app/imagenes",
-    label: "Laboratorio",
+    labelKey: "nav.lab",
     icon: FlaskConical,
     view: "medical-images",
     feature: MEMBERSHIP_FEATURES.medicalImages,
   },
-  { to: "/app/configuracion", label: "Configuración", icon: Settings, view: "settings" },
-  { to: "/app/historial", label: "Historial clínico", icon: ClipboardList, view: "consultation-history" },
-  { to: "/app/membresia", label: "Membresía", icon: Crown, view: "membership" },
-  { to: "/app/perfil", label: "Perfil", icon: User, view: "profile" },
+  { to: "/app/configuracion", labelKey: "nav.settings", icon: Settings, view: "settings" },
+  { to: "/app/ayuda", labelKey: "nav.help", icon: CircleHelp, view: "help" },
+  { to: "/app/historial", labelKey: "nav.history", icon: ClipboardList, view: "consultation-history" },
+  { to: "/app/membresia", labelKey: "nav.membership", icon: Crown, view: "membership" },
+  { to: "/app/perfil", labelKey: "nav.profile", icon: User, view: "profile" },
 ];
 
 export function ClinicShell({ children, setView }) {
+  const { t } = useTranslation("clinic");
   const navigate = useNavigate();
   const { veterinarian, platformAdmin } = useVet();
   const { organization, loading: orgLoading, role } = useClinic();
@@ -82,6 +90,11 @@ export function ClinicShell({ children, setView }) {
   const [lowStockCount, setLowStockCount] = useState(0);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  const BASE_NAV_ITEMS = useMemo(
+    () => NAV_ITEM_DEFS.map((item) => ({ ...item, label: t(item.labelKey) })),
+    [t],
+  );
 
   const loadAdminSupportCount = useCallback(async () => {
     if (!platformAdmin || !veterinarian?.id) {
@@ -101,11 +114,16 @@ export function ClinicShell({ children, setView }) {
       setPendingAgendaRequests(0);
       return;
     }
+    const key = clinicCacheKey(veterinarian.id, "appointment-requests", "pending");
+    const cached = readClinicDataCache(key);
+    if (cached) setPendingAgendaRequests((cached.requests || []).length);
     try {
-      const data = await fetchAppointmentRequests(veterinarian.id, "pending");
+      const data = await loadClinicData(key, () => fetchAppointmentRequests(veterinarian.id, "pending"), {
+        ttlMs: 45_000,
+      });
       setPendingAgendaRequests((data.requests || []).length);
     } catch {
-      setPendingAgendaRequests(0);
+      if (!cached) setPendingAgendaRequests(0);
     }
   }, [veterinarian?.id]);
 
@@ -119,10 +137,17 @@ export function ClinicShell({ children, setView }) {
       return;
     }
     try {
-      const data = await fetchInventorySummary(veterinarian.id);
+      const key = clinicCacheKey(veterinarian.id, "inventory-summary");
+      const cached = readClinicDataCache(key);
+      if (cached) setLowStockCount(cached.low_stock_count ?? 0);
+      const data = await loadClinicData(key, () => fetchInventorySummary(veterinarian.id), {
+        ttlMs: 60_000,
+      });
       setLowStockCount(data.low_stock_count ?? 0);
     } catch {
-      setLowStockCount(0);
+      if (!readClinicDataCache(clinicCacheKey(veterinarian.id, "inventory-summary"))) {
+        setLowStockCount(0);
+      }
     }
   }, [veterinarian?.id, platformAdmin]);
 
@@ -165,6 +190,11 @@ export function ClinicShell({ children, setView }) {
   }, [veterinarian?.id]);
 
   useEffect(() => {
+    if (!veterinarian?.id) return;
+    warmClinicAppData(veterinarian.id, { platformAdmin });
+  }, [veterinarian?.id, platformAdmin]);
+
+  useEffect(() => {
     if (!veterinarian?.id || orgLoading) return undefined;
     if (hasCompletedPlatformOnboarding(veterinarian.id)) return undefined;
 
@@ -174,6 +204,12 @@ export function ClinicShell({ children, setView }) {
 
     return () => window.clearTimeout(timer);
   }, [veterinarian?.id, orgLoading]);
+
+  useEffect(() => {
+    const onOpenTour = () => setShowOnboarding(true);
+    window.addEventListener(OPEN_PLATFORM_ONBOARDING_EVENT, onOpenTour);
+    return () => window.removeEventListener(OPEN_PLATFORM_ONBOARDING_EVENT, onOpenTour);
+  }, []);
 
   const spacerRef = useRef(null);
 
@@ -225,13 +261,13 @@ export function ClinicShell({ children, setView }) {
     if (platformAdmin) {
       items.push({
         to: "/app/admin",
-        label: "Admin GUIAA",
+        label: t("nav.admin"),
         icon: Shield,
         view: "admin",
       });
     }
     return items;
-  }, [platformAdmin, veterinarian, role]);
+  }, [platformAdmin, veterinarian, BASE_NAV_ITEMS, t, role]);
 
   const handleBrandNav = (view) => {
     if (setView) setView(view);
@@ -259,10 +295,13 @@ export function ClinicShell({ children, setView }) {
       <Header
         setView={handleBrandNav}
         actions={
-          <NotificationBell
-            veterinarianId={veterinarian?.id}
-            onNavigate={handleNotificationNavigate}
-          />
+          <>
+            <LanguageSwitcher />
+            <NotificationBell
+              veterinarianId={veterinarian?.id}
+              onNavigate={handleNotificationNavigate}
+            />
+          </>
         }
       />
       <div ref={spacerRef} className="clinic-header-spacer" aria-hidden="true" />
@@ -276,13 +315,14 @@ export function ClinicShell({ children, setView }) {
             aria-controls="clinic-mobile-drawer-nav"
           >
             <Menu size={20} aria-hidden />
-            <span>Menú</span>
+            <span>{t("nav.menu")}</span>
           </button>
           {!orgLoading && organization?.name ? (
             <p className="clinic-mobile-org" title={organization.name}>
               {organization.name}
             </p>
           ) : null}
+          <LanguageSwitcher className="ml-auto" />
         </div>
 
         <ClinicMobileNavDrawer
@@ -299,7 +339,7 @@ export function ClinicShell({ children, setView }) {
 
         <aside className="clinic-sidebar clinic-sidebar--desktop">
           <div className="clinic-sidebar-head">
-            <span className="clinic-sidebar-title">Clínica</span>
+            <span className="clinic-sidebar-title">{t("shell.clinic")}</span>
             {!orgLoading && organization?.name && (
               <span className="clinic-sidebar-org">{organization.name}</span>
             )}
@@ -307,7 +347,7 @@ export function ClinicShell({ children, setView }) {
         <nav
             id="clinic-sidebar-nav"
             className="clinic-sidebar-nav"
-            aria-label="Módulos clínicos (escritorio)"
+            aria-label={t("shell.navAria")}
           >
             {navItems.map(({ to, label, icon: Icon, view, locked }, index) => (
               <NavLink
@@ -332,7 +372,7 @@ export function ClinicShell({ children, setView }) {
               >
                 <Icon size={18} aria-hidden />
                 <span>{label}</span>
-                {locked && <span className="clinic-sidebar-lock-badge">Premium</span>}
+                {locked && <span className="clinic-sidebar-lock-badge">{t("shell.premiumBadge")}</span>}
                 {view === "admin" && adminSupportOpen > 0 && (
                   <span className="clinic-sidebar-badge">{adminSupportOpen}</span>
                 )}

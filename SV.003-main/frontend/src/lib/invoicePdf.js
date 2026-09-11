@@ -1,7 +1,9 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import i18n from "../i18n";
 import {
   drawPdfBrandHeader,
   embedGuiaaLogo,
+  PDF_BRAND_COLOR,
   PDF_MUTED_COLOR,
 } from "./pdfLogo";
 
@@ -9,18 +11,31 @@ const PAGE = { width: 595.28, height: 841.89 };
 const MARGIN = 50;
 const CONTENT_WIDTH = PAGE.width - MARGIN * 2;
 
-const STATUS_LABELS = {
-  draft: "Borrador",
-  issued: "Emitido",
-  paid: "Pagado",
-  cancelled: "Cancelado",
-};
+function pdfT(key, options) {
+  return i18n.t(key, { ns: "pdf", ...options });
+}
 
-const PAYMENT_LABELS = {
-  efectivo: "Efectivo",
-  tarjeta: "Tarjeta",
-  transferencia: "Transferencia",
-};
+function pdfLocale() {
+  return i18n.language?.startsWith("en") ? "en-US" : "es-MX";
+}
+
+function getInvoiceStatusLabel(status) {
+  if (!status) return "—";
+  const key = `invoiceStatus.${status}`;
+  if (i18n.exists(key, { ns: "pdf" })) {
+    return pdfT(key);
+  }
+  return status;
+}
+
+function getPaymentMethodLabel(method) {
+  if (!method) return "";
+  const key = `paymentMethods.${method}`;
+  if (i18n.exists(key, { ns: "pdf" })) {
+    return pdfT(key);
+  }
+  return method;
+}
 
 function toPdfSafeText(text) {
   return String(text ?? "")
@@ -37,7 +52,7 @@ function formatMoney(value) {
 function formatDate(value) {
   if (!value) return "—";
   try {
-    return new Date(value).toLocaleDateString("es-MX", {
+    return new Date(value).toLocaleDateString(pdfLocale(), {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -68,7 +83,7 @@ function wrapText(text, font, fontSize, maxWidth) {
 }
 
 function sanitizeFilename(value) {
-  return (value || "recibo")
+  return (value || pdfT("invoice.filenameDefault"))
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-zA-Z0-9-_]+/g, "-")
@@ -94,8 +109,8 @@ export async function downloadInvoicePdf(invoice, options = {}) {
       pageWidth: PAGE.width,
       margin: MARGIN,
       subtitle: options.organizationName
-        ? `Recibo clinico · ${options.organizationName}`
-        : "Recibo clinico",
+        ? pdfT("invoice.subtitleOrg", { org: options.organizationName })
+        : pdfT("invoice.subtitle"),
     },
   );
 
@@ -103,7 +118,7 @@ export async function downloadInvoicePdf(invoice, options = {}) {
   const text = rgb(0.12, 0.16, 0.22);
 
   const folio = invoice.invoice_number || invoice.id?.slice(0, 8).toUpperCase() || "—";
-  page.drawText(toPdfSafeText(`Folio: ${folio}`), {
+  page.drawText(toPdfSafeText(`${pdfT("invoice.folio")}: ${folio}`), {
     x: PAGE.width - MARGIN - 140,
     y: PAGE.height - MARGIN - 14,
     size: 10,
@@ -138,15 +153,15 @@ export async function downloadInvoicePdf(invoice, options = {}) {
     y -= 16;
   };
 
-  drawRow("Receptor", invoice.clients?.name || "Público general");
-  if (invoice.patients?.name) drawRow("Mascota", invoice.patients.name);
-  drawRow("Estado", STATUS_LABELS[invoice.status] || invoice.status || "—");
+  drawRow(pdfT("invoice.recipient"), invoice.clients?.name || pdfT("invoice.publicGeneral"));
+  if (invoice.patients?.name) drawRow(pdfT("invoice.pet"), invoice.patients.name);
+  drawRow(pdfT("invoice.status"), getInvoiceStatusLabel(invoice.status));
   if (invoice.payment_method) {
-    drawRow("Pago", PAYMENT_LABELS[invoice.payment_method] || invoice.payment_method);
+    drawRow(pdfT("invoice.payment"), getPaymentMethodLabel(invoice.payment_method));
   }
 
   y -= 8;
-  page.drawText("Conceptos", { x: MARGIN, y, size: 12, font: bold, color: brandBlue });
+  page.drawText(pdfT("invoice.lineItems"), { x: MARGIN, y, size: 12, font: bold, color: PDF_BRAND_COLOR });
   y -= 18;
 
   const colDesc = MARGIN;
@@ -154,14 +169,14 @@ export async function downloadInvoicePdf(invoice, options = {}) {
   const colPrice = PAGE.width - MARGIN - 110;
   const colTotal = PAGE.width - MARGIN - 50;
 
-  page.drawText("Descripción", { x: colDesc, y, size: 9, font: bold, color: muted });
-  page.drawText("Cant.", { x: colQty, y, size: 9, font: bold, color: muted });
-  page.drawText("Precio", { x: colPrice, y, size: 9, font: bold, color: muted });
-  page.drawText("Total", { x: colTotal, y, size: 9, font: bold, color: muted });
+  page.drawText(pdfT("invoice.description"), { x: colDesc, y, size: 9, font: bold, color: muted });
+  page.drawText(pdfT("invoice.qty"), { x: colQty, y, size: 9, font: bold, color: muted });
+  page.drawText(pdfT("invoice.price"), { x: colPrice, y, size: 9, font: bold, color: muted });
+  page.drawText(pdfT("invoice.total"), { x: colTotal, y, size: 9, font: bold, color: muted });
   y -= 12;
 
   for (const item of invoice.items || []) {
-    const descLines = wrapText(item.description || "Concepto", regular, 9, colQty - colDesc - 8);
+    const descLines = wrapText(item.description || pdfT("invoice.lineDefault"), regular, 9, colQty - colDesc - 8);
     descLines.forEach((line, index) => {
       page.drawText(line, {
         x: colDesc,
@@ -207,9 +222,9 @@ export async function downloadInvoicePdf(invoice, options = {}) {
   y -= 18;
 
   const totals = [
-    ["Subtotal", formatMoney(invoice.subtotal)],
-    [`IVA (${Number(invoice.tax_rate || 0)}%)`, formatMoney(invoice.tax_amount)],
-    ["Total", formatMoney(invoice.total)],
+    [pdfT("invoice.subtotal"), formatMoney(invoice.subtotal)],
+    [pdfT("invoice.tax", { rate: Number(invoice.tax_rate || 0) }), formatMoney(invoice.tax_amount)],
+    [pdfT("invoice.total"), formatMoney(invoice.total)],
   ];
   totals.forEach(([label, value], index) => {
     page.drawText(toPdfSafeText(label), {
@@ -231,7 +246,7 @@ export async function downloadInvoicePdf(invoice, options = {}) {
 
   if (invoice.notes) {
     y -= 8;
-    page.drawText("Notas", { x: MARGIN, y, size: 10, font: bold, color: muted });
+    page.drawText(pdfT("invoice.notes"), { x: MARGIN, y, size: 10, font: bold, color: muted });
     y -= 14;
     wrapText(invoice.notes, regular, 9, CONTENT_WIDTH).forEach((line) => {
       page.drawText(line, { x: MARGIN, y, size: 9, font: regular, color: text });
@@ -240,7 +255,7 @@ export async function downloadInvoicePdf(invoice, options = {}) {
   }
 
   y = MARGIN + 20;
-  page.drawText(toPdfSafeText("Documento interno — no sustituye CFDI."), {
+  page.drawText(toPdfSafeText(pdfT("invoice.disclaimer")), {
     x: MARGIN,
     y,
     size: 8,

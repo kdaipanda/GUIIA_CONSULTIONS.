@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import YesNoChips from '../ui/yes-no-chips';
+import { useSpeciesFormI18n } from '../../hooks/useSpeciesFormI18n';
+import { normalizePetSex } from '../../lib/petSex';
+import ReproductiveSexHint from './ReproductiveSexHint';
 
 const ErizosForm = ({ formData, setFormData }) => {
+  const { t, field, placeholder, section, title } = useSpeciesFormI18n('erizos');
+  const sexo = normalizePetSex(formData.sexo);
   const [activeSection, setActiveSection] = useState('erizos-info-basica');
 
-  const handleChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
+  const handleChange = (fieldName, value) => {
+    setFormData({ ...formData, [fieldName]: value });
   };
 
   const toggleSection = useCallback((e) => {
@@ -25,20 +30,20 @@ const ErizosForm = ({ formData, setFormData }) => {
   }, [formData]);
 
   const sections = [
-    { id: 'erizos-info-basica', label: 'Información Básica', icon: '📋' },
-    { id: 'erizos-historial', label: 'Historial Médico', icon: '📁' },
-    { id: 'erizos-alimentacion', label: 'Alimentación', icon: '🥗' },
-    { id: 'erizos-ambiente', label: 'Ambiente', icon: '🏠' },
+    { id: 'erizos-info-basica', labelKey: 'info_basica', icon: '📋' },
+    { id: 'erizos-historial', labelKey: 'historial_medico', icon: '📁' },
+    { id: 'erizos-alimentacion', labelKey: 'alimentacion', icon: '🥗' },
+    { id: 'erizos-ambiente', labelKey: 'ambiente', icon: '🏠' },
     { id: 'erizos-ejercicio', label: 'Ejercicio', icon: '🏃' },
     { id: 'erizos-socializacion', label: 'Socialización', icon: '🤝' },
     { id: 'erizos-higiene', label: 'Higiene', icon: '🚿' },
-    { id: 'erizos-respiratorio', label: 'Sistema Respiratorio', icon: '🫁' },
-    { id: 'erizos-digestivo', label: 'Sistema Digestivo', icon: '🫃' },
+    { id: 'erizos-respiratorio', labelKey: 'respiratorio', icon: '🫁' },
+    { id: 'erizos-digestivo', labelKey: 'digestivo', icon: '🫃' },
     { id: 'erizos-tegumentario', label: 'Sistema Tegumentario', icon: '🦔' },
-    { id: 'erizos-examen', label: 'Examen Físico', icon: '🩺' },
-    { id: 'erizos-neurologico', label: 'Sistema Neurológico', icon: '🧠' },
+    { id: 'erizos-examen', labelKey: 'examen_fisico', icon: '🩺' },
+    { id: 'erizos-neurologico', labelKey: 'neurologico', icon: '🧠' },
     { id: 'erizos-dental', label: 'Sistema Dental', icon: '🦷' },
-    { id: 'erizos-reproductivo', label: 'Sistema Reproductivo', icon: '🔬' },
+    { id: 'erizos-reproductivo', labelKey: 'reproductivo', icon: '🔬' },
   ];
 
   useEffect(() => {
@@ -66,34 +71,34 @@ const ErizosForm = ({ formData, setFormData }) => {
 
   return (
     <div className="species-form">
-      <h2>Datos de la mascota - Erizo Africano</h2>
+      <h2>{title('erizos')}</h2>
 
       <div className="species-form-progress">
         <div className="species-form-progress-header">
-          <span className="species-form-progress-label">Progreso del formulario</span>
+          <span className="species-form-progress-label">{t('chrome.progress')}</span>
           <span className="species-form-progress-percent">{progress}%</span>
         </div>
         <div className="species-form-progress-bar">
           <div className={`species-form-progress-fill ${progress === 100 ? 'complete' : ''}`} style={{ width: `${progress}%` }} />
         </div>
         <div className="species-form-progress-stats">
-          <span>{requiredFields.filter(f => formData[f] && formData[f] !== '').length} de {requiredFields.length} campos</span>
-          {progress === 100 && <span style={{ color: '#10b981', fontWeight: 600 }}>✓ Completo</span>}
+          <span>{t('chrome.fieldsCount', { filled: requiredFields.filter(f => formData[f] && formData[f] !== '').length, total: requiredFields.length })}</span>
+          {progress === 100 && <span style={{ color: '#10b981', fontWeight: 600 }}>✓ {t('chrome.complete')}</span>}
         </div>
       </div>
 
       <div className="species-form-layout">
         <aside className="species-form-nav">
-          <div className="species-form-nav-title">Secciones</div>
+          <div className="species-form-nav-title">{t('chrome.sections')}</div>
           <ul>
-            {sections.map((section) => (
-              <li key={section.id}>
+            {sections.map((sec) => (
+              <li key={sec.id}>
                 <button
                   type="button"
-                  className={`species-form-nav-link ${activeSection === section.id ? 'active' : ''}`}
-                  onClick={() => scrollToSection(section.id)}
+                  className={`species-form-nav-link ${activeSection === sec.id ? 'active' : ''}`}
+                  onClick={() => scrollToSection(sec.id)}
                 >
-                  <span className="nav-icon">{section.icon}</span> {section.label}
+                  <span className="nav-icon">{sec.icon}</span> {sec.label || section(sec.labelKey)}
                 </button>
               </li>
             ))}
@@ -103,91 +108,91 @@ const ErizosForm = ({ formData, setFormData }) => {
         <div className="species-form-content" onClick={toggleSection}>
       
       <div id="erizos-info-basica" className="form-section">
-        <h3>Información Básica</h3>
+        <h3>{section('info_basica')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Nombre de la mascota *</label>
+            <label>{field('nombre_de_la_mascota')}</label>
             <input type="text" required value={formData.nombre_mascota || ''} onChange={(e) => handleChange('nombre_mascota', e.target.value)} />
           </div>
           <div className="form-group">
-            <label>Nombre del Dueño *</label>
+            <label>{field('nombre_dueño')}</label>
             <input type="text" required value={formData.nombre_dueño || ''} onChange={(e) => handleChange('nombre_dueño', e.target.value)} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Edad (años/meses) *</label>
-            <input type="text" required value={formData.edad || ''} onChange={(e) => handleChange('edad', e.target.value)} placeholder="Adulto &gt;6 meses, Senior &gt;3 años" />
+            <label>{field('edad_anos_meses')}</label>
+            <input type="text" required value={formData.edad || ''} onChange={(e) => handleChange('edad', e.target.value)} placeholder={placeholder('adulto_gt_6_meses_senior_gt_3_anos')} />
           </div>
           <div className="form-group">
-            <label>Sexo *</label>
-            <select required value={formData.sexo || ''} onChange={(e) => handleChange('sexo', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="macho">Macho</option>
-              <option value="hembra">Hembra</option>
+            <label>{field('sexo')}</label>
+            <select required value={sexo || ''} onChange={(e) => handleChange('sexo', e.target.value)}>
+              <option value="">{t('select')}</option>
+              <option value="macho">{t('options.macho')}</option>
+              <option value="hembra">{t('options.hembra')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Esterilizado *</label>
+            <label>{field('esterilizado')}</label>
             <select required value={formData.esterilizado || ''} onChange={(e) => handleChange('esterilizado', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="SI">Sí</option>
-              <option value="NO">No</option>
+              <option value="">{t('select')}</option>
+              <option value="SI">{t('yes')}</option>
+              <option value="NO">{t('no')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Peso Actual (g) *</label>
-            <input type="text" required value={formData.peso || ''} onChange={(e) => handleChange('peso', e.target.value)} placeholder="Normal: 300-600g" />
+            <label>{field('peso_actual_g_2')}</label>
+            <input type="text" required value={formData.peso || ''} onChange={(e) => handleChange('peso', e.target.value)} placeholder={placeholder('normal_300_600g')} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Índice de Condición Corporal *</label>
+            <label>{field('indice_de_condicion_corporal')}</label>
             <select required value={formData.condicion_corporal || ''} onChange={(e) => handleChange('condicion_corporal', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="1-3">1-3 (Emaciado)</option>
-              <option value="4-5">4-5 (Delgado)</option>
-              <option value="6-7">6-7 (Ideal)</option>
-              <option value="8-9">8-9 (Sobrepeso)</option>
+              <option value="">{t('select')}</option>
+              <option value="1-3">{t('options.n_1_3_emaciado')}</option>
+              <option value="4-5">{t('options.n_4_5_delgado')}</option>
+              <option value="6-7">{t('options.n_6_7_ideal')}</option>
+              <option value="8-9">{t('options.n_8_9_sobrepeso')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Temperamento</label>
+            <label>{field('temperamento')}</label>
             <select value={formData.temperamento || 'tranquilo'} onChange={(e) => handleChange('temperamento', e.target.value)}>
-              <option value="activo">Activo</option>
-              <option value="letargico">Letárgico</option>
-              <option value="agresivo">Agresivo</option>
-              <option value="timido">Tímido</option>
-              <option value="hiperactivo">Hiperactivo</option>
+              <option value="activo">{t('options.actividad_activo')}</option>
+              <option value="letargico">{t('options.letargico')}</option>
+              <option value="agresivo">{t('options.agresivo')}</option>
+              <option value="timido">{t('options.timido')}</option>
+              <option value="hiperactivo">{t('options.hiperactivo')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-group">
-          <label>Duración del Problema *</label>
+          <label>{field('duracion_del_problema')}</label>
           <select required value={formData.duracion_problema || ''} onChange={(e) => handleChange('duracion_problema', e.target.value)}>
-            <option value="">Seleccionar</option>
-            <option value="<12h">&lt; 12 horas</option>
-            <option value="12-24h">12-24 horas</option>
-            <option value="2-3dias">2-3 días</option>
-            <option value="4-7dias">4-7 días</option>
-            <option value=">1semana">&gt; 1 semana</option>
+            <option value="">{t('select')}</option>
+            <option value="<12h">{t('options.lt_12_horas')}</option>
+            <option value="12-24h">{t('options.n_12_24_horas')}</option>
+            <option value="2-3dias">{t('options.n_2_3_dias')}</option>
+            <option value="4-7dias">{t('options.n_4_7_dias')}</option>
+            <option value=">1semana">{t('options.gt_1_semana')}</option>
           </select>
         </div>
       </div>
 
       <div id="erizos-historial" className="form-section">
-        <h3>Historial Médico</h3>
+        <h3>{section('historial_medico')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Desparasitación Interna *</label>
+            <label>{field('desparasitacion_interna')}</label>
             <YesNoChips
               value={formData.desparasitacion_interna}
               onChange={(val) => handleChange('desparasitacion_interna', val)}
@@ -195,7 +200,7 @@ const ErizosForm = ({ formData, setFormData }) => {
           </div>
           {formData.desparasitacion_interna === 'SI' && (
             <div className="form-group">
-              <label>Producto/Fecha</label>
+              <label>{field('producto_fecha')}</label>
               <input type="text" value={formData.despara_interna_producto || ''} onChange={(e) => handleChange('despara_interna_producto', e.target.value)} />
             </div>
           )}
@@ -203,7 +208,7 @@ const ErizosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Desparasitación Externa *</label>
+            <label>{field('desparasitacion_externa')}</label>
             <YesNoChips
               value={formData.desparasitacion_externa}
               onChange={(val) => handleChange('desparasitacion_externa', val)}
@@ -211,7 +216,7 @@ const ErizosForm = ({ formData, setFormData }) => {
           </div>
           {formData.desparasitacion_externa === 'SI' && (
             <div className="form-group">
-              <label>Producto/Fecha</label>
+              <label>{field('producto_fecha')}</label>
               <input type="text" value={formData.despara_externa_producto || ''} onChange={(e) => handleChange('despara_externa_producto', e.target.value)} />
             </div>
           )}
@@ -219,7 +224,7 @@ const ErizosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Tratamiento para Sarna</label>
+            <label>{field('tratamiento_para_sarna')}</label>
             <YesNoChips
               value={formData.tratamiento_sarna}
               onChange={(val) => handleChange('tratamiento_sarna', val)}
@@ -229,34 +234,34 @@ const ErizosForm = ({ formData, setFormData }) => {
       </div>
 
       <div id="erizos-alimentacion" className="form-section">
-        <h3>Alimentación</h3>
+        <h3>{section('alimentacion')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Tipo de Dieta *</label>
+            <label>{field('tipo_de_dieta_2')}</label>
             <select required value={formData.tipo_dieta || ''} onChange={(e) => handleChange('tipo_dieta', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="comercial">Comercial específica</option>
-              <option value="casera">Casera</option>
-              <option value="mixta">Mixta</option>
+              <option value="">{t('select')}</option>
+              <option value="comercial">{t('options.comercial_especifica')}</option>
+              <option value="casera">{t('options.casera')}</option>
+              <option value="mixta">{t('options.mixta')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Marca y Composición</label>
+            <label>{field('marca_y_composicion')}</label>
             <input type="text" value={formData.marca_alimento || ''} onChange={(e) => handleChange('marca_alimento', e.target.value)} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Come Insectos *</label>
+            <label>{field('come_insectos')}</label>
             <YesNoChips
               value={formData.come_insectos}
               onChange={(val) => handleChange('come_insectos', val)}
             />
           </div>
           <div className="form-group">
-            <label>Come Pellets *</label>
+            <label>{field('come_pellets')}</label>
             <YesNoChips
               value={formData.come_pellets}
               onChange={(val) => handleChange('come_pellets', val)}
@@ -266,56 +271,56 @@ const ErizosForm = ({ formData, setFormData }) => {
       </div>
 
       <div id="erizos-ambiente" className="form-section">
-        <h3>Ambiente</h3>
+        <h3>{section('ambiente')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Hábitat *</label>
+            <label>{field('habitat')}</label>
             <select required value={formData.habitat || ''} onChange={(e) => handleChange('habitat', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="jaula">Jaula</option>
-              <option value="corral">Corral</option>
-              <option value="pecera">Pecera</option>
+              <option value="">{t('select')}</option>
+              <option value="jaula">{t('options.jaula')}</option>
+              <option value="corral">{t('options.corral')}</option>
+              <option value="pecera">{t('options.pecera')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Ubicación *</label>
+            <label>{field('ubicacion_2')}</label>
             <select required value={formData.ubicacion || ''} onChange={(e) => handleChange('ubicacion', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="interior">Interior</option>
-              <option value="exterior">Exterior</option>
+              <option value="">{t('select')}</option>
+              <option value="interior">{t('options.habitat_interior')}</option>
+              <option value="exterior">{t('options.habitat_exterior')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Uso de Placa Térmica *</label>
+            <label>{field('uso_de_placa_termica')}</label>
             <YesNoChips
               value={formData.placa_termica}
               onChange={(val) => handleChange('placa_termica', val)}
             />
           </div>
           <div className="form-group">
-            <label>Superficie donde vive *</label>
+            <label>{field('superficie_donde_vive')}</label>
             <select required value={formData.superficie || ''} onChange={(e) => handleChange('superficie', e.target.value)}>
-              <option value="">Seleccionar</option>
-              <option value="alfombra">Alfombra</option>
-              <option value="piso_duro">Piso duro</option>
-              <option value="sustrato">Sustrato/Aserrín</option>
-              <option value="jaula_barrotes">Jaula con barrotes</option>
-              <option value="otro">Otro</option>
+              <option value="">{t('select')}</option>
+              <option value="alfombra">{t('options.alfombra')}</option>
+              <option value="piso_duro">{t('options.piso_duro')}</option>
+              <option value="sustrato">{t('options.sustrato_aserrin')}</option>
+              <option value="jaula_barrotes">{t('options.jaula_con_barrotes')}</option>
+              <option value="otro">{t('options.otro')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-group">
-          <label>Limpieza de Jaula *</label>
+          <label>{field('limpieza_de_jaula_3')}</label>
           <select required value={formData.limpieza_jaula || ''} onChange={(e) => handleChange('limpieza_jaula', e.target.value)}>
-            <option value="">Seleccionar</option>
-            <option value="diaria">Diaria</option>
-            <option value="cada_2_dias">Cada 2 días</option>
-            <option value="semanal">Semanal</option>
+            <option value="">{t('select')}</option>
+            <option value="diaria">{t('options.diaria')}</option>
+            <option value="cada_2_dias">{t('options.cada_2_dias')}</option>
+            <option value="semanal">{t('options.semanal')}</option>
           </select>
         </div>
       </div>
@@ -325,7 +330,7 @@ const ErizosForm = ({ formData, setFormData }) => {
         
         <div className="form-row">
           <div className="form-group">
-            <label>Tiempo de actividad nocturna (horas)</label>
+            <label>{field('tiempo_de_actividad_nocturna_horas')}</label>
             <input
               type="text"
               value={formData.actividad_nocturna_horas || ''}
@@ -333,15 +338,15 @@ const ErizosForm = ({ formData, setFormData }) => {
             />
           </div>
           <div className="form-group">
-            <label>Tipo de ejercicio</label>
+            <label>{field('tipo_de_ejercicio')}</label>
             <select
               value={formData.tipo_ejercicio || ''}
               onChange={(e) => handleChange('tipo_ejercicio', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="rueda">Rueda</option>
-              <option value="tuneles">Túneles</option>
-              <option value="libre_habitacion">Libre en habitación</option>
+              <option value="">{t('select')}</option>
+              <option value="rueda">{t('options.rueda')}</option>
+              <option value="tuneles">{t('options.tuneles')}</option>
+              <option value="libre_habitacion">{t('options.libre_en_habitacion')}</option>
             </select>
           </div>
         </div>
@@ -352,18 +357,18 @@ const ErizosForm = ({ formData, setFormData }) => {
         
         <div className="form-row">
           <div className="form-group">
-            <label>Vive</label>
+            <label>{field('vive')}</label>
             <select
               value={formData.socializacion_tipo || ''}
               onChange={(e) => handleChange('socializacion_tipo', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="solo">Solo</option>
-              <option value="pareja">Pareja</option>
+              <option value="">{t('select')}</option>
+              <option value="solo">{t('options.solo')}</option>
+              <option value="pareja">{t('options.pareja')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Peleas recientes</label>
+            <label>{field('peleas_recientes_2')}</label>
             <YesNoChips
               value={formData.peleas_recientes}
               onChange={(val) => handleChange('peleas_recientes', val)}
@@ -373,7 +378,7 @@ const ErizosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Compatible con compañeros</label>
+            <label>{field('compatible_con_companeros_2')}</label>
             <YesNoChips
               value={formData.compatibilidad_companeros}
               onChange={(val) => handleChange('compatibilidad_companeros', val)}
@@ -387,18 +392,18 @@ const ErizosForm = ({ formData, setFormData }) => {
         
         <div className="form-row">
           <div className="form-group">
-            <label>Lavado de comederos/bebederos</label>
+            <label>{field('lavado_de_comederos_bebederos')}</label>
             <select
               value={formData.lavado_comederos || ''}
               onChange={(e) => handleChange('lavado_comederos', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="diario">Diario</option>
-              <option value="cada_2_dias">Cada 2 días</option>
+              <option value="">{t('select')}</option>
+              <option value="diario">{t('options.diario')}</option>
+              <option value="cada_2_dias">{t('options.cada_2_dias')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Uso de desinfectantes</label>
+            <label>{field('uso_de_desinfectantes_2')}</label>
             <YesNoChips
               value={formData.uso_desinfectantes}
               onChange={(val) => handleChange('uso_desinfectantes', val)}
@@ -408,25 +413,25 @@ const ErizosForm = ({ formData, setFormData }) => {
       </div>
 
       <div id="erizos-respiratorio" className="form-section">
-        <h3>Sistema Respiratorio</h3>
+        <h3>{section('respiratorio')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Secreción Nasal *</label>
+            <label>{field('secrecion_nasal')}</label>
             <select required value={formData.secrecion_nasal || 'NO'} onChange={(e) => handleChange('secrecion_nasal', e.target.value)}>
-              <option value="NO">No</option>
-              <option value="clara">Clara (moco)</option>
-              <option value="purulenta">Purulenta (amarilla/verde)</option>
-              <option value="sangre">Sangre</option>
+              <option value="NO">{t('no')}</option>
+              <option value="clara">{t('options.clara_moco')}</option>
+              <option value="purulenta">{t('options.purulenta_amarilla_verde')}</option>
+              <option value="sangre">{t('options.sangre')}</option>
             </select>
           </div>
           {formData.secrecion_nasal !== 'NO' && (
             <div className="form-group">
-              <label>Localización</label>
+              <label>{field('localizacion')}</label>
               <select value={formData.secrecion_localizacion || ''} onChange={(e) => handleChange('secrecion_localizacion', e.target.value)}>
-                <option value="">Seleccionar</option>
-                <option value="unilateral">Unilateral</option>
-                <option value="bilateral">Bilateral</option>
+                <option value="">{t('select')}</option>
+                <option value="unilateral">{t('options.unilateral')}</option>
+                <option value="bilateral">{t('options.bilateral')}</option>
               </select>
             </div>
           )}
@@ -434,30 +439,30 @@ const ErizosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Respiración *</label>
+            <label>{field('respiracion')}</label>
             <select required value={formData.respiracion || 'normal'} onChange={(e) => handleChange('respiracion', e.target.value)}>
-              <option value="normal">Normal</option>
-              <option value="ruidosa">Ruidosa</option>
-              <option value="dificultad_inhalar">Dificultad para inhalar</option>
-              <option value="dificultad_exhalar">Dificultad para exhalar</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="ruidosa">{t('options.ruidosa')}</option>
+              <option value="dificultad_inhalar">{t('options.dificultad_para_inhalar')}</option>
+              <option value="dificultad_exhalar">{t('options.dificultad_para_exhalar')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Frecuencia Respiratoria (rpm)</label>
-            <input type="text" value={formData.frecuencia_respiratoria || ''} onChange={(e) => handleChange('frecuencia_respiratoria', e.target.value)} placeholder="Normal: 40-60" />
+            <label>{field('frecuencia_respiratoria')}</label>
+            <input type="text" value={formData.frecuencia_respiratoria || ''} onChange={(e) => handleChange('frecuencia_respiratoria', e.target.value)} placeholder={placeholder('normal_40_60')} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Costras en nariz/orejas?</label>
+            <label>{field('costras_en_nariz_orejas')}</label>
             <YesNoChips
               value={formData.costras_nariz_orejas}
               onChange={(val) => handleChange('costras_nariz_orejas', val)}
             />
           </div>
           <div className="form-group">
-            <label>Ronquidos o estertores</label>
+            <label>{field('ronquidos_o_estertores')}</label>
             <YesNoChips
               value={formData.ronquidos_estertores}
               onChange={(val) => handleChange('ronquidos_estertores', val)}
@@ -467,36 +472,36 @@ const ErizosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Estornudos</label>
+            <label>{field('estornudos')}</label>
             <select
               value={formData.estornudos || ''}
               onChange={(e) => handleChange('estornudos', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="aislados">Aislados</option>
-              <option value="frecuentes">Frecuentes</option>
-              <option value="con_secrecion">Con secreción</option>
-              <option value="sin_secrecion">Sin secreción</option>
+              <option value="">{t('select')}</option>
+              <option value="aislados">{t('options.aislados')}</option>
+              <option value="frecuentes">{t('options.frecuentes')}</option>
+              <option value="con_secrecion">{t('options.con_secrecion')}</option>
+              <option value="sin_secrecion">{t('options.sin_secrecion')}</option>
             </select>
           </div>
         </div>
       </div>
 
       <div id="erizos-digestivo" className="form-section">
-        <h3>Sistema Digestivo</h3>
+        <h3>{section('digestivo')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Apetito *</label>
+            <label>{field('apetito')}</label>
             <select required value={formData.apetito || 'normal'} onChange={(e) => handleChange('apetito', e.target.value)}>
-              <option value="normal">Normal</option>
-              <option value="anorexia_total">Totalmente anoréxico (&gt;12h)</option>
-              <option value="anorexia_parcial">Parcialmente anoréxico</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="anorexia_total">{t('options.totalmente_anorexico_gt_12h')}</option>
+              <option value="anorexia_parcial">{t('options.parcialmente_anorexico')}</option>
             </select>
           </div>
           {(formData.apetito === 'anorexia_total' || formData.apetito === 'anorexia_parcial') && (
             <div className="form-group">
-              <label>Tiempo sin comer (horas)</label>
+              <label>{field('tiempo_sin_comer_horas')}</label>
               <input type="text" value={formData.tiempo_sin_comer || ''} onChange={(e) => handleChange('tiempo_sin_comer', e.target.value)} />
             </div>
           )}
@@ -504,7 +509,7 @@ const ErizosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Rechaza comida húmeda</label>
+            <label>{field('rechaza_comida_humeda')}</label>
             <YesNoChips
               value={formData.rechaza_comida_humeda}
               onChange={(val) => handleChange('rechaza_comida_humeda', val)}
@@ -514,37 +519,37 @@ const ErizosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Heces *</label>
+            <label>{field('heces')}</label>
             <select required value={formData.heces || 'normal'} onChange={(e) => handleChange('heces', e.target.value)}>
-              <option value="normal">Normal</option>
-              <option value="ausentes">Ausentes (&gt;24h)</option>
-              <option value="blandas">Blandas/pastosas</option>
-              <option value="liquidas">Líquidas</option>
-              <option value="con_sangre">Con sangre</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="ausentes">{t('options.ausentes_gt_24h')}</option>
+              <option value="blandas">{t('options.blandas_pastosas')}</option>
+              <option value="liquidas">{t('options.liquidas')}</option>
+              <option value="con_sangre">{t('options.con_sangre')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Frecuencia (veces/día)</label>
-            <input type="text" value={formData.heces_frecuencia || ''} onChange={(e) => handleChange('heces_frecuencia', e.target.value)} placeholder="Normal: 1-3 veces/día" />
+            <label>{field('frecuencia_veces_dia')}</label>
+            <input type="text" value={formData.heces_frecuencia || ''} onChange={(e) => handleChange('heces_frecuencia', e.target.value)} placeholder={placeholder('normal_1_3_veces_dia')} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Color de las heces</label>
+            <label>{field('color_de_las_heces')}</label>
             <select
               value={formData.heces_color || ''}
               onChange={(e) => handleChange('heces_color', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="marron_oscuro">Marrón oscuro</option>
-              <option value="amarillo">Amarillo</option>
-              <option value="verde">Verde</option>
-              <option value="rojizo">Rojizo (sangre)</option>
+              <option value="">{t('select')}</option>
+              <option value="marron_oscuro">{t('options.marron_oscuro')}</option>
+              <option value="amarillo">{t('options.amarillo')}</option>
+              <option value="verde">{t('options.verde')}</option>
+              <option value="rojizo">{t('options.rojizo_sangre')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Presencia de moco</label>
+            <label>{field('presencia_de_moco_2')}</label>
             <YesNoChips
               value={formData.heces_moco}
               onChange={(val) => handleChange('heces_moco', val)}
@@ -554,29 +559,29 @@ const ErizosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Presencia de parásitos</label>
+            <label>{field('presencia_de_parasitos_3')}</label>
             <YesNoChips
               value={formData.heces_parasitos}
               onChange={(val) => handleChange('heces_parasitos', val)}
             />
           </div>
           <div className="form-group">
-            <label>Abdomen</label>
+            <label>{field('abdomen')}</label>
             <select
               value={formData.abdomen || ''}
               onChange={(e) => handleChange('abdomen', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="distendido">Distendido</option>
-              <option value="doloroso">Doloroso al tacto</option>
-              <option value="ruidos_ausentes">Ruidos intestinales ausentes</option>
+              <option value="">{t('select')}</option>
+              <option value="distendido">{t('options.distendido')}</option>
+              <option value="doloroso">{t('options.doloroso_al_tacto')}</option>
+              <option value="ruidos_ausentes">{t('options.ruidos_intestinales_ausentes')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Deshidratación visible</label>
+            <label>{field('deshidratacion_visible')}</label>
             <YesNoChips
               value={formData.deshidratacion_visible}
               onChange={(val) => handleChange('deshidratacion_visible', val)}
@@ -590,37 +595,37 @@ const ErizosForm = ({ formData, setFormData }) => {
         
         <div className="form-row">
           <div className="form-group">
-            <label>Púas *</label>
+            <label>{field('puas')}</label>
             <select required value={formData.puas || 'normales'} onChange={(e) => handleChange('puas', e.target.value)}>
-              <option value="normales">Normales</option>
-              <option value="caida_simetrica">Caída simétrica</option>
-              <option value="caida_localizada">Caída localizada</option>
-              <option value="rotas">Púas rotas</option>
-              <option value="con_costras">Con costras</option>
+              <option value="normales">{t('options.normales')}</option>
+              <option value="caida_simetrica">{t('options.caida_simetrica')}</option>
+              <option value="caida_localizada">{t('options.caida_localizada')}</option>
+              <option value="rotas">{t('options.puas_rotas')}</option>
+              <option value="con_costras">{t('options.con_costras')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Prurito Intenso *</label>
+            <label>{field('prurito_intenso_2')}</label>
             <select required value={formData.prurito || 'ausente'} onChange={(e) => handleChange('prurito', e.target.value)}>
-              <option value="ausente">Ausente</option>
-              <option value="leve">Leve</option>
-              <option value="intenso">Intenso</option>
+              <option value="ausente">{t('options.ausente')}</option>
+              <option value="leve">{t('options.leve')}</option>
+              <option value="intenso">{t('options.intenso')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Piel *</label>
+            <label>{field('piel_2')}</label>
             <select required value={formData.piel || 'normal'} onChange={(e) => handleChange('piel', e.target.value)}>
-              <option value="normal">Normal</option>
-              <option value="descamacion">Descamación excesiva</option>
-              <option value="costras">Costras en cabeza</option>
-              <option value="ulceras">Úlceras faciales</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="descamacion">{t('options.descamacion_excesiva')}</option>
+              <option value="costras">{t('options.costras_en_cabeza')}</option>
+              <option value="ulceras">{t('options.ulceras_faciales')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Ácaros Visibles *</label>
+            <label>{field('acaros_visibles_3')}</label>
             <YesNoChips
               value={formData.acaros}
               onChange={(val) => handleChange('acaros', val)}
@@ -630,65 +635,65 @@ const ErizosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Piel seca/grasa</label>
+            <label>{field('piel_seca_grasa')}</label>
             <YesNoChips
               value={formData.piel_seca_grasa}
               onChange={(val) => handleChange('piel_seca_grasa', val)}
             />
           </div>
           <div className="form-group">
-            <label>Pies</label>
+            <label>{field('pies')}</label>
             <select
               value={formData.pies || ''}
               onChange={(e) => handleChange('pies', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="ulceras_almohadillas">Úlceras en almohadillas</option>
-              <option value="hinchazon">Hinchazón</option>
-              <option value="sangrado">Sangrado</option>
+              <option value="">{t('select')}</option>
+              <option value="ulceras_almohadillas">{t('options.ulceras_en_almohadillas')}</option>
+              <option value="hinchazon">{t('options.hinchazon')}</option>
+              <option value="sangrado">{t('options.sangrado')}</option>
             </select>
           </div>
         </div>
       </div>
 
       <div id="erizos-examen" className="form-section">
-        <h3>Examen Físico</h3>
+        <h3>{section('examen_fisico')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Temperatura (°C)</label>
-            <input type="text" value={formData.temperatura || ''} onChange={(e) => handleChange('temperatura', e.target.value)} placeholder="Normal: 32-35°C" />
+            <label>{field('temperatura')}</label>
+            <input type="text" value={formData.temperatura || ''} onChange={(e) => handleChange('temperatura', e.target.value)} placeholder={placeholder('normal_32_35_c')} />
           </div>
           <div className="form-group">
-            <label>Peso Corporal (g)</label>
+            <label>{field('peso_corporal_g_2')}</label>
             <input type="text" value={formData.peso_corporal || ''} onChange={(e) => handleChange('peso_corporal', e.target.value)} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Color de Mucosas</label>
+            <label>{field('color_de_mucosas_2')}</label>
             <select value={formData.mucosas || 'rosado'} onChange={(e) => handleChange('mucosas', e.target.value)}>
-              <option value="rosado">Rosado</option>
-              <option value="palido">Pálido</option>
-              <option value="icterico">Ictérico</option>
-              <option value="cianotico">Cianótico</option>
+              <option value="rosado">{t('options.rosado')}</option>
+              <option value="palido">{t('options.palido')}</option>
+              <option value="icterico">{t('options.icterico')}</option>
+              <option value="cianotico">{t('options.cianotico')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Estado de Hidratación</label>
+            <label>{field('estado_de_hidratacion_2')}</label>
             <select value={formData.hidratacion || 'normal'} onChange={(e) => handleChange('hidratacion', e.target.value)}>
-              <option value="normal">Normal</option>
-              <option value="leve">Leve</option>
-              <option value="moderado">Moderado</option>
-              <option value="severo">Severo</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="leve">{t('options.leve')}</option>
+              <option value="moderado">{t('options.moderado')}</option>
+              <option value="severo">{t('options.severo')}</option>
             </select>
           </div>
         </div>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Tiempo de relleno capilar (TRC) (segundos)</label>
+            <label>{field('tiempo_de_relleno_capilar_trc_segundos')}</label>
             <input
               type="text"
               value={formData.trc_segundos || ''}
@@ -696,89 +701,89 @@ const ErizosForm = ({ formData, setFormData }) => {
             />
           </div>
           <div className="form-group">
-            <label>Condición muscular</label>
+            <label>{field('condicion_muscular')}</label>
             <select
               value={formData.condicion_muscular || ''}
               onChange={(e) => handleChange('condicion_muscular', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="excelente">Excelente</option>
-              <option value="buena">Buena</option>
-              <option value="regular">Regular</option>
-              <option value="mala">Mala</option>
-              <option value="ausente">Ausente</option>
+              <option value="">{t('select')}</option>
+              <option value="excelente">{t('options.excelente')}</option>
+              <option value="buena">{t('options.buena')}</option>
+              <option value="regular">{t('options.regular')}</option>
+              <option value="mala">{t('options.mala')}</option>
+              <option value="ausente">{t('options.ausente')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Estado de las púas</label>
+            <label>{field('estado_de_las_puas')}</label>
             <select
               value={formData.estado_puas || ''}
               onChange={(e) => handleChange('estado_puas', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="completo">Completo</option>
-              <option value="perdida_parcial">Pérdida parcial</option>
-              <option value="perdida_total">Pérdida total</option>
+              <option value="">{t('select')}</option>
+              <option value="completo">{t('options.completo')}</option>
+              <option value="perdida_parcial">{t('options.perdida_parcial')}</option>
+              <option value="perdida_total">{t('options.perdida_total')}</option>
             </select>
           </div>
         </div>
       </div>
 
       <div id="erizos-neurologico" className="form-section">
-        <h3>Sistema Neurológico</h3>
+        <h3>{section('neurologico')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Inestabilidad</label>
+            <label>{field('inestabilidad')}</label>
             <select
               value={formData.inestabilidad || ''}
               onChange={(e) => handleChange('inestabilidad', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="temblor_patas_traseras">Temblor en patas traseras</option>
-              <option value="caidas_laterales">Caídas laterales</option>
-              <option value="no_mantiene_derecho">No puede mantenerse derecho</option>
+              <option value="">{t('select')}</option>
+              <option value="temblor_patas_traseras">{t('options.temblor_en_patas_traseras')}</option>
+              <option value="caidas_laterales">{t('options.caidas_laterales')}</option>
+              <option value="no_mantiene_derecho">{t('options.no_puede_mantenerse_derecho')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Progresión</label>
+            <label>{field('progresion')}</label>
             <select
               value={formData.progresion || ''}
               onChange={(e) => handleChange('progresion', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="lenta">Lenta (meses)</option>
-              <option value="rapida">Rápida (semanas)</option>
+              <option value="">{t('select')}</option>
+              <option value="lenta">{t('options.lenta_meses')}</option>
+              <option value="rapida">{t('options.rapida_semanas')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Convulsiones</label>
+            <label>{field('convulsiones')}</label>
             <select
               value={formData.convulsiones || ''}
               onChange={(e) => handleChange('convulsiones', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="temblor_generalizado">Temblor generalizado</option>
-              <option value="focales">Convulsiones focales</option>
-              <option value="generalizadas">Convulsiones generalizadas</option>
+              <option value="">{t('select')}</option>
+              <option value="temblor_generalizado">{t('options.temblor_generalizado')}</option>
+              <option value="focales">{t('options.convulsiones_focales')}</option>
+              <option value="generalizadas">{t('options.convulsiones_generalizadas')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Letargo extremo</label>
+            <label>{field('letargo_extremo')}</label>
             <select
               value={formData.letargo_extremo || ''}
               onChange={(e) => handleChange('letargo_extremo', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="duerme_todo_dia">Duerme todo el día</option>
-              <option value="no_responde_estimulos">No responde a estímulos</option>
-              <option value="hipotermia">Hipotermia</option>
+              <option value="">{t('select')}</option>
+              <option value="duerme_todo_dia">{t('options.duerme_todo_el_dia')}</option>
+              <option value="no_responde_estimulos">{t('options.no_responde_a_estimulos')}</option>
+              <option value="hipotermia">{t('options.hipotermia')}</option>
             </select>
           </div>
         </div>
@@ -789,20 +794,20 @@ const ErizosForm = ({ formData, setFormData }) => {
         
         <div className="form-row">
           <div className="form-group">
-            <label>Dientes</label>
+            <label>{field('dientes_2')}</label>
             <select
               value={formData.dientes_estado || ''}
               onChange={(e) => handleChange('dientes_estado', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="amarillentos">Amarillentos</option>
-              <option value="caries">Caries</option>
-              <option value="rotos">Rotos</option>
-              <option value="sangrantes">Sangrantes</option>
+              <option value="">{t('select')}</option>
+              <option value="amarillentos">{t('options.amarillentos')}</option>
+              <option value="caries">{t('options.caries')}</option>
+              <option value="rotos">{t('options.rotos')}</option>
+              <option value="sangrantes">{t('options.sangrantes')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Dificultad para comer</label>
+            <label>{field('dificultad_para_comer')}</label>
             <YesNoChips
               value={formData.dificultad_comer}
               onChange={(val) => handleChange('dificultad_comer', val)}
@@ -812,36 +817,37 @@ const ErizosForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Secreción bucal</label>
+            <label>{field('secrecion_bucal')}</label>
             <YesNoChips
               value={formData.secrecion_bucal}
               onChange={(val) => handleChange('secrecion_bucal', val)}
             />
           </div>
           <div className="form-group">
-            <label>Comportamiento alimenticio</label>
+            <label>{field('comportamiento_alimenticio')}</label>
             <select
               value={formData.comportamiento_alimenticio || ''}
               onChange={(e) => handleChange('comportamiento_alimenticio', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="mordisquea_lentamente">Mordisquea lentamente</option>
-              <option value="deja_sin_masticar">Deja comida sin masticar</option>
-              <option value="rechaza_comida_dura">Rechaza comida dura</option>
-              <option value="prefiere_blanda">Preferencia por comida blanda</option>
+              <option value="">{t('select')}</option>
+              <option value="mordisquea_lentamente">{t('options.mordisquea_lentamente')}</option>
+              <option value="deja_sin_masticar">{t('options.deja_comida_sin_masticar')}</option>
+              <option value="rechaza_comida_dura">{t('options.rechaza_comida_dura')}</option>
+              <option value="prefiere_blanda">{t('options.preferencia_por_comida_blanda')}</option>
             </select>
           </div>
         </div>
       </div>
 
       <div id="erizos-reproductivo" className="form-section">
-        <h3>Sistema Reproductivo</h3>
+        <h3>{section('reproductivo')}</h3>
         
-        {formData.sexo === 'hembra' && (
+                <ReproductiveSexHint sexo={sexo} />
+        {sexo === 'hembra' && (
           <>
             <div className="form-row">
               <div className="form-group">
-                <label>Último celo (días atrás)</label>
+                <label>{field('ultimo_celo_dias_atras')}</label>
                 <input
                   type="text"
                   value={formData.ultimo_celo_dias || ''}
@@ -852,27 +858,27 @@ const ErizosForm = ({ formData, setFormData }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <label>Secreción vaginal</label>
+                <label>{field('secrecion_vaginal')}</label>
                 <select
                   value={formData.secrecion_vaginal || 'NO'}
                   onChange={(e) => handleChange('secrecion_vaginal', e.target.value)}
                 >
-                  <option value="NO">No</option>
-                  <option value="sanguinolenta">Sanguinolenta</option>
-                  <option value="purulenta">Purulenta</option>
-                  <option value="mucosa">Mucosa</option>
+                  <option value="NO">{t('no')}</option>
+                  <option value="sanguinolenta">{t('options.sanguinolenta')}</option>
+                  <option value="purulenta">{t('options.purulenta')}</option>
+                  <option value="mucosa">{t('options.mucosa')}</option>
                 </select>
               </div>
               {formData.secrecion_vaginal !== 'NO' && (
                 <div className="form-group">
-                  <label>Frecuencia</label>
+                  <label>{field('frecuencia')}</label>
                   <select
                     value={formData.secrecion_vaginal_frecuencia || ''}
                     onChange={(e) => handleChange('secrecion_vaginal_frecuencia', e.target.value)}
                   >
-                    <option value="">Seleccionar</option>
-                    <option value="intermitente">Intermitente</option>
-                    <option value="continua">Continua</option>
+                    <option value="">{t('select')}</option>
+                    <option value="intermitente">{t('options.intermitente')}</option>
+                    <option value="continua">{t('options.continua')}</option>
                   </select>
                 </div>
               )}
@@ -880,7 +886,7 @@ const ErizosForm = ({ formData, setFormData }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <label>Hinchazón abdominal</label>
+                <label>{field('hinchazon_abdominal_3')}</label>
                 <YesNoChips
                   value={formData.hinchazon_abdominal}
                   onChange={(val) => handleChange('hinchazon_abdominal', val)}
@@ -890,17 +896,17 @@ const ErizosForm = ({ formData, setFormData }) => {
           </>
         )}
 
-        {formData.sexo === 'macho' && (
+        {sexo === 'macho' && (
           <div className="form-row">
             <div className="form-group">
-              <label>Testículos descendidos</label>
+              <label>{field('testiculos_descendidos')}</label>
               <YesNoChips
                 value={formData.testiculos_descendidos}
                 onChange={(val) => handleChange('testiculos_descendidos', val)}
               />
             </div>
             <div className="form-group">
-              <label>Hinchazón escrotal</label>
+              <label>{field('hinchazon_escrotal')}</label>
               <YesNoChips
                 value={formData.hinchazon_escrotal}
                 onChange={(val) => handleChange('hinchazon_escrotal', val)}

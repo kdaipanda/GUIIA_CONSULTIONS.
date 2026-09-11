@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Users, PawPrint, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { clinicDialogClass } from "./ClinicPageUi";
 import { DoctorPlumitas } from "../brand/DoctorPlumitas";
 import { createClient, createPatient } from "../../lib/clinicApi";
@@ -30,6 +31,7 @@ export function QuickClientPatientDialog({
   onSuccess,
   onOwnerOnly,
 }) {
+  const { t } = useTranslation("clinic");
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
 
@@ -55,7 +57,12 @@ export function QuickClientPatientDialog({
         species: form.species,
         weight_kg: null,
       });
-      notifySuccess(`${form.petName.trim()} y ${form.ownerName.trim()} registrados.`);
+      notifySuccess(
+        t("quickRegister.success", {
+          pet: form.petName.trim(),
+          owner: form.ownerName.trim(),
+        }),
+      );
       onOpenChange(false);
       onSuccess?.({ client, patient });
     } catch (err) {
@@ -74,11 +81,13 @@ export function QuickClientPatientDialog({
             <div className="clinic-quick-dialog-intro">
               <p className="clinic-quick-dialog-eyebrow">
                 <Zap size={12} aria-hidden />
-                Registro en un paso
+                {t("quickRegister.eyebrow")}
               </p>
-              <DialogTitle className="clinic-quick-dialog-title">Dueño + mascota</DialogTitle>
+              <DialogTitle className="clinic-quick-dialog-title">
+                {t("quickRegister.title")}
+              </DialogTitle>
               <p className="clinic-dialog-subtitle clinic-quick-hint">
-                Solo lo esencial. Puedes completar más datos después.
+                {t("quickRegister.lead")}
               </p>
             </div>
           </div>
@@ -87,62 +96,62 @@ export function QuickClientPatientDialog({
         <form onSubmit={handleSubmit} className="clinic-form clinic-form-product clinic-quick-dialog-form">
           <div className="clinic-form-scroll clinic-form-scroll-compact">
             <p className="clinic-form-section-label">
-              <Users size={14} aria-hidden /> Dueño
+              <Users size={14} aria-hidden /> {t("quickRegister.ownerSection")}
             </p>
             <div className="clinic-form-grid-2">
               <div className="form-group">
-                <Label htmlFor="quick-owner-name">Nombre *</Label>
+                <Label htmlFor="quick-owner-name">{t("quickRegister.name")}</Label>
                 <Input
                   id="quick-owner-name"
                   className="clinic-field-control"
                   value={form.ownerName}
                   onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
-                  placeholder="Ej. María López"
+                  placeholder={t("quickRegister.ownerPlaceholder")}
                   required
                   autoFocus
                 />
               </div>
               <div className="form-group">
-                <Label htmlFor="quick-owner-phone">Teléfono</Label>
+                <Label htmlFor="quick-owner-phone">{t("quickRegister.phone")}</Label>
                 <Input
                   id="quick-owner-phone"
                   className="clinic-field-control"
                   value={form.ownerPhone}
                   onChange={(e) => setForm({ ...form, ownerPhone: e.target.value })}
-                  placeholder="Opcional"
+                  placeholder={t("quickRegister.optional")}
                 />
               </div>
             </div>
 
             <p className="clinic-form-section-label clinic-form-section-label--spaced">
-              <PawPrint size={14} aria-hidden /> Mascota
+              <PawPrint size={14} aria-hidden /> {t("quickRegister.petSection")}
             </p>
             <div className="form-group">
-              <Label htmlFor="quick-pet-name">Nombre *</Label>
+              <Label htmlFor="quick-pet-name">{t("quickRegister.name")}</Label>
               <Input
                 id="quick-pet-name"
                 className="clinic-field-control"
                 value={form.petName}
                 onChange={(e) => setForm({ ...form, petName: e.target.value })}
-                placeholder="Ej. Firulais"
+                placeholder={t("quickRegister.petPlaceholder")}
                 required
               />
             </div>
             <div className="form-group">
-              <Label id="quick-species-label">Especie</Label>
+              <Label id="quick-species-label">{t("quickRegister.species")}</Label>
               <div
                 className="clinic-quick-chips clinic-quick-chips--species"
                 role="group"
                 aria-labelledby="quick-species-label"
               >
-                {QUICK_SPECIES.map(({ value, label }) => (
+                {QUICK_SPECIES.map(({ value }) => (
                   <button
                     key={value}
                     type="button"
                     className={`clinic-quick-chip${form.species === value ? " is-active" : ""}`}
                     onClick={() => setForm({ ...form, species: value })}
                   >
-                    {label}
+                    {t(`quickRegister.speciesLabels.${value}`, { defaultValue: value })}
                   </button>
                 ))}
               </div>
@@ -150,17 +159,17 @@ export function QuickClientPatientDialog({
 
             {onOwnerOnly && (
               <button type="button" className="clinic-link-btn clinic-quick-owner-only" onClick={onOwnerOnly}>
-                Solo dueño (sin mascota)
+                {t("quickRegister.ownerOnly")}
               </button>
             )}
           </div>
 
           <DialogFooter className="clinic-dialog-footer clinic-quick-dialog-footer">
             <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-              Cancelar
+              {t("common.cancel")}
             </Button>
             <Button type="submit" className="clinic-quick-submit-btn" disabled={saving}>
-              {saving ? "Guardando..." : "Registrar ambos"}
+              {saving ? t("common.saving") : t("quickRegister.submit")}
             </Button>
           </DialogFooter>
         </form>

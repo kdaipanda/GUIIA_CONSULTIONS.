@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AlertCircle, CheckCircle2, Clock, Loader2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { GuiaaBrandLockup } from "../components/GuiaaBrandLockup";
@@ -10,6 +11,7 @@ import { trackMetaPurchaseOnce } from "../lib/metaPixel";
 import "./membershipPage.css";
 
 export function PaymentSuccessPage({ setView }) {
+  const { t } = useTranslation("clinic");
   const { login, veterinarian } = useVet();
   const [paymentStatus, setPaymentStatus] = useState("checking");
   const [purchaseType, setPurchaseType] = useState(null);
@@ -18,11 +20,22 @@ export function PaymentSuccessPage({ setView }) {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get("session_id");
+    const sessionId =
+      urlParams.get("session_id") ||
+      (typeof sessionStorage !== "undefined"
+        ? sessionStorage.getItem("guiaa_checkout_session_id")
+        : "") ||
+      "";
 
     if (!sessionId) {
       setPaymentStatus("error");
       return;
+    }
+
+    try {
+      sessionStorage.setItem("guiaa_checkout_session_id", sessionId);
+    } catch {
+      /* ignore */
     }
 
     pollPaymentStatus(sessionId);
@@ -43,8 +56,13 @@ export function PaymentSuccessPage({ setView }) {
         { headers: getAuthHeaders(veterinarian?.id) },
       );
 
+      if (response.status === 401) {
+        setView("login");
+        return;
+      }
+
       if (!response.ok) {
-        throw new Error("Error verificando pago");
+        throw new Error(t("paymentSuccess.verifyError"));
       }
 
       const data = await response.json();
@@ -52,6 +70,11 @@ export function PaymentSuccessPage({ setView }) {
       if (data.payment_status === "paid") {
         if (data?.veterinarian) {
           login(data.veterinarian);
+        }
+        try {
+          sessionStorage.removeItem("guiaa_checkout_session_id");
+        } catch {
+          /* ignore */
         }
         setPurchaseType(data.purchase_type || null);
         setCreditsPurchased(data.credits || null);
@@ -92,11 +115,11 @@ export function PaymentSuccessPage({ setView }) {
           <span className="payment-status-icon payment-status-icon--loading">
             <Loader2 size={28} aria-hidden />
           </span>
-          <h2>Verificando pago</h2>
-          <p>Estamos confirmando tu transacción. Esto puede tomar unos segundos.</p>
+          <h2>{t("paymentSuccess.checkingTitle")}</h2>
+          <p>{t("paymentSuccess.checkingBody")}</p>
           {pollAttempt > 0 && (
             <p className="payment-status-note text-sm text-muted-foreground" role="status">
-              Intento {pollAttempt} de 5…
+              {t("paymentSuccess.attempt", { current: pollAttempt, max: 5 })}
             </p>
           )}
         </div>
@@ -109,15 +132,15 @@ export function PaymentSuccessPage({ setView }) {
           <span className="payment-status-icon payment-status-icon--success">
             <CheckCircle2 size={30} aria-hidden />
           </span>
-          <h2>¡Pago exitoso!</h2>
+          <h2>{t("paymentSuccess.successTitle")}</h2>
           <p>
             {purchaseType === "consultation_credits"
-              ? `Se agregaron ${creditsPurchased || ""} consultas a tu cuenta.`
-              : "Tu membresía quedó activa. Ya puedes usar todas las funciones de GUIAA."}
+              ? t("paymentSuccess.creditsAdded", { count: creditsPurchased || "" })
+              : t("paymentSuccess.membershipActive")}
           </p>
           <div className="payment-status-actions">
             <Button type="button" onClick={() => setView("dashboard")} className="w-full sm:w-auto">
-              Ir al dashboard
+              {t("paymentSuccess.goDashboard")}
             </Button>
             <Button
               type="button"
@@ -125,7 +148,7 @@ export function PaymentSuccessPage({ setView }) {
               onClick={() => setView("new-consultation")}
               className="w-full sm:w-auto"
             >
-              Nueva consulta
+              {t("paymentSuccess.newConsultation")}
             </Button>
           </div>
         </div>
@@ -138,18 +161,18 @@ export function PaymentSuccessPage({ setView }) {
           <span className="payment-status-icon payment-status-icon--loading">
             <Clock size={28} aria-hidden />
           </span>
-          <h2>Pago en proceso</h2>
+          <h2>{t("paymentSuccess.pendingTitle")}</h2>
           <p>
             {purchaseType === "consultation_credits"
-              ? "Recibimos tu solicitud de recarga. Si pagaste con OXXO u otro método en efectivo, activaremos las consultas en cuanto Stripe confirme el pago (puede tardar hasta 3 días)."
-              : "Recibimos tu solicitud de membresía. Si pagaste con OXXO u otro método en efectivo, activaremos tu plan en cuanto Stripe confirme el pago (puede tardar hasta 3 días)."}
+              ? t("paymentSuccess.pendingCredits")
+              : t("paymentSuccess.pendingMembership")}
           </p>
           <p className="payment-status-note text-sm text-muted-foreground">
-            También te enviaremos la confirmación al correo de tu cuenta. Precios en MXN (pesos mexicanos).
+            {t("paymentSuccess.pendingNote")}
           </p>
           <div className="payment-status-actions">
             <Button type="button" onClick={() => setView("dashboard")} className="w-full sm:w-auto">
-              Ir al dashboard
+              {t("paymentSuccess.goDashboard")}
             </Button>
           </div>
         </div>
@@ -162,11 +185,11 @@ export function PaymentSuccessPage({ setView }) {
           <span className="payment-status-icon payment-status-icon--error">
             <Clock size={28} aria-hidden />
           </span>
-          <h2>Sesión expirada</h2>
-          <p>La sesión de pago expiró. Inicia el proceso nuevamente desde membresía.</p>
+          <h2>{t("paymentSuccess.expiredTitle")}</h2>
+          <p>{t("paymentSuccess.expiredBody")}</p>
           <div className="payment-status-actions">
             <Button type="button" onClick={() => setView("membership")} className="w-full sm:w-auto">
-              Volver a membresías
+              {t("paymentSuccess.backMembership")}
             </Button>
           </div>
         </div>
@@ -179,10 +202,8 @@ export function PaymentSuccessPage({ setView }) {
           <span className="payment-status-icon payment-status-icon--error">
             <Clock size={28} aria-hidden />
           </span>
-          <h2>Tiempo agotado</h2>
-          <p>
-            No pudimos verificar el pago a tiempo. Revisa tu correo o contacta a soporte@guiaa.vet.
-          </p>
+          <h2>{t("paymentSuccess.timeoutTitle")}</h2>
+          <p>{t("paymentSuccess.timeoutBody")}</p>
           <div className="payment-status-actions">
             <Button
               type="button"
@@ -190,7 +211,7 @@ export function PaymentSuccessPage({ setView }) {
               onClick={() => setView("dashboard")}
               className="w-full sm:w-auto"
             >
-              Ir al dashboard
+              {t("paymentSuccess.backDashboard")}
             </Button>
           </div>
         </div>
@@ -202,11 +223,11 @@ export function PaymentSuccessPage({ setView }) {
         <span className="payment-status-icon payment-status-icon--error">
           <AlertCircle size={28} aria-hidden />
         </span>
-        <h2>Error en el pago</h2>
-        <p>Hubo un problema al procesar tu pago. Puedes intentarlo de nuevo.</p>
+        <h2>{t("paymentSuccess.errorTitle")}</h2>
+        <p>{t("paymentSuccess.errorBody")}</p>
         <div className="payment-status-actions">
           <Button type="button" onClick={() => setView("membership")} className="w-full sm:w-auto">
-            Intentar nuevamente
+            {t("paymentSuccess.retry")}
           </Button>
           <Button
             type="button"
@@ -214,7 +235,7 @@ export function PaymentSuccessPage({ setView }) {
             onClick={() => setView("dashboard")}
             className="w-full sm:w-auto"
           >
-            Volver al dashboard
+            {t("paymentSuccess.backDashboard")}
           </Button>
         </div>
       </div>

@@ -9,17 +9,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
+import { useTranslation } from "react-i18next";
 
 export function ConfirmActionDialog({
   open,
   title,
   description,
-  confirmLabel = "Confirmar",
-  cancelLabel = "Cancelar",
+  confirmLabel,
+  cancelLabel,
   destructive = false,
   onOpenChange,
   onConfirm,
 }) {
+  const { t } = useTranslation("clinic");
+  const resolvedConfirm = confirmLabel ?? t("common.confirm");
+  const resolvedCancel = cancelLabel ?? t("common.cancel");
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="clinic-confirm-dialog">
@@ -30,12 +35,12 @@ export function ConfirmActionDialog({
           ) : null}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="min-h-11">{cancelLabel}</AlertDialogCancel>
+          <AlertDialogCancel className="min-h-11">{resolvedCancel}</AlertDialogCancel>
           <AlertDialogAction
             className={`min-h-11${destructive ? " bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}`}
             onClick={onConfirm}
           >
-            {confirmLabel}
+            {resolvedConfirm}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

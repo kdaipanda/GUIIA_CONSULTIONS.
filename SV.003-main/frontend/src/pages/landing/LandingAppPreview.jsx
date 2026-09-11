@@ -1,16 +1,17 @@
 import React from "react";
 import { BarChart3, Sun } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   PREVIEW_CATEGORIES,
   PREVIEW_CATEGORY_ICONS,
-  PREVIEW_CATEGORY_LABELS,
 } from "./landingPreviewData";
 
 function PreviewStepper({ currentStep }) {
+  const { t } = useTranslation("landing");
   const steps = [
-    { number: 1, label: "Datos", icon: "🐾" },
-    { number: 2, label: "Motivo", icon: "📝" },
-    { number: 3, label: "Diagnóstico", icon: "🔬" },
+    { number: 1, label: t("preview.steps.data"), icon: "🐾" },
+    { number: 2, label: t("preview.steps.reason"), icon: "📝" },
+    { number: 3, label: t("preview.steps.diagnosis"), icon: "🔬" },
   ];
 
   return (
@@ -41,12 +42,13 @@ function PreviewStepper({ currentStep }) {
 }
 
 function CategoryGrid({ selected = "perros" }) {
+  const { t } = useTranslation("landing");
   const speciesCount = PREVIEW_CATEGORIES.length;
   return (
     <div className="form-section category-selector-glass-wrap">
       <div className="category-selector-glass-head">
         <span className="category-selector-glass-badge">
-          Multiespecie veterinaria · {speciesCount} formularios clínicos
+          {t("preview.multiSpeciesBadge", { count: speciesCount })}
         </span>
       </div>
       <div className="category-selector-glass-panel">
@@ -57,7 +59,9 @@ function CategoryGrid({ selected = "perros" }) {
               className={`category-card category-card--liquid ${selected === key ? "selected" : ""}`}
             >
               <span className="category-icon">{PREVIEW_CATEGORY_ICONS[key]}</span>
-              <span className="category-label">{PREVIEW_CATEGORY_LABELS[key]}</span>
+              <span className="category-label">
+                {t(`speciesMarquee.categories.${key}`, { defaultValue: key })}
+              </span>
             </div>
           ))}
         </div>
@@ -68,22 +72,23 @@ function CategoryGrid({ selected = "perros" }) {
 
 function ConsultationSidebar({
   petName = "Max",
-  species = "Perros",
   progress = "33%",
-  stepLabel = "Progreso (1/3)",
 }) {
+  const { t } = useTranslation("landing");
   return (
     <aside className="consultation-sidebar">
       <div className="sidebar-section">
-        <div className="sidebar-label">Mascota</div>
+        <div className="sidebar-label">{t("preview.sidebar.pet")}</div>
         <div className="sidebar-value">{petName}</div>
       </div>
       <div className="sidebar-section">
-        <div className="sidebar-label">Especie</div>
-        <div className="sidebar-value">{species}</div>
+        <div className="sidebar-label">{t("preview.sidebar.species")}</div>
+        <div className="sidebar-value">{t("preview.sidebar.dogs")}</div>
       </div>
       <div className="sidebar-section">
-        <div className="sidebar-label">{stepLabel}</div>
+        <div className="sidebar-label">
+          {t("preview.sidebar.progress", { current: 1, total: 3 })}
+        </div>
         <div className="sidebar-progress-container">
           <div className="sidebar-progress-bar" style={{ width: progress }} />
         </div>
@@ -93,6 +98,7 @@ function ConsultationSidebar({
 }
 
 export function ConsultationSpeciesPreview() {
+  const { t } = useTranslation("landing");
   return (
     <div className="consultation-page landing-app-preview-page">
       <div className="page-title-header">
@@ -100,8 +106,8 @@ export function ConsultationSpeciesPreview() {
           <div className="page-title-content">
             <div className="page-title-icon">🐾</div>
             <div className="page-title-text">
-              <h1>Nueva Consulta Veterinaria</h1>
-              <p>Complete la información de la mascota para iniciar el diagnóstico clínico</p>
+              <h1>{t("preview.speciesTitle")}</h1>
+              <p>{t("preview.speciesLead")}</p>
             </div>
           </div>
         </div>
@@ -114,14 +120,19 @@ export function ConsultationSpeciesPreview() {
               <form className="consultation-form">
                 <CategoryGrid selected="perros" />
                 <div className="form-section">
-                  <h3>Información básica</h3>
+                  <h3>{t("preview.basicInfo")}</h3>
                   <div className="form-group">
-                    <label>Nombre de la mascota</label>
+                    <label>{t("preview.petName")}</label>
                     <input type="text" value="Max" readOnly tabIndex={-1} />
                   </div>
                   <div className="form-group">
-                    <label>Raza</label>
-                    <input type="text" value="Mestizo" readOnly tabIndex={-1} />
+                    <label>{t("preview.breed")}</label>
+                    <input
+                      type="text"
+                      value={t("preview.breedValue")}
+                      readOnly
+                      tabIndex={-1}
+                    />
                   </div>
                 </div>
               </form>
@@ -135,6 +146,7 @@ export function ConsultationSpeciesPreview() {
 }
 
 export function ConsultationFormPreview() {
+  const { t } = useTranslation("landing");
   return (
     <div className="consultation-page landing-app-preview-page">
       <div className="page-title-header">
@@ -142,8 +154,8 @@ export function ConsultationFormPreview() {
           <div className="page-title-content">
             <div className="page-title-icon">📝</div>
             <div className="page-title-text">
-              <h1>Motivo de Consulta</h1>
-              <p>Describa detalladamente los síntomas y observaciones de la mascota</p>
+              <h1>{t("preview.reasonTitle")}</h1>
+              <p>{t("preview.reasonLead")}</p>
             </div>
           </div>
         </div>
@@ -153,16 +165,14 @@ export function ConsultationFormPreview() {
           <PreviewStepper currentStep={2} />
           <form className="consultation-form">
             <div className="form-section">
-              <h3>Detalle de la mascota</h3>
+              <h3>{t("preview.petDetail")}</h3>
               <div className="form-group">
-                <label>ANOTA CON EL MAYOR DETALLE LOS DATOS SOBRE LA MASCOTA.</label>
+                <label>{t("preview.petDetailLabel")}</label>
                 <textarea
                   readOnly
                   tabIndex={-1}
                   rows={8}
-                  value={
-                    "Paciente canino, 4 años, 18 kg. Vómito intermitente desde hace 48 h, sin diarrea. Apetito disminuido. Última comida ayer por la noche.\n\nAl examen: T° 39.2 °C, deshidratación leve (5%), mucosas pálidas, dolor abdominal leve en epigastrio."
-                  }
+                  value={t("preview.petDetailSample")}
                 />
               </div>
             </div>
@@ -174,6 +184,7 @@ export function ConsultationFormPreview() {
 }
 
 export function DashboardPreview() {
+  const { t } = useTranslation("landing");
   return (
     <div className="dashboard-page dashboard-morning landing-app-preview-page">
       <div className="container">
@@ -181,7 +192,7 @@ export function DashboardPreview() {
           <div className="dashboard-header-row">
             <div className="hero-welcome">
               <div className="hero-greeting">
-                <h1>Buenos días, Dra. García</h1>
+                <h1>{t("preview.dashboardGreeting")}</h1>
                 <span className="greeting-icon">
                   <Sun size={18} aria-hidden />
                 </span>
@@ -190,7 +201,7 @@ export function DashboardPreview() {
               <div className="hero-summary">
                 <span className="hero-summary-item">
                   <BarChart3 className="icon" size={16} aria-hidden />
-                  24 consultas
+                  {t("preview.dashboardConsultations", { count: 24 })}
                 </span>
                 <span className="hero-summary-divider">•</span>
                 <span className="hero-badge premium">⭐ Premium</span>
@@ -203,21 +214,21 @@ export function DashboardPreview() {
             <div className="stat-icon">📊</div>
             <div className="stat-content">
               <h3>24</h3>
-              <p>Consultas Totales</p>
+              <p>{t("preview.statTotal")}</p>
             </div>
           </div>
           <div className="stat-card">
             <div className="stat-icon">📅</div>
             <div className="stat-content">
               <h3>8</h3>
-              <p>Este Mes</p>
+              <p>{t("preview.statMonth")}</p>
             </div>
           </div>
           <div className="stat-card">
             <div className="stat-icon">⭐</div>
             <div className="stat-content">
               <h3>Premium</h3>
-              <p>Membresía</p>
+              <p>{t("preview.statMembership")}</p>
             </div>
           </div>
         </div>

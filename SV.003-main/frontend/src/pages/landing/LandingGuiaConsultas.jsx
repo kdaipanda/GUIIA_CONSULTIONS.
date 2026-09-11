@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Megaphone, Target, Users, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { submitGuiaConsultasLead } from "../../lib/clinicApi";
 import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Input } from "../../components/ui/input";
@@ -17,25 +18,14 @@ const INITIAL = {
   privacy_accepted: false,
 };
 
-const VALUE_PROPS = [
-  {
-    icon: Target,
-    title: "Momento de decisión",
-    text: "Tu marca aparece cuando el MVZ y el tutor evalúan tratamiento o producto.",
-  },
-  {
-    icon: Zap,
-    title: "Alta intención",
-    text: "Contexto clínico real, no banners genéricos en sitios ajenos.",
-  },
-  {
-    icon: Users,
-    title: "Alcance MVZ",
-    text: "Médicos veterinarios certificados en Latinoamérica.",
-  },
+const VALUE_PROP_KEYS = [
+  { icon: Target, key: "moment" },
+  { icon: Zap, key: "intent" },
+  { icon: Users, key: "reach" },
 ];
 
 export function LandingGuiaConsultas() {
+  const { t } = useTranslation("landing");
   const [form, setForm] = useState(INITIAL);
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
@@ -43,11 +33,11 @@ export function LandingGuiaConsultas() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim()) {
-      notifyError("Completa nombre y email.");
+      notifyError(t("guiaConsultas.errorNameEmail"));
       return;
     }
     if (!form.privacy_accepted) {
-      notifyError("Debes aceptar el tratamiento de datos personales.");
+      notifyError(t("guiaConsultas.errorPrivacy"));
       return;
     }
 
@@ -60,7 +50,7 @@ export function LandingGuiaConsultas() {
         message: form.message.trim() || undefined,
         privacy_accepted: true,
       });
-      notifySuccess(data.message || "Solicitud enviada correctamente.");
+      notifySuccess(data.message || t("guiaConsultas.sentTitle"));
       setForm(INITIAL);
       setSent(true);
     } catch (err) {
@@ -83,27 +73,26 @@ export function LandingGuiaConsultas() {
           <div className="landing-guia-consultas-grid">
             <div className="landing-guia-consultas-copy">
               <div className="landing-guia-consultas-brand-row">
-                <span className="landing-guia-ads-badge">ADSGuiaa</span>
-                <span className="landing-guia-consultas-eyebrow">Guía Consultas</span>
+                <span className="landing-guia-ads-badge">{t("guiaConsultas.badge")}</span>
+                <span className="landing-guia-consultas-eyebrow">
+                  {t("guiaConsultas.eyebrow")}
+                </span>
               </div>
 
               <h2 id="landing-guia-consultas-heading" className="landing-guia-consultas-title">
-                Anúnciate con nosotros
+                {t("guiaConsultas.title")}
               </h2>
-              <p className="landing-guia-consultas-lead">
-                Influye en cada consulta veterinaria: coloca tu marca en el momento exacto de la
-                decisión clínica, dentro del software que usan los MVZ cada día.
-              </p>
+              <p className="landing-guia-consultas-lead">{t("guiaConsultas.lead")}</p>
 
               <ul className="landing-guia-value-props">
-                {VALUE_PROPS.map(({ icon: Icon, title, text }) => (
-                  <li key={title} className="landing-guia-value-prop">
+                {VALUE_PROP_KEYS.map(({ icon: Icon, key }) => (
+                  <li key={key} className="landing-guia-value-prop">
                     <span className="landing-guia-value-prop-icon" aria-hidden>
                       <Icon size={18} strokeWidth={2} />
                     </span>
                     <div>
-                      <strong>{title}</strong>
-                      <p>{text}</p>
+                      <strong>{t(`guiaConsultas.props.${key}.title`)}</strong>
+                      <p>{t(`guiaConsultas.props.${key}.text`)}</p>
                     </div>
                   </li>
                 ))}
@@ -126,17 +115,18 @@ export function LandingGuiaConsultas() {
               <div className="landing-guia-consultas-form-wrap">
                 {sent ? (
                   <div className="landing-guia-consultas-success" role="status">
-                    <p className="landing-guia-consultas-success-title">Solicitud recibida</p>
+                    <p className="landing-guia-consultas-success-title">
+                      {t("guiaConsultas.sentTitle")}
+                    </p>
                     <p className="landing-guia-consultas-success-text">
-                      El equipo GUIAA revisará tu mensaje y te contactará con opciones de
-                      publicidad en <strong>ADSGuiaa</strong>.
+                      {t("guiaConsultas.sentText")}
                     </p>
                     <button
                       type="button"
                       className="landing-guia-consultas-submit"
                       onClick={() => setSent(false)}
                     >
-                      Enviar otra solicitud
+                      {t("guiaConsultas.sentAgain")}
                     </button>
                   </div>
                 ) : (
@@ -146,22 +136,25 @@ export function LandingGuiaConsultas() {
                         <Megaphone size={20} strokeWidth={2} />
                       </span>
                       <div>
-                        <h3 className="landing-guia-form-kicker">Solicitud de información</h3>
-                        <p className="landing-guia-form-sub">
-                          Cuéntanos tu marca o laboratorio. Te proponemos formatos en Guía
-                          Consultas.
-                        </p>
+                        <h3 className="landing-guia-form-kicker">
+                          {t("guiaConsultas.formTitle")}
+                        </h3>
+                        <p className="landing-guia-form-sub">{t("guiaConsultas.formSub")}</p>
                       </div>
                     </div>
 
-                    <form className="landing-guia-consultas-form" onSubmit={handleSubmit} noValidate>
+                    <form
+                      className="landing-guia-consultas-form"
+                      onSubmit={handleSubmit}
+                      noValidate
+                    >
                       <div className="landing-guia-field">
-                        <Label htmlFor="gc-name">Nombre o empresa</Label>
+                        <Label htmlFor="gc-name">{t("guiaConsultas.name")}</Label>
                         <Input
                           id="gc-name"
                           value={form.name}
                           onChange={(e) => setForm({ ...form, name: e.target.value })}
-                          placeholder="Laboratorio VetLab"
+                          placeholder={t("guiaConsultas.namePlaceholder")}
                           autoComplete="organization"
                           required
                           className="landing-guia-input"
@@ -169,38 +162,38 @@ export function LandingGuiaConsultas() {
                       </div>
                       <div className="landing-guia-field-row">
                         <div className="landing-guia-field">
-                          <Label htmlFor="gc-email">Email</Label>
+                          <Label htmlFor="gc-email">{t("guiaConsultas.email")}</Label>
                           <Input
                             id="gc-email"
                             type="email"
                             value={form.email}
                             onChange={(e) => setForm({ ...form, email: e.target.value })}
-                            placeholder="contacto@marca.com"
+                            placeholder={t("guiaConsultas.emailPlaceholder")}
                             autoComplete="email"
                             required
                             className="landing-guia-input"
                           />
                         </div>
                         <div className="landing-guia-field">
-                          <Label htmlFor="gc-phone">Teléfono</Label>
+                          <Label htmlFor="gc-phone">{t("guiaConsultas.phone")}</Label>
                           <Input
                             id="gc-phone"
                             type="tel"
                             value={form.phone}
                             onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                            placeholder="+52 55 0000 0000"
+                            placeholder={t("guiaConsultas.phonePlaceholder")}
                             autoComplete="tel"
                             className="landing-guia-input"
                           />
                         </div>
                       </div>
                       <div className="landing-guia-field">
-                        <Label htmlFor="gc-message">Producto o marca a promover</Label>
+                        <Label htmlFor="gc-message">{t("guiaConsultas.message")}</Label>
                         <Textarea
                           id="gc-message"
                           value={form.message}
                           onChange={(e) => setForm({ ...form, message: e.target.value })}
-                          placeholder="Alimento terapéutico, vacunas, laboratorio, equipamiento…"
+                          placeholder={t("guiaConsultas.messagePlaceholder")}
                           rows={3}
                           className="landing-guia-input landing-guia-textarea"
                         />
@@ -213,10 +206,7 @@ export function LandingGuiaConsultas() {
                             setForm({ ...form, privacy_accepted: checked === true })
                           }
                         />
-                        <span>
-                          Acepto el tratamiento de mis datos para recibir información sobre ADSGuiaa
-                          y publicidad en Guía Consultas.
-                        </span>
+                        <span>{t("guiaConsultas.privacy")}</span>
                       </label>
 
                       <button
@@ -224,7 +214,9 @@ export function LandingGuiaConsultas() {
                         className="landing-guia-consultas-submit"
                         disabled={submitting}
                       >
-                        {submitting ? "Enviando…" : "Quiero anunciarme"}
+                        {submitting
+                          ? t("guiaConsultas.submitting")
+                          : t("guiaConsultas.submit")}
                       </button>
                     </form>
                   </>

@@ -1,8 +1,9 @@
+import i18n from "../i18n";
 import {
   CONSULTATION_CATEGORY_ICONS,
-  CONSULTATION_CATEGORY_NAMES,
 } from "./consultationCategories";
 
+/** @deprecated Prefer getConsultationStatusLabel — kept for callers that read keys */
 export const CONSULTATION_STATUS_LABELS = {
   completed: "Completada",
   in_progress: "En progreso",
@@ -25,7 +26,13 @@ export function getConsultationSpeciesIcon(consultation) {
 
 export function getConsultationSpeciesLabel(consultation) {
   const key = getConsultationSpeciesKey(consultation);
-  return CONSULTATION_CATEGORY_NAMES[key] || key || "Multiespecie";
+  if (key) {
+    const categoryKey = `categories.${key}`;
+    if (i18n.exists(categoryKey, { ns: "speciesForms" })) {
+      return i18n.t(categoryKey, { ns: "speciesForms" });
+    }
+  }
+  return key || i18n.t("consultationDisplay.multispecies", { ns: "clinic" });
 }
 
 export function getConsultationPatientTitle(consultation) {
@@ -49,14 +56,15 @@ export function getConsultationReasonPreview(consultation, maxLength = 120) {
     "";
 
   const cleaned = String(text).trim();
-  if (!cleaned) return "Sin descripción clínica";
+  if (!cleaned) return i18n.t("consultationDisplay.noClinicalDescription", { ns: "clinic" });
   if (cleaned.length <= maxLength) return cleaned;
   return `${cleaned.slice(0, maxLength).trim()}…`;
 }
 
 export function formatConsultationDateShort(value) {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString("es-MX", {
+  const locale = i18n.language?.startsWith("en") ? "en-US" : "es-MX";
+  return new Date(value).toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -64,7 +72,12 @@ export function formatConsultationDateShort(value) {
 }
 
 export function getConsultationStatusLabel(status) {
-  return CONSULTATION_STATUS_LABELS[status] || status || "—";
+  if (!status) return "—";
+  const key = `consultationStatus.${status}`;
+  if (i18n.exists(key, { ns: "clinic" })) {
+    return i18n.t(key, { ns: "clinic" });
+  }
+  return CONSULTATION_STATUS_LABELS[status] || status;
 }
 
 export function normalizeConsultationRecord(consultation) {

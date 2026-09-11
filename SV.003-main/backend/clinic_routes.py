@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Header, HTTPException
 from fastapi.responses import Response
@@ -132,6 +132,7 @@ class PatientCreate(BaseModel):
     weight_kg: Optional[float] = None
     status: Optional[str] = "active"
     notes: Optional[str] = None
+    clinical_chart: Optional[Dict[str, Any]] = None
 
     @field_validator("birth_date", mode="before")
     @classmethod
@@ -153,6 +154,7 @@ class PatientUpdate(BaseModel):
     weight_kg: Optional[float] = None
     status: Optional[str] = None
     notes: Optional[str] = None
+    clinical_chart: Optional[Dict[str, Any]] = None
 
     @field_validator("birth_date", mode="before")
     @classmethod
@@ -160,6 +162,19 @@ class PatientUpdate(BaseModel):
         if value == "" or value is None:
             return None
         return value
+
+
+class ClinicalChartPatch(BaseModel):
+    allergies: Optional[List[Dict[str, Any]]] = None
+    chronic_conditions: Optional[List[Dict[str, Any]]] = None
+    surgeries: Optional[List[Dict[str, Any]]] = None
+    vaccines: Optional[List[Dict[str, Any]]] = None
+    deworming: Optional[List[Dict[str, Any]]] = None
+    problems: Optional[List[Dict[str, Any]]] = None
+    reproductive: Optional[Dict[str, Any]] = None
+    updated_from_consultation_id: Optional[str] = None
+    replace: Optional[bool] = False
+    weight_kg: Optional[float] = None
 
 
 class AppointmentCreate(BaseModel):
@@ -292,6 +307,8 @@ def _serialize_consultation_row(row: dict) -> dict:
     return {
         "id": row.get("id"),
         "veterinarian_id": row.get("user_id"),
+        "patient_id": row.get("patient_id"),
+        "client_id": row.get("client_id"),
         "category": payload.get("category"),
         "especie": payload.get("category"),
         "form_data": form_data,
@@ -624,7 +641,9 @@ async def api_create_patient(body: PatientCreate, x_veterinarian_id: str = Heade
     client, err = clinic_db.get_client(body.client_id, ctx["organization_id"])
     if err or not client:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
-    patient, err = clinic_db.insert_patient({"organization_id": ctx["organization_id"], **body.model_dump()})
+    patient, err = clinic_db.insert_patient(
+        {"organization_id": ctx["organization_id"], **body.model_dump(exclude_none=True)}
+    )
     if err:
         raise HTTPException(status_code=500, detail=err)
     return {"patient": patient}
@@ -643,11 +662,63 @@ async def api_get_patient(patient_id: str, x_veterinarian_id: str = Header(None)
     medical_images, _ = clinic_db.list_medical_images_for_patient(
         patient_id, patient_name=patient.get("name")
     )
+    serialized = [_serialize_consultation_row(c) for c in consultations]
+    try:
+        from clinical_chart_sync import build_vitals_series, normalize_chart
+
+        vitals_series = build_vitals_series(serialized)
+        patient = {**patient, "clinical_chart": normalize_chart(patient.get("clinical_chart"))}
+    except Exception:  # noqa: BLE001
+        vitals_series = []
     return {
         "patient": patient,
-        "consultations": [_serialize_consultation_row(c) for c in consultations],
+        "consultations": serialized,
         "medical_images": medical_images,
+        "vitals_series": vitals_series,
     }
+
+
+@clinic_router.patch("/patients/{patient_id}/clinical-chart")
+async def api_patch_patient_clinical_chart(
+    patient_id: str,
+    body: ClinicalChartPatch,
+    x_veterinarian_id: str = Header(None),
+):
+    vet_id = _require_vet_id(x_veterinarian_id)
+    ctx = await _resolve_org_context(vet_id)
+    _check_write(ctx["role"])
+    patch = body.model_dump(exclude_none=True)
+    weight_kg = patch.pop("weight_kg", None)
+    replace = bool(patch.pop("replace", False))
+
+    if replace:
+        try:
+            from clinical_chart_sync import normalize_chart
+
+            fields: Dict[str, Any] = {"clinical_chart": normalize_chart(patch)}
+            if weight_kg is not None:
+                fields["weight_kg"] = weight_kg
+            patient, err = clinic_db.update_patient(patient_id, ctx["organization_id"], fields)
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+    else:
+        patient, err = clinic_db.merge_patient_clinical_chart(
+            patient_id,
+            ctx["organization_id"],
+            patch,
+            weight_kg=weight_kg,
+        )
+    if err:
+        # Column may not exist yet before migration — soft fail with clear message
+        if "clinical_chart" in str(err).lower() or "PGRST204" in str(err):
+            raise HTTPException(
+                status_code=503,
+                detail="Aplicar migración 20260911_patient_clinical_chart.sql para habilitar el expediente.",
+            )
+        raise HTTPException(status_code=500, detail=err)
+    if not patient:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    return {"patient": patient}
 
 
 @clinic_router.patch("/patients/{patient_id}")

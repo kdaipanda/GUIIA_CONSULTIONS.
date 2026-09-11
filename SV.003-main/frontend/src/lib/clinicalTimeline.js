@@ -1,13 +1,13 @@
-export const IMAGE_TYPE_LABELS = {
-  blood_test: "Análisis de sangre",
-  urinalysis: "Urianálisis",
-  xray: "Radiografía",
-  general: "Estudio general",
-};
+import i18n from "../i18n";
 
 export function getLabStudyLabel(study) {
-  if (!study) return "Estudio";
-  return IMAGE_TYPE_LABELS[study.image_type] || study.image_type || "Estudio";
+  if (!study) return i18n.t("lab.studyDefault", { ns: "clinic" });
+  const type = study.image_type;
+  const labelKey = `labTypes.${type}.label`;
+  if (type && i18n.exists(labelKey, { ns: "clinic" })) {
+    return i18n.t(labelKey, { ns: "clinic" });
+  }
+  return type || i18n.t("lab.studyDefault", { ns: "clinic" });
 }
 
 export function getLabStudySearchHaystack(study) {

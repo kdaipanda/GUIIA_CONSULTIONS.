@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
 import {
@@ -18,25 +19,10 @@ const PLUMITAS_FLYING_SRC = "/brand/doctor-plumitas-flying-cutout.png";
 const LANDING_VIEWS = new Set(["landing"]);
 const AUTH_VIEWS = new Set(["login", "register", "cedula-verification"]);
 
-const STATUS_LABELS = {
-  open: "Abierto",
-  in_progress: "En progreso",
-  resolved: "Resuelto",
-  closed: "Cerrado",
-};
-
-const INITIAL_CHAT = [
-  {
-    role: "assistant",
-    content:
-      "Hola, soy tu asistente de soporte GUIAA. Te ayudo con dudas de login, pagos, membresía, cédula y uso de la plataforma.",
-  },
-];
-
-function formatTicketDate(iso) {
+function formatTicketDate(iso, locale) {
   if (!iso) return "";
   try {
-    return new Date(iso).toLocaleString("es-MX", {
+    return new Date(iso).toLocaleString(locale?.startsWith("es") ? "es-MX" : "en-US", {
       day: "2-digit",
       month: "short",
       hour: "2-digit",
@@ -48,6 +34,7 @@ function formatTicketDate(iso) {
 }
 
 export function SupportChatWidget({ currentView }) {
+  const { t, i18n } = useTranslation("clinic");
   const { veterinarian } = useVet();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("chat");
@@ -58,7 +45,7 @@ export function SupportChatWidget({ currentView }) {
   const [ticketMessage, setTicketMessage] = useState("");
   const [ticketSending, setTicketSending] = useState(false);
   const [ticketDone, setTicketDone] = useState("");
-  const [messages, setMessages] = useState(INITIAL_CHAT);
+  const [messages, setMessages] = useState([]);
   const [ticketSummary, setTicketSummary] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [selectedTicketId, setSelectedTicketId] = useState(null);
@@ -68,6 +55,15 @@ export function SupportChatWidget({ currentView }) {
   const [ticketReplySending, setTicketReplySending] = useState(false);
   const listRef = useRef(null);
   const ticketThreadRef = useRef(null);
+
+  const statusLabel = useCallback(
+    (status) => t(`supportWidget.status.${status}`, { defaultValue: status }),
+    [t],
+  );
+
+  useEffect(() => {
+    setMessages([{ role: "assistant", content: t("supportWidget.greeting") }]);
+  }, [t, i18n.language]);
 
   const refreshSummary = useCallback(async () => {
     if (!veterinarian?.id) {
@@ -128,12 +124,12 @@ export function SupportChatWidget({ currentView }) {
         }
       } catch (err) {
         setTicketDetail(null);
-        setTicketDone(err.message || "No se pudo cargar el ticket.");
+        setTicketDone(err.message || t("supportWidget.errors.ticketLoadFailed"));
       } finally {
         setTicketDetailLoading(false);
       }
     },
-    [veterinarian?.id, refreshSummary],
+    [veterinarian?.id, refreshSummary, t],
   );
 
   useEffect(() => {
@@ -171,22 +167,20 @@ export function SupportChatWidget({ currentView }) {
       }
 
       if (!response.ok) {
-        const detail = data?.detail || "No pude responder en este momento.";
-        throw new Error(typeof detail === "string" ? detail : "Error de soporte");
+        const detail = data?.detail || t("supportWidget.errors.noAnswer");
+        throw new Error(typeof detail === "string" ? detail : t("supportWidget.errors.generic"));
       }
 
       const answer =
         (data?.answer || "").toString().trim() ||
-        "No pude generar una respuesta por ahora.";
+        t("supportWidget.errors.emptyAnswer");
       setMessages((prev) => [...prev, { role: "assistant", content: answer }]);
     } catch (err) {
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content:
-            err?.message ||
-            "No pude conectar con soporte. Inténtalo de nuevo en unos segundos.",
+          content: err?.message || t("supportWidget.errors.connection"),
         },
       ]);
     } finally {
@@ -197,13 +191,13 @@ export function SupportChatWidget({ currentView }) {
   const handleCreateTicket = async (e) => {
     e.preventDefault();
     if (!veterinarian?.id) {
-      setTicketDone("Inicia sesión para enviar un ticket a soporte.");
+      setTicketDone(t("supportWidget.errors.loginRequired"));
       return;
     }
     const subject = ticketSubject.trim();
     const message = ticketMessage.trim();
     if (subject.length < 3 || message.length < 5) {
-      setTicketDone("Completa asunto (mín. 3) y mensaje (mín. 5 caracteres).");
+      setTicketDone(t("supportWidget.errors.ticketFields"));
       return;
     }
     setTicketSending(true);
@@ -215,7 +209,7 @@ export function SupportChatWidget({ currentView }) {
         context_view: currentView,
         chat_history: messages.map((m) => ({ role: m.role, content: m.content })),
       });
-      setTicketDone("Ticket enviado. El equipo de soporte te responderá pronto.");
+      setTicketDone(t("supportWidget.errors.ticketCreated"));
       setTicketSubject("");
       setTicketMessage("");
       setShowTicketForm(false);
@@ -224,7 +218,7 @@ export function SupportChatWidget({ currentView }) {
       if (newId) setSelectedTicketId(newId);
       await refreshSummary();
     } catch (err) {
-      setTicketDone(err.message || "No se pudo crear el ticket.");
+      setTicketDone(err.message || t("supportWidget.errors.ticketCreateFailed"));
     } finally {
       setTicketSending(false);
     }
@@ -241,7 +235,7 @@ export function SupportChatWidget({ currentView }) {
       await loadTicketDetail(selectedTicketId);
       await refreshSummary();
     } catch (err) {
-      setTicketDone(err.message || "No se pudo enviar el mensaje.");
+      setTicketDone(err.message || t("supportWidget.errors.messageFailed"));
     } finally {
       setTicketReplySending(false);
     }
@@ -263,8 +257,8 @@ export function SupportChatWidget({ currentView }) {
       {isOpen && (
         <div className="support-chat-panel">
           <div className="support-chat-header">
-            <strong>Soporte GUIAA · Doctor Plumitas</strong>
-            <button type="button" onClick={() => setIsOpen(false)} aria-label="Cerrar chat">
+            <strong>{t("supportWidget.header")}</strong>
+            <button type="button" onClick={() => setIsOpen(false)} aria-label={t("supportWidget.closeChat")}>
               ✕
             </button>
           </div>
@@ -275,7 +269,7 @@ export function SupportChatWidget({ currentView }) {
               className={activeTab === "chat" ? "active" : ""}
               onClick={() => setActiveTab("chat")}
             >
-              Chat
+              {t("supportWidget.tabChat")}
             </button>
             <button
               type="button"
@@ -286,7 +280,7 @@ export function SupportChatWidget({ currentView }) {
                 setTicketDetail(null);
               }}
             >
-              Mis tickets
+              {t("supportWidget.tabTickets")}
               {unreadCount > 0 && (
                 <span className="support-chat-tab-badge">{unreadCount}</span>
               )}
@@ -304,7 +298,7 @@ export function SupportChatWidget({ currentView }) {
                     {msg.content}
                   </div>
                 ))}
-                {isSending && <div className="support-chat-typing">Escribiendo...</div>}
+                {isSending && <div className="support-chat-typing">{t("supportWidget.typing")}</div>}
               </div>
               <div className="support-chat-input-row">
                 <input
@@ -314,11 +308,11 @@ export function SupportChatWidget({ currentView }) {
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleSend();
                   }}
-                  placeholder="Escribe tu duda..."
+                  placeholder={t("supportWidget.inputPlaceholder")}
                   maxLength={500}
                 />
                 <button type="button" onClick={handleSend} disabled={isSending || !input.trim()}>
-                  Enviar
+                  {t("supportWidget.send")}
                 </button>
               </div>
               <div className="support-chat-human">
@@ -331,7 +325,7 @@ export function SupportChatWidget({ currentView }) {
                       setTicketDone("");
                     }}
                   >
-                    ¿No resolviste tu duda? Crear ticket
+                    {t("supportWidget.createTicket")}
                   </button>
                 ) : (
                   <form onSubmit={handleCreateTicket} className="support-chat-ticket-form">
@@ -339,26 +333,26 @@ export function SupportChatWidget({ currentView }) {
                       type="text"
                       value={ticketSubject}
                       onChange={(e) => setTicketSubject(e.target.value)}
-                      placeholder="Asunto del ticket"
+                      placeholder={t("supportWidget.ticketSubject")}
                       maxLength={200}
                     />
                     <textarea
                       value={ticketMessage}
                       onChange={(e) => setTicketMessage(e.target.value)}
-                      placeholder="Describe tu duda o problema..."
+                      placeholder={t("supportWidget.ticketMessage")}
                       rows={3}
                       maxLength={2000}
                     />
                     <div className="support-chat-ticket-actions">
                       <button type="submit" disabled={ticketSending}>
-                        {ticketSending ? "Enviando..." : "Enviar ticket"}
+                        {ticketSending ? t("supportWidget.ticketSending") : t("supportWidget.ticketSend")}
                       </button>
                       <button
                         type="button"
                         className="support-chat-ticket-cancel"
                         onClick={() => setShowTicketForm(false)}
                       >
-                        Cancelar
+                        {t("supportWidget.cancel")}
                       </button>
                     </div>
                   </form>
@@ -374,11 +368,11 @@ export function SupportChatWidget({ currentView }) {
                 <>
                   {!veterinarian?.id ? (
                     <p className="support-chat-tickets-empty">
-                      Inicia sesión para ver tus tickets de soporte.
+                      {t("supportWidget.loginForTickets")}
                     </p>
                   ) : ticketSummary.length === 0 ? (
                     <p className="support-chat-tickets-empty">
-                      Aún no tienes tickets. Usa el chat o crea uno desde la pestaña Chat.
+                      {t("supportWidget.noTickets")}
                     </p>
                   ) : (
                     <ul className="support-chat-ticket-list">
@@ -398,9 +392,9 @@ export function SupportChatWidget({ currentView }) {
                                 {unread && <span className="support-chat-item-dot" />}
                               </span>
                               <span className="support-chat-ticket-item-meta">
-                                {STATUS_LABELS[ticket.status] || ticket.status}
+                                {statusLabel(ticket.status)}
                                 {ticket.updated_at
-                                  ? ` · ${formatTicketDate(ticket.updated_at)}`
+                                  ? ` · ${formatTicketDate(ticket.updated_at, i18n.language)}`
                                   : ""}
                               </span>
                               {ticket.last_admin_preview && (
@@ -426,16 +420,16 @@ export function SupportChatWidget({ currentView }) {
                       setTicketDone("");
                     }}
                   >
-                    ← Volver
+                    {t("supportWidget.back")}
                   </button>
                   {ticketDetailLoading ? (
-                    <p className="support-chat-tickets-empty">Cargando...</p>
+                    <p className="support-chat-tickets-empty">{t("supportWidget.loading")}</p>
                   ) : ticketDetail ? (
                     <>
                       <div className="support-chat-ticket-detail-head">
                         <h4>{ticketDetail.subject}</h4>
                         <span className={`support-chat-status support-chat-status-${ticketDetail.status}`}>
-                          {STATUS_LABELS[ticketDetail.status] || ticketDetail.status}
+                          {statusLabel(ticketDetail.status)}
                         </span>
                       </div>
                       <div className="support-chat-ticket-thread" ref={ticketThreadRef}>
@@ -446,13 +440,13 @@ export function SupportChatWidget({ currentView }) {
                           >
                             <span className="support-chat-thread-label">
                               {msg.author_role === "admin"
-                                ? "Soporte GUIAA"
+                                ? t("supportWidget.supportLabel")
                                 : msg.author_role === "user"
-                                  ? "Tú"
-                                  : "Asistente"}
+                                  ? t("supportWidget.you")
+                                  : t("supportWidget.assistant")}
                             </span>
                             <p>{msg.body}</p>
-                            <time>{formatTicketDate(msg.created_at)}</time>
+                            <time>{formatTicketDate(msg.created_at, i18n.language)}</time>
                           </div>
                         ))}
                       </div>
@@ -461,7 +455,7 @@ export function SupportChatWidget({ currentView }) {
                           <textarea
                             value={ticketReply}
                             onChange={(e) => setTicketReply(e.target.value)}
-                            placeholder="Escribe tu respuesta..."
+                            placeholder={t("supportWidget.replyPlaceholder")}
                             rows={2}
                             maxLength={2000}
                           />
@@ -469,13 +463,13 @@ export function SupportChatWidget({ currentView }) {
                             type="submit"
                             disabled={ticketReplySending || ticketReply.trim().length < 2}
                           >
-                            {ticketReplySending ? "Enviando..." : "Enviar"}
+                            {ticketReplySending ? t("supportWidget.ticketSending") : t("supportWidget.send")}
                           </button>
                         </form>
                       )}
                     </>
                   ) : (
-                    <p className="support-chat-tickets-empty">Ticket no encontrado.</p>
+                    <p className="support-chat-tickets-empty">{t("supportWidget.ticketNotFound")}</p>
                   )}
                   {ticketDone && activeTab === "tickets" && (
                     <p className="support-chat-ticket-msg">{ticketDone}</p>
@@ -490,7 +484,7 @@ export function SupportChatWidget({ currentView }) {
         type="button"
         className={`support-chat-toggle${isOpen ? " is-open" : ""}`}
         onClick={() => setIsOpen((v) => !v)}
-        aria-label={isOpen ? "Cerrar soporte" : "Abrir soporte con Doctor Plumitas"}
+        aria-label={isOpen ? t("supportWidget.closeSupport") : t("supportWidget.openSupport")}
       >
         {isOpen ? (
           <span className="support-chat-toggle-close" aria-hidden>
@@ -506,7 +500,7 @@ export function SupportChatWidget({ currentView }) {
               height={80}
               decoding="async"
             />
-            <span className="support-chat-plumitas-hint">¿Ayuda?</span>
+            <span className="support-chat-plumitas-hint">{t("supportWidget.helpHint")}</span>
             {unreadCount > 0 && (
               <span className="support-chat-toggle-badge">{unreadCount}</span>
             )}

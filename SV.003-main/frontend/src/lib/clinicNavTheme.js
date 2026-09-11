@@ -85,6 +85,11 @@ const CLINIC_NAV_THEMES = {
     to: "#1a4066",
     glow: "38, 91, 147",
   },
+  help: {
+    from: "#3d9b8f",
+    to: "#2f857a",
+    glow: "61, 155, 143",
+  },
 };
 
 export function getClinicNavTheme(viewOrId) {

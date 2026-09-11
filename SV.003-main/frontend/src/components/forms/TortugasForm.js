@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import YesNoChips from '../ui/yes-no-chips';
+import { useSpeciesFormI18n } from '../../hooks/useSpeciesFormI18n';
+import { normalizePetSex } from '../../lib/petSex';
+import ReproductiveSexHint from './ReproductiveSexHint';
 
 const TortugasForm = ({ formData, setFormData }) => {
+  const { t, field, placeholder, section, title } = useSpeciesFormI18n('tortugas');
+  const sexo = normalizePetSex(formData.sexo);
   const [activeSection, setActiveSection] = useState('tortugas-info-basica');
 
-  const handleChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
+  const handleChange = (fieldName, value) => {
+    setFormData({ ...formData, [fieldName]: value });
   };
 
   const toggleSection = useCallback((e) => {
@@ -25,18 +30,18 @@ const TortugasForm = ({ formData, setFormData }) => {
   }, [formData]);
 
   const sections = [
-    { id: 'tortugas-info-basica', label: 'Información Básica', icon: '📋' },
-    { id: 'tortugas-respiratorio', label: 'Sistema Respiratorio', icon: '🫁' },
+    { id: 'tortugas-info-basica', labelKey: 'info_basica', icon: '📋' },
+    { id: 'tortugas-respiratorio', labelKey: 'respiratorio', icon: '🫁' },
     { id: 'tortugas-tegumentario', label: 'Sistema Tegumentario', icon: '🐢' },
-    { id: 'tortugas-digestivo', label: 'Sistema Digestivo', icon: '🫃' },
-    { id: 'tortugas-neurologico', label: 'Sistema Neurológico', icon: '🧠' },
-    { id: 'tortugas-comportamiento', label: 'Comportamiento', icon: '👀' },
-    { id: 'tortugas-reproductivo', label: 'Sistema Reproductivo', icon: '🥚' },
-    { id: 'tortugas-alimentacion', label: 'Alimentación', icon: '🥗' },
-    { id: 'tortugas-ambiente', label: 'Ambiente', icon: '🏠' },
+    { id: 'tortugas-digestivo', labelKey: 'digestivo', icon: '🫃' },
+    { id: 'tortugas-neurologico', labelKey: 'neurologico', icon: '🧠' },
+    { id: 'tortugas-comportamiento', labelKey: 'comportamiento', icon: '👀' },
+    { id: 'tortugas-reproductivo', labelKey: 'reproductivo', icon: '🥚' },
+    { id: 'tortugas-alimentacion', labelKey: 'alimentacion', icon: '🥗' },
+    { id: 'tortugas-ambiente', labelKey: 'ambiente', icon: '🏠' },
     { id: 'tortugas-socializacion', label: 'Socialización', icon: '🤝' },
     { id: 'tortugas-historial', label: 'Historia Médica Previa', icon: '📁' },
-    { id: 'tortugas-examen', label: 'Examen Físico', icon: '🩺' },
+    { id: 'tortugas-examen', labelKey: 'examen_fisico', icon: '🩺' },
     { id: 'tortugas-riesgos', label: 'Factores de Riesgo', icon: '⚠️' },
   ];
 
@@ -65,34 +70,34 @@ const TortugasForm = ({ formData, setFormData }) => {
 
   return (
     <div className="species-form">
-      <h2>Datos de la mascota - Tortuga</h2>
+      <h2>{title('tortugas')}</h2>
 
       <div className="species-form-progress">
         <div className="species-form-progress-header">
-          <span className="species-form-progress-label">Progreso del formulario</span>
+          <span className="species-form-progress-label">{t('chrome.progress')}</span>
           <span className="species-form-progress-percent">{progress}%</span>
         </div>
         <div className="species-form-progress-bar">
           <div className={`species-form-progress-fill ${progress === 100 ? 'complete' : ''}`} style={{ width: `${progress}%` }} />
         </div>
         <div className="species-form-progress-stats">
-          <span>{requiredFields.filter(f => formData[f] && formData[f] !== '').length} de {requiredFields.length} campos</span>
-          {progress === 100 && <span style={{ color: '#10b981', fontWeight: 600 }}>✓ Completo</span>}
+          <span>{t('chrome.fieldsCount', { filled: requiredFields.filter(f => formData[f] && formData[f] !== '').length, total: requiredFields.length })}</span>
+          {progress === 100 && <span style={{ color: '#10b981', fontWeight: 600 }}>✓ {t('chrome.complete')}</span>}
         </div>
       </div>
 
       <div className="species-form-layout">
         <aside className="species-form-nav">
-          <div className="species-form-nav-title">Secciones</div>
+          <div className="species-form-nav-title">{t('chrome.sections')}</div>
           <ul>
-            {sections.map((section) => (
-              <li key={section.id}>
+            {sections.map((sec) => (
+              <li key={sec.id}>
                 <button
                   type="button"
-                  className={`species-form-nav-link ${activeSection === section.id ? 'active' : ''}`}
-                  onClick={() => scrollToSection(section.id)}
+                  className={`species-form-nav-link ${activeSection === sec.id ? 'active' : ''}`}
+                  onClick={() => scrollToSection(sec.id)}
                 >
-                  <span className="nav-icon">{section.icon}</span> {section.label}
+                  <span className="nav-icon">{sec.icon}</span> {sec.label || section(sec.labelKey)}
                 </button>
               </li>
             ))}
@@ -103,46 +108,46 @@ const TortugasForm = ({ formData, setFormData }) => {
       
       {/* Información Básica */}
       <div id="tortugas-info-basica" className="form-section">
-        <h3>Información Básica</h3>
+        <h3>{section('info_basica')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Nombre de la mascota *</label>
+            <label>{field('nombre_de_la_mascota')}</label>
             <input
               type="text"
               required
               value={formData.nombre_mascota || ''}
               onChange={(e) => handleChange('nombre_mascota', e.target.value)}
-              placeholder="Nombre"
+              placeholder={placeholder('nombre')}
             />
           </div>
           
           <div className="form-group">
-            <label>Nombre del Dueño *</label>
+            <label>{field('nombre_dueño')}</label>
             <input
               type="text"
               required
               value={formData.nombre_dueño || ''}
               onChange={(e) => handleChange('nombre_dueño', e.target.value)}
-              placeholder="Nombre del propietario"
+              placeholder={placeholder('nombre_del_propietario')}
             />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Especie Exacta *</label>
+            <label>{field('especie_exacta')}</label>
             <input
               type="text"
               required
               value={formData.especie_exacta || ''}
               onChange={(e) => handleChange('especie_exacta', e.target.value)}
-              placeholder="Ej: Testudo graeca, Chelonoidis carbonaria"
+              placeholder={placeholder('ej_testudo_graeca_chelonoidis_carbonaria')}
             />
           </div>
           
           <div className="form-group">
-            <label>Subespecie/Variante</label>
+            <label>{field('subespecie_variante')}</label>
             <input
               type="text"
               value={formData.subespecie || ''}
@@ -153,7 +158,7 @@ const TortugasForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Edad Estimada (años) *</label>
+            <label>{field('edad_estimada_anos')}</label>
             <input
               type="text"
               required
@@ -163,22 +168,22 @@ const TortugasForm = ({ formData, setFormData }) => {
           </div>
           
           <div className="form-group">
-            <label>Sexo *</label>
+            <label>{field('sexo')}</label>
             <select
               required
-              value={formData.sexo || ''}
+              value={sexo || ''}
               onChange={(e) => handleChange('sexo', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="macho">Macho</option>
-              <option value="hembra">Hembra</option>
+              <option value="">{t('select')}</option>
+              <option value="macho">{t('options.macho')}</option>
+              <option value="hembra">{t('options.hembra')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Peso Actual (g/kg) *</label>
+            <label>{field('peso_actual_g_kg')}</label>
             <input
               type="text"
               required
@@ -188,96 +193,96 @@ const TortugasForm = ({ formData, setFormData }) => {
           </div>
           
           <div className="form-group">
-            <label>Condición Corporal *</label>
+            <label>{field('condicion_corporal_2')}</label>
             <select
               required
               value={formData.condicion_corporal || ''}
               onChange={(e) => handleChange('condicion_corporal', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="emaciado">Emaciado</option>
-              <option value="delgado">Delgado</option>
-              <option value="ideal">Ideal</option>
-              <option value="sobrepeso">Sobrepeso</option>
+              <option value="">{t('select')}</option>
+              <option value="emaciado">{t('options.emaciado')}</option>
+              <option value="delgado">{t('options.delgado')}</option>
+              <option value="ideal">{t('options.ideal')}</option>
+              <option value="sobrepeso">{t('options.sobrepeso')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Tamaño Caparazón (cm) *</label>
+            <label>{field('tamano_caparazon_cm')}</label>
             <input
               type="text"
               required
               value={formData.tamano_caparazon || ''}
               onChange={(e) => handleChange('tamano_caparazon', e.target.value)}
-              placeholder="Largo x Ancho x Alto"
+              placeholder={placeholder('largo_x_ancho_x_alto')}
             />
           </div>
           
           <div className="form-group">
-            <label>Origen *</label>
+            <label>{field('origen')}</label>
             <select
               required
               value={formData.origen || ''}
               onChange={(e) => handleChange('origen', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="silvestre">Silvestre</option>
-              <option value="criadero">Criadero</option>
-              <option value="comercial">Comercial</option>
-              <option value="regalo">Regalo</option>
+              <option value="">{t('select')}</option>
+              <option value="silvestre">{t('options.silvestre')}</option>
+              <option value="criadero">{t('options.criadero')}</option>
+              <option value="comercial">{t('options.comercial')}</option>
+              <option value="regalo">{t('options.regalo')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-group">
-          <label>Duración del Problema *</label>
+          <label>{field('duracion_del_problema')}</label>
           <select
             required
             value={formData.duracion_problema || ''}
             onChange={(e) => handleChange('duracion_problema', e.target.value)}
           >
-            <option value="">Seleccionar</option>
-            <option value="<12h">&lt; 12 horas</option>
-            <option value="12-24h">12-24 horas</option>
-            <option value="2-3dias">2-3 días</option>
-            <option value="4-7dias">4-7 días</option>
-            <option value=">1semana">&gt; 1 semana</option>
+            <option value="">{t('select')}</option>
+            <option value="<12h">{t('options.lt_12_horas')}</option>
+            <option value="12-24h">{t('options.n_12_24_horas')}</option>
+            <option value="2-3dias">{t('options.n_2_3_dias')}</option>
+            <option value="4-7dias">{t('options.n_4_7_dias')}</option>
+            <option value=">1semana">{t('options.gt_1_semana')}</option>
           </select>
         </div>
       </div>
 
       {/* Sistema Respiratorio */}
       <div id="tortugas-respiratorio" className="form-section">
-        <h3>Sistema Respiratorio</h3>
+        <h3>{section('respiratorio')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Secreción Nasal/Oral *</label>
+            <label>{field('secrecion_nasal_oral')}</label>
             <select
               required
               value={formData.secrecion_nasal || 'NO'}
               onChange={(e) => handleChange('secrecion_nasal', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="clara">Clara</option>
-              <option value="mucosa">Mucosa</option>
-              <option value="purulenta">Purulenta</option>
-              <option value="sangre">Sangre</option>
+              <option value="NO">{t('no')}</option>
+              <option value="clara">{t('options.clara')}</option>
+              <option value="mucosa">{t('options.mucosa')}</option>
+              <option value="purulenta">{t('options.purulenta')}</option>
+              <option value="sangre">{t('options.sangre')}</option>
             </select>
           </div>
           
           {formData.secrecion_nasal !== 'NO' && (
             <div className="form-group">
-              <label>Localización</label>
+              <label>{field('localizacion')}</label>
               <select
                 value={formData.secrecion_localizacion || ''}
                 onChange={(e) => handleChange('secrecion_localizacion', e.target.value)}
               >
-                <option value="">Seleccionar</option>
-                <option value="unilateral">Unilateral</option>
-                <option value="bilateral">Bilateral</option>
+                <option value="">{t('select')}</option>
+                <option value="unilateral">{t('options.unilateral')}</option>
+                <option value="bilateral">{t('options.bilateral')}</option>
               </select>
             </div>
           )}
@@ -285,35 +290,35 @@ const TortugasForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Burbujas en boca/nariz? *</label>
+            <label>{field('burbujas_en_boca_nariz')}</label>
             <select
               required
               value={formData.burbujas || 'NO'}
               onChange={(e) => handleChange('burbujas', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           
           <div className="form-group">
-            <label>Dificultad Respiratoria *</label>
+            <label>{field('dificultad_respiratoria')}</label>
             <select
               required
               value={formData.dificultad_respiratoria || 'NO'}
               onChange={(e) => handleChange('dificultad_respiratoria', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="boca_abierta">Boca abierta</option>
-              <option value="movimiento_cuello">Movimiento cuello exagerado</option>
-              <option value="aleteo">Aleteo rápido</option>
+              <option value="NO">{t('no')}</option>
+              <option value="boca_abierta">{t('options.boca_abierta')}</option>
+              <option value="movimiento_cuello">{t('options.movimiento_cuello_exagerado')}</option>
+              <option value="aleteo">{t('options.aleteo_rapido')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Temperatura Ambiente (°C)</label>
+            <label>{field('temperatura_ambiente_c_2')}</label>
             <input
               type="text"
               value={formData.temp_ambiente || ''}
@@ -322,15 +327,15 @@ const TortugasForm = ({ formData, setFormData }) => {
           </div>
           
           <div className="form-group">
-            <label>¿Tiene calentador? *</label>
+            <label>{field('tiene_calentador')}</label>
             <select
               required
               value={formData.tiene_calentador || ''}
               onChange={(e) => handleChange('tiene_calentador', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="SI">Sí</option>
-              <option value="NO">No</option>
+              <option value="">{t('select')}</option>
+              <option value="SI">{t('yes')}</option>
+              <option value="NO">{t('no')}</option>
             </select>
           </div>
         </div>
@@ -342,103 +347,103 @@ const TortugasForm = ({ formData, setFormData }) => {
         
         <div className="form-row">
           <div className="form-group">
-            <label>Estado del Caparazón *</label>
+            <label>{field('estado_del_caparazon')}</label>
             <select
               required
               value={formData.caparazon || 'normal'}
               onChange={(e) => handleChange('caparazon', e.target.value)}
             >
-              <option value="normal">Normal</option>
-              <option value="blandeza">Blandeza/Ablandamiento</option>
-              <option value="manchas_blancas">Manchas blancas</option>
-              <option value="manchas_oscuras">Manchas oscuras</option>
-              <option value="deformidad">Deformidad</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="blandeza">{t('options.blandeza_ablandamiento')}</option>
+              <option value="manchas_blancas">{t('options.manchas_blancas')}</option>
+              <option value="manchas_oscuras">{t('options.manchas_oscuras')}</option>
+              <option value="deformidad">{t('options.deformidad')}</option>
             </select>
           </div>
           
           <div className="form-group">
-            <label>Localización</label>
+            <label>{field('localizacion')}</label>
             <select
               value={formData.caparazon_localizacion || ''}
               onChange={(e) => handleChange('caparazon_localizacion', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="plastron">Plastrón</option>
-              <option value="caparazon">Caparazón</option>
-              <option value="marginales">Marginales</option>
-              <option value="ambos">Ambos</option>
+              <option value="">{t('select')}</option>
+              <option value="plastron">{t('options.plastron')}</option>
+              <option value="caparazon">{t('options.caparazon')}</option>
+              <option value="marginales">{t('options.marginales')}</option>
+              <option value="ambos">{t('options.ambos')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Hundimiento o abombamiento? *</label>
+            <label>{field('hundimiento_o_abombamiento')}</label>
             <select
               required
               value={formData.hundimiento || 'NO'}
               onChange={(e) => handleChange('hundimiento', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           
           <div className="form-group">
-            <label>¿Olor fétido? *</label>
+            <label>{field('olor_fetido')}</label>
             <select
               required
               value={formData.olor_fetido || 'NO'}
               onChange={(e) => handleChange('olor_fetido', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Estado de la Piel *</label>
+            <label>{field('estado_de_la_piel')}</label>
             <select
               required
               value={formData.piel || 'normal'}
               onChange={(e) => handleChange('piel', e.target.value)}
             >
-              <option value="normal">Normal</option>
-              <option value="descamacion">Descamación excesiva</option>
-              <option value="costras">Costras</option>
-              <option value="ulceras">Úlceras</option>
-              <option value="hinchazon">Hinchazón</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="descamacion">{t('options.descamacion_excesiva')}</option>
+              <option value="costras">{t('options.costras')}</option>
+              <option value="ulceras">{t('options.ulceras')}</option>
+              <option value="hinchazon">{t('options.hinchazon')}</option>
             </select>
           </div>
           
           <div className="form-group">
-            <label>¿Edema en párpados? *</label>
+            <label>{field('edema_en_parpados')}</label>
             <select
               required
               value={formData.edema_parpados || 'NO'}
               onChange={(e) => handleChange('edema_parpados', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Estado de los Ojos *</label>
+            <label>{field('estado_de_los_ojos')}</label>
             <select
               required
               value={formData.ojos || 'normal'}
               onChange={(e) => handleChange('ojos', e.target.value)}
             >
-              <option value="normal">Normal</option>
-              <option value="cerrados">Cerrados</option>
-              <option value="hinchados">Hinchados</option>
-              <option value="secrecion">Secreción</option>
-              <option value="opacidad">Opacidad corneal</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="cerrados">{t('options.cerrados')}</option>
+              <option value="hinchados">{t('options.hinchados')}</option>
+              <option value="secrecion">{t('options.secrecion')}</option>
+              <option value="opacidad">{t('options.opacidad_corneal')}</option>
             </select>
           </div>
         </div>
@@ -446,25 +451,25 @@ const TortugasForm = ({ formData, setFormData }) => {
 
       {/* Sistema Digestivo */}
       <div id="tortugas-digestivo" className="form-section">
-        <h3>Sistema Digestivo</h3>
+        <h3>{section('digestivo')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Apetito *</label>
+            <label>{field('apetito')}</label>
             <select
               required
               value={formData.apetito || 'normal'}
               onChange={(e) => handleChange('apetito', e.target.value)}
             >
-              <option value="normal">Normal</option>
-              <option value="anorexia_total">Anorexia total (&gt;48h)</option>
-              <option value="anorexia_parcial">Anorexia parcial</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="anorexia_total">{t('options.anorexia_total_gt_48h')}</option>
+              <option value="anorexia_parcial">{t('options.anorexia_parcial')}</option>
             </select>
           </div>
           
           {(formData.apetito === 'anorexia_total' || formData.apetito === 'anorexia_parcial') && (
             <div className="form-group">
-              <label>Tiempo sin comer (horas/días)</label>
+              <label>{field('tiempo_sin_comer_horas_dias')}</label>
               <input
                 type="text"
                 value={formData.tiempo_sin_comer || ''}
@@ -476,244 +481,245 @@ const TortugasForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Come fruta? *</label>
+            <label>{field('come_fruta')}</label>
             <select
               required
               value={formData.come_fruta || ''}
               onChange={(e) => handleChange('come_fruta', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="SI">Sí</option>
-              <option value="NO">No</option>
+              <option value="">{t('select')}</option>
+              <option value="SI">{t('yes')}</option>
+              <option value="NO">{t('no')}</option>
             </select>
           </div>
           
           <div className="form-group">
-            <label>¿Tiene calcio suplementado? *</label>
+            <label>{field('tiene_calcio_suplementado')}</label>
             <select
               required
               value={formData.calcio_suplementado || ''}
               onChange={(e) => handleChange('calcio_suplementado', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="SI">Sí</option>
-              <option value="NO">No</option>
+              <option value="">{t('select')}</option>
+              <option value="SI">{t('yes')}</option>
+              <option value="NO">{t('no')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Heces *</label>
+            <label>{field('heces')}</label>
             <select
               required
               value={formData.heces || 'normal'}
               onChange={(e) => handleChange('heces', e.target.value)}
             >
-              <option value="normal">Normal</option>
-              <option value="ausentes">Ausentes (&gt;72h)</option>
-              <option value="blandas">Blandas</option>
-              <option value="liquidas">Líquidas</option>
-              <option value="con_sangre">Con sangre</option>
-              <option value="con_parasitos">Con parásitos</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="ausentes">{t('options.ausentes_gt_72h')}</option>
+              <option value="blandas">{t('options.blandas')}</option>
+              <option value="liquidas">{t('options.liquidas')}</option>
+              <option value="con_sangre">{t('options.con_sangre')}</option>
+              <option value="con_parasitos">{t('options.con_parasitos')}</option>
             </select>
           </div>
           
           <div className="form-group">
-            <label>Frecuencia (veces/semana)</label>
+            <label>{field('frecuencia_veces_semana')}</label>
             <input
               type="text"
               value={formData.heces_frecuencia || ''}
               onChange={(e) => handleChange('heces_frecuencia', e.target.value)}
-              placeholder="Normal: 1-7 según especie/temperatura"
+              placeholder={placeholder('normal_1_7_segun_especie_temperatura')}
             />
           </div>
         </div>
   
         <div className="form-row">
           <div className="form-group">
-            <label>¿Deshidratación? *</label>
+            <label>{field('deshidratacion')}</label>
             <select
               required
               value={formData.deshidratacion || 'NO'}
               onChange={(e) => handleChange('deshidratacion', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí (piel no vuelve al pinchar)</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('options.si_piel_no_vuelve_al_pinchar')}</option>
             </select>
           </div>
         </div>
       </div>
 
       <div id="tortugas-neurologico" className="form-section">
-        <h3>Sistema Neurológico</h3>
+        <h3>{section('neurologico')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Inestabilidad *</label>
+            <label>{field('inestabilidad_2')}</label>
             <select
               required
               value={formData.inestabilidad || 'NO'}
               onChange={(e) => handleChange('inestabilidad', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="temblor_extremidades">Temblor en extremidades</option>
-              <option value="caidas_laterales">Caídas laterales</option>
-              <option value="no_mantiene_derecho">No puede mantenerse derecho</option>
+              <option value="NO">{t('no')}</option>
+              <option value="temblor_extremidades">{t('options.temblor_en_extremidades')}</option>
+              <option value="caidas_laterales">{t('options.caidas_laterales')}</option>
+              <option value="no_mantiene_derecho">{t('options.no_puede_mantenerse_derecho')}</option>
             </select>
           </div>
 
           <div className="form-group">
-            <label>Progresión *</label>
+            <label>{field('progresion_2')}</label>
             <select
               required
               value={formData.progresion || 'NO'}
               onChange={(e) => handleChange('progresion', e.target.value)}
             >
-              <option value="NO">No aplica / Desconocido</option>
-              <option value="lenta">Lenta (meses)</option>
-              <option value="rapida">Rápida (semanas)</option>
+              <option value="NO">{t('options.no_aplica_desconocido')}</option>
+              <option value="lenta">{t('options.lenta_meses')}</option>
+              <option value="rapida">{t('options.rapida_semanas')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Convulsiones *</label>
+            <label>{field('convulsiones_2')}</label>
             <select
               required
               value={formData.convulsiones || 'NO'}
               onChange={(e) => handleChange('convulsiones', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="temblor_generalizado">Temblor generalizado</option>
-              <option value="focales">Convulsiones focales</option>
-              <option value="generalizadas">Convulsiones generalizadas</option>
+              <option value="NO">{t('no')}</option>
+              <option value="temblor_generalizado">{t('options.temblor_generalizado')}</option>
+              <option value="focales">{t('options.convulsiones_focales')}</option>
+              <option value="generalizadas">{t('options.convulsiones_generalizadas')}</option>
             </select>
           </div>
 
           <div className="form-group">
-            <label>Desencadenantes</label>
+            <label>{field('desencadenantes')}</label>
             <select
               value={formData.desencadenantes || ''}
               onChange={(e) => handleChange('desencadenantes', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="estres">Estrés</option>
-              <option value="manipulacion">Manipulación</option>
-              <option value="ninguno">Ninguno</option>
+              <option value="">{t('select')}</option>
+              <option value="estres">{t('options.estres')}</option>
+              <option value="manipulacion">{t('options.manipulacion')}</option>
+              <option value="ninguno">{t('options.ninguno')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Letargo extremo *</label>
+            <label>{field('letargo_extremo_2')}</label>
             <select
               required
               value={formData.letargo || 'NO'}
               onChange={(e) => handleChange('letargo', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="no_se_mueve">No se mueve</option>
-              <option value="no_responde">No responde a estímulos</option>
-              <option value="hipotermia">Hipotermia</option>
+              <option value="NO">{t('no')}</option>
+              <option value="no_se_mueve">{t('options.no_se_mueve')}</option>
+              <option value="no_responde">{t('options.no_responde_a_estimulos')}</option>
+              <option value="hipotermia">{t('options.hipotermia')}</option>
             </select>
           </div>
 
           <div className="form-group">
-            <label>Temperatura corporal (°C)</label>
+            <label>{field('temperatura_corporal_c')}</label>
             <input
               type="text"
               value={formData.temperatura_corporal || ''}
               onChange={(e) => handleChange('temperatura_corporal', e.target.value)}
-              placeholder="Normal: similar a ambiente"
+              placeholder={placeholder('normal_similar_a_ambiente')}
             />
           </div>
         </div>
       </div>
 
       <div id="tortugas-comportamiento" className="form-section">
-        <h3>Comportamiento</h3>
+        <h3>{section('comportamiento')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Actividad diurna/nocturna *</label>
+            <label>{field('actividad_diurna_nocturna')}</label>
             <select
               required
               value={formData.actividad || 'normal'}
               onChange={(e) => handleChange('actividad', e.target.value)}
             >
-              <option value="hiperactivo">Hiperactivo</option>
-              <option value="normal">Normal</option>
-              <option value="letargico">Letárgico</option>
-              <option value="inactivo">Inactivo</option>
+              <option value="hiperactivo">{t('options.hiperactivo')}</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="letargico">{t('options.letargico')}</option>
+              <option value="inactivo">{t('options.inactivo')}</option>
             </select>
           </div>
 
           <div className="form-group">
-            <label>¿Cambio en patrón de actividad? *</label>
+            <label>{field('cambio_en_patron_de_actividad')}</label>
             <select
               required
               value={formData.cambio_actividad || 'NO'}
               onChange={(e) => handleChange('cambio_actividad', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Interacción ambiental</label>
+            <label>{field('interaccion_ambiental')}</label>
             <select
               value={formData.interaccion_ambiental || ''}
               onChange={(e) => handleChange('interaccion_ambiental', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="evita_zona_caliente">Evita zona caliente</option>
-              <option value="evita_zona_fria">Evita zona fría</option>
-              <option value="no_usa_escondites">No usa escondites</option>
+              <option value="">{t('select')}</option>
+              <option value="evita_zona_caliente">{t('options.evita_zona_caliente')}</option>
+              <option value="evita_zona_fria">{t('options.evita_zona_fria')}</option>
+              <option value="no_usa_escondites">{t('options.no_usa_escondites')}</option>
             </select>
           </div>
 
           <div className="form-group">
-            <label>Dificultad para nadar</label>
+            <label>{field('dificultad_para_nadar')}</label>
             <select
               value={formData.dificultad_nado || ''}
               onChange={(e) => handleChange('dificultad_nado', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="dificultad_sumergirse">Dificultad para sumergirse</option>
-              <option value="flota_lateralmente">Flota lateralmente</option>
-              <option value="no_nada">No nada</option>
+              <option value="">{t('select')}</option>
+              <option value="dificultad_sumergirse">{t('options.dificultad_para_sumergirse')}</option>
+              <option value="flota_lateralmente">{t('options.flota_lateralmente')}</option>
+              <option value="no_nada">{t('options.no_nada')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Dificultad para hundirse?</label>
+            <label>{field('dificultad_para_hundirse')}</label>
             <select
               value={formData.dificultad_hundirse || 'NO'}
               onChange={(e) => handleChange('dificultad_hundirse', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
       </div>
 
       <div id="tortugas-reproductivo" className="form-section">
-        <h3>Sistema Reproductivo</h3>
+        <h3>{section('reproductivo')}</h3>
         
-        {formData.sexo === 'hembra' && (
+                <ReproductiveSexHint sexo={sexo} />
+        {sexo === 'hembra' && (
           <>
             <div className="form-row">
               <div className="form-group">
-                <label>¿Última puesta? (días atrás)</label>
+                <label>{field('ultima_puesta_dias_atras')}</label>
                 <input
                   type="text"
                   value={formData.ultima_puesta || ''}
@@ -721,66 +727,66 @@ const TortugasForm = ({ formData, setFormData }) => {
                 />
               </div>
               <div className="form-group">
-                <label>¿Dificultad para poner? *</label>
+                <label>{field('dificultad_para_poner')}</label>
                 <select
                   required
                   value={formData.dificultad_poner || 'NO'}
                   onChange={(e) => handleChange('dificultad_poner', e.target.value)}
                 >
-                  <option value="NO">No</option>
-                  <option value="SI">Sí</option>
+                  <option value="NO">{t('no')}</option>
+                  <option value="SI">{t('yes')}</option>
                 </select>
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label>¿Huevos deformes? *</label>
+                <label>{field('huevos_deformes')}</label>
                 <select
                   required
                   value={formData.huevos_deformes || 'NO'}
                   onChange={(e) => handleChange('huevos_deformes', e.target.value)}
                 >
-                  <option value="NO">No</option>
-                  <option value="SI">Sí</option>
+                  <option value="NO">{t('no')}</option>
+                  <option value="SI">{t('yes')}</option>
                 </select>
               </div>
               <div className="form-group">
-                <label>¿Hinchazón abdominal? *</label>
+                <label>{field('hinchazon_abdominal_2')}</label>
                 <select
                   required
                   value={formData.hinchazon_abdominal || 'NO'}
                   onChange={(e) => handleChange('hinchazon_abdominal', e.target.value)}
                 >
-                  <option value="NO">No</option>
-                  <option value="SI">Sí</option>
+                  <option value="NO">{t('no')}</option>
+                  <option value="SI">{t('yes')}</option>
                 </select>
               </div>
             </div>
           </>
         )}
 
-        {formData.sexo === 'macho' && (
+        {sexo === 'macho' && (
           <div className="form-row">
             <div className="form-group">
-              <label>Comportamiento territorial excesivo *</label>
+              <label>{field('comportamiento_territorial_excesivo')}</label>
               <select
                 required
                 value={formData.territorial || 'NO'}
                 onChange={(e) => handleChange('territorial', e.target.value)}
               >
-                <option value="NO">No</option>
-                <option value="SI">Sí</option>
+                <option value="NO">{t('no')}</option>
+                <option value="SI">{t('yes')}</option>
               </select>
             </div>
             <div className="form-group">
-              <label>Agresividad repentina</label>
+              <label>{field('agresividad_repentina')}</label>
               <select
                 value={formData.agresividad_reproductiva || 'NO'}
                 onChange={(e) => handleChange('agresividad_reproductiva', e.target.value)}
               >
-                <option value="NO">No</option>
-                <option value="SI">Sí</option>
+                <option value="NO">{t('no')}</option>
+                <option value="SI">{t('yes')}</option>
               </select>
             </div>
           </div>
@@ -788,86 +794,86 @@ const TortugasForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Problemas para aparearse?</label>
+            <label>{field('problemas_para_aparearse')}</label>
             <select
               value={formData.problemas_aparearse || 'NO'}
               onChange={(e) => handleChange('problemas_aparearse', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
       </div>
 
       <div id="tortugas-alimentacion" className="form-section">
-        <h3>Alimentación</h3>
+        <h3>{section('alimentacion')}</h3>
         
         <div className="form-row">
           <div className="form-group">
-            <label>Tipo de dieta *</label>
+            <label>{field('tipo_de_dieta')}</label>
             <select
               required
               value={formData.tipo_dieta || ''}
               onChange={(e) => handleChange('tipo_dieta', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="herbivora">Herbívora</option>
-              <option value="omnivora">Omnívora</option>
-              <option value="carnivora">Carnívora</option>
+              <option value="">{t('select')}</option>
+              <option value="herbivora">{t('options.herbivora')}</option>
+              <option value="omnivora">{t('options.omnivora')}</option>
+              <option value="carnivora">{t('options.carnivora')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Suplementos de calcio</label>
+            <label>{field('suplementos_de_calcio')}</label>
             <select
               value={formData.suplemento_calcio || 'NO'}
               onChange={(e) => handleChange('suplemento_calcio', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Suplementos de vitamina D3</label>
+            <label>{field('suplementos_de_vitamina_d3')}</label>
             <select
               value={formData.suplemento_vitamina_d3 || 'NO'}
               onChange={(e) => handleChange('suplemento_vitamina_d3', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Suplementos multivitamínicos</label>
+            <label>{field('suplementos_multivitaminicos')}</label>
             <select
               value={formData.suplemento_multivitaminicos || 'NO'}
               onChange={(e) => handleChange('suplemento_multivitaminicos', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>¿Frutas/vegetales frescos?</label>
+            <label>{field('frutas_vegetales_frescos')}</label>
             <select
               value={formData.frutas_vegetales_frescas || 'NO'}
               onChange={(e) => handleChange('frutas_vegetales_frescas', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         {formData.frutas_vegetales_frescas === 'SI' && (
           <div className="form-group">
-            <label>¿Cuáles frutas/vegetales?</label>
+            <label>{field('cuales_frutas_vegetales')}</label>
             <input
               type="text"
               value={formData.frutas_vegetales_cuales || ''}
@@ -877,31 +883,31 @@ const TortugasForm = ({ formData, setFormData }) => {
         )}
 
         <div className="form-group">
-          <label>¿Acceso a materiales no comestibles?</label>
+          <label>{field('acceso_a_materiales_no_comestibles')}</label>
           <select
             value={formData.acceso_no_comestibles || 'NO'}
             onChange={(e) => handleChange('acceso_no_comestibles', e.target.value)}
           >
-            <option value="NO">No</option>
-            <option value="SI">Sí</option>
+            <option value="NO">{t('no')}</option>
+            <option value="SI">{t('yes')}</option>
           </select>
         </div>
       </div>
 
       {/* Ambiente */}
       <div id="tortugas-ambiente" className="form-section">
-        <h3>Ambiente</h3>
+        <h3>{section('ambiente')}</h3>
         
         <div className="form-group">
-          <label>Tipo de Ambiente *</label>
+          <label>{field('tipo_de_ambiente')}</label>
           <select
             required
             value={formData.tipo_ambiente || ''}
             onChange={(e) => handleChange('tipo_ambiente', e.target.value)}
           >
-            <option value="">Seleccionar</option>
-            <option value="terrestre">Terrestre</option>
-            <option value="acuatico">Acuático</option>
+            <option value="">{t('select')}</option>
+            <option value="terrestre">{t('options.terrestre')}</option>
+            <option value="acuatico">{t('options.acuatico')}</option>
           </select>
         </div>
 
@@ -909,47 +915,47 @@ const TortugasForm = ({ formData, setFormData }) => {
           <>
             <div className="form-row">
               <div className="form-group">
-                <label>Tamaño del Recinto (cm)</label>
+                <label>{field('tamano_del_recinto_cm')}</label>
                 <input
                   type="text"
                   value={formData.tamano_recinto || ''}
                   onChange={(e) => handleChange('tamano_recinto', e.target.value)}
-                  placeholder="Largo x Ancho x Alto"
+                  placeholder={placeholder('largo_x_ancho_x_alto')}
                 />
               </div>
               
               <div className="form-group">
-                <label>Temperatura Ambiente (°C)</label>
+                <label>{field('temperatura_ambiente_c_2')}</label>
                 <input
                   type="text"
                   value={formData.temperatura_ambiente || ''}
                   onChange={(e) => handleChange('temperatura_ambiente', e.target.value)}
-                  placeholder="Zona fría y zona caliente"
+                  placeholder={placeholder('zona_fria_y_zona_caliente')}
                 />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label>Humedad (%)</label>
+                <label>{field('humedad')}</label>
                 <input
                   type="text"
                   value={formData.humedad || ''}
                   onChange={(e) => handleChange('humedad', e.target.value)}
-                  placeholder="Ideal varía por especie: desérticas 30-40%, tropicales 60-80%"
+                  placeholder={placeholder('ideal_varia_por_especie_deserticas_30_40_tropicales_60_80')}
                 />
               </div>
               
               <div className="form-group">
-                <label>Iluminación UVB *</label>
+                <label>{field('iluminacion_uvb')}</label>
                 <select
                   required
                   value={formData.iluminacion_uvb || ''}
                   onChange={(e) => handleChange('iluminacion_uvb', e.target.value)}
                 >
-                  <option value="">Seleccionar</option>
-                  <option value="SI">Sí</option>
-                  <option value="NO">No</option>
+                  <option value="">{t('select')}</option>
+                  <option value="SI">{t('yes')}</option>
+                  <option value="NO">{t('no')}</option>
                 </select>
               </div>
             </div>
@@ -957,7 +963,7 @@ const TortugasForm = ({ formData, setFormData }) => {
             {formData.iluminacion_uvb === 'SI' && (
               <>
                 <div className="form-group">
-                  <label>Distancia de la lámpara (cm)</label>
+                  <label>{field('distancia_de_la_lampara_cm')}</label>
                   <input
                     type="text"
                     value={formData.distancia_lampara || ''}
@@ -966,30 +972,30 @@ const TortugasForm = ({ formData, setFormData }) => {
                 </div>
 
                 <div className="form-group">
-                  <label>¿Cambio reciente en la lámpara UVB?</label>
+                  <label>{field('cambio_reciente_en_la_lampara_uvb')}</label>
                   <select
                     value={formData.cambio_lampara_uvb || 'NO'}
                     onChange={(e) => handleChange('cambio_lampara_uvb', e.target.value)}
                   >
-                    <option value="NO">No</option>
-                    <option value="SI">Sí</option>
+                    <option value="NO">{t('no')}</option>
+                    <option value="SI">{t('yes')}</option>
                   </select>
                 </div>
               </>
             )}
 
             <div className="form-group">
-              <label>Superficie del Sustrato *</label>
+              <label>{field('superficie_del_sustrato_2')}</label>
               <select
                 required
                 value={formData.sustrato || ''}
                 onChange={(e) => handleChange('sustrato', e.target.value)}
               >
-                <option value="">Seleccionar</option>
-                <option value="tierra">Tierra</option>
-                <option value="arena">Arena</option>
-                <option value="alfombra">Alfombra</option>
-                <option value="otro">Otro</option>
+                <option value="">{t('select')}</option>
+                <option value="tierra">{t('options.tierra')}</option>
+                <option value="arena">{t('options.arena')}</option>
+                <option value="alfombra">{t('options.alfombra')}</option>
+                <option value="otro">{t('options.otro')}</option>
               </select>
             </div>
           </>
@@ -999,7 +1005,7 @@ const TortugasForm = ({ formData, setFormData }) => {
           <>
             <div className="form-row">
               <div className="form-group">
-                <label>Tamaño del Tanque (L)</label>
+                <label>{field('tamano_del_tanque_l')}</label>
                 <input
                   type="text"
                   value={formData.tamano_tanque || ''}
@@ -1008,84 +1014,84 @@ const TortugasForm = ({ formData, setFormData }) => {
               </div>
               
               <div className="form-group">
-                <label>Temperatura del Agua (°C)</label>
+                <label>{field('temperatura_del_agua_c')}</label>
                 <input
                   type="text"
                   value={formData.temp_agua || ''}
                   onChange={(e) => handleChange('temp_agua', e.target.value)}
-                  placeholder="Ideal: 24-28°C"
+                  placeholder={placeholder('ideal_24_28_c')}
                 />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label>Temperatura de la zona seca (°C)</label>
+                <label>{field('temperatura_de_la_zona_seca_c')}</label>
                 <input
                   type="text"
                   value={formData.temp_zona_seca || ''}
                   onChange={(e) => handleChange('temp_zona_seca', e.target.value)}
-                  placeholder="Ideal: 30-35°C"
+                  placeholder={placeholder('ideal_30_35_c')}
                 />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label>Filtración *</label>
+                <label>{field('filtracion')}</label>
                 <select
                   required
                   value={formData.filtracion || ''}
                   onChange={(e) => handleChange('filtracion', e.target.value)}
                 >
-                  <option value="">Seleccionar</option>
-                  <option value="SI">Sí</option>
-                  <option value="NO">No</option>
+                  <option value="">{t('select')}</option>
+                  <option value="SI">{t('yes')}</option>
+                  <option value="NO">{t('no')}</option>
                 </select>
               </div>
               
               <div className="form-group">
-                <label>Cambio de Agua *</label>
+                <label>{field('cambio_de_agua')}</label>
                 <select
                   required
                   value={formData.cambio_agua || ''}
                   onChange={(e) => handleChange('cambio_agua', e.target.value)}
                 >
-                  <option value="">Seleccionar</option>
-                  <option value="diario">Diario</option>
-                  <option value="cada_2_dias">Cada 2 días</option>
-                  <option value="semanal">Semanal</option>
+                  <option value="">{t('select')}</option>
+                  <option value="diario">{t('options.diario')}</option>
+                  <option value="cada_2_dias">{t('options.cada_2_dias')}</option>
+                  <option value="semanal">{t('options.semanal')}</option>
                 </select>
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label>¿En hibernación/brumación?</label>
+                <label>{field('en_hibernacion_brumacion')}</label>
                 <select
                   value={formData.hibernacion || 'NO'}
                   onChange={(e) => handleChange('hibernacion', e.target.value)}
                 >
-                  <option value="NO">No</option>
-                  <option value="SI">Sí</option>
+                  <option value="NO">{t('no')}</option>
+                  <option value="SI">{t('yes')}</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label>¿Control de peso durante hibernación?</label>
+                <label>{field('control_de_peso_durante_hibernacion')}</label>
                 <select
                   value={formData.control_peso_hibernacion || 'NO'}
                   onChange={(e) => handleChange('control_peso_hibernacion', e.target.value)}
                 >
-                  <option value="NO">No</option>
-                  <option value="SI">Sí</option>
+                  <option value="NO">{t('no')}</option>
+                  <option value="SI">{t('yes')}</option>
                 </select>
               </div>
             </div>
 
             {formData.control_peso_hibernacion === 'SI' && (
               <div className="form-group">
-                <label>Peso inicial (g)</label>
+                <label>{field('peso_inicial_g')}</label>
                 <input
                   type="text"
                   value={formData.peso_inicial_hibernacion || ''}
@@ -1096,20 +1102,20 @@ const TortugasForm = ({ formData, setFormData }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <label>¿Temperatura controlada?</label>
+                <label>{field('temperatura_controlada')}</label>
                 <select
                   value={formData.temperatura_controlada_hibernacion || 'NO'}
                   onChange={(e) => handleChange('temperatura_controlada_hibernacion', e.target.value)}
                 >
-                  <option value="NO">No</option>
-                  <option value="SI">Sí</option>
+                  <option value="NO">{t('no')}</option>
+                  <option value="SI">{t('yes')}</option>
                 </select>
               </div>
             </div>
 
             {formData.temperatura_controlada_hibernacion === 'SI' && (
               <div className="form-group">
-                <label>Rango de temperatura (°C)</label>
+                <label>{field('rango_de_temperatura_c')}</label>
                 <input
                   type="text"
                   value={formData.rango_temperatura_hibernacion || ''}
@@ -1126,38 +1132,38 @@ const TortugasForm = ({ formData, setFormData }) => {
         
         <div className="form-row">
           <div className="form-group">
-            <label>¿Vive sola o en grupo?</label>
+            <label>{field('vive_sola_o_en_grupo')}</label>
             <select
               value={formData.socializacion_tipo || ''}
               onChange={(e) => handleChange('socializacion_tipo', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="sola">Sola</option>
-              <option value="pareja">Pareja</option>
-              <option value="grupo">Grupo</option>
+              <option value="">{t('select')}</option>
+              <option value="sola">{t('options.sola')}</option>
+              <option value="pareja">{t('options.pareja')}</option>
+              <option value="grupo">{t('options.grupo')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>¿Peleas recientes?</label>
+            <label>{field('peleas_recientes')}</label>
             <select
               value={formData.peleas_recientes || 'NO'}
               onChange={(e) => handleChange('peleas_recientes', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Compatible con compañeros?</label>
+            <label>{field('compatible_con_companeros')}</label>
             <select
               value={formData.compatibilidad_companeros || 'SI'}
               onChange={(e) => handleChange('compatibilidad_companeros', e.target.value)}
             >
-              <option value="SI">Sí</option>
-              <option value="NO">No</option>
+              <option value="SI">{t('yes')}</option>
+              <option value="NO">{t('no')}</option>
             </select>
           </div>
         </div>
@@ -1168,18 +1174,18 @@ const TortugasForm = ({ formData, setFormData }) => {
         
         <div className="form-row">
           <div className="form-group">
-            <label>Calcio con D3</label>
+            <label>{field('calcio_con_d3')}</label>
             <select
               value={formData.hist_calcio_d3 || 'NO'}
               onChange={(e) => handleChange('hist_calcio_d3', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           {formData.hist_calcio_d3 === 'SI' && (
             <div className="form-group">
-              <label>Frecuencia</label>
+              <label>{field('frecuencia')}</label>
               <input
                 type="text"
                 value={formData.hist_calcio_d3_frecuencia || ''}
@@ -1191,18 +1197,18 @@ const TortugasForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Multivitamínicos</label>
+            <label>{field('multivitaminicos')}</label>
             <select
               value={formData.hist_multivitaminicos || 'NO'}
               onChange={(e) => handleChange('hist_multivitaminicos', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           {formData.hist_multivitaminicos === 'SI' && (
             <div className="form-group">
-              <label>Frecuencia</label>
+              <label>{field('frecuencia')}</label>
               <input
                 type="text"
                 value={formData.hist_multivitaminicos_frecuencia || ''}
@@ -1214,18 +1220,18 @@ const TortugasForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Exposición a luz solar directa?</label>
+            <label>{field('exposicion_a_luz_solar_directa')}</label>
             <select
               value={formData.exposicion_sol || 'NO'}
               onChange={(e) => handleChange('exposicion_sol', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           {formData.exposicion_sol === 'SI' && (
             <div className="form-group">
-              <label>Duración (horas/día)</label>
+              <label>{field('duracion_horas_dia')}</label>
               <input
                 type="text"
                 value={formData.exposicion_sol_duracion || ''}
@@ -1237,30 +1243,30 @@ const TortugasForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Desparasitación previa</label>
+            <label>{field('desparasitacion_previa')}</label>
             <select
               value={formData.desparasitacion_previa || 'NO'}
               onChange={(e) => handleChange('desparasitacion_previa', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Trauma previo</label>
+            <label>{field('trauma_previo')}</label>
             <select
               value={formData.trauma_previo || 'NO'}
               onChange={(e) => handleChange('trauma_previo', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         {formData.trauma_previo === 'SI' && (
           <div className="form-group">
-            <label>Fecha del trauma</label>
+            <label>{field('fecha_del_trauma')}</label>
             <input
               type="text"
               value={formData.trauma_fecha || ''}
@@ -1271,43 +1277,43 @@ const TortugasForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Reparación de caparazón</label>
+            <label>{field('reparacion_de_caparazon')}</label>
             <select
               value={formData.reparacion_caparazon || 'NO'}
               onChange={(e) => handleChange('reparacion_caparazon', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Extracción de cuerpo extraño</label>
+            <label>{field('extraccion_de_cuerpo_extrano')}</label>
             <select
               value={formData.extraccion_cuerpo_extrano || 'NO'}
               onChange={(e) => handleChange('extraccion_cuerpo_extrano', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Medicaciones actuales</label>
+            <label>{field('medicaciones_actuales')}</label>
             <select
               value={formData.medicaciones_actuales || 'NO'}
               onChange={(e) => handleChange('medicaciones_actuales', e.target.value)}
             >
-              <option value="NO">No</option>
-              <option value="SI">Sí</option>
+              <option value="NO">{t('no')}</option>
+              <option value="SI">{t('yes')}</option>
             </select>
           </div>
         </div>
 
         {formData.medicaciones_actuales === 'SI' && (
           <div className="form-group">
-            <label>¿Cuáles medicaciones?</label>
+            <label>{field('cuales_medicaciones')}</label>
             <input
               type="text"
               value={formData.medicaciones_actuales_cuales || ''}
@@ -1318,22 +1324,22 @@ const TortugasForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Suplementos previos</label>
+            <label>{field('suplementos_previos')}</label>
             <select
               value={formData.suplementos_historia_tipo || ''}
               onChange={(e) => handleChange('suplementos_historia_tipo', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="probioticos">Probióticos</option>
-              <option value="vitaminas">Vitaminas</option>
-              <option value="otros">Otros</option>
+              <option value="">{t('select')}</option>
+              <option value="probioticos">{t('options.probioticos')}</option>
+              <option value="vitaminas">{t('options.vitaminas')}</option>
+              <option value="otros">{t('options.otros')}</option>
             </select>
           </div>
         </div>
 
         {formData.suplementos_historia_tipo === 'otros' && (
           <div className="form-group">
-            <label>Otros suplementos</label>
+            <label>{field('otros_suplementos')}</label>
             <input
               type="text"
               value={formData.suplementos_historia_otros || ''}
@@ -1348,7 +1354,7 @@ const TortugasForm = ({ formData, setFormData }) => {
         
         <div className="form-row">
           <div className="form-group">
-            <label>Temperatura ambiente (°C)</label>
+            <label>{field('temperatura_ambiente_c')}</label>
             <input
               type="text"
               value={formData.examen_temp_ambiente || ''}
@@ -1356,7 +1362,7 @@ const TortugasForm = ({ formData, setFormData }) => {
             />
           </div>
           <div className="form-group">
-            <label>Temperatura corporal (°C)</label>
+            <label>{field('temperatura_corporal_c')}</label>
             <input
               type="text"
               value={formData.examen_temp_corporal || formData.temperatura_corporal || ''}
@@ -1367,7 +1373,7 @@ const TortugasForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Peso corporal (g/kg)</label>
+            <label>{field('peso_corporal_g_kg')}</label>
             <input
               type="text"
               value={formData.peso_corporal_examen || formData.peso || ''}
@@ -1375,78 +1381,78 @@ const TortugasForm = ({ formData, setFormData }) => {
             />
           </div>
           <div className="form-group">
-            <label>Condición muscular</label>
+            <label>{field('condicion_muscular')}</label>
             <select
               value={formData.condicion_muscular || ''}
               onChange={(e) => handleChange('condicion_muscular', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="excelente">Excelente</option>
-              <option value="buena">Buena</option>
-              <option value="regular">Regular</option>
-              <option value="mala">Mala</option>
-              <option value="ausente">Ausente</option>
+              <option value="">{t('select')}</option>
+              <option value="excelente">{t('options.excelente')}</option>
+              <option value="buena">{t('options.buena')}</option>
+              <option value="regular">{t('options.regular')}</option>
+              <option value="mala">{t('options.mala')}</option>
+              <option value="ausente">{t('options.ausente')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Estado de hidratación</label>
+            <label>{field('estado_de_hidratacion')}</label>
             <select
               value={formData.estado_hidratacion_examen || ''}
               onChange={(e) => handleChange('estado_hidratacion_examen', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="normal">Normal</option>
-              <option value="leve">Leve</option>
-              <option value="moderado">Moderado</option>
-              <option value="severo">Severo</option>
+              <option value="">{t('select')}</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="leve">{t('options.leve')}</option>
+              <option value="moderado">{t('options.moderado')}</option>
+              <option value="severo">{t('options.severo')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Caparazón (evaluación rápida)</label>
+            <label>{field('caparazon_evaluacion_rapida')}</label>
             <select
               value={formData.caparazon_examen || ''}
               onChange={(e) => handleChange('caparazon_examen', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="normal">Normal</option>
-              <option value="blandeza">Blandeza</option>
-              <option value="deformidad">Deformidad</option>
-              <option value="lesiones">Lesiones</option>
+              <option value="">{t('select')}</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="blandeza">{t('options.blandeza')}</option>
+              <option value="deformidad">{t('options.deformidad')}</option>
+              <option value="lesiones">{t('options.lesiones')}</option>
             </select>
           </div>
           <div className="form-group">
-            <label>Piel (evaluación rápida)</label>
+            <label>{field('piel_evaluacion_rapida')}</label>
             <select
               value={formData.piel_examen || ''}
               onChange={(e) => handleChange('piel_examen', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="normal">Normal</option>
-              <option value="descamacion">Descamación</option>
-              <option value="ulceras">Úlceras</option>
-              <option value="edema">Edema</option>
+              <option value="">{t('select')}</option>
+              <option value="normal">{t('options.normal')}</option>
+              <option value="descamacion">{t('options.descamacion')}</option>
+              <option value="ulceras">{t('options.ulceras')}</option>
+              <option value="edema">{t('options.edema')}</option>
             </select>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Ojos (evaluación rápida)</label>
+            <label>{field('ojos_evaluacion_rapida')}</label>
             <select
               value={formData.ojos_examen || ''}
               onChange={(e) => handleChange('ojos_examen', e.target.value)}
             >
-              <option value="">Seleccionar</option>
-              <option value="abiertos">Abiertos</option>
-              <option value="hinchados">Hinchados</option>
-              <option value="secrecion">Secreción</option>
-              <option value="opacidad">Opacidad</option>
+              <option value="">{t('select')}</option>
+              <option value="abiertos">{t('options.abiertos')}</option>
+              <option value="hinchados">{t('options.hinchados')}</option>
+              <option value="secrecion">{t('options.secrecion')}</option>
+              <option value="opacidad">{t('options.opacidad')}</option>
             </select>
           </div>
         </div>
@@ -1458,14 +1464,14 @@ const TortugasForm = ({ formData, setFormData }) => {
         <h4>Tortugas Terrestres (Testudinidae)</h4>
         <div className="form-row">
           <div className="form-group">
-            <label>¿Historia de hiperdosis de vitamina D?</label>
+            <label>{field('historia_de_hiperdosis_de_vitamina_d')}</label>
             <YesNoChips
               value={formData.hiperdosis_vitamina_d}
               onChange={(val) => handleChange('hiperdosis_vitamina_d', val)}
             />
           </div>
           <div className="form-group">
-            <label>¿Dieta rica en proteínas?</label>
+            <label>{field('dieta_rica_en_proteinas')}</label>
             <YesNoChips
               value={formData.dieta_rica_proteinas}
               onChange={(val) => handleChange('dieta_rica_proteinas', val)}
@@ -1475,7 +1481,7 @@ const TortugasForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Exposición inadecuada a UVB?</label>
+            <label>{field('exposicion_inadecuada_a_uvb')}</label>
             <YesNoChips
               value={formData.exposicion_uvb_inadecuada}
               onChange={(val) => handleChange('exposicion_uvb_inadecuada', val)}
@@ -1486,14 +1492,14 @@ const TortugasForm = ({ formData, setFormData }) => {
         <h4>Tortugas Acuáticas (Emydidae, Trionychidae)</h4>
         <div className="form-row">
           <div className="form-group">
-            <label>¿Filtración inadecuada?</label>
+            <label>{field('filtracion_inadecuada')}</label>
             <YesNoChips
               value={formData.filtracion_inadecuada}
               onChange={(val) => handleChange('filtracion_inadecuada', val)}
             />
           </div>
           <div className="form-group">
-            <label>¿Temperatura del agua baja?</label>
+            <label>{field('temperatura_del_agua_baja')}</label>
             <YesNoChips
               value={formData.temperatura_agua_baja}
               onChange={(val) => handleChange('temperatura_agua_baja', val)}
@@ -1503,7 +1509,7 @@ const TortugasForm = ({ formData, setFormData }) => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>¿Superficie de descanso inadecuada?</label>
+            <label>{field('superficie_de_descanso_inadecuada')}</label>
             <YesNoChips
               value={formData.superficie_descanso_inadecuada}
               onChange={(val) => handleChange('superficie_descanso_inadecuada', val)}
@@ -1514,7 +1520,7 @@ const TortugasForm = ({ formData, setFormData }) => {
         <h4>Tortugas de Desierto (Gopherus, Geochelone)</h4>
         <div className="form-row">
           <div className="form-group">
-            <label>¿Dieta con mucha fruta?</label>
+            <label>{field('dieta_con_mucha_fruta')}</label>
             <YesNoChips
               value={formData.dieta_mucha_fruta_desierto}
               onChange={(val) => handleChange('dieta_mucha_fruta_desierto', val)}
@@ -1523,7 +1529,7 @@ const TortugasForm = ({ formData, setFormData }) => {
         </div>
 
         <div className="form-group">
-          <label>¿Tipo de sustrato? (desierto)</label>
+          <label>{field('tipo_de_sustrato_desierto')}</label>
           <input
             type="text"
             value={formData.tipo_sustrato_desierto || ''}

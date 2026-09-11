@@ -1,49 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { BACKEND_URL } from '../lib/backendUrl';
-import { notifyError, notifySuccess } from '../lib/appToast';
+import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import axios from "axios";
+import { BACKEND_URL } from "../lib/backendUrl";
+import { notifyError, notifySuccess } from "../lib/appToast";
+import { LegacySpeciesFormBridge } from "./LegacySpeciesFormBridge";
 
-// Importar formularios específicos por especie
-import DogForm from './species/DogForm';
-import CatForm from './species/CatForm';
-import TurtleForm from './species/TurtleForm';
-import HedgehogForm from './species/HedgehogForm';
-import FerretForm from './species/FerretForm';
-import IguanaForm from './species/IguanaForm';
-import HamsterForm from './species/HamsterForm';
-import PoultryForm from './species/PoultryForm';
-import BirdForm from './species/BirdForm';
-import RabbitForm from './species/RabbitForm';
+const DEFAULT_SPECIES_IDS = [
+  "perro",
+  "gato",
+  "tortuga",
+  "erizo",
+  "huron",
+  "iguana",
+  "hamster",
+  "patos_pollos",
+  "aves",
+  "conejo",
+];
 
 const AnimalConsultForm = ({ veterinarianId, onSuccess }) => {
-  const [species, setSpecies] = useState('');
+  const { t } = useTranslation("clinic");
+  const [species, setSpecies] = useState("");
   const [speciesList, setSpeciesList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Lista por defecto de especies
-  const defaultSpecies = [
-    { id: 'perro', name: 'Perro' },
-    { id: 'gato', name: 'Gato' },
-    { id: 'tortuga', name: 'Tortuga' },
-    { id: 'erizo', name: 'Erizo Africano' },
-    { id: 'huron', name: 'Hurón' },
-    { id: 'iguana', name: 'Iguana' },
-    { id: 'hamster', name: 'Hámster' },
-    { id: 'patos_pollos', name: 'Patos y Pollos' },
-    { id: 'aves', name: 'Aves (Psitácidos/Ornamentales)' },
-    { id: 'conejo', name: 'Conejo' }
-  ];
+  const defaultSpecies = useMemo(
+    () =>
+      DEFAULT_SPECIES_IDS.map((id) => ({
+        id,
+        name: t(`legacyAnimalForm.species.${id}`),
+      })),
+    [t],
+  );
 
   useEffect(() => {
     loadSpecies();
-  }, []);
+  }, [defaultSpecies]);
 
   const loadSpecies = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/species`);
-      setSpeciesList(response.data || defaultSpecies);
+      const apiSpecies = response.data || defaultSpecies;
+      setSpeciesList(
+        apiSpecies.map((item) => ({
+          ...item,
+          name: t(`legacyAnimalForm.species.${item.id}`, { defaultValue: item.name }),
+        })),
+      );
     } catch (err) {
-      console.warn('No se pudo cargar la lista de especies desde el API, usando lista por defecto');
+      console.warn("No se pudo cargar la lista de especies desde el API, usando lista por defecto");
       setSpeciesList(defaultSpecies);
     } finally {
       setLoading(false);
@@ -55,57 +60,23 @@ const AnimalConsultForm = ({ veterinarianId, onSuccess }) => {
       const payload = {
         veterinarian_id: veterinarianId,
         species: species,
-        consultation_data: consultationData
+        consultation_data: consultationData,
       };
 
       const response = await axios.post(`${BACKEND_URL}/api/animal-consults`, payload);
-      
-      notifySuccess('¡Consulta guardada exitosamente!');
-      
+
+      notifySuccess(t("legacyAnimalForm.saveSuccess"));
+
       if (onSuccess) {
         onSuccess(response.data);
       }
-      
+
       setTimeout(() => {
-        setSpecies('');
+        setSpecies("");
       }, 2000);
-      
     } catch (err) {
-      notifyError(err.response?.data?.detail || 'Error al guardar la consulta');
-      console.error('Error:', err);
-    }
-  };
-
-  const renderSpeciesForm = () => {
-    const formProps = {
-      veterinarianId,
-      onSubmit: handleSubmit,
-      onCancel: () => setSpecies('')
-    };
-
-    switch (species) {
-      case 'perro':
-        return <DogForm {...formProps} />;
-      case 'gato':
-        return <CatForm {...formProps} />;
-      case 'tortuga':
-        return <TurtleForm {...formProps} />;
-      case 'erizo':
-        return <HedgehogForm {...formProps} />;
-      case 'huron':
-        return <FerretForm {...formProps} />;
-      case 'iguana':
-        return <IguanaForm {...formProps} />;
-      case 'hamster':
-        return <HamsterForm {...formProps} />;
-      case 'patos_pollos':
-        return <PoultryForm {...formProps} />;
-      case 'aves':
-        return <BirdForm {...formProps} />;
-      case 'conejo':
-        return <RabbitForm {...formProps} />;
-      default:
-        return null;
+      notifyError(err.response?.data?.detail || t("legacyAnimalForm.saveError"));
+      console.error("Error:", err);
     }
   };
 
@@ -121,21 +92,20 @@ const AnimalConsultForm = ({ veterinarianId, onSuccess }) => {
     <div className="max-w-5xl mx-auto">
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">
-          Consulta Veterinaria por Especie
+          {t("legacyAnimalForm.title")}
         </h2>
 
-        {/* Selector de especie */}
         {!species && (
           <div className="space-y-4">
             <label className="block text-sm font-medium text-gray-700">
-              Selecciona la especie de la mascota:
+              {t("legacyAnimalForm.selectLabel")}
             </label>
             <select
               value={species}
               onChange={(e) => setSpecies(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">-- Selecciona una especie --</option>
+              <option value="">{t("legacyAnimalForm.selectPlaceholder")}</option>
               {speciesList.map((sp) => (
                 <option key={sp.id} value={sp.id}>
                   {sp.name}
@@ -145,8 +115,13 @@ const AnimalConsultForm = ({ veterinarianId, onSuccess }) => {
           </div>
         )}
 
-        {/* Renderizar formulario específico */}
-        {species && renderSpeciesForm()}
+        {species && (
+          <LegacySpeciesFormBridge
+            speciesId={species}
+            onSubmit={handleSubmit}
+            onCancel={() => setSpecies("")}
+          />
+        )}
       </div>
     </div>
   );

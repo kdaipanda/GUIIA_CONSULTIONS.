@@ -18,6 +18,7 @@ export function ConsultationHistoryCard({
   onView,
   onDownloadPdf,
   onContinue,
+  onOpenPatientChart,
 }) {
   const record = normalizeConsultationRecord(consultation);
   const status = record.status || "completed";
@@ -142,6 +143,17 @@ export function ConsultationHistoryCard({
           <span>Ver ficha</span>
           <span className="text-lg transition-transform group-hover:translate-x-1">→</span>
         </Button>
+        {onOpenPatientChart && record.patient_id && (
+          <Button
+            type="button"
+            variant="guiaaSoft"
+            size="consult"
+            className="history-card-action-btn"
+            onClick={() => onOpenPatientChart(record.patient_id)}
+          >
+            Expediente
+          </Button>
+        )}
         <Button
           type="button"
           variant="guiaaSoft"

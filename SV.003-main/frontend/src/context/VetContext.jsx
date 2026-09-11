@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useState,
   useRef,
+  useCallback,
 } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { getBackendUrl } from "../lib/backendUrl";
@@ -16,6 +17,7 @@ import {
   persistAuthFromResponse,
   getAccessToken,
 } from "../lib/authHeaders";
+import i18n from "../i18n";
 
 const DEV_AUTO_LOGIN = false;
 
@@ -24,7 +26,7 @@ const VetContext = createContext();
 export const useVet = () => {
   const context = useContext(VetContext);
   if (!context) {
-    throw new Error("useVet must be used within a VetProvider");
+    throw new Error(i18n.t("errors.vetContext", { ns: "common" }));
   }
   return context;
 };
@@ -38,7 +40,6 @@ function buildSupabaseVetStub(user) {
   };
 }
 
-/** No pisar sesión GUIAA (JWT + perfil real) con un stub de Supabase Auth. */
 function shouldKeepExistingProfile(prev, user) {
   if (!prev?.id) return false;
   if (getAccessToken()) return true;
@@ -50,27 +51,60 @@ function shouldKeepExistingProfile(prev, user) {
 }
 
 export const VetProvider = ({ children }) => {
-  const [veterinarian, setVeterinarian] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [veterinarian, setVeterinarian] = useState(() => {
+    try {
+      const storedVet = localStorage.getItem("veterinarian");
+      if (!storedVet) return null;
+      const parsedVet = JSON.parse(storedVet);
+      if (parsedVet?.id === "dev-carlos-hernandez") {
+        localStorage.removeItem("veterinarian");
+        return null;
+      }
+      return parsedVet;
+    } catch {
+      localStorage.removeItem("veterinarian");
+      return null;
+    }
+  });
+  const [loading, setLoading] = useState(false);
   const [authUser, setAuthUser] = useState(null);
   const [platformAdmin, setPlatformAdmin] = useState(false);
   const profileSyncedRef = useRef(false);
 
-  useEffect(() => {
-    const storedVet = localStorage.getItem("veterinarian");
-    if (storedVet) {
-      try {
-        const parsedVet = JSON.parse(storedVet);
-        const isLegacyDevStub = parsedVet?.id === "dev-carlos-hernandez";
-        if (isLegacyDevStub) {
-          localStorage.removeItem("veterinarian");
-        } else {
-          setVeterinarian(parsedVet);
+  const refreshProfile = useCallback(async () => {
+    if (!veterinarian?.id) return;
+
+    try {
+      const backendUrl = getBackendUrl();
+      const response = await fetch(`${backendUrl}/api/auth/profile`, {
+        headers: getAuthHeaders(veterinarian.id),
+      });
+
+      if (response.ok) {
+        const updatedProfile = await parseJsonResponse(response, null);
+        if (updatedProfile) {
+          setVeterinarian(updatedProfile);
+          localStorage.setItem("veterinarian", JSON.stringify(updatedProfile));
         }
-      } catch {
-        localStorage.removeItem("veterinarian");
+        return;
       }
-    } else if (DEV_AUTO_LOGIN) {
+
+      // Token viejo/inválido: forzar re-login en lugar de dejar estado trial fantasma.
+      if (response.status === 401) {
+        clearAccessToken();
+        clearCedulaFlowNonce();
+        setVeterinarian(null);
+        localStorage.removeItem("veterinarian");
+        profileSyncedRef.current = false;
+        setPlatformAdmin(false);
+      }
+    } catch (error) {
+      console.error("Error refrescando perfil:", error);
+    }
+  }, [veterinarian?.id]);
+
+  useEffect(() => {
+    if (DEV_AUTO_LOGIN && !veterinarian) {
       const devVet = {
         id: "dev-carlos-hernandez",
         nombre: "Carlos Hernandez",
@@ -87,10 +121,11 @@ export const VetProvider = ({ children }) => {
       setVeterinarian(devVet);
       localStorage.setItem("veterinarian", JSON.stringify(devVet));
     }
-  }, []);
+  }, [veterinarian]);
 
   useEffect(() => {
     let mounted = true;
+
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
       const sessionUser = data.session?.user;
@@ -132,68 +167,52 @@ export const VetProvider = ({ children }) => {
     };
   }, []);
 
-  const refreshProfile = async () => {
-    if (!veterinarian?.id) return;
-
-    try {
-      const backendUrl = getBackendUrl();
-      const response = await fetch(`${backendUrl}/api/auth/profile`, {
-        headers: getAuthHeaders(veterinarian.id),
-      });
-
-      if (response.ok) {
-        const updatedProfile = await parseJsonResponse(response, null);
-        if (updatedProfile) {
-          setVeterinarian(updatedProfile);
-          localStorage.setItem("veterinarian", JSON.stringify(updatedProfile));
-        }
-        return;
-      }
-
-      // Token viejo/inválido: forzar re-login (evita encuesta trial fantasma).
-      if (response.status === 401) {
-        clearAccessToken();
-        clearCedulaFlowNonce();
-        setVeterinarian(null);
-        localStorage.removeItem("veterinarian");
-        profileSyncedRef.current = false;
-        setPlatformAdmin(false);
-      }
-    } catch (error) {
-      console.error("Error refrescando perfil:", error);
-    }
-  };
-
-  // Tras login o al recargar: sincronizar plan/cupo heredado del consultorio.
   useEffect(() => {
     if (profileSyncedRef.current || !veterinarian?.id || !getAccessToken()) return;
     profileSyncedRef.current = true;
     void refreshProfile();
-  }, [veterinarian?.id]);
+  }, [veterinarian?.id, refreshProfile]);
 
   useEffect(() => {
     if (!veterinarian?.id || !getAccessToken()) {
       setPlatformAdmin(false);
       return;
     }
+
+    let cancelled = false;
     const backendUrl = getBackendUrl();
+
     fetchWithTimeout(
       `${backendUrl}/api/admin/access`,
       { headers: getAuthHeaders(veterinarian.id) },
-      { timeoutMs: 20000, retries: 2 },
+      { timeoutMs: 8000, retries: 1 },
     )
       .then(async (response) => {
         if (!response.ok) return { platform_admin: false };
         return parseJsonResponse(response, { platform_admin: false });
       })
-      .then((data) => setPlatformAdmin(!!data.platform_admin))
-      .catch(() => setPlatformAdmin(false));
-  }, [veterinarian?.id]);
+      .then((data) => {
+        if (!cancelled) setPlatformAdmin(!!data.platform_admin);
+      })
+      .catch(() => {
+        if (!cancelled) setPlatformAdmin(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [veterinarian?.id, veterinarian?.email]);
 
   const login = (vetData) => {
     persistAuthFromResponse(vetData);
-    const { access_token, token_type, expires_in, cedula_flow_nonce, cedula_flow_expires_in, ...profile } =
-      vetData || {};
+    const {
+      access_token,
+      token_type,
+      expires_in,
+      cedula_flow_nonce,
+      cedula_flow_expires_in,
+      ...profile
+    } = vetData || {};
     const nextProfile = profile.id || profile.email ? profile : vetData;
     setVeterinarian(nextProfile);
     localStorage.setItem("veterinarian", JSON.stringify(nextProfile));

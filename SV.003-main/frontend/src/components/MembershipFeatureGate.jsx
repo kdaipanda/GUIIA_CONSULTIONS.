@@ -1,5 +1,6 @@
 import React from "react";
 import { Crown, Lock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useVet } from "../context/VetContext";
 import {
   canAccessFeature,
@@ -9,6 +10,7 @@ import { Button } from "./ui/button";
 import "../pages/clinic/clinicPageShared.css";
 
 export function MembershipFeatureGate({ feature, setView, children }) {
+  const { t } = useTranslation("clinic");
   const { veterinarian, platformAdmin } = useVet();
   const allowed = canAccessFeature(veterinarian, feature, { platformAdmin });
 
@@ -22,8 +24,8 @@ export function MembershipFeatureGate({ feature, setView, children }) {
         <div className="membership-feature-gate-icon" aria-hidden>
           <Lock size={22} />
         </div>
-        <p className="membership-feature-gate-eyebrow">Función no incluida en tu plan</p>
-        <h2>Actualiza tu membresía</h2>
+        <p className="membership-feature-gate-eyebrow">{t("featureGate.eyebrow")}</p>
+        <h2>{t("featureGate.title")}</h2>
         <p>{getFeatureUpgradeMessage(feature)}</p>
         <Button
           type="button"
@@ -31,7 +33,7 @@ export function MembershipFeatureGate({ feature, setView, children }) {
           onClick={() => setView?.("membership")}
         >
           <Crown size={16} aria-hidden />
-          Ver planes
+          {t("featureGate.viewPlans")}
         </Button>
       </div>
     </div>

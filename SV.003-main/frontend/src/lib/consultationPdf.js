@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import i18n from "../i18n";
 import { buildClinicalTimeline, getLabStudyLabel } from "./clinicalTimeline";
 import {
   drawPdfBrandHeader,
@@ -11,42 +12,26 @@ const PAGE = { width: 595.28, height: 841.89 };
 const MARGIN = 50;
 const CONTENT_WIDTH = PAGE.width - MARGIN * 2;
 
-const CLINICAL_FIELD_LABELS = {
-  nombre_mascota: "Nombre de la mascota",
-  nombre_dueño: "Propietario",
-  nombre_dueno: "Propietario",
-  raza: "Raza",
-  mix: "Mix / Cruza",
-  edad: "Edad",
-  peso: "Peso",
-  sexo: "Sexo",
-  estado_reproductivo: "Estado reproductivo",
-  condicion_corporal: "Condición corporal",
-  vacunas_vigentes: "Vacunas vigentes",
-  vacunas_cual: "Vacunas (detalle)",
-  desparasitacion_interna: "Desparasitación interna",
-  desparasitacion_externa: "Desparasitación externa",
-  habitat: "Hábitat",
-  zona_geografica: "Zona geográfica",
-  alimentacion: "Alimentación",
-  dieta: "Dieta",
-  alimentacion_seco: "Alimento seco",
-  alimentacion_humedo: "Alimento húmedo",
-  alimentacion_casero: "Alimentación casera",
-  alimentacion_frecuencia: "Frecuencia alimentación",
-  sintomas: "Síntomas",
-  motivo_consulta: "Motivo de consulta",
-  medicamentos: "Medicamentos",
-  medicamentos_cual: "Medicamentos (detalle)",
-  actividad_general: "Actividad general",
-  fecha: "Fecha de consulta",
-};
+function pdfT(key, options) {
+  return i18n.t(key, { ns: "pdf", ...options });
+}
 
-const STATUS_LABELS = {
-  completed: "Completada",
-  in_progress: "En progreso",
-  draft: "Borrador",
-};
+function pdfLocale() {
+  return i18n.language?.startsWith("en") ? "en-US" : "es-MX";
+}
+
+function getClinicalFieldLabels() {
+  return pdfT("consultation.fields", { returnObjects: true }) || {};
+}
+
+function getConsultationStatusLabel(status) {
+  if (!status) return pdfT("consultation.statusRegistered");
+  const key = `status.${status}`;
+  if (i18n.exists(key, { ns: "pdf" })) {
+    return pdfT(key);
+  }
+  return status;
+}
 
 function toPdfSafeText(text) {
   return String(text ?? "")
@@ -57,7 +42,7 @@ function toPdfSafeText(text) {
 }
 
 function sanitizeFilename(value) {
-  return (value || "consulta")
+  return (value || pdfT("consultation.filenameDefault"))
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-zA-Z0-9-_]+/g, "-")
@@ -74,7 +59,7 @@ function formatConsultationId(consultation) {
 function formatDate(value) {
   if (!value) return "—";
   try {
-    return new Date(value).toLocaleDateString("es-MX", {
+    return new Date(value).toLocaleDateString(pdfLocale(), {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -149,12 +134,14 @@ function collectClinicalFields(consultation) {
     rows.push({ label, value: normalized });
   };
 
-  Object.entries(CLINICAL_FIELD_LABELS).forEach(([field, label]) => {
+  const fieldLabels = getClinicalFieldLabels();
+
+  Object.entries(fieldLabels).forEach(([field, label]) => {
     addRow(label, formData[field] ?? consultation[field]);
   });
 
   Object.entries(formData).forEach(([field, value]) => {
-    if (CLINICAL_FIELD_LABELS[field]) return;
+    if (fieldLabels[field]) return;
     if (value == null || value === "") return;
     if (typeof value === "object") return;
     const label = field
@@ -290,7 +277,7 @@ class PdfWriter {
       {
         pageWidth: PAGE.width,
         margin: MARGIN,
-        subtitle: "Ficha clinica veterinaria",
+        subtitle: pdfT("consultation.brandSubtitle"),
       },
     );
   }
@@ -299,33 +286,33 @@ class PdfWriter {
 function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
   const formData = consultation?.form_data || {};
   const patientName =
-    formData.nombre_mascota || consultation.nombre_mascota || "Mascota";
+    formData.nombre_mascota || consultation.nombre_mascota || pdfT("consultation.petDefault");
   const consultationId = formatConsultationId(consultation);
   const statusLabel =
-    STATUS_LABELS[consultation.status] || consultation.status || "Registrada";
+    getConsultationStatusLabel(consultation.status);
 
-  writer.drawLine(`Folio: ${consultationId}`, { size: 11, font: "bold" });
-  writer.drawLine(`Mascota: ${patientName}`, { size: 11 });
-  writer.drawLine(`Especie: ${consultation.category || consultation.especie || "—"}`, {
+  writer.drawLine(`${pdfT("consultation.folio")}: ${consultationId}`, { size: 11, font: "bold" });
+  writer.drawLine(`${pdfT("consultation.pet")}: ${patientName}`, { size: 11 });
+  writer.drawLine(`${pdfT("consultation.species")}: ${consultation.category || consultation.especie || "—"}`, {
     size: 11,
   });
-  writer.drawLine(`Estado: ${statusLabel}`, { size: 11 });
-  writer.drawLine(`Fecha: ${formatDate(consultation.created_at)}`, { size: 11 });
+  writer.drawLine(`${pdfT("consultation.status")}: ${statusLabel}`, { size: 11 });
+  writer.drawLine(`${pdfT("consultation.date")}: ${formatDate(consultation.created_at)}`, { size: 11 });
 
   if (veterinarian?.nombre || veterinarian?.email) {
     writer.drawLine(
-      `Veterinario: ${veterinarian.nombre || "—"}${veterinarian.email ? ` (${veterinarian.email})` : ""}`,
+      `${pdfT("consultation.vet")}: ${veterinarian.nombre || "—"}${veterinarian.email ? ` (${veterinarian.email})` : ""}`,
       { size: 10.5, color: rgb(0.35, 0.42, 0.52) },
     );
   }
 
   writer.y -= 8;
-  writer.drawSectionTitle("Datos clínicos de la mascota");
+  writer.drawSectionTitle(pdfT("consultation.sectionClinicalData"));
   const clinicalRows = collectClinicalFields(consultation);
   if (clinicalRows.length) {
     clinicalRows.forEach(({ label, value }) => writer.drawKeyValue(label, value));
   } else {
-    writer.drawLine("Sin datos estructurados registrados.", {
+    writer.drawLine(pdfT("consultation.noStructuredData"), {
       size: 10.5,
       color: rgb(0.45, 0.5, 0.58),
     });
@@ -337,15 +324,15 @@ function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
     consultation.motivo_consulta ||
     "";
   if (motivo) {
-    writer.drawSectionTitle("Motivo de consulta");
+    writer.drawSectionTitle(pdfT("consultation.sectionReason"));
     writer.drawLine(motivo, { size: 10.5, lineHeight: 14 });
   }
 
   const extraSections = [
-    ["Parámetros vitales", consultation.parametros_vitales],
-    ["Laboratorio / estudios", consultation.laboratorio_estudios],
-    ["Ambiente y manejo", consultation.ambiente_manejo],
-    ["Notas adicionales", consultation.notas_adicionales],
+    [pdfT("consultation.sectionVitals"), consultation.parametros_vitales],
+    [pdfT("consultation.sectionLab"), consultation.laboratorio_estudios],
+    [pdfT("consultation.sectionEnvironment"), consultation.ambiente_manejo],
+    [pdfT("consultation.sectionNotes"), consultation.notas_adicionales],
   ];
 
   extraSections.forEach(([title, value]) => {
@@ -356,13 +343,13 @@ function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
 
   const analysis = cleanAnalysisText(consultation.analysis);
   if (analysis) {
-    writer.drawSectionTitle("Análisis clínico");
+    writer.drawSectionTitle(pdfT("consultation.sectionAnalysis"));
     writer.drawLine(analysis, { size: 10, lineHeight: 13.5 });
   }
 
   if (consultation.rating) {
     writer.y -= 4;
-    writer.drawLine(`Calificación del caso: ${consultation.rating}/5`, {
+    writer.drawLine(pdfT("consultation.rating", { rating: consultation.rating }), {
       size: 10,
       color: rgb(0.35, 0.42, 0.52),
     });
@@ -371,11 +358,11 @@ function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
 
 function appendPdfFooter(writer) {
   writer.ensureSpace(24);
-  writer.drawLine(`Documento generado el ${formatDate(new Date().toISOString())}`, {
+  writer.drawLine(pdfT("consultation.footerGenerated", { date: formatDate(new Date().toISOString()) }), {
     size: 9,
     color: rgb(0.5, 0.55, 0.62),
   });
-  writer.drawLine("Plataforma GUIAA — Uso exclusivo del profesional veterinario.", {
+  writer.drawLine(pdfT("consultation.footerDisclaimer"), {
     size: 9,
     color: rgb(0.5, 0.55, 0.62),
   });
@@ -395,7 +382,7 @@ function triggerPdfDownload(pdfBytes, filename) {
 
 export async function downloadConsultationPdf(consultation, { veterinarian } = {}) {
   if (!consultation?.id) {
-    throw new Error("Consulta inválida para generar PDF");
+    throw new Error(pdfT("consultation.invalid"));
   }
 
   const pdfDoc = await PDFDocument.create();
@@ -406,7 +393,7 @@ export async function downloadConsultationPdf(consultation, { veterinarian } = {
 
   const formData = consultation.form_data || {};
   const patientName =
-    formData.nombre_mascota || consultation.nombre_mascota || "Mascota";
+    formData.nombre_mascota || consultation.nombre_mascota || pdfT("consultation.petDefault");
   const consultationId = formatConsultationId(consultation);
 
   writer.drawBrandHeader(logoImage);
@@ -426,7 +413,7 @@ export async function downloadUserConsultationsHistoryPdf(
   { generatedBy } = {},
 ) {
   if (!user?.id && !user?.email) {
-    throw new Error("Usuario inválido para generar PDF");
+    throw new Error(pdfT("consultation.userInvalid"));
   }
 
   const sorted = [...(consultations || [])].sort(
@@ -440,16 +427,19 @@ export async function downloadUserConsultationsHistoryPdf(
   const logoImage = await embedGuiaaLogo(pdfDoc);
 
   writer.drawBrandHeader(logoImage);
-  writer.drawLine("Historial completo de consultas", { size: 14, font: "bold" });
-  writer.drawLine(`Veterinario: ${user.nombre || "—"}`, { size: 11 });
-  writer.drawLine(`Email: ${user.email || "—"}`, { size: 11 });
-  writer.drawLine(`Consultas registradas: ${sorted.length}`, {
+  writer.drawLine(pdfT("consultation.historyTitle"), { size: 14, font: "bold" });
+  writer.drawLine(`${pdfT("consultation.vet")}: ${user.nombre || "—"}`, { size: 11 });
+  writer.drawLine(`${pdfT("consultation.email")}: ${user.email || "—"}`, { size: 11 });
+  writer.drawLine(pdfT("consultation.consultationsRegistered", { count: sorted.length }), {
     size: 10.5,
     color: rgb(0.35, 0.42, 0.52),
   });
   if (generatedBy?.nombre || generatedBy?.email) {
     writer.drawLine(
-      `Exportado por: ${generatedBy.nombre || "—"}${generatedBy.email ? ` (${generatedBy.email})` : ""}`,
+      pdfT("consultation.exportedBy", {
+        name: generatedBy.nombre || "—",
+        email: generatedBy.email ? ` (${generatedBy.email})` : "",
+      }),
       { size: 10, color: rgb(0.35, 0.42, 0.52) },
     );
   }
@@ -457,14 +447,16 @@ export async function downloadUserConsultationsHistoryPdf(
   writer.y -= 8;
 
   if (!sorted.length) {
-    writer.drawSectionTitle("Consultas");
-    writer.drawLine("Este usuario no tiene consultas registradas.", {
+    writer.drawSectionTitle(pdfT("consultation.consultationsSection"));
+    writer.drawLine(pdfT("consultation.noConsultations"), {
       size: 10.5,
       color: rgb(0.45, 0.5, 0.58),
     });
   } else {
     sorted.forEach((consultation, index) => {
-      writer.drawSectionTitle(`Consulta ${index + 1} de ${sorted.length}`);
+      writer.drawSectionTitle(
+        pdfT("consultation.consultationOf", { current: index + 1, total: sorted.length }),
+      );
       appendConsultationDetail(writer, consultation, { veterinarian: user });
       if (index < sorted.length - 1) {
         writer.y -= 10;
@@ -481,7 +473,7 @@ export async function downloadUserConsultationsHistoryPdf(
 
 export async function downloadPatientHistoryPdf(patient, consultations, { veterinarian, medicalImages = [] } = {}) {
   if (!patient?.name) {
-    throw new Error("Mascota inválida para generar PDF");
+    throw new Error(pdfT("consultation.patientInvalid"));
   }
 
   const pdfDoc = await PDFDocument.create();
@@ -491,31 +483,31 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
   const logoImage = await embedGuiaaLogo(pdfDoc);
 
   writer.drawBrandHeader(logoImage);
-  writer.drawLine("Historia clínica de la mascota", { size: 14, font: "bold" });
-  writer.drawLine(`Mascota: ${patient.name}`, { size: 11 });
-  writer.drawLine(`Especie: ${patient.species || "—"}`, { size: 11 });
-  writer.drawLine(`Raza: ${patient.breed || "—"}`, { size: 11 });
+  writer.drawLine(pdfT("consultation.patientHistoryTitle"), { size: 14, font: "bold" });
+  writer.drawLine(`${pdfT("consultation.pet")}: ${patient.name}`, { size: 11 });
+  writer.drawLine(`${pdfT("consultation.species")}: ${patient.species || "—"}`, { size: 11 });
+  writer.drawLine(`${pdfT("consultation.breed")}: ${patient.breed || "—"}`, { size: 11 });
   if (patient.clients?.name) {
-    writer.drawLine(`Propietario: ${patient.clients.name}`, { size: 11 });
+    writer.drawLine(`${pdfT("consultation.owner")}: ${patient.clients.name}`, { size: 11 });
   }
-  writer.drawLine(`Consultas CDS: ${(consultations || []).length}`, {
+  writer.drawLine(pdfT("consultation.cdsConsultations", { count: (consultations || []).length }), {
     size: 10.5,
     color: rgb(0.35, 0.42, 0.52),
   });
   if (medicalImages.length) {
-    writer.drawLine(`Interpretaciones de laboratorio: ${medicalImages.length}`, {
+    writer.drawLine(pdfT("consultation.labInterpretations", { count: medicalImages.length }), {
       size: 10.5,
       color: rgb(0.35, 0.42, 0.52),
     });
   }
 
   writer.y -= 8;
-  writer.drawSectionTitle("Historial clínico unificado");
+  writer.drawSectionTitle(pdfT("consultation.unifiedHistory"));
 
   const timeline = buildClinicalTimeline(consultations, medicalImages);
 
   if (!timeline.length) {
-    writer.drawLine("No hay registros clínicos vinculados a esta mascota.", {
+    writer.drawLine(pdfT("consultation.noRecords"), {
       size: 10.5,
       color: rgb(0.45, 0.5, 0.58),
     });
@@ -524,26 +516,26 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
       if (item.kind === "consultation") {
         const consultation = item.consultation;
         const folio = formatConsultationId(consultation);
-        const statusLabel = STATUS_LABELS[consultation.status] || consultation.status || "Registrada";
+        const statusLabel = getConsultationStatusLabel(consultation.status);
         const motivo =
           consultation.detalle_paciente ||
           consultation.motivo_consulta ||
           consultation.form_data?.motivo_consulta ||
-          "Sin motivo registrado";
+          pdfT("consultation.noReason");
         const analysisPreview = cleanAnalysisText(consultation.analysis).slice(0, 280);
 
         writer.drawLine(
-          `${index + 1}. [Consulta CDS] ${folio} — ${formatDate(consultation.created_at)}`,
+          `${index + 1}. ${pdfT("consultation.consultationEntry")} ${folio} — ${formatDate(consultation.created_at)}`,
           { size: 11, font: "bold" },
         );
-        writer.drawLine(`Estado: ${statusLabel}`, { size: 10.5 });
-        writer.drawLine(`Motivo: ${toPdfSafeText(motivo).slice(0, 200)}`, {
+        writer.drawLine(`${pdfT("consultation.status")}: ${statusLabel}`, { size: 10.5 });
+        writer.drawLine(`${pdfT("consultation.reason")}: ${toPdfSafeText(motivo).slice(0, 200)}`, {
           size: 10.5,
           lineHeight: 13,
         });
         if (analysisPreview) {
           writer.drawLine(
-            `Diagnóstico / análisis: ${toPdfSafeText(analysisPreview)}${consultation.analysis?.length > 280 ? "…" : ""}`,
+            `${pdfT("consultation.diagnosis")}: ${toPdfSafeText(analysisPreview)}${consultation.analysis?.length > 280 ? "…" : ""}`,
             { size: 10, lineHeight: 12.5, color: rgb(0.35, 0.42, 0.52) },
           );
         }
@@ -563,7 +555,7 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
       } else {
         const study = item.study;
         writer.drawLine(
-          `${index + 1}. [Laboratorio] ${getLabStudyLabel(study)} — ${formatDate(study.created_at)}`,
+          `${index + 1}. ${pdfT("consultation.labEntry")} ${getLabStudyLabel(study)} — ${formatDate(study.created_at)}`,
           { size: 11, font: "bold" },
         );
         if (study.analysis) {
@@ -581,17 +573,17 @@ export async function downloadPatientHistoryPdf(patient, consultations, { veteri
   if (veterinarian?.nombre || veterinarian?.email) {
     writer.y -= 4;
     writer.drawLine(
-      `Veterinario: ${veterinarian.nombre || "—"}${veterinarian.email ? ` (${veterinarian.email})` : ""}`,
+      `${pdfT("consultation.vet")}: ${veterinarian.nombre || "—"}${veterinarian.email ? ` (${veterinarian.email})` : ""}`,
       { size: 10, color: rgb(0.35, 0.42, 0.52) },
     );
   }
 
   writer.ensureSpace(24);
-  writer.drawLine(`Documento generado el ${formatDate(new Date().toISOString())}`, {
+  writer.drawLine(pdfT("consultation.footerGenerated", { date: formatDate(new Date().toISOString()) }), {
     size: 9,
     color: rgb(0.5, 0.55, 0.62),
   });
-  writer.drawLine("Plataforma GUIAA — Uso exclusivo del profesional veterinario.", {
+  writer.drawLine(pdfT("consultation.footerDisclaimer"), {
     size: 9,
     color: rgb(0.5, 0.55, 0.62),
   });

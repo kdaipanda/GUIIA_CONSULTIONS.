@@ -1,0 +1,29 @@
+{
+  "language": "Language",
+  "languageEs": "Español",
+  "languageEn": "English",
+  "switchToEs": "Switch to Spanish",
+  "switchToEn": "Switch to English",
+  "loading": "Loading…",
+  "errors": {
+    "server": "Server error",
+    "serverStatus": "Server error: {{status}}",
+    "invalidJson": "The server returned an invalid response. This often happens when the API is restarting; wait a few seconds and try again.",
+    "invalidJsonShort": "The server did not return valid data. Wait a few seconds and try again.",
+    "gatewayTimeout": "The server did not respond in time (502/503 error). This often happens when the API is restarting. Wait 10–20 seconds and try again.",
+    "networkGeneric": "Network or server error",
+    "dbFallback": "Error saving to the database",
+    "dbMigration": "A database update is missing (column not found). Contact us to apply the migration in Supabase.",
+    "dbPermission": "Could not save: permission denied. Sign out, sign in again, and retry.",
+    "dbInvalidUuid": "Invalid consultation ID. Open the consultation from history or create a new one.",
+    "dbDuplicate": "This record already exists. Reload the page and try again.",
+    "dbConnection": "Could not connect to the database. Try again in a few seconds.",
+    "networkLocalProd": "Could not connect to {{base}}. For local development use the backend at http://localhost:8000. Reload the page (Ctrl+Shift+R) or run in the console: localStorage.removeItem('backend_url'); location.reload();",
+    "networkProd": "Could not connect to the server ({{base}}). Check your connection or open https://api.guiaa.vet/docs in another tab. If the API responds, try incognito mode or clear your browser cache.",
+    "requestIncomplete": "Could not complete the request",
+    "requestTimeout": "The request took too long. The server may be starting; wait a few seconds and try again.",
+    "emptyResponse": "The server returned no data. Wait a few seconds and try again.",
+    "invalidResponseRetry": "The server returned an invalid response. Try again in a few seconds.",
+    "vetContext": "useVet must be used within a VetProvider"
+  }
+}

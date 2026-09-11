@@ -1,0 +1,29 @@
+{
+  "language": "Idioma",
+  "languageEs": "Español",
+  "languageEn": "English",
+  "switchToEs": "Cambiar a español",
+  "switchToEn": "Cambiar a inglés",
+  "loading": "Cargando…",
+  "errors": {
+    "server": "Error del servidor",
+    "serverStatus": "Error del servidor: {{status}}",
+    "invalidJson": "El servidor devolvió una respuesta inválida. Suele ocurrir cuando la API se reinicia; espera unos segundos e intenta de nuevo.",
+    "invalidJsonShort": "El servidor no devolvió datos válidos. Espera unos segundos e intenta de nuevo.",
+    "gatewayTimeout": "El servidor no respondió a tiempo (error 502/503). Suele ocurrir cuando la API se está reiniciando. Espera 10–20 segundos y vuelve a intentar.",
+    "networkGeneric": "Error de red o del servidor",
+    "dbFallback": "Error al guardar en la base de datos",
+    "dbMigration": "Falta una actualización en la base de datos (columna no encontrada). Avísanos para aplicar la migración en Supabase.",
+    "dbPermission": "No se pudo guardar: permiso denegado. Cierra sesión, vuelve a entrar e intenta de nuevo.",
+    "dbInvalidUuid": "Identificador de consulta inválido. Abre la consulta desde el historial o crea una nueva.",
+    "dbDuplicate": "Este registro ya existe. Recarga la página e intenta de nuevo.",
+    "dbConnection": "No se pudo conectar con la base de datos. Intenta de nuevo en unos segundos.",
+    "networkLocalProd": "No se pudo conectar con {{base}}. En desarrollo local usa el backend en http://localhost:8000. Recarga la página (Ctrl+Shift+R) o ejecuta en la consola: localStorage.removeItem('backend_url'); location.reload();",
+    "networkProd": "No se pudo conectar con el servidor ({{base}}). Comprueba tu conexión o abre https://api.guiaa.vet/docs en otra pestaña. Si la API responde, prueba en ventana de incógnito o limpia la caché del navegador.",
+    "requestIncomplete": "No se pudo completar la solicitud",
+    "requestTimeout": "La solicitud tardó demasiado. El servidor puede estar iniciando; espera unos segundos e intenta de nuevo.",
+    "emptyResponse": "El servidor no devolvió datos. Espera unos segundos e intenta de nuevo.",
+    "invalidResponseRetry": "El servidor devolvió una respuesta inválida. Intenta de nuevo en unos segundos.",
+    "vetContext": "useVet debe usarse dentro de un VetProvider"
+  }
+}

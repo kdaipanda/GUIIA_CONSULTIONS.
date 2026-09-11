@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Search, Receipt, FileDown } from "lucide-react";
 import "./clinicPageShared.css";
+import "./helpCenterPage.css";
 import {
   ClinicTableSkeleton,
   ClinicEmptyState,
@@ -8,6 +9,7 @@ import {
   ClinicStatusPill,
   clinicDialogClass,
 } from "../../components/clinic/ClinicPageUi";
+import { ModuleHelpTip } from "../../components/clinic/ModuleHelpTip";
 import { useVet } from "../../context/VetContext";
 import { useClinic } from "../../context/ClinicContext";
 import {
@@ -15,11 +17,13 @@ import {
   fetchInvoice,
   createInvoice,
   updateInvoice,
-  fetchClients,
   fetchProducts,
 } from "../../lib/clinicApi";
+import { loadClinicRegistry, readClinicRegistryCache } from "../../lib/clinicRegistryCache";
+import { clinicCacheKey, loadClinicData, readClinicDataCache } from "../../lib/clinicDataCache";
 import { downloadInvoicePdf } from "../../lib/invoicePdf";
 import { notifyError, notifySuccess } from "../../lib/appToast";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -43,18 +47,10 @@ import {
 } from "../../lib/clinicQuickForms";
 import { DoctorPlumitas } from "../../components/brand/DoctorPlumitas";
 
-const STATUS_LABELS = {
-  draft: "Borrador",
-  issued: "Emitido",
-  paid: "Pagado",
-  cancelled: "Cancelado",
-};
-
 const GENERAL_PUBLIC_ID = "__general__";
-const GENERAL_PUBLIC_LABEL = "Público general";
 
-const invoiceClientLabel = (invoice) =>
-  invoice?.clients?.name || GENERAL_PUBLIC_LABEL;
+const invoiceClientLabel = (invoice, t) =>
+  invoice?.clients?.name || t("billing.generalPublic");
 
 const EMPTY_SALE = {
   client_id: GENERAL_PUBLIC_ID,
@@ -101,13 +97,16 @@ function buildSalePreview(form, products) {
 }
 
 export function BillingPage() {
+  const { t, i18n } = useTranslation("clinic");
+  const locale = (i18n.language || "en").startsWith("es") ? "es-MX" : "en-US";
+  const statusLabel = (status) => t(`invoiceStatus.${status}`, { defaultValue: status });
   const { veterinarian } = useVet();
   const { organization } = useClinic();
   const [invoices, setInvoices] = useState([]);
-  const [clients, setClients] = useState([]);
+  const [clients, setClients] = useState(() => readClinicRegistryCache(veterinarian?.id)?.clients || []);
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !readClinicRegistryCache(veterinarian?.id));
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detail, setDetail] = useState(null);
@@ -115,16 +114,26 @@ export function BillingPage() {
   const [saleForm, setSaleForm] = useState(EMPTY_SALE);
 
   const load = useCallback(async () => {
-    if (!veterinarian?.id) return;
-    setLoading(true);
+    if (!veterinarian?.id) {
+      setLoading(false);
+      return;
+    }
+    const cachedRegistry = readClinicRegistryCache(veterinarian.id);
+    if (!cachedRegistry) setLoading(true);
+    const productsKey = clinicCacheKey(veterinarian.id, "billing-products");
+    const invoicesKey = clinicCacheKey(veterinarian.id, "invoices");
     try {
-      const [invData, clientsData, productsData] = await Promise.all([
-        fetchInvoices(veterinarian.id),
-        fetchClients(veterinarian.id),
-        fetchProducts(veterinarian.id).catch(() => ({ products: [] })),
+      const [invData, registryData, productsData] = await Promise.all([
+        loadClinicData(invoicesKey, () => fetchInvoices(veterinarian.id), { ttlMs: 60_000 }),
+        loadClinicRegistry(veterinarian.id),
+        loadClinicData(
+          productsKey,
+          () => fetchProducts(veterinarian.id).catch(() => ({ products: [] })),
+          { ttlMs: 90_000 },
+        ),
       ]);
       setInvoices(invData.invoices || []);
-      setClients(clientsData.clients || []);
+      setClients(registryData.clients || []);
       setProducts((productsData.products || []).filter((p) => p.is_active !== false));
     } catch (err) {
       notifyError(err.message);
@@ -142,7 +151,7 @@ export function BillingPage() {
     const q = search.toLowerCase();
     return (
       (inv.invoice_number || "").toLowerCase().includes(q) ||
-      invoiceClientLabel(inv).toLowerCase().includes(q)
+      invoiceClientLabel(inv, t).toLowerCase().includes(q)
     );
   });
 
@@ -179,7 +188,7 @@ export function BillingPage() {
     const { items, total, product } = salePreview;
 
     if (!items.length) {
-      notifyError("Agrega al menos un producto del inventario o un servicio/concepto.");
+      notifyError(t("billing.needLine"));
       return;
     }
 
@@ -187,7 +196,9 @@ export function BillingPage() {
     if (productLine && product) {
       const available = Number(product.stock_qty) || 0;
       if (productLine.quantity > available) {
-        notifyError(`Stock insuficiente para «${product.name}» (disponible: ${available}).`);
+        notifyError(
+          t("billing.insufficientStock", { name: product.name, available }),
+        );
         return;
       }
     }
@@ -214,8 +225,8 @@ export function BillingPage() {
       });
       notifySuccess(
         hasInventory
-          ? `Venta registrada por ${formatMoney(total)}. Stock actualizado.`
-          : `Venta registrada por ${formatMoney(total)}.`,
+          ? t("billing.saleWithStock", { amount: formatMoney(total) })
+          : t("billing.saleOk", { amount: formatMoney(total) }),
       );
       setDialogOpen(false);
       load();
@@ -232,7 +243,7 @@ export function BillingPage() {
         status: "paid",
         payment_method: invoice.payment_method || "efectivo",
       });
-      notifySuccess("Recibo marcado como pagado.");
+      notifySuccess(t("billing.markedPaid"));
       setDetailOpen(false);
       load();
     } catch (err) {
@@ -257,7 +268,7 @@ export function BillingPage() {
     try {
       await downloadInvoicePdf(detail, { organizationName: organization?.name });
     } catch (err) {
-      notifyError(err.message || "No se pudo generar el PDF");
+      notifyError(err.message || t("common.pdfError"));
     }
   };
 
@@ -267,12 +278,15 @@ export function BillingPage() {
     <div className="clinic-page clinic-page-guiaa">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">Consultorio</p>
-          <h1>Ventas</h1>
-          <p>Productos del inventario y servicios en un solo cobro.</p>
+          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
+          <div className="clinic-page-title-row">
+            <h1>{t("billing.title")}</h1>
+            <ModuleHelpTip topicId="billing" />
+          </div>
+          <p>{t("billing.lead")}</p>
         </div>
         <Button type="button" onClick={openCreate}>
-          <Plus size={16} className="mr-1" /> Nueva Venta
+          <Plus size={16} className="mr-1" /> {t("billing.newSale")}
         </Button>
       </div>
 
@@ -280,7 +294,7 @@ export function BillingPage() {
         <div className="clinic-search">
           <Search size={16} />
           <Input
-            placeholder="Buscar por folio, dueño o público general..."
+            placeholder={t("billing.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -289,9 +303,9 @@ export function BillingPage() {
 
       {!loading && invoices.length > 0 && (
         <div className="clinic-stats-row">
-          <ClinicStatPill value={stats.total} label="Recibos" />
-          <ClinicStatPill value={stats.paid} label="Pagados" />
-          <ClinicStatPill value={formatMoney(stats.revenue)} label="Cobrado" />
+          <ClinicStatPill value={stats.total} label={t("billing.statReceipts")} />
+          <ClinicStatPill value={stats.paid} label={t("billing.statPaid")} />
+          <ClinicStatPill value={formatMoney(stats.revenue)} label={t("billing.statCollected")} />
         </div>
       )}
 
@@ -300,13 +314,11 @@ export function BillingPage() {
       ) : filtered.length === 0 ? (
         <ClinicEmptyState
           mascot={<DoctorPlumitas size="sm" badge />}
-          title={search.trim() ? "Sin resultados" : "Sin recibos registrados"}
+          title={search.trim() ? t("common.noResults") : t("billing.emptyTitle")}
           description={
-            search.trim()
-              ? "Prueba con otro folio o nombre de receptor."
-              : "Registra la primera venta con producto, servicio o ambos."
+            search.trim() ? t("billing.emptySearchDesc") : t("billing.emptyDesc")
           }
-          actionLabel={search.trim() ? undefined : "Nueva venta"}
+          actionLabel={search.trim() ? undefined : t("billing.newSale")}
           onAction={search.trim() ? undefined : openCreate}
         />
       ) : (
@@ -314,26 +326,26 @@ export function BillingPage() {
           <table className="clinic-table">
             <thead>
               <tr>
-                <th>Folio</th>
-                <th>Receptor</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th>Fecha</th>
+                <th>{t("billing.colFolio")}</th>
+                <th>{t("billing.colRecipient")}</th>
+                <th>{t("billing.colTotal")}</th>
+                <th>{t("billing.colStatus")}</th>
+                <th>{t("billing.colDate")}</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((inv) => (
                 <tr key={inv.id} className="clinic-table-row-click" onClick={() => openDetail(inv)}>
                   <td><strong>{inv.invoice_number || inv.id.slice(0, 8)}</strong></td>
-                  <td>{invoiceClientLabel(inv)}</td>
+                  <td>{invoiceClientLabel(inv, t)}</td>
                   <td>{formatMoney(inv.total)}</td>
                   <td>
                     <ClinicStatusPill
                       status={inv.status}
-                      label={STATUS_LABELS[inv.status] || inv.status}
+                      label={statusLabel(inv.status)}
                     />
                   </td>
-                  <td>{inv.created_at ? new Date(inv.created_at).toLocaleDateString("es-MX") : "—"}</td>
+                  <td>{inv.created_at ? new Date(inv.created_at).toLocaleDateString(locale) : t("common.emDash")}</td>
                 </tr>
               ))}
             </tbody>
@@ -344,30 +356,30 @@ export function BillingPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className={clinicDialogClass("max-w-md", "clinic-sale-dialog")}>
           <DialogHeader>
-            <DialogTitle>Nueva venta</DialogTitle>
+            <DialogTitle>{t("billing.saleDialogTitle")}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleQuickSave} className="clinic-form">
             <p className="clinic-muted clinic-quick-hint">
-              Puedes cobrar producto del inventario, un servicio o ambos en la misma venta.
+              {t("billing.saleHint")}
             </p>
 
             <div className="clinic-sale-section">
-              <p className="clinic-form-section-label">Producto del inventario</p>
+              <p className="clinic-form-section-label">{t("billing.inventorySection")}</p>
               {products.length === 0 ? (
                 <p className="clinic-muted clinic-quick-hint">
-                  Sin productos en inventario. Solo servicios por ahora.
+                  {t("billing.noProducts")}
                 </p>
               ) : (
                 <>
                   <div className="form-group">
-                    <Label>Producto</Label>
+                    <Label>{t("billing.productLabel")}</Label>
                     <Select
                       value={saleForm.product_id || undefined}
                       onValueChange={handleProductSelect}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar producto (opcional)" />
+                        <SelectValue placeholder={t("billing.selectProductOptional")} />
                       </SelectTrigger>
                       <SelectContent>
                         {products.map((p) => (
@@ -380,8 +392,13 @@ export function BillingPage() {
                     {selectedProduct && (
                       <>
                         <p className="clinic-muted clinic-quick-hint">
-                          Stock: {Number(selectedProduct.stock_qty) || 0} {selectedProduct.unit || "pza"}
-                          {selectedProduct.sku ? ` · SKU ${selectedProduct.sku}` : ""}
+                          {t("billing.stockLabel", {
+                            qty: Number(selectedProduct.stock_qty) || 0,
+                            unit: selectedProduct.unit || "pza",
+                            sku: selectedProduct.sku
+                              ? t("billing.stockSkuSuffix", { sku: selectedProduct.sku })
+                              : "",
+                          })}
                         </p>
                         <button
                           type="button"
@@ -395,14 +412,14 @@ export function BillingPage() {
                             }))
                           }
                         >
-                          Quitar producto de esta venta
+                          {t("billing.removeProduct")}
                         </button>
                       </>
                     )}
                   </div>
                   <div className="clinic-form-grid-2">
                     <div className="form-group">
-                      <Label htmlFor="sale-product-qty">Cantidad</Label>
+                      <Label htmlFor="sale-product-qty">{t("billing.quantity")}</Label>
                       <Input
                         id="sale-product-qty"
                         type="number"
@@ -413,7 +430,7 @@ export function BillingPage() {
                       />
                     </div>
                     <div className="form-group">
-                      <Label htmlFor="sale-product-price">Precio unitario</Label>
+                      <Label htmlFor="sale-product-price">{t("billing.unitPrice")}</Label>
                       <Input
                         id="sale-product-price"
                         type="number"
@@ -430,8 +447,8 @@ export function BillingPage() {
             </div>
 
             <div className="clinic-sale-section">
-              <p className="clinic-form-section-label">Servicio o concepto</p>
-              <div className="clinic-quick-chips" role="group" aria-label="Conceptos frecuentes">
+              <p className="clinic-form-section-label">{t("billing.serviceSection")}</p>
+              <div className="clinic-quick-chips" role="group" aria-label={t("billing.frequentConceptsAria")}>
                 {QUICK_SALE_CONCEPTS.map((concept) => (
                   <button
                     key={concept}
@@ -439,15 +456,15 @@ export function BillingPage() {
                     className={`clinic-quick-chip${saleForm.service_description === concept ? " is-active" : ""}`}
                     onClick={() => setSaleForm({ ...saleForm, service_description: concept })}
                   >
-                    {concept}
+                    {t(`billing.saleConcepts.${concept}`, { defaultValue: concept })}
                   </button>
                 ))}
               </div>
               <div className="form-group mt-2">
-                <Label htmlFor="sale-service-desc">Concepto</Label>
+                <Label htmlFor="sale-service-desc">{t("billing.conceptLabel")}</Label>
                 <Input
                   id="sale-service-desc"
-                  placeholder="Ej. Consulta general, baño..."
+                  placeholder={t("billing.conceptPlaceholder")}
                   value={saleForm.service_description}
                   onChange={(e) => setSaleForm({ ...saleForm, service_description: e.target.value })}
                 />
@@ -468,7 +485,7 @@ export function BillingPage() {
 
             {salePreview.items.length > 0 && (
               <div className="clinic-sale-summary">
-                <p className="clinic-form-section-label">Resumen</p>
+                <p className="clinic-form-section-label">{t("billing.summary")}</p>
                 <ul className="clinic-sale-summary-list">
                   {salePreview.items.map((item) => (
                     <li key={`${item.description}-${item.fromInventory}`}>
@@ -481,25 +498,25 @@ export function BillingPage() {
                   ))}
                 </ul>
                 <p className="clinic-sale-summary-total">
-                  Total: <strong>{formatMoney(salePreview.total)}</strong>
+                  {t("billing.summaryTotal")} <strong>{formatMoney(salePreview.total)}</strong>
                 </p>
                 {salePreview.items.some((item) => item.fromInventory) && (
                   <p className="clinic-muted clinic-quick-hint">
-                    Los productos del inventario se descontarán al cobrar.
+                    {t("billing.stockDeductHint")}
                   </p>
                 )}
               </div>
             )}
 
             <div className="form-group">
-              <Label>Receptor</Label>
+              <Label>{t("billing.recipient")}</Label>
               <Select
                 value={saleForm.client_id || GENERAL_PUBLIC_ID}
                 onValueChange={(v) => setSaleForm({ ...saleForm, client_id: v })}
               >
-                <SelectTrigger><SelectValue placeholder="Receptor" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("billing.recipientPlaceholder")} /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={GENERAL_PUBLIC_ID}>{GENERAL_PUBLIC_LABEL}</SelectItem>
+                  <SelectItem value={GENERAL_PUBLIC_ID}>{t("billing.generalPublic")}</SelectItem>
                   {clients.map((c) => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
@@ -508,16 +525,16 @@ export function BillingPage() {
             </div>
 
             <div className="form-group">
-              <Label>Método de pago</Label>
-              <div className="clinic-quick-chips" role="group" aria-label="Método de pago">
-                {PAYMENT_METHODS.map(({ value, label }) => (
+              <Label>{t("billing.paymentMethod")}</Label>
+              <div className="clinic-quick-chips" role="group" aria-label={t("billing.paymentMethodAria")}>
+                {PAYMENT_METHODS.map(({ value }) => (
                   <button
                     key={value}
                     type="button"
                     className={`clinic-quick-chip${saleForm.payment_method === value ? " is-active" : ""}`}
                     onClick={() => setSaleForm({ ...saleForm, payment_method: value })}
                   >
-                    {label}
+                    {t(`billing.paymentMethods.${value}`, { defaultValue: value })}
                   </button>
                 ))}
               </div>
@@ -525,10 +542,12 @@ export function BillingPage() {
 
             <DialogFooter>
               <Button type="button" variant="secondary" onClick={() => setDialogOpen(false)}>
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={saving || salePreview.items.length === 0}>
-                {saving ? "Guardando..." : `Cobrar ${salePreview.total > 0 ? formatMoney(salePreview.total) : ""}`.trim()}
+                {saving
+                  ? t("common.saving")
+                  : `${t("billing.charge")} ${salePreview.total > 0 ? formatMoney(salePreview.total) : ""}`.trim()}
               </Button>
             </DialogFooter>
           </form>
@@ -538,15 +557,15 @@ export function BillingPage() {
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
         <DialogContent className={clinicDialogClass("max-w-md")}>
           <DialogHeader>
-            <DialogTitle>{detail?.invoice_number || "Recibo"}</DialogTitle>
+            <DialogTitle>{detail?.invoice_number || t("billing.receiptFallback")}</DialogTitle>
           </DialogHeader>
           {detail && (
             <div className="clinic-detail">
-              <p><strong>Receptor:</strong> {invoiceClientLabel(detail)}</p>
-              <p><strong>Estado:</strong> {STATUS_LABELS[detail.status] || detail.status}</p>
-              <p><strong>Subtotal:</strong> {formatMoney(detail.subtotal)}</p>
-              <p><strong>IVA:</strong> {formatMoney(detail.tax_amount)}</p>
-              <p><strong>Total:</strong> {formatMoney(detail.total)}</p>
+              <p><strong>{t("billing.detailRecipient")}</strong> {invoiceClientLabel(detail, t)}</p>
+              <p><strong>{t("billing.detailStatus")}</strong> {statusLabel(detail.status)}</p>
+              <p><strong>{t("billing.detailSubtotal")}</strong> {formatMoney(detail.subtotal)}</p>
+              <p><strong>{t("billing.detailTax")}</strong> {formatMoney(detail.tax_amount)}</p>
+              <p><strong>{t("billing.detailTotal")}</strong> {formatMoney(detail.total)}</p>
               {detail.items?.length > 0 && (
                 <ul className="clinic-invoice-detail-list">
                   {detail.items.map((item) => (
@@ -558,11 +577,11 @@ export function BillingPage() {
               )}
               {detail.status !== "paid" && detail.status !== "cancelled" && (
                 <Button type="button" className="mt-4" onClick={() => markPaid(detail)}>
-                  <Receipt size={16} className="mr-1" /> Marcar como pagado
+                  <Receipt size={16} className="mr-1" /> {t("billing.markPaid")}
                 </Button>
               )}
               <Button type="button" variant="secondary" className="mt-4 ml-2" onClick={handleDownloadPdf}>
-                <FileDown size={16} className="mr-1" /> Descargar PDF
+                <FileDown size={16} className="mr-1" /> {t("billing.downloadPdf")}
               </Button>
             </div>
           )}

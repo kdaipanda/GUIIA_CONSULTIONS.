@@ -1,18 +1,13 @@
 import React, { useState } from "react";
 import { ArrowUpRight, Mail } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { TermsAndConditionsModal } from "../../components/TermsAndConditionsModal";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 import { scrollToLandingProduct, scrollToLandingSection } from "./landingScroll";
 import {
   LANDING_NEWSLETTER_EMAIL,
   LANDING_SOCIAL_LINKS,
 } from "./landingBrandAssets";
-
-const FOOTER_NAV = [
-  { label: "Producto", action: () => scrollToLandingProduct("species") },
-  { label: "Características", action: () => scrollToLandingSection("#features") },
-  { label: "Precios", action: () => scrollToLandingSection("#pricing") },
-  { label: "FAQ", action: () => scrollToLandingSection("#faq") },
-];
 
 function SocialIcon({ id }) {
   const common = {
@@ -66,10 +61,18 @@ function SocialIcon({ id }) {
 }
 
 export function LandingFooter() {
+  const { t } = useTranslation("landing");
   const year = new Date().getFullYear();
   const [email, setEmail] = useState("");
   const [newsletterState, setNewsletterState] = useState("idle");
   const [legalModal, setLegalModal] = useState(null);
+
+  const footerNav = [
+    { label: t("footer.product"), action: () => scrollToLandingProduct("species") },
+    { label: t("footer.features"), action: () => scrollToLandingSection("#features") },
+    { label: t("footer.pricing"), action: () => scrollToLandingSection("#pricing") },
+    { label: t("footer.faq"), action: () => scrollToLandingSection("#faq") },
+  ];
 
   const handleNewsletterSubmit = (event) => {
     event.preventDefault();
@@ -79,10 +82,8 @@ export function LandingFooter() {
       return;
     }
 
-    const subject = encodeURIComponent("Suscripción newsletter GUIAA");
-    const body = encodeURIComponent(
-      `Hola equipo GUIAA,\n\nDeseo recibir novedades clínicas y del producto.\n\nCorreo: ${trimmed}\n`,
-    );
+    const subject = encodeURIComponent(t("footer.newsletterSubject"));
+    const body = encodeURIComponent(t("footer.newsletterBody", { email: trimmed }));
     window.location.href = `mailto:${LANDING_NEWSLETTER_EMAIL}?subject=${subject}&body=${body}`;
     setNewsletterState("sent");
     setEmail("");
@@ -93,17 +94,21 @@ export function LandingFooter() {
       <div className="landing-footer-v2-inner landing-container">
         <div className="landing-footer-v2-panel">
           <header className="landing-footer-v2-hero">
-            <span className="landing-footer-v2-eyebrow">Comunidad GUIAA</span>
+            <span className="landing-footer-v2-eyebrow">{t("footer.eyebrow")}</span>
             <h2 className="landing-footer-v2-headline">
-              ¡Impulsando la práctica veterinaria con{" "}
-              <span className="landing-footer-v2-accent">inteligencia clínica</span>!
+              {t("footer.headlineBefore")}{" "}
+              <span className="landing-footer-v2-accent">{t("footer.headlineAccent")}</span>
+              {t("footer.headlineAfter")}
             </h2>
           </header>
 
           <div className="landing-footer-v2-grid">
             <section className="landing-footer-v2-connect" aria-labelledby="footer-social-title">
+              <div className="mb-4">
+                <LanguageSwitcher />
+              </div>
               <h3 id="footer-social-title" className="landing-footer-v2-label">
-                Síguenos en redes
+                {t("footer.newsletterTitle")}
               </h3>
               <div className="landing-footer-v2-social-grid">
                 {LANDING_SOCIAL_LINKS.map(({ id, label, href, subtitle }) => (
@@ -132,8 +137,8 @@ export function LandingFooter() {
                 ))}
               </div>
 
-              <nav className="landing-footer-v2-nav" aria-label="Navegación del sitio">
-                {FOOTER_NAV.map(({ label, action }) => (
+              <nav className="landing-footer-v2-nav" aria-label={t("nav.main")}>
+                {footerNav.map(({ label, action }) => (
                   <button key={label} type="button" onClick={action}>
                     {label}
                   </button>
@@ -152,24 +157,24 @@ export function LandingFooter() {
                   </span>
                   <div>
                     <h3 id="footer-mailbox-title" className="landing-footer-v2-label">
-                      Buzón
+                      {t("footer.newsletterTitle")}
                     </h3>
                     <p className="landing-footer-v2-mailbox-hint">
-                      Novedades clínicas, actualizaciones del producto y recursos para MVZ.
+                      {t("footer.newsletterLead")}
                     </p>
                   </div>
                 </div>
 
                 <form className="landing-footer-v2-form" onSubmit={handleNewsletterSubmit}>
                   <label htmlFor="landing-newsletter-email" className="sr-only">
-                    Correo electrónico
+                    {t("footer.newsletterPlaceholder")}
                   </label>
                   <input
                     id="landing-newsletter-email"
                     type="email"
                     name="email"
                     autoComplete="email"
-                    placeholder="Tu correo profesional"
+                    placeholder={t("footer.newsletterPlaceholder")}
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
@@ -179,7 +184,7 @@ export function LandingFooter() {
                     disabled={newsletterState === "sent"}
                   />
                   <button type="submit" className="landing-footer-v2-submit">
-                    Enviar
+                    {t("footer.newsletterSubmit")}
                   </button>
                 </form>
 
@@ -188,7 +193,7 @@ export function LandingFooter() {
                     className="landing-footer-v2-form-msg landing-footer-v2-form-msg--error"
                     role="alert"
                   >
-                    Introduce un correo válido.
+                    {t("footer.newsletterError")}
                   </p>
                 )}
                 {newsletterState === "sent" && (
@@ -196,7 +201,7 @@ export function LandingFooter() {
                     className="landing-footer-v2-form-msg landing-footer-v2-form-msg--ok"
                     role="status"
                   >
-                    ¡Gracias! Abrimos tu cliente de correo para confirmar.
+                    {t("footer.newsletterSent")}
                   </p>
                 )}
               </div>
@@ -205,17 +210,17 @@ export function LandingFooter() {
 
           <div className="landing-footer-v2-bottom">
             <p className="landing-footer-v2-copy">
-              © {year} GUIAA. Todos los derechos reservados.
+              © {year} GUIAA. {t("footer.rights")}
             </p>
             <div className="landing-footer-v2-legal">
               <button type="button" onClick={() => setLegalModal("terms")}>
-                Términos de uso
+                {t("footer.terms")}
               </button>
               <span className="landing-footer-v2-legal-dot" aria-hidden>
                 ·
               </span>
               <button type="button" onClick={() => setLegalModal("privacy")}>
-                Política de privacidad
+                {t("footer.privacy")}
               </button>
               <span className="landing-footer-v2-legal-dot" aria-hidden>
                 ·

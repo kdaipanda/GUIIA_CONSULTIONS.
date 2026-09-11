@@ -1,9 +1,12 @@
 import React from "react";
 import { LANDING_IMAGES } from "./landingBrandAssets";
+import { useTranslation } from "react-i18next";
 
 export function LandingBrandBand() {
+  const { t } = useTranslation("landing");
+
   return (
-    <section className="landing-brand-band" aria-label="Marca GUIAA">
+    <section className="landing-brand-band" aria-label={t("brandBand.aria")}>
       <div className="landing-container landing-brand-band-inner">
         <div className="landing-brand-band-mascot-wrap" aria-hidden>
           <span className="landing-brand-band-spark landing-brand-band-spark--1" />
@@ -20,11 +23,8 @@ export function LandingBrandBand() {
           />
         </div>
         <div>
-          <strong>Doctor Plumitas te acompaña en consulta</strong>
-          <span>
-            La mascota de GUIAA representa un flujo clínico cercano, claro y pensado para el
-            día a día del médico veterinario.
-          </span>
+          <strong>{t("brandBand.title")}</strong>
+          <span>{t("brandBand.lead")}</span>
         </div>
       </div>
     </section>

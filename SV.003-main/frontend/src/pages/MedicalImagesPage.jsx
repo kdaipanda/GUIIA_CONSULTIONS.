@@ -11,16 +11,19 @@ import {
   validateLabUploadFile,
 } from "../lib/labFileUtils";
 import { PatientSelector } from "../components/clinic/PatientSelector";
+import { ModuleHelpTip } from "../components/clinic/ModuleHelpTip";
 import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
+import { useTranslation } from "react-i18next";
 import "./clinic/clinicPageShared.css";
+import "./clinic/helpCenterPage.css";
 import "./medicalImagesPage.css";
 
-const EXTRACTION_LABELS = {
-  markitdown: "Texto extraído del PDF con MarkItDown",
-  vision: "PDF escaneado — análisis visual de páginas",
-  image: "Imagen del estudio analizada",
-  text: "Resultados pegados como texto",
+const EXTRACTION_LABEL_KEYS = {
+  markitdown: "lab.sourceMarkitdown",
+  vision: "lab.sourceVision",
+  image: "lab.sourceImage",
+  text: "lab.sourceText",
 };
 
 export function MedicalImagesPage({
@@ -28,6 +31,7 @@ export function MedicalImagesPage({
   clinicalContext = null,
   onClinicalContextChange,
 }) {
+  const { t } = useTranslation("clinic");
   const { veterinarian } = useVet();
   const [imageType, setImageType] = useState("blood_test");
   const [inputMode, setInputMode] = useState("pdf");
@@ -48,14 +52,14 @@ export function MedicalImagesPage({
 
   const typeMeta = {
     blood_test: {
-      label: "Análisis de Sangre",
+      label: t("labTypes.blood_test.label"),
       icon: "🩸",
-      hint: "Especifica tipo de estudio (hemograma, bioquímica, etc.) y valores relevantes.",
+      hint: t("labTypes.blood_test.hint"),
     },
     urinalysis: {
-      label: "Urianálisis",
+      label: t("labTypes.urinalysis.label"),
       icon: "🧪",
-      hint: "Indica método de recolección y hallazgos previos en tira reactiva o sedimento.",
+      hint: t("labTypes.urinalysis.hint"),
     },
   };
 
@@ -132,8 +136,8 @@ export function MedicalImagesPage({
     if (!canSubmit) {
       notifyError(
         inputMode === "text"
-          ? "Pega los resultados del estudio"
-          : "Sube un PDF o imagen del laboratorio",
+          ? t("lab.pasteResults")
+          : t("lab.uploadLabFile"),
       );
       return;
     }
@@ -212,7 +216,7 @@ export function MedicalImagesPage({
 
       const data = await response.json();
       setResult(data);
-      notifySuccess("Interpretación generada correctamente");
+      notifySuccess(t("lab.success"));
       // Recargar historial después de crear un nuevo análisis
       await loadHistory();
 
@@ -228,7 +232,7 @@ export function MedicalImagesPage({
     } catch (err) {
       console.error("Error en handleSubmit:", err);
       // Asegurar que el error siempre sea un string
-      let errorMessage = "Error al procesar el estudio";
+      let errorMessage = t("lab.processError");
       
       if (err instanceof Error) {
         errorMessage = err.message || errorMessage;
@@ -240,7 +244,7 @@ export function MedicalImagesPage({
       }
       
       // Asegurar que sea string y no esté vacío
-      errorMessage = String(errorMessage || "Error desconocido");
+      errorMessage = String(errorMessage || t("lab.unknownError"));
       notifyError(errorMessage);
       setLoading(false);
     } finally {
@@ -253,12 +257,15 @@ export function MedicalImagesPage({
       <div className="container">
         <header className="medical-images-header">
           <div>
-            <p className="medical-images-eyebrow">Premium · CDS</p>
-            <h1>
-              <FlaskConical size={28} aria-hidden />
-              Interpretación de análisis
-            </h1>
-            <p>Sube el PDF del laboratorio o pega resultados para obtener el análisis clínico detallado.</p>
+            <p className="medical-images-eyebrow">{t("lab.eyebrow")}</p>
+            <div className="clinic-page-title-row">
+              <h1>
+                <FlaskConical size={28} aria-hidden />
+                {t("lab.title")}
+              </h1>
+              <ModuleHelpTip topicId="lab" setView={setView} />
+            </div>
+            <p>{t("lab.lead")}</p>
           </div>
           <Button
             type="button"
@@ -266,24 +273,24 @@ export function MedicalImagesPage({
             className="medical-lab-header-toggle"
             onClick={() => setShowHistory(!showHistory)}
           >
-            {showHistory ? "Nueva interpretación" : "Ver historial"}
+            {showHistory ? t("lab.newInterpretation") : t("lab.viewHistory")}
           </Button>
         </header>
 
         {!showHistory ? (
           <div className="image-interpretation-layout medical-lab-layout">
-            <aside className="image-side-panel medical-lab-summary" aria-label="Resumen del estudio">
+            <aside className="image-side-panel medical-lab-summary" aria-label={t("lab.summaryTitle")}>
               <div className="side-panel-header">
-                <span className="side-panel-pill">Panel clínico</span>
-                <h3>Resumen del estudio</h3>
+                <span className="side-panel-pill">{t("lab.panelPill")}</span>
+                <h3>{t("lab.summaryTitle")}</h3>
                 <p className="medical-lab-summary-lead">
-                  Verifica que la información clave del caso esté completa antes de enviar.
+                  {t("lab.summaryLead")}
                 </p>
               </div>
 
               <div className="medical-lab-summary-grid">
                 <div className="side-panel-section medical-lab-summary-item">
-                  <div className="side-panel-label">Tipo</div>
+                  <div className="side-panel-label">{t("lab.type")}</div>
                   <div className="side-panel-main">
                     <span className="side-panel-icon">{imageMeta.icon}</span>
                     <span className="side-panel-text">{imageMeta.label}</span>
@@ -291,24 +298,24 @@ export function MedicalImagesPage({
                 </div>
 
                 <div className="side-panel-section medical-lab-summary-item">
-                  <div className="side-panel-label">Mascota</div>
+                  <div className="side-panel-label">{t("lab.pet")}</div>
                   <div className="side-panel-chip">
-                    {imageClinicalContext?.patient?.name || patientName || "Sin asignar"}
+                    {imageClinicalContext?.patient?.name || patientName || t("lab.unassigned")}
                   </div>
                 </div>
 
                 <div className="side-panel-section medical-lab-summary-item">
-                  <div className="side-panel-label">Estado</div>
+                  <div className="side-panel-label">{t("lab.status")}</div>
                   <div
                     className={`side-panel-status ${loading ? "loading" : result ? "done" : "idle"}`}
                   >
                     {loading
-                      ? "Analizando..."
+                      ? t("lab.analyzing")
                       : result
-                        ? "Listo"
+                        ? t("lab.done")
                         : canSubmit
-                          ? "Listo para enviar"
-                          : "Falta estudio"}
+                          ? t("lab.readyToSend")
+                          : t("lab.missingStudy")}
                   </div>
                 </div>
               </div>
@@ -358,9 +365,9 @@ export function MedicalImagesPage({
               </div>
 
               <div className="form-section medical-lab-patient-section">
-                <h3>Mascota del estudio</h3>
+                <h3>{t("lab.petSectionTitle")}</h3>
                 <p className="medical-lab-patient-hint">
-                  Vincula el análisis al paciente registrado para que aparezca en su historial clínico.
+                  {t("lab.petSectionHint")}
                 </p>
                 <PatientSelector
                   value={imageClinicalContext?.patientId}
@@ -369,17 +376,19 @@ export function MedicalImagesPage({
                 {imageClinicalContext?.patientId ? (
                   <p className="medical-lab-patient-linked">
                     <Link2 size={14} aria-hidden />
-                    Vinculado a {imageClinicalContext.patient?.name || "paciente registrado"}
+                    {t("lab.linkedTo", {
+                      name: imageClinicalContext.patient?.name || t("lab.registeredPatient"),
+                    })}
                   </p>
                 ) : (
                   <p className="medical-lab-patient-unlinked">
-                    Sin vincular — el estudio no aparecerá en la ficha del paciente.
+                    {t("lab.unlinkedHint")}
                   </p>
                 )}
               </div>
 
               <div className="form-section">
-                <h3>Cargar estudio</h3>
+                <h3>{t("lab.uploadTitle")}</h3>
 
                 <div className="clinic-sale-mode-toggle medical-lab-input-tabs">
                   <button
@@ -387,28 +396,28 @@ export function MedicalImagesPage({
                     className={`clinic-quick-chip${inputMode === "pdf" ? " is-active" : ""}`}
                     onClick={() => setInputMode("pdf")}
                   >
-                    PDF
+                    {t("lab.tabPdf")}
                   </button>
                   <button
                     type="button"
                     className={`clinic-quick-chip${inputMode === "image" ? " is-active" : ""}`}
                     onClick={() => setInputMode("image")}
                   >
-                    Imagen
+                    {t("lab.tabImage")}
                   </button>
                   <button
                     type="button"
                     className={`clinic-quick-chip${inputMode === "text" ? " is-active" : ""}`}
                     onClick={() => setInputMode("text")}
                   >
-                    Pegar texto
+                    {t("lab.tabText")}
                   </button>
                 </div>
 
                 {(inputMode === "pdf" || inputMode === "image") && (
                   <div className="form-group">
                     <label htmlFor="lab-file-upload">
-                      {inputMode === "pdf" ? "Archivo PDF del laboratorio" : "Foto o captura del estudio"}
+                      {inputMode === "pdf" ? t("lab.filePdfLabel") : t("lab.fileImageLabel")}
                     </label>
                     <input
                       ref={fileInputRef}
@@ -431,19 +440,19 @@ export function MedicalImagesPage({
                         {imageFile
                           ? labFileLabel(imageFile)
                           : inputMode === "pdf"
-                            ? "Toca para seleccionar PDF"
-                            : "Toca para tomar o elegir imagen"}
+                            ? t("lab.pickPdf")
+                            : t("lab.pickImage")}
                       </span>
                       <span className="medical-lab-upload-hint">
                         {inputMode === "pdf"
-                          ? "Se convierte a Markdown con MarkItDown y luego se interpreta"
-                          : "JPG o PNG del reporte"}
+                          ? t("lab.pdfHint")
+                          : t("lab.imageHint")}
                       </span>
                     </button>
                     {imagePreview && inputMode === "image" && (
                       <img
                         src={imagePreview}
-                        alt="Vista previa del estudio"
+                        alt={t("lab.previewAlt")}
                         className="medical-lab-preview"
                       />
                     )}
@@ -461,7 +470,7 @@ export function MedicalImagesPage({
                   >
                     <span className="medical-lab-help-toggle-label">
                       <span aria-hidden>ℹ️</span>
-                      ¿Cómo copiar texto de un PDF?
+                      {t("lab.helpToggle")}
                     </span>
                     <ChevronDown
                       size={18}
@@ -473,44 +482,38 @@ export function MedicalImagesPage({
                   {showHelp && (
                     <div className="medical-lab-help-body">
                       <div className="medical-lab-help-block">
-                        <strong>Caso 1: PDF normal (no escaneado ni bloqueado)</strong>
-                        <p><strong>Adobe Acrobat Reader:</strong> selecciona el texto y usa Copiar o Ctrl+C.</p>
-                        <p><strong>Navegador:</strong> abre el PDF, selecciona texto y pégalo aquí.</p>
+                        <strong>{t("lab.helpCase1Title")}</strong>
+                        <p>{t("lab.helpCase1Adobe")}</p>
+                        <p>{t("lab.helpCase1Browser")}</p>
                       </div>
                       <div className="medical-lab-help-block">
-                        <strong>Caso 2: PDF escaneado (imagen)</strong>
-                        <p>Usa OCR en iLovePDF, PDF Candy o convierte a Word/Docs y copia el texto.</p>
+                        <strong>{t("lab.helpCase2Title")}</strong>
+                        <p>{t("lab.helpCase2Body")}</p>
                       </div>
                       <div className="medical-lab-help-block">
-                        <strong>Caso 3: PDF protegido</strong>
-                        <p>Quita la protección con la contraseña o convierte el archivo a un formato editable.</p>
+                        <strong>{t("lab.helpCase3Title")}</strong>
+                        <p>{t("lab.helpCase3Body")}</p>
                       </div>
                       <div className="medical-lab-help-block">
-                        <strong>Alternativa rápida</strong>
-                        <p>Abre el PDF en Word o en Google Docs y copia desde ahí.</p>
+                        <strong>{t("lab.helpAltTitle")}</strong>
+                        <p>{t("lab.helpAltBody")}</p>
                       </div>
                     </div>
                   )}
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="lab-paste-data">Copia y pega los datos del estudio</label>
+                  <label htmlFor="lab-paste-data">{t("lab.pasteLabel")}</label>
                   <Textarea
                     id="lab-paste-data"
                     value={pastedStudyData}
                     onChange={(e) => setPastedStudyData(e.target.value)}
-                    placeholder={`Pega aquí los resultados del análisis, por ejemplo:
-
-BIOMETRÍA HEMÁTICA
-Eritrocitos: 6.5 x10^6/µL (Ref: 5.5-8.5)
-Hemoglobina: 14.2 g/dL (Ref: 12-18)
-...
-`}
+                    placeholder={t("lab.pastePlaceholder")}
                     rows={6}
                     className="medical-lab-paste-area"
                   />
                   <small className="medical-lab-paste-hint">
-                    Copia los resultados del laboratorio y pégalos aquí para su análisis.
+                    {t("lab.pasteHint")}
                   </small>
                 </div>
                 </>
@@ -524,7 +527,7 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                   onClick={() => setShowAdvanced((open) => !open)}
                   aria-expanded={showAdvanced}
                 >
-                  {showAdvanced ? "Ocultar opciones" : "Más opciones (consulta, contexto)"}
+                  {showAdvanced ? t("lab.hideOptions") : t("lab.moreOptions")}
                   <ChevronDown
                     size={16}
                     className={`medical-lab-help-chevron${showAdvanced ? " is-open" : ""}`}
@@ -535,40 +538,40 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                 <div className="medical-lab-optional-body">
                   {!imageClinicalContext?.patientId && (
                     <div className="form-group">
-                      <label htmlFor="lab-patient-name">Nombre de la mascota (solo texto libre)</label>
+                      <label htmlFor="lab-patient-name">{t("lab.freeNameLabel")}</label>
                       <input
                         id="lab-patient-name"
                         type="text"
                         value={patientName}
                         onChange={(e) => setPatientName(e.target.value)}
-                        placeholder="Ej: Max, Luna, Rocky"
+                        placeholder={t("lab.freeNamePlaceholder")}
                       />
                       <small className="medical-lab-paste-hint">
-                        Si no eliges una mascota registrada arriba, el sistema intentará vincular por nombre exacto.
+                        {t("lab.freeNameHint")}
                       </small>
                     </div>
                   )}
 
                   <div className="form-row medical-lab-form-row">
                     <div className="form-group medical-lab-consultation-field">
-                      <label htmlFor="lab-consultation-id">ID de consulta previa (opcional)</label>
+                      <label htmlFor="lab-consultation-id">{t("lab.consultationIdLabel")}</label>
                       <input
                         id="lab-consultation-id"
                         type="text"
                         value={consultationId}
                         onChange={(e) => setConsultationId(e.target.value)}
-                        placeholder="Para incluir historial"
+                        placeholder={t("lab.consultationIdPlaceholder")}
                       />
                     </div>
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="lab-additional-context">Contexto adicional (opcional)</label>
+                    <label htmlFor="lab-additional-context">{t("lab.contextLabel")}</label>
                     <Textarea
                       id="lab-additional-context"
                       value={additionalContext}
                       onChange={(e) => setAdditionalContext(e.target.value)}
-                      placeholder="Información relevante para la interpretación..."
+                      placeholder={t("lab.contextPlaceholder")}
                       rows={3}
                       className="medical-lab-context-area"
                     />
@@ -583,7 +586,7 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                   variant="secondary"
                   onClick={() => setView("dashboard")}
                 >
-                  Cancelar
+                  {t("lab.cancel")}
                 </Button>
                 <Button
                   type="submit"
@@ -592,27 +595,27 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                 >
                   {loading
                     ? inputMode === "pdf"
-                      ? "Extrayendo y analizando PDF..."
-                      : "Analizando..."
-                    : "Interpretar estudio"}
-                </Button>
+                      ? t("lab.extractingPdf")
+                      : t("lab.analyzing")
+                    : t("lab.interpret")}
+                  </Button>
               </div>
               )}
             </form>
 
             {result && (
               <div className="interpretation-result medical-lab-result">
-                <h2>Análisis detallado</h2>
-                {result.extraction_method && EXTRACTION_LABELS[result.extraction_method] && (
+                <h2>{t("lab.detailedAnalysis")}</h2>
+                {result.extraction_method && EXTRACTION_LABEL_KEYS[result.extraction_method] && (
                   <p className="medical-lab-extract-badge">
-                    {EXTRACTION_LABELS[result.extraction_method]}
+                    {t(EXTRACTION_LABEL_KEYS[result.extraction_method])}
                   </p>
                 )}
                 {result.prompt_source && (
                   <p className="medical-lab-prompt-badge">
-                    Motor CDS: {result.prompt_source}
+                    {t("lab.cdsEngine", { source: result.prompt_source })}
                     {result.instructions_chars
-                      ? ` (${Math.round(result.instructions_chars / 1000)}k instrucciones)`
+                      ? ` ${t("lab.instructionsK", { count: Math.round(result.instructions_chars / 1000) })}`
                       : ""}
                   </p>
                 )}
@@ -624,7 +627,7 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                     ) : result.detailed_analysis ? (
                       <pre>{cleanClinicalDisplayText(result.detailed_analysis)}</pre>
                     ) : (
-                      <div className="medical-lab-result-fallback">No hay análisis disponible</div>
+                      <div className="medical-lab-result-fallback">{t("lab.noAnalysis")}</div>
                     )}
                   </div>
                 </div>
@@ -717,7 +720,7 @@ Hemoglobina: 14.2 g/dL (Ref: 12-18)
                 <h3>No hay interpretaciones aún</h3>
                 <p>Comienza pegando los datos de tu primer estudio</p>
                 <Button type="button" onClick={() => setShowHistory(false)}>
-                  Nueva Interpretación
+                  {t("lab.newBtn")}
                 </Button>
               </div>
             )}

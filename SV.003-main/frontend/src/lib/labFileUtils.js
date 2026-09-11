@@ -1,4 +1,10 @@
+import i18n from "../i18n";
+
 const MAX_LAB_FILE_BYTES = 12 * 1024 * 1024;
+
+function labT(key, options) {
+  return i18n.t(`labFile.${key}`, { ns: "clinic", ...options });
+}
 
 export function fileToBase64Payload(file) {
   return new Promise((resolve, reject) => {
@@ -7,20 +13,20 @@ export function fileToBase64Payload(file) {
       const result = String(reader.result || "");
       resolve(result.includes(",") ? result.split(",")[1] : result);
     };
-    reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
+    reader.onerror = () => reject(new Error(labT("readError")));
     reader.readAsDataURL(file);
   });
 }
 
 export function validateLabUploadFile(file) {
-  if (!file) return "Selecciona un archivo";
+  if (!file) return labT("selectFile");
   if (file.size > MAX_LAB_FILE_BYTES) {
-    return "El archivo es demasiado grande. Máximo 12 MB.";
+    return labT("tooLarge");
   }
   const isPdf = file.type === "application/pdf" || file.name?.toLowerCase().endsWith(".pdf");
   const isImage = file.type.startsWith("image/");
   if (!isPdf && !isImage) {
-    return "Formato no soportado. Usa PDF, JPG o PNG.";
+    return labT("unsupported");
   }
   return null;
 }
@@ -28,7 +34,7 @@ export function validateLabUploadFile(file) {
 export function labFileLabel(file) {
   if (!file) return "";
   if (file.type === "application/pdf" || file.name?.toLowerCase().endsWith(".pdf")) {
-    return `PDF: ${file.name}`;
+    return labT("pdfLabel", { name: file.name });
   }
-  return `Imagen: ${file.name}`;
+  return labT("imageLabel", { name: file.name });
 }

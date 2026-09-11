@@ -1,10 +1,7 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Check, Circle } from "lucide-react";
-import {
-  getPasswordChecks,
-  PASSWORD_EXAMPLE_TEXT,
-  PASSWORD_HELP_INTRO,
-} from "../lib/passwordPolicy";
+import { getPasswordChecks } from "../lib/passwordPolicy";
 
 export function PasswordRequirementsHint({
   password,
@@ -13,11 +10,11 @@ export function PasswordRequirementsHint({
   id,
   variant = "default",
 }) {
+  const { t } = useTranslation("auth");
   const checks = getPasswordChecks(password);
   const metCount = checks.filter((check) => check.met).length;
   const allMet = metCount === checks.length && (password || "").length > 0;
   const headingId = id ? `${id}-heading` : "password-requirements-heading";
-  const examples = PASSWORD_EXAMPLE_TEXT.replace(/^Ejemplos válidos:\s*/i, "");
 
   return (
     <div
@@ -25,12 +22,12 @@ export function PasswordRequirementsHint({
       id={id}
     >
       {showIntro && (
-        <p className="password-requirements-intro">{PASSWORD_HELP_INTRO}</p>
+        <p className="password-requirements-intro">{t("password.helpIntro")}</p>
       )}
 
       <div className="password-requirements-card">
         <p className="password-requirements-heading" id={headingId}>
-          Tu contraseña debe tener
+          {t("password.requirementsHeading")}
         </p>
         <ul
           className="password-requirements-list"
@@ -56,8 +53,8 @@ export function PasswordRequirementsHint({
 
         {showIntro && (
           <p className="password-requirements-examples">
-            <span className="password-requirements-examples-label">Ejemplos:</span>
-            {examples}
+            <span className="password-requirements-examples-label">{t("password.examplesLabel")}</span>
+            {t("password.examples")}
           </p>
         )}
       </div>
@@ -65,7 +62,7 @@ export function PasswordRequirementsHint({
       {allMet && (
         <p className="password-requirements-ready" role="status">
           <Check size={14} strokeWidth={2.5} aria-hidden />
-          Listo: tu contraseña cumple los requisitos.
+          {t("password.ready")}
         </p>
       )}
     </div>

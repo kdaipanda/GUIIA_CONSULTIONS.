@@ -1,6 +1,7 @@
 import { BACKEND_URL } from "./backendUrl";
 import { getAccessToken, getAuthHeaders, persistAuthFromResponse } from "./authHeaders";
 import { formatApiErrorDetail } from "./friendlyFetchError";
+import i18n from "../i18n";
 
 /**
  * Entra a la app tras el flujo de cédula: reutiliza JWT si existe,
@@ -53,7 +54,10 @@ export async function finalizeCedulaFlowEntry({
   if (!resp.ok) {
     const raw = await resp.json().catch(() => ({}));
     throw new Error(
-      formatApiErrorDetail(raw.detail, "Error iniciando sesión tras verificación"),
+      formatApiErrorDetail(
+        raw.detail,
+        i18n.t("cedulaFlow.loginAfterVerify", { ns: "clinic" }),
+      ),
     );
   }
 

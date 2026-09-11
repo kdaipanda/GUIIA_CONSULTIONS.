@@ -1,35 +1,26 @@
 import React from "react";
 import { ClipboardList, PawPrint, ShieldCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const HERO_STATS = [
-  {
-    icon: PawPrint,
-    value: "11+ especies veterinarias",
-    desc: "Formularios clínicos para perros, felinos, exóticos y más.",
-  },
-  {
-    icon: ClipboardList,
-    value: "Expediente unificado",
-    desc: "Dueños, mascotas, consultas y ventas en un solo consultorio.",
-  },
-  {
-    icon: ShieldCheck,
-    value: "Acceso MVZ verificado",
-    desc: "Registro con cédula profesional para veterinarios en LATAM.",
-  },
+  { id: "species", icon: PawPrint },
+  { id: "record", icon: ClipboardList },
+  { id: "access", icon: ShieldCheck },
 ];
 
 export function LandingHeroStats() {
+  const { t } = useTranslation("landing");
+
   return (
-    <div className="landing-petpal-stats" role="region" aria-label="Ventajas de GUIAA">
-      {HERO_STATS.map(({ icon: Icon, value, desc }) => (
-        <div key={value} className="landing-petpal-stat">
+    <div className="landing-petpal-stats" role="region" aria-label={t("heroStats.aria")}>
+      {HERO_STATS.map(({ id, icon: Icon }) => (
+        <div key={id} className="landing-petpal-stat">
           <span className="landing-petpal-stat-icon">
             <Icon size={18} aria-hidden />
           </span>
           <div className="landing-petpal-stat-copy">
-            <p className="landing-petpal-stat-value">{value}</p>
-            <p className="landing-petpal-stat-desc">{desc}</p>
+            <p className="landing-petpal-stat-value">{t(`heroStats.items.${id}.value`)}</p>
+            <p className="landing-petpal-stat-desc">{t(`heroStats.items.${id}.desc`)}</p>
           </div>
         </div>
       ))}

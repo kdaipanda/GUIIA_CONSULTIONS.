@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Copy, Save, Users, UserPlus, Trash2, Settings, ShieldAlert } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Copy, Save, Users, UserPlus, Trash2, Settings, ShieldAlert, BookOpen, PlayCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import "./clinicPageShared.css";
 import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
 import { AccountPasswordSection } from "../../components/AccountPasswordSection";
@@ -8,6 +9,7 @@ import {
   ClinicSettingsSkeleton,
   ClinicEmptyState,
 } from "../../components/clinic/ClinicPageUi";
+import { ModuleHelpTip } from "../../components/clinic/ModuleHelpTip";
 import { useVet } from "../../context/VetContext";
 import { useClinic } from "../../context/ClinicContext";
 import {
@@ -19,6 +21,7 @@ import {
   removeOrganizationMember,
 } from "../../lib/clinicApi";
 import { notifyError, notifySuccess } from "../../lib/appToast";
+import { requestPlatformOnboarding } from "../../lib/helpCenter";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -29,60 +32,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import "./helpCenterPage.css";
 
-const ROLE_LABELS = {
-  owner: "Propietario",
-  admin: "Administrador",
-  veterinarian: "Veterinario",
-  receptionist: "Recepción",
-};
-
-const INVITE_ROLES = [
-  {
-    value: "receptionist",
-    label: "Recepción",
-    hint: "Agenda, dueños y pacientes. Sin consultas CDS. Alta sin cédula.",
-  },
-  {
-    value: "admin",
-    label: "Administrador",
-    hint: "Configurar el consultorio y el equipo. Alta sin cédula.",
-  },
-  {
-    value: "veterinarian",
-    label: "Veterinario",
-    hint: "Consultas CDS, expediente, pacientes y agenda. Requiere cédula.",
-  },
+const INVITE_ROLE_KEYS = [
+  { value: "receptionist", hintKey: "settings.roleHintReceptionist" },
+  { value: "admin", hintKey: "settings.roleHintAdmin" },
+  { value: "veterinarian", hintKey: "settings.roleHintVeterinarian" },
 ];
 
 const TEAM_STEPS = [
-  {
-    title: "Elige el rol",
-    body:
-      "Recepción: agenda, dueños y pacientes (sin consultas CDS). Administrador: configura el consultorio y el equipo. Veterinario: consultas CDS y expediente. Recepción y admin no necesitan cédula; el veterinario sí, con la suya (no la tuya).",
-  },
-  {
-    title: "Escribe el email y envía",
-    body:
-      "Pon el correo de tu colega abajo y pulsa «Enviar invitación». Si ya tiene cuenta GUIAA, entra a tu equipo al momento. Si no, le mandamos un correo con un enlace (también se copia al portapapeles por si no llega).",
-  },
-  {
-    title: "Tu colega completa el alta",
-    body:
-      "Abre el enlace, crea su contraseña y acepta. Recepción/admin: formulario corto. Veterinario: cédula y documento. Al terminar, que cierre sesión y vuelva a entrar: verá este consultorio.",
-  },
+  { titleKey: "settings.teamStep1Title", bodyKey: "settings.teamStep1" },
+  { titleKey: "settings.teamStep2Title", bodyKey: "settings.teamStep2" },
+  { titleKey: "settings.teamStep3Title", bodyKey: "settings.teamStep3" },
 ];
 
-export function SettingsPage() {
+export function SettingsPage({ setView }) {
+  const { t, i18n } = useTranslation("clinic");
+  const { t: tHelp } = useTranslation("help");
   const { veterinarian } = useVet();
   const { role } = useClinic();
   const { confirm, dialogProps } = useConfirmAction();
   const [org, setOrg] = useState(null);
   const [members, setMembers] = useState([]);
-  const [pendingInvites, setPendingInvites] = useState([]);
   const [form, setForm] = useState({ name: "", timezone: "America/Mexico_City" });
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("receptionist");
+  const [pendingInvites, setPendingInvites] = useState([]);
   const [lastInviteUrl, setLastInviteUrl] = useState("");
   const [lastInviteEmail, setLastInviteEmail] = useState("");
   const [loading, setLoading] = useState(true);
@@ -90,6 +65,17 @@ export function SettingsPage() {
   const [inviting, setInviting] = useState(false);
 
   const isOrgAdmin = role === "owner" || role === "admin";
+  const dateLocale = i18n.language?.startsWith("en") ? "en-US" : "es-MX";
+
+  const inviteRoles = useMemo(
+    () =>
+      INVITE_ROLE_KEYS.map((item) => ({
+        ...item,
+        label: t(`settings.roles.${item.value}`),
+        hint: t(item.hintKey),
+      })),
+    [t],
+  );
 
   const load = useCallback(async () => {
     if (!veterinarian?.id) return;
@@ -124,7 +110,7 @@ export function SettingsPage() {
     try {
       const data = await updateOrganization(veterinarian.id, form);
       setOrg(data.organization || null);
-      notifySuccess("Consultorio actualizado.");
+      notifySuccess(t("settings.orgUpdated"));
     } catch (err) {
       notifyError(err.message);
     } finally {
@@ -142,15 +128,15 @@ export function SettingsPage() {
         inviteEmail.trim().toLowerCase(),
         inviteRole,
       );
-      notifySuccess(data.message || "Invitación enviada.");
+      notifySuccess(data.message || t("settings.memberAdded"));
       if (data.mode === "invited" && data.invite_url) {
         setLastInviteUrl(data.invite_url);
         setLastInviteEmail(inviteEmail.trim().toLowerCase());
         try {
           await navigator.clipboard.writeText(data.invite_url);
-          notifySuccess("Enlace de invitación copiado al portapapeles.");
+          notifySuccess(t("settings.inviteLinkCopied"));
         } catch {
-          /* el enlace queda visible abajo */
+          /* clipboard opcional: el enlace queda visible abajo */
         }
       } else {
         setLastInviteUrl("");
@@ -169,23 +155,23 @@ export function SettingsPage() {
     if (!lastInviteUrl) return;
     try {
       await navigator.clipboard.writeText(lastInviteUrl);
-      notifySuccess("Enlace de invitación copiado al portapapeles.");
+      notifySuccess(t("settings.inviteLinkCopied"));
     } catch {
-      notifyError("No se pudo copiar. Selecciona el enlace y cópialo manualmente.");
+      notifyError(t("settings.inviteLinkCopyFailed"));
     }
   };
 
   const handleRevokeInvite = async (invite) => {
     const ok = await confirm({
-      title: "Cancelar invitación",
-      description: `¿Cancelar la invitación a ${invite.email}?`,
-      confirmLabel: "Cancelar",
+      title: t("settings.revokeInviteTitle"),
+      description: t("settings.revokeInviteDesc", { email: invite.email }),
+      confirmLabel: t("settings.revokeInviteConfirm"),
       destructive: true,
     });
     if (!ok) return;
     try {
       await revokeOrganizationInvite(veterinarian.id, invite.id);
-      notifySuccess("Invitación cancelada.");
+      notifySuccess(t("settings.inviteRevoked"));
       load();
     } catch (err) {
       notifyError(err.message);
@@ -194,17 +180,17 @@ export function SettingsPage() {
 
   const handleRemoveMember = async (member) => {
     if (member.role === "owner") return;
-    const label = member.nombre || member.email || "este miembro";
+    const label = member.nombre || member.email || t("settings.thisMember");
     const ok = await confirm({
-      title: "Quitar miembro",
-      description: `¿Quitar a ${label} del consultorio? Perderá acceso a la organización.`,
-      confirmLabel: "Quitar",
+      title: t("settings.removeMemberTitle"),
+      description: t("settings.removeMemberDesc", { name: label }),
+      confirmLabel: t("settings.removeConfirm"),
       destructive: true,
     });
     if (!ok) return;
     try {
       const data = await removeOrganizationMember(veterinarian.id, member.id);
-      notifySuccess(data.message || "Miembro eliminado.");
+      notifySuccess(data.message || t("settings.memberRemoved"));
       load();
     } catch (err) {
       notifyError(err.message);
@@ -218,7 +204,7 @@ export function SettingsPage() {
   const copyPortal = () => {
     if (!portalUrl) return;
     navigator.clipboard.writeText(portalUrl);
-    notifySuccess("Enlace del portal copiado.");
+    notifySuccess(t("settings.portalCopied"));
   };
 
   const extraMembers = members.filter((m) => m.role !== "owner");
@@ -228,16 +214,35 @@ export function SettingsPage() {
       <div className="clinic-page clinic-page-guiaa">
         <div className="clinic-page-header">
           <div>
-            <p className="clinic-page-eyebrow">Cuenta</p>
-            <h1>Configuración</h1>
-            <p>Seguridad de tu cuenta GUIAA.</p>
+            <p className="clinic-page-eyebrow">{t("settings.accountEyebrow")}</p>
+            <div className="clinic-page-title-row">
+              <h1>{t("settings.title")}</h1>
+              <ModuleHelpTip topicId="settings" setView={setView} />
+            </div>
+            <p>{t("settings.accountLead")}</p>
           </div>
         </div>
         <AccountPasswordSection />
+        <section className="clinic-settings-help-card" aria-label={tHelp("settingsCardTitle")}>
+          <div>
+            <h2>{tHelp("settingsCardTitle")}</h2>
+            <p>{tHelp("settingsCardLead")}</p>
+          </div>
+          <div className="clinic-settings-help-actions">
+            <Button type="button" variant="secondary" onClick={() => setView?.("help")}>
+              <BookOpen size={16} aria-hidden />
+              {tHelp("settingsOpenHelp")}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => requestPlatformOnboarding()}>
+              <PlayCircle size={16} aria-hidden />
+              {tHelp("openTour")}
+            </Button>
+          </div>
+        </section>
         <ClinicEmptyState
           icon={ShieldAlert}
-          title="Configuración del consultorio"
-          description="Solo el propietario o un administrador pueden agregar veterinarios. Pídeles que te den de alta en Configuración → Equipo."
+          title={t("settings.lockedTitle")}
+          description={t("settings.lockedDesc")}
         />
         <ConfirmActionDialog {...dialogProps} />
       </div>
@@ -248,11 +253,31 @@ export function SettingsPage() {
     <div className="clinic-page clinic-page-guiaa">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">Consultorio</p>
-          <h1>Configuración del consultorio</h1>
-          <p>Datos de la clínica, cómo invitar al equipo y el portal de citas.</p>
+          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
+          <div className="clinic-page-title-row">
+            <h1>{t("settings.titleAdmin")}</h1>
+            <ModuleHelpTip topicId="settings" setView={setView} />
+          </div>
+          <p>{t("settings.leadAdmin")}</p>
         </div>
       </div>
+
+      <section className="clinic-settings-help-card" aria-label={tHelp("settingsCardTitle")}>
+        <div>
+          <h2>{tHelp("settingsCardTitle")}</h2>
+          <p>{tHelp("settingsCardLead")}</p>
+        </div>
+        <div className="clinic-settings-help-actions">
+          <Button type="button" variant="secondary" onClick={() => setView?.("help")}>
+            <BookOpen size={16} aria-hidden />
+            {tHelp("settingsOpenHelp")}
+          </Button>
+          <Button type="button" variant="outline" onClick={() => requestPlatformOnboarding()}>
+            <PlayCircle size={16} aria-hidden />
+            {tHelp("openTour")}
+          </Button>
+        </div>
+      </section>
 
       <AccountPasswordSection />
 
@@ -263,11 +288,11 @@ export function SettingsPage() {
           <form onSubmit={handleSave} className="clinic-settings-card clinic-form">
             <h2>
               <Settings size={18} aria-hidden />
-              Datos generales
+              {t("settings.general")}
             </h2>
             <div className="clinic-form-grid-2">
               <div className="form-group">
-                <Label htmlFor="org-name">Nombre del consultorio</Label>
+                <Label htmlFor="org-name">{t("settings.orgName")}</Label>
                 <Input
                   id="org-name"
                   value={form.name}
@@ -276,7 +301,7 @@ export function SettingsPage() {
                 />
               </div>
               <div className="form-group">
-                <Label htmlFor="org-timezone">Zona horaria</Label>
+                <Label htmlFor="org-timezone">{t("settings.timezone")}</Label>
                 <Input
                   id="org-timezone"
                   value={form.timezone}
@@ -286,20 +311,18 @@ export function SettingsPage() {
             </div>
             <Button type="submit" disabled={saving}>
               <Save size={16} aria-hidden />
-              {saving ? "Guardando..." : "Guardar cambios"}
+              {saving ? t("common.saving") : t("settings.saveChanges")}
             </Button>
           </form>
 
           <section className="clinic-settings-card">
-            <h2>Portal de solicitud de citas</h2>
-            <p className="clinic-team-note">
-              Comparte este enlace con los dueños para que soliciten cita sin iniciar sesión.
-            </p>
+            <h2>{t("settings.portalTitle")}</h2>
+            <p className="clinic-team-note">{t("settings.portalDesc")}</p>
             <div className="clinic-settings-portal">
               <Input readOnly value={portalUrl} />
               <Button type="button" variant="secondary" onClick={copyPortal}>
                 <Copy size={16} aria-hidden />
-                Copiar
+                {t("settings.copy")}
               </Button>
             </div>
           </section>
@@ -307,42 +330,35 @@ export function SettingsPage() {
           <section className="clinic-settings-card">
             <h2>
               <Users size={18} aria-hidden />
-              Equipo
+              {t("settings.team")}
             </h2>
             <div className="clinic-team-guide">
-              <p className="clinic-team-lead">
-                Así agregas a tu equipo en GUIAA. No hace falta que se den de alta solos primero:
-                tú los invitas y ellos terminan el registro con el enlace.
-              </p>
-              <ol className="clinic-team-steps" aria-label="Pasos para invitar al equipo">
+              <p className="clinic-team-lead">{t("settings.teamDesc")}</p>
+              <ol className="clinic-team-steps" aria-label={t("settings.teamHowToAria")}>
                 {TEAM_STEPS.map((step, index) => (
-                  <li key={step.title} className="clinic-team-step">
+                  <li key={step.titleKey} className="clinic-team-step">
                     <span className="clinic-team-step-num" aria-hidden>
                       {index + 1}
                     </span>
                     <div>
-                      <p className="clinic-team-step-title">{step.title}</p>
-                      <p className="clinic-team-step-body">{step.body}</p>
+                      <p className="clinic-team-step-title">{t(step.titleKey)}</p>
+                      <p className="clinic-team-step-body">{t(step.bodyKey)}</p>
                     </div>
                   </li>
                 ))}
               </ol>
-              <p className="clinic-team-callout">
-                Importante: una cuenta solo puede estar en un consultorio. Si tu colega ya abrió
-                GUIAA solo, lo pasamos a tu clínica (con dueños y pacientes si tenía). Si ya
-                pertenece a otro equipo con más gente, primero debe salir de esa organización.
-              </p>
+              <p className="clinic-team-callout">{t("settings.teamOneOrg")}</p>
             </div>
 
             <div className="clinic-team-add">
-              <h3>Invitar colega</h3>
+              <h3>{t("settings.teamAddHeading")}</h3>
               <form onSubmit={handleInvite} className="clinic-invite-form">
                 <div className="form-group">
-                  <Label htmlFor="invite-email">Email del colega</Label>
+                  <Label htmlFor="invite-email">{t("settings.inviteEmail")}</Label>
                   <Input
                     id="invite-email"
                     type="email"
-                    placeholder="colega@ejemplo.com"
+                    placeholder={t("settings.invitePlaceholder")}
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     required
@@ -350,13 +366,13 @@ export function SettingsPage() {
                   />
                 </div>
                 <div className="form-group">
-                  <Label htmlFor="invite-role">Rol en el consultorio</Label>
+                  <Label htmlFor="invite-role">{t("settings.inviteRole")}</Label>
                   <Select value={inviteRole} onValueChange={setInviteRole}>
                     <SelectTrigger id="invite-role">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {INVITE_ROLES.map((item) => (
+                      {inviteRoles.map((item) => (
                         <SelectItem key={item.value} value={item.value}>
                           {item.label}
                         </SelectItem>
@@ -364,28 +380,27 @@ export function SettingsPage() {
                     </SelectContent>
                   </Select>
                   <p className="clinic-team-role-hint">
-                    {INVITE_ROLES.find((item) => item.value === inviteRole)?.hint}
+                    {inviteRoles.find((item) => item.value === inviteRole)?.hint}
                   </p>
                 </div>
                 <Button type="submit" disabled={inviting || !inviteEmail.trim()}>
                   <UserPlus size={16} aria-hidden />
-                  {inviting ? "Enviando..." : "Enviar invitación"}
+                  {inviting ? t("settings.inviting") : t("settings.sendInvite")}
                 </Button>
               </form>
             </div>
 
             {lastInviteUrl ? (
               <div className="clinic-team-callout" style={{ marginTop: "1rem" }}>
-                <p className="clinic-team-step-title">Enlace de la última invitación</p>
+                <p className="clinic-team-step-title">{t("settings.lastInviteTitle")}</p>
                 <p className="clinic-team-step-body">
-                  Compártelo con {lastInviteEmail || "tu colega"} si el correo no llega (revisa
-                  spam). Solo se muestra esta vez.
+                  {t("settings.lastInviteBody", { email: lastInviteEmail || t("common.emDash") })}
                 </p>
                 <div className="clinic-settings-portal" style={{ marginTop: "0.75rem" }}>
                   <Input readOnly value={lastInviteUrl} />
                   <Button type="button" variant="secondary" onClick={copyLastInvite}>
                     <Copy size={16} aria-hidden />
-                    Copiar
+                    {t("settings.copy")}
                   </Button>
                 </div>
               </div>
@@ -393,26 +408,26 @@ export function SettingsPage() {
 
             {pendingInvites.length > 0 ? (
               <div className="clinic-team-pending">
-                <h3>Invitaciones pendientes</h3>
+                <h3>{t("settings.pendingInvites")}</h3>
                 <div className="clinic-table-wrap">
                   <table className="clinic-table">
                     <thead>
                       <tr>
-                        <th>Email</th>
-                        <th>Rol</th>
-                        <th>Vence</th>
-                        <th aria-label="Acciones" />
+                        <th>{t("settings.memberEmail")}</th>
+                        <th>{t("settings.memberRole")}</th>
+                        <th>{t("settings.inviteExpires")}</th>
+                        <th aria-label={t("common.actionsAria")} />
                       </tr>
                     </thead>
                     <tbody>
                       {pendingInvites.map((invite) => (
                         <tr key={invite.id}>
                           <td>{invite.email}</td>
-                          <td>{ROLE_LABELS[invite.role] || invite.role}</td>
+                          <td>{t(`settings.roles.${invite.role}`, { defaultValue: invite.role })}</td>
                           <td>
                             {invite.expires_at
-                              ? new Date(invite.expires_at).toLocaleDateString("es-MX")
-                              : "—"}
+                              ? new Date(invite.expires_at).toLocaleDateString(dateLocale)
+                              : t("common.emDash")}
                           </td>
                           <td>
                             <Button
@@ -420,7 +435,7 @@ export function SettingsPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleRevokeInvite(invite)}
-                              aria-label="Cancelar invitación"
+                              aria-label={t("settings.revokeInviteAria")}
                             >
                               <Trash2 size={16} aria-hidden />
                             </Button>
@@ -436,37 +451,35 @@ export function SettingsPage() {
             {members.length === 0 ? (
               <ClinicEmptyState
                 icon={Users}
-                title="Aún no hay colegas en el equipo"
-                description="Invita por email. Recepción y admin pueden darse de alta sin cédula."
+                title={t("settings.noMembers")}
+                description={t("settings.noMembersDesc")}
               />
             ) : (
               <>
                 {extraMembers.length === 0 && (
-                  <p className="clinic-team-note">
-                    Tú eres el propietario. Invita a tus colegas con el formulario de arriba.
-                  </p>
+                  <p className="clinic-team-note">{t("settings.teamOwnerNote")}</p>
                 )}
                 <div className="clinic-table-wrap">
                   <table className="clinic-table">
                     <thead>
                       <tr>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Rol</th>
-                        <th>Alta</th>
-                        <th aria-label="Acciones" />
+                        <th>{t("settings.memberName")}</th>
+                        <th>{t("settings.memberEmail")}</th>
+                        <th>{t("settings.memberRole")}</th>
+                        <th>{t("settings.memberSince")}</th>
+                        <th aria-label={t("common.actionsAria")} />
                       </tr>
                     </thead>
                     <tbody>
                       {members.map((member) => (
                         <tr key={member.id}>
-                          <td>{member.nombre || "—"}</td>
-                          <td>{member.email || "—"}</td>
-                          <td>{ROLE_LABELS[member.role] || member.role}</td>
+                          <td>{member.nombre || t("common.emDash")}</td>
+                          <td>{member.email || t("common.emDash")}</td>
+                          <td>{t(`settings.roles.${member.role}`, { defaultValue: member.role })}</td>
                           <td>
                             {member.created_at
-                              ? new Date(member.created_at).toLocaleDateString("es-MX")
-                              : "—"}
+                              ? new Date(member.created_at).toLocaleDateString(dateLocale)
+                              : t("common.emDash")}
                           </td>
                           <td>
                             {member.role !== "owner" && member.profile_id !== veterinarian?.id && (
@@ -475,7 +488,7 @@ export function SettingsPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleRemoveMember(member)}
-                                aria-label="Quitar miembro"
+                                aria-label={t("settings.removeMemberAria")}
                               >
                                 <Trash2 size={16} aria-hidden />
                               </Button>

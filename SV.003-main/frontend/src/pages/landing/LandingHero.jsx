@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown, Play } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { LandingVideoModal } from "./LandingVideoModal";
 import { LandingVetAnimations } from "./LandingVetAnimations";
 import { LandingHeroVideo } from "./LandingHeroVideo";
@@ -138,6 +139,7 @@ function Hero3DPanel({ children }) {
 }
 
 function HeroVideoControls() {
+  const { t } = useTranslation("landing");
   const [videoOpen, setVideoOpen] = useState(false);
 
   return (
@@ -148,10 +150,10 @@ function HeroVideoControls() {
         onClick={() => {
           requestAnimationFrame(() => setVideoOpen(true));
         }}
-        aria-label="Ver video de presentación"
+        aria-label={t("hero.playVideo")}
       >
         <Play size={18} fill="currentColor" aria-hidden />
-        <span className="sr-only">Ver video de presentación</span>
+        <span className="sr-only">{t("hero.playVideo")}</span>
       </button>
       <LandingVideoModal open={videoOpen} onClose={() => setVideoOpen(false)} />
     </>
@@ -159,6 +161,7 @@ function HeroVideoControls() {
 }
 
 export function LandingHero({ setView }) {
+  const { t } = useTranslation("landing");
   return (
     <section className="landing-petpal-hero" aria-labelledby="landing-hero-title">
       <LandingVetAnimations variant="hero" />
@@ -167,16 +170,16 @@ export function LandingHero({ setView }) {
       <div className="landing-container">
         <div className="landing-petpal-grid">
           <div className="landing-petpal-copy">
-            <p className="landing-petpal-kicker">Software clínico veterinario · GUIAA</p>
+            <p className="landing-petpal-kicker">{t("hero.kicker")}</p>
             <h1 id="landing-hero-title" className="landing-petpal-title">
-              Conecta con{" "}
-              <span className="landing-petpal-accent">tu consulta</span>, en cualquier momento
+              {t("hero.titleBefore")}{" "}
+              <span className="landing-petpal-accent">{t("hero.titleAccent")}</span>
+              {t("hero.titleAfter")}
             </h1>
             <p className="landing-petpal-lead">
-              Comunicación fluida entre tu práctica y cada caso clínico. Gestión de salud
-              simplificada para{" "}
-              <span className="landing-petpal-accent">cada paciente</span> con anamnesis
-              multiespecie y soporte CDS avanzado.
+              {t("hero.leadBefore")}{" "}
+              <span className="landing-petpal-accent">{t("hero.leadAccent")}</span>
+              {t("hero.leadAfter")}
             </p>
 
             <div className="landing-petpal-cta-row">
@@ -185,21 +188,19 @@ export function LandingHero({ setView }) {
                 onClick={() => setView("register")}
                 className="landing-petpal-cta-primary"
               >
-                Comenzar registro MVZ
+                {t("hero.ctaRegister")}
               </button>
               <HeroVideoControls />
             </div>
 
-            <p className="landing-petpal-cta-hint">
-              Registro MVZ en minutos · Verificación de cédula incluida
-            </p>
+            <p className="landing-petpal-cta-hint">{t("hero.ctaHint")}</p>
 
             <button
               type="button"
               onClick={() => scrollToLandingProduct("species")}
               className="landing-petpal-demo-link"
             >
-              Explorar interfaz sin registro →
+              {t("hero.explore")}
             </button>
 
             <div className="landing-petpal-scroll-hint" aria-hidden>

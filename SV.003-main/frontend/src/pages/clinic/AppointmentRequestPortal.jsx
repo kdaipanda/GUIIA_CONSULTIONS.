@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { fetchPublicOrganization, submitAppointmentRequest } from "../../lib/clinicApi";
 import { notifyError, notifySuccess } from "../../lib/appToast";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { Textarea } from "../../components/ui/textarea";
 import { GuiaaLogoImg } from "../../components/GuiaaBrandLockup";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 
 const SPECIES = ["perros", "gatos", "conejos", "aves", "otros"];
 
 export function AppointmentRequestPortal({ organizationId }) {
+  const { t } = useTranslation("clinic");
   const [orgName, setOrgName] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -26,15 +30,23 @@ export function AppointmentRequestPortal({ organizationId }) {
 
   useEffect(() => {
     if (invalidLink) {
-      notifyError("Enlace inválido");
+      notifyError(t("portal.invalidLink"));
       setLoading(false);
       return;
     }
     fetchPublicOrganization(organizationId)
-      .then((data) => setOrgName(data.organization?.name || "Consultorio"))
+      .then((data) => setOrgName(data.organization?.name || t("portal.defaultOrg")))
       .catch((err) => notifyError(err.message))
       .finally(() => setLoading(false));
-  }, [organizationId, invalidLink]);
+  }, [organizationId, invalidLink, t]);
+
+  const speciesOptions = useMemo(
+    () => SPECIES.map((value) => ({
+      value,
+      label: t(`portal.speciesOptions.${value}`),
+    })),
+    [t],
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,7 +60,7 @@ export function AppointmentRequestPortal({ organizationId }) {
           ? new Date(form.preferred_starts_at).toISOString()
           : null,
       });
-      notifySuccess(data.message || "Solicitud enviada correctamente.");
+      notifySuccess(data.message || t("portal.success"));
       setForm({
         client_name: "",
         phone: "",
@@ -67,19 +79,22 @@ export function AppointmentRequestPortal({ organizationId }) {
 
   return (
     <div className="portal-page">
+      <div className="portal-lang">
+        <LanguageSwitcher />
+      </div>
       <div className="portal-card">
         <div className="portal-brand">
           <GuiaaLogoImg className="portal-logo-full logo-image logo-image-full" tone="on-light" />
           <div>
-            <h1>Solicitar cita</h1>
-            <p>{loading ? "Cargando..." : orgName}</p>
+            <h1>{t("portal.title")}</h1>
+            <p>{loading ? t("portal.loading") : orgName}</p>
           </div>
         </div>
 
         {!loading && !invalidLink && (
           <form onSubmit={handleSubmit} className="clinic-form portal-form">
             <div className="form-group">
-              <Label>Tu nombre *</Label>
+              <Label>{t("portal.clientName")}</Label>
               <Input
                 value={form.client_name}
                 onChange={(e) => setForm({ ...form, client_name: e.target.value })}
@@ -87,14 +102,14 @@ export function AppointmentRequestPortal({ organizationId }) {
               />
             </div>
             <div className="form-group">
-              <Label>Teléfono</Label>
+              <Label>{t("portal.phone")}</Label>
               <Input
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
               />
             </div>
             <div className="form-group">
-              <Label>Email</Label>
+              <Label>{t("portal.email")}</Label>
               <Input
                 type="email"
                 value={form.email}
@@ -102,7 +117,7 @@ export function AppointmentRequestPortal({ organizationId }) {
               />
             </div>
             <div className="form-group">
-              <Label>Nombre de la mascota *</Label>
+              <Label>{t("portal.petName")}</Label>
               <Input
                 value={form.patient_name}
                 onChange={(e) => setForm({ ...form, patient_name: e.target.value })}
@@ -110,19 +125,21 @@ export function AppointmentRequestPortal({ organizationId }) {
               />
             </div>
             <div className="form-group">
-              <Label>Especie</Label>
+              <Label>{t("portal.species")}</Label>
               <select
                 className="portal-select"
                 value={form.species}
                 onChange={(e) => setForm({ ...form, species: e.target.value })}
               >
-                {SPECIES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                {speciesOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
                 ))}
               </select>
             </div>
             <div className="form-group">
-              <Label>Fecha y hora preferida</Label>
+              <Label>{t("portal.preferredDate")}</Label>
               <Input
                 type="datetime-local"
                 value={form.preferred_starts_at}
@@ -130,7 +147,7 @@ export function AppointmentRequestPortal({ organizationId }) {
               />
             </div>
             <div className="form-group">
-              <Label>Motivo de la consulta</Label>
+              <Label>{t("portal.reason")}</Label>
               <Textarea
                 value={form.reason}
                 onChange={(e) => setForm({ ...form, reason: e.target.value })}
@@ -138,7 +155,7 @@ export function AppointmentRequestPortal({ organizationId }) {
               />
             </div>
             <Button type="submit" disabled={submitting} className="w-full">
-              {submitting ? "Enviando..." : "Enviar solicitud"}
+              {submitting ? t("portal.submitting") : t("portal.submit")}
             </Button>
           </form>
         )}

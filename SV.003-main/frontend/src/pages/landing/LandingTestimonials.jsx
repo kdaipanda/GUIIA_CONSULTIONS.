@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const COLLEAGUE_TESTIMONIALS = [
   {
@@ -6,11 +7,6 @@ const COLLEAGUE_TESTIMONIALS = [
     name: "Dra. Ana M.",
     petName: "Max",
     petImage: "/landing/pets/dog-golden.png",
-    petAlt: "Perro golden retriever atendido en consulta",
-    tags: ["CDS L4·L5", "Expediente"],
-    quote:
-      "La estructura CDS me ayuda a no omitir pasos en casos complejos. Mis consultas son más claras.",
-    role: "Pequeñas especies · CDMX",
     tone: "coral",
   },
   {
@@ -18,10 +14,6 @@ const COLLEAGUE_TESTIMONIALS = [
     name: "Dr. Carlos R.",
     petName: "Luna",
     petImage: "/landing/pets/cat-tabby.png",
-    petAlt: "Gata atendida en consulta veterinaria",
-    tags: ["Inventario", "Ventas"],
-    quote: "Expediente, inventario y ventas conectados ahorran tiempo entre pacientes.",
-    role: "Consulta mixta · GDL",
     tone: "rose",
   },
   {
@@ -29,10 +21,6 @@ const COLLEAGUE_TESTIMONIALS = [
     name: "MVZ Laura S.",
     petName: "Rocky",
     petImage: "/landing/pets/puppy.png",
-    petAlt: "Cachorro en consulta multiespecie",
-    tags: ["Multiespecie", "Producción"],
-    quote: "Uso GUIAA en perros, gatos y consultas de producción con el mismo rigor.",
-    role: "Medicina de producción · MTY",
     tone: "sky",
   },
   {
@@ -40,11 +28,6 @@ const COLLEAGUE_TESTIMONIALS = [
     name: "Dra. Patricia V.",
     petName: "Nala",
     petImage: "/landing/pets/corgi.png",
-    petAlt: "Corgi atendido en clínica veterinaria",
-    tags: ["Anamnesis", "CDS avanzado"],
-    quote:
-      "GUIAA refleja cómo trabajo en consulta: datos del paciente, razonamiento clínico y trazabilidad sin saltar entre herramientas.",
-    role: "Clínica felina · Querétaro",
     tone: "amber",
   },
   {
@@ -52,11 +35,6 @@ const COLLEAGUE_TESTIMONIALS = [
     name: "Dr. Miguel T.",
     petName: "Simba",
     petImage: "/landing/pets/cat-ginger.png",
-    petAlt: "Gato naranja en hospital veterinario",
-    tags: ["Laboratorio PDF", "Premium"],
-    quote:
-      "Interpretar laboratorios con el PDF integrado cambió mi flujo. Los tutores reciben explicaciones más claras.",
-    role: "Hospital veterinario · Puebla",
     tone: "violet",
   },
   {
@@ -64,15 +42,13 @@ const COLLEAGUE_TESTIMONIALS = [
     name: "Dra. Sofía L.",
     petName: "Mía",
     petImage: "/landing/pets/cat-black.png",
-    petAlt: "Gata en servicio de emergencias veterinarias",
-    tags: ["Registro MVZ", "LATAM"],
-    quote: "El acceso verificado con cédula profesional da confianza a todo el equipo clínico.",
-    role: "Emergencias · Lima",
     tone: "slate",
   },
 ];
 
 export function LandingTestimonials() {
+  const { t } = useTranslation("landing");
+
   return (
     <section
       className="landing-colleagues-section landing-section"
@@ -80,21 +56,26 @@ export function LandingTestimonials() {
     >
       <div className="landing-container">
         <div className="landing-colleagues-head">
-          <p className="landing-eyebrow">Comunidad MVZ</p>
+          <p className="landing-eyebrow">{t("testimonials.eyebrow")}</p>
           <h2
             id="landing-colleagues-heading"
             className="landing-section-title mt-3 text-3xl sm:text-4xl"
           >
-            Lo que dicen los colegas
+            {t("testimonials.title")}
           </h2>
-          <p className="landing-lead mt-4 max-w-xl">
-            Colegas MVZ comparten cómo documentan consultas y recuperan tiempo clínico con GUIAA.
-          </p>
+          <p className="landing-lead mt-4 max-w-xl">{t("testimonials.lead")}</p>
         </div>
 
-        <div className="landing-colleagues-bento" role="list" aria-label="Testimonios de colegas MVZ">
-          {COLLEAGUE_TESTIMONIALS.map(
-            ({ id, name, petName, petImage, petAlt, tags, quote, role, tone }) => (
+        <div
+          className="landing-colleagues-bento"
+          role="list"
+          aria-label={t("testimonials.listAria")}
+        >
+          {COLLEAGUE_TESTIMONIALS.map(({ id, name, petName, petImage, tone }) => {
+            const tags = t(`testimonials.items.${id}.tags`, {
+              returnObjects: true,
+            });
+            return (
               <figure
                 key={id}
                 role="listitem"
@@ -102,23 +83,31 @@ export function LandingTestimonials() {
               >
                 <div className="landing-colleague-card-top">
                   <figcaption className="landing-colleague-name">{petName}</figcaption>
-                  <ul className="landing-colleague-tags" aria-label={`Caso de ${petName}`}>
-                    {tags.map((tag) => (
+                  <ul
+                    className="landing-colleague-tags"
+                    aria-label={t("testimonials.caseOf", { name: petName })}
+                  >
+                    {(Array.isArray(tags) ? tags : []).map((tag) => (
                       <li key={tag}>{tag}</li>
                     ))}
                   </ul>
                 </div>
 
-                <blockquote className="landing-colleague-quote">&ldquo;{quote}&rdquo;</blockquote>
+                <blockquote className="landing-colleague-quote">
+                  &ldquo;{t(`testimonials.items.${id}.quote`)}&rdquo;
+                </blockquote>
                 <p className="landing-colleague-role">
-                  {name} · {role}
+                  {name} · {t(`testimonials.items.${id}.role`)}
                 </p>
 
                 <picture>
-                  <source srcSet={petImage.replace(/\.png$/, ".webp")} type="image/webp" />
+                  <source
+                    srcSet={petImage.replace(/\.png$/, ".webp")}
+                    type="image/webp"
+                  />
                   <img
                     src={petImage}
-                    alt={petAlt}
+                    alt={t(`testimonials.items.${id}.petAlt`)}
                     className="landing-colleague-pet"
                     loading="lazy"
                     decoding="async"
@@ -129,14 +118,15 @@ export function LandingTestimonials() {
 
                 <span className="landing-colleague-curve" aria-hidden />
               </figure>
-            ),
-          )}
+            );
+          })}
         </div>
 
         <p className="landing-colleagues-disclaimer landing-colleagues-scroll-hint">
-          <span className="landing-colleagues-scroll-hint-mobile">Desliza para ver más testimonios · </span>
-          Casos ilustrativos con fines demostrativos. Los testimonios representan flujos típicos
-          de consulta MVZ en GUIAA.
+          <span className="landing-colleagues-scroll-hint-mobile">
+            {t("testimonials.disclaimerMobile")}
+          </span>
+          {t("testimonials.disclaimer")}
         </p>
       </div>
     </section>

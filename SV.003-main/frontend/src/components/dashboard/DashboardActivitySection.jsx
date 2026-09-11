@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import * as Tabs from "@radix-ui/react-tabs";
 import {
   Brain,
   CalendarDays,
   ClipboardList,
   Crown,
-  FlaskConical,
   Plus,
   Stethoscope,
   User,
@@ -21,17 +21,9 @@ import {
 } from "../../lib/consultationDisplay";
 import "./dashboardActivity.css";
 
-const SHORTCUTS = [
-  { key: "N", label: "Nueva consulta", icon: Plus, view: "new-consultation" },
-  { key: "E", label: "Manejo Experto", icon: Brain, view: "expert", premium: true },
-  { key: "H", label: "Historial clínico", icon: ClipboardList, view: "consultation-history" },
-  { key: "M", label: "Membresía", icon: Crown, view: "membership" },
-  { key: "P", label: "Perfil MVZ", icon: User, view: "profile" },
-];
-
-function ActivityCard({ consultation, embedded, onOpen }) {
+function ActivityCard({ consultation, embedded, onOpen, continueLabel, viewLabel }) {
   const status = consultation.status;
-  const actionLabel = status === "draft" ? "Continuar" : "Ver";
+  const actionLabel = status === "draft" ? continueLabel : viewLabel;
 
   return (
     <article
@@ -113,6 +105,19 @@ export function DashboardActivitySection({
   openConsultation,
   onExpertConsultation,
 }) {
+  const { t } = useTranslation("clinic");
+
+  const shortcuts = useMemo(
+    () => [
+      { key: "N", label: t("dashActivity.shortcuts.new"), icon: Plus, view: "new-consultation" },
+      { key: "E", label: t("dashActivity.shortcuts.expert"), icon: Brain, view: "expert", premium: true },
+      { key: "H", label: t("dashActivity.shortcuts.history"), icon: ClipboardList, view: "consultation-history" },
+      { key: "M", label: t("dashActivity.shortcuts.membership"), icon: Crown, view: "membership" },
+      { key: "P", label: t("dashActivity.shortcuts.profile"), icon: User, view: "profile" },
+    ],
+    [t],
+  );
+
   const handleShortcut = (item) => {
     if (item.premium && !isPremium) {
       setView("membership");
@@ -128,26 +133,26 @@ export function DashboardActivitySection({
   return (
     <section className={`dashboard-block dashboard-block-activity${embedded ? " clinic-settings-card" : ""}`}>
       <div className="dashboard-block-head">
-        <h2>Actividad clínica</h2>
-        <p>Consultas recientes, casos en curso y accesos rápidos del flujo CDS.</p>
+        <h2>{t("dashActivity.title")}</h2>
+        <p>{t("dashActivity.lead")}</p>
       </div>
 
       <Tabs.Root className="tabs-root" defaultValue="activity">
-        <Tabs.List className="tabs-list dashboard-activity-tabs" aria-label="Secciones del dashboard">
+        <Tabs.List className="tabs-list dashboard-activity-tabs" aria-label={t("dashActivity.tabsAria")}>
           <Tabs.Trigger className="tabs-trigger" value="activity">
-            Recientes
+            {t("dashActivity.tabRecent")}
             {recentConsultations.length > 0 && (
               <span className="dashboard-activity-tab-count">{recentConsultations.length}</span>
             )}
           </Tabs.Trigger>
           <Tabs.Trigger className="tabs-trigger" value="followup">
-            Seguimiento
+            {t("dashActivity.tabFollowup")}
             {followUpCases.length > 0 && (
               <span className="dashboard-activity-tab-count">{followUpCases.length}</span>
             )}
           </Tabs.Trigger>
           <Tabs.Trigger className="tabs-trigger" value="shortcuts">
-            Atajos
+            {t("dashActivity.tabShortcuts")}
           </Tabs.Trigger>
         </Tabs.List>
 
@@ -156,7 +161,7 @@ export function DashboardActivitySection({
             <div className="dashboard-activity-panel-head">
               <h3>
                 <ClipboardList size={18} aria-hidden />
-                Últimas consultas CDS
+                {t("dashActivity.recentTitle")}
               </h3>
               {recentConsultations.length > 0 && (
                 <Button
@@ -165,7 +170,7 @@ export function DashboardActivitySection({
                   className="dashboard-activity-view-all"
                   onClick={() => setView("consultation-history")}
                 >
-                  Ver historial
+                  {t("dashActivity.viewHistory")}
                 </Button>
               )}
             </div>
@@ -188,6 +193,8 @@ export function DashboardActivitySection({
                     consultation={consultation}
                     embedded={embedded}
                     onOpen={openConsultation}
+                    continueLabel={t("dashActivity.continue")}
+                    viewLabel={t("dashActivity.view")}
                   />
                 ))}
               </div>
@@ -196,15 +203,15 @@ export function DashboardActivitySection({
                 <div className="dashboard-activity-empty-icon">
                   <Stethoscope size={40} aria-hidden />
                 </div>
-                <h3>Sin consultas aún</h3>
-                <p>Inicia tu primera consulta CDS con anamnesis estructurada multiespecie.</p>
+                <h3>{t("dashActivity.emptyTitle")}</h3>
+                <p>{t("dashActivity.emptyBody")}</p>
                 <Button
                   type="button"
                   variant="guiaaPrimary"
                   size="consult"
                   onClick={() => setView("new-consultation")}
                 >
-                  Nueva consulta
+                  {t("dashActivity.newConsultation")}
                 </Button>
               </div>
             )}
@@ -215,9 +222,9 @@ export function DashboardActivitySection({
           <div className="dashboard-activity-panel">
             <div className="dashboard-activity-panel-head dashboard-activity-panel-head--stacked">
               <div>
-                <h3>Casos en seguimiento</h3>
+                <h3>{t("dashActivity.followupTitle")}</h3>
                 <p className="dashboard-activity-panel-note">
-                  Consultas en progreso que requieren continuidad clínica.
+                  {t("dashActivity.followupNote")}
                 </p>
               </div>
             </div>
@@ -236,7 +243,7 @@ export function DashboardActivitySection({
                 <div className="dashboard-activity-empty-icon" aria-hidden>
                   <ClipboardList size={28} />
                 </div>
-                <p>No hay casos abiertos. Las consultas en progreso aparecerán aquí.</p>
+                <p>{t("dashActivity.followupEmpty")}</p>
               </div>
             )}
           </div>
@@ -244,7 +251,7 @@ export function DashboardActivitySection({
 
         <Tabs.Content className="tabs-content" value="shortcuts">
           <div className="dashboard-shortcuts-grid">
-            {SHORTCUTS.map((item) => {
+            {shortcuts.map((item) => {
               const Icon = item.icon;
               const locked = item.premium && !isPremium;
               return (
@@ -259,7 +266,7 @@ export function DashboardActivitySection({
                   </span>
                   <span className="dashboard-shortcut-label">{item.label}</span>
                   <kbd>{item.key}</kbd>
-                  {locked && <span className="dashboard-shortcut-lock">Premium</span>}
+                  {locked && <span className="dashboard-shortcut-lock">{t("dashActivity.premium")}</span>}
                 </button>
               );
             })}
