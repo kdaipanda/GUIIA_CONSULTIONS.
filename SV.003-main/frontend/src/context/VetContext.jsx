@@ -1,6 +1,7 @@
 import React, {
   createContext,
   useContext,
+  useCallback,
   useEffect,
   useState,
   useRef,
@@ -132,8 +133,8 @@ export const VetProvider = ({ children }) => {
     };
   }, []);
 
-  const refreshProfile = async () => {
-    if (!veterinarian?.id) return;
+  const refreshProfile = useCallback(async () => {
+    if (!veterinarian?.id) return null;
 
     try {
       const backendUrl = getBackendUrl();
@@ -147,7 +148,7 @@ export const VetProvider = ({ children }) => {
           setVeterinarian(updatedProfile);
           localStorage.setItem("veterinarian", JSON.stringify(updatedProfile));
         }
-        return;
+        return updatedProfile;
       }
 
       // Token viejo/inválido: forzar re-login (evita encuesta trial fantasma).
@@ -162,14 +163,15 @@ export const VetProvider = ({ children }) => {
     } catch (error) {
       console.error("Error refrescando perfil:", error);
     }
-  };
+    return null;
+  }, [veterinarian?.id]);
 
   // Tras login o al recargar: sincronizar plan/cupo heredado del consultorio.
   useEffect(() => {
     if (profileSyncedRef.current || !veterinarian?.id || !getAccessToken()) return;
     profileSyncedRef.current = true;
     void refreshProfile();
-  }, [veterinarian?.id]);
+  }, [veterinarian?.id, refreshProfile]);
 
   useEffect(() => {
     if (!veterinarian?.id || !getAccessToken()) {
@@ -190,7 +192,7 @@ export const VetProvider = ({ children }) => {
       .catch(() => setPlatformAdmin(false));
   }, [veterinarian?.id]);
 
-  const login = (vetData) => {
+  const login = useCallback((vetData) => {
     persistAuthFromResponse(vetData);
     const { access_token, token_type, expires_in, cedula_flow_nonce, cedula_flow_expires_in, ...profile } =
       vetData || {};
@@ -198,9 +200,9 @@ export const VetProvider = ({ children }) => {
     setVeterinarian(nextProfile);
     localStorage.setItem("veterinarian", JSON.stringify(nextProfile));
     profileSyncedRef.current = true;
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setVeterinarian(null);
     localStorage.removeItem("veterinarian");
@@ -208,7 +210,7 @@ export const VetProvider = ({ children }) => {
     clearCedulaFlowNonce();
     profileSyncedRef.current = false;
     setPlatformAdmin(false);
-  };
+  }, []);
 
   const loginWithEmailPassword = async (email, password) => {
     const { error, data } = await supabase.auth.signInWithPassword({
@@ -228,7 +230,7 @@ export const VetProvider = ({ children }) => {
     return data;
   };
 
-  const patchVeterinarian = (partial) => {
+  const patchVeterinarian = useCallback((partial) => {
     if (!partial || typeof partial !== "object") return;
     setVeterinarian((prev) => {
       if (!prev) return prev;
@@ -236,7 +238,7 @@ export const VetProvider = ({ children }) => {
       localStorage.setItem("veterinarian", JSON.stringify(next));
       return next;
     });
-  };
+  }, []);
 
   return (
     <VetContext.Provider

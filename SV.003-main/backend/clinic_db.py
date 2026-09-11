@@ -428,7 +428,18 @@ def _clear_personal_membership_for_team_member(profile_id: str) -> None:
     try:
         from datetime import datetime, timezone
 
-        from supabase_client import update_profile
+        from supabase_client import get_profile, update_profile
+
+        profile, err = get_profile(profile_id)
+        if err:
+            print(f"[WARN] No se pudo revisar membresía personal de {profile_id}: {err}")
+            return
+        if profile and (
+            profile.get("membership_type")
+            or int(profile.get("consultations_remaining") or 0) > 0
+            or profile.get("membership_expires")
+        ):
+            return
 
         update_profile(
             profile_id,
@@ -448,6 +459,8 @@ def add_organization_member(
     organization_id: str,
     profile_id: str,
     role: str,
+    *,
+    allow_reassign: bool = False,
 ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     allowed_roles = {"admin", "veterinarian", "receptionist"}
     if role not in allowed_roles:
@@ -475,6 +488,14 @@ def add_organization_member(
     if action in {"conflict_team", "conflict_data"}:
         return (None, _ADD_MEMBER_MESSAGES[action])
     if action == "reassign":
+        if not allow_reassign:
+            return (
+                None,
+                (
+                    "Esa cuenta ya pertenece a otro consultorio. "
+                    "Pídele que acepte una invitación desde su propia sesión antes de moverla."
+                ),
+            )
         member, re_err = _reassign_member_to_organization(existing, organization_id, role)
         if not re_err and member:
             _clear_personal_membership_for_team_member(profile_id)

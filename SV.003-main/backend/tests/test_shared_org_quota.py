@@ -69,6 +69,32 @@ class SharedOrgQuota(unittest.TestCase):
         self.assertEqual(overlay["membership_source"], "organization")
         self.assertEqual(overlay["membership_owner_id"], "owner-1")
 
+    def test_clinic_feature_guard_uses_owner_membership_overlay(self):
+        import clinic_routes
+
+        raw_member_profile = {
+            "id": "member-1",
+            "membership_type": None,
+            "consultations_remaining": 0,
+        }
+        owner_overlay = {
+            **raw_member_profile,
+            "membership_type": "professional",
+            "consultations_remaining": 29,
+            "membership_source": "organization",
+            "membership_owner_id": "owner-1",
+        }
+
+        with mock.patch.object(
+            clinic_routes.clinic_db,
+            "apply_team_membership_overlay",
+            return_value=owner_overlay,
+        ):
+            clinic_routes._require_membership_feature(
+                {"profile": raw_member_profile},
+                "inventory",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

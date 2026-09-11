@@ -262,7 +262,8 @@ def _check_write(role: str) -> None:
 
 
 def _require_membership_feature(ctx: dict, feature: str) -> None:
-    require_feature_for_profile(ctx.get("profile"), feature)
+    effective_profile = clinic_db.apply_team_membership_overlay(ctx.get("profile"))
+    require_feature_for_profile(effective_profile, feature)
 
 
 def _coerce_analysis_text(value: Any) -> Optional[str]:

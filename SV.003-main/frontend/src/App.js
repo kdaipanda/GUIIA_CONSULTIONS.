@@ -528,10 +528,6 @@ const Router = () => {
         }
         if (data?.completed_at) {
           patchVeterinarian?.({ trial_survey_completed_at: data.completed_at });
-        } else {
-          patchVeterinarian?.({
-            trial_survey_completed_at: new Date().toISOString(),
-          });
         }
       } catch {
         if (!cancelled) setTrialSurveyConfirmed(false);
