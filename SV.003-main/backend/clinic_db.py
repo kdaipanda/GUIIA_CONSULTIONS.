@@ -448,6 +448,8 @@ def add_organization_member(
     organization_id: str,
     profile_id: str,
     role: str,
+    *,
+    allow_reassign: bool = False,
 ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     allowed_roles = {"admin", "veterinarian", "receptionist"}
     if role not in allowed_roles:
@@ -475,6 +477,14 @@ def add_organization_member(
     if action in {"conflict_team", "conflict_data"}:
         return (None, _ADD_MEMBER_MESSAGES[action])
     if action == "reassign":
+        if not allow_reassign:
+            return (
+                None,
+                (
+                    "Esa cuenta ya pertenece a otro consultorio. "
+                    "Pídele que acepte una invitación desde su propia sesión antes de moverla."
+                ),
+            )
         member, re_err = _reassign_member_to_organization(existing, organization_id, role)
         if not re_err and member:
             _clear_personal_membership_for_team_member(profile_id)
