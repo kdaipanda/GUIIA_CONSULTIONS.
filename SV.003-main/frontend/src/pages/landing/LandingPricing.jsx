@@ -3,6 +3,7 @@ import { Check, Coins, ShieldCheck } from "lucide-react";
 import { getBackendUrl } from "../../lib/backendUrl";
 import { buildLandingPricingPlans } from "../../lib/landingPricingPlans";
 import { trackMetaViewContent } from "../../lib/metaPixel";
+import { trackGoogleAdsViewContent } from "../../lib/googleAds";
 import {
   DEFAULT_CREDIT_PACKAGES,
   parseMembershipCatalogResponse,
@@ -25,6 +26,7 @@ export function LandingPricing({ setView }) {
         if (!entry?.isIntersecting || pricingViewTracked.current) return;
         pricingViewTracked.current = true;
         trackMetaViewContent("Pricing");
+        trackGoogleAdsViewContent();
         observer.disconnect();
       },
       { threshold: 0.35 },

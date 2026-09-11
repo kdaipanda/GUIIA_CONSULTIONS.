@@ -36,12 +36,14 @@ import { LandingSeo } from "./landing/LandingSeo";
 import { LandingVetAnimations } from "./landing/LandingVetAnimations";
 import { useLandingInteractionQuiet } from "./landing/useLandingInteractionQuiet";
 import { trackMetaPageView } from "../lib/metaPixel";
+import { trackGoogleAdsPageView } from "../lib/googleAds";
 
 export function LandingPage({ setView }) {
   useLandingInteractionQuiet();
 
   useEffect(() => {
     trackMetaPageView();
+    trackGoogleAdsPageView();
   }, []);
 
   const setViewDeferred = useCallback((view) => {

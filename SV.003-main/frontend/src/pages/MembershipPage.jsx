@@ -24,6 +24,7 @@ import {
   getPlanFeatureList,
 } from "../lib/membershipPlans";
 import { trackMetaInitiateCheckout } from "../lib/metaPixel";
+import { trackGoogleAdsInitiateCheckout } from "../lib/googleAds";
 import { notifyError } from "../lib/appToast";
 import "./membershipPage.css";
 
@@ -288,6 +289,7 @@ export function MembershipPage({ setView }) {
         value: price,
         contentCategory: "membership",
       });
+      trackGoogleAdsInitiateCheckout({ value: price });
 
       window.location.href = data.checkout_url;
     } catch (error) {
@@ -334,6 +336,7 @@ export function MembershipPage({ setView }) {
         value: pkg?.price,
         contentCategory: "consultation_credits",
       });
+      trackGoogleAdsInitiateCheckout({ value: pkg?.price });
 
       window.location.href = data.checkout_url;
     } catch (error) {
