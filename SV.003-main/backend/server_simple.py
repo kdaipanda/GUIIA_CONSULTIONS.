@@ -2425,10 +2425,11 @@ async def create_consultation(
         import clinic_db as _clinic_db
 
         org_member, _ = _clinic_db.get_member_by_profile(vet_id)
-        if org_member and (org_member.get("role") or "") == "receptionist":
+        role_block_reason = _clinic_db.consultation_role_block_reason(profile, org_member)
+        if role_block_reason:
             raise HTTPException(
                 status_code=403,
-                detail="El rol de recepción no puede crear consultas CDS. Usa agenda, dueños y pacientes.",
+                detail=role_block_reason,
             )
     except HTTPException:
         raise

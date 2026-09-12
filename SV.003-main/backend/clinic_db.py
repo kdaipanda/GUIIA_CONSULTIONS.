@@ -15,6 +15,12 @@ STAFF_INVITE_ROLES = frozenset({"admin", "receptionist"})
 INVITE_TTL_DAYS = 7  # Antes 14; enlace de alta más corto
 INVITE_EMAIL_CODE_TTL_SECONDS = 15 * 60
 INVITE_REGISTER_PENDING_TTL_SECONDS = 15 * 60
+CDS_RECEPTION_BLOCK_MESSAGE = (
+    "El rol de recepción no puede crear consultas CDS. Usa agenda, dueños y pacientes."
+)
+CDS_ADMIN_LICENSE_BLOCK_MESSAGE = (
+    "El rol admin necesita cédula profesional para crear consultas CDS."
+)
 
 
 def _now_iso() -> str:
@@ -91,6 +97,12 @@ def apply_team_membership_overlay(profile: Optional[Dict[str, Any]]) -> Dict[str
     if not member:
         return out
     role = (member.get("role") or "").strip().lower()
+    out["org_role"] = role or "veterinarian"
+    if member.get("organization_id"):
+        out["organization_id"] = member.get("organization_id")
+    org = member.get("organizations")
+    if isinstance(org, dict) and org.get("name"):
+        out["organization_name"] = org.get("name")
     if role in ("", "owner"):
         return out
     org_id = member.get("organization_id")
@@ -134,6 +146,22 @@ def resolve_consultation_billing_profile_id(profile: Dict[str, Any]) -> str:
     if overlay.get("membership_source") == "organization" and bill_to:
         return str(bill_to)
     return str(profile.get("id") or "")
+
+
+def consultation_role_block_reason(
+    profile: Optional[Dict[str, Any]],
+    org_member: Optional[Dict[str, Any]],
+) -> Optional[str]:
+    """Motivo de bloqueo para iniciar CDS según rol de equipo."""
+    if not org_member:
+        return None
+    role = (org_member.get("role") or "").strip().lower()
+    if role == "receptionist":
+        return CDS_RECEPTION_BLOCK_MESSAGE
+    cedula = str((profile or {}).get("cedula_profesional") or "").strip()
+    if role == "admin" and not cedula:
+        return CDS_ADMIN_LICENSE_BLOCK_MESSAGE
+    return None
 
 
 def build_admin_team_index(

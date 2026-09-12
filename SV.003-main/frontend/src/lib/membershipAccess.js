@@ -96,8 +96,11 @@ export function getTrialExhaustedMessage() {
  */
 export function canCreateConsultation(veterinarian, options = {}) {
   if (options.platformAdmin) return true;
-  if (options.orgRole === "receptionist") return false;
   if (!veterinarian) return false;
+
+  const orgRole = (options.orgRole || veterinarian.org_role || "").toLowerCase();
+  if (orgRole === "receptionist") return false;
+  if (orgRole === "admin" && !String(veterinarian.cedula_profesional || "").trim()) return false;
 
   const membershipType = veterinarian.membership_type?.toLowerCase();
   const remaining = veterinarian.consultations_remaining ?? 0;
