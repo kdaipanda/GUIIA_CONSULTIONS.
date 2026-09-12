@@ -325,21 +325,54 @@ def _anthropic_use_top_p() -> bool:
     return os.getenv("ANTHROPIC_USE_TOP_P", "").strip().lower() in ("1", "true", "yes")
 
 
+def _anthropic_disable_sampling() -> bool:
+    """Algunos modelos nuevos rechazan temperature/top_p/top_k con HTTP 400."""
+    return os.getenv("ANTHROPIC_DISABLE_SAMPLING", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+
+
+def _anthropic_create_accepts_temperature() -> bool:
+    """SDK anthropic>=1.0 quitó temperature/top_p/top_k de messages.create()."""
+    if Anthropic is None:
+        return True
+    try:
+        import inspect
+
+        from anthropic.resources.messages.messages import Messages  # type: ignore
+
+        return "temperature" in inspect.signature(Messages.create).parameters
+    except Exception:
+        return False
+
+
 def _anthropic_sampling_params(*, temperature: Optional[float] = None) -> Dict[str, Any]:
     """
-    Modelos recientes de Anthropic no aceptan temperature y top_p simultáneamente.
-    Por defecto usa temperature; ANTHROPIC_USE_TOP_P=1 para usar solo top_p.
+    Compatibilidad SDK 0.x / 1.x:
+    - SDK 1.0+ ya no acepta temperature/top_p/top_k como kwargs → van en extra_body.
+    - Modelos recientes no aceptan temperature y top_p a la vez.
+    - ANTHROPIC_DISABLE_SAMPLING=1 omite sampling por completo.
     """
-    params: Dict[str, Any] = {}
+    if _anthropic_disable_sampling():
+        return {}
+
+    sampling: Dict[str, Any] = {}
     if _anthropic_use_top_p():
-        params["top_p"] = ANTHROPIC_TOP_P
+        sampling["top_p"] = ANTHROPIC_TOP_P
     else:
-        params["temperature"] = (
+        sampling["temperature"] = (
             ANTHROPIC_TEMPERATURE if temperature is None else temperature
         )
     if ANTHROPIC_TOP_K:
-        params["top_k"] = ANTHROPIC_TOP_K
-    return params
+        sampling["top_k"] = ANTHROPIC_TOP_K
+    if not sampling:
+        return {}
+
+    if not _anthropic_create_accepts_temperature():
+        return {"extra_body": sampling}
+    return sampling
 
 
 anthropic_client: Optional[Anthropic] = (
@@ -498,13 +531,26 @@ async def send_llm_message(
             "system": system_param,
             "messages": messages_payload,
         }
-        if is_headroom_enabled() and hasattr(llm_client, "messages"):
-            response = llm_client.messages.create(
-                **create_kwargs,
-                headroom_mode=get_headroom_mode(),
-            )
-        else:
-            response = llm_client.messages.create(**create_kwargs)
+
+        def _do_create(kwargs: Dict[str, Any]):
+            if is_headroom_enabled() and hasattr(llm_client, "messages"):
+                return llm_client.messages.create(
+                    **kwargs,
+                    headroom_mode=get_headroom_mode(),
+                )
+            return llm_client.messages.create(**kwargs)
+
+        try:
+            response = _do_create(create_kwargs)
+        except TypeError as exc:
+            # SDK nuevo / wrapper: kwargs de sampling rechazados.
+            err = str(exc).lower()
+            if not any(k in err for k in ("temperature", "top_p", "top_k")):
+                raise
+            for key in ("temperature", "top_p", "top_k", "extra_body"):
+                create_kwargs.pop(key, None)
+            print(f"[WARN] Anthropic create sin sampling ({exc})")
+            response = _do_create(create_kwargs)
 
         text_blocks = [
             block.text
@@ -1313,13 +1359,23 @@ async def send_support_chat_message(
     ]
 
     def _call_support() -> str:
-        response = anthropic_client.messages.create(
-            model=ANTHROPIC_MODEL,
-            max_tokens=min(ANTHROPIC_MAX_TOKENS, 900),
+        create_kwargs: Dict[str, Any] = {
+            "model": ANTHROPIC_MODEL,
+            "max_tokens": min(ANTHROPIC_MAX_TOKENS, 900),
             **_anthropic_sampling_params(temperature=0.2),
-            system=system_prompt,
-            messages=messages_payload,
-        )
+            "system": system_prompt,
+            "messages": messages_payload,
+        }
+        try:
+            response = anthropic_client.messages.create(**create_kwargs)
+        except TypeError as exc:
+            err = str(exc).lower()
+            if not any(k in err for k in ("temperature", "top_p", "top_k")):
+                raise
+            for key in ("temperature", "top_p", "top_k", "extra_body"):
+                create_kwargs.pop(key, None)
+            print(f"[WARN] Anthropic support create sin sampling ({exc})")
+            response = anthropic_client.messages.create(**create_kwargs)
         text_blocks = [
             block.text for block in response.content if getattr(block, "type", "") == "text"
         ]
