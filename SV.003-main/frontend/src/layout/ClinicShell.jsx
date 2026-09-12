@@ -251,7 +251,10 @@ export function ClinicShell({ children, setView }) {
 
   const navItems = useMemo(() => {
     const items = BASE_NAV_ITEMS.filter((item) => {
-      if (role === "receptionist" && item.view === "new-consultation") return false;
+      if (item.view === "new-consultation") {
+        if (role === "receptionist") return false;
+        if (role === "admin" && !String(veterinarian?.cedula_profesional || "").trim()) return false;
+      }
       return true;
     }).map((item) => {
       if (!item.feature) return item;
