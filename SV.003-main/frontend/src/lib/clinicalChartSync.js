@@ -10,6 +10,8 @@ export const EMPTY_CLINICAL_CHART = {
   deworming: [],
   problems: [],
   reproductive: { sterilized: null, notes: "" },
+  form_snapshot: null,
+  form_category: null,
   updated_at: null,
   updated_from_consultation_id: null,
 };
@@ -45,6 +47,9 @@ export function normalizeClinicalChart(raw) {
     out.reproductive && typeof out.reproductive === "object"
       ? { ...EMPTY_CLINICAL_CHART.reproductive, ...out.reproductive }
       : { ...EMPTY_CLINICAL_CHART.reproductive };
+  out.form_snapshot =
+    out.form_snapshot && typeof out.form_snapshot === "object" ? out.form_snapshot : null;
+  out.form_category = out.form_category ? String(out.form_category) : null;
   return out;
 }
 
@@ -133,6 +138,12 @@ export function mergeClinicalChart(existing, patch) {
   if (patch.reproductive && typeof patch.reproductive === "object") {
     out.reproductive = { ...out.reproductive, ...patch.reproductive };
   }
+  if (patch.form_snapshot && typeof patch.form_snapshot === "object") {
+    out.form_snapshot = { ...patch.form_snapshot };
+  }
+  if (patch.form_category != null && String(patch.form_category).trim()) {
+    out.form_category = String(patch.form_category).trim();
+  }
   if (patch.updated_from_consultation_id) {
     out.updated_from_consultation_id = patch.updated_from_consultation_id;
   }
@@ -147,6 +158,7 @@ function cryptoRandomId() {
 
 /**
  * Extract a clinical_chart patch from species form fields.
+ * Pass consultationId only from Diagnóstico (creates open problems from motivo).
  */
 export function extractChartPatchFromFormData(category, formData, { consultationId, notedAt } = {}) {
   const fd = formData && typeof formData === "object" ? formData : {};
@@ -252,74 +264,95 @@ export function extractChartPatchFromFormData(category, formData, { consultation
 }
 
 /**
+ * Patch for saving species form as patient chart (no CDS consultation, no problems).
+ */
+export function buildSpeciesFormChartPatch(category, formData) {
+  const patch = extractChartPatchFromFormData(category, formData, { consultationId: null });
+  patch.problems = [];
+  patch.updated_from_consultation_id = null;
+  patch.form_snapshot = formData && typeof formData === "object" ? { ...formData } : {};
+  patch.form_category = category || null;
+  return patch;
+}
+
+function setIfEmpty(target, key, value) {
+  if (value == null || value === "") return;
+  if (target[key] == null || String(target[key]).trim() === "") {
+    target[key] = value;
+  }
+}
+
+/**
  * Prefill form fields from patient + clinical chart + last consultation.
+ * Priority: form_snapshot > chart lists > patient demographics > last consultation.
  */
 export function hydrateFormDataFromChart(category, chart, patient, lastConsultation) {
   const c = normalizeClinicalChart(chart || patient?.clinical_chart);
+  const snapshot =
+    c.form_snapshot && typeof c.form_snapshot === "object" ? { ...c.form_snapshot } : {};
   const lastFd =
     lastConsultation?.form_data && typeof lastConsultation.form_data === "object"
       ? lastConsultation.form_data
       : {};
-  const next = {};
+  const next = { ...snapshot };
 
-  if (patient?.name) next.nombre_mascota = patient.name;
-  if (patient?.breed) next.raza = patient.breed;
-  if (patient?.sex) next.sexo = patient.sex;
-  if (patient?.weight_kg != null) next.peso = String(patient.weight_kg);
+  if (patient?.name) setIfEmpty(next, "nombre_mascota", patient.name);
+  if (patient?.breed) setIfEmpty(next, "raza", patient.breed);
+  if (patient?.sex) setIfEmpty(next, "sexo", patient.sex);
+  if (patient?.weight_kg != null) setIfEmpty(next, "peso", String(patient.weight_kg));
   const owner = patient?.clients;
-  if (owner?.name) next.nombre_dueño = owner.name;
+  if (owner?.name) setIfEmpty(next, "nombre_dueño", owner.name);
 
   const lastVaccine = [...(c.vaccines || [])].reverse().find((v) => v?.label);
   if (lastVaccine) {
-    next.vacunas_vigentes = "SI";
-    next.vacunas_cual = lastVaccine.label;
+    setIfEmpty(next, "vacunas_vigentes", "SI");
+    setIfEmpty(next, "vacunas_cual", lastVaccine.label);
   }
 
   const lastSurgery = [...(c.surgeries || [])].reverse().find((s) => s?.label);
   if (lastSurgery) {
-    next.cirugias_previas = "SI";
-    next.cirugias_cual = lastSurgery.label;
+    setIfEmpty(next, "cirugias_previas", "SI");
+    setIfEmpty(next, "cirugias_cual", lastSurgery.label);
   }
 
   const lastInternal = [...(c.deworming || [])]
     .reverse()
     .find((d) => d?.type === "internal");
   if (lastInternal) {
-    next.desparasitacion_interna = "SI";
-    next.desparasitacion_interna_cual = lastInternal.product || "";
-    next.desparasitacion_interna_producto = lastInternal.product || "";
-    next.desparasitacion_interna_fecha = lastInternal.date || "";
+    setIfEmpty(next, "desparasitacion_interna", "SI");
+    setIfEmpty(next, "desparasitacion_interna_cual", lastInternal.product || "");
+    setIfEmpty(next, "desparasitacion_interna_producto", lastInternal.product || "");
+    setIfEmpty(next, "desparasitacion_interna_fecha", lastInternal.date || "");
   }
 
   const lastExternal = [...(c.deworming || [])]
     .reverse()
     .find((d) => d?.type === "external");
   if (lastExternal) {
-    next.desparasitacion_externa = "SI";
-    next.desparasitacion_externa_producto = lastExternal.product || "";
-    next.desparasitacion_externa_fecha = lastExternal.date || "";
+    setIfEmpty(next, "desparasitacion_externa", "SI");
+    setIfEmpty(next, "desparasitacion_externa_producto", lastExternal.product || "");
+    setIfEmpty(next, "desparasitacion_externa_fecha", lastExternal.date || "");
   }
 
   if (c.reproductive?.sterilized === true) {
-    next.esterilizado = "SI";
-    next.estado_reproductivo = "ESTERILIZADO";
+    setIfEmpty(next, "esterilizado", "SI");
+    setIfEmpty(next, "estado_reproductivo", "ESTERILIZADO");
   } else if (c.reproductive?.sterilized === false) {
-    next.esterilizado = "NO";
-    next.estado_reproductivo = "ENTERO";
+    setIfEmpty(next, "esterilizado", "NO");
+    setIfEmpty(next, "estado_reproductivo", "ENTERO");
   } else if (c.reproductive?.notes) {
-    next.estado_reproductivo = c.reproductive.notes;
+    setIfEmpty(next, "estado_reproductivo", c.reproductive.notes);
   }
 
   const allergies = (c.allergies || []).map((a) => a.label).filter(Boolean);
-  if (allergies.length) next.alergias = allergies.join("; ");
+  if (allergies.length) setIfEmpty(next, "alergias", allergies.join("; "));
 
   const chronic = (c.chronic_conditions || [])
     .filter((x) => x.status !== "resolved")
     .map((x) => x.label)
     .filter(Boolean);
-  if (chronic.length) next.enfermedades_cronicas = chronic.join("; ");
+  if (chronic.length) setIfEmpty(next, "enfermedades_cronicas", chronic.join("; "));
 
-  // Soft fill from last consultation for empty habitat/diet style fields
   for (const key of [
     "habitat",
     "dieta",
@@ -329,11 +362,16 @@ export function hydrateFormDataFromChart(category, chart, patient, lastConsultat
     "alimentacion_casero",
     "alimentacion_frecuencia",
   ]) {
-    if (lastFd[key] && !next[key]) next[key] = lastFd[key];
+    if (lastFd[key]) setIfEmpty(next, key, lastFd[key]);
   }
 
   void category;
   return next;
+}
+
+export function resolveChartFormCategory(chart, patient) {
+  const c = normalizeClinicalChart(chart || patient?.clinical_chart);
+  return c.form_category || patient?.species || "";
 }
 
 export function openProblems(chart) {
@@ -345,3 +383,18 @@ export function latestByDate(items, dateField = "date") {
   if (!Array.isArray(items) || !items.length) return null;
   return [...items].sort((a, b) => String(b?.[dateField] || "").localeCompare(String(a?.[dateField] || "")))[0];
 }
+
+/** Categories supported by LazySpeciesForm (primary keys). */
+export const SPECIES_FORM_CATEGORIES = [
+  "perros",
+  "gatos",
+  "conejos",
+  "aves",
+  "hamsters",
+  "cuyos",
+  "hurones",
+  "erizos",
+  "tortugas",
+  "iguanas",
+  "patos_pollos",
+];

@@ -218,7 +218,15 @@
       "surgery": "Surgery",
       "product": "Product",
       "problem": "New clinical problem"
-    }
+    },
+    "speciesFormTitle": "Species clinical record",
+    "speciesFormHint": "Updates the patient chart. Does not create a CDS consult or use quota.",
+    "speciesFormSaved": "Clinical record saved",
+    "saveSpeciesForm": "Save record",
+    "showSpeciesForm": "Show form",
+    "hideSpeciesForm": "Hide form",
+    "speciesLabel": "Form species",
+    "unknownSpecies": "Select a species to edit the record."
   },
   "agenda": {
     "title": "Schedule",

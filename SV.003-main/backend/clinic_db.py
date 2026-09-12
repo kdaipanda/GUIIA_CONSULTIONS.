@@ -973,6 +973,7 @@ def merge_patient_clinical_chart(
     patch: Dict[str, Any],
     *,
     weight_kg: Optional[float] = None,
+    extra_fields: Optional[Dict[str, Any]] = None,
 ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     """Merge partial clinical_chart into patient row; optionally update weight_kg."""
     try:
@@ -990,6 +991,10 @@ def merge_patient_clinical_chart(
     fields: Dict[str, Any] = {"clinical_chart": normalize_chart(merged)}
     if weight_kg is not None:
         fields["weight_kg"] = weight_kg
+    if extra_fields:
+        for key, value in extra_fields.items():
+            if value is not None:
+                fields[key] = value
     return update_patient(patient_id, organization_id, fields)
 
 

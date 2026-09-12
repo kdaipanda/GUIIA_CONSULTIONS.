@@ -1,131 +1,28 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {
-  ArrowLeft,
-  FileDown,
-  FlaskConical,
-  Plus,
-  Stethoscope,
-  FolderOpen,
-  X,
-  Check,
-} from "lucide-react";
+import { ArrowLeft, FileDown, FlaskConical, Stethoscope } from "lucide-react";
 import { useVet } from "../../context/VetContext";
-import {
-  fetchPatient,
-  patchPatientClinicalChart,
-} from "../../lib/clinicApi";
+import { fetchPatient, patchPatientClinicalChart } from "../../lib/clinicApi";
 import {
   normalizeClinicalChart,
-  openProblems,
-  latestByDate,
+  hydrateFormDataFromChart,
+  buildSpeciesFormChartPatch,
+  resolveChartFormCategory,
+  parseWeightKg,
+  SPECIES_FORM_CATEGORIES,
+  mergeClinicalChart,
 } from "../../lib/clinicalChartSync";
+import { LazySpeciesForm } from "../../components/forms/LazySpeciesForm";
 import { ClinicalTimelineList } from "../../components/clinical/ClinicalTimelineList";
 import { ConsultationFormDataView } from "../../components/clinical/ConsultationFormDataView";
 import { downloadConsultationPdf, downloadPatientHistoryPdf } from "../../lib/consultationPdf";
-import { formatConsultationDateShort } from "../../lib/consultationDisplay";
+import { normalizePetSex } from "../../lib/petSex";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import { notifyError, notifySuccess } from "../../lib/appToast";
 import { loadI18nNamespace } from "../../lib/loadI18nNamespace";
 import "./clinicPageShared.css";
 import "./patientClinicalChartPage.css";
-
-function WeightSparkline({ series }) {
-  const points = (series || [])
-    .filter((s) => s.weight_kg != null)
-    .map((s) => Number(s.weight_kg));
-  if (points.length < 2) return null;
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  const span = max - min || 1;
-  const w = 160;
-  const h = 36;
-  const path = points
-    .map((p, i) => {
-      const x = (i / (points.length - 1)) * w;
-      const y = h - ((p - min) / span) * (h - 4) - 2;
-      return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-  return (
-    <svg className="patient-chart-sparkline" viewBox={`0 0 ${w} ${h}`} width={w} height={h} aria-hidden>
-      <path d={path} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function ChartListEditor({
-  title,
-  items,
-  fields,
-  onChange,
-  addLabel,
-  emptyLabel,
-}) {
-  const { t } = useTranslation("clinic");
-  const [draft, setDraft] = useState(() =>
-    Object.fromEntries(fields.map((f) => [f.key, ""])),
-  );
-
-  const add = () => {
-    const row = {};
-    let hasValue = false;
-    for (const f of fields) {
-      const v = String(draft[f.key] || "").trim();
-      row[f.key] = v;
-      if (v) hasValue = true;
-    }
-    if (!hasValue) return;
-    if (fields.some((f) => f.key === "status") && !row.status) row.status = "active";
-    if (fields.some((f) => f.key === "type") && !row.type) row.type = "internal";
-    onChange([...(items || []), row]);
-    setDraft(Object.fromEntries(fields.map((f) => [f.key, ""])));
-  };
-
-  const removeAt = (idx) => {
-    onChange((items || []).filter((_, i) => i !== idx));
-  };
-
-  return (
-    <div className="patient-chart-list-editor">
-      <h3>{title}</h3>
-      {(items || []).length === 0 ? (
-        <p className="clinic-muted">{emptyLabel}</p>
-      ) : (
-        <ul className="patient-chart-chip-list">
-          {(items || []).map((item, idx) => (
-            <li key={`${item.label || item.product || item.title || "item"}-${idx}`}>
-              <span>
-                {fields
-                  .map((f) => item[f.key])
-                  .filter(Boolean)
-                  .join(" · ")}
-              </span>
-              <button type="button" className="patient-chart-icon-btn" onClick={() => removeAt(idx)} aria-label={t("common.delete")}>
-                <X size={14} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="patient-chart-add-row">
-        {fields.map((f) => (
-          <Input
-            key={f.key}
-            placeholder={f.placeholder}
-            value={draft[f.key] || ""}
-            onChange={(e) => setDraft((d) => ({ ...d, [f.key]: e.target.value }))}
-          />
-        ))}
-        <Button type="button" variant="secondary" size="sm" onClick={add}>
-          <Plus size={14} className="mr-1" /> {addLabel}
-        </Button>
-      </div>
-    </div>
-  );
-}
 
 export default function PatientClinicalChartPage({
   patientId,
@@ -134,16 +31,19 @@ export default function PatientClinicalChartPage({
   onViewConsultation,
 }) {
   const { t } = useTranslation("clinic");
+  const { t: tSpecies } = useTranslation("speciesForms");
   const { veterinarian } = useVet();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState(null);
   const [chart, setChart] = useState(normalizeClinicalChart(null));
-  const [saving, setSaving] = useState(false);
   const [historyPdfLoading, setHistoryPdfLoading] = useState(false);
   const [pdfLoadingId, setPdfLoadingId] = useState(null);
   const [selectedConsultation, setSelectedConsultation] = useState(null);
-  const [problemDraft, setProblemDraft] = useState("");
+  const [speciesFormOpen, setSpeciesFormOpen] = useState(true);
+  const [speciesCategory, setSpeciesCategory] = useState("");
+  const [speciesFormData, setSpeciesFormData] = useState({});
+  const [savingSpeciesForm, setSavingSpeciesForm] = useState(false);
 
   const load = useCallback(async () => {
     if (!veterinarian?.id || !patientId) return;
@@ -151,7 +51,17 @@ export default function PatientClinicalChartPage({
     try {
       const data = await fetchPatient(veterinarian.id, patientId);
       setDetail(data);
-      setChart(normalizeClinicalChart(data?.patient?.clinical_chart));
+      const nextChart = normalizeClinicalChart(data?.patient?.clinical_chart);
+      setChart(nextChart);
+      const category = resolveChartFormCategory(nextChart, data?.patient);
+      setSpeciesCategory(category || "perros");
+      const hydrated = hydrateFormDataFromChart(
+        category,
+        nextChart,
+        data?.patient,
+        (data?.consultations || [])[0] || null,
+      );
+      setSpeciesFormData(hydrated);
     } catch (err) {
       notifyError(err?.message || t("patientChart.loadError"));
       setDetail(null);
@@ -171,40 +81,45 @@ export default function PatientClinicalChartPage({
   const patient = detail?.patient;
   const consultations = detail?.consultations || [];
   const medicalImages = detail?.medical_images || [];
-  const vitalsSeries = detail?.vitals_series || [];
   const owner = patient?.clients || {};
+  const currentWeight = patient?.weight_kg;
 
-  const problemsOpen = useMemo(() => openProblems(chart), [chart]);
-  const lastVaccine = latestByDate(chart.vaccines);
-  const lastDeworm = latestByDate(chart.deworming);
-  const currentWeight =
-    patient?.weight_kg ??
-    (vitalsSeries.length ? vitalsSeries[vitalsSeries.length - 1]?.weight_kg : null);
-
-  const persistChart = async (nextChart, extra = {}) => {
-    if (!veterinarian?.id || !patientId) return;
-    setSaving(true);
+  const saveSpeciesForm = async () => {
+    if (!veterinarian?.id || !patientId || !speciesCategory) return;
+    setSavingSpeciesForm(true);
     try {
-      const normalized = normalizeClinicalChart(nextChart);
+      const patch = buildSpeciesFormChartPatch(speciesCategory, speciesFormData);
+      const weight = parseWeightKg(speciesFormData?.peso);
       const res = await patchPatientClinicalChart(veterinarian.id, patientId, {
-        ...normalized,
-        replace: true,
-        ...extra,
+        ...patch,
+        replace: false,
+        weight_kg: weight,
+        species: speciesCategory,
+        breed: speciesFormData?.raza || undefined,
+        sex: normalizePetSex(speciesFormData?.sexo) || undefined,
       });
-      setChart(normalizeClinicalChart(res?.patient?.clinical_chart || normalized));
+      const nextChart = normalizeClinicalChart(
+        res?.patient?.clinical_chart || mergeClinicalChart(chart, patch),
+      );
+      setChart(nextChart);
       setDetail((prev) =>
         prev
           ? {
               ...prev,
-              patient: res?.patient || { ...prev.patient, clinical_chart: normalized },
+              patient: res?.patient || {
+                ...prev.patient,
+                clinical_chart: nextChart,
+                species: speciesCategory,
+                ...(weight != null ? { weight_kg: weight } : {}),
+              },
             }
           : prev,
       );
-      notifySuccess(t("patientChart.saved"));
+      notifySuccess(t("patientChart.speciesFormSaved"));
     } catch (err) {
       notifyError(err?.message || t("patientChart.saveError"));
     } finally {
-      setSaving(false);
+      setSavingSpeciesForm(false);
     }
   };
 
@@ -232,43 +147,6 @@ export default function PatientClinicalChartPage({
     } finally {
       setPdfLoadingId(null);
     }
-  };
-
-  const addProblem = () => {
-    const title = problemDraft.trim();
-    if (!title) return;
-    const next = {
-      ...chart,
-      problems: [
-        ...(chart.problems || []),
-        {
-          id: `local_${Date.now()}`,
-          title,
-          status: "open",
-          opened_at: new Date().toISOString().slice(0, 10),
-          closed_at: "",
-          source_consultation_id: null,
-        },
-      ],
-    };
-    setProblemDraft("");
-    persistChart(next);
-  };
-
-  const toggleProblem = (problemId, close) => {
-    const next = {
-      ...chart,
-      problems: (chart.problems || []).map((p) =>
-        p.id === problemId
-          ? {
-              ...p,
-              status: close ? "closed" : "open",
-              closed_at: close ? new Date().toISOString().slice(0, 10) : "",
-            }
-          : p,
-      ),
-    };
-    persistChart(next);
   };
 
   if (loading) {
@@ -350,206 +228,56 @@ export default function PatientClinicalChartPage({
         </div>
       </header>
 
-      <section className="patient-chart-summary" aria-label={t("patientChart.summaryTitle")}>
-        <h2>{t("patientChart.summaryTitle")}</h2>
-        <div className="clinic-stats-row">
-          <div className="clinic-stat-pill">
-            <span className="clinic-stat-value">{problemsOpen.length}</span>
-            <span className="clinic-stat-label">{t("patientChart.openProblems")}</span>
+      <section className="patient-chart-species-form" aria-label={t("patientChart.speciesFormTitle")}>
+        <div className="patient-chart-species-form-head">
+          <div>
+            <h2>{t("patientChart.speciesFormTitle")}</h2>
+            <p className="clinic-muted">{t("patientChart.speciesFormHint")}</p>
           </div>
-          <div className="clinic-stat-pill">
-            <span className="clinic-stat-value">{(chart.allergies || []).length}</span>
-            <span className="clinic-stat-label">{t("patientChart.allergies")}</span>
-          </div>
-          <div className="clinic-stat-pill">
-            <span className="clinic-stat-value">
-              {currentWeight != null ? `${currentWeight}` : t("common.emDash")}
-            </span>
-            <span className="clinic-stat-label">{t("patientChart.weightKg")}</span>
-          </div>
-          <div className="clinic-stat-pill">
-            <span className="clinic-stat-value">{consultations.length}</span>
-            <span className="clinic-stat-label">{t("patientChart.consultations")}</span>
-          </div>
-        </div>
-        <div className="patient-chart-summary-meta">
-          {lastVaccine && (
-            <p>
-              <strong>{t("patientChart.lastVaccine")}:</strong> {lastVaccine.label}
-              {lastVaccine.date ? ` (${lastVaccine.date})` : ""}
-            </p>
-          )}
-          {lastDeworm && (
-            <p>
-              <strong>{t("patientChart.lastDeworming")}:</strong>{" "}
-              {lastDeworm.product || lastDeworm.type}
-              {lastDeworm.date ? ` (${lastDeworm.date})` : ""}
-            </p>
-          )}
-          {(chart.allergies || []).length > 0 && (
-            <p>
-              <strong>{t("patientChart.allergies")}:</strong>{" "}
-              {chart.allergies.map((a) => a.label).filter(Boolean).join(", ")}
-            </p>
-          )}
-        </div>
-      </section>
-
-      <div className="patient-chart-grid">
-        <section className="patient-chart-panel">
-          <ChartListEditor
-            title={t("patientChart.allergies")}
-            items={chart.allergies}
-            emptyLabel={t("patientChart.emptyAllergies")}
-            addLabel={t("patientChart.addItem")}
-            fields={[
-              { key: "label", placeholder: t("patientChart.placeholders.allergy") },
-              { key: "severity", placeholder: t("patientChart.placeholders.severity") },
-              { key: "noted_at", placeholder: t("patientChart.placeholders.date") },
-            ]}
-            onChange={(allergies) => {
-              const next = { ...chart, allergies };
-              setChart(next);
-              persistChart(next);
-            }}
-          />
-          <ChartListEditor
-            title={t("patientChart.chronicConditions")}
-            items={chart.chronic_conditions}
-            emptyLabel={t("patientChart.emptyChronic")}
-            addLabel={t("patientChart.addItem")}
-            fields={[
-              { key: "label", placeholder: t("patientChart.placeholders.condition") },
-              { key: "status", placeholder: "active|resolved" },
-              { key: "noted_at", placeholder: t("patientChart.placeholders.date") },
-            ]}
-            onChange={(chronic_conditions) => {
-              const next = { ...chart, chronic_conditions };
-              setChart(next);
-              persistChart(next);
-            }}
-          />
-          <ChartListEditor
-            title={t("patientChart.vaccines")}
-            items={chart.vaccines}
-            emptyLabel={t("patientChart.emptyVaccines")}
-            addLabel={t("patientChart.addItem")}
-            fields={[
-              { key: "label", placeholder: t("patientChart.placeholders.vaccine") },
-              { key: "date", placeholder: t("patientChart.placeholders.date") },
-              { key: "notes", placeholder: t("patientChart.placeholders.notes") },
-            ]}
-            onChange={(vaccines) => {
-              const next = { ...chart, vaccines };
-              setChart(next);
-              persistChart(next);
-            }}
-          />
-          <ChartListEditor
-            title={t("patientChart.surgeries")}
-            items={chart.surgeries}
-            emptyLabel={t("patientChart.emptySurgeries")}
-            addLabel={t("patientChart.addItem")}
-            fields={[
-              { key: "label", placeholder: t("patientChart.placeholders.surgery") },
-              { key: "date", placeholder: t("patientChart.placeholders.date") },
-              { key: "notes", placeholder: t("patientChart.placeholders.notes") },
-            ]}
-            onChange={(surgeries) => {
-              const next = { ...chart, surgeries };
-              setChart(next);
-              persistChart(next);
-            }}
-          />
-          <ChartListEditor
-            title={t("patientChart.deworming")}
-            items={chart.deworming}
-            emptyLabel={t("patientChart.emptyDeworming")}
-            addLabel={t("patientChart.addItem")}
-            fields={[
-              { key: "type", placeholder: "internal|external" },
-              { key: "product", placeholder: t("patientChart.placeholders.product") },
-              { key: "date", placeholder: t("patientChart.placeholders.date") },
-            ]}
-            onChange={(deworming) => {
-              const next = { ...chart, deworming };
-              setChart(next);
-              persistChart(next);
-            }}
-          />
-          {saving && <p className="clinic-muted">{t("common.saving")}</p>}
-        </section>
-
-        <section className="patient-chart-panel">
-          <h3>{t("patientChart.problemList")}</h3>
-          {(chart.problems || []).length === 0 ? (
-            <p className="clinic-muted">{t("patientChart.emptyProblems")}</p>
-          ) : (
-            <ul className="patient-chart-problems">
-              {(chart.problems || []).map((p) => (
-                <li key={p.id} className={p.status === "closed" ? "is-closed" : ""}>
-                  <div>
-                    <strong>{p.title}</strong>
-                    <span className="clinic-muted">
-                      {" "}
-                      · {p.status === "closed" ? t("patientChart.closed") : t("patientChart.open")}
-                      {p.opened_at ? ` · ${p.opened_at}` : ""}
-                    </span>
-                  </div>
-                  {p.status !== "closed" ? (
-                    <button
-                      type="button"
-                      className="patient-chart-icon-btn"
-                      onClick={() => toggleProblem(p.id, true)}
-                      aria-label={t("patientChart.closeProblem")}
-                    >
-                      <Check size={14} />
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className="patient-chart-icon-btn"
-                      onClick={() => toggleProblem(p.id, false)}
-                      aria-label={t("patientChart.reopenProblem")}
-                    >
-                      <FolderOpen size={14} />
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="patient-chart-add-row">
-            <Input
-              placeholder={t("patientChart.placeholders.problem")}
-              value={problemDraft}
-              onChange={(e) => setProblemDraft(e.target.value)}
-            />
-            <Button type="button" variant="secondary" size="sm" onClick={addProblem}>
-              <Plus size={14} className="mr-1" /> {t("patientChart.addProblem")}
+          <div className="patient-chart-species-form-actions">
+            <label className="patient-chart-species-select">
+              <span className="sr-only">{t("patientChart.speciesLabel")}</span>
+              <select
+                value={speciesCategory}
+                onChange={(e) => setSpeciesCategory(e.target.value)}
+                aria-label={t("patientChart.speciesLabel")}
+              >
+                {SPECIES_FORM_CATEGORIES.map((key) => (
+                  <option key={key} value={key}>
+                    {tSpecies(`categories.${key}`, { defaultValue: key })}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setSpeciesFormOpen((v) => !v)}
+            >
+              {speciesFormOpen ? t("patientChart.hideSpeciesForm") : t("patientChart.showSpeciesForm")}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              disabled={savingSpeciesForm || !speciesCategory}
+              onClick={saveSpeciesForm}
+            >
+              {savingSpeciesForm ? t("common.saving") : t("patientChart.saveSpeciesForm")}
             </Button>
           </div>
-
-          <h3 className="patient-chart-vitals-title">{t("patientChart.vitals")}</h3>
-          <WeightSparkline series={vitalsSeries} />
-          {vitalsSeries.filter((s) => s.weight_kg != null).length === 0 ? (
-            <p className="clinic-muted">{t("patientChart.emptyVitals")}</p>
-          ) : (
-            <ul className="patient-chart-vitals-list">
-              {[...vitalsSeries]
-                .filter((s) => s.weight_kg != null)
-                .reverse()
-                .slice(0, 12)
-                .map((s) => (
-                  <li key={`${s.consultation_id}-${s.created_at}`}>
-                    <span>{formatConsultationDateShort(s.created_at)}</span>
-                    <strong>{s.weight_kg} kg</strong>
-                  </li>
-                ))}
-            </ul>
-          )}
-        </section>
-      </div>
+        </div>
+        {speciesFormOpen && (
+          <div className="patient-chart-species-form-body">
+            <LazySpeciesForm
+              category={speciesCategory}
+              formData={speciesFormData}
+              setFormData={setSpeciesFormData}
+              unknownMessage={t("patientChart.unknownSpecies")}
+            />
+          </div>
+        )}
+      </section>
 
       <section className="patient-chart-timeline clinic-timeline clinic-timeline-unified">
         <h2>{t("clients.clinicalHistory")}</h2>

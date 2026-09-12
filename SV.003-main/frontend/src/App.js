@@ -3221,7 +3221,9 @@ const NewConsultation = ({
           ...hydrated,
           sexo: normalizePetSex(hydrated.sexo || patient?.sex) || prev.sexo,
         }));
-        if (patient?.species) setSelectedCategory(patient.species);
+        const chartCategory =
+          patient?.clinical_chart?.form_category || patient?.species;
+        if (chartCategory) setSelectedCategory(chartCategory);
       } catch {
         const p = clinicalContext.patient;
         if (!p || cancelled) return;

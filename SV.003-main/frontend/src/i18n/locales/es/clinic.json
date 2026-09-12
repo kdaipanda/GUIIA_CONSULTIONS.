@@ -218,7 +218,15 @@
       "surgery": "Cirugía",
       "product": "Producto",
       "problem": "Nuevo problema clínico"
-    }
+    },
+    "speciesFormTitle": "Ficha clínica por especie",
+    "speciesFormHint": "Actualiza la ficha del paciente. No crea una consulta CDS ni descuenta cupo.",
+    "speciesFormSaved": "Ficha clínica guardada",
+    "saveSpeciesForm": "Guardar ficha",
+    "showSpeciesForm": "Mostrar formulario",
+    "hideSpeciesForm": "Ocultar formulario",
+    "speciesLabel": "Especie del formulario",
+    "unknownSpecies": "Selecciona una especie para editar la ficha."
   },
   "agenda": {
     "title": "Agenda",

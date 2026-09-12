@@ -18,6 +18,65 @@
   margin-bottom: 20px;
 }
 
+.patient-chart-species-form {
+  margin-bottom: 20px;
+  border: 1px solid rgba(38, 91, 147, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 14px 16px;
+}
+
+.patient-chart-species-form-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.patient-chart-species-form-head h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  color: var(--clinic-navy, #0c2d4d);
+}
+
+.patient-chart-species-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.patient-chart-species-select select {
+  min-width: 160px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(38, 91, 147, 0.2);
+  padding: 0 10px;
+  background: #fff;
+  color: var(--clinic-navy, #0c2d4d);
+  font-size: 0.875rem;
+}
+
+.patient-chart-species-form-body {
+  margin-top: 8px;
+  border-top: 1px solid rgba(38, 91, 147, 0.08);
+  padding-top: 12px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .patient-chart-summary h2,
 .patient-chart-timeline h2 {
   margin: 0 0 10px;

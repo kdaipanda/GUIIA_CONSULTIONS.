@@ -15,6 +15,8 @@ EMPTY_CHART: Dict[str, Any] = {
     "deworming": [],
     "problems": [],
     "reproductive": {"sterilized": None, "notes": ""},
+    "form_snapshot": None,
+    "form_category": None,
     "updated_at": None,
     "updated_from_consultation_id": None,
 }
@@ -45,6 +47,10 @@ def normalize_chart(raw: Any) -> Dict[str, Any]:
     out["reproductive"] = (
         {**EMPTY_CHART["reproductive"], **repro} if isinstance(repro, dict) else {**EMPTY_CHART["reproductive"]}
     )
+    snap = out.get("form_snapshot")
+    out["form_snapshot"] = snap if isinstance(snap, dict) else None
+    cat = out.get("form_category")
+    out["form_category"] = str(cat).strip() if cat else None
     return out
 
 
@@ -140,6 +146,11 @@ def merge_clinical_chart(existing: Any, patch: Any) -> Dict[str, Any]:
 
     if isinstance(patch.get("reproductive"), dict):
         out["reproductive"] = {**out["reproductive"], **patch["reproductive"]}
+
+    if isinstance(patch.get("form_snapshot"), dict):
+        out["form_snapshot"] = dict(patch["form_snapshot"])
+    if patch.get("form_category") is not None and str(patch.get("form_category") or "").strip():
+        out["form_category"] = str(patch["form_category"]).strip()
 
     if patch.get("updated_from_consultation_id"):
         out["updated_from_consultation_id"] = patch["updated_from_consultation_id"]

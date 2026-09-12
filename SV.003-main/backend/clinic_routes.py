@@ -172,9 +172,14 @@ class ClinicalChartPatch(BaseModel):
     deworming: Optional[List[Dict[str, Any]]] = None
     problems: Optional[List[Dict[str, Any]]] = None
     reproductive: Optional[Dict[str, Any]] = None
+    form_snapshot: Optional[Dict[str, Any]] = None
+    form_category: Optional[str] = None
     updated_from_consultation_id: Optional[str] = None
     replace: Optional[bool] = False
     weight_kg: Optional[float] = None
+    species: Optional[str] = None
+    breed: Optional[str] = None
+    sex: Optional[str] = None
 
 
 class AppointmentCreate(BaseModel):
@@ -690,12 +695,16 @@ async def api_patch_patient_clinical_chart(
     patch = body.model_dump(exclude_none=True)
     weight_kg = patch.pop("weight_kg", None)
     replace = bool(patch.pop("replace", False))
+    patient_fields: Dict[str, Any] = {}
+    for key in ("species", "breed", "sex"):
+        if key in patch:
+            patient_fields[key] = patch.pop(key)
 
     if replace:
         try:
             from clinical_chart_sync import normalize_chart
 
-            fields: Dict[str, Any] = {"clinical_chart": normalize_chart(patch)}
+            fields: Dict[str, Any] = {"clinical_chart": normalize_chart(patch), **patient_fields}
             if weight_kg is not None:
                 fields["weight_kg"] = weight_kg
             patient, err = clinic_db.update_patient(patient_id, ctx["organization_id"], fields)
@@ -707,6 +716,7 @@ async def api_patch_patient_clinical_chart(
             ctx["organization_id"],
             patch,
             weight_kg=weight_kg,
+            extra_fields=patient_fields or None,
         )
     if err:
         # Column may not exist yet before migration — soft fail with clear message
