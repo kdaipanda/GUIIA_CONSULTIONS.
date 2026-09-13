@@ -2642,12 +2642,16 @@ async def create_consultation(
                 consultation_id=consultation_id,
             )
             weight = extract_weight_kg(payload.consultation_data)
-            _cdb.merge_patient_clinical_chart(
+            synced_patient, sync_err = _cdb.merge_patient_clinical_chart(
                 payload.patient_id,
                 org_id,
                 chart_patch,
                 weight_kg=weight,
             )
+            if sync_err:
+                print(f"[WARN] clinical_chart sync on create failed: {sync_err}")
+            elif not synced_patient:
+                print("[WARN] clinical_chart sync on create skipped: patient not found")
         except Exception as sync_exc:  # noqa: BLE001
             print(f"[WARN] clinical_chart sync on create: {sync_exc}")
 
@@ -2868,12 +2872,16 @@ async def update_consultation_payload(
             # Avoid spawning duplicate open problems on every payload save
             chart_patch["problems"] = []
             weight = extract_weight_kg(form_data)
-            _cdb.merge_patient_clinical_chart(
+            synced_patient, sync_err = _cdb.merge_patient_clinical_chart(
                 patient_id,
                 org_id,
                 chart_patch,
                 weight_kg=weight,
             )
+            if sync_err:
+                print(f"[WARN] clinical_chart sync on payload failed: {sync_err}")
+            elif not synced_patient:
+                print("[WARN] clinical_chart sync on payload skipped: patient not found")
         except Exception as sync_exc:  # noqa: BLE001
             print(f"[WARN] clinical_chart sync on payload: {sync_exc}")
 
