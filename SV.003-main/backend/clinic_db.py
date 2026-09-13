@@ -967,6 +967,30 @@ def update_patient(
         return (None, str(exc))
 
 
+def _update_patient_if_unchanged(
+    patient_id: str,
+    organization_id: str,
+    fields: Dict[str, Any],
+    expected_updated_at: Optional[str],
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    fields = _nullify_empty_optional_fields({**fields, "updated_at": _now_iso()})
+    try:
+        query = (
+            _table("patients")
+            .update(fields)
+            .eq("id", patient_id)
+            .eq("organization_id", organization_id)
+        )
+        if expected_updated_at:
+            query = query.eq("updated_at", expected_updated_at)
+        else:
+            query = query.is_("updated_at", "null")
+        resp = query.execute()
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
 def merge_patient_clinical_chart(
     patient_id: str,
     organization_id: str,
@@ -981,21 +1005,34 @@ def merge_patient_clinical_chart(
     except Exception as exc:  # noqa: BLE001
         return (None, f"clinical_chart_sync unavailable: {exc}")
 
-    patient, err = get_patient(patient_id, organization_id)
-    if err:
-        return (None, err)
-    if not patient:
-        return (None, None)
+    for _attempt in range(3):
+        patient, err = get_patient(patient_id, organization_id)
+        if err:
+            return (None, err)
+        if not patient:
+            return (None, None)
 
-    merged = merge_clinical_chart(patient.get("clinical_chart"), patch)
-    fields: Dict[str, Any] = {"clinical_chart": normalize_chart(merged)}
-    if weight_kg is not None:
-        fields["weight_kg"] = weight_kg
-    if extra_fields:
-        for key, value in extra_fields.items():
-            if value is not None:
-                fields[key] = value
-    return update_patient(patient_id, organization_id, fields)
+        merged = merge_clinical_chart(patient.get("clinical_chart"), patch)
+        fields: Dict[str, Any] = {"clinical_chart": normalize_chart(merged)}
+        if weight_kg is not None:
+            fields["weight_kg"] = weight_kg
+        if extra_fields:
+            for key, value in extra_fields.items():
+                if value is not None:
+                    fields[key] = value
+        updated, update_err = _update_patient_if_unchanged(
+            patient_id,
+            organization_id,
+            fields,
+            patient.get("updated_at"),
+        )
+        if update_err:
+            return (None, update_err)
+        if updated:
+            return (updated, None)
+
+    return (None, "clinical_chart update conflict; retry exhausted")
+
 
 
 def delete_patient(patient_id: str, organization_id: str) -> Optional[str]:
