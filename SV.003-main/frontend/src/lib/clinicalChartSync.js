@@ -282,14 +282,36 @@ function setIfEmpty(target, key, value) {
   }
 }
 
+const CATEGORY_ALIASES = {
+  perro: "perros",
+  gato: "gatos",
+  conejo: "conejos",
+  tortuga: "tortugas",
+  erizo: "erizos",
+  huron: "hurones",
+  hamster: "hamsters",
+  aves_ornamentales: "aves",
+  aves_corral: "patos_pollos",
+};
+
+function normalizeCategoryKey(value) {
+  const key = String(value || "").trim().toLowerCase();
+  return CATEGORY_ALIASES[key] || key;
+}
+
 /**
  * Prefill form fields from patient + clinical chart + last consultation.
  * Priority: form_snapshot > chart lists > patient demographics > last consultation.
  */
 export function hydrateFormDataFromChart(category, chart, patient, lastConsultation) {
   const c = normalizeClinicalChart(chart || patient?.clinical_chart);
-  const snapshot =
-    c.form_snapshot && typeof c.form_snapshot === "object" ? { ...c.form_snapshot } : {};
+  const requestedCategory = normalizeCategoryKey(category);
+  const snapshotCategory = normalizeCategoryKey(c.form_category);
+  const canReuseSnapshot =
+    c.form_snapshot &&
+    typeof c.form_snapshot === "object" &&
+    (!snapshotCategory || !requestedCategory || snapshotCategory === requestedCategory);
+  const snapshot = canReuseSnapshot ? { ...c.form_snapshot } : {};
   const lastFd =
     lastConsultation?.form_data && typeof lastConsultation.form_data === "object"
       ? lastConsultation.form_data
