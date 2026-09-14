@@ -54,9 +54,10 @@ export default function PatientClinicalChartPage({
       const nextChart = normalizeClinicalChart(data?.patient?.clinical_chart);
       setChart(nextChart);
       const category = resolveChartFormCategory(nextChart, data?.patient);
-      setSpeciesCategory(category || "perros");
+      const selectedCategory = category || "perros";
+      setSpeciesCategory(selectedCategory);
       const hydrated = hydrateFormDataFromChart(
-        category,
+        selectedCategory,
         nextChart,
         data?.patient,
         (data?.consultations || [])[0] || null,
@@ -83,6 +84,13 @@ export default function PatientClinicalChartPage({
   const medicalImages = detail?.medical_images || [];
   const owner = patient?.clients || {};
   const currentWeight = patient?.weight_kg;
+
+  const handleSpeciesCategoryChange = (nextCategory) => {
+    setSpeciesCategory(nextCategory);
+    setSpeciesFormData(
+      hydrateFormDataFromChart(nextCategory, chart, patient, consultations[0] || null),
+    );
+  };
 
   const saveSpeciesForm = async () => {
     if (!veterinarian?.id || !patientId || !speciesCategory) return;
@@ -239,7 +247,7 @@ export default function PatientClinicalChartPage({
               <span className="sr-only">{t("patientChart.speciesLabel")}</span>
               <select
                 value={speciesCategory}
-                onChange={(e) => setSpeciesCategory(e.target.value)}
+                onChange={(e) => handleSpeciesCategoryChange(e.target.value)}
                 aria-label={t("patientChart.speciesLabel")}
               >
                 {SPECIES_FORM_CATEGORIES.map((key) => (
