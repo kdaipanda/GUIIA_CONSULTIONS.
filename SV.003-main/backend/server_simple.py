@@ -375,6 +375,52 @@ def _anthropic_sampling_params(*, temperature: Optional[float] = None) -> Dict[s
     return sampling
 
 
+def _anthropic_error_text(exc: BaseException) -> str:
+    parts = [str(exc)]
+    message = getattr(exc, "message", None)
+    if message:
+        parts.append(str(message))
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        error = body.get("error")
+        if isinstance(error, dict) and error.get("message"):
+            parts.append(str(error["message"]))
+    elif body:
+        parts.append(str(body))
+    return " ".join(parts).lower()
+
+
+def _is_anthropic_sampling_error(exc: BaseException) -> bool:
+    text = _anthropic_error_text(exc)
+    if not any(key in text for key in ("temperature", "top_p", "top_k", "extra_body")):
+        return False
+    if isinstance(exc, TypeError):
+        return True
+    return getattr(exc, "status_code", None) == 400
+
+
+def _strip_anthropic_sampling_params(kwargs: Dict[str, Any]) -> None:
+    for key in ("temperature", "top_p", "top_k", "extra_body"):
+        kwargs.pop(key, None)
+
+
+def _create_anthropic_message_with_sampling_fallback(
+    create_kwargs: Dict[str, Any],
+    create_func,
+    *,
+    warn_label: str,
+):
+    try:
+        return create_func(create_kwargs)
+    except Exception as exc:  # noqa: BLE001
+        # SDK/modelo nuevo: kwargs o valores de sampling rechazados.
+        if not _is_anthropic_sampling_error(exc):
+            raise
+        _strip_anthropic_sampling_params(create_kwargs)
+        print(f"[WARN] {warn_label} sin sampling ({exc})")
+        return create_func(create_kwargs)
+
+
 anthropic_client: Optional[Anthropic] = (
     Anthropic(api_key=ANTHROPIC_API_KEY) if (Anthropic and ANTHROPIC_API_KEY) else None
 )
@@ -540,17 +586,11 @@ async def send_llm_message(
                 )
             return llm_client.messages.create(**kwargs)
 
-        try:
-            response = _do_create(create_kwargs)
-        except TypeError as exc:
-            # SDK nuevo / wrapper: kwargs de sampling rechazados.
-            err = str(exc).lower()
-            if not any(k in err for k in ("temperature", "top_p", "top_k")):
-                raise
-            for key in ("temperature", "top_p", "top_k", "extra_body"):
-                create_kwargs.pop(key, None)
-            print(f"[WARN] Anthropic create sin sampling ({exc})")
-            response = _do_create(create_kwargs)
+        response = _create_anthropic_message_with_sampling_fallback(
+            create_kwargs,
+            _do_create,
+            warn_label="Anthropic create",
+        )
 
         text_blocks = [
             block.text
@@ -1366,16 +1406,11 @@ async def send_support_chat_message(
             "system": system_prompt,
             "messages": messages_payload,
         }
-        try:
-            response = anthropic_client.messages.create(**create_kwargs)
-        except TypeError as exc:
-            err = str(exc).lower()
-            if not any(k in err for k in ("temperature", "top_p", "top_k")):
-                raise
-            for key in ("temperature", "top_p", "top_k", "extra_body"):
-                create_kwargs.pop(key, None)
-            print(f"[WARN] Anthropic support create sin sampling ({exc})")
-            response = anthropic_client.messages.create(**create_kwargs)
+        response = _create_anthropic_message_with_sampling_fallback(
+            create_kwargs,
+            lambda kwargs: anthropic_client.messages.create(**kwargs),
+            warn_label="Anthropic support create",
+        )
         text_blocks = [
             block.text for block in response.content if getattr(block, "type", "") == "text"
         ]
