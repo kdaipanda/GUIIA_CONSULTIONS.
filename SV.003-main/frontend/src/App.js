@@ -993,7 +993,7 @@ const Router = () => {
     ),
     "payment-success": (
       <AppShell fullBleed>
-        <PaymentSuccessPage setView={handleSetView} />
+        <PaymentSuccessPage setView={navigateSetView} />
       </AppShell>
     ),
     profile: (
