@@ -1679,7 +1679,6 @@ async def register_veterinarian(vet: VeterinarianRegister, request: Request):
         raise HTTPException(status_code=500, detail=f"Error guardando perfil: {err}")
 
     saved = result or vet_data
-    result_data = auth_security.attach_auth_tokens(saved)
 
     if not is_dev:
         cedula_verification.maybe_send_cedula_upload_reminder(saved, force=True)
@@ -1699,7 +1698,14 @@ async def register_veterinarian(vet: VeterinarianRegister, request: Request):
     asyncio.create_task(_track_meta_registration())
 
     rate_limit.reset_rate_limit(request, "register", vet.email)
-    return result_data
+    if is_dev:
+        return auth_security.attach_auth_tokens(saved)
+    return _cedula_flow_response(
+        saved,
+        message="Debes subir tu documento de registro profesional para continuar.",
+        needs_upload=True,
+        verification_status=initial_status,
+    )
 
 
 @app.get("/api/auth/invite/{token}")
