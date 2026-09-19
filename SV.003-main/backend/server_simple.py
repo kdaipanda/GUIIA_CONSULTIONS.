@@ -2325,6 +2325,29 @@ def _with_team_membership(profile: Optional[Dict[str, Any]]) -> Dict[str, Any]:
             return dict(profile)
 
 
+def _feature_access_profile(profile: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Perfil efectivo para gates de features; grants personales no aplican a miembros."""
+    effective = _with_team_membership(profile)
+    if not profile:
+        return effective
+    try:
+        import clinic_db as _clinic_db
+
+        member, _ = _clinic_db.get_member_by_profile(str(profile.get("id") or ""))
+        role = ((member or {}).get("role") or "").strip().lower()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] membresía org para feature gate: {exc}")
+        role = ""
+    if role and role != "owner":
+        effective = {
+            **effective,
+            "membership_source": "organization",
+            "premium_features_until": None,
+            "premium_features_active": False,
+        }
+    return effective
+
+
 def _consultation_bill_to_id(profile: Dict[str, Any]) -> str:
     try:
         import clinic_db as _clinic_db
@@ -3781,7 +3804,11 @@ async def interpret_medical_image(
 
     user_email = vet_profile.get("email", "")
     has_unlimited = has_unlimited_consultations(user_email) if user_email else False
-    require_feature_for_profile(vet_profile, "medical_images", has_unlimited=has_unlimited)
+    require_feature_for_profile(
+        _feature_access_profile(vet_profile),
+        "medical_images",
+        has_unlimited=has_unlimited,
+    )
 
     has_file = bool(request.image_base64 and str(request.image_base64).strip())
     has_text = bool(request.pasted_study_data and str(request.pasted_study_data).strip())
@@ -3988,7 +4015,11 @@ async def get_image_history(x_veterinarian_id: str = Header(None), limit: int = 
 
     user_email = vet_profile.get("email", "")
     has_unlimited = has_unlimited_consultations(user_email) if user_email else False
-    require_feature_for_profile(vet_profile, "medical_images", has_unlimited=has_unlimited)
+    require_feature_for_profile(
+        _feature_access_profile(vet_profile),
+        "medical_images",
+        has_unlimited=has_unlimited,
+    )
 
     rows, err = list_medical_images(vet_id, limit=limit)
     if err:
