@@ -282,7 +282,22 @@ def _check_write(role: str) -> None:
 
 
 def _require_membership_feature(ctx: dict, feature: str) -> None:
-    require_feature_for_profile(ctx.get("profile"), feature)
+    profile = ctx.get("profile") or {}
+    try:
+        effective_profile = clinic_db.apply_team_membership_overlay(profile)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] overlay membresía feature: {exc}")
+        effective_profile = dict(profile)
+
+    role = (ctx.get("role") or "").strip().lower()
+    if role and role != "owner":
+        effective_profile = {
+            **effective_profile,
+            "membership_source": "organization",
+            "premium_features_until": None,
+            "premium_features_active": False,
+        }
+    require_feature_for_profile(effective_profile, feature)
 
 
 def _coerce_analysis_text(value: Any) -> Optional[str]:
