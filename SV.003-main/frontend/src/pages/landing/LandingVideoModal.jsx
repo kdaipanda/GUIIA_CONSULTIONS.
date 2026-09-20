@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -23,9 +23,23 @@ function presentationEmbedSrc() {
 
 export function LandingVideoModal({ open, onClose }) {
   const { t } = useTranslation("landing");
-  const embedSrc = useMemo(() => (open ? presentationEmbedSrc() : ""), [open]);
+  const [embedReady, setEmbedReady] = useState(false);
+  const embedSrc = useMemo(
+    () => (open && embedReady ? presentationEmbedSrc() : ""),
+    [open, embedReady],
+  );
   const closeRef = useRef(null);
   const previouslyFocused = useRef(null);
+
+  // Defer iframe mount so the open click stays responsive (INP).
+  useEffect(() => {
+    if (!open) {
+      setEmbedReady(false);
+      return undefined;
+    }
+    const id = window.requestAnimationFrame(() => setEmbedReady(true));
+    return () => window.cancelAnimationFrame(id);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -45,7 +59,6 @@ export function LandingVideoModal({ open, onClose }) {
       }
       if (event.key !== "Tab" || !closeRef.current) return;
 
-      // Single focusable control in chrome — keep focus in dialog
       const focusables = closeRef.current
         .closest(".landing-video-modal")
         ?.querySelectorAll(
@@ -99,19 +112,33 @@ export function LandingVideoModal({ open, onClose }) {
           </button>
 
           <div className="landing-video-modal-embed">
-            <iframe
-              key={embedSrc}
-              className="landing-video-modal-player landing-video-modal-player--youtube"
-              src={embedSrc}
-              title={t("hero.presentationTitle")}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-            />
+            {embedSrc ? (
+              <iframe
+                key={embedSrc}
+                className="landing-video-modal-player landing-video-modal-player--youtube"
+                src={embedSrc}
+                title={t("hero.presentationTitle")}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            ) : (
+              <div className="landing-video-modal-loading" aria-hidden />
+            )}
           </div>
         </div>
 
-        <p className="landing-video-modal-footnote">{t("hero.presentationCaption")}</p>
+        <p className="landing-video-modal-footnote">
+          {t("hero.presentationCaption")}{" "}
+          <a
+            className="landing-video-modal-watch-link"
+            href={LANDING_PRESENTATION_YOUTUBE.watchUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t("hero.watchOnYoutube")}
+          </a>
+        </p>
       </div>
     </div>,
     document.body,

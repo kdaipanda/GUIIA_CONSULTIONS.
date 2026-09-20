@@ -635,6 +635,12 @@
   background: #000;
 }
 
+.landing-video-modal-loading {
+  position: absolute;
+  inset: 0;
+  background: #0a0a0a;
+}
+
 .landing-video-modal-footnote {
   margin: 0;
   padding-inline: 0.15rem;
@@ -643,6 +649,16 @@
   letter-spacing: -0.01em;
   color: rgba(255, 255, 255, 0.6);
   text-wrap: pretty;
+}
+
+.landing-video-modal-watch-link {
+  color: rgba(255, 255, 255, 0.92);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.landing-video-modal-watch-link:hover {
+  color: #fff;
 }
 
 @media (max-width: 639px) {
