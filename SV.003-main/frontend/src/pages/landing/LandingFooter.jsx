@@ -3,7 +3,7 @@ import { ArrowUpRight, Mail } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TermsAndConditionsModal } from "../../components/TermsAndConditionsModal";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher";
-import { scrollToLandingProduct, scrollToLandingSection } from "./landingScroll";
+import { onLandingAnchorClick, productTabHref } from "./landingScroll";
 import {
   LANDING_NEWSLETTER_EMAIL,
   LANDING_SOCIAL_LINKS,
@@ -68,10 +68,10 @@ export function LandingFooter() {
   const [legalModal, setLegalModal] = useState(null);
 
   const footerNav = [
-    { label: t("footer.product"), action: () => scrollToLandingProduct("species") },
-    { label: t("footer.features"), action: () => scrollToLandingSection("#features") },
-    { label: t("footer.pricing"), action: () => scrollToLandingSection("#pricing") },
-    { label: t("footer.faq"), action: () => scrollToLandingSection("#faq") },
+    { label: t("footer.product"), href: productTabHref("species"), productTab: "species" },
+    { label: t("footer.features"), href: "#features" },
+    { label: t("footer.pricing"), href: "#pricing" },
+    { label: t("footer.faq"), href: "#faq" },
   ];
 
   const handleNewsletterSubmit = (event) => {
@@ -108,7 +108,7 @@ export function LandingFooter() {
                 <LanguageSwitcher />
               </div>
               <h3 id="footer-social-title" className="landing-footer-v2-label">
-                {t("footer.newsletterTitle")}
+                {t("footer.socialTitle")}
               </h3>
               <div className="landing-footer-v2-social-grid">
                 {LANDING_SOCIAL_LINKS.map(({ id, label, href, subtitle }) => (
@@ -118,6 +118,7 @@ export function LandingFooter() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="landing-footer-v2-social-card"
+                    aria-label={`${label}${subtitle ? ` — ${subtitle}` : ""}`}
                   >
                     <span className="landing-footer-v2-social-icon" aria-hidden>
                       <SocialIcon id={id} />
@@ -138,10 +139,14 @@ export function LandingFooter() {
               </div>
 
               <nav className="landing-footer-v2-nav" aria-label={t("nav.main")}>
-                {footerNav.map(({ label, action }) => (
-                  <button key={label} type="button" onClick={action}>
+                {footerNav.map(({ label, href, productTab }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    onClick={(event) => onLandingAnchorClick(event, { productTab })}
+                  >
                     {label}
-                  </button>
+                  </a>
                 ))}
               </nav>
             </section>
@@ -180,6 +185,7 @@ export function LandingFooter() {
                       setEmail(e.target.value);
                       if (newsletterState !== "idle") setNewsletterState("idle");
                     }}
+                    spellCheck={false}
                     className="landing-footer-v2-input"
                     disabled={newsletterState === "sent"}
                   />

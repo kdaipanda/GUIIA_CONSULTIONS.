@@ -160,7 +160,7 @@ export function LandingPricing({ setView }) {
 
   return (
 
-    <section id="pricing" ref={pricingRef} className="landing-section landing-section-alt">
+    <section id="pricing" ref={pricingRef} className="landing-section">
 
       <div className="landing-container">
 
@@ -168,7 +168,7 @@ export function LandingPricing({ setView }) {
 
           <p className="landing-eyebrow">{t("pricing.eyebrow")}</p>
 
-          <h2 className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl">
+          <h2 className="landing-section-title text-3xl text-guiaa-brand-navy sm:text-4xl">
 
             {t("pricing.title")}
 
@@ -180,11 +180,17 @@ export function LandingPricing({ setView }) {
 
           </p>
 
+          <p className="landing-pricing-trial-note mt-3 text-sm font-semibold text-guiaa-brand-green-dark">
+
+            {t("pricing.trialNote")}
+
+          </p>
+
         </div>
 
 
 
-        <div className="landing-pricing-grid grid gap-5 md:grid-cols-2 lg:grid-cols-3 lg:items-stretch">
+        <div className="landing-pricing-grid grid grid-cols-1 gap-5 lg:grid-cols-3 lg:items-stretch">
 
           {plans.map(
 
@@ -198,11 +204,13 @@ export function LandingPricing({ setView }) {
 
                   highlighted
 
-                    ? "landing-pricing-card--featured landing-pricing-featured landing-card-accent-top md:col-span-2 lg:col-span-1"
+                    ? "landing-pricing-card--featured landing-pricing-featured"
 
                     : ""
 
                 }`}
+
+                aria-labelledby={`pricing-plan-${key}`}
 
               >
 
@@ -210,7 +218,11 @@ export function LandingPricing({ setView }) {
 
                   <div>
 
-                    <h3 className="landing-pricing-plan-name">{name}</h3>
+                    <h3 id={`pricing-plan-${key}`} className="landing-pricing-plan-name">
+
+                      {name}
+
+                    </h3>
 
                     <p className="landing-pricing-price">{price}</p>
 

@@ -2,7 +2,7 @@
 
 :root {
   --landing-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --landing-ease-spring: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --landing-ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* —— Entrada escalonada al hacer scroll —— */
@@ -174,25 +174,11 @@
 }
 
 .landing-petpal-cta-primary::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    100deg,
-    transparent 30%,
-    rgba(61, 155, 143, 0.12) 50%,
-    transparent 70%
-  );
-  transform: translateX(-120%);
-  transition: transform 0.5s ease;
-}
-
-.landing-petpal-cta-primary:hover::after {
-  transform: translateX(120%);
+  display: none;
 }
 
 .landing-petpal-cta-primary:hover {
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-1px);
 }
 
 @keyframes landing-play-pulse {
@@ -206,14 +192,14 @@
 }
 
 .landing-petpal-cta-play {
-  animation: landing-play-pulse 2.5s ease-in-out infinite;
+  animation: none;
   transition: transform 0.22s var(--landing-ease-out), background 0.22s ease;
 }
 
 .landing-petpal-cta-play:hover {
-  transform: scale(1.1);
+  transform: translateY(-1px);
   animation: none;
-  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14);
 }
 
 /* —— Stats bar —— */
@@ -381,23 +367,17 @@
 }
 
 .landing-cta-panel-v2:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: 0 28px 64px -22px rgba(12, 45, 77, 0.5);
-  animation: landing-cta-glow 3s ease-in-out infinite;
 }
 
 /* —— Especies marquee —— */
 .landing-species-chip {
   transition:
-    transform 0.22s var(--landing-ease-out),
-    border-color 0.22s ease,
-    background-color 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-.landing-species-chip:hover {
-  transform: translateY(-3px) scale(1.03);
-  box-shadow: 0 10px 22px -12px rgba(47, 133, 122, 0.28);
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.25s ease;
 }
 
 /* —— Tabs producto —— */
@@ -418,13 +398,11 @@
 
 /* —— Eyebrow sutil —— */
 .landing-eyebrow {
-  transition:
-    letter-spacing 0.3s ease,
-    background-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .landing-section-head:hover .landing-eyebrow {
-  letter-spacing: 0.11em;
+  color: #0c2d4d;
 }
 
 /* —— Accesibilidad —— */
@@ -516,36 +494,32 @@
 }
 
 /* —— Mockup dispositivo —— */
-.landing-device-mockup {
+.landing-device-mockup,
+.landing-product-shot {
   position: relative;
-  padding: 0.75rem 0.75rem 1.25rem;
-  border-radius: 1.5rem;
-  background: linear-gradient(160deg, #0c2d4d 0%, #1a4d6e 100%);
-  box-shadow:
-    0 28px 60px -24px rgba(12, 45, 77, 0.45),
-    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-  transform: perspective(1200px) rotateY(-4deg) rotateX(2deg);
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  padding: 0;
+  border-radius: 0.85rem;
+  background: #ffffff;
+  border: 1px solid rgba(12, 45, 77, 0.1);
+  box-shadow: 0 12px 32px rgba(12, 45, 77, 0.08);
+  transform: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-.landing-device-mockup:hover {
-  transform: perspective(1200px) rotateY(-2deg) rotateX(1deg) translateY(-4px);
+.landing-device-mockup:hover,
+.landing-product-shot:hover {
+  transform: none;
+  border-color: rgba(61, 155, 143, 0.28);
+  box-shadow: 0 16px 40px rgba(12, 45, 77, 0.1);
 }
 
 .landing-device-mockup::before {
-  content: "";
-  position: absolute;
-  top: 0.35rem;
-  left: 50%;
-  width: 3.5rem;
-  height: 0.35rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateX(-50%);
+  display: none;
 }
 
-.landing-device-mockup .landing-product-frame {
-  margin-top: 0.35rem;
+.landing-device-mockup .landing-product-frame,
+.landing-product-shot .landing-product-frame {
+  margin-top: 0;
 }
 
 /* —— Colegas: contraste —— */
@@ -583,14 +557,32 @@
 }
 
 .landing-nav-mobile-cta {
-  min-height: 2.75rem;
+  min-height: 2.5rem;
+  white-space: nowrap;
+}
+
+.landing-nav-hero .guiaa-brand-lockup--navbar .logo-image-navbar,
+.landing-shell .guiaa-brand-lockup--navbar .logo-image-navbar {
+  width: auto;
+  max-height: 2.5rem;
+  max-width: 5.5rem;
+  object-fit: contain;
+}
+
+@media (min-width: 640px) {
+  .landing-nav-hero .guiaa-brand-lockup--navbar .logo-image-navbar,
+  .landing-shell .guiaa-brand-lockup--navbar .logo-image-navbar {
+    max-height: 3rem;
+    max-width: 7rem;
+  }
 }
 
 .landing-nav-mobile-link {
   min-height: 2.75rem;
 }
 
-.landing-footer-v2-nav button {
+.landing-footer-v2-nav button,
+.landing-footer-v2-nav a {
   min-height: 2.75rem;
   padding: 0.5rem 0.9rem;
 }

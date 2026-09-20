@@ -9,13 +9,13 @@ import {
 function PreviewStepper({ currentStep }) {
   const { t } = useTranslation("landing");
   const steps = [
-    { number: 1, label: t("preview.steps.data"), icon: "🐾" },
-    { number: 2, label: t("preview.steps.reason"), icon: "📝" },
-    { number: 3, label: t("preview.steps.diagnosis"), icon: "🔬" },
+    { number: 1, label: t("preview.steps.data") },
+    { number: 2, label: t("preview.steps.reason") },
+    { number: 3, label: t("preview.steps.diagnosis") },
   ];
 
   return (
-    <div className="step-indicator">
+    <div className="step-indicator landing-preview-stepper">
       <div
         className="step-progress-line"
         style={{ width: `${(currentStep - 1) * 50}%` }}
@@ -31,7 +31,7 @@ function PreviewStepper({ currentStep }) {
             {currentStep > step.number ? (
               <span className="check-icon">✓</span>
             ) : (
-              step.icon
+              <span className="landing-preview-step-num">{step.number}</span>
             )}
           </div>
           <div className="step-label">{step.label}</div>
@@ -45,26 +45,26 @@ function CategoryGrid({ selected = "perros" }) {
   const { t } = useTranslation("landing");
   const speciesCount = PREVIEW_CATEGORIES.length;
   return (
-    <div className="form-section category-selector-glass-wrap">
-      <div className="category-selector-glass-head">
-        <span className="category-selector-glass-badge">
-          {t("preview.multiSpeciesBadge", { count: speciesCount })}
-        </span>
-      </div>
-      <div className="category-selector-glass-panel">
-        <div className="category-grid category-grid--liquid">
-          {PREVIEW_CATEGORIES.map((key) => (
-            <div
-              key={key}
-              className={`category-card category-card--liquid ${selected === key ? "selected" : ""}`}
-            >
-              <span className="category-icon">{PREVIEW_CATEGORY_ICONS[key]}</span>
-              <span className="category-label">
-                {t(`speciesMarquee.categories.${key}`, { defaultValue: key })}
-              </span>
-            </div>
-          ))}
-        </div>
+    <div className="form-section landing-preview-species">
+      <p className="landing-preview-species-eyebrow">
+        {t("preview.multiSpeciesBadge", { count: speciesCount })}
+      </p>
+      <div className="landing-preview-species-grid">
+        {PREVIEW_CATEGORIES.map((key) => (
+          <div
+            key={key}
+            className={`landing-species-chip landing-preview-species-chip${
+              selected === key ? " is-selected" : ""
+            }`}
+          >
+            <span className="landing-species-icon" aria-hidden>
+              {PREVIEW_CATEGORY_ICONS[key]}
+            </span>
+            <span className="landing-species-label">
+              {t(`speciesMarquee.categories.${key}`, { defaultValue: key })}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -203,33 +203,24 @@ export function DashboardPreview() {
                   <BarChart3 className="icon" size={16} aria-hidden />
                   {t("preview.dashboardConsultations", { count: 24 })}
                 </span>
-                <span className="hero-summary-divider">•</span>
-                <span className="hero-badge premium">⭐ Premium</span>
+                <span className="hero-summary-divider">·</span>
+                <span className="landing-preview-plan-badge">Premium</span>
               </div>
             </div>
           </div>
         </div>
-        <div className="stats-cards">
-          <div className="stat-card">
-            <div className="stat-icon">📊</div>
-            <div className="stat-content">
-              <h3>24</h3>
-              <p>{t("preview.statTotal")}</p>
-            </div>
+        <div className="landing-preview-stats">
+          <div className="landing-preview-stat">
+            <p className="landing-preview-stat-value">24</p>
+            <p className="landing-preview-stat-label">{t("preview.statTotal")}</p>
           </div>
-          <div className="stat-card">
-            <div className="stat-icon">📅</div>
-            <div className="stat-content">
-              <h3>8</h3>
-              <p>{t("preview.statMonth")}</p>
-            </div>
+          <div className="landing-preview-stat">
+            <p className="landing-preview-stat-value">8</p>
+            <p className="landing-preview-stat-label">{t("preview.statMonth")}</p>
           </div>
-          <div className="stat-card">
-            <div className="stat-icon">⭐</div>
-            <div className="stat-content">
-              <h3>Premium</h3>
-              <p>{t("preview.statMembership")}</p>
-            </div>
+          <div className="landing-preview-stat">
+            <p className="landing-preview-stat-value">Premium</p>
+            <p className="landing-preview-stat-label">{t("preview.statMembership")}</p>
           </div>
         </div>
       </div>

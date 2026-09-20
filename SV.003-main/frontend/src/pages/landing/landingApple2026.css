@@ -1,0 +1,367 @@
+/* GUIAA landing — Apple HIG clarity × Vetmed 2026 (tokens DESIGN.md) */
+
+:root {
+  --landing-spring: cubic-bezier(0.25, 1, 0.5, 1);
+  --landing-spring-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --landing-shadow-soft:
+    0 8px 24px rgba(12, 45, 77, 0.08),
+    0 1px 2px rgba(12, 45, 77, 0.04);
+  --landing-shadow-lift:
+    0 16px 48px rgba(12, 45, 77, 0.1),
+    0 2px 6px rgba(12, 45, 77, 0.04);
+}
+
+/* Shell: navy clínico (oscuro) */
+.landing-shell {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% -8%, rgba(61, 155, 143, 0.14), transparent 55%),
+    linear-gradient(180deg, #06121c 0%, #0c2d4d 55%, #0f3548 100%);
+}
+
+.landing-page-card {
+  border-radius: 1.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 32px 80px -24px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  background: #ffffff;
+}
+
+@media (min-width: 1024px) {
+  .landing-page-card {
+    border-radius: 2rem;
+  }
+}
+
+.landing-body-wrap {
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f7fafc 42%, #f4f8f7 100%);
+}
+
+.landing-body-wrap::before {
+  opacity: 0.18;
+  background-size: 28px 28px;
+}
+
+/* Tipografía Apple-scale sobre tokens GUIAA */
+.landing-body-wrap .landing-section {
+  padding-block: clamp(4rem, 9vw, 6.5rem);
+}
+
+.landing-body-wrap .landing-section-title {
+  font-size: clamp(1.65rem, 3.2vw, 2.35rem);
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  line-height: 1.15;
+  color: #0c2d4d;
+  text-wrap: balance;
+}
+
+.landing-body-wrap .landing-lead {
+  margin-top: 0.85rem;
+  max-width: 38rem;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+  color: #475569;
+}
+
+.landing-body-wrap .landing-eyebrow {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #265b93;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+/* Cards: deferencia + profundidad suave */
+.landing-body-wrap .landing-card {
+  border-radius: 1.125rem;
+  border: 1px solid rgba(12, 45, 77, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--landing-shadow-soft);
+  transition:
+    transform 0.35s var(--landing-spring),
+    box-shadow 0.35s var(--landing-spring),
+    border-color 0.35s var(--landing-spring);
+}
+
+.landing-body-wrap .landing-card-interactive:hover {
+  border-color: rgba(38, 91, 147, 0.18);
+  box-shadow: var(--landing-shadow-lift);
+  transform: translateY(-2px);
+}
+
+.landing-body-wrap .landing-card-interactive:active {
+  transform: scale(0.985);
+}
+
+/* CTAs */
+.landing-body-wrap .landing-btn-primary {
+  min-height: 2.75rem;
+  border-radius: 0.75rem;
+  background: #3d9b8f;
+  box-shadow:
+    0 8px 24px rgba(47, 133, 122, 0.28),
+    0 1px 2px rgba(12, 45, 77, 0.06);
+  transition:
+    transform 0.35s var(--landing-spring),
+    background-color 0.25s var(--landing-spring),
+    box-shadow 0.35s var(--landing-spring);
+}
+
+.landing-body-wrap .landing-btn-primary:hover {
+  background: #2f857a;
+  box-shadow:
+    0 12px 28px rgba(47, 133, 122, 0.34),
+    0 1px 2px rgba(12, 45, 77, 0.06);
+}
+
+.landing-body-wrap .landing-btn-primary:active {
+  transform: scale(0.97);
+}
+
+.landing-body-wrap .landing-btn-secondary {
+  min-height: 2.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(12, 45, 77, 0.12);
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition:
+    transform 0.35s var(--landing-spring),
+    border-color 0.25s var(--landing-spring),
+    background-color 0.25s var(--landing-spring);
+}
+
+.landing-body-wrap .landing-btn-secondary:active {
+  transform: scale(0.97);
+}
+
+.landing-body-wrap .landing-section-alt {
+  background: linear-gradient(
+    180deg,
+    rgba(232, 244, 252, 0.4) 0%,
+    rgba(255, 255, 255, 0.85) 100%
+  );
+}
+
+.landing-body-wrap .landing-product-frame {
+  border-radius: 1.5rem;
+  padding: 0.65rem;
+  background: linear-gradient(160deg, rgba(232, 244, 252, 0.9), rgba(244, 249, 247, 0.95));
+  box-shadow: var(--landing-shadow-lift);
+}
+
+.landing-body-wrap .landing-clinical-step {
+  border-radius: 1rem;
+  border: 1px solid rgba(12, 45, 77, 0.06);
+  background: rgba(255, 255, 255, 0.9);
+  transition:
+    transform 0.35s var(--landing-spring),
+    box-shadow 0.35s var(--landing-spring);
+}
+
+.landing-body-wrap .landing-clinical-step:hover {
+  box-shadow: var(--landing-shadow-soft);
+  transform: translateY(-2px);
+}
+
+.landing-brand-band {
+  border-block: 1px solid rgba(12, 45, 77, 0.06);
+  background: linear-gradient(180deg, #f8fbfd 0%, #ffffff 100%);
+}
+
+.landing-body-wrap .landing-pricing-featured {
+  border-color: rgba(61, 155, 143, 0.28);
+  box-shadow: var(--landing-shadow-lift);
+}
+
+/* Nav frosted (Apple material) cuando scrollea en hero */
+.landing-nav-hero.landing-nav-scrolled {
+  background: rgba(7, 22, 34, 0.88) !important;
+  backdrop-filter: blur(8px) saturate(1.05);
+  -webkit-backdrop-filter: blur(8px) saturate(1.05);
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* —— Cómo funciona: layout editorial asimétrico —— */
+.landing-how-layout {
+  display: grid;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .landing-how-layout {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    gap: 3.5rem;
+  }
+}
+
+.landing-how-intro {
+  max-width: 28rem;
+}
+
+.landing-how-rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.landing-how-rail-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: 0.85rem 1rem;
+  padding-bottom: 1.75rem;
+}
+
+.landing-how-rail-item:last-child {
+  padding-bottom: 0;
+}
+
+.landing-how-rail-num {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: #0c2d4d;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-how-rail-line {
+  position: absolute;
+  left: 1.2rem;
+  top: 2.5rem;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(61, 155, 143, 0.55), rgba(12, 45, 77, 0.12));
+}
+
+.landing-how-rail-copy {
+  padding-top: 0.2rem;
+}
+
+.landing-how-rail-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0c2d4d;
+}
+
+.landing-how-rail-detail {
+  margin-top: 0.35rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #475569;
+  max-width: 32rem;
+}
+
+/* Features: destacada a ancho completo, flujo vertical intacto */
+.landing-body-wrap #features .landing-card-featured {
+  display: block;
+  text-align: left;
+}
+
+.landing-body-wrap #features .landing-card-featured > * {
+  grid-column: unset;
+}
+
+/* Stats más sobrios */
+.landing-petpal-stats {
+  background: #f8fafc;
+}
+
+.landing-petpal-stat-value {
+  font-weight: 600;
+}
+
+/* CTA panel: contraste legible sobre fondo oscuro */
+.landing-body-wrap .landing-cta-panel-v2 {
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(ellipse 70% 80% at 100% 0%, rgba(61, 155, 143, 0.28), transparent 55%),
+    linear-gradient(135deg, #0c2d4d 0%, #123a52 55%, #1a4d5c 100%);
+  box-shadow: var(--landing-shadow-lift);
+  color: #ffffff;
+}
+
+.landing-body-wrap .landing-cta-panel-v2 .landing-section-title {
+  color: #ffffff !important;
+  text-wrap: balance;
+}
+
+.landing-body-wrap .landing-cta-panel-v2 .landing-eyebrow {
+  color: #9fd9d0 !important;
+  background: transparent;
+  padding: 0;
+}
+
+.landing-body-wrap .landing-cta-panel-v2 .landing-lead {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+.landing-body-wrap .landing-cta-panel-v2 .landing-cta-faq-link {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-color: rgba(255, 255, 255, 0.45);
+}
+
+.landing-body-wrap .landing-cta-panel-v2 .landing-cta-faq-link:hover {
+  color: #ffffff;
+  text-decoration-color: rgba(255, 255, 255, 0.85);
+}
+
+.landing-body-wrap .landing-cta-panel-v2 .landing-btn-primary {
+  background: #ffffff;
+  color: #0c2d4d;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.landing-body-wrap .landing-cta-panel-v2 .landing-btn-primary:hover {
+  background: #f8fafc;
+  color: #0c2d4d;
+}
+
+.landing-body-wrap .landing-cta-panel-v2 .landing-btn-on-dark {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.landing-body-wrap .landing-cta-panel-v2 .landing-btn-on-dark:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.65);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-body-wrap .landing-card,
+  .landing-body-wrap .landing-btn-primary,
+  .landing-body-wrap .landing-btn-secondary,
+  .landing-body-wrap .landing-clinical-step,
+  .landing-petpal-cta-primary,
+  .landing-petpal-cta-play {
+    transition: none !important;
+  }
+
+  .landing-body-wrap .landing-card-interactive:hover,
+  .landing-body-wrap .landing-clinical-step:hover {
+    transform: none;
+  }
+}

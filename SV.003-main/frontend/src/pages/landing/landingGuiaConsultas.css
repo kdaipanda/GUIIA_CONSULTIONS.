@@ -6,18 +6,15 @@
 .landing-guia-consultas-panel {
   position: relative;
   overflow: hidden;
-  border-radius: 1.25rem;
+  border-radius: 0.85rem;
   padding: 0;
   background: #fff;
   border: 1px solid rgba(12, 45, 77, 0.1);
-  box-shadow:
-    0 20px 48px -32px rgba(12, 45, 77, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  box-shadow: none;
 }
 
 .landing-guia-consultas-accent {
-  height: 4px;
-  background: linear-gradient(90deg, #f5a623 0%, #3d9b8f 55%, #0c2d4d 100%);
+  display: none;
 }
 
 .landing-guia-consultas-grid {
@@ -37,7 +34,7 @@
 .landing-guia-consultas-copy {
   position: relative;
   padding: 1.75rem 1.5rem 2rem;
-  background: linear-gradient(165deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #f8fafc;
   border-bottom: 1px solid rgba(12, 45, 77, 0.06);
 }
 
@@ -60,13 +57,13 @@
   display: inline-flex;
   align-items: center;
   padding: 0.28rem 0.65rem;
-  border-radius: 0.4rem;
-  background: linear-gradient(135deg, #0c2d4d, #1a4d6e);
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  border-radius: 0.35rem;
+  background: rgba(12, 45, 77, 0.08);
+  color: #0c2d4d;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: none;
 }
 
 .landing-guia-consultas-eyebrow {
@@ -78,13 +75,14 @@
 }
 
 .landing-guia-consultas-title {
-  margin-top: 1rem;
-  font-size: clamp(1.5rem, 2.6vw, 2rem);
-  font-weight: 800;
+  margin-top: 0.75rem;
+  font-size: clamp(1.45rem, 2.6vw, 1.9rem);
+  font-weight: 700;
   line-height: 1.2;
   color: #0c2d4d;
   letter-spacing: -0.025em;
   max-width: 16ch;
+  font-family: var(--landing-font-display, Georgia, serif);
 }
 
 .landing-guia-consultas-lead {
@@ -159,17 +157,14 @@
     object-fit: contain;
     object-position: bottom right;
     filter: drop-shadow(0 8px 16px rgba(12, 45, 77, 0.12));
-    animation: landing-guia-plumitas-float 5s ease-in-out infinite;
+    animation: none;
   }
 }
 
 @keyframes landing-guia-plumitas-float {
   0%,
   100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
+    transform: none;
   }
 }
 
@@ -192,24 +187,13 @@
 }
 
 .landing-guia-form-head {
-  display: flex;
-  gap: 0.85rem;
-  align-items: flex-start;
   margin-bottom: 1.25rem;
   padding-bottom: 1.1rem;
   border-bottom: 1px solid rgba(12, 45, 77, 0.08);
 }
 
 .landing-guia-form-head-icon {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.75rem;
-  background: rgba(245, 166, 35, 0.15);
-  color: #b45309;
+  display: none;
 }
 
 .landing-guia-form-kicker {
@@ -292,6 +276,13 @@
   font-size: 0.72rem;
   line-height: 1.55;
   color: #64748b;
+}
+
+.landing-guia-privacy-label {
+  font-size: inherit;
+  font-weight: 500;
+  line-height: inherit;
+  color: inherit;
   cursor: pointer;
 }
 
@@ -307,16 +298,15 @@
   padding-block: 0.65rem;
   border: none;
   border-radius: 0.65rem;
-  background: linear-gradient(135deg, #3d9b8f, #2f857a);
+  background: #3d9b8f;
   color: #fff;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
+    background-color 0.2s ease,
     opacity 0.2s ease;
-  box-shadow: 0 8px 20px -12px rgba(47, 133, 122, 0.55);
+  box-shadow: none;
 }
 
 .landing-guia-consultas-submit:focus-visible {
@@ -325,12 +315,13 @@
 }
 
 .landing-guia-consultas-submit:active:not(:disabled) {
-  transform: translateY(0);
+  transform: none;
 }
 
 .landing-guia-consultas-submit:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px -12px rgba(47, 133, 122, 0.5);
+  background: #2f857a;
+  transform: none;
+  box-shadow: none;
 }
 
 .landing-guia-consultas-submit:disabled {

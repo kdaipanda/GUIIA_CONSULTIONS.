@@ -51,6 +51,7 @@ export function LandingSeo() {
     upsertMeta("name", "twitter:title", title);
     upsertMeta("name", "twitter:description", description);
     upsertMeta("name", "twitter:image", LANDING_OG_IMAGE);
+    upsertMeta("name", "theme-color", "#0c2d4d");
     upsertLink("canonical", LANDING_URL);
     upsertLink("preload", "/brand/doctor-plumitas-hub.png");
     const preloadTag = document.querySelector('link[rel="preload"][href*="doctor-plumitas-hub"]');

@@ -1,28 +1,13 @@
 /* Taste Skill — landing GUIAA (dials 5/5/3 · DESIGN.md) */
 
 .landing-shell {
-  background: linear-gradient(165deg, #0a2540 0%, #0c2d4d 38%, #1e5280 100%);
-  contain: paint;
-}
-
-/* Pause decorative motion during input so next paint isn't blocked (INP / body). */
-html.landing-inp-quiet .landing-vet-anim,
-html.landing-inp-quiet .landing-hero-3d-glow,
-html.landing-inp-quiet .landing-hero-3d-orbit,
-html.landing-inp-quiet .landing-hero-3d-scanline {
-  animation-play-state: paused !important;
-}
-
-.landing-shell-inner {
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  box-shadow:
-    0 24px 80px -12px rgba(12, 45, 77, 0.35),
-    0 0 0 1px rgba(12, 45, 77, 0.06) inset;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% -8%, rgba(61, 155, 143, 0.14), transparent 55%),
+    linear-gradient(180deg, #06121c 0%, #0c2d4d 55%, #0f3548 100%);
 }
 
 .landing-body-wrap {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 3200px;
+  content-visibility: visible;
 }
 
 .landing-nav-progress {
@@ -184,7 +169,7 @@ html.landing-inp-quiet .landing-hero-3d-scanline {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  border-radius: 999px;
+  border-radius: 0.5rem;
   border: 1px solid rgba(12, 45, 77, 0.1);
   background: #ffffff;
   padding: 0.5rem 0.875rem;
@@ -279,7 +264,7 @@ html.landing-inp-quiet .landing-hero-3d-scanline {
 }
 
 .landing-tab {
-  border-radius: 999px;
+  border-radius: 0.5rem;
   border: 1px solid rgba(12, 45, 77, 0.12);
   background: #ffffff;
   min-height: 2.75rem;
@@ -371,9 +356,9 @@ html.landing-inp-quiet .landing-hero-3d-scanline {
 
 .landing-trust-banner {
   border: 1px solid rgba(12, 45, 77, 0.1);
-  border-radius: 1rem;
-  background: linear-gradient(90deg, rgba(232, 244, 252, 0.65), rgba(255, 255, 255, 0.9));
-  box-shadow: 0 2px 12px -8px rgba(12, 45, 77, 0.08);
+  border-radius: 0.85rem;
+  background: #f8fafc;
+  box-shadow: none;
 }
 
 .landing-btn-on-dark {
@@ -393,19 +378,11 @@ html.landing-inp-quiet .landing-hero-3d-scanline {
 .landing-species-glass-section {
   position: relative;
   isolation: isolate;
-  background: linear-gradient(180deg, rgba(248, 252, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
+  background: #f8fafc;
 }
 
 .landing-species-glass-section::before {
-  content: "";
-  position: absolute;
-  inset: -5% -8%;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 40% 50% at 15% 40%, rgba(61, 155, 143, 0.18), transparent 68%),
-    radial-gradient(ellipse 38% 48% at 85% 35%, rgba(155, 110, 243, 0.14), transparent 65%),
-    radial-gradient(ellipse 35% 42% at 50% 85%, rgba(240, 138, 93, 0.1), transparent 62%);
+  display: none;
 }
 
 .landing-species-glass-section > div {
@@ -416,6 +393,8 @@ html.landing-inp-quiet .landing-hero-3d-scanline {
 .landing-species-glass-badge {
   display: block;
   text-align: center;
+  margin: 0;
+  font: inherit;
 }
 
 .landing-species-glass-panel {
@@ -590,9 +569,11 @@ html.landing-inp-quiet .landing-hero-3d-scanline {
 }
 
 .landing-rail {
-  border-color: rgba(255, 255, 255, 0.65);
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 8px 32px -8px rgba(12, 45, 77, 0.18);
+  border-color: rgba(12, 45, 77, 0.1);
+  background: #ffffff;
+  box-shadow: 0 10px 24px -14px rgba(12, 45, 77, 0.2);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* —— Flujo clínico veterinario —— */

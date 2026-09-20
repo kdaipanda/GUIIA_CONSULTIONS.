@@ -5,44 +5,38 @@ const COLLEAGUE_TESTIMONIALS = [
   {
     id: "ana",
     name: "Dra. Ana M.",
-    petName: "Max",
     petImage: "/landing/pets/dog-golden.png",
-    tone: "coral",
+    tone: "navy",
   },
   {
     id: "carlos",
     name: "Dr. Carlos R.",
-    petName: "Luna",
     petImage: "/landing/pets/cat-tabby.png",
-    tone: "rose",
+    tone: "green",
   },
   {
     id: "laura",
     name: "MVZ Laura S.",
-    petName: "Rocky",
     petImage: "/landing/pets/puppy.png",
-    tone: "sky",
+    tone: "blue",
   },
   {
     id: "patricia",
     name: "Dra. Patricia V.",
-    petName: "Nala",
     petImage: "/landing/pets/corgi.png",
-    tone: "amber",
+    tone: "navy",
   },
   {
     id: "miguel",
     name: "Dr. Miguel T.",
-    petName: "Simba",
     petImage: "/landing/pets/cat-ginger.png",
-    tone: "violet",
+    tone: "green",
   },
   {
     id: "sofia",
     name: "Dra. Sofía L.",
-    petName: "Mía",
     petImage: "/landing/pets/cat-black.png",
-    tone: "slate",
+    tone: "blue",
   },
 ];
 
@@ -66,40 +60,19 @@ export function LandingTestimonials() {
           <p className="landing-lead mt-4 max-w-xl">{t("testimonials.lead")}</p>
         </div>
 
-        <div
-          className="landing-colleagues-bento"
-          role="list"
-          aria-label={t("testimonials.listAria")}
-        >
-          {COLLEAGUE_TESTIMONIALS.map(({ id, name, petName, petImage, tone }) => {
-            const tags = t(`testimonials.items.${id}.tags`, {
-              returnObjects: true,
-            });
-            return (
-              <figure
-                key={id}
-                role="listitem"
-                className={`landing-colleague-card landing-colleague-card--${tone}`}
-              >
-                <div className="landing-colleague-card-top">
-                  <figcaption className="landing-colleague-name">{petName}</figcaption>
-                  <ul
-                    className="landing-colleague-tags"
-                    aria-label={t("testimonials.caseOf", { name: petName })}
-                  >
-                    {(Array.isArray(tags) ? tags : []).map((tag) => (
-                      <li key={tag}>{tag}</li>
-                    ))}
-                  </ul>
-                </div>
-
+        <ul className="landing-colleagues-bento" aria-label={t("testimonials.listAria")}>
+          {COLLEAGUE_TESTIMONIALS.map(({ id, name, petImage, tone }) => (
+            <li key={id}>
+              <figure className={`landing-colleague-card landing-colleague-card--${tone}`}>
                 <blockquote className="landing-colleague-quote">
-                  &ldquo;{t(`testimonials.items.${id}.quote`)}&rdquo;
+                  <p>&ldquo;{t(`testimonials.items.${id}.quote`)}&rdquo;</p>
                 </blockquote>
-                <p className="landing-colleague-role">
-                  {name} · {t(`testimonials.items.${id}.role`)}
-                </p>
-
+                <figcaption className="landing-colleague-meta">
+                  <span className="landing-colleague-name">{name}</span>
+                  <span className="landing-colleague-role">
+                    {t(`testimonials.items.${id}.role`)}
+                  </span>
+                </figcaption>
                 <picture>
                   <source
                     srcSet={petImage.replace(/\.png$/, ".webp")}
@@ -107,22 +80,21 @@ export function LandingTestimonials() {
                   />
                   <img
                     src={petImage}
-                    alt={t(`testimonials.items.${id}.petAlt`)}
+                    alt=""
+                    aria-hidden
                     className="landing-colleague-pet"
                     loading="lazy"
                     decoding="async"
-                    width={320}
-                    height={400}
+                    width={280}
+                    height={340}
                   />
                 </picture>
-
-                <span className="landing-colleague-curve" aria-hidden />
               </figure>
-            );
-          })}
-        </div>
+            </li>
+          ))}
+        </ul>
 
-        <p className="landing-colleagues-disclaimer landing-colleagues-scroll-hint">
+        <p className="landing-colleagues-disclaimer">
           <span className="landing-colleagues-scroll-hint-mobile">
             {t("testimonials.disclaimerMobile")}
           </span>

@@ -37,7 +37,7 @@ export function LanguageSwitcher({ className = "", tone = "default" }) {
     >
       <button
         type="button"
-        className={`rounded-md px-2.5 py-1.5 transition ${current === "es" ? active : idle}`}
+        className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-2.5 py-1.5 transition ${current === "es" ? active : idle}`}
         onClick={() => setLang("es")}
         aria-pressed={current === "es"}
         title={t("switchToEs")}
@@ -46,7 +46,7 @@ export function LanguageSwitcher({ className = "", tone = "default" }) {
       </button>
       <button
         type="button"
-        className={`rounded-md px-2.5 py-1.5 transition ${current === "en" ? active : idle}`}
+        className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-2.5 py-1.5 transition ${current === "en" ? active : idle}`}
         onClick={() => setLang("en")}
         aria-pressed={current === "en"}
         title={t("switchToEn")}

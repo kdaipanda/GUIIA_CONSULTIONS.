@@ -7,6 +7,7 @@
 
 [data-theme="dark"] .landing-shell,
 html.dark .landing-shell {
+  color-scheme: dark;
   background: linear-gradient(
     165deg,
     #060a10 0%,
@@ -19,22 +20,22 @@ html.dark .landing-shell {
 html.dark .landing-page-card {
   background: linear-gradient(
     180deg,
-    rgba(18, 26, 38, 0.92) 0%,
-    rgba(14, 20, 30, 0.88) 100%
+    rgba(18, 26, 38, 0.98) 0%,
+    rgba(14, 20, 30, 0.96) 100%
   ) !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
   box-shadow:
     0 24px 80px -12px rgba(0, 0, 0, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
-  backdrop-filter: blur(20px) saturate(1.12);
-  -webkit-backdrop-filter: blur(20px) saturate(1.12);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 [data-theme="dark"] .landing-body-wrap,
 html.dark .landing-body-wrap {
   background:
     radial-gradient(ellipse 90% 50% at 50% 0%, rgba(61, 155, 143, 0.12), transparent 55%),
-    radial-gradient(ellipse 60% 45% at 100% 40%, rgba(155, 110, 243, 0.08), transparent 52%),
+    radial-gradient(ellipse 60% 45% at 100% 40%, rgba(38, 91, 147, 0.1), transparent 52%),
     linear-gradient(180deg, #0e1622 0%, #0a1018 45%, #0c121c 100%) !important;
 }
 
@@ -44,16 +45,41 @@ html.dark .landing-body-wrap::before {
   opacity: 0.25;
 }
 
-/* —— Hero (mantiene teal, más profundo) —— */
+/* —— Hero (sky clínico claro) —— */
 
 [data-theme="dark"] .landing-petpal-top,
 html.dark .landing-petpal-top {
-  background: linear-gradient(
-    145deg,
-    #008f8f 0%,
-    #2f857a 40%,
-    #1a4d48 100%
-  );
+  color: #e8eef5;
+  background:
+    radial-gradient(ellipse 80% 60% at 90% 10%, rgba(61, 155, 143, 0.16), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 5% 90%, rgba(38, 91, 147, 0.14), transparent 50%),
+    linear-gradient(165deg, #0e1622 0%, #121c28 48%, #0a1018 100%);
+}
+
+[data-theme="dark"] .landing-petpal-brand,
+[data-theme="dark"] .landing-petpal-title,
+html.dark .landing-petpal-brand,
+html.dark .landing-petpal-title {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .landing-petpal-lead,
+[data-theme="dark"] .landing-petpal-cta-hint,
+html.dark .landing-petpal-lead,
+html.dark .landing-petpal-cta-hint {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .landing-nav-hero,
+html.dark .landing-nav-hero {
+  background: rgba(14, 22, 34, 0.72) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .landing-hero-window,
+html.dark .landing-hero-window {
+  background: linear-gradient(160deg, rgba(24, 34, 48, 0.95), rgba(18, 26, 38, 0.92));
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="dark"] .landing-nav-hero.landing-nav-scrolled,
@@ -325,12 +351,10 @@ html.dark .landing-body-wrap .landing-service-pill {
   color: #e2e8f0;
 }
 
-[data-theme="dark"] .landing-body-wrap .landing-stat-panel,
 [data-theme="dark"] .landing-body-wrap .landing-trust-banner,
-html.dark .landing-body-wrap .landing-stat-panel,
 html.dark .landing-body-wrap .landing-trust-banner {
-  background: var(--liquid-glass-bg) !important;
-  border-color: var(--liquid-glass-border-color) !important;
+  background: rgba(18, 26, 38, 0.96) !important;
+  border-color: rgba(148, 163, 184, 0.14) !important;
 }
 
 [data-theme="dark"] .landing-trust-strip,
@@ -445,19 +469,50 @@ html.dark .landing-brand-band {
 }
 
 [data-theme="dark"] .landing-brand-band strong,
-html.dark .landing-brand-band strong {
+[data-theme="dark"] .landing-brand-band-title,
+html.dark .landing-brand-band strong,
+html.dark .landing-brand-band-title {
   color: #f0f4f8;
 }
 
 [data-theme="dark"] .landing-brand-band span,
-html.dark .landing-brand-band span {
+[data-theme="dark"] .landing-brand-band-lead,
+html.dark .landing-brand-band span,
+html.dark .landing-brand-band-lead {
   color: #94a3b8;
 }
 
-/* Testimonios — blobs más suaves; tarjetas coloridas se mantienen */
+/* Testimonios — superficie editorial en oscuro */
+[data-theme="dark"] .landing-colleagues-section,
+html.dark .landing-colleagues-section {
+  background: transparent;
+}
+
 [data-theme="dark"] .landing-colleagues-section::before,
 html.dark .landing-colleagues-section::before {
-  opacity: 0.55;
+  display: none;
+}
+
+[data-theme="dark"] .landing-colleague-card,
+html.dark .landing-colleague-card {
+  background:
+    radial-gradient(ellipse 70% 80% at 100% 100%, var(--colleague-wash, rgba(61, 155, 143, 0.12)), transparent 55%),
+    rgba(18, 26, 38, 0.95) !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 12px 28px -16px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .landing-colleague-quote,
+html.dark .landing-colleague-quote,
+[data-theme="dark"] .landing-colleague-name,
+html.dark .landing-colleague-name {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .landing-colleague-role,
+html.dark .landing-colleague-role {
+  color: #94a3b8 !important;
 }
 
 [data-theme="dark"] .landing-colleagues-disclaimer,
@@ -480,23 +535,36 @@ html.dark .landing-species-glass-section::before {
   opacity: 0.7;
 }
 
+[data-theme="dark"] .landing-species-chip,
 [data-theme="dark"] .landing-species-chip.category-card--liquid,
+html.dark .landing-species-chip,
 html.dark .landing-species-chip.category-card--liquid {
+  background: rgba(18, 26, 38, 0.95) !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
   color: #e2e8f0 !important;
+  box-shadow: 0 10px 24px -16px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .landing-species-icon,
+html.dark .landing-species-icon {
+  background: rgba(61, 155, 143, 0.18) !important;
+  border-color: rgba(61, 155, 143, 0.28) !important;
 }
 
 [data-theme="dark"] .landing-species-chip:hover,
 html.dark .landing-species-chip:hover {
-  background: rgba(61, 155, 143, 0.2) !important;
+  background: rgba(28, 40, 56, 0.98) !important;
   border-color: rgba(61, 155, 143, 0.4) !important;
 }
 
 /* Guía consultas */
 [data-theme="dark"] .landing-guia-consultas-panel,
 html.dark .landing-guia-consultas-panel {
-  background: var(--liquid-glass-bg-strong) !important;
-  border-color: var(--liquid-glass-border-color) !important;
-  box-shadow: var(--liquid-glass-shadow) !important;
+  background: rgba(18, 26, 38, 0.96) !important;
+  border-color: rgba(148, 163, 184, 0.14) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 [data-theme="dark"] .landing-guia-consultas-copy,
@@ -642,7 +710,9 @@ html.dark .landing-footer-v2-social-sub {
 }
 
 [data-theme="dark"] .landing-footer-v2-nav button,
-html.dark .landing-footer-v2-nav button {
+[data-theme="dark"] .landing-footer-v2-nav a,
+html.dark .landing-footer-v2-nav button,
+html.dark .landing-footer-v2-nav a {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.68);
@@ -685,11 +755,12 @@ html.dark .landing-footer-v2-bottom {
 /* Rail social y barra móvil */
 [data-theme="dark"] .landing-rail,
 html.dark .landing-rail {
-  background: rgba(18, 26, 38, 0.88) !important;
-  border-color: rgba(61, 155, 143, 0.25) !important;
-  backdrop-filter: blur(16px) saturate(1.1);
-  -webkit-backdrop-filter: blur(16px) saturate(1.1);
-  box-shadow: var(--liquid-glass-shadow-soft);
+  background: rgba(18, 26, 38, 0.96) !important;
+  border-color: rgba(61, 155, 143, 0.28) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.45) !important;
+  border-radius: 0.75rem !important;
 }
 
 [data-theme="dark"] .landing-rail a,
@@ -717,14 +788,49 @@ html.dark .landing-mobile-bar {
 
 /* Preview app embebido */
 [data-theme="dark"] .landing-app-preview-page .category-selector-glass-panel,
-html.dark .landing-app-preview-page .category-selector-glass-panel {
-  background: var(--liquid-glass-bg) !important;
-  border-color: var(--liquid-glass-border-color) !important;
+[data-theme="dark"] .landing-app-preview-page .landing-preview-species,
+html.dark .landing-app-preview-page .category-selector-glass-panel,
+html.dark .landing-app-preview-page .landing-preview-species {
+  background: transparent !important;
+  border-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 [data-theme="dark"] .landing-app-preview-page .consultation-form-container,
 html.dark .landing-app-preview-page .consultation-form-container {
-  background: var(--liquid-glass-bg-strong) !important;
+  background: rgba(18, 26, 38, 0.96) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[data-theme="dark"] .landing-preview-stat,
+html.dark .landing-preview-stat {
+  background: rgba(18, 26, 38, 0.96) !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
+}
+
+[data-theme="dark"] .landing-preview-stat-value,
+html.dark .landing-preview-stat-value {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .landing-preview-stat-label,
+html.dark .landing-preview-stat-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-card,
+[data-theme="dark"] .landing-body-wrap .landing-how-step,
+[data-theme="dark"] .landing-testimonial-card,
+html.dark .landing-body-wrap .landing-card,
+html.dark .landing-body-wrap .landing-how-step,
+html.dark .landing-testimonial-card {
+  background: rgba(18, 26, 38, 0.96) !important;
+  border-color: rgba(148, 163, 184, 0.14) !important;
+  box-shadow: 0 10px 24px -16px rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 @media (prefers-reduced-transparency: reduce) {

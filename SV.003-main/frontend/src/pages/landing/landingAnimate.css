@@ -1,0 +1,466 @@
+/* animate skill × GUIAA landing
+   Thesis:
+   - Focal: hero clinical entrance — brand → title → CTAs → Diagnóstico lead
+   - Continuity: how-rail sequence · stats proof · pricing set · final CTA settle
+   - Feedback: CTA/feature press · FAQ · nav drawer · active nav cue
+   MOTION dial 5 · tokens DESIGN.md · transform/opacity only · no bounce
+*/
+
+.landing-shell {
+  --animate-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-feedback: 140ms;
+  --animate-state: 260ms;
+  --animate-focal: 680ms;
+}
+
+/* —— Focal moment: hero ——
+   Progressive enhancement: only when motion is allowed.
+   Default styles stay fully visible without animation. */
+
+@keyframes landing-focal-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes landing-focal-soft {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes landing-nav-drawer-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes landing-cue-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-petpal-hero .landing-petpal-brand {
+    animation: landing-focal-rise var(--animate-focal) var(--animate-ease-expo) both;
+    animation-delay: 40ms;
+  }
+
+  .landing-petpal-hero .landing-petpal-title {
+    animation: landing-focal-rise var(--animate-focal) var(--animate-ease-expo) both;
+    animation-delay: 120ms;
+  }
+
+  .landing-petpal-hero .landing-petpal-lead {
+    animation: landing-focal-rise 0.58s var(--animate-ease) both;
+    animation-delay: 200ms;
+  }
+
+  .landing-petpal-hero .landing-petpal-cta-row {
+    animation: landing-focal-rise 0.52s var(--animate-ease) both;
+    animation-delay: 280ms;
+  }
+
+  .landing-petpal-hero .landing-petpal-cta-hint {
+    animation: landing-focal-rise 0.48s var(--animate-ease) both;
+    animation-delay: 340ms;
+  }
+
+  .landing-petpal-hero .landing-petpal-visual {
+    animation: landing-focal-soft 0.72s var(--animate-ease) both;
+    animation-delay: 180ms;
+  }
+
+  /* Diagnóstico — second beat of the focal sequence (unique LATAM signal) */
+  .landing-petpal-hero .landing-hero-cap-block--lead {
+    animation: landing-focal-soft 0.7s var(--animate-ease-expo) both;
+    animation-delay: 420ms;
+  }
+
+  .landing-petpal-hero .landing-hero-capabilities-head {
+    animation: landing-focal-rise 0.5s var(--animate-ease) both;
+    animation-delay: 360ms;
+  }
+
+  .landing-petpal-hero .landing-hero-cap-secondary,
+  .landing-petpal-hero .landing-hero-cap-more {
+    animation: landing-focal-rise 0.48s var(--animate-ease) both;
+    animation-delay: 520ms;
+  }
+}
+
+/* —— Continuity: proof stats (after hero) —— */
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-reveal.is-visible .landing-petpal-stat {
+    animation: landing-focal-rise 0.5s var(--animate-ease) both;
+  }
+
+  .landing-reveal.is-visible .landing-petpal-stat:nth-child(1) {
+    animation-delay: 40ms;
+  }
+
+  .landing-reveal.is-visible .landing-petpal-stat:nth-child(2) {
+    animation-delay: 110ms;
+  }
+
+  .landing-reveal.is-visible .landing-petpal-stat:nth-child(3) {
+    animation-delay: 180ms;
+  }
+}
+
+/* —— Continuity: how-rail is a real sequence —— */
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-reveal.is-visible .landing-how-rail-item {
+    animation: landing-focal-rise 0.48s var(--animate-ease) both;
+  }
+
+  .landing-reveal.is-visible .landing-how-rail-item:nth-child(1) {
+    animation-delay: 60ms;
+  }
+
+  .landing-reveal.is-visible .landing-how-rail-item:nth-child(2) {
+    animation-delay: 140ms;
+  }
+
+  .landing-reveal.is-visible .landing-how-rail-item:nth-child(3) {
+    animation-delay: 220ms;
+  }
+
+  .landing-reveal.is-visible .landing-how-rail-line {
+    animation: landing-cue-in 0.55s var(--animate-ease) both;
+    animation-delay: 180ms;
+    transform-origin: top center;
+  }
+}
+
+/* —— Continuity: clinical workflow steps (cap total delay) —— */
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-reveal.is-visible .landing-clinical-step {
+    animation: landing-focal-soft 0.48s var(--animate-ease) both;
+  }
+
+  .landing-reveal.is-visible .landing-clinical-step:nth-child(1) {
+    animation-delay: 40ms;
+  }
+
+  .landing-reveal.is-visible .landing-clinical-step:nth-child(2) {
+    animation-delay: 100ms;
+  }
+
+  .landing-reveal.is-visible .landing-clinical-step:nth-child(3) {
+    animation-delay: 160ms;
+  }
+
+  .landing-reveal.is-visible .landing-clinical-step:nth-child(4) {
+    animation-delay: 220ms;
+  }
+
+  .landing-reveal.is-visible .landing-clinical-step:nth-child(5) {
+    animation-delay: 280ms;
+  }
+
+  .landing-reveal.is-visible .landing-clinical-step:nth-child(6) {
+    animation-delay: 340ms;
+  }
+}
+
+/* —— Continuity: pricing as a comparison set —— */
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-reveal.is-visible #pricing .landing-pricing-card--featured {
+    animation-name: landing-focal-soft;
+    animation-duration: 0.6s;
+    animation-timing-function: var(--animate-ease-expo);
+    animation-fill-mode: both;
+    animation-delay: 0.16s;
+  }
+}
+
+/* —— Continuity: final CTA — conversion settle —— */
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-reveal.is-visible .landing-cta-panel-v2 {
+    animation: landing-focal-soft 0.62s var(--animate-ease-expo) both;
+  }
+
+  .landing-reveal.is-visible .landing-cta-panel-v2 .landing-section-title {
+    animation: landing-focal-rise 0.5s var(--animate-ease) both;
+    animation-delay: 80ms;
+  }
+
+  .landing-reveal.is-visible .landing-cta-actions {
+    animation: landing-focal-rise 0.48s var(--animate-ease) both;
+    animation-delay: 140ms;
+  }
+}
+
+/* —— Continuity: trust line —— */
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-reveal.is-visible .landing-trust-line,
+  .landing-reveal.is-visible .landing-trust-strip-inner {
+    animation: landing-focal-rise 0.45s var(--animate-ease) both;
+  }
+}
+
+/* —— Feedback: CTAs (pointer-fine hover only; press for all) —— */
+
+.landing-shell .landing-btn-primary,
+.landing-shell .landing-btn-secondary,
+.landing-shell .landing-btn-on-dark,
+.landing-shell .landing-petpal-cta-primary,
+.landing-shell .landing-petpal-cta-play,
+.landing-shell .landing-pricing-cta,
+.landing-shell .landing-cta-primary-btn,
+.landing-shell .landing-cta-secondary-btn {
+  transition:
+    transform var(--animate-feedback) var(--animate-ease),
+    background-color var(--animate-state) ease,
+    border-color var(--animate-state) ease,
+    box-shadow var(--animate-state) ease,
+    color var(--animate-state) ease;
+}
+
+.landing-shell .landing-btn-primary:active,
+.landing-shell .landing-btn-secondary:active,
+.landing-shell .landing-btn-on-dark:active,
+.landing-shell .landing-petpal-cta-primary:active,
+.landing-shell .landing-petpal-cta-play:active,
+.landing-shell .landing-pricing-cta:active,
+.landing-shell .landing-cta-primary-btn:active,
+.landing-shell .landing-cta-secondary-btn:active {
+  transform: scale(0.97);
+}
+
+.landing-shell .landing-cta-primary-btn svg {
+  transition: transform var(--animate-feedback) var(--animate-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .landing-shell .landing-btn-primary:hover,
+  .landing-shell .landing-petpal-cta-primary:hover,
+  .landing-shell .landing-cta-primary-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .landing-shell .landing-btn-primary:hover:active,
+  .landing-shell .landing-petpal-cta-primary:hover:active,
+  .landing-shell .landing-cta-primary-btn:hover:active {
+    transform: scale(0.97);
+  }
+
+  .landing-shell .landing-cta-primary-btn:hover svg {
+    transform: translateX(3px);
+  }
+
+  .landing-shell .landing-pricing-card:hover {
+    transform: none;
+  }
+
+  .landing-shell .landing-card-interactive:active {
+    transform: scale(0.99);
+  }
+
+  .landing-shell .landing-card-interactive .group-hover\:gap-1\.5,
+  .landing-shell .landing-card-interactive span.inline-flex svg {
+    transition: transform var(--animate-feedback) var(--animate-ease);
+  }
+
+  .landing-shell .landing-card-interactive:hover span.inline-flex svg {
+    transform: translate(2px, -2px);
+  }
+}
+
+/* Soften decorative button sheen — feedback > spectacle */
+.landing-shell .landing-btn-primary::after {
+  opacity: 0.55;
+  transition: transform 0.45s var(--animate-ease);
+}
+
+/* —— Feedback: FAQ state (opacity/transform only — no grid-template-rows) —— */
+
+.landing-faq-panel[hidden] {
+  display: none;
+}
+
+@keyframes landing-faq-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.landing-faq-row.is-open .landing-faq-panel-inner {
+  animation: landing-faq-in var(--animate-state) var(--animate-ease) both;
+}
+
+.landing-faq-chevron {
+  transition: transform var(--animate-state) var(--animate-ease);
+}
+
+.landing-faq-trigger {
+  transition: color var(--animate-feedback) ease;
+}
+
+.landing-faq-row.is-open .landing-faq-trigger,
+.landing-faq-trigger[aria-expanded="true"] {
+  color: #0c2d4d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-faq-row.is-open .landing-faq-panel-inner {
+    animation: none;
+  }
+}
+
+/* —— Feedback: nav scroll + mobile drawer —— */
+
+.landing-nav-hero,
+.landing-nav-scrolled {
+  transition:
+    background-color var(--animate-state) var(--animate-ease),
+    box-shadow var(--animate-state) ease,
+    border-color var(--animate-state) ease,
+    backdrop-filter var(--animate-state) ease;
+}
+
+.landing-nav-progress {
+  transition: opacity var(--animate-feedback) ease;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-nav-mobile-panel {
+    animation: landing-nav-drawer-in 0.28s var(--animate-ease) both;
+  }
+
+  .landing-nav-mobile-link {
+    animation: landing-focal-rise 0.32s var(--animate-ease) both;
+  }
+
+  .landing-nav-mobile-link:nth-child(1) {
+    animation-delay: 40ms;
+  }
+
+  .landing-nav-mobile-link:nth-child(2) {
+    animation-delay: 70ms;
+  }
+
+  .landing-nav-mobile-link:nth-child(3) {
+    animation-delay: 100ms;
+  }
+
+  .landing-nav-mobile-link:nth-child(4) {
+    animation-delay: 130ms;
+  }
+}
+
+.landing-nav-mobile-link {
+  transition:
+    background-color var(--animate-feedback) ease,
+    color var(--animate-feedback) ease;
+}
+
+.landing-nav-mobile-toggle {
+  transition:
+    transform var(--animate-feedback) var(--animate-ease),
+    background-color var(--animate-feedback) ease;
+}
+
+.landing-nav-mobile-toggle:active {
+  transform: scale(0.94);
+}
+
+/* —— Continuity: section reveal — quieter, faster —— */
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-body-wrap .landing-reveal {
+    transition:
+      opacity 0.45s var(--animate-ease),
+      transform 0.45s var(--animate-ease);
+    transform: translate3d(0, 12px, 0);
+  }
+
+  .landing-body-wrap .landing-reveal.is-visible {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* —— Reduced motion: keep meaning, drop spatial travel —— */
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-petpal-hero .landing-petpal-brand,
+  .landing-petpal-hero .landing-petpal-title,
+  .landing-petpal-hero .landing-petpal-lead,
+  .landing-petpal-hero .landing-petpal-cta-row,
+  .landing-petpal-hero .landing-petpal-cta-hint,
+  .landing-petpal-hero .landing-petpal-visual,
+  .landing-petpal-hero .landing-hero-cap-block--lead,
+  .landing-petpal-hero .landing-hero-capabilities-head,
+  .landing-petpal-hero .landing-hero-cap-secondary,
+  .landing-petpal-hero .landing-hero-cap-more,
+  .landing-reveal.is-visible .landing-petpal-stat,
+  .landing-reveal.is-visible .landing-how-rail-item,
+  .landing-reveal.is-visible .landing-how-rail-line,
+  .landing-reveal.is-visible .landing-clinical-step,
+  .landing-reveal.is-visible #pricing .landing-pricing-card--featured,
+  .landing-reveal.is-visible .landing-cta-panel-v2,
+  .landing-reveal.is-visible .landing-cta-panel-v2 .landing-section-title,
+  .landing-reveal.is-visible .landing-cta-actions,
+  .landing-reveal.is-visible .landing-trust-line,
+  .landing-reveal.is-visible .landing-trust-strip-inner,
+  .landing-nav-mobile-panel,
+  .landing-nav-mobile-link {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .landing-shell .landing-btn-primary:active,
+  .landing-shell .landing-btn-secondary:active,
+  .landing-shell .landing-btn-on-dark:active,
+  .landing-shell .landing-petpal-cta-primary:active,
+  .landing-shell .landing-pricing-cta:active,
+  .landing-shell .landing-cta-primary-btn:active,
+  .landing-shell .landing-cta-secondary-btn:active,
+  .landing-nav-mobile-toggle:active {
+    transform: none;
+    filter: brightness(0.96);
+  }
+
+  .landing-faq-panel,
+  .landing-faq-chevron,
+  .landing-nav-hero,
+  .landing-nav-scrolled {
+    transition: none;
+  }
+}

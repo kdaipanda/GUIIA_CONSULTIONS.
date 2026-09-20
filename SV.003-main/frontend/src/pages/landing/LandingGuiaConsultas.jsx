@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Megaphone, Target, Users, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { submitGuiaConsultasLead } from "../../lib/clinicApi";
 import { notifyError, notifySuccess } from "../../lib/appToast";
@@ -19,9 +18,9 @@ const INITIAL = {
 };
 
 const VALUE_PROP_KEYS = [
-  { icon: Target, key: "moment" },
-  { icon: Zap, key: "intent" },
-  { icon: Users, key: "reach" },
+  { key: "moment" },
+  { key: "intent" },
+  { key: "reach" },
 ];
 
 export function LandingGuiaConsultas() {
@@ -68,16 +67,9 @@ export function LandingGuiaConsultas() {
     >
       <div className="landing-container">
         <div className="landing-guia-consultas-panel">
-          <div className="landing-guia-consultas-accent" aria-hidden />
-
           <div className="landing-guia-consultas-grid">
             <div className="landing-guia-consultas-copy">
-              <div className="landing-guia-consultas-brand-row">
-                <span className="landing-guia-ads-badge">{t("guiaConsultas.badge")}</span>
-                <span className="landing-guia-consultas-eyebrow">
-                  {t("guiaConsultas.eyebrow")}
-                </span>
-              </div>
+              <p className="landing-eyebrow">{t("guiaConsultas.eyebrow")}</p>
 
               <h2 id="landing-guia-consultas-heading" className="landing-guia-consultas-title">
                 {t("guiaConsultas.title")}
@@ -85,11 +77,8 @@ export function LandingGuiaConsultas() {
               <p className="landing-guia-consultas-lead">{t("guiaConsultas.lead")}</p>
 
               <ul className="landing-guia-value-props">
-                {VALUE_PROP_KEYS.map(({ icon: Icon, key }) => (
+                {VALUE_PROP_KEYS.map(({ key }) => (
                   <li key={key} className="landing-guia-value-prop">
-                    <span className="landing-guia-value-prop-icon" aria-hidden>
-                      <Icon size={18} strokeWidth={2} />
-                    </span>
                     <div>
                       <strong>{t(`guiaConsultas.props.${key}.title`)}</strong>
                       <p>{t(`guiaConsultas.props.${key}.text`)}</p>
@@ -132,15 +121,10 @@ export function LandingGuiaConsultas() {
                 ) : (
                   <>
                     <div className="landing-guia-form-head">
-                      <span className="landing-guia-form-head-icon" aria-hidden>
-                        <Megaphone size={20} strokeWidth={2} />
-                      </span>
-                      <div>
-                        <h3 className="landing-guia-form-kicker">
-                          {t("guiaConsultas.formTitle")}
-                        </h3>
-                        <p className="landing-guia-form-sub">{t("guiaConsultas.formSub")}</p>
-                      </div>
+                      <h3 className="landing-guia-form-kicker">
+                        {t("guiaConsultas.formTitle")}
+                      </h3>
+                      <p className="landing-guia-form-sub">{t("guiaConsultas.formSub")}</p>
                     </div>
 
                     <form
@@ -152,6 +136,7 @@ export function LandingGuiaConsultas() {
                         <Label htmlFor="gc-name">{t("guiaConsultas.name")}</Label>
                         <Input
                           id="gc-name"
+                          name="organization"
                           value={form.name}
                           onChange={(e) => setForm({ ...form, name: e.target.value })}
                           placeholder={t("guiaConsultas.namePlaceholder")}
@@ -166,10 +151,12 @@ export function LandingGuiaConsultas() {
                           <Input
                             id="gc-email"
                             type="email"
+                            name="email"
                             value={form.email}
                             onChange={(e) => setForm({ ...form, email: e.target.value })}
                             placeholder={t("guiaConsultas.emailPlaceholder")}
                             autoComplete="email"
+                            spellCheck={false}
                             required
                             className="landing-guia-input"
                           />
@@ -179,6 +166,8 @@ export function LandingGuiaConsultas() {
                           <Input
                             id="gc-phone"
                             type="tel"
+                            name="tel"
+                            inputMode="tel"
                             value={form.phone}
                             onChange={(e) => setForm({ ...form, phone: e.target.value })}
                             placeholder={t("guiaConsultas.phonePlaceholder")}
@@ -199,15 +188,18 @@ export function LandingGuiaConsultas() {
                         />
                       </div>
 
-                      <label className="landing-guia-privacy">
+                      <div className="landing-guia-privacy">
                         <Checkbox
+                          id="gc-privacy"
                           checked={form.privacy_accepted}
                           onCheckedChange={(checked) =>
                             setForm({ ...form, privacy_accepted: checked === true })
                           }
                         />
-                        <span>{t("guiaConsultas.privacy")}</span>
-                      </label>
+                        <Label htmlFor="gc-privacy" className="landing-guia-privacy-label">
+                          {t("guiaConsultas.privacy")}
+                        </Label>
+                      </div>
 
                       <button
                         type="submit"

@@ -65,19 +65,16 @@ html {
 }
 
 .landing-marquee-viewport:hover .landing-marquee-track,
-.landing-marquee-viewport:focus-within .landing-marquee-track {
+.landing-marquee-viewport:focus-within .landing-marquee-track,
+.landing-marquee-track.is-paused {
   animation-play-state: paused;
-}
-
-.landing-species-icon {
-  font-size: 1.35rem;
-  line-height: 1;
-  filter: drop-shadow(0 1px 2px rgba(12, 45, 77, 0.12));
 }
 
 @media (prefers-reduced-motion: reduce) {
   .landing-marquee-track {
-    animation-duration: 72s;
+    animation: none;
+    transform: none;
+    will-change: auto;
   }
 
   .landing-marquee-fade::before,

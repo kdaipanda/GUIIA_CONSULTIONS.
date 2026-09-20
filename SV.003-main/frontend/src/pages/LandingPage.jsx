@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, startTransition } from "react";
+import { useTranslation } from "react-i18next";
 
 import "../styles/consultationFlow.css";
 import "./landing/landingPreview.css";
@@ -6,12 +7,16 @@ import "./landing/landingMotion.css";
 import "./landing/landingTaste.css";
 import "./landing/landingPetpal.css";
 import "./landing/landingRefined.css";
-import "./landing/landingVetAnimations.css";
 import "./landing/landingColleaguesBento.css";
 import "./landing/landingHero3d.css";
 import "./landing/landingInteractions.css";
 import "./landing/landingDarkMode.css";
 import "./landing/landingPricing.css";
+import "./landing/landingApple2026.css";
+import "./landing/landingAntiSlop.css";
+import "./landing/landingFrontendDesign.css";
+import "./landing/landingUiUxProMax.css";
+import "./landing/landingAnimate.css";
 
 import { LandingNavbar } from "./landing/LandingNavbar";
 import { LandingHero } from "./landing/LandingHero";
@@ -32,12 +37,13 @@ import { LandingGuiaConsultas } from "./landing/LandingGuiaConsultas";
 import { LandingFooter } from "./landing/LandingFooter";
 import { LandingSocialRail } from "./landing/LandingSocialRail";
 import { LandingReveal } from "./landing/LandingReveal";
+import { LandingDeferred } from "./landing/LandingDeferred";
 import { LandingSeo } from "./landing/LandingSeo";
-import { LandingVetAnimations } from "./landing/LandingVetAnimations";
 import { useLandingInteractionQuiet } from "./landing/useLandingInteractionQuiet";
 import { trackMetaPageView } from "../lib/metaPixel";
 
 export function LandingPage({ setView }) {
+  const { t } = useTranslation("landing");
   useLandingInteractionQuiet();
 
   useEffect(() => {
@@ -45,7 +51,6 @@ export function LandingPage({ setView }) {
   }, []);
 
   const setViewDeferred = useCallback((view) => {
-    // Yield one frame so the click paint (pressed state) lands before the route swap.
     requestAnimationFrame(() => {
       startTransition(() => {
         setView(view);
@@ -57,68 +62,93 @@ export function LandingPage({ setView }) {
     <div className="landing-shell landing-shell--page min-h-screen p-3 pb-5 antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
       <LandingSeo />
 
+      <a href="#landing-main" className="landing-skip-link">
+        {t("nav.skipToContent")}
+      </a>
+
       <div className="landing-page-card mx-auto max-w-[82rem]">
         <div className="landing-petpal-top">
           <LandingNavbar setView={setViewDeferred} hero />
           <LandingHero setView={setViewDeferred} />
         </div>
 
-        <LandingHeroStats />
+        <LandingReveal>
+          <LandingHeroStats />
+        </LandingReveal>
 
         <div className="landing-body-wrap">
-          <LandingVetAnimations variant="body" />
-          <main className="relative">
+          <main id="landing-main" className="relative" tabIndex={-1}>
             <LandingReveal>
               <LandingHowItWorks setView={setViewDeferred} />
             </LandingReveal>
 
-            <LandingReveal delay={15}>
+            <LandingReveal>
               <LandingClinicalWorkflow />
             </LandingReveal>
 
-            <LandingReveal delay={20}>
+            <LandingReveal>
               <LandingBrandBand />
             </LandingReveal>
 
-            <LandingReveal delay={30}>
-              <LandingProductShowcase />
-            </LandingReveal>
+            <LandingDeferred minHeight={420}>
+              <LandingReveal>
+                <LandingProductShowcase />
+              </LandingReveal>
+            </LandingDeferred>
 
-            <LandingReveal delay={40}>
-              <LandingFeatures />
-            </LandingReveal>
+            <LandingDeferred minHeight={520}>
+              <LandingReveal>
+                <LandingFeatures />
+              </LandingReveal>
+            </LandingDeferred>
 
-            <LandingReveal delay={50}>
-              <LandingUseCases />
-            </LandingReveal>
+            <LandingDeferred minHeight={360}>
+              <LandingReveal>
+                <LandingUseCases />
+              </LandingReveal>
+            </LandingDeferred>
 
-            <LandingReveal delay={60}>
-              <LandingTestimonials />
-            </LandingReveal>
+            <LandingDeferred minHeight={480}>
+              <LandingReveal>
+                <LandingTestimonials />
+              </LandingReveal>
+            </LandingDeferred>
 
-            <LandingReveal>
-              <LandingSpeciesMarquee />
-            </LandingReveal>
+            <LandingDeferred minHeight={120}>
+              <LandingReveal>
+                <LandingSpeciesMarquee />
+              </LandingReveal>
+            </LandingDeferred>
 
-            <LandingReveal delay={30}>
-              <LandingTrustStrip />
-            </LandingReveal>
+            <LandingDeferred minHeight={100}>
+              <LandingReveal>
+                <LandingTrustStrip />
+              </LandingReveal>
+            </LandingDeferred>
 
-            <LandingReveal delay={40}>
-              <LandingPricing setView={setViewDeferred} />
-            </LandingReveal>
+            <LandingDeferred minHeight={520}>
+              <LandingReveal>
+                <LandingPricing setView={setViewDeferred} />
+              </LandingReveal>
+            </LandingDeferred>
 
-            <LandingReveal delay={50}>
-              <LandingFaq setView={setViewDeferred} />
-            </LandingReveal>
+            <LandingDeferred minHeight={360}>
+              <LandingReveal>
+                <LandingFaq />
+              </LandingReveal>
+            </LandingDeferred>
 
-            <LandingReveal>
-              <LandingCta setView={setViewDeferred} />
-            </LandingReveal>
+            <LandingDeferred minHeight={220}>
+              <LandingReveal>
+                <LandingCta setView={setViewDeferred} />
+              </LandingReveal>
+            </LandingDeferred>
 
-            <LandingReveal delay={20}>
-              <LandingGuiaConsultas />
-            </LandingReveal>
+            <LandingDeferred minHeight={280}>
+              <LandingReveal>
+                <LandingGuiaConsultas />
+              </LandingReveal>
+            </LandingDeferred>
           </main>
 
           <LandingFooter />

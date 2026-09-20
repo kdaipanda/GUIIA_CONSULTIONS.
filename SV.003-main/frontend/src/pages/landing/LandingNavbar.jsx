@@ -3,7 +3,7 @@ import { Menu, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 import { LandingBrandLockup } from "./LandingBrandLockup";
-import { scrollToLandingProduct } from "./landingScroll";
+import { onLandingAnchorClick, productTabHref } from "./landingScroll";
 import { useLandingScrollSpy } from "./useLandingScrollSpy";
 
 const SPY_SECTIONS = ["product", "features", "pricing", "faq"];
@@ -18,7 +18,12 @@ export function LandingNavbar({ setView, hero = false }) {
   const activeSection = useLandingScrollSpy(SPY_SECTIONS);
 
   const navLinks = [
-    { href: "#product", label: t("nav.product"), sectionId: "product", isProduct: true },
+    {
+      href: productTabHref("species"),
+      label: t("nav.product"),
+      sectionId: "product",
+      productTab: "species",
+    },
     { href: "#features", label: t("nav.services"), sectionId: "features" },
     { href: "#pricing", label: t("nav.pricing"), sectionId: "pricing" },
     { href: "#faq", label: t("nav.faq"), sectionId: "faq" },
@@ -73,20 +78,11 @@ export function LandingNavbar({ setView, hero = false }) {
     };
   }, [mobileOpen]);
 
-  const scrollTo = (href, isProduct) => {
-    setMobileOpen(false);
-    if (isProduct) {
-      scrollToLandingProduct("species");
-      return;
-    }
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   const navLinkClass = (sectionId) => {
     const isActive = activeSection === sectionId;
     if (hero) {
       return `relative text-sm font-semibold transition-colors duration-150 hover:text-white ${
-        isActive ? "text-white" : "text-white/95"
+        isActive ? "text-white" : "text-white/90"
       }`;
     }
     return `relative landing-eyebrow transition-colors duration-150 hover:text-guiaa-brand-navy ${
@@ -104,40 +100,43 @@ export function LandingNavbar({ setView, hero = false }) {
             : "border-guiaa-brand-navy/6 bg-white/40"
       }`}
     >
-      <div className="landing-container flex min-h-[4.75rem] items-center justify-between gap-3 py-2 sm:min-h-[5rem] sm:gap-4">
+      <div className="landing-container flex min-h-[3.75rem] items-center justify-between gap-2 py-2 sm:min-h-[4.75rem] sm:gap-4 sm:py-2.5">
         <LandingBrandLockup
           variant="navbar"
           logoTone={hero ? "on-dark" : "auto"}
           onClick={() => setView("landing")}
-          className="max-w-[min(100%,42rem)]"
+          className="min-w-0 shrink"
         />
 
         <nav
           className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 lg:flex"
           aria-label={t("nav.main")}
         >
-          {navLinks.map(({ href, label, sectionId, isProduct }) => (
-            <button
+          {navLinks.map(({ href, label, sectionId, productTab }) => (
+            <a
               key={href}
-              type="button"
-              onClick={() => scrollTo(href, isProduct)}
+              href={href}
+              onClick={(event) =>
+                onLandingAnchorClick(event, {
+                  productTab,
+                  after: () => setMobileOpen(false),
+                })
+              }
               className={navLinkClass(sectionId)}
               aria-current={activeSection === sectionId ? "true" : undefined}
             >
               {label}
               {activeSection === sectionId && (
                 <span
-                  className={`absolute -bottom-1 left-0 right-0 mx-auto h-0.5 w-4 rounded-full ${
-                    hero ? "bg-white" : "bg-guiaa-brand-green"
-                  }`}
+                  className="absolute -bottom-1 left-0 right-0 mx-auto h-0.5 w-4 rounded-full bg-guiaa-brand-green"
                   aria-hidden
                 />
               )}
-            </button>
+            </a>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 sm:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           <LanguageSwitcher tone={hero ? "on-dark" : "default"} />
           <button
             type="button"
@@ -155,23 +154,11 @@ export function LandingNavbar({ setView, hero = false }) {
           </button>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:hidden">
-          <LanguageSwitcher tone={hero ? "on-dark" : "default"} />
-          <button
-            type="button"
-            onClick={() => setView("login")}
-            className={`landing-nav-mobile-cta rounded-lg px-3 py-2.5 text-xs font-semibold ${
-              hero
-                ? "text-white hover:bg-white/10"
-                : "text-guiaa-brand-navy/80 hover:bg-guiaa-brand-navy/5"
-            }`}
-          >
-            {t("nav.enter")}
-          </button>
+        <div className="flex shrink-0 items-center gap-1.5 lg:hidden">
           <button
             type="button"
             onClick={() => setView("register")}
-            className="landing-btn-primary landing-nav-mobile-cta px-3 py-2.5 text-xs"
+            className="landing-btn-primary landing-nav-mobile-cta px-3.5 py-2 text-xs"
           >
             {t("nav.registerShort")}
           </button>
@@ -182,14 +169,13 @@ export function LandingNavbar({ setView, hero = false }) {
             }`}
             onClick={() => setMobileOpen((open) => !open)}
             aria-expanded={mobileOpen}
+            aria-controls="landing-nav-mobile-panel"
             aria-label={mobileOpen ? t("nav.closeMenu") : t("nav.openMenu")}
           >
             {mobileOpen ? <X size={22} aria-hidden /> : <Menu size={22} aria-hidden />}
-            <span className="sr-only">{mobileOpen ? t("nav.closeMenu") : t("nav.openMenu")}</span>
           </button>
         </div>
       </div>
-
       <div
         ref={progressRef}
         className="landing-nav-progress absolute bottom-0 left-0 h-0.5 w-full origin-left bg-guiaa-brand-green/80"
@@ -198,34 +184,67 @@ export function LandingNavbar({ setView, hero = false }) {
 
       {mobileOpen && (
         <div
-          className={`border-t sm:hidden ${
+          id="landing-nav-mobile-panel"
+          className={`landing-nav-mobile-panel border-t lg:hidden ${
             hero
-              ? "border-white/15 bg-[#0c2d4d]/94"
+              ? "border-white/15 bg-[#071622]/94"
               : "border-guiaa-brand-navy/10 bg-white/97"
           }`}
         >
           <div className="landing-container py-4">
-            <nav className="flex flex-col gap-1">
-            {navLinks.map(({ href, label, sectionId, isProduct }) => (
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <LanguageSwitcher tone={hero ? "on-dark" : "default"} />
               <button
-                key={href}
                 type="button"
-                onClick={() => scrollTo(href, isProduct)}
-                className={`landing-nav-mobile-link rounded-lg px-3 py-2.5 text-left text-sm font-semibold ${
-                  activeSection === sectionId
-                    ? hero
-                      ? "bg-white/12 text-white"
-                      : "bg-guiaa-sky-soft/60 text-guiaa-brand-navy"
-                    : hero
-                      ? "text-white"
-                      : "text-guiaa-brand-navy/80"
+                onClick={() => {
+                  setMobileOpen(false);
+                  setView("login");
+                }}
+                className={`min-h-11 rounded-lg px-3 py-2 text-sm font-semibold ${
+                  hero
+                    ? "text-white hover:bg-white/10"
+                    : "text-guiaa-brand-navy hover:bg-guiaa-brand-navy/5"
                 }`}
-                aria-current={activeSection === sectionId ? "true" : undefined}
               >
-                {label}
+                {t("nav.login")}
               </button>
-            ))}
+            </div>
+            <nav className="flex flex-col gap-1" aria-label={t("nav.main")}>
+              {navLinks.map(({ href, label, sectionId, productTab }) => (
+                <a
+                  key={href}
+                  href={href}
+                  onClick={(event) =>
+                    onLandingAnchorClick(event, {
+                      productTab,
+                      after: () => setMobileOpen(false),
+                    })
+                  }
+                  className={`landing-nav-mobile-link min-h-11 rounded-lg px-3 py-2.5 text-left text-sm font-semibold ${
+                    activeSection === sectionId
+                      ? hero
+                        ? "bg-white/12 text-white"
+                        : "bg-guiaa-sky-soft/60 text-guiaa-brand-navy"
+                      : hero
+                        ? "text-white"
+                        : "text-guiaa-brand-navy/80"
+                  }`}
+                  aria-current={activeSection === sectionId ? "true" : undefined}
+                >
+                  {label}
+                </a>
+              ))}
             </nav>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileOpen(false);
+                setView("register");
+              }}
+              className="landing-btn-primary mt-3 w-full justify-center"
+            >
+              {t("nav.register")}
+            </button>
           </div>
         </div>
       )}

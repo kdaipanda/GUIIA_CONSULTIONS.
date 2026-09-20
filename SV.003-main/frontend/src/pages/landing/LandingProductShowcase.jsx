@@ -28,6 +28,8 @@ function ScreenshotPanel({ shot, alt, useFallback, onFallback }) {
       <img
         src={shot.src}
         alt={alt}
+        width={1440}
+        height={900}
         className="block h-full w-full object-cover object-top"
         loading="lazy"
         decoding="async"
@@ -69,7 +71,7 @@ export function LandingProductShowcase() {
   };
 
   return (
-    <section id="product" className="landing-section border-y border-guiaa-brand-navy/8 bg-white/60">
+    <section id="product" className="landing-section border-y border-guiaa-brand-navy/8">
       <div className="landing-container">
         <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
           <div className="lg:sticky lg:top-24">
@@ -140,14 +142,11 @@ export function LandingProductShowcase() {
             <p className="mt-4 text-sm text-guiaa-brand-ink-muted">{activeCaption}</p>
           </div>
 
-          <div className="landing-device-mockup">
+          <div className="landing-product-shot">
             <div className="landing-product-frame">
               <div className="landing-product-frame-inner">
-                <div className="landing-product-chrome flex items-center gap-2 border-b border-guiaa-brand-navy/10 bg-white px-4 py-2.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-                  <span className="landing-kicker ml-3 truncate normal-case">
+                <div className="landing-product-chrome flex items-center border-b border-guiaa-brand-navy/10 bg-white px-4 py-2.5">
+                  <span className="landing-product-chrome-label truncate">
                     GUIAA · {activeLabel}
                   </span>
                 </div>

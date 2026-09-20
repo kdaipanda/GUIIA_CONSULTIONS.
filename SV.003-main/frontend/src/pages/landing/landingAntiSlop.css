@@ -1,0 +1,819 @@
+/* Anti-slop overrides — tokens GUIAA only (loaded last) */
+
+/* Eyebrow: texto, no píldora SaaS */
+.landing-body-wrap .landing-eyebrow,
+.landing-colleagues-section .landing-eyebrow,
+.landing-clinical-workflow-section .landing-eyebrow,
+.landing-footer-v2 .landing-eyebrow {
+  display: block;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #265b93 !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+}
+
+/* Species: sin orbes púrpura/coral */
+.landing-species-glass-section {
+  background: #f8fafc;
+}
+
+.landing-species-glass-section::before {
+  display: none !important;
+}
+
+/* Workflow: un solo tono, sin arcoíris */
+.landing-clinical-workflow-section .landing-clinical-step,
+.landing-clinical-workflow-section .landing-clinical-step:nth-child(n) {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(12, 45, 77, 0.08);
+  box-shadow: 0 8px 24px rgba(12, 45, 77, 0.06);
+}
+
+.landing-clinical-workflow-section .landing-clinical-step-icon {
+  background: rgba(61, 155, 143, 0.1) !important;
+  color: #0c2d4d !important;
+  animation: none !important;
+}
+
+/* Testimonios: wash de marca + mascota nítida */
+.landing-colleague-card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(12, 45, 77, 0.1) !important;
+  border-left-width: 3px !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 28px -18px rgba(12, 45, 77, 0.22) !important;
+}
+
+.landing-colleague-card--navy,
+.landing-colleague-card--coral,
+.landing-colleague-card--slate {
+  --colleague-accent: #0c2d4d;
+  --colleague-wash: rgba(12, 45, 77, 0.08);
+  border-left-color: #0c2d4d !important;
+  background:
+    radial-gradient(ellipse 70% 80% at 100% 100%, rgba(12, 45, 77, 0.08), transparent 55%),
+    #ffffff !important;
+  color: #0c2d4d !important;
+}
+
+.landing-colleague-card--blue,
+.landing-colleague-card--sky,
+.landing-colleague-card--rose {
+  --colleague-accent: #265b93;
+  --colleague-wash: rgba(38, 91, 147, 0.1);
+  border-left-color: #265b93 !important;
+  background:
+    radial-gradient(ellipse 70% 80% at 100% 100%, rgba(38, 91, 147, 0.1), transparent 55%),
+    #ffffff !important;
+  color: #0c2d4d !important;
+}
+
+.landing-colleague-card--green,
+.landing-colleague-card--amber,
+.landing-colleague-card--violet {
+  --colleague-accent: #3d9b8f;
+  --colleague-wash: rgba(61, 155, 143, 0.12);
+  border-left-color: #3d9b8f !important;
+  background:
+    radial-gradient(ellipse 70% 80% at 100% 100%, rgba(61, 155, 143, 0.12), transparent 55%),
+    #ffffff !important;
+  color: #0c2d4d !important;
+}
+
+/* Footer: sin cream ni oro */
+.landing-footer-v2 {
+  background: #f8fafc !important;
+  color: #0c2d4d;
+  border-top: 1px solid rgba(12, 45, 77, 0.08);
+}
+
+.landing-footer-v2-social-icon,
+.landing-footer-v2 button[type="submit"],
+.landing-footer-v2 .landing-footer-v2-submit {
+  background: #3d9b8f !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(47, 133, 122, 0.28) !important;
+}
+
+/* Pricing / panels: opaco, no glass */
+.landing-pricing-card:not(.landing-pricing-card--featured),
+.landing-footer-v2-panel {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #ffffff !important;
+}
+
+.landing-pricing-card--featured {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #f8fafc !important;
+  border-color: rgba(61, 155, 143, 0.45) !important;
+}
+
+/* Featured: borde sólido, no barra gradient */
+.landing-card-accent-top::before {
+  background: #3d9b8f !important;
+  height: 3px;
+}
+
+/* CTAs body: radius editorial, no píldora 980px */
+.landing-body-wrap .landing-btn-primary,
+.landing-body-wrap .landing-btn-secondary,
+.landing-shell .landing-btn-primary,
+.landing-shell .landing-btn-secondary {
+  border-radius: 0.75rem !important;
+}
+
+.landing-body-wrap .landing-btn-primary {
+  background: #3d9b8f !important;
+  box-shadow: 0 8px 24px rgba(47, 133, 122, 0.28) !important;
+}
+
+.landing-body-wrap .landing-btn-secondary {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #ffffff !important;
+}
+
+/* Cáscara menos “mockup flotante” */
+.landing-page-card {
+  border-radius: 1.25rem !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22) !important;
+}
+
+@media (min-width: 1024px) {
+  .landing-page-card {
+    border-radius: 1.5rem !important;
+  }
+}
+
+/* Trust: tipográfico, sin icon chips */
+.landing-trust-strip-inner {
+  list-style: none;
+  margin: 0;
+  padding-inline: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  justify-content: center;
+  align-items: baseline;
+  padding-block: 0.15rem;
+}
+
+.landing-trust-strip-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.landing-trust-icon {
+  display: none !important;
+}
+
+.landing-trust-strip-item p.text-sm {
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+}
+
+.landing-trust-strip-item p.text-sm::after {
+  content: "";
+}
+
+.landing-trust-strip-item:not(:last-child) p.text-sm::after {
+  content: " ·";
+  margin-left: 0.85rem;
+  color: rgba(12, 45, 77, 0.35);
+  font-weight: 400;
+}
+
+.landing-trust-strip-item p.text-\[11px\] {
+  display: none !important;
+}
+
+/* Use cases: menos “icon tile” */
+.landing-body-wrap .landing-clinical-step-icon {
+  background: transparent !important;
+  padding: 0 !important;
+  color: #265b93 !important;
+}
+
+.landing-vet-tag {
+  border-radius: 0.35rem !important;
+  background: rgba(38, 91, 147, 0.08) !important;
+  color: #265b93 !important;
+  text-transform: none !important;
+  letter-spacing: -0.01em !important;
+  font-size: 0.7rem !important;
+}
+
+/* Use cases — lista editorial */
+.landing-usecases-layout {
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (min-width: 900px) {
+  .landing-usecases-layout {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 3.5rem;
+    align-items: start;
+  }
+}
+
+.landing-usecases-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(12, 45, 77, 0.1);
+}
+
+.landing-usecase-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.15rem 0.15rem 1.25rem;
+  border-bottom: 1px solid rgba(12, 45, 77, 0.1);
+  text-decoration: none;
+  color: inherit;
+  background: transparent;
+  transition: background-color 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@media (min-width: 640px) {
+  .landing-usecase-row {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+}
+
+.landing-usecase-row:hover {
+  background: rgba(248, 250, 252, 0.9);
+}
+
+.landing-usecase-row--featured {
+  border-left: 3px solid #3d9b8f;
+  padding-left: 0.85rem;
+}
+
+.landing-usecase-row--featured .landing-usecase-title {
+  font-size: 1.2rem;
+  font-family: var(--landing-font-display, Georgia, serif);
+}
+
+.landing-usecase-tag {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #265b93;
+}
+
+.landing-usecase-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0c2d4d;
+}
+
+.landing-usecase-desc {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #64748b;
+  max-width: 36rem;
+}
+
+.landing-usecase-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #265b93;
+  white-space: nowrap;
+}
+
+.landing-trust-line {
+  margin: 0;
+  padding-block: 1.35rem;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #0c2d4d;
+  text-wrap: pretty;
+}
+
+.landing-trust-sep {
+  color: rgba(12, 45, 77, 0.35);
+  font-weight: 400;
+}
+
+/* Footer eyebrow: texto, no píldora */
+.landing-footer-v2-eyebrow {
+  display: block !important;
+  padding: 0 !important;
+  margin-bottom: 0.75rem !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+  color: #265b93 !important;
+}
+
+.landing-footer-v2-input,
+.landing-footer-v2-submit {
+  border-radius: 0.75rem !important;
+}
+
+.landing-footer-v2-social-card {
+  border-radius: 0.85rem !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(12, 45, 77, 0.08) !important;
+  box-shadow: none !important;
+}
+
+/* Product chrome: sin semáforo macOS genérico */
+.landing-product-chrome-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(12, 45, 77, 0.22);
+}
+
+/* Feature unique label — tipográfico, no píldora */
+.landing-feature-species {
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.landing-feature-unique {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #3d9b8f;
+}
+
+.landing-body-wrap #features .landing-card-featured {
+  border-color: rgba(61, 155, 143, 0.28);
+  box-shadow: 0 14px 36px rgba(12, 45, 77, 0.1);
+}
+
+.landing-hero-cap-row:first-child .landing-hero-capability-title {
+  color: #fff;
+}
+
+/* Testimonial tags off */
+.landing-colleague-tags {
+  display: none !important;
+}
+
+/* Clinical step numbers: tipográficos */
+.landing-clinical-workflow-section .landing-clinical-step-num {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #265b93 !important;
+}
+
+.landing-clinical-workflow-section .landing-clinical-step-icon {
+  display: none !important;
+}
+
+/* Pricing: opaco + badge sólido */
+.landing-pricing-card {
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 28px rgba(12, 45, 77, 0.07) !important;
+}
+
+.landing-pricing-badge,
+.landing-body-wrap .landing-service-pill {
+  border-radius: 0.4rem !important;
+  background: rgba(61, 155, 143, 0.12) !important;
+  color: #0c2d4d !important;
+  text-transform: none !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* CTA panel: sin glass excesivo */
+.landing-cta-panel-v2 {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Hero 3D orbits decorativos: apagar ruido AI */
+.landing-hero-3d-orbit {
+  display: none !important;
+  animation: none !important;
+}
+
+/* Species chips: editorial, no liquid glass */
+.landing-species-chip,
+.landing-species-chip.category-card--liquid {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(12, 45, 77, 0.1) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 8px 20px -14px rgba(12, 45, 77, 0.2) !important;
+}
+
+/* Dark mode: mantener tokens, sin glass púrpura */
+[data-theme="dark"] .landing-species-glass-section::before,
+html.dark .landing-species-glass-section::before {
+  background:
+    radial-gradient(ellipse 42% 50% at 12% 40%, rgba(61, 155, 143, 0.16), transparent 68%),
+    radial-gradient(ellipse 40% 48% at 88% 30%, rgba(38, 91, 147, 0.14), transparent 65%) !important;
+}
+
+[data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step,
+html.dark .landing-clinical-workflow-section .landing-clinical-step {
+  background: rgba(15, 28, 42, 0.92) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .landing-footer-v2,
+html.dark .landing-footer-v2 {
+  background: #0a1622 !important;
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .landing-body-wrap .landing-eyebrow,
+[data-theme="dark"] .landing-colleagues-section .landing-eyebrow,
+[data-theme="dark"] .landing-clinical-workflow-section .landing-eyebrow,
+[data-theme="dark"] .landing-footer-v2 .landing-eyebrow,
+[data-theme="dark"] .landing-footer-v2-eyebrow,
+html.dark .landing-body-wrap .landing-eyebrow,
+html.dark .landing-colleagues-section .landing-eyebrow,
+html.dark .landing-clinical-workflow-section .landing-eyebrow,
+html.dark .landing-footer-v2 .landing-eyebrow,
+html.dark .landing-footer-v2-eyebrow {
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: #7eb8c9 !important;
+}
+
+/* Pricing: menos icon tiles */
+.landing-pricing-addon-icon {
+  background: rgba(61, 155, 143, 0.12) !important;
+  color: #0c2d4d !important;
+  border-radius: 0.65rem !important;
+}
+
+/* —— Features editorial —— */
+.landing-feature-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(12, 45, 77, 0.1);
+}
+
+.landing-feature-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.15rem 0.25rem 1.25rem;
+  border-bottom: 1px solid rgba(12, 45, 77, 0.1);
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+@media (min-width: 640px) {
+  .landing-feature-row {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+}
+
+.landing-feature-secondary {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .landing-feature-secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.landing-feature-secondary-item {
+  padding: 1.1rem 1.15rem;
+  border-radius: 0.85rem !important;
+}
+
+.landing-feature-hero {
+  border-radius: 1rem !important;
+}
+
+/* —— Clinical rail (asimétrico) —— */
+.landing-clinical-layout {
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (min-width: 900px) {
+  .landing-clinical-layout {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: 3.5rem;
+    align-items: start;
+  }
+}
+
+.landing-clinical-rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.landing-clinical-rail-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: 0.85rem 1rem;
+  padding-bottom: 1.35rem;
+}
+
+.landing-clinical-rail-num {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.55rem;
+  background: #0c2d4d;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-clinical-rail-line {
+  position: absolute;
+  left: 1.1rem;
+  top: 2.35rem;
+  bottom: 0;
+  width: 1px;
+  background: rgba(12, 45, 77, 0.14);
+}
+
+.landing-clinical-rail-title {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0c2d4d;
+}
+
+.landing-clinical-rail-detail {
+  margin: 0.3rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.landing-clinical-workflow-foot {
+  text-align: left;
+  max-width: 40rem;
+  color: #64748b;
+}
+
+/* Guia value props tipográficos */
+.landing-guia-value-prop-icon {
+  display: none !important;
+}
+
+.landing-guia-value-prop {
+  align-items: flex-start !important;
+  gap: 0 !important;
+  padding-block: 0.65rem;
+  border-bottom: 1px solid rgba(12, 45, 77, 0.08);
+}
+
+.landing-guia-value-props {
+  gap: 0 !important;
+}
+
+.landing-guia-ads-badge {
+  display: none !important;
+}
+
+.landing-guia-consultas-panel {
+  border-radius: 0.85rem !important;
+  box-shadow: none !important;
+}
+
+/* Colleagues: tipografía editorial, mascota decorativa */
+.landing-colleagues-section::before {
+  display: none !important;
+}
+
+.landing-colleague-pet {
+  opacity: 1 !important;
+  max-width: 8.75rem !important;
+  max-height: 10rem !important;
+  filter: drop-shadow(0 10px 16px rgba(12, 45, 77, 0.22)) !important;
+}
+
+.landing-colleague-curve,
+.landing-colleague-curve::before {
+  display: none !important;
+}
+
+/* Product tabs: sólido, no pill gradient */
+.landing-body-wrap .landing-tab {
+  border-radius: 0.45rem !important;
+}
+
+.landing-body-wrap .landing-tab.is-active {
+  background: #3d9b8f !important;
+}
+
+/* Featured pricing: mismo layout que el resto, solo acento */
+.landing-pricing-card--featured {
+  box-shadow: 0 12px 36px -18px rgba(12, 45, 77, 0.16) !important;
+}
+
+.landing-pricing-card--featured .landing-pricing-plan-name,
+.landing-pricing-card--featured .landing-pricing-price {
+  font-family: var(--landing-font-body, inherit) !important;
+}
+
+.landing-cta-panel-v2::before {
+  display: none !important;
+}
+
+/* —— FAQ editorial —— */
+.landing-faq-layout {
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (min-width: 900px) {
+  .landing-faq-layout {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: 3.5rem;
+    align-items: start;
+  }
+}
+
+.landing-faq-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgba(12, 45, 77, 0.1);
+}
+
+.landing-faq-heading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.landing-faq-row {
+  border-bottom: 1px solid rgba(12, 45, 77, 0.1);
+}
+
+.landing-faq-row .landing-faq-trigger {
+  padding-inline: 0.15rem;
+}
+
+.landing-faq-row .landing-faq-trigger:hover {
+  background: transparent;
+}
+
+.landing-faq-more {
+  padding-top: 0.25rem;
+}
+
+/* —— Footer social tipográfico —— */
+.landing-footer-v2-social-grid {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.35rem !important;
+}
+
+.landing-footer-v2-social-card {
+  display: inline-flex !important;
+  align-items: baseline;
+  gap: 0.35rem;
+  min-height: auto !important;
+  padding: 0.35rem 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.landing-footer-v2-social-card:hover {
+  transform: none !important;
+  background: transparent !important;
+}
+
+.landing-footer-v2-social-icon {
+  display: none !important;
+}
+
+.landing-footer-v2-social-name {
+  color: #265b93 !important;
+  font-size: 0.875rem !important;
+}
+
+.landing-footer-v2-social-sub {
+  display: none !important;
+}
+
+.landing-footer-v2-social-arrow {
+  color: #265b93;
+  opacity: 0.55;
+}
+
+.landing-footer-v2-nav button,
+.landing-footer-v2-nav a {
+  border-radius: 0.45rem !important;
+}
+
+/* —— Species: panel opaco —— */
+.landing-species-glass-section .category-selector-glass-panel,
+.landing-species-glass-panel {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.landing-species-glass-section .category-selector-glass-badge,
+.landing-species-glass-badge {
+  border-radius: 0.35rem !important;
+  background: rgba(38, 91, 147, 0.1) !important;
+  color: #0c2d4d !important;
+  text-transform: none !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* —— Cáscara menos flotante —— */
+.landing-page-card {
+  border-radius: 1.15rem !important;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+.landing-body-wrap::before {
+  opacity: 0.08 !important;
+}
+
+.landing-body-wrap .landing-section-alt {
+  background: transparent !important;
+}
+
+/* Product chrome tipográfico */
+.landing-product-chrome-dot {
+  display: none !important;
+}
+
+.landing-product-frame {
+  border-radius: 0.75rem !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+/* Hero video frame más sobrio */
+.landing-hero-video-frame {
+  border-radius: 0.85rem !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28) !important;
+}
+
+/* Nav hero: opaco editorial */
+.landing-nav-hero {
+  background: rgba(7, 22, 34, 0.78) !important;
+  backdrop-filter: blur(8px) saturate(1.05) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(1.05) !important;
+}
+
+

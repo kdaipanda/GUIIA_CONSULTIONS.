@@ -18,12 +18,14 @@ Este skill complementa **Impeccable** y **Taste Skill**. No reemplaza `DESIGN.md
 
 | Área | Ruta / pantalla | Skill principal | Dials GUIAA |
 |------|-----------------|-----------------|-------------|
-| Landing pública | `/`, marketing | `design-taste-frontend` | VARIANCE **5**, MOTION **5**, DENSITY **3** |
+| Landing pública | `/`, marketing | `frontend-design` + `design-taste-frontend` + `ui-ux-pro-max` | VARIANCE **5**, MOTION **5**, DENSITY **3** |
 | Rediseño UI existente | cualquier | `redesign-existing-projects` | preservar tokens GUIAA |
 | Clínica / dashboard | `/app/*` | **Impeccable** (no design-taste landing) | DENSITY **6–7**, MOTION **4–5** |
 | Consulta multistep | flujo consulta | Impeccable + `consultationFlow.css` | VARIANCE **3**, MOTION **4**, DENSITY **6** |
 | Output completo | refactors, App.js | `full-output-enforcement` | — |
 | Soft / premium landing | hero, pricing | `high-end-visual-design` | solo si no rompe paleta GUIAA |
+| Motion / micro-interacciones | landing o UI | `animate` (+ Impeccable `reference/animate.md`) | Landing MOTION **5**; clínica **4–5**, sin bounce |
+| Auditoría UI / a11y / UX | cualquier | `web-design-guidelines` (Vercel Web Interface Guidelines) | revisar, no inventar tokens |
 
 ## Paleta obligatoria (no inventar acentos)
 

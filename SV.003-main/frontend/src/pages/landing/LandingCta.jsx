@@ -1,7 +1,7 @@
 import React from "react";
 import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { scrollToLandingSection } from "./landingScroll";
+import { onLandingAnchorClick } from "./landingScroll";
 
 export function LandingCta({ setView }) {
   const { t } = useTranslation("landing");
@@ -11,19 +11,19 @@ export function LandingCta({ setView }) {
         <div className="landing-cta-panel landing-cta-panel-v2 relative overflow-hidden">
           <div>
             <p className="landing-eyebrow">{t("cta.eyebrow")}</p>
-            <h2 className="landing-section-title mt-3 text-3xl sm:text-4xl">
+            <h2 className="landing-section-title text-3xl sm:text-4xl">
               {t("cta.title")}
             </h2>
             <p className="landing-lead mt-4 max-w-lg">
               {t("cta.lead")}
             </p>
-            <button
-              type="button"
-              onClick={() => scrollToLandingSection("#faq")}
+            <a
+              href="#faq"
+              onClick={(event) => onLandingAnchorClick(event)}
               className="landing-cta-faq-link mt-5 inline-flex min-h-11 items-center text-sm font-medium text-white transition hover:text-white"
             >
               {t("cta.faqLink")}
-            </button>
+            </a>
           </div>
 
           <div className="landing-cta-actions">

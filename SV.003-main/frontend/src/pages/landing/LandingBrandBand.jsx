@@ -6,12 +6,9 @@ export function LandingBrandBand() {
   const { t } = useTranslation("landing");
 
   return (
-    <section className="landing-brand-band" aria-label={t("brandBand.aria")}>
+    <section className="landing-brand-band" aria-labelledby="landing-brand-band-title">
       <div className="landing-container landing-brand-band-inner">
         <div className="landing-brand-band-mascot-wrap" aria-hidden>
-          <span className="landing-brand-band-spark landing-brand-band-spark--1" />
-          <span className="landing-brand-band-spark landing-brand-band-spark--2" />
-          <span className="landing-brand-band-spark landing-brand-band-spark--3" />
           <img
             src={LANDING_IMAGES.mascotFlyingCutout}
             alt=""
@@ -22,9 +19,11 @@ export function LandingBrandBand() {
             decoding="async"
           />
         </div>
-        <div>
-          <strong>{t("brandBand.title")}</strong>
-          <span>{t("brandBand.lead")}</span>
+        <div className="landing-brand-band-copy">
+          <h2 id="landing-brand-band-title" className="landing-brand-band-title">
+            {t("brandBand.title")}
+          </h2>
+          <p className="landing-brand-band-lead">{t("brandBand.lead")}</p>
         </div>
       </div>
     </section>

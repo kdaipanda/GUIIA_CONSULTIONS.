@@ -10,25 +10,35 @@
     "registerShort": "Sign up",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "main": "Main"
+    "main": "Main",
+    "skipToContent": "Skip to content"
   },
   "seo": {
-    "title": "GUIAA — Clinical CDS platform for veterinarians",
-    "description": "CDS L4 and L5 clinical decision support for licensed veterinarians. Multi-species, records, inventory, and sales across Latin America.",
+    "title": "GUIAA Diagnosis — Unique veterinary CDS platform in Latin America",
+    "description": "GUIAA Diagnosis: CDS L4·L5 support for precise, structured veterinary diagnosis. Unique in Latin America for licensed veterinarians. Multi-species, records, inventory, and sales.",
     "audience": "Licensed veterinarians"
   },
   "hero": {
-    "kicker": "Veterinary clinical software · GUIAA",
-    "titleBefore": "Connect with",
-    "titleAccent": "your practice",
-    "titleAfter": ", anytime",
-    "leadBefore": "Smooth communication between your practice and every clinical case. Simplified health management for",
-    "leadAccent": "every patient",
-    "leadAfter": " with multi-species history-taking and advanced CDS support.",
-    "ctaRegister": "Start vet registration",
-    "ctaHint": "MVZ registration in minutes · License verification included",
-    "explore": "Explore the interface without signing up →",
-    "playVideo": "Watch presentation video"
+    "brand": "GUIAA",
+    "kicker": "GUIAA Diagnosis · Unique in Latin America",
+    "title": "Precise veterinary diagnosis, under control.",
+    "titleBefore": "Precise veterinary diagnosis",
+    "titleAccent": "",
+    "titleAfter": ", under control.",
+    "lead": "GUIAA Diagnosis structures history-taking and CDS L4·L5 for verifiable clinical reasoning — unique in Latin America for licensed veterinarians.",
+    "leadExtended": "We are the only platform in Latin America focused on structured, verifiable clinical diagnosis for licensed veterinarians — with records, inventory, and sales in the same flow.",
+    "ctaRegister": "Create vet account",
+    "ctaHint": "3 free CDS consultations when you sign up",
+    "explore": "Explore the interface without signing up",
+    "playVideo": "See how it works",
+    "playHeroVideo": "Play",
+    "closeVideo": "Close",
+    "presentationTitle": "How GUIAA works",
+    "presentationCaption": "A quick tour of GUIAA Diagnosis with CDS L4·L5.",
+    "windowTitle": "New consult · Multi-species",
+    "capabilitiesTitle": "What you use in consult",
+    "capabilitiesLead": "GUIAA Diagnosis leads the flow. Everything else stays inside the clinical act.",
+    "capabilitiesMore": "Also"
   },
   "heroStats": {
     "aria": "GUIAA advantages",
@@ -38,18 +48,21 @@
         "desc": "Clinical forms for dogs, cats, exotics, and more."
       },
       "record": {
-        "value": "Unified clinical record",
-        "desc": "Owners, pets, consultations, and sales in one practice."
+        "value": "GUIAA Diagnosis",
+        "desc": "Unique in Latin America for precise, structured clinical diagnosis."
       },
       "access": {
         "value": "Verified vet access",
-        "desc": "Registration with professional license for veterinarians in LATAM."
+        "desc": "Registration with professional license for veterinarians in Latin America."
       }
     }
   },
   "speciesMarquee": {
+    "eyebrow": "Clinical coverage",
     "heading": "Multi-species veterinary · {{count}} clinical forms",
     "aria": "Species available in consultation",
+    "pause": "Pause carousel",
+    "play": "Resume carousel",
     "categories": {
       "perros": "Dogs",
       "gatos": "Cats",
@@ -95,8 +108,8 @@
     "petDetailLabel": "RECORD THE PET'S DETAILS AS THOROUGHLY AS POSSIBLE.",
     "petDetailSample": "Canine patient, 4 years old, 18 kg. Intermittent vomiting for 48 h, no diarrhea. Decreased appetite. Last meal last night.\n\nOn exam: Temp 39.2 °C, mild dehydration (5%), pale mucous membranes, mild epigastric abdominal pain.",
     "dashboardGreeting": "Good morning, Dr. García",
-    "dashboardConsultations": "{{count}} consultations",
-    "statTotal": "Total consultations",
+    "dashboardConsultations": "{{count}} CDS consultations",
+    "statTotal": "Total CDS consultations",
     "statMonth": "This month",
     "statMembership": "Membership"
   },
@@ -104,6 +117,7 @@
     "eyebrow": "Vet membership",
     "title": "Plans for your veterinary practice",
     "lead": "Basic, Professional, and Premium — choose your CDS consultation volume and multi-species coverage. License verification included.",
+    "trialNote": "When you register you get 3 free CDS consultations to try the platform before choosing a plan.",
     "ctaRegister": "Start with this plan",
     "ctaPlan": "Choose plan",
     "billingNote": "monthly or annual billing",
@@ -111,9 +125,9 @@
     "askPrice": "Contact us",
     "pricePerMonth": "/mo",
     "badgeFeatured": "Most popular",
-    "badgeConsultations": "{{count}} consultations/mo",
+    "badgeConsultations": "{{count}} CDS consultations/mo",
     "creditAddonDesc": "Additional CDS consultations without changing your plan. Credits are added to your current balance.",
-    "trustNote": "Certified veterinarians only. Professional license verification is part of initial registration.",
+    "trustNote": "Register with your professional license and get 3 free CDS consultations. Certified veterinarians only.",
     "comparePlans": "Compare plans in detail →",
     "planDescriptions": {
       "basic": "Small-animal practice: structured CDS, records, and scheduling for dogs and cats.",
@@ -128,10 +142,19 @@
     "moreTitle": "Can't find your answer?",
     "moreLead": "Write to us and we'll help before you register.",
     "emailCta": "Email support",
+    "empty": "Frequently asked questions are unavailable right now.",
     "items": [
       {
         "q": "Who can register on GUIAA?",
         "a": "Only licensed veterinarians. During registration we verify your professional license to keep a clinical-only environment."
+      },
+      {
+        "q": "Do I get free CDS consultations when I register?",
+        "a": "Yes. When you create your veterinarian account you receive 3 free CDS consultations to try the full clinical flow. After that you can choose the plan that fits your practice."
+      },
+      {
+        "q": "What makes GUIAA Diagnosis different?",
+        "a": "GUIAA Diagnosis structures history-taking, physical exam, and CDS L4·L5 reasoning for precise, real diagnosis in consult. It is the only platform in Latin America focused on this level of veterinary diagnostic support — always under your professional judgment."
       },
       {
         "q": "What are CDS L4 and L5?",
@@ -157,10 +180,10 @@
   },
   "cta": {
     "eyebrow": "Professional vet registration",
-    "title": "Your veterinary practice, documented with clinical rigor",
-    "lead": "We verify your professional license. Start recording multi-species patients with CDS L4 and L5 support from day one.",
+    "title": "Start with GUIAA Diagnosis today",
+    "lead": "We verify your license, give you 3 free CDS consultations, and open the flow unique in Latin America.",
     "faqLink": "See frequently asked questions",
-    "createAccount": "Create vet account",
+    "createAccount": "Create account with 3 free CDS consultations",
     "haveAccount": "I already have an account"
   },
   "footer": {
@@ -174,7 +197,8 @@
     "faq": "FAQ",
     "newsletterTitle": "Clinical updates",
     "newsletterLead": "Product news and clinical tips for your practice.",
-    "newsletterPlaceholder": "your@email.com",
+    "socialTitle": "Follow us",
+    "newsletterPlaceholder": "your@email.com…",
     "newsletterSubmit": "Subscribe",
     "newsletterError": "Enter a valid email",
     "newsletterSent": "Opening your email app…",
@@ -188,13 +212,15 @@
   "features": {
     "eyebrow": "Practice modules",
     "title": "Clinic and operations in one place",
-    "lead": "Diagnosis, records, inventory, and sales — designed for the veterinarian's routine, not a generic dashboard.",
+    "lead": "GUIAA Diagnosis leads the platform: CDS support for precise, real diagnosis. Records, inventory, and sales follow in the same consult.",
     "viewProduct": "See product screenshots",
     "seeInProduct": "View in product",
+    "seeInProductFor": "View {{title}} in the product",
+    "uniqueBadge": "Unique in Latin America",
     "primary": {
       "diagnostico": {
         "title": "GUIAA Diagnosis",
-        "description": "Guided history-taking, physical exam, and CDS L4/L5 support to document veterinary diagnostic reasoning."
+        "description": "Guided history-taking, physical exam, and CDS L4·L5 support for precise, structured veterinary diagnosis grounded in real clinic work. We are the only platform in Latin America focused on this level of clinical rigor."
       },
       "expediente": {
         "title": "Clinical record",
@@ -231,17 +257,17 @@
   "how": {
     "eyebrow": "How it works",
     "title": "From registration to a full record in three steps",
-    "lead": "No long learning curve: start documenting consultations from day one.",
+    "lead": "No long learning curve: register, get 3 free CDS consultations, and start documenting from day one.",
     "ctaRegister": "Start vet registration",
     "ctaExplore": "Explore the interface without signing up",
     "steps": {
       "01": {
         "title": "Vet registration",
-        "detail": "Create your account with a professional license. Verification included for LATAM."
+        "detail": "Create your account with a professional license. Includes 3 free CDS consultations and verification for Latin America."
       },
       "02": {
-        "title": "First consultation",
-        "detail": "Pick a species, register the patient, and document with CDS L4·L5 forms."
+        "title": "GUIAA Diagnosis",
+        "detail": "Document the consult with guided history-taking and CDS L4·L5 for precise, structured diagnosis."
       },
       "03": {
         "title": "Complete record",
@@ -260,9 +286,13 @@
         "text": "Forms by veterinary species",
         "sub": "Dogs, cats, birds, reptiles, and exotics"
       },
-      "history": {
-        "text": "Longitudinal clinical history",
-        "sub": "Unified record per patient and owner"
+      "trial": {
+        "text": "3 free CDS consultations on signup",
+        "sub": "Try the full CDS flow before choosing a plan"
+      },
+      "diagnosis": {
+        "text": "GUIAA Diagnosis · Unique in Latin America",
+        "sub": "Precise, structured clinical diagnosis"
       }
     }
   },
@@ -309,7 +339,7 @@
         "quote": "Verified access with a professional license gives the whole clinical team confidence.",
         "role": "Emergency · Lima",
         "petAlt": "Cat in veterinary emergency care",
-        "tags": ["Vet registration", "LATAM"]
+        "tags": ["Vet registration", "Latin America"]
       }
     }
   },
@@ -344,7 +374,7 @@
   "workflow": {
     "eyebrow": "Veterinary clinical flow",
     "title": "From patient intake to a complete record",
-    "lead": "GUIAA mirrors how you work in clinic: patient data, clinical reasoning, and traceability — without jumping between disconnected tools.",
+    "lead": "GUIAA Diagnosis structures CDS L4·L5 clinical reasoning for precise, real diagnosis — unique in Latin America — with traceability through the full record.",
     "ctaLive": "See live consultation",
     "foot": "Each species unlocks different veterinary forms — dogs, cats, birds, reptiles, exotics, and more.",
     "steps": {
@@ -431,7 +461,7 @@
     "name": "Name or company",
     "namePlaceholder": "VetLab Laboratory",
     "email": "Email",
-    "emailPlaceholder": "contact@brand.com",
+    "emailPlaceholder": "contact@brand.com…",
     "phone": "Phone",
     "phonePlaceholder": "+1 555 000 0000",
     "message": "Product or brand to promote",

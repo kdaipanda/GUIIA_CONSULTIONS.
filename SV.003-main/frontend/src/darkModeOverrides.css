@@ -741,6 +741,46 @@ html.dark .clinic-dialog-guiaa {
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
 }
 
+[data-theme="dark"] .clinic-patient-detail-dialog,
+html.dark .clinic-patient-detail-dialog {
+  background: var(--clinic-surface) !important;
+}
+
+[data-theme="dark"] .clinic-patient-detail,
+html.dark .clinic-patient-detail {
+  background: var(--clinic-surface);
+}
+
+[data-theme="dark"] .clinic-patient-detail-header,
+[data-theme="dark"] .clinic-patient-detail-history,
+html.dark .clinic-patient-detail-header,
+html.dark .clinic-patient-detail-history {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .clinic-patient-detail-title,
+html.dark .clinic-patient-detail-title {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .clinic-patient-detail-subtitle,
+[data-theme="dark"] .clinic-patient-detail-label,
+html.dark .clinic-patient-detail-subtitle,
+html.dark .clinic-patient-detail-label {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .clinic-patient-detail-value,
+html.dark .clinic-patient-detail-value {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme="dark"] .clinic-patient-detail-stats .clinic-stat-pill,
+html.dark .clinic-patient-detail-stats .clinic-stat-pill {
+  background: var(--clinic-surface-muted, #1e293b);
+  border-color: var(--border-color);
+}
+
 [data-theme="dark"] .clinic-page-guiaa .clinic-table thead th,
 html.dark .clinic-page-guiaa .clinic-table thead th {
   background: var(--clinic-surface-muted);

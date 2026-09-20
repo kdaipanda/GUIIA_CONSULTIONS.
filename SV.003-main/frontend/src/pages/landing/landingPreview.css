@@ -52,7 +52,7 @@
 }
 
 .landing-app-preview-page .category-grid--liquid {
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -78,6 +78,109 @@
   border-radius: 16px;
 }
 
+/* Preview species — chips editoriales (sin liquid glass) */
+.landing-preview-species-eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #265b93;
+}
+
+.landing-preview-species-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.landing-preview-species-chip {
+  min-height: 2.35rem !important;
+  padding: 0.28rem 0.7rem 0.28rem 0.28rem !important;
+  pointer-events: none;
+  box-shadow: none !important;
+}
+
+.landing-preview-species-chip .landing-species-icon {
+  width: 1.65rem !important;
+  height: 1.65rem !important;
+  font-size: 0.95rem !important;
+  border-radius: 0.4rem !important;
+}
+
+.landing-preview-species-chip .landing-species-label {
+  font-size: 0.72rem !important;
+}
+
+.landing-preview-species-chip.is-selected {
+  border-color: rgba(61, 155, 143, 0.55) !important;
+  background: #f0faf8 !important;
+}
+
+.landing-preview-plan-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
+  background: rgba(61, 155, 143, 0.14);
+  color: #0c2d4d;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.landing-preview-step-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: inherit;
+}
+
+.landing-app-preview-page .landing-preview-stepper .step-icon-wrapper {
+  font-size: 0.8rem;
+}
+
+.landing-preview-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.landing-preview-stat {
+  padding: 0.85rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(12, 45, 77, 0.1);
+  background: #ffffff;
+}
+
+.landing-preview-stat-value {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0c2d4d;
+}
+
+.landing-preview-stat-label {
+  margin: 0.2rem 0 0;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.landing-app-preview-page .category-selector-glass-wrap,
+.landing-app-preview-page .category-selector-glass-panel,
+.landing-app-preview-page .category-card--liquid {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.landing-app-preview-page .category-card--liquid::before {
+  display: none !important;
+}
+
 .landing-app-preview-page .page-title-header {
   padding-top: 12px;
   padding-bottom: 12px;
@@ -89,6 +192,25 @@
 
 .landing-app-preview-page .page-title-text p {
   font-size: 0.85rem;
+}
+
+@media (max-width: 639px) {
+  .landing-preview-panel {
+    height: min(380px, 78vw);
+  }
+
+  .landing-preview-scaler {
+    width: 720px;
+    transform: scale(0.52);
+  }
+
+  .landing-app-preview-page .consultation-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-app-preview-page .consultation-sidebar {
+    display: none;
+  }
 }
 
 .landing-screenshot-capture-page .landing-capture-frame {

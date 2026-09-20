@@ -38,7 +38,7 @@ export function GuiaaLogoImg({ className, tone = "auto", alt = "GUIAA" }) {
     return () => observer.disconnect();
   }, [tone]);
 
-  return <img src={src} alt={alt} className={className} decoding="async" />;
+  return <img src={src} alt={alt} className={className} width={240} height={96} decoding="async" />;
 }
 
 export function GuiaaBrandLockup({
@@ -108,7 +108,7 @@ export function GuiaaBrandLockup({
   }
 
   const taglineClasses = isNavbar
-    ? "min-w-0 max-w-[11rem] sm:max-w-none sm:border-l sm:border-guiaa-brand-navy/12 sm:pl-3 lg:pl-4"
+    ? "min-w-0 max-w-[14rem] border-l border-guiaa-brand-navy/12 pl-3 lg:max-w-none lg:pl-4"
     : isLoading || isFooter
       ? "min-w-0 max-w-sm text-center sm:text-left"
       : isAuth
@@ -130,7 +130,7 @@ export function GuiaaBrandLockup({
       : "mt-1 text-[11px] leading-snug text-guiaa-brand-navy/60 sm:text-xs";
 
   const wrapperClasses = isNavbar
-    ? "guiaa-brand-lockup guiaa-brand-lockup--navbar flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4"
+    ? "guiaa-brand-lockup guiaa-brand-lockup--navbar flex min-w-0 items-center gap-0 sm:gap-3 lg:gap-4"
     : isAuth || isLoading || isFooter
       ? "guiaa-brand-lockup guiaa-brand-lockup--stack flex min-w-0 flex-col items-center gap-3"
       : "guiaa-brand-lockup flex min-w-0 flex-col items-center gap-3 sm:flex-row sm:items-center sm:gap-4";
@@ -139,7 +139,7 @@ export function GuiaaBrandLockup({
     <div className={`${wrapperClasses} ${className}`}>
       <GuiaaLogoImg className={logoClasses} tone={resolvedTone} alt={onClick ? "" : "GUIAA"} />
       {showTaglines && (
-        <div className={taglineClasses} aria-hidden={Boolean(onClick)}>
+        <div className={`${taglineClasses}${isNavbar ? " hidden min-[900px]:block" : ""}`} aria-hidden={Boolean(onClick)}>
           <p className={primaryClasses}>{GUIAA_TAGLINE_PRIMARY}</p>
           <p className={secondaryClasses}>{GUIAA_TAGLINE_SECONDARY}</p>
         </div>

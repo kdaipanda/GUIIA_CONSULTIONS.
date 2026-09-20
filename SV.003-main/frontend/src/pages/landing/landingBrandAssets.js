@@ -27,9 +27,17 @@ export const LANDING_IMAGES = {
   },
 };
 
-export const LANDING_HERO_VIDEO = "/VG1.mp4";
+export const LANDING_HERO_VIDEO = "/VG1-mobile.mp4";
 export const LANDING_HERO_VIDEO_MOBILE = "/VG1-mobile.mp4";
 export const LANDING_HERO_VIDEO_POSTER = LANDING_IMAGES.heroHub;
+
+/** Presentación YouTube del botón "Ver presentación" (inicio en 0:39). */
+export const LANDING_PRESENTATION_YOUTUBE = {
+  id: "cvg2wl_QuU8",
+  startSeconds: 39,
+  watchUrl: "https://www.youtube.com/watch?v=cvg2wl_QuU8&t=39s",
+};
+
 export const LANDING_OG_IMAGE = "https://guiaa.vet/brand/doctor-plumitas-hub.png";
 
 /** Redes sociales GUIAA — sobreescribir con REACT_APP_SOCIAL_* en producción si aplica. */

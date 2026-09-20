@@ -1,65 +1,60 @@
 import React from "react";
-import {
-  ClipboardPlus,
-  FileSearch,
-  HeartPulse,
-  Microscope,
-  PawPrint,
-  Pill,
-} from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { scrollToLandingProduct } from "./landingScroll";
+import { onLandingAnchorClick, productTabHref } from "./landingScroll";
 
-const CLINICAL_STEPS = [
-  { icon: PawPrint, step: "01" },
-  { icon: ClipboardPlus, step: "02" },
-  { icon: HeartPulse, step: "03" },
-  { icon: Microscope, step: "04" },
-  { icon: Pill, step: "05" },
-  { icon: FileSearch, step: "06" },
-];
+const CLINICAL_STEPS = ["01", "02", "03", "04", "05", "06"];
 
 export function LandingClinicalWorkflow() {
   const { t } = useTranslation("landing");
 
   return (
-    <section className="landing-section landing-section-first landing-clinical-workflow-section border-b border-guiaa-brand-navy/8">
+    <section
+      className="landing-section landing-section-first landing-clinical-workflow-section border-b border-guiaa-brand-navy/8"
+      aria-labelledby="landing-workflow-heading"
+    >
       <div className="landing-container">
-        <div className="landing-section-head-wide items-start sm:items-end">
-          <div className="landing-section-head">
+        <div className="landing-clinical-layout">
+          <div className="landing-clinical-intro">
             <p className="landing-eyebrow">{t("workflow.eyebrow")}</p>
-            <h2 className="landing-section-title mt-3 text-2xl text-guiaa-brand-navy sm:text-3xl">
+            <h2
+              id="landing-workflow-heading"
+              className="landing-section-title mt-3 text-2xl text-guiaa-brand-navy sm:text-3xl"
+            >
               {t("workflow.title")}
             </h2>
             <p className="landing-lead mt-4">{t("workflow.lead")}</p>
+            <a
+              href={productTabHref("consultation")}
+              onClick={(event) => onLandingAnchorClick(event, { productTab: "consultation" })}
+              className="landing-btn-secondary mt-8 inline-flex shrink-0 items-center justify-center"
+            >
+              {t("workflow.ctaLive")}
+            </a>
           </div>
-          <button
-            type="button"
-            onClick={() => scrollToLandingProduct("consultation")}
-            className="landing-btn-secondary shrink-0"
-          >
-            {t("workflow.ctaLive")}
-          </button>
+
+          <ol className="landing-clinical-rail">
+            {CLINICAL_STEPS.map((step, index) => (
+              <li key={step} className="landing-clinical-rail-item">
+                <span className="landing-clinical-rail-num" aria-hidden>
+                  {step}
+                </span>
+                {index < CLINICAL_STEPS.length - 1 ? (
+                  <span className="landing-clinical-rail-line" aria-hidden />
+                ) : null}
+                <div className="landing-clinical-rail-copy">
+                  <h3 className="landing-clinical-rail-title">
+                    {t(`workflow.steps.${step}.title`)}
+                  </h3>
+                  <p className="landing-clinical-rail-detail">
+                    {t(`workflow.steps.${step}.detail`)}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
 
-        <div className="landing-clinical-flow mt-10 sm:mt-12">
-          {CLINICAL_STEPS.map(({ icon: Icon, step }) => (
-            <article key={step} className="landing-clinical-step">
-              <span className="landing-clinical-step-num">{step}</span>
-              <span className="landing-clinical-step-icon" aria-hidden>
-                <Icon size={18} strokeWidth={1.75} />
-              </span>
-              <h3 className="landing-clinical-step-title mt-3 text-sm font-bold">
-                {t(`workflow.steps.${step}.title`)}
-              </h3>
-              <p className="landing-clinical-step-detail landing-body mt-1.5 text-xs leading-relaxed">
-                {t(`workflow.steps.${step}.detail`)}
-              </p>
-            </article>
-          ))}
-        </div>
-
-        <p className="landing-clinical-workflow-foot landing-body mt-8 text-center text-xs sm:text-sm">
+        <p className="landing-clinical-workflow-foot landing-body mt-8 text-xs sm:text-sm">
           {t("workflow.foot")}
         </p>
       </div>
