@@ -63,6 +63,7 @@ export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatie
   const [statusFilter, setStatusFilter] = useState("all");
   const [pdfLoadingId, setPdfLoadingId] = useState(null);
   const [pdfError, setPdfError] = useState("");
+  const [historyWarning, setHistoryWarning] = useState("");
 
   const loadHistory = async () => {
     if (!veterinarian?.id) return;
@@ -84,12 +85,19 @@ export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatie
       if (imagesRes.ok) {
         const data = await imagesRes.json();
         setMedicalImages(data.images || []);
+        setHistoryWarning("");
       } else if (consultationsRes.ok) {
+        const message =
+          "No se pudieron cargar las interpretaciones de laboratorio. El historial puede estar incompleto.";
         setMedicalImages([]);
+        setHistoryWarning(message);
+        notifyError(message);
       } else {
+        setHistoryWarning("");
         notifyError("No se pudo cargar el historial clínico completo.");
       }
     } catch (error) {
+      setHistoryWarning("");
       notifyError("No se pudo cargar el historial. Revisa tu conexión.");
     } finally {
       setLoading(false);
@@ -264,6 +272,12 @@ export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatie
         {pdfError && (
           <p className="history-error-banner" role="alert">
             {pdfError}
+          </p>
+        )}
+
+        {historyWarning && (
+          <p className="history-error-banner" role="alert">
+            {historyWarning}
           </p>
         )}
 
