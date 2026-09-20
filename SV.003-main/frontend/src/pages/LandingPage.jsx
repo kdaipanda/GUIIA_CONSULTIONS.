@@ -40,6 +40,7 @@ import { LandingReveal } from "./landing/LandingReveal";
 import { LandingDeferred } from "./landing/LandingDeferred";
 import { LandingSeo } from "./landing/LandingSeo";
 import { useLandingInteractionQuiet } from "./landing/useLandingInteractionQuiet";
+import { scrollToLandingHash } from "./landing/landingScroll";
 import { trackMetaPageView } from "../lib/metaPixel";
 
 export function LandingPage({ setView }) {
@@ -48,6 +49,10 @@ export function LandingPage({ setView }) {
 
   useEffect(() => {
     trackMetaPageView();
+  }, []);
+
+  useEffect(() => {
+    scrollToLandingHash(window.location.hash, { behavior: "auto" });
   }, []);
 
   const setViewDeferred = useCallback((view) => {
@@ -90,13 +95,13 @@ export function LandingPage({ setView }) {
               <LandingBrandBand />
             </LandingReveal>
 
-            <LandingDeferred minHeight={420}>
+            <LandingDeferred revealFor="#product" minHeight={420}>
               <LandingReveal>
                 <LandingProductShowcase />
               </LandingReveal>
             </LandingDeferred>
 
-            <LandingDeferred minHeight={520}>
+            <LandingDeferred revealFor="#features" minHeight={520}>
               <LandingReveal>
                 <LandingFeatures />
               </LandingReveal>
@@ -126,13 +131,13 @@ export function LandingPage({ setView }) {
               </LandingReveal>
             </LandingDeferred>
 
-            <LandingDeferred minHeight={520}>
+            <LandingDeferred revealFor="#pricing" minHeight={520}>
               <LandingReveal>
                 <LandingPricing setView={setViewDeferred} />
               </LandingReveal>
             </LandingDeferred>
 
-            <LandingDeferred minHeight={360}>
+            <LandingDeferred revealFor="#faq" minHeight={360}>
               <LandingReveal>
                 <LandingFaq />
               </LandingReveal>
