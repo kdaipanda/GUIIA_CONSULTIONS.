@@ -512,3 +512,22 @@
     transition: none;
   }
 }
+
+/* Móvil — refuerzo final de cascada (después de UiUxProMax) */
+@media (max-width: 639px) {
+  #pricing .landing-pricing-card-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.55rem;
+  }
+
+  #pricing .landing-pricing-badge {
+    white-space: normal !important;
+    max-width: 100%;
+    flex-shrink: 1;
+  }
+
+  .landing-shell.landing-shell--page {
+    overflow-x: clip;
+  }
+}

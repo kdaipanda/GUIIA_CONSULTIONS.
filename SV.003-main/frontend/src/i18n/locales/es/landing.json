@@ -150,7 +150,7 @@
     "askPrice": "Consultar",
     "pricePerMonth": "/mes",
     "badgeFeatured": "Más usado",
-    "badgeConsultations": "{{count}} consultas CDS/mes",
+    "badgeConsultations": "{{count}} CDS/mes",
     "creditAddonDesc": "Consultas CDS adicionales sin cambiar de plan. Se suman a tu saldo actual.",
     "trustNote": "Regístrate con cédula profesional y obtén 3 consultas CDS gratis. Solo médicos veterinarios certificados.",
     "comparePlans": "Comparar planes en detalle →",

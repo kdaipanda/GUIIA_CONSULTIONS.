@@ -1114,4 +1114,98 @@ html.dark .landing-feature-strip {
   border-top-color: rgba(255, 255, 255, 0.12);
 }
 
+/* —— Móvil: landing sin overflow horizontal —— */
+@media (max-width: 639px) {
+  .landing-shell.landing-shell--page {
+    overflow-x: clip;
+    padding-inline: 0.65rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .landing-page-card {
+    --landing-gutter: 0.95rem;
+    border-radius: 1rem;
+  }
+
+  .landing-container {
+    padding-inline: var(--landing-gutter, 0.95rem);
+  }
+
+  .landing-section {
+    padding-block: 2.75rem;
+  }
+
+  .landing-section-title {
+    font-size: clamp(1.35rem, 6.2vw, 1.75rem);
+    line-height: 1.2;
+  }
+
+  .landing-petpal-cta-row {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .landing-petpal-cta-primary,
+  .landing-petpal-cta-play {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .landing-petpal-title {
+    font-size: clamp(1.65rem, 8vw, 2.15rem);
+    line-height: 1.15;
+  }
+
+  .landing-product-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 0.15rem;
+    max-width: 100%;
+  }
+
+  .landing-product-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .landing-product-tab {
+    flex: 0 0 auto;
+  }
+
+  .landing-colleague-result {
+    max-width: 100%;
+  }
+
+  .landing-colleague-quote {
+    padding-right: 5.5rem;
+    font-size: 0.88rem;
+  }
+
+  .landing-features-head {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-faq-intro .landing-section-title {
+    max-width: none;
+  }
+
+  .landing-clinical-band-title {
+    font-size: 1.05rem;
+  }
+
+  .landing-cta-panel-v2 {
+    padding: 1.35rem 1.15rem;
+  }
+
+  .landing-cta-actions {
+    width: 100%;
+  }
+
+  .landing-cta-primary-btn,
+  .landing-cta-secondary-btn {
+    width: 100%;
+  }
+}
+
 
