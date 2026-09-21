@@ -76,36 +76,36 @@ def purge_user_related_data(profile_id: str, email: str) -> Dict[str, int]:
 
 
 def _purge_user_storage(profile_id: str) -> int:
-    """Elimina archivos del bucket uploads del usuario (cédula, etc.)."""
+    """Elimina archivos del usuario en buckets históricos y privados."""
     if not profile_id:
         return 0
     client = get_supabase_client()
     prefix = f"user-{profile_id}"
     removed = 0
     try:
-        bucket = client.storage.from_("uploads")
-        to_remove: list[str] = []
+        for bucket_name in ("uploads", "cedula-documents"):
+            bucket = client.storage.from_(bucket_name)
+            to_remove: list[str] = []
 
-        def collect_paths(folder: str) -> None:
-            nonlocal removed
-            items = bucket.list(folder) or []
-            for item in items:
-                if not isinstance(item, dict):
-                    continue
-                name = item.get("name")
-                if not name:
-                    continue
-                path = f"{folder}/{name}".strip("/")
-                # Carpetas en Supabase storage no tienen id de archivo
-                if item.get("id") is None:
-                    collect_paths(path)
-                else:
-                    to_remove.append(path)
+            def collect_paths(folder: str) -> None:
+                items = bucket.list(folder) or []
+                for item in items:
+                    if not isinstance(item, dict):
+                        continue
+                    name = item.get("name")
+                    if not name:
+                        continue
+                    path = f"{folder}/{name}".strip("/")
+                    # Carpetas en Supabase storage no tienen id de archivo
+                    if item.get("id") is None:
+                        collect_paths(path)
+                    else:
+                        to_remove.append(path)
 
-        collect_paths(prefix)
-        if to_remove:
-            bucket.remove(to_remove)
-            removed = len(to_remove)
+            collect_paths(prefix)
+            if to_remove:
+                bucket.remove(to_remove)
+                removed += len(to_remove)
     except Exception:
         return removed
     return removed
