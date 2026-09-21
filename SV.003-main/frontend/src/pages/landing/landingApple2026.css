@@ -142,18 +142,14 @@
 }
 
 .landing-body-wrap .landing-section-alt {
-  background: linear-gradient(
-    180deg,
-    rgba(232, 244, 252, 0.4) 0%,
-    rgba(255, 255, 255, 0.85) 100%
-  );
+  background: #f8fafc;
 }
 
 .landing-body-wrap .landing-product-frame {
-  border-radius: 1.5rem;
-  padding: 0.65rem;
-  background: linear-gradient(160deg, rgba(232, 244, 252, 0.9), rgba(244, 249, 247, 0.95));
-  box-shadow: var(--landing-shadow-lift);
+  border-radius: 0.85rem;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .landing-body-wrap .landing-clinical-step {
@@ -166,8 +162,8 @@
 }
 
 .landing-body-wrap .landing-clinical-step:hover {
-  box-shadow: var(--landing-shadow-soft);
-  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(12, 45, 77, 0.06);
+  transform: none;
 }
 
 .landing-brand-band {
@@ -180,11 +176,11 @@
   box-shadow: var(--landing-shadow-lift);
 }
 
-/* Nav frosted (Apple material) cuando scrollea en hero */
+/* Nav sólido sobre hero */
 .landing-nav-hero.landing-nav-scrolled {
-  background: rgba(7, 22, 34, 0.88) !important;
-  backdrop-filter: blur(8px) saturate(1.05);
-  -webkit-backdrop-filter: blur(8px) saturate(1.05);
+  background: #071622 !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border-bottom-color: rgba(255, 255, 255, 0.1) !important;
 }
 

@@ -1,5 +1,4 @@
 import React from "react";
-import { ArrowUpRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { onLandingAnchorClick, productTabHref } from "./landingScroll";
 
@@ -21,10 +20,9 @@ export function LandingUseCases() {
       <div className="landing-container">
         <div className="landing-usecases-layout">
           <div className="landing-section-head max-w-xl">
-            <p className="landing-eyebrow">{t("useCases.eyebrow")}</p>
             <h2
               id="landing-usecases-heading"
-              className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl"
+              className="landing-section-title text-guiaa-brand-navy"
             >
               {t("useCases.title")}
             </h2>
@@ -39,22 +37,16 @@ export function LandingUseCases() {
                   key={id}
                   href={productTabHref(productTab)}
                   onClick={(event) => onLandingAnchorClick(event, { productTab })}
-                  className={`landing-usecase-row group text-left ${
+                  className={`landing-usecase-row text-left ${
                     featured ? "landing-usecase-row--featured" : ""
                   }`}
-                  aria-label={`${title}. ${t("useCases.seeFlow")}`}
+                  aria-label={title}
                 >
-                  <div className="min-w-0">
-                    <p className="landing-usecase-tag">{t(`useCases.items.${id}.tag`)}</p>
-                    <h3 className="landing-usecase-title">{title}</h3>
-                    <p className="landing-usecase-desc">
-                      {t(`useCases.items.${id}.description`)}
-                    </p>
-                  </div>
-                  <span className="landing-usecase-link" aria-hidden>
-                    {t("useCases.seeFlow")}
-                    <ArrowUpRight size={14} aria-hidden />
-                  </span>
+                  <p className="landing-usecase-tag">{t(`useCases.items.${id}.tag`)}</p>
+                  <h3 className="landing-usecase-title">{title}</h3>
+                  <p className="landing-usecase-desc">
+                    {t(`useCases.items.${id}.description`)}
+                  </p>
                 </a>
               );
             })}

@@ -25,12 +25,7 @@ function SpeciesChip({ icon, name, href, onClick, decorative = false }) {
   }
 
   return (
-    <a
-      href={href}
-      onClick={onClick}
-      className={className}
-      aria-label={name}
-    >
+    <a href={href} onClick={onClick} className={className} aria-label={name}>
       {content}
     </a>
   );
@@ -61,7 +56,7 @@ export function LandingSpeciesMarquee() {
 
   return (
     <section
-      className="landing-section-band landing-species-glass-section border-y border-guiaa-brand-navy/8 py-10"
+      className="landing-section-band landing-species-section border-y border-guiaa-brand-navy/8 py-10"
       aria-labelledby="landing-species-heading"
     >
       <div className="landing-container mb-6 flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:gap-4 sm:text-left">
@@ -69,7 +64,7 @@ export function LandingSpeciesMarquee() {
           <p className="landing-eyebrow">{t("speciesMarquee.eyebrow")}</p>
           <h2
             id="landing-species-heading"
-            className="landing-section-title mt-2 text-2xl text-guiaa-brand-navy sm:text-3xl"
+            className="landing-section-title mt-2 text-guiaa-brand-navy"
           >
             {t("speciesMarquee.heading", { count: speciesCount })}
           </h2>
@@ -88,7 +83,7 @@ export function LandingSpeciesMarquee() {
         )}
       </div>
 
-      <div className="landing-species-glass-panel landing-container">
+      <div className="landing-species-panel landing-container">
         <div className="landing-marquee-viewport landing-marquee-fade relative">
           <div
             id="landing-species-marquee-track"

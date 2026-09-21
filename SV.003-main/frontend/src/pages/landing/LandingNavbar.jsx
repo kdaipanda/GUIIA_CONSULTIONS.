@@ -224,7 +224,7 @@ export function LandingNavbar({ setView, hero = false }) {
                     activeSection === sectionId
                       ? hero
                         ? "bg-white/12 text-white"
-                        : "bg-guiaa-sky-soft/60 text-guiaa-brand-navy"
+                        : "bg-guiaa-brand-navy/[0.06] text-guiaa-brand-navy"
                       : hero
                         ? "text-white"
                         : "text-guiaa-brand-navy/80"

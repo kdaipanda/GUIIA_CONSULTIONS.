@@ -13,8 +13,8 @@ export function LandingBrandBand() {
             src={LANDING_IMAGES.mascotFlyingCutout}
             alt=""
             className="landing-brand-band-mascot"
-            width={160}
-            height={120}
+            width={140}
+            height={110}
             loading="lazy"
             decoding="async"
           />

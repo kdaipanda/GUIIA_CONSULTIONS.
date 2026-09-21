@@ -16,10 +16,9 @@ export function LandingHowItWorks({ setView }) {
       <div className="landing-container">
         <div className="landing-how-layout">
           <div className="landing-how-intro">
-            <p className="landing-eyebrow">{t("how.eyebrow")}</p>
             <h2
               id="landing-how-heading"
-              className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl"
+              className="landing-section-title text-guiaa-brand-navy"
             >
               {t("how.title")}
             </h2>

@@ -50,23 +50,17 @@ export function LandingFaq() {
       <div className="landing-container">
         <div className="landing-faq-layout">
           <div className="landing-faq-intro">
-            <p className="landing-eyebrow">{t("faq.eyebrow")}</p>
-            <h2 className="landing-section-title mt-3 text-3xl text-guiaa-brand-navy sm:text-4xl">
+            <h2 className="landing-section-title text-guiaa-brand-navy">
               {t("faq.title")}
             </h2>
-            <p className="landing-lead mt-4 text-sm sm:text-base">{t("faq.lead")}</p>
-
-            <div className="landing-faq-more mt-8">
-              <p className="text-sm font-semibold text-guiaa-brand-navy">{t("faq.moreTitle")}</p>
-              <p className="mt-2 text-sm text-guiaa-brand-ink-muted">{t("faq.moreLead")}</p>
-              <a
-                href="mailto:soporte@guiaa.vet"
-                className="landing-footer-link mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-guiaa-brand-blue transition hover:text-guiaa-brand-navy"
-              >
-                <Mail size={15} aria-hidden />
-                {t("faq.emailCta")}
-              </a>
-            </div>
+            <p className="landing-lead mt-3 text-sm sm:text-base">{t("faq.lead")}</p>
+            <a
+              href="mailto:soporte@guiaa.vet"
+              className="landing-link-quiet mt-6 inline-flex min-h-11 items-center gap-2"
+            >
+              <Mail size={15} aria-hidden />
+              {t("faq.emailCta")}
+            </a>
           </div>
 
           <ul className="landing-faq-list" aria-label={t("faq.title")}>

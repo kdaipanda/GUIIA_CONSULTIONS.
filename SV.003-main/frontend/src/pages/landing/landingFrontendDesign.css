@@ -168,15 +168,11 @@
 
 /* Meta · dots: tipografía limpia, sin middle-dot AI */
 .landing-hero-cap-more {
-  margin-top: 1.25rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.5);
+  display: none;
 }
 
 .landing-hero-cap-more-sep {
-  margin: 0 0.35rem;
-  color: rgba(255, 255, 255, 0.28);
+  display: none;
 }
 
 /* Body sections: ritmo tipográfico */
@@ -290,13 +286,13 @@
   width: 2.15rem;
   height: 2.15rem;
   border-radius: 0.55rem;
-  background: rgba(61, 155, 143, 0.12);
-  border: 1px solid rgba(61, 155, 143, 0.18);
-  font-size: 1.25rem;
+  background: rgba(61, 155, 143, 0.1);
+  border: 1px solid rgba(61, 155, 143, 0.16);
+  font-size: 1.2rem;
   line-height: 1;
   font-family:
-    "Segoe UI Emoji",
     "Apple Color Emoji",
+    "Segoe UI Emoji",
     "Noto Color Emoji",
     "Twemoji Mozilla",
     sans-serif;

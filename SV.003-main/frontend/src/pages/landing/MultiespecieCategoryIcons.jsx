@@ -4,7 +4,7 @@ import { CONSULTATION_CATEGORY_LIST } from "../../lib/consultationCategories";
 export function MultiespecieCategoryIcons({ compact = false }) {
   return (
     <div
-      className={`grid gap-1.5 ${
+      className={`landing-multiespecie-grid grid gap-1.5 ${
         compact ? "grid-cols-4" : "grid-cols-3 sm:grid-cols-4"
       }`}
       aria-hidden
@@ -13,10 +13,10 @@ export function MultiespecieCategoryIcons({ compact = false }) {
         <div
           key={key}
           title={name}
-          className="flex flex-col items-center justify-center rounded-xl border border-guiaa-brand-navy/8 bg-white px-1 py-1.5 shadow-sm transition hover:border-blue-300 hover:shadow-md sm:py-2"
+          className="landing-multiespecie-cell flex flex-col items-center justify-center rounded-lg border border-guiaa-brand-navy/10 bg-white px-1 py-1.5 sm:py-2"
         >
           <span
-            className={`leading-none drop-shadow-sm ${
+            className={`landing-multiespecie-emoji leading-none ${
               compact ? "text-xl" : "text-2xl sm:text-[1.65rem]"
             }`}
           >

@@ -165,27 +165,18 @@ export function LandingPricing({ setView }) {
       <div className="landing-container">
 
         <div className="max-w-xl">
-
-          <p className="landing-eyebrow">{t("pricing.eyebrow")}</p>
-
-          <h2 className="landing-section-title text-3xl text-guiaa-brand-navy sm:text-4xl">
-
+          <h2 className="landing-section-title text-guiaa-brand-navy">
             {t("pricing.title")}
-
           </h2>
-
           <p className="landing-lead mt-4">
-
             {t("pricing.lead")}
-
           </p>
-
           <p className="landing-pricing-trial-note mt-3 text-sm font-semibold text-guiaa-brand-green-dark">
-
             {t("pricing.trialNote")}
-
           </p>
-
+          <p className="landing-pricing-roi-note mt-2 text-sm text-guiaa-brand-ink-muted">
+            {t("pricing.roiNote")}
+          </p>
         </div>
 
 

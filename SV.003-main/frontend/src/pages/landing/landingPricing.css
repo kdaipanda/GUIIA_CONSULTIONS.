@@ -256,9 +256,9 @@
 
 [data-theme="dark"] #pricing .landing-pricing-card,
 html.dark #pricing .landing-pricing-card {
-  background: rgba(14, 22, 34, 0.78) !important;
-  border-color: var(--liquid-glass-border-color) !important;
-  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  background: #152032 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 16px 36px -24px rgba(0, 0, 0, 0.55) !important;
 }
 
 [data-theme="dark"] #pricing .landing-pricing-card:hover,
@@ -334,9 +334,9 @@ html.dark #pricing .landing-pricing-cta.landing-btn-secondary:hover {
 
 [data-theme="dark"] #pricing .landing-pricing-addon,
 html.dark #pricing .landing-pricing-addon {
-  background: rgba(14, 22, 34, 0.78) !important;
+  background: #152032 !important;
   border-color: rgba(61, 155, 143, 0.28) !important;
-  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  box-shadow: 0 14px 32px -22px rgba(0, 0, 0, 0.5) !important;
 }
 
 [data-theme="dark"] #pricing .landing-pricing-addon-icon,
@@ -361,3 +361,10 @@ html.dark #pricing .landing-pricing-addon-price {
     transform: none;
   }
 }
+
+.landing-pricing-roi-note {
+  max-width: 36rem;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+

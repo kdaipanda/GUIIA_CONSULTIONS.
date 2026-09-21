@@ -1,10 +1,7 @@
 import React from "react";
-import { BarChart3, Sun } from "lucide-react";
+import { BarChart3, ClipboardList, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import {
-  PREVIEW_CATEGORIES,
-  PREVIEW_CATEGORY_ICONS,
-} from "./landingPreviewData";
+import { PREVIEW_CATEGORIES, PREVIEW_CATEGORY_ICONS } from "./landingPreviewData";
 
 function PreviewStepper({ currentStep }) {
   const { t } = useTranslation("landing");
@@ -44,13 +41,16 @@ function PreviewStepper({ currentStep }) {
 function CategoryGrid({ selected = "perros" }) {
   const { t } = useTranslation("landing");
   const speciesCount = PREVIEW_CATEGORIES.length;
+  const visible = PREVIEW_CATEGORIES.slice(0, 6);
+  const moreCount = Math.max(0, speciesCount - visible.length);
+
   return (
     <div className="form-section landing-preview-species">
       <p className="landing-preview-species-eyebrow">
         {t("preview.multiSpeciesBadge", { count: speciesCount })}
       </p>
       <div className="landing-preview-species-grid">
-        {PREVIEW_CATEGORIES.map((key) => (
+        {visible.map((key) => (
           <div
             key={key}
             className={`landing-species-chip landing-preview-species-chip${
@@ -65,6 +65,11 @@ function CategoryGrid({ selected = "perros" }) {
             </span>
           </div>
         ))}
+        {moreCount > 0 ? (
+          <div className="landing-species-chip landing-preview-species-chip landing-preview-species-more">
+            <span className="landing-species-label">+{moreCount}</span>
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -73,6 +78,7 @@ function CategoryGrid({ selected = "perros" }) {
 function ConsultationSidebar({
   petName = "Max",
   progress = "33%",
+  current = 1,
 }) {
   const { t } = useTranslation("landing");
   return (
@@ -87,7 +93,7 @@ function ConsultationSidebar({
       </div>
       <div className="sidebar-section">
         <div className="sidebar-label">
-          {t("preview.sidebar.progress", { current: 1, total: 3 })}
+          {t("preview.sidebar.progress", { current, total: 3 })}
         </div>
         <div className="sidebar-progress-container">
           <div className="sidebar-progress-bar" style={{ width: progress }} />
@@ -104,7 +110,9 @@ export function ConsultationSpeciesPreview() {
       <div className="page-title-header">
         <div className="container">
           <div className="page-title-content">
-            <div className="page-title-icon">🐾</div>
+            <div className="page-title-icon" aria-hidden>
+              {PREVIEW_CATEGORY_ICONS.perros}
+            </div>
             <div className="page-title-text">
               <h1>{t("preview.speciesTitle")}</h1>
               <p>{t("preview.speciesLead")}</p>
@@ -152,7 +160,9 @@ export function ConsultationFormPreview() {
       <div className="page-title-header">
         <div className="container">
           <div className="page-title-content">
-            <div className="page-title-icon">📝</div>
+            <div className="page-title-icon" aria-hidden>
+              <ClipboardList size={22} strokeWidth={1.75} />
+            </div>
             <div className="page-title-text">
               <h1>{t("preview.reasonTitle")}</h1>
               <p>{t("preview.reasonLead")}</p>
@@ -161,22 +171,56 @@ export function ConsultationFormPreview() {
         </div>
       </div>
       <div className="container">
-        <div className="consultation-form-container">
-          <PreviewStepper currentStep={2} />
-          <form className="consultation-form">
-            <div className="form-section">
-              <h3>{t("preview.petDetail")}</h3>
-              <div className="form-group">
-                <label>{t("preview.petDetailLabel")}</label>
-                <textarea
-                  readOnly
-                  tabIndex={-1}
-                  rows={8}
-                  value={t("preview.petDetailSample")}
-                />
-              </div>
+        <div className="consultation-layout">
+          <div className="consultation-main">
+            <div className="consultation-form-container">
+              <PreviewStepper currentStep={2} />
+              <form className="consultation-form">
+                <div className="form-section">
+                  <h3>{t("preview.petDetail")}</h3>
+                  <div className="form-group">
+                    <label>{t("preview.petDetailLabel")}</label>
+                    <textarea
+                      readOnly
+                      tabIndex={-1}
+                      rows={4}
+                      value={t("preview.petDetailSample")}
+                    />
+                  </div>
+                </div>
+                <div className="form-section landing-preview-vitals">
+                  <h3>{t("preview.vitalsTitle")}</h3>
+                  <div className="landing-preview-vitals-grid">
+                    <div>
+                      <span>{t("preview.vitals.temp")}</span>
+                      <strong>39.2 °C</strong>
+                    </div>
+                    <div>
+                      <span>{t("preview.vitals.hr")}</span>
+                      <strong>118 bpm</strong>
+                    </div>
+                    <div>
+                      <span>{t("preview.vitals.rr")}</span>
+                      <strong>32 rpm</strong>
+                    </div>
+                    <div>
+                      <span>{t("preview.vitals.weight")}</span>
+                      <strong>18 kg</strong>
+                    </div>
+                  </div>
+                </div>
+                <div className="form-section landing-preview-cds">
+                  <h3>{t("preview.cdsTitle")}</h3>
+                  <ol className="landing-preview-cds-list">
+                    <li>{t("preview.cds.h1")}</li>
+                    <li>{t("preview.cds.h2")}</li>
+                    <li>{t("preview.cds.h3")}</li>
+                  </ol>
+                </div>
+              </form>
             </div>
-          </form>
+          </div>
+          <ConsultationSidebar progress="66%" current={2} />
         </div>
       </div>
     </div>
@@ -185,6 +229,12 @@ export function ConsultationFormPreview() {
 
 export function DashboardPreview() {
   const { t } = useTranslation("landing");
+  const recent = [
+    { pet: "Max", species: t("preview.sidebar.dogs"), status: t("preview.recent.open") },
+    { pet: "Luna", species: t("preview.recent.cats"), status: t("preview.recent.done") },
+    { pet: "Kira", species: t("preview.sidebar.dogs"), status: t("preview.recent.open") },
+  ];
+
   return (
     <div className="dashboard-page dashboard-morning landing-app-preview-page">
       <div className="container">
@@ -204,7 +254,9 @@ export function DashboardPreview() {
                   {t("preview.dashboardConsultations", { count: 24 })}
                 </span>
                 <span className="hero-summary-divider">·</span>
-                <span className="landing-preview-plan-badge">Premium</span>
+                <span className="landing-preview-plan-label">
+                  {t("preview.statMembership")} · Premium
+                </span>
               </div>
             </div>
           </div>
@@ -219,9 +271,21 @@ export function DashboardPreview() {
             <p className="landing-preview-stat-label">{t("preview.statMonth")}</p>
           </div>
           <div className="landing-preview-stat">
-            <p className="landing-preview-stat-value">Premium</p>
-            <p className="landing-preview-stat-label">{t("preview.statMembership")}</p>
+            <p className="landing-preview-stat-value">3</p>
+            <p className="landing-preview-stat-label">{t("preview.statToday")}</p>
           </div>
+        </div>
+        <div className="landing-preview-recent">
+          <p className="landing-preview-recent-title">{t("preview.recentTitle")}</p>
+          <ul className="landing-preview-recent-list">
+            {recent.map((row) => (
+              <li key={row.pet}>
+                <span className="landing-preview-recent-pet">{row.pet}</span>
+                <span className="landing-preview-recent-meta">{row.species}</span>
+                <span className="landing-preview-recent-status">{row.status}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>

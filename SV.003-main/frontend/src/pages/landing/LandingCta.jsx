@@ -1,5 +1,4 @@
 import React from "react";
-import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { onLandingAnchorClick } from "./landingScroll";
 
@@ -10,13 +9,8 @@ export function LandingCta({ setView }) {
       <div className="landing-container">
         <div className="landing-cta-panel landing-cta-panel-v2 relative overflow-hidden">
           <div>
-            <p className="landing-eyebrow">{t("cta.eyebrow")}</p>
-            <h2 className="landing-section-title text-3xl sm:text-4xl">
-              {t("cta.title")}
-            </h2>
-            <p className="landing-lead mt-4 max-w-lg">
-              {t("cta.lead")}
-            </p>
+            <h2 className="landing-section-title">{t("cta.title")}</h2>
+            <p className="landing-lead mt-4 max-w-lg">{t("cta.lead")}</p>
             <a
               href="#faq"
               onClick={(event) => onLandingAnchorClick(event)}
@@ -30,10 +24,9 @@ export function LandingCta({ setView }) {
             <button
               type="button"
               onClick={() => setView("register")}
-              className="landing-cta-primary-btn inline-flex min-h-11 items-center justify-center gap-2 landing-btn-primary"
+              className="landing-cta-primary-btn inline-flex min-h-11 items-center justify-center landing-btn-primary"
             >
               {t("cta.createAccount")}
-              <ArrowRight size={16} aria-hidden />
             </button>
             <button
               type="button"

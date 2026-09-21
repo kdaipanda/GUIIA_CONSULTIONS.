@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-const COLLEAGUE_TESTIMONIALS = [
+const PRACTICE_OUTCOMES = [
   {
     id: "ana",
     name: "Dra. Ana M.",
@@ -15,27 +15,9 @@ const COLLEAGUE_TESTIMONIALS = [
     tone: "green",
   },
   {
-    id: "laura",
-    name: "MVZ Laura S.",
-    petImage: "/landing/pets/puppy.png",
-    tone: "blue",
-  },
-  {
     id: "patricia",
     name: "Dra. Patricia V.",
     petImage: "/landing/pets/corgi.png",
-    tone: "navy",
-  },
-  {
-    id: "miguel",
-    name: "Dr. Miguel T.",
-    petImage: "/landing/pets/cat-ginger.png",
-    tone: "green",
-  },
-  {
-    id: "sofia",
-    name: "Dra. Sofía L.",
-    petImage: "/landing/pets/cat-black.png",
     tone: "blue",
   },
 ];
@@ -50,27 +32,35 @@ export function LandingTestimonials() {
     >
       <div className="landing-container">
         <div className="landing-colleagues-head">
-          <p className="landing-eyebrow">{t("testimonials.eyebrow")}</p>
           <h2
             id="landing-colleagues-heading"
-            className="landing-section-title mt-3 text-3xl sm:text-4xl"
+            className="landing-section-title"
           >
             {t("testimonials.title")}
           </h2>
           <p className="landing-lead mt-4 max-w-xl">{t("testimonials.lead")}</p>
         </div>
 
-        <ul className="landing-colleagues-bento" aria-label={t("testimonials.listAria")}>
-          {COLLEAGUE_TESTIMONIALS.map(({ id, name, petImage, tone }) => (
+        <ul className="landing-colleagues-bento landing-colleagues-bento--outcomes" aria-label={t("testimonials.listAria")}>
+          {PRACTICE_OUTCOMES.map(({ id, name, petImage, tone }) => (
             <li key={id}>
               <figure className={`landing-colleague-card landing-colleague-card--${tone}`}>
+                <p className="landing-colleague-result">
+                  <span className="landing-colleague-result-label">
+                    {t("testimonials.resultLabel")}
+                  </span>
+                  {t(`testimonials.items.${id}.result`)}
+                </p>
                 <blockquote className="landing-colleague-quote">
                   <p>&ldquo;{t(`testimonials.items.${id}.quote`)}&rdquo;</p>
                 </blockquote>
                 <figcaption className="landing-colleague-meta">
                   <span className="landing-colleague-name">{name}</span>
+                  <span className="landing-colleague-clinic">
+                    {t(`testimonials.items.${id}.clinic`)}
+                  </span>
                   <span className="landing-colleague-role">
-                    {t(`testimonials.items.${id}.role`)}
+                    {t(`testimonials.items.${id}.city`)}
                   </span>
                 </figcaption>
                 <picture>

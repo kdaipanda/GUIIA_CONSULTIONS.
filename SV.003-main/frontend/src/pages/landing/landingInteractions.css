@@ -220,15 +220,15 @@
 
 /* —— Doctor Plumitas band —— */
 .landing-brand-band:hover .landing-brand-band-mascot {
-  animation-duration: 2.6s;
+  animation: none;
 }
 
 .landing-brand-band-mascot-wrap {
-  transition: transform 0.3s var(--landing-ease-out);
+  transition: none;
 }
 
 .landing-brand-band:hover .landing-brand-band-mascot-wrap {
-  transform: scale(1.05);
+  transform: none;
 }
 
 /* —— Tarjetas colegas —— */
@@ -393,7 +393,7 @@
 }
 
 .landing-tab.is-active {
-  transform: scale(1.02);
+  transform: none;
 }
 
 /* —— Eyebrow sutil —— */
@@ -494,14 +494,45 @@
 }
 
 /* —— Mockup dispositivo —— */
+.landing-product-layout {
+  display: grid;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .landing-product-layout {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 2.5rem;
+  }
+}
+
+.landing-product-tabs {
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  mask-image: linear-gradient(to right, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(to right, #000 88%, transparent);
+}
+
+.landing-product-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.landing-product-tab {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
 .landing-device-mockup,
 .landing-product-shot {
   position: relative;
   padding: 0;
-  border-radius: 0.85rem;
+  max-width: 36rem;
+  border-radius: 0.75rem;
   background: #ffffff;
   border: 1px solid rgba(12, 45, 77, 0.1);
-  box-shadow: 0 12px 32px rgba(12, 45, 77, 0.08);
+  box-shadow: 0 10px 28px rgba(12, 45, 77, 0.08);
   transform: none;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }

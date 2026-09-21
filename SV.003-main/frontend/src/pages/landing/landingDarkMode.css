@@ -260,7 +260,7 @@ html.dark .landing-clinical-workflow-section .landing-btn-secondary {
 [data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step,
 html.dark .landing-clinical-workflow-section .landing-clinical-step {
   border-color: rgba(255, 255, 255, 0.1) !important;
-  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  box-shadow: 0 14px 32px -22px rgba(0, 0, 0, 0.5) !important;
 }
 
 [data-theme="dark"] .landing-clinical-workflow-section .landing-clinical-step:nth-child(1),
@@ -314,11 +314,11 @@ html.dark .landing-body-wrap .landing-card,
 html.dark .landing-body-wrap .landing-how-step,
 html.dark .landing-body-wrap .landing-clinical-step,
 html.dark .landing-testimonial-card {
-  background: var(--liquid-glass-bg) !important;
-  border-color: var(--liquid-glass-border-color) !important;
-  box-shadow: var(--liquid-glass-shadow-soft) !important;
-  backdrop-filter: blur(16px) saturate(1.1);
-  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  background: #152032 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 16px 36px -24px rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 [data-theme="dark"] .landing-body-wrap .landing-card-interactive:hover,
@@ -443,8 +443,8 @@ html.dark .landing-body-wrap .landing-product-frame-inner {
 
 [data-theme="dark"] .landing-body-wrap .landing-clinical-note,
 html.dark .landing-body-wrap .landing-clinical-note {
-  background: var(--liquid-glass-bg) !important;
-  border-color: var(--liquid-glass-border-color) !important;
+  background: #152032 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 [data-theme="dark"] .landing-body-wrap .landing-clinical-note-label,
@@ -522,17 +522,15 @@ html.dark .landing-colleagues-disclaimer {
 
 /* Especies */
 [data-theme="dark"] .landing-species-glass-section,
-html.dark .landing-species-glass-section {
-  background: linear-gradient(
-    180deg,
-    rgba(18, 26, 38, 0.7) 0%,
-    rgba(14, 20, 30, 0.5) 100%
-  ) !important;
+[data-theme="dark"] .landing-species-section,
+html.dark .landing-species-glass-section,
+html.dark .landing-species-section {
+  background: #121a26 !important;
 }
 
 [data-theme="dark"] .landing-species-glass-section::before,
 html.dark .landing-species-glass-section::before {
-  opacity: 0.7;
+  opacity: 0;
 }
 
 [data-theme="dark"] .landing-species-chip,
@@ -547,8 +545,30 @@ html.dark .landing-species-chip.category-card--liquid {
 
 [data-theme="dark"] .landing-species-icon,
 html.dark .landing-species-icon {
-  background: rgba(61, 155, 143, 0.18) !important;
+  background: rgba(61, 155, 143, 0.16) !important;
   border-color: rgba(61, 155, 143, 0.28) !important;
+  color: #c5ebe6 !important;
+}
+
+[data-theme="dark"] .landing-section-band .landing-marquee-fade::before,
+html.dark .landing-section-band .landing-marquee-fade::before {
+  background: linear-gradient(to right, #121a26, transparent);
+}
+
+[data-theme="dark"] .landing-section-band .landing-marquee-fade::after,
+html.dark .landing-section-band .landing-marquee-fade::after {
+  background: linear-gradient(to left, #121a26, transparent);
+}
+
+[data-theme="dark"] .landing-multiespecie-cell,
+html.dark .landing-multiespecie-cell {
+  background: #152032 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .landing-multiespecie-emoji,
+html.dark .landing-multiespecie-emoji {
+  filter: none;
 }
 
 [data-theme="dark"] .landing-species-chip:hover,

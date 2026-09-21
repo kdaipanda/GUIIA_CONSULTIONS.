@@ -26,14 +26,12 @@ import { LandingClinicalWorkflow } from "./landing/LandingClinicalWorkflow";
 import { LandingBrandBand } from "./landing/LandingBrandBand";
 import { LandingProductShowcase } from "./landing/LandingProductShowcase";
 import { LandingFeatures } from "./landing/LandingFeatures";
-import { LandingUseCases } from "./landing/LandingUseCases";
 import { LandingTestimonials } from "./landing/LandingTestimonials";
 import { LandingSpeciesMarquee } from "./landing/LandingSpeciesMarquee";
 import { LandingTrustStrip } from "./landing/LandingTrustStrip";
 import { LandingPricing } from "./landing/LandingPricing";
 import { LandingFaq } from "./landing/LandingFaq";
 import { LandingCta } from "./landing/LandingCta";
-import { LandingGuiaConsultas } from "./landing/LandingGuiaConsultas";
 import { LandingFooter } from "./landing/LandingFooter";
 import { LandingSocialRail } from "./landing/LandingSocialRail";
 import { LandingReveal } from "./landing/LandingReveal";
@@ -50,13 +48,16 @@ export function LandingPage({ setView }) {
     trackMetaPageView();
   }, []);
 
-  const setViewDeferred = useCallback((view) => {
-    requestAnimationFrame(() => {
-      startTransition(() => {
-        setView(view);
+  const setViewDeferred = useCallback(
+    (view) => {
+      requestAnimationFrame(() => {
+        startTransition(() => {
+          setView(view);
+        });
       });
-    });
-  }, [setView]);
+    },
+    [setView],
+  );
 
   return (
     <div className="landing-shell landing-shell--page min-h-screen p-3 pb-5 antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
@@ -72,23 +73,13 @@ export function LandingPage({ setView }) {
           <LandingHero setView={setViewDeferred} />
         </div>
 
-        <LandingReveal>
-          <LandingHeroStats />
-        </LandingReveal>
+        <LandingHeroStats />
 
         <div className="landing-body-wrap">
           <main id="landing-main" className="relative" tabIndex={-1}>
-            <LandingReveal>
-              <LandingHowItWorks setView={setViewDeferred} />
-            </LandingReveal>
-
-            <LandingReveal>
-              <LandingClinicalWorkflow />
-            </LandingReveal>
-
-            <LandingReveal>
-              <LandingBrandBand />
-            </LandingReveal>
+            <LandingHowItWorks setView={setViewDeferred} />
+            <LandingClinicalWorkflow />
+            <LandingBrandBand />
 
             <LandingDeferred minHeight={420}>
               <LandingReveal>
@@ -97,33 +88,21 @@ export function LandingPage({ setView }) {
             </LandingDeferred>
 
             <LandingDeferred minHeight={520}>
-              <LandingReveal>
-                <LandingFeatures />
-              </LandingReveal>
+              <LandingFeatures />
             </LandingDeferred>
 
             <LandingDeferred minHeight={360}>
-              <LandingReveal>
-                <LandingUseCases />
-              </LandingReveal>
-            </LandingDeferred>
-
-            <LandingDeferred minHeight={480}>
               <LandingReveal>
                 <LandingTestimonials />
               </LandingReveal>
             </LandingDeferred>
 
-            <LandingDeferred minHeight={120}>
-              <LandingReveal>
-                <LandingSpeciesMarquee />
-              </LandingReveal>
+            <LandingDeferred minHeight={100}>
+              <LandingTrustStrip />
             </LandingDeferred>
 
-            <LandingDeferred minHeight={100}>
-              <LandingReveal>
-                <LandingTrustStrip />
-              </LandingReveal>
+            <LandingDeferred minHeight={120}>
+              <LandingSpeciesMarquee />
             </LandingDeferred>
 
             <LandingDeferred minHeight={520}>
@@ -133,20 +112,12 @@ export function LandingPage({ setView }) {
             </LandingDeferred>
 
             <LandingDeferred minHeight={360}>
-              <LandingReveal>
-                <LandingFaq />
-              </LandingReveal>
+              <LandingFaq />
             </LandingDeferred>
 
             <LandingDeferred minHeight={220}>
               <LandingReveal>
                 <LandingCta setView={setViewDeferred} />
-              </LandingReveal>
-            </LandingDeferred>
-
-            <LandingDeferred minHeight={280}>
-              <LandingReveal>
-                <LandingGuiaConsultas />
               </LandingReveal>
             </LandingDeferred>
           </main>

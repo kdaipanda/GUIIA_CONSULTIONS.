@@ -12071,17 +12071,17 @@ html {
   white-space: nowrap;
 }
 
-.clinic-empty,
-.clinic-muted {
+.clinic-empty {
   text-align: center;
   color: #64748b;
   padding: 48px 24px;
-}
-
-.clinic-empty {
   background: #fff;
   border-radius: 12px;
   border: 1px dashed #cbd5e1;
+}
+
+.clinic-muted {
+  color: #475569;
 }
 
 .clinic-form .form-group {
@@ -12596,11 +12596,18 @@ html {
 .clinic-timeline-unified .clinic-timeline-hint {
   margin: 0 0 12px;
   font-size: 13px;
+  line-height: 1.45;
+  color: #475569;
+  text-align: left;
+  padding: 0;
 }
 
 .clinic-timeline-summary {
   margin-top: 4px !important;
   font-size: 13px;
+  color: #475569;
+  text-align: left;
+  padding: 0;
 }
 
 .clinic-timeline-type {

@@ -21,14 +21,14 @@
   "hero": {
     "brand": "GUIAA",
     "kicker": "GUIAA Diagnóstico · Única en Latinoamérica",
-    "title": "Diagnóstico veterinario preciso y bajo control.",
-    "titleBefore": "Diagnóstico veterinario preciso",
+    "title": "Documenta la consulta sin perder el hilo clínico.",
+    "titleBefore": "Documenta la consulta",
     "titleAccent": "",
-    "titleAfter": " y bajo control.",
-    "lead": "GUIAA Diagnóstico estructura anamnesis y CDS L4·L5 para un razonamiento clínico verificable — único en Latinoamérica para MVZ certificados.",
+    "titleAfter": " sin perder el hilo clínico.",
+    "lead": "Anamnesis, examen y razonamiento CDS L4·L5 en un solo flujo — para MVZ certificados que necesitan trazabilidad real en el consultorio, no notas sueltas.",
     "leadExtended": "Somos la única plataforma en Latinoamérica orientada a un diagnóstico clínico estructurado y verificable para MVZ certificados — con expediente, inventario y ventas en el mismo flujo.",
-    "ctaRegister": "Crear cuenta MVZ",
-    "ctaHint": "3 consultas CDS gratis al registrarte",
+    "ctaRegister": "Probar con 3 consultas CDS gratis",
+    "ctaHint": "Registro con cédula profesional · sin tarjeta para las primeras 3",
     "explore": "Explorar interfaz sin registro",
     "playVideo": "Ver cómo funciona",
     "playHeroVideo": "Reproducir",
@@ -49,12 +49,12 @@
         "desc": "Formularios clínicos para perros, felinos, exóticos y más."
       },
       "record": {
-        "value": "GUIAA Diagnóstico",
-        "desc": "Única en Latinoamérica para un diagnóstico clínico preciso y estructurado."
+        "value": "Menos ida y vuelta entre herramientas",
+        "desc": "CDS, expediente e inventario en el mismo acto clínico."
       },
       "access": {
-        "value": "Acceso MVZ verificado",
-        "desc": "Registro con cédula profesional para veterinarios en Latinoamérica."
+        "value": "3 CDS gratis al registrarte",
+        "desc": "Prueba el flujo completo con cédula profesional verificada."
       }
     }
   },
@@ -112,13 +112,37 @@
     "dashboardConsultations": "{{count}} consultas CDS",
     "statTotal": "Consultas CDS totales",
     "statMonth": "Este mes",
-    "statMembership": "Membresía"
+    "statToday": "Hoy en consultorio",
+    "statMembership": "Membresía",
+    "actionNew": "Nueva consulta CDS",
+    "actionPatients": "Pacientes recientes",
+    "actionReports": "Reportes del mes",
+    "vitalsTitle": "Constantes clínicas",
+    "vitals": {
+      "temp": "Temperatura",
+      "hr": "FC",
+      "rr": "FR",
+      "weight": "Peso"
+    },
+    "cdsTitle": "Hipótesis CDS L4",
+    "cds": {
+      "h1": "Gastroenteritis aguda — alta",
+      "h2": "Obstrucción parcial — media",
+      "h3": "Pancreatitis — baja"
+    },
+    "recentTitle": "Consultas abiertas",
+    "recent": {
+      "cats": "Gatos",
+      "open": "En curso",
+      "done": "Cerrada"
+    }
   },
   "pricing": {
     "eyebrow": "Membresía MVZ",
     "title": "Planes para tu consultorio veterinario",
-    "lead": "Básica, Profesional y Premium — elige el volumen de consultas CDS y el alcance multiespecie que necesitas. Verificación de cédula incluida.",
-    "trialNote": "Al registrarte recibes 3 consultas CDS gratis para probar la plataforma antes de elegir un plan.",
+    "lead": "Elige el volumen de consultas CDS según tu agenda. Cada plan incluye verificación de cédula y el flujo clínico completo.",
+    "trialNote": "3 consultas CDS gratis al registrarte — sin tarjeta — para medir el flujo en tu propio consultorio.",
+    "roiNote": "ROI típico: una anamnesis estructurada en minutos, sin reconstruir el caso entre visitas ni saltar entre Word, WhatsApp y hojas sueltas.",
     "ctaRegister": "Empezar con este plan",
     "ctaPlan": "Contratar plan",
     "billingNote": "facturación mensual o anual",
@@ -138,8 +162,8 @@
   },
   "faq": {
     "eyebrow": "Antes de registrarte",
-    "title": "Preguntas frecuentes",
-    "lead": "Dudas habituales sobre acceso, especies, seguridad y uso en consulta.",
+    "title": "Antes de registrar tu cédula",
+    "lead": "Acceso MVZ, especies, seguridad y las 3 consultas CDS de prueba.",
     "moreTitle": "¿No encuentras tu respuesta?",
     "moreLead": "Escríbenos y te orientamos antes del registro.",
     "emailCta": "Escribir a soporte",
@@ -181,8 +205,8 @@
   },
   "cta": {
     "eyebrow": "Registro profesional MVZ",
-    "title": "Empieza con GUIAA Diagnóstico hoy",
-    "lead": "Verificamos tu cédula, te damos 3 consultas CDS gratis y abres el flujo único en Latinoamérica.",
+    "title": "Prueba GUIAA en tu próxima consulta",
+    "lead": "Verificamos tu cédula, te damos 3 consultas CDS gratis y documentas el caso con trazabilidad clínica desde el día uno.",
     "faqLink": "Ver preguntas frecuentes",
     "createAccount": "Crear cuenta con 3 consultas CDS gratis",
     "haveAccount": "Ya tengo cuenta"
@@ -212,67 +236,68 @@
   },
   "features": {
     "eyebrow": "Módulos del consultorio",
-    "title": "Clínica y operación en un solo entorno",
-    "lead": "GUIAA Diagnóstico encabeza la plataforma: soporte CDS para un diagnóstico preciso y real. Expediente, inventario y ventas lo acompañan en la misma consulta.",
-    "viewProduct": "Ver capturas del producto",
-    "seeInProduct": "Ver en producto",
+    "title": "Lo que usas entre un paciente y el siguiente",
+    "lead": "Diagnóstico CDS al frente. Expediente, inventario y ventas sin salir del acto clínico.",
+    "viewProduct": "Ver pantallas reales",
+    "seeInProduct": "Abrir en producto",
     "seeInProductFor": "Ver {{title}} en el producto",
+    "stripAria": "Capacidades complementarias",
     "uniqueBadge": "Única en Latinoamérica",
     "primary": {
       "diagnostico": {
         "title": "GUIAA Diagnóstico",
-        "description": "Anamnesis guiada, examen físico y soporte CDS L4·L5 para un diagnóstico veterinario preciso, estructurado y apegado a la realidad del consultorio. Somos la única plataforma en Latinoamérica enfocada en este nivel de rigor clínico."
+        "description": "Anamnesis, examen físico e hipótesis CDS L4·L5 en secuencia — trazable y bajo tu criterio profesional."
       },
       "expediente": {
         "title": "Expediente clínico",
-        "description": "Historial clínico por paciente: consultas previas, tratamientos y evolución entre visitas."
+        "description": "Historial por paciente: visitas previas, tratamientos y evolución sin reconstruir el caso."
       },
       "inventario": {
         "title": "Inventario",
-        "description": "Stock de medicamentos e insumos clínicos, alertas de reorden y trazabilidad en consulta."
+        "description": "Medicamentos e insumos con alerta de reorden, ligados a la consulta."
       },
       "ventas": {
         "title": "Ventas",
-        "description": "Cobro de servicios y productos desde la consulta, vinculado al acto clínico del paciente."
+        "description": "Cobro de servicios y productos desde el mismo flujo clínico."
       }
     },
     "secondary": {
       "multiespecie": {
         "title": "Multiespecie",
-        "description": "11 categorías con formularios veterinarios dedicados por especie."
+        "description": "11 formularios por categoría"
       },
       "panel": {
         "title": "Panel clínico",
-        "description": "Indicadores de consultas, actividad clínica y resumen de tu práctica MVZ."
+        "description": "Agenda y actividad del día"
       },
       "integracion": {
-        "title": "Integración clínica",
-        "description": "Diagnóstico, expediente, inventario y ventas en un solo contexto."
+        "title": "Un solo contexto",
+        "description": "Sin saltar entre herramientas"
       },
       "onboarding": {
-        "title": "Capacitación inicial",
-        "description": "Recorrido guiado para dominar la plataforma desde tu primera consulta."
+        "title": "Arranque guiado",
+        "description": "Primera consulta con recorrido"
       }
     }
   },
   "how": {
     "eyebrow": "Cómo funciona",
-    "title": "De registro a expediente en tres pasos",
-    "lead": "Sin curva de aprendizaje larga: te registras, recibes 3 consultas CDS gratis y empiezas a documentar desde el primer día.",
+    "title": "Tres pasos para empezar a documentar",
+    "lead": "Registro con cédula, 3 consultas CDS gratis y el expediente listo desde el primer paciente.",
     "ctaRegister": "Comenzar registro MVZ",
     "ctaExplore": "Explorar interfaz sin registro",
     "steps": {
       "01": {
         "title": "Registro MVZ",
-        "detail": "Crea tu cuenta con cédula profesional. Incluye 3 consultas CDS gratis y verificación para Latinoamérica."
+        "detail": "Cuenta con cédula profesional y 3 consultas CDS para probar en tu consultorio."
       },
       "02": {
         "title": "GUIAA Diagnóstico",
-        "detail": "Documenta la consulta con anamnesis guiada y CDS L4·L5 para un diagnóstico preciso y estructurado."
+        "detail": "Anamnesis guiada y CDS L4·L5 sin perder el hilo clínico."
       },
       "03": {
         "title": "Expediente completo",
-        "detail": "Dueño, mascota, ventas e historial clínico conectados en un solo lugar."
+        "detail": "Dueño, paciente, plan y ventas conectados en un solo lugar."
       }
     }
   },
@@ -280,67 +305,55 @@
     "aria": "Garantías GUIAA",
     "items": {
       "license": {
-        "text": "Cédula profesional MVZ verificada",
-        "sub": "Acceso exclusivo para médicos veterinarios"
-      },
-      "species": {
-        "text": "Formularios por especie veterinaria",
-        "sub": "Perros, felinos, aves, reptiles y exóticos"
+        "text": "Solo MVZ con cédula verificada",
+        "sub": "Entorno clínico exclusivo para veterinarios"
       },
       "trial": {
-        "text": "3 consultas CDS gratis al registrarte",
-        "sub": "Prueba el flujo CDS completo antes de elegir plan"
+        "text": "3 consultas CDS gratis",
+        "sub": "Sin tarjeta · mide el flujo en tu consultorio"
       },
       "diagnosis": {
-        "text": "GUIAA Diagnóstico · Única en Latinoamérica",
-        "sub": "Diagnóstico clínico preciso y estructurado"
+        "text": "Un solo hilo clínico por paciente",
+        "sub": "Anamnesis → CDS → expediente sin reconstruir el caso"
       }
     }
   },
   "testimonials": {
-    "eyebrow": "Comunidad MVZ",
-    "title": "Lo que dicen los colegas",
-    "lead": "Colegas MVZ comparten cómo documentan consultas y recuperan tiempo clínico con GUIAA.",
-    "listAria": "Testimonios de colegas MVZ",
+    "eyebrow": "Práctica MVZ",
+    "title": "Resultados en consultorio",
+    "lead": "Perfiles de práctica realistas: qué cambia cuando el CDS y el expediente viven en el mismo flujo.",
+    "listAria": "Resultados de colegas MVZ",
     "caseOf": "Caso de {{name}}",
-    "disclaimerMobile": "Desliza para ver más testimonios · ",
-    "disclaimer": "Casos ilustrativos con fines demostrativos. Los testimonios representan flujos típicos de consulta MVZ en GUIAA.",
+    "resultLabel": "Resultado",
+    "disclaimerMobile": "Desliza para ver más · ",
+    "disclaimer": "Perfiles compuestos a partir de flujos típicos de consulta MVZ. No son testimonios de marcas clínicas específicas.",
     "items": {
       "ana": {
-        "quote": "La estructura CDS me ayuda a no omitir pasos en casos complejos. Mis consultas son más claras.",
+        "quote": "Antes reconstruía la anamnesis entre visitas. Con el CDS estructurado cierro el razonamiento en la misma consulta y el expediente queda listo.",
+        "clinic": "Clínica de pequeñas especies",
+        "city": "Ciudad de México",
         "role": "Pequeñas especies · CDMX",
+        "result": "Anamnesis + CDS sin reconstruir el caso",
         "petAlt": "Perro golden retriever atendido en consulta",
         "tags": ["CDS L4·L5", "Expediente"]
       },
       "carlos": {
-        "quote": "Expediente, inventario y ventas conectados ahorran tiempo entre pacientes.",
+        "quote": "Entre pacientes perdía tiempo pasando de la nota clínica al inventario. Ahora cargo el tratamiento y la venta sin salir del flujo.",
+        "clinic": "Consulta mixta urbana",
+        "city": "Guadalajara",
         "role": "Consulta mixta · GDL",
+        "result": "Menos cambio de herramienta entre pacientes",
         "petAlt": "Gata atendida en consulta veterinaria",
         "tags": ["Inventario", "Ventas"]
       },
-      "laura": {
-        "quote": "Uso GUIAA en perros, gatos y consultas de producción con el mismo rigor.",
-        "role": "Medicina de producción · MTY",
-        "petAlt": "Cachorro en consulta multiespecie",
-        "tags": ["Multiespecie", "Producción"]
-      },
       "patricia": {
-        "quote": "GUIAA refleja cómo trabajo en consulta: datos del paciente, razonamiento clínico y trazabilidad sin saltar entre herramientas.",
+        "quote": "En felinos el detalle importa. GUIAA me obliga a completar el examen y las hipótesis sin saltar pasos que después cuestan tiempo.",
+        "clinic": "Consulta felina enfocada",
+        "city": "Querétaro",
         "role": "Clínica felina · Querétaro",
-        "petAlt": "Corgi atendido en clínica veterinaria",
-        "tags": ["Anamnesis", "CDS avanzado"]
-      },
-      "miguel": {
-        "quote": "Interpretar laboratorios con el PDF integrado cambió mi flujo. Los tutores reciben explicaciones más claras.",
-        "role": "Hospital veterinario · Puebla",
-        "petAlt": "Gato naranja en hospital veterinario",
-        "tags": ["Laboratorio PDF", "Premium"]
-      },
-      "sofia": {
-        "quote": "El acceso verificado con cédula profesional da confianza a todo el equipo clínico.",
-        "role": "Emergencias · Lima",
-        "petAlt": "Gata en servicio de emergencias veterinarias",
-        "tags": ["Registro MVZ", "Latinoamérica"]
+        "result": "Examen + hipótesis CDS con trazabilidad",
+        "petAlt": "Paciente felino en clínica veterinaria",
+        "tags": ["Anamnesis", "CDS"]
       }
     }
   },
@@ -374,8 +387,7 @@
   },
   "workflow": {
     "eyebrow": "Flujo clínico veterinario",
-    "title": "De la recepción del paciente al expediente completo",
-    "lead": "GUIAA Diagnóstico estructura el razonamiento clínico CDS L4·L5 para un diagnóstico preciso y real — único en Latinoamérica — con trazabilidad hasta el expediente.",
+    "title": "De la recepción al expediente",
     "ctaLive": "Ver consulta en vivo",
     "foot": "Cada especie activa formularios veterinarios distintos — perros, felinos, aves, reptiles, exóticos y más.",
     "steps": {
@@ -407,13 +419,13 @@
   },
   "product": {
     "eyebrow": "Interfaz veterinaria",
-    "title": "La misma pantalla que usas con cada paciente",
-    "lead": "Capturas del flujo real: selección de especie, consulta clínica y panel del MVZ en consultorio.",
+    "title": "La pantalla de consulta, no un brochure",
+    "lead": "Especie, anamnesis y panel MVZ — la misma interfaz que usas con el paciente enfrente.",
     "tabsAria": "Vistas del producto",
     "bullets": [
-      "Selector multiespecie con formularios veterinarios por categoría",
-      "Stepper clínico: paciente → anamnesis → examen → plan terapéutico",
-      "Panel con consultas recientes e indicadores de tu práctica"
+      "Formularios por especie, no plantillas genéricas",
+      "Stepper clínico: paciente → anamnesis → examen → plan",
+      "Panel con consultas abiertas y actividad del día"
     ],
     "shots": {
       "species": {
@@ -435,8 +447,8 @@
   },
   "brandBand": {
     "aria": "Marca GUIAA",
-    "title": "Doctor Plumitas te acompaña en consulta",
-    "lead": "La mascota de GUIAA representa un flujo clínico cercano, claro y pensado para el día a día del médico veterinario."
+    "title": "Plumitas en el consultorio",
+    "lead": "La mascota de GUIAA marca un tono cercano — el software sigue siendo clínico y serio."
   },
   "guiaConsultas": {
     "badge": "ADSGuiaa",

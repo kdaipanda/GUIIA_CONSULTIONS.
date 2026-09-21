@@ -21,14 +21,14 @@
   "hero": {
     "brand": "GUIAA",
     "kicker": "GUIAA Diagnosis · Unique in Latin America",
-    "title": "Precise veterinary diagnosis, under control.",
-    "titleBefore": "Precise veterinary diagnosis",
+    "title": "Document the consult without losing clinical thread.",
+    "titleBefore": "Document the consult",
     "titleAccent": "",
-    "titleAfter": ", under control.",
-    "lead": "GUIAA Diagnosis structures history-taking and CDS L4·L5 for verifiable clinical reasoning — unique in Latin America for licensed veterinarians.",
+    "titleAfter": " without losing clinical thread.",
+    "lead": "History-taking, exam, and CDS L4·L5 reasoning in one flow — for licensed veterinarians who need real clinic traceability, not scattered notes.",
     "leadExtended": "We are the only platform in Latin America focused on structured, verifiable clinical diagnosis for licensed veterinarians — with records, inventory, and sales in the same flow.",
-    "ctaRegister": "Create vet account",
-    "ctaHint": "3 free CDS consultations when you sign up",
+    "ctaRegister": "Try with 3 free CDS consultations",
+    "ctaHint": "License verification · no card required for the first 3",
     "explore": "Explore the interface without signing up",
     "playVideo": "See how it works",
     "playHeroVideo": "Play",
@@ -49,12 +49,12 @@
         "desc": "Clinical forms for dogs, cats, exotics, and more."
       },
       "record": {
-        "value": "GUIAA Diagnosis",
-        "desc": "Unique in Latin America for precise, structured clinical diagnosis."
+        "value": "Less tool-switching mid-consult",
+        "desc": "CDS, records, and inventory in the same clinical act."
       },
       "access": {
-        "value": "Verified vet access",
-        "desc": "Registration with professional license for veterinarians in Latin America."
+        "value": "3 free CDS on signup",
+        "desc": "Try the full flow with verified professional license."
       }
     }
   },
@@ -112,13 +112,37 @@
     "dashboardConsultations": "{{count}} CDS consultations",
     "statTotal": "Total CDS consultations",
     "statMonth": "This month",
-    "statMembership": "Membership"
+    "statToday": "In clinic today",
+    "statMembership": "Membership",
+    "actionNew": "New CDS consultation",
+    "actionPatients": "Recent patients",
+    "actionReports": "Monthly reports",
+    "vitalsTitle": "Clinical vitals",
+    "vitals": {
+      "temp": "Temp",
+      "hr": "HR",
+      "rr": "RR",
+      "weight": "Weight"
+    },
+    "cdsTitle": "CDS L4 hypotheses",
+    "cds": {
+      "h1": "Acute gastroenteritis — high",
+      "h2": "Partial obstruction — medium",
+      "h3": "Pancreatitis — low"
+    },
+    "recentTitle": "Open consultations",
+    "recent": {
+      "cats": "Cats",
+      "open": "In progress",
+      "done": "Closed"
+    }
   },
   "pricing": {
     "eyebrow": "Vet membership",
     "title": "Plans for your veterinary practice",
-    "lead": "Basic, Professional, and Premium — choose your CDS consultation volume and multi-species coverage. License verification included.",
-    "trialNote": "When you register you get 3 free CDS consultations to try the platform before choosing a plan.",
+    "lead": "Choose CDS consultation volume for your schedule. Every plan includes license verification and the full clinical flow.",
+    "trialNote": "3 free CDS consultations on signup — no card — so you can measure the flow in your own clinic.",
+    "roiNote": "Typical ROI: structured history-taking in minutes, without rebuilding the case between visits or jumping between Word, WhatsApp, and loose notes.",
     "ctaRegister": "Start with this plan",
     "ctaPlan": "Choose plan",
     "billingNote": "monthly or annual billing",
@@ -138,8 +162,8 @@
   },
   "faq": {
     "eyebrow": "Before you register",
-    "title": "Frequently asked questions",
-    "lead": "Common questions about access, species, security, and in-clinic use.",
+    "title": "Before you register your license",
+    "lead": "Vet access, species, security, and the 3 trial CDS consultations.",
     "moreTitle": "Can't find your answer?",
     "moreLead": "Write to us and we'll help before you register.",
     "emailCta": "Email support",
@@ -181,8 +205,8 @@
   },
   "cta": {
     "eyebrow": "Professional vet registration",
-    "title": "Start with GUIAA Diagnosis today",
-    "lead": "We verify your license, give you 3 free CDS consultations, and open the flow unique in Latin America.",
+    "title": "Try GUIAA on your next consult",
+    "lead": "We verify your license, give you 3 free CDS consultations, and you document the case with clinical traceability from day one.",
     "faqLink": "See frequently asked questions",
     "createAccount": "Create account with 3 free CDS consultations",
     "haveAccount": "I already have an account"
@@ -212,67 +236,68 @@
   },
   "features": {
     "eyebrow": "Practice modules",
-    "title": "Clinic and operations in one place",
-    "lead": "GUIAA Diagnosis leads the platform: CDS support for precise, real diagnosis. Records, inventory, and sales follow in the same consult.",
-    "viewProduct": "See product screenshots",
-    "seeInProduct": "View in product",
+    "title": "What you use between one patient and the next",
+    "lead": "CDS diagnosis up front. Records, inventory, and sales without leaving the clinical act.",
+    "viewProduct": "See real screens",
+    "seeInProduct": "Open in product",
     "seeInProductFor": "View {{title}} in the product",
+    "stripAria": "Supporting capabilities",
     "uniqueBadge": "Unique in Latin America",
     "primary": {
       "diagnostico": {
         "title": "GUIAA Diagnosis",
-        "description": "Guided history-taking, physical exam, and CDS L4·L5 support for precise, structured veterinary diagnosis grounded in real clinic work. We are the only platform in Latin America focused on this level of clinical rigor."
+        "description": "History-taking, physical exam, and CDS L4·L5 hypotheses in sequence — traceable and under your judgment."
       },
       "expediente": {
         "title": "Clinical record",
-        "description": "Patient clinical history: prior visits, treatments, and progress between appointments."
+        "description": "Patient history: prior visits, treatments, and progress without rebuilding the case."
       },
       "inventario": {
         "title": "Inventory",
-        "description": "Medication and supply stock, reorder alerts, and traceability during consultation."
+        "description": "Meds and supplies with reorder alerts, tied to the consult."
       },
       "ventas": {
         "title": "Sales",
-        "description": "Bill services and products from the consult, linked to the patient's clinical act."
+        "description": "Bill services and products from the same clinical flow."
       }
     },
     "secondary": {
       "multiespecie": {
         "title": "Multi-species",
-        "description": "11 categories with dedicated veterinary forms per species."
+        "description": "11 forms by category"
       },
       "panel": {
         "title": "Clinical panel",
-        "description": "Consultation metrics, clinical activity, and a summary of your vet practice."
+        "description": "Day schedule and activity"
       },
       "integracion": {
-        "title": "Clinical integration",
-        "description": "Diagnosis, records, inventory, and sales in one context."
+        "title": "One context",
+        "description": "No tool-switching mid-case"
       },
       "onboarding": {
-        "title": "Initial training",
-        "description": "Guided walkthrough to master the platform from your first consultation."
+        "title": "Guided start",
+        "description": "First consult with walkthrough"
       }
     }
   },
   "how": {
     "eyebrow": "How it works",
-    "title": "From registration to a full record in three steps",
-    "lead": "No long learning curve: register, get 3 free CDS consultations, and start documenting from day one.",
+    "title": "Three steps to start documenting",
+    "lead": "License registration, 3 free CDS consultations, and a ready record from the first patient.",
     "ctaRegister": "Start vet registration",
     "ctaExplore": "Explore the interface without signing up",
     "steps": {
       "01": {
         "title": "Vet registration",
-        "detail": "Create your account with a professional license. Includes 3 free CDS consultations and verification for Latin America."
+        "detail": "Account with professional license and 3 CDS consultations to try in your clinic."
       },
       "02": {
         "title": "GUIAA Diagnosis",
-        "detail": "Document the consult with guided history-taking and CDS L4·L5 for precise, structured diagnosis."
+        "detail": "Guided history-taking and CDS L4·L5 without losing clinical thread."
       },
       "03": {
-        "title": "Complete record",
-        "detail": "Owner, pet, sales, and clinical history connected in one place."
+        "title": "Full record",
+        "detail": "Owner, patient, plan, and sales connected in one place."
       }
     }
   },
@@ -280,67 +305,64 @@
     "aria": "GUIAA guarantees",
     "items": {
       "license": {
-        "text": "Verified veterinary professional license",
-        "sub": "Access exclusive to licensed veterinarians"
-      },
-      "species": {
-        "text": "Forms by veterinary species",
-        "sub": "Dogs, cats, birds, reptiles, and exotics"
+        "text": "Licensed veterinarians only",
+        "sub": "Clinical environment exclusive to verified vets"
       },
       "trial": {
-        "text": "3 free CDS consultations on signup",
-        "sub": "Try the full CDS flow before choosing a plan"
+        "text": "3 free CDS consultations",
+        "sub": "No card · measure the flow in your clinic"
       },
       "diagnosis": {
-        "text": "GUIAA Diagnosis · Unique in Latin America",
-        "sub": "Precise, structured clinical diagnosis"
+        "text": "One clinical thread per patient",
+        "sub": "History → CDS → record without rebuilding the case"
       }
     }
   },
   "testimonials": {
-    "eyebrow": "Vet community",
-    "title": "What colleagues say",
-    "lead": "Fellow veterinarians share how they document consultations and reclaim clinical time with GUIAA.",
-    "listAria": "Colleague testimonials",
+    "eyebrow": "Vet practice",
+    "title": "Outcomes in the clinic",
+    "lead": "Realistic practice profiles: what changes when CDS and the clinical record live in the same flow.",
+    "listAria": "Colleague practice outcomes",
     "caseOf": "Case of {{name}}",
-    "disclaimerMobile": "Swipe to see more testimonials · ",
-    "disclaimer": "Illustrative cases for demonstration. Testimonials represent typical vet consultation flows in GUIAA.",
+    "resultLabel": "Outcome",
+    "disclaimerMobile": "Swipe for more · ",
+    "disclaimer": "Composite profiles based on typical vet consultation flows. Not testimonials from specific clinic brands.",
     "items": {
       "ana": {
-        "quote": "The CDS structure helps me not skip steps in complex cases. My consultations are clearer.",
+        "quote": "I used to rebuild the history between visits. With structured CDS I close the reasoning in the same consult and the record is ready.",
+        "clinic": "Small-animal clinic",
+        "city": "Mexico City",
         "role": "Small animals · Mexico City",
+        "result": "History + CDS without rebuilding the case",
         "petAlt": "Golden retriever seen in consultation",
-        "tags": ["CDS L4·L5", "Records"]
+        "tags": [
+          "CDS L4·L5",
+          "Records"
+        ]
       },
       "carlos": {
-        "quote": "Connected records, inventory, and sales save time between patients.",
+        "quote": "Between patients I lost time jumping from the clinical note to inventory. Now I load treatment and sale without leaving the flow.",
+        "clinic": "Urban mixed practice",
+        "city": "Guadalajara",
         "role": "Mixed practice · Guadalajara",
+        "result": "Less tool-switching between patients",
         "petAlt": "Cat seen in veterinary consultation",
-        "tags": ["Inventory", "Sales"]
-      },
-      "laura": {
-        "quote": "I use GUIAA for dogs, cats, and production visits with the same rigor.",
-        "role": "Production medicine · Monterrey",
-        "petAlt": "Puppy in multi-species consultation",
-        "tags": ["Multi-species", "Production"]
+        "tags": [
+          "Inventory",
+          "Sales"
+        ]
       },
       "patricia": {
-        "quote": "GUIAA mirrors how I work in clinic: patient data, clinical reasoning, and traceability without jumping between tools.",
+        "quote": "With cats, detail matters. GUIAA pushes me to complete the exam and hypotheses without skipping steps that cost time later.",
+        "clinic": "Feline-focused practice",
+        "city": "Querétaro",
         "role": "Feline clinic · Querétaro",
-        "petAlt": "Corgi seen at a veterinary clinic",
-        "tags": ["History-taking", "Advanced CDS"]
-      },
-      "miguel": {
-        "quote": "Interpreting labs with the integrated PDF changed my flow. Owners get clearer explanations.",
-        "role": "Veterinary hospital · Puebla",
-        "petAlt": "Orange cat at a veterinary hospital",
-        "tags": ["Lab PDF", "Premium"]
-      },
-      "sofia": {
-        "quote": "Verified access with a professional license gives the whole clinical team confidence.",
-        "role": "Emergency · Lima",
-        "petAlt": "Cat in veterinary emergency care",
-        "tags": ["Vet registration", "Latin America"]
+        "result": "Exam + CDS hypotheses with traceability",
+        "petAlt": "Feline patient at a veterinary clinic",
+        "tags": [
+          "History-taking",
+          "CDS"
+        ]
       }
     }
   },
@@ -374,8 +396,7 @@
   },
   "workflow": {
     "eyebrow": "Veterinary clinical flow",
-    "title": "From patient intake to a complete record",
-    "lead": "GUIAA Diagnosis structures CDS L4·L5 clinical reasoning for precise, real diagnosis — unique in Latin America — with traceability through the full record.",
+    "title": "From intake to the record",
     "ctaLive": "See live consultation",
     "foot": "Each species unlocks different veterinary forms — dogs, cats, birds, reptiles, exotics, and more.",
     "steps": {
@@ -407,13 +428,13 @@
   },
   "product": {
     "eyebrow": "Veterinary interface",
-    "title": "The same screen you use with every patient",
-    "lead": "Real-flow screenshots: species selection, clinical consultation, and the vet panel in clinic.",
+    "title": "The consult screen — not a brochure",
+    "lead": "Species, history-taking, and vet panel — the same UI you use with the patient in front of you.",
     "tabsAria": "Product views",
     "bullets": [
-      "Multi-species selector with veterinary forms per category",
-      "Clinical stepper: patient → history → exam → treatment plan",
-      "Panel with recent consultations and practice indicators"
+      "Forms by species, not generic templates",
+      "Clinical stepper: patient → history → exam → plan",
+      "Panel with open consults and day activity"
     ],
     "shots": {
       "species": {
@@ -435,8 +456,8 @@
   },
   "brandBand": {
     "aria": "GUIAA brand",
-    "title": "Doctor Plumitas joins you in consultation",
-    "lead": "GUIAA's mascot represents a clinical flow that feels close, clear, and built for the veterinarian's day-to-day."
+    "title": "Plumitas in the clinic",
+    "lead": "GUIAA's mascot keeps the tone approachable — the software stays clinical and serious."
   },
   "guiaConsultas": {
     "badge": "ADSGuiaa",

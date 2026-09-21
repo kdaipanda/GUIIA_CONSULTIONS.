@@ -1,5 +1,4 @@
 import React from "react";
-import { ArrowUpRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { MultiespecieCategoryIcons } from "./MultiespecieCategoryIcons";
 import { onLandingAnchorClick, productTabHref } from "./landingScroll";
@@ -39,48 +38,45 @@ function ProductLink({ productTab, label }) {
   if (!productTab) return null;
 
   return (
-    <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-guiaa-brand-blue transition group-hover:gap-1.5" aria-hidden>
+    <span className="landing-feature-link mt-4 text-xs font-semibold text-guiaa-brand-blue" aria-hidden>
       {label}
-      <ArrowUpRight size={13} aria-hidden />
     </span>
   );
 }
 
+/** Índice clínico: un bloque dominante + filas + franja densa (rompe grid SaaS). */
 export function LandingFeatures() {
   const { t } = useTranslation("landing");
   const featured = PRIMARY_FEATURES.find((f) => f.featured);
   const restPrimary = PRIMARY_FEATURES.filter((f) => !f.featured);
 
   return (
-    <section id="features" className="landing-section">
+    <section id="features" className="landing-section landing-features-section">
       <div className="landing-container">
-        <div className="landing-section-head-wide">
-          <div className="landing-section-head max-w-2xl">
-            <p className="landing-eyebrow">{t("features.eyebrow")}</p>
-            <h2 className="landing-section-title text-3xl text-guiaa-brand-navy sm:text-4xl">
-              {t("features.title")}
-            </h2>
-            <p className="landing-lead mt-4">{t("features.lead")}</p>
+        <div className="landing-features-head">
+          <h2 className="landing-section-title text-guiaa-brand-navy">
+            {t("features.title")}
+          </h2>
+          <div className="landing-features-head-side">
+            <p className="landing-lead">{t("features.lead")}</p>
+            <a
+              href={productTabHref("species")}
+              onClick={(event) => onLandingAnchorClick(event, { productTab: "species" })}
+              className="landing-link-quiet"
+            >
+              {t("features.viewProduct")}
+            </a>
           </div>
-          <a
-            href={productTabHref("species")}
-            onClick={(event) => onLandingAnchorClick(event, { productTab: "species" })}
-            className="landing-link-arrow inline-flex min-h-11 shrink-0 items-center gap-1"
-          >
-            {t("features.viewProduct")}
-            <ArrowUpRight size={15} aria-hidden />
-          </a>
         </div>
 
         <FeatureCard
           productTab={featured.productTab}
-          className="landing-feature-hero mt-12 p-6 sm:p-8 landing-card"
+          className="landing-feature-hero mt-10 p-6 sm:p-8 landing-card"
           ariaLabel={t("features.seeInProductFor", {
             title: t(`features.primary.${featured.id}.title`),
           })}
         >
-          <p className="landing-feature-unique">{t("features.uniqueBadge")}</p>
-          <h3 className="mt-2 text-xl font-semibold text-guiaa-brand-navy sm:text-2xl">
+          <h3 className="text-xl font-semibold text-guiaa-brand-navy sm:text-2xl">
             {t(`features.primary.${featured.id}.title`)}
           </h3>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-guiaa-brand-ink-muted sm:text-base">
@@ -89,7 +85,7 @@ export function LandingFeatures() {
           <ProductLink productTab={featured.productTab} label={t("features.seeInProduct")} />
         </FeatureCard>
 
-        <div className="landing-feature-list mt-4">
+        <div className="landing-feature-list mt-3">
           {restPrimary.map(({ id, productTab }) => (
             <FeatureCard
               key={id}
@@ -116,35 +112,41 @@ export function LandingFeatures() {
           ))}
         </div>
 
-        <div className="landing-feature-secondary mt-6">
-          {SECONDARY_FEATURES.map(({ id, useCategoryIcons, productTab }) => (
-            <FeatureCard
-              key={id}
-              productTab={productTab}
-              className="landing-feature-secondary-item landing-card"
-              ariaLabel={
-                productTab
-                  ? t("features.seeInProductFor", {
-                      title: t(`features.secondary.${id}.title`),
-                    })
-                  : undefined
-              }
-            >
-              {useCategoryIcons ? (
-                <div className="landing-feature-species mb-2" aria-hidden>
-                  <MultiespecieCategoryIcons compact />
-                </div>
-              ) : null}
-              <h3 className="text-sm font-semibold text-guiaa-brand-navy">
-                {t(`features.secondary.${id}.title`)}
-              </h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-guiaa-brand-ink-muted">
-                {t(`features.secondary.${id}.description`)}
-              </p>
-              <ProductLink productTab={productTab} label={t("features.seeInProduct")} />
-            </FeatureCard>
-          ))}
-        </div>
+        <ul className="landing-feature-strip" aria-label={t("features.stripAria")}>
+          {SECONDARY_FEATURES.map(({ id, useCategoryIcons, productTab }) => {
+            const title = t(`features.secondary.${id}.title`);
+            const body = (
+              <>
+                {useCategoryIcons ? (
+                  <span className="landing-feature-strip-icons" aria-hidden>
+                    <MultiespecieCategoryIcons compact />
+                  </span>
+                ) : null}
+                <span className="landing-feature-strip-title">{title}</span>
+                <span className="landing-feature-strip-desc">
+                  {t(`features.secondary.${id}.description`)}
+                </span>
+              </>
+            );
+
+            return (
+              <li key={id}>
+                {productTab ? (
+                  <a
+                    href={productTabHref(productTab)}
+                    onClick={(event) => onLandingAnchorClick(event, { productTab })}
+                    className="landing-feature-strip-item"
+                    aria-label={t("features.seeInProductFor", { title })}
+                  >
+                    {body}
+                  </a>
+                ) : (
+                  <div className="landing-feature-strip-item">{body}</div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </section>
   );

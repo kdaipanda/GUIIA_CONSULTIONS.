@@ -67,11 +67,11 @@
 }
 
 .landing-guia-consultas-eyebrow {
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #64748b;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: #265b93;
 }
 
 .landing-guia-consultas-title {
@@ -81,7 +81,7 @@
   line-height: 1.2;
   color: #0c2d4d;
   letter-spacing: -0.025em;
-  max-width: 16ch;
+  max-width: none;
   font-family: var(--landing-font-display, Georgia, serif);
 }
 

@@ -234,9 +234,7 @@
 }
 
 .landing-usecase-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: block;
   padding: 1.15rem 0.15rem 1.25rem;
   border-bottom: 1px solid rgba(12, 45, 77, 0.1);
   text-decoration: none;
@@ -247,10 +245,7 @@
 
 @media (min-width: 640px) {
   .landing-usecase-row {
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 1.5rem;
+    padding: 1.25rem 0.15rem 1.35rem;
   }
 }
 
@@ -292,14 +287,7 @@
 }
 
 .landing-usecase-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  flex-shrink: 0;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #265b93;
-  white-space: nowrap;
+  display: none !important;
 }
 
 .landing-trust-line {
@@ -760,7 +748,8 @@ html.dark .landing-footer-v2-eyebrow {
 
 /* —— Species: panel opaco —— */
 .landing-species-glass-section .category-selector-glass-panel,
-.landing-species-glass-panel {
+.landing-species-glass-panel,
+.landing-species-panel {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   background: transparent !important;
@@ -775,6 +764,32 @@ html.dark .landing-footer-v2-eyebrow {
   color: #0c2d4d !important;
   text-transform: none !important;
   letter-spacing: -0.01em !important;
+}
+
+.landing-species-section {
+  background: #f8fafc;
+}
+
+.landing-multiespecie-cell {
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .landing-multiespecie-cell:hover {
+    border-color: rgba(61, 155, 143, 0.45);
+    background: #f8fafc;
+  }
+}
+
+.landing-multiespecie-emoji {
+  font-family:
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Noto Color Emoji",
+    "Twemoji Mozilla",
+    sans-serif;
+  line-height: 1;
+  filter: none;
 }
 
 /* —— Cáscara menos flotante —— */
@@ -803,6 +818,45 @@ html.dark .landing-footer-v2-eyebrow {
   background: transparent !important;
 }
 
+.landing-product-shot {
+  max-width: 36rem !important;
+}
+
+.landing-product-bullets {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-product-bullets li {
+  position: relative;
+  padding: 0.55rem 0 0.55rem 1rem;
+  border-top: 1px solid rgba(12, 45, 77, 0.08);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.landing-product-bullets li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 1rem;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 1px;
+  background: #3d9b8f;
+}
+
+.landing-product-bullets li:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.landing-product-bullets li:first-child::before {
+  top: 0.45rem;
+}
+
 /* Hero video frame más sobrio */
 .landing-hero-video-frame {
   border-radius: 0.85rem !important;
@@ -811,9 +865,253 @@ html.dark .landing-footer-v2-eyebrow {
 
 /* Nav hero: opaco editorial */
 .landing-nav-hero {
-  background: rgba(7, 22, 34, 0.78) !important;
-  backdrop-filter: blur(8px) saturate(1.05) !important;
-  -webkit-backdrop-filter: blur(8px) saturate(1.05) !important;
+  background: #071622 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Product preview: no heredar opacity:0 de App.css fadeInUp */
+.landing-app-preview-page,
+.landing-app-preview-page .form-section,
+.landing-app-preview-page .step-indicator,
+.landing-app-preview-page .consultation-sidebar {
+  opacity: 1 !important;
+  animation: none !important;
+}
+
+/* Banda clínica densa — rompe el gemelo How/Workflow */
+.landing-clinical-band {
+  padding: 1.35rem 0 1.6rem;
+  background:
+    linear-gradient(180deg, rgba(8, 47, 73, 0.03) 0%, transparent 100%);
+}
+
+.landing-clinical-band-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.landing-clinical-band-title {
+  margin: 0;
+  font-family: "Source Serif 4", "Source Serif Pro", Georgia, serif;
+  font-size: clamp(1.05rem, 1.5vw, 1.25rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0c2d4d;
+  line-height: 1.25;
+}
+
+.landing-clinical-band-link {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #0e7490;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(14, 116, 144, 0.35);
+}
+
+.landing-clinical-band-link:hover {
+  color: #0c2d4d;
+  border-bottom-color: rgba(12, 45, 77, 0.45);
+}
+
+.landing-clinical-band-grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.landing-clinical-band-item {
+  padding: 0.65rem 0.55rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(12, 45, 77, 0.1);
+  background: #ffffff;
+  min-height: 4.25rem;
+}
+
+.landing-clinical-band-num {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #0e7490;
+  margin-bottom: 0.25rem;
+}
+
+.landing-clinical-band-label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  color: #0c2d4d;
+}
+
+@media (max-width: 899px) {
+  .landing-clinical-band-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 539px) {
+  .landing-clinical-band-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .landing-clinical-band-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+[data-theme="dark"] .landing-clinical-band,
+html.dark .landing-clinical-band {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+}
+
+[data-theme="dark"] .landing-clinical-band-title,
+html.dark .landing-clinical-band-title,
+[data-theme="dark"] .landing-clinical-band-label,
+html.dark .landing-clinical-band-label {
+  color: #e8eef4;
+}
+
+[data-theme="dark"] .landing-clinical-band-item,
+html.dark .landing-clinical-band-item {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* —— Features: cabeza asimétrica + franja densa (anti grid SaaS) —— */
+.landing-features-head {
+  display: grid;
+  gap: 1rem;
+  max-width: 52rem;
+}
+
+@media (min-width: 768px) {
+  .landing-features-head {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 2rem;
+    align-items: end;
+  }
+}
+
+.landing-features-head-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.landing-features-head-side .landing-lead {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.landing-link-quiet {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #0e7490;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(14, 116, 144, 0.35);
+  width: fit-content;
+}
+
+.landing-link-quiet:hover {
+  color: #0c2d4d;
+  border-bottom-color: rgba(12, 45, 77, 0.4);
+}
+
+.landing-feature-strip {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0.85rem 0 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem 1.25rem;
+  border-top: 1px solid rgba(12, 45, 77, 0.1);
+}
+
+@media (min-width: 640px) {
+  .landing-feature-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-feature-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.landing-feature-strip-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.15rem 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+a.landing-feature-strip-item:hover .landing-feature-strip-title {
+  color: #0e7490;
+}
+
+.landing-feature-strip-icons {
+  margin-bottom: 0.15rem;
+  opacity: 0.9;
+}
+
+.landing-feature-strip-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: #0c2d4d;
+}
+
+.landing-feature-strip-desc {
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: rgba(12, 45, 77, 0.55);
+}
+
+.landing-features-section .landing-feature-hero {
+  border-left: 3px solid #0e7490;
+}
+
+.landing-features-section .landing-feature-row {
+  border-radius: 0.55rem !important;
+  box-shadow: none !important;
+}
+
+/* FAQ sin eyebrow: intro más editorial */
+.landing-faq-intro .landing-section-title {
+  max-width: 14ch;
+}
+
+[data-theme="dark"] .landing-feature-strip-title,
+html.dark .landing-feature-strip-title {
+  color: #e8eef4;
+}
+
+[data-theme="dark"] .landing-feature-strip-desc,
+html.dark .landing-feature-strip-desc {
+  color: rgba(232, 238, 244, 0.55);
+}
+
+[data-theme="dark"] .landing-feature-strip,
+html.dark .landing-feature-strip {
+  border-top-color: rgba(255, 255, 255, 0.12);
 }
 
 

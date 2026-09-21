@@ -31,6 +31,49 @@
   list-style: none;
 }
 
+.landing-colleagues-bento--outcomes {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .landing-colleagues-bento--outcomes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.landing-colleague-result {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 0.75rem;
+  padding: 0.45rem 0.65rem;
+  max-width: calc(100% - 5.5rem);
+  border-radius: 0.4rem;
+  background: rgba(12, 45, 77, 0.06);
+  border: 1px solid rgba(12, 45, 77, 0.1);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: #0c2d4d;
+}
+
+.landing-colleague-result-label {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0e7490;
+}
+
+.landing-colleague-clinic {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #265b93;
+}
+
 @media (min-width: 640px) {
   .landing-colleagues-bento {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -50,7 +93,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 13.5rem;
+  min-height: 16.5rem;
   height: 100%;
   margin: 0;
   padding: 1.35rem 1.2rem 1.4rem;
@@ -97,9 +140,9 @@
   z-index: 1;
   margin: 0;
   max-width: 100%;
-  padding-right: 7rem;
+  padding-right: 6.5rem;
   font-family: var(--landing-font-display, Georgia, serif);
-  font-size: 0.98rem;
+  font-size: 0.92rem;
   line-height: 1.45;
   font-weight: 600;
   letter-spacing: -0.015em;

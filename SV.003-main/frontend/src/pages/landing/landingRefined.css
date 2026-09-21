@@ -62,20 +62,11 @@
   padding-bottom: clamp(3rem, 7vw, 4.5rem);
 }
 .landing-body-wrap .landing-section-alt {
-  background: linear-gradient(
-    180deg,
-    rgba(232, 244, 252, 0.35) 0%,
-    rgba(255, 255, 255, 0.65) 100%
-  );
+  background: #f8fafc;
 }
 
 .landing-body-wrap .landing-section-band {
-  background: linear-gradient(
-    90deg,
-    rgba(61, 155, 143, 0.08) 0%,
-    rgba(38, 91, 147, 0.05) 50%,
-    rgba(61, 155, 143, 0.08) 100%
-  );
+  background: #f8fafc;
 }
 
 .landing-body-wrap .landing-eyebrow {
@@ -200,8 +191,8 @@
 .landing-brand-band-mascot-wrap {
   position: relative;
   flex-shrink: 0;
-  width: 7.5rem;
-  height: 5.75rem;
+  width: 7rem;
+  height: 5.5rem;
 }
 
 .landing-brand-band-mascot {
@@ -213,9 +204,9 @@
   object-fit: contain;
   object-position: center;
   background: transparent;
-  filter: drop-shadow(0 10px 18px rgba(12, 45, 77, 0.16));
+  filter: none;
   animation: none;
-  transform-origin: center center;
+  transform: none;
 }
 
 .landing-brand-band-spark,
@@ -391,13 +382,9 @@
   gap: clamp(1.75rem, 3.5vw, 2.5rem);
   padding: clamp(1.5rem, 3vw, 2.25rem);
   border: 1px solid rgba(12, 45, 77, 0.08);
-  border-radius: 1.5rem;
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow:
-    0 24px 60px -32px rgba(12, 45, 77, 0.22),
-    0 0 0 1px rgba(255, 255, 255, 0.65) inset;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border-radius: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 18px 48px -28px rgba(12, 45, 77, 0.2);
   min-width: 0;
   max-width: 100%;
 }
@@ -965,7 +952,7 @@
     padding: 1.25rem 1.1rem 1.15rem !important;
     border-radius: 1.125rem !important;
     border: 1px solid rgba(255, 255, 255, 0.78) !important;
-    box-shadow: var(--liquid-glass-shadow-soft);
+    box-shadow: 0 8px 24px rgba(12, 45, 77, 0.06);
   }
 
   .landing-clinical-workflow-section .landing-clinical-step:nth-child(n + 4) {
