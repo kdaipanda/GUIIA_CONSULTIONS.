@@ -7,7 +7,6 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
-import { GuiaaBrandLockup } from "../components/GuiaaBrandLockup";
 import { AuthPageShell } from "../layout/AuthPageShell";
 import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
@@ -345,7 +344,6 @@ export function MembershipPage({ setView }) {
   if (!veterinarian) {
     return (
       <AuthPageShell setView={setView}>
-        <GuiaaBrandLockup variant="auth" className="mb-6" />
         <h2>{t("membership.authTitle")}</h2>
         <p>{t("membership.authLead")}</p>
         <ul className="membership-auth-features">

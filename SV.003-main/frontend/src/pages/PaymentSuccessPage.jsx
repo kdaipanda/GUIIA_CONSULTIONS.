@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertCircle, CheckCircle2, Clock, Loader2 } from "lucide-react";
 import { Button } from "../components/ui/button";
-import { GuiaaBrandLockup } from "../components/GuiaaBrandLockup";
 import { AuthPageShell } from "../layout/AuthPageShell";
 import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
@@ -244,7 +243,6 @@ export function PaymentSuccessPage({ setView }) {
 
   return (
     <AuthPageShell setView={setView}>
-      <GuiaaBrandLockup variant="auth" className="mb-6" />
       <div className="payment-status-shell">{renderContent()}</div>
     </AuthPageShell>
   );

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AuthPageShell } from "../layout/AuthPageShell";
-import { GuiaaBrandLockup } from "../components/GuiaaBrandLockup";
 import { TermsAndConditionsModal } from "../components/TermsAndConditionsModal";
 import { PasswordRequirementsHint } from "../components/PasswordRequirementsHint";
 import { Button } from "../components/ui/button";
@@ -262,7 +261,6 @@ export function InviteRegisterPage({ setView, setCedulaFlow, onAuthSuccess }) {
   if (loadingInvite) {
     return (
       <AuthPageShell setView={setView}>
-        <GuiaaBrandLockup variant="auth" className="mb-6" />
         <p>Cargando invitación…</p>
       </AuthPageShell>
     );
@@ -271,7 +269,6 @@ export function InviteRegisterPage({ setView, setCedulaFlow, onAuthSuccess }) {
   if (loadError || !invite) {
     return (
       <AuthPageShell setView={setView}>
-        <GuiaaBrandLockup variant="auth" className="mb-6" />
         <h2>Invitación no válida</h2>
         <p>{loadError || "Esta invitación no es válida o ya expiró."}</p>
         <Button type="button" className="mt-4" onClick={() => setView("login")}>
@@ -284,7 +281,6 @@ export function InviteRegisterPage({ setView, setCedulaFlow, onAuthSuccess }) {
   if (step === "verify") {
     return (
       <AuthPageShell setView={setView}>
-        <GuiaaBrandLockup variant="auth" className="mb-6" />
         <h2>Confirma tu email</h2>
         <p>
           Enviamos un código de 6 dígitos a{" "}
@@ -342,7 +338,6 @@ export function InviteRegisterPage({ setView, setCedulaFlow, onAuthSuccess }) {
   return (
     <>
       <AuthPageShell setView={setView} wide={requiresLicense}>
-        <GuiaaBrandLockup variant="auth" className="mb-6" />
         <h2>Únete al consultorio</h2>
         <p>
           Te invitaron a {invite.organization_name || "un consultorio en GUIAA"} como {roleLabel}.

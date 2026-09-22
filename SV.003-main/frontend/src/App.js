@@ -77,7 +77,6 @@ import {
   getTrialExhaustedMessage,
 } from "./lib/membershipAccess";
 import { MembershipFeatureGate } from "./components/MembershipFeatureGate";
-import { GuiaaBrandLockup } from "./components/GuiaaBrandLockup";
 import { InviteRegisterPage } from "./pages/InviteRegisterPage";
 import { Header } from "./components/Header";
 import { AppShell } from "./layout/AppShell";
@@ -1173,7 +1172,6 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
   return (
     <>
       <AuthPageShell setView={setView} wide>
-          <GuiaaBrandLockup variant="auth" className="mb-6" />
           <h2>{t("register.title")}</h2>
           <p>{t("register.subtitle")}</p>
 
@@ -1678,7 +1676,6 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
   return (
     <>
       <AuthPageShell setView={setView}>
-          <GuiaaBrandLockup variant="auth" className="mb-6" />
           <h2>{t("login.title")}</h2>
           <p>
             {legacyLogin
@@ -1884,7 +1881,6 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
   if (!cedulaFlow?.veterinarian_id) {
     return (
       <AuthPageShell setView={setView}>
-          <GuiaaBrandLockup variant="auth" className="mb-6" />
           <h2>{t("cedula.noSessionTitle")}</h2>
           <p>{t("cedula.noSessionBody")}</p>
           <Button className="w-full" onClick={() => setView("login")}>
@@ -1993,7 +1989,6 @@ const CedulaVerificationPage = ({ setView, cedulaFlow, setCedulaFlow, onAuthSucc
 
   return (
     <AuthPageShell setView={setView} wide>
-          <GuiaaBrandLockup variant="auth" className="mb-6" />
           <h2>{t("cedula.title")}</h2>
           <p className="text-sm text-muted-foreground">
             {t("cedula.subtitle")}
