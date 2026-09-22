@@ -197,7 +197,6 @@
     "openChart": "Open chart"
   },
   "patientChart": {
-    "eyebrow": "Clinical chart",
     "backToClients": "Back to owners",
     "loadError": "Could not load the clinical chart",
     "saveError": "Could not save the clinical chart",

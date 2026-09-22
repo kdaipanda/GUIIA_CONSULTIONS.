@@ -197,7 +197,6 @@
     "openChart": "Abrir expediente"
   },
   "patientChart": {
-    "eyebrow": "Expediente clínico",
     "backToClients": "Volver a dueños",
     "loadError": "No se pudo cargar el expediente",
     "saveError": "No se pudo guardar el expediente",

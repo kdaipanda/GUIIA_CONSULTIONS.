@@ -152,7 +152,9 @@ export default function PatientClinicalChartPage({
   if (loading) {
     return (
       <div className="clinic-page clinic-page-guiaa patient-clinical-chart">
-        <p className="clinic-muted">{t("common.loading")}</p>
+        <p className="clinic-muted" role="status">
+          {t("common.loading")}
+        </p>
       </div>
     );
   }
@@ -161,8 +163,14 @@ export default function PatientClinicalChartPage({
     return (
       <div className="clinic-page clinic-page-guiaa patient-clinical-chart">
         <p className="clinic-muted">{t("patientChart.notFound")}</p>
-        <Button type="button" variant="secondary" onClick={() => navigate("/app/clientes")}>
-          <ArrowLeft size={16} className="mr-1" /> {t("patientChart.backToClients")}
+        <Button
+          type="button"
+          variant="secondary"
+          className="patient-chart-action-btn"
+          onClick={() => navigate("/app/clientes")}
+        >
+          <ArrowLeft size={16} aria-hidden className="mr-1" />{" "}
+          {t("patientChart.backToClients")}
         </Button>
       </div>
     );
@@ -172,7 +180,6 @@ export default function PatientClinicalChartPage({
     <div className="clinic-page clinic-page-guiaa patient-clinical-chart">
       <header className="clinic-page-header patient-chart-header">
         <div>
-          <p className="clinic-page-eyebrow">{t("patientChart.eyebrow")}</p>
           <h1>{patient.name}</h1>
           <p>
             {[patient.species, patient.breed, owner.name]
@@ -182,12 +189,19 @@ export default function PatientClinicalChartPage({
           </p>
         </div>
         <div className="patient-chart-actions">
-          <Button type="button" variant="secondary" onClick={() => navigate("/app/clientes")}>
-            <ArrowLeft size={16} className="mr-1" /> {t("patientChart.backToClients")}
+          <Button
+            type="button"
+            variant="secondary"
+            className="patient-chart-action-btn"
+            onClick={() => navigate("/app/clientes")}
+          >
+            <ArrowLeft size={16} aria-hidden className="mr-1" />{" "}
+            {t("patientChart.backToClients")}
           </Button>
           {onStartConsultation && (
             <Button
               type="button"
+              className="patient-chart-action-btn"
               onClick={() =>
                 onStartConsultation({
                   patientId: patient.id,
@@ -196,13 +210,15 @@ export default function PatientClinicalChartPage({
                 })
               }
             >
-              <Stethoscope size={16} className="mr-1" /> {t("clients.startConsultation")}
+              <Stethoscope size={16} aria-hidden className="mr-1" />{" "}
+              {t("clients.startConsultation")}
             </Button>
           )}
           {onStartLabAnalysis && (
             <Button
               type="button"
               variant="secondary"
+              className="patient-chart-action-btn"
               onClick={() =>
                 onStartLabAnalysis({
                   patientId: patient.id,
@@ -211,18 +227,22 @@ export default function PatientClinicalChartPage({
                 })
               }
             >
-              <FlaskConical size={16} className="mr-1" /> {t("clients.interpretStudy")}
+              <FlaskConical size={16} aria-hidden className="mr-1" />{" "}
+              {t("clients.interpretStudy")}
             </Button>
           )}
           {(consultations.length || medicalImages.length) > 0 && (
             <Button
               type="button"
               variant="secondary"
+              className="patient-chart-action-btn"
               disabled={historyPdfLoading}
               onClick={handleDownloadHistoryPdf}
             >
-              <FileDown size={16} className="mr-1" />
-              {historyPdfLoading ? t("clients.generatingPdf") : t("clients.downloadHistoryPdf")}
+              <FileDown size={16} aria-hidden className="mr-1" />
+              {historyPdfLoading
+                ? t("clients.generatingPdf")
+                : t("clients.downloadHistoryPdf")}
             </Button>
           )}
         </div>
@@ -253,6 +273,7 @@ export default function PatientClinicalChartPage({
               type="button"
               variant="secondary"
               size="sm"
+              className="patient-chart-action-btn"
               onClick={() => setSpeciesFormOpen((v) => !v)}
             >
               {speciesFormOpen ? t("patientChart.hideSpeciesForm") : t("patientChart.showSpeciesForm")}
@@ -260,6 +281,7 @@ export default function PatientClinicalChartPage({
             <Button
               type="button"
               size="sm"
+              className="patient-chart-action-btn"
               disabled={savingSpeciesForm || !speciesCategory}
               onClick={saveSpeciesForm}
             >
