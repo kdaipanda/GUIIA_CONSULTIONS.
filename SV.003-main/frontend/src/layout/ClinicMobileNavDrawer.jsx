@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Drawer,
   DrawerContent,
@@ -22,6 +23,7 @@ export function ClinicMobileNavDrawer({
   pendingAgendaRequests,
   lowStockCount,
 }) {
+  const { t } = useTranslation("clinic");
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -40,7 +42,9 @@ export function ClinicMobileNavDrawer({
     <Drawer open={open} onOpenChange={onOpenChange} shouldScaleBackground={false}>
       <DrawerContent className="clinic-mobile-drawer">
         <DrawerHeader className="clinic-mobile-drawer-head">
-          <DrawerTitle className="clinic-mobile-drawer-title">Clínica</DrawerTitle>
+          <DrawerTitle className="clinic-mobile-drawer-title">
+            {t("shell.clinic")}
+          </DrawerTitle>
           {!orgLoading && organizationName && (
             <DrawerDescription className="clinic-mobile-drawer-org">
               {organizationName}
@@ -50,18 +54,15 @@ export function ClinicMobileNavDrawer({
         <nav
           id="clinic-mobile-drawer-nav"
           className="clinic-sidebar-nav"
-          aria-label="Módulos clínicos"
+          aria-label={t("shell.navAriaMobile")}
         >
-          {navItems.map(({ to, label, icon: Icon, view, locked }, index) => (
+          {navItems.map(({ to, label, icon: Icon, view, locked }) => (
             <NavLink
               key={to}
               to={locked ? "/app/membresia" : to}
-              style={{
-                ...clinicNavThemeStyle(view),
-                animationDelay: `${index * 0.06}s`,
-              }}
+              style={clinicNavThemeStyle(view)}
               className={({ isActive }) =>
-                `clinic-sidebar-link nav-toned nav-pulse${clinicNavIsHero(view) ? " nav-hero" : ""}${isActive && !locked ? " active" : ""}${locked ? " clinic-sidebar-link--locked" : ""}`
+                `clinic-sidebar-link nav-toned${clinicNavIsHero(view) ? " nav-hero" : ""}${isActive && !locked ? " active" : ""}${locked ? " clinic-sidebar-link--locked" : ""}`
               }
               onClick={(e) => {
                 if (locked) {
@@ -76,7 +77,11 @@ export function ClinicMobileNavDrawer({
             >
               <Icon size={18} aria-hidden />
               <span>{label}</span>
-              {locked && <span className="clinic-sidebar-lock-badge">Premium</span>}
+              {locked && (
+                <span className="clinic-sidebar-lock-badge">
+                  {t("shell.premiumBadge")}
+                </span>
+              )}
               {view === "admin" && adminSupportOpen > 0 && (
                 <span className="clinic-sidebar-badge">{adminSupportOpen}</span>
               )}

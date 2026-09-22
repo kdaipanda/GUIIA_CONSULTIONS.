@@ -21,7 +21,7 @@
   "shell": {
     "clinic": "Clínica",
     "navAria": "Módulos clínicos (escritorio)",
-    "eyebrow": "Consultorio",
+    "navAriaMobile": "Módulos clínicos",
     "premiumBadge": "Premium"
   },
   "common": {

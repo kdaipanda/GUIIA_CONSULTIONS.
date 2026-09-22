@@ -262,7 +262,6 @@ export function ClinicDashboardPage({ setView, onStartConsultation, onExpertCons
     <div className="clinic-page clinic-page-guiaa clinic-dashboard-page" aria-busy={loading}>
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
           <div className="clinic-page-title-row">
             <h1 className="clinic-dashboard-greeting">
               {getTimeGreeting(t)}, {greetingName}

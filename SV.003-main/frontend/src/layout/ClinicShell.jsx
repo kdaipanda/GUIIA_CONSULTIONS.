@@ -357,16 +357,13 @@ export function ClinicShell({ children, setView }) {
             className="clinic-sidebar-nav"
             aria-label={t("shell.navAria")}
           >
-            {navItems.map(({ to, label, icon: Icon, view, locked }, index) => (
+            {navItems.map(({ to, label, icon: Icon, view, locked }) => (
               <NavLink
                 key={to}
                 to={locked ? "/app/membresia" : to}
-                style={{
-                  ...clinicNavThemeStyle(view),
-                  animationDelay: `${index * 0.12}s`,
-                }}
+                style={clinicNavThemeStyle(view)}
                 className={({ isActive }) =>
-                  `clinic-sidebar-link nav-toned nav-pulse${clinicNavIsHero(view) ? " nav-hero" : ""}${isActive && !locked ? " active" : ""}${locked ? " clinic-sidebar-link--locked" : ""}`
+                  `clinic-sidebar-link nav-toned${clinicNavIsHero(view) ? " nav-hero" : ""}${isActive && !locked ? " active" : ""}${locked ? " clinic-sidebar-link--locked" : ""}`
                 }
                 onClick={(e) => {
                   if (locked) {

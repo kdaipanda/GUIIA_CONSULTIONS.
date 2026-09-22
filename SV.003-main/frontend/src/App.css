@@ -11788,10 +11788,10 @@ html {
 
 .clinic-sidebar-title {
   display: block;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: -0.01em;
   color: #64748b;
 }
 
@@ -11814,6 +11814,7 @@ html {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-height: 2.75rem;
   padding: 10px 12px;
   border-radius: 10px;
   font-size: 14px;
@@ -11825,27 +11826,26 @@ html {
 .clinic-sidebar-link.nav-toned {
   color: #fff;
   background: linear-gradient(135deg, var(--nav-from) 0%, var(--nav-to) 100%);
-  box-shadow: 0 4px 16px rgba(var(--nav-glow), 0.4);
+  box-shadow: 0 2px 8px -2px rgba(var(--nav-glow), 0.35);
 }
 
 .clinic-sidebar-link.nav-toned:hover {
   color: #fff;
-  filter: brightness(1.08);
+  filter: brightness(1.06);
 }
 
 .clinic-sidebar-link.nav-toned.active {
-  color: #fff;
-  filter: brightness(0.94);
-  box-shadow: 0 6px 22px rgba(var(--nav-glow), 0.55);
+  filter: brightness(1.04);
+  box-shadow: 0 3px 12px -2px rgba(var(--nav-glow), 0.45);
 }
 
 .clinic-sidebar-link.nav-toned.nav-pulse {
-  animation: clinicNavGlow 2.6s ease-in-out infinite;
+  animation: none;
 }
 
 .clinic-sidebar-link.nav-toned.nav-hero {
   font-weight: 700;
-  animation: clinicNavGlowHero 2.2s ease-in-out infinite;
+  animation: none;
 }
 
 .clinic-sidebar-link--locked {
@@ -11859,12 +11859,12 @@ html {
 
 .clinic-sidebar-lock-badge {
   margin-left: auto;
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
   background: rgba(255, 255, 255, 0.22);
   color: #fff;
 }
@@ -11872,24 +11872,27 @@ html {
 @keyframes clinicNavGlow {
   0%,
   100% {
-    box-shadow: 0 4px 16px rgba(var(--nav-glow), 0.4);
+    box-shadow: 0 2px 8px -2px rgba(var(--nav-glow), 0.35);
   }
   50% {
-    box-shadow: 0 6px 26px rgba(var(--nav-glow), 0.62);
+    box-shadow: 0 2px 8px -2px rgba(var(--nav-glow), 0.35);
   }
 }
 
 @keyframes clinicNavGlowHero {
   0%,
   100% {
-    box-shadow:
-      0 6px 20px rgba(var(--nav-glow), 0.48),
-      0 0 0 0 rgba(var(--nav-glow), 0.15);
+    box-shadow: 0 2px 8px -2px rgba(var(--nav-glow), 0.4);
   }
   50% {
-    box-shadow:
-      0 8px 30px rgba(var(--nav-glow), 0.72),
-      0 0 14px 3px rgba(var(--nav-glow), 0.28);
+    box-shadow: 0 2px 8px -2px rgba(var(--nav-glow), 0.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clinic-sidebar-link.nav-toned.nav-pulse,
+  .clinic-sidebar-link.nav-toned.nav-hero {
+    animation: none !important;
   }
 }
 

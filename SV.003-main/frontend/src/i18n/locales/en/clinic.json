@@ -21,7 +21,7 @@
   "shell": {
     "clinic": "Clinic",
     "navAria": "Clinical modules (desktop)",
-    "eyebrow": "Practice",
+    "navAriaMobile": "Clinical modules",
     "premiumBadge": "Premium"
   },
   "common": {
