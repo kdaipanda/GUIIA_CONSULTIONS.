@@ -9,15 +9,6 @@
   letter-spacing: -0.02em;
 }
 
-.agenda-page-eyebrow {
-  margin: 0 0 4px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--agenda-blue);
-}
-
 .agenda-page-guiaa .clinic-page-header p {
   max-width: 28rem;
 }
@@ -109,7 +100,7 @@
 
 .agenda-page-guiaa .clinic-agenda-day.today {
   border-color: var(--agenda-green);
-  box-shadow: 0 0 0 1px rgba(61, 155, 143, 0.25);
+  box-shadow: 0 2px 12px -6px rgba(12, 45, 77, 0.12);
 }
 
 .agenda-page-guiaa .clinic-agenda-day.today .clinic-agenda-day-head {
@@ -120,22 +111,57 @@
   color: var(--agenda-green);
 }
 
-.agenda-page-guiaa .clinic-agenda-card.status-scheduled {
-  border-left: 3px solid var(--agenda-blue);
+.agenda-page-guiaa .clinic-agenda-card {
+  min-height: 2.75rem;
+  gap: 3px;
+  padding: 10px 12px;
+  border-color: rgba(38, 91, 147, 0.14);
+  background: #f8fafc;
 }
 
-.agenda-page-guiaa .clinic-agenda-card.status-confirmed {
-  border-left: 3px solid var(--agenda-green);
+.agenda-page-guiaa .clinic-agenda-card:hover {
+  border-color: rgba(38, 91, 147, 0.28);
+  background: #eff6ff;
+}
+
+.agenda-page-guiaa .clinic-agenda-card:focus-visible {
+  outline: 2px solid var(--agenda-blue);
+  outline-offset: 2px;
+}
+
+.agenda-page-guiaa .clinic-agenda-card-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.agenda-page-guiaa .clinic-agenda-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--agenda-blue);
+}
+
+.agenda-page-guiaa .clinic-agenda-status-dot.status-confirmed {
+  background: var(--agenda-green);
+}
+
+.agenda-page-guiaa .clinic-agenda-status-dot.status-completed {
+  background: #64748b;
+}
+
+.agenda-page-guiaa .clinic-agenda-status-dot.status-cancelled,
+.agenda-page-guiaa .clinic-agenda-status-dot.status-no_show {
+  background: #ef4444;
 }
 
 .agenda-page-guiaa .clinic-agenda-card.status-completed {
-  border-left: 3px solid #64748b;
   opacity: 0.88;
 }
 
 .agenda-page-guiaa .clinic-agenda-card.status-cancelled,
 .agenda-page-guiaa .clinic-agenda-card.status-no_show {
-  border-left: 3px solid #ef4444;
   opacity: 0.75;
 }
 
@@ -154,8 +180,13 @@
 }
 
 .agenda-page-guiaa .clinic-agenda-client {
-  font-size: 10px;
-  color: #94a3b8;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.agenda-page-guiaa .clinic-agenda-status {
+  color: var(--agenda-navy);
+  font-weight: 600;
 }
 
 .agenda-list-section {
@@ -224,15 +255,13 @@
   margin-bottom: 16px;
 }
 
-@media (max-width: 1024px) {
-  .agenda-skeleton-grid {
-    grid-template-columns: 1fr;
-  }
+.agenda-page-guiaa .clinic-requests-actions button {
+  min-height: 2.75rem;
 }
 
-@media (max-width: 768px) {
-  .agenda-stats-row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+@media (max-width: 1023px) {
+  .agenda-skeleton-grid {
+    grid-template-columns: 1fr;
   }
 
   .agenda-page-guiaa .clinic-page-header {
@@ -245,12 +274,35 @@
   }
 
   .agenda-page-guiaa .clinic-agenda-nav button {
-    flex: 1 1 auto;
+    min-height: 2.75rem;
   }
 
   .agenda-toolbar {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .agenda-toolbar > button {
+    min-height: 2.75rem;
+  }
+
+  .agenda-view-toggle {
+    width: 100%;
+  }
+
+  .agenda-view-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .agenda-stats-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .agenda-page-guiaa .clinic-agenda-nav button {
+    flex: 1 1 auto;
   }
 }
 
@@ -329,4 +381,17 @@ html.dark .agenda-view-btn.is-active {
 html.dark .agenda-list-section-head {
   background: rgba(255, 255, 255, 0.04);
   border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .agenda-page-guiaa .clinic-agenda-card,
+html.dark .agenda-page-guiaa .clinic-agenda-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .agenda-page-guiaa .clinic-agenda-client,
+[data-theme="dark"] .agenda-page-guiaa .clinic-agenda-reason,
+html.dark .agenda-page-guiaa .clinic-agenda-client,
+html.dark .agenda-page-guiaa .clinic-agenda-reason {
+  color: var(--text-secondary);
 }

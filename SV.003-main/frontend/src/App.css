@@ -12420,8 +12420,8 @@ html {
 }
 
 .clinic-agenda-day.today {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);
+  border-color: #3d9b8f;
+  box-shadow: 0 2px 12px -6px rgba(12, 45, 77, 0.12);
 }
 
 .clinic-agenda-day-head {
@@ -12465,6 +12465,11 @@ html {
 .clinic-agenda-card:hover {
   border-color: #93c5fd;
   background: #eff6ff;
+}
+
+.clinic-agenda-card:focus-visible {
+  outline: 2px solid #265b93;
+  outline-offset: 2px;
 }
 
 .clinic-agenda-time {
@@ -12727,7 +12732,7 @@ html {
   border: 1px solid #bae6fd;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1023px) {
   .clinic-agenda-grid {
     grid-template-columns: 1fr;
   }

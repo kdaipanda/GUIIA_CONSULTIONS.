@@ -61,22 +61,24 @@ const APPOINTMENT_STATUS_KEYS = [
   "no_show",
 ];
 
-function AgendaAppointmentCard({ appointment, onEdit, statusLabel, locale, defaultPetLabel }) {
+function AgendaAppointmentCard({ appointment, onEdit, statusLabel, locale, defaultPetLabel, editAria }) {
+  const petName = appointment.patients?.name || defaultPetLabel;
+  const timeLabel = new Date(appointment.starts_at).toLocaleTimeString(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
   return (
     <button
       type="button"
       className={`clinic-agenda-card status-${appointment.status}`}
       onClick={() => onEdit(appointment)}
+      aria-label={editAria({ time: timeLabel, pet: petName, status: statusLabel || appointment.status })}
     >
-      <span className="clinic-agenda-time">
-        {new Date(appointment.starts_at).toLocaleTimeString(locale, {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
+      <span className="clinic-agenda-card-top">
+        <span className={`clinic-agenda-status-dot status-${appointment.status}`} aria-hidden />
+        <span className="clinic-agenda-time">{timeLabel}</span>
       </span>
-      <span className="clinic-agenda-patient">
-        {appointment.patients?.name || defaultPetLabel}
-      </span>
+      <span className="clinic-agenda-patient">{petName}</span>
       {appointment.clients?.name && (
         <span className="clinic-agenda-client">{appointment.clients.name}</span>
       )}
@@ -160,7 +162,7 @@ export function AgendaPage({ onStartConsultation }) {
   const [viewMode, setViewMode] = useState("week");
 
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 768px)");
+    const mq = window.matchMedia("(max-width: 1023px)");
     const apply = () => setViewMode(mq.matches ? "list" : "week");
     apply();
     mq.addEventListener("change", apply);
@@ -328,6 +330,17 @@ export function AgendaPage({ onStartConsultation }) {
     }
   };
 
+  const handleRejectRequest = async (requestId) => {
+    const ok = await confirm({
+      title: t("agenda.rejectTitle"),
+      description: t("agenda.rejectDesc"),
+      confirmLabel: t("agenda.rejectConfirm"),
+      destructive: true,
+    });
+    if (!ok) return;
+    await handleRequestAction(requestId, "rejected");
+  };
+
   const openApproveDialog = (req) => {
     let start = new Date();
     if (req.preferred_starts_at) {
@@ -386,59 +399,75 @@ export function AgendaPage({ onStartConsultation }) {
     <div className="clinic-page clinic-page-guiaa agenda-page-guiaa">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
           <div className="clinic-page-title-row">
             <h1>{t("agenda.title")}</h1>
             <ModuleHelpTip topicId="agenda" />
           </div>
           <p>{t("agenda.lead")}</p>
         </div>
-        <div className="clinic-agenda-nav">
+        <div className="clinic-agenda-nav" role="group" aria-label={t("agenda.weekNavAria")}>
           <Button type="button" variant="outline" size="sm" onClick={() => setWeekStart(startOfWeek(new Date()))}>
             {t("agenda.today")}
           </Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => setWeekStart(addDays(weekStart, -7))}>
-            <ChevronLeft size={16} />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-label={t("agenda.prevWeekAria")}
+            onClick={() => setWeekStart(addDays(weekStart, -7))}
+          >
+            <ChevronLeft size={16} aria-hidden />
           </Button>
           <span className="clinic-agenda-range">
             {weekDays[0].toLocaleDateString(locale, { day: "numeric", month: "short" })}
             {" – "}
             {weekDays[6].toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}
           </span>
-          <Button type="button" variant="outline" size="sm" onClick={() => setWeekStart(addDays(weekStart, 7))}>
-            <ChevronRight size={16} />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-label={t("agenda.nextWeekAria")}
+            onClick={() => setWeekStart(addDays(weekStart, 7))}
+          >
+            <ChevronRight size={16} aria-hidden />
           </Button>
           <Button type="button" size="sm" onClick={() => openCreate(new Date())}>
-            <Plus size={16} className="mr-1" /> {t("agenda.newAppointment")}
+            <Plus size={16} className="mr-1" aria-hidden /> {t("agenda.newAppointment")}
           </Button>
-          {organization?.id && (
-            <Button type="button" variant="secondary" size="sm" onClick={copyPortalLink}>
-              <Link2 size={14} className="mr-1" /> {linkCopied ? t("agenda.linkCopiedShort") : t("agenda.portalOwners")}
-            </Button>
-          )}
         </div>
       </div>
 
-      <div className="agenda-stats-row">
-        <div className="agenda-stat-pill">
+      <div className="agenda-stats-row" role="group" aria-label={t("agenda.statsAria")}>
+        <div
+          className="agenda-stat-pill"
+          aria-label={t("agenda.statWeekAria", { count: stats.weekTotal })}
+        >
           <span className="agenda-stat-value">{stats.weekTotal}</span>
           <span className="agenda-stat-label">{t("agenda.statWeek")}</span>
         </div>
-        <div className="agenda-stat-pill">
+        <div
+          className="agenda-stat-pill"
+          aria-label={t("agenda.statTodayAria", { count: stats.todayTotal })}
+        >
           <span className="agenda-stat-value">{stats.todayTotal}</span>
           <span className="agenda-stat-label">{t("agenda.statToday")}</span>
         </div>
-        <div className="agenda-stat-pill">
+        <div
+          className="agenda-stat-pill"
+          aria-label={t("agenda.statPendingAria", { count: stats.pendingRequests })}
+        >
           <span className="agenda-stat-value">{stats.pendingRequests}</span>
           <span className="agenda-stat-label">{t("agenda.statPendingRequests")}</span>
         </div>
       </div>
 
       <div className="agenda-toolbar">
-        <div className="agenda-view-toggle">
+        <div className="agenda-view-toggle" role="group" aria-label={t("agenda.viewToggleAria")}>
           <button
             type="button"
             className={`agenda-view-btn${viewMode === "week" ? " is-active" : ""}`}
+            aria-pressed={viewMode === "week"}
             onClick={() => setViewMode("week")}
           >
             <LayoutGrid size={15} aria-hidden />
@@ -447,12 +476,19 @@ export function AgendaPage({ onStartConsultation }) {
           <button
             type="button"
             className={`agenda-view-btn${viewMode === "list" ? " is-active" : ""}`}
+            aria-pressed={viewMode === "list"}
             onClick={() => setViewMode("list")}
           >
             <List size={15} aria-hidden />
             {t("agenda.viewList")}
           </button>
         </div>
+        {organization?.id && (
+          <Button type="button" variant="secondary" size="sm" onClick={copyPortalLink}>
+            <Link2 size={14} className="mr-1" aria-hidden />{" "}
+            {linkCopied ? t("agenda.linkCopiedShort") : t("agenda.portalOwners")}
+          </Button>
+        )}
       </div>
 
       {requests.length > 0 && (
@@ -472,10 +508,15 @@ export function AgendaPage({ onStartConsultation }) {
                 </div>
                 <div className="clinic-requests-actions">
                   <Button type="button" size="sm" onClick={() => openApproveDialog(req)}>
-                    <Check size={14} className="mr-1" /> {t("agenda.approve")}
+                    <Check size={14} className="mr-1" aria-hidden /> {t("agenda.approve")}
                   </Button>
-                  <Button type="button" variant="secondary" size="sm" onClick={() => handleRequestAction(req.id, "rejected")}>
-                    <X size={14} className="mr-1" /> {t("agenda.reject")}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleRejectRequest(req.id)}
+                  >
+                    <X size={14} className="mr-1" aria-hidden /> {t("agenda.reject")}
                   </Button>
                 </div>
               </li>
@@ -500,12 +541,12 @@ export function AgendaPage({ onStartConsultation }) {
                 <div className="agenda-list-section-head">
                   <div>
                     <strong>
-                      {day.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "short" })}
+                      {day.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "short" })}
                     </strong>
-                    {isToday && <span> · Hoy</span>}
+                    {isToday && <span> · {t("agenda.today")}</span>}
                   </div>
                   <Button type="button" variant="ghost" size="sm" onClick={() => openCreate(day)}>
-                    <Plus size={14} /> Añadir
+                    <Plus size={14} aria-hidden /> {t("agenda.addShort")}
                   </Button>
                 </div>
                 <div className="agenda-list-section-body">
@@ -520,6 +561,9 @@ export function AgendaPage({ onStartConsultation }) {
                         statusLabel={statusLabel(a.status)}
                         locale={locale}
                         defaultPetLabel={t("agenda.defaultPet")}
+                        editAria={({ time, pet, status }) =>
+                          t("agenda.editAppointmentAria", { time, pet, status })
+                        }
                       />
                     ))
                   )}
@@ -537,10 +581,18 @@ export function AgendaPage({ onStartConsultation }) {
           return (
             <div key={key} className={`clinic-agenda-day${isToday ? " today" : ""}`}>
               <div className="clinic-agenda-day-head">
-                <span>{day.toLocaleDateString("es-MX", { weekday: "short" })}</span>
+                <span>{day.toLocaleDateString(locale, { weekday: "short" })}</span>
                 <strong>{day.getDate()}</strong>
-                <Button type="button" variant="ghost" size="sm" onClick={() => openCreate(day)}>
-                  +
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-label={t("agenda.addDayAria", {
+                    day: day.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "short" }),
+                  })}
+                  onClick={() => openCreate(day)}
+                >
+                  <Plus size={14} aria-hidden />
                 </Button>
               </div>
               <div className="clinic-agenda-day-body">
@@ -555,6 +607,9 @@ export function AgendaPage({ onStartConsultation }) {
                       statusLabel={statusLabel(a.status)}
                       locale={locale}
                       defaultPetLabel={t("agenda.defaultPet")}
+                      editAria={({ time, pet, status }) =>
+                        t("agenda.editAppointmentAria", { time, pet, status })
+                      }
                     />
                   ))
                 )}
