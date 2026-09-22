@@ -261,7 +261,19 @@ export function BillingPage() {
     }
   };
 
-  const formatMoney = (n) => `$${Number(n || 0).toFixed(2)}`;
+  const onInvoiceRowKeyDown = (e, inv) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openDetail(inv);
+    }
+  };
+
+  const formatMoney = (n) =>
+    new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: "MXN",
+      maximumFractionDigits: 2,
+    }).format(Number(n) || 0);
 
   const handleDownloadPdf = async () => {
     if (!detail) return;
@@ -275,10 +287,9 @@ export function BillingPage() {
   const selectedProduct = salePreview.product;
 
   return (
-    <div className="clinic-page clinic-page-guiaa">
+    <div className="clinic-page clinic-page-guiaa clinic-billing-page">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
           <div className="clinic-page-title-row">
             <h1>{t("billing.title")}</h1>
             <ModuleHelpTip topicId="billing" />
@@ -286,14 +297,16 @@ export function BillingPage() {
           <p>{t("billing.lead")}</p>
         </div>
         <Button type="button" onClick={openCreate}>
-          <Plus size={16} className="mr-1" /> {t("billing.newSale")}
+          <Plus size={16} className="mr-1" aria-hidden /> {t("billing.newSale")}
         </Button>
       </div>
 
       <div className="clinic-toolbar">
         <div className="clinic-search">
-          <Search size={16} />
+          <Search size={16} aria-hidden />
           <Input
+            type="search"
+            aria-label={t("billing.searchAria")}
             placeholder={t("billing.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -302,10 +315,22 @@ export function BillingPage() {
       </div>
 
       {!loading && invoices.length > 0 && (
-        <div className="clinic-stats-row">
-          <ClinicStatPill value={stats.total} label={t("billing.statReceipts")} />
-          <ClinicStatPill value={stats.paid} label={t("billing.statPaid")} />
-          <ClinicStatPill value={formatMoney(stats.revenue)} label={t("billing.statCollected")} />
+        <div className="clinic-stats-row" role="group" aria-label={t("billing.statsAria")}>
+          <ClinicStatPill
+            value={stats.total}
+            label={t("billing.statReceipts")}
+            ariaLabel={t("billing.statReceiptsAria", { count: stats.total })}
+          />
+          <ClinicStatPill
+            value={stats.paid}
+            label={t("billing.statPaid")}
+            ariaLabel={t("billing.statPaidAria", { count: stats.paid })}
+          />
+          <ClinicStatPill
+            value={formatMoney(stats.revenue)}
+            label={t("billing.statCollected")}
+            ariaLabel={t("billing.statCollectedAria", { amount: formatMoney(stats.revenue) })}
+          />
         </div>
       )}
 
@@ -334,20 +359,33 @@ export function BillingPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((inv) => (
-                <tr key={inv.id} className="clinic-table-row-click" onClick={() => openDetail(inv)}>
-                  <td><strong>{inv.invoice_number || inv.id.slice(0, 8)}</strong></td>
-                  <td>{invoiceClientLabel(inv, t)}</td>
-                  <td>{formatMoney(inv.total)}</td>
-                  <td>
-                    <ClinicStatusPill
-                      status={inv.status}
-                      label={statusLabel(inv.status)}
-                    />
-                  </td>
-                  <td>{inv.created_at ? new Date(inv.created_at).toLocaleDateString(locale) : t("common.emDash")}</td>
-                </tr>
-              ))}
+              {filtered.map((inv) => {
+                const folio = inv.invoice_number || inv.id.slice(0, 8);
+                return (
+                  <tr
+                    key={inv.id}
+                    className="clinic-table-row-click"
+                    tabIndex={0}
+                    aria-label={t("billing.openReceiptAria", {
+                      folio,
+                      recipient: invoiceClientLabel(inv, t),
+                    })}
+                    onClick={() => openDetail(inv)}
+                    onKeyDown={(e) => onInvoiceRowKeyDown(e, inv)}
+                  >
+                    <td><strong>{folio}</strong></td>
+                    <td>{invoiceClientLabel(inv, t)}</td>
+                    <td>{formatMoney(inv.total)}</td>
+                    <td>
+                      <ClinicStatusPill
+                        status={inv.status}
+                        label={statusLabel(inv.status)}
+                      />
+                    </td>
+                    <td>{inv.created_at ? new Date(inv.created_at).toLocaleDateString(locale) : t("common.emDash")}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -436,7 +474,7 @@ export function BillingPage() {
                         type="number"
                         min="0"
                         step="0.01"
-                        placeholder="0.00"
+                        placeholder={t("billing.pricePlaceholder")}
                         value={saleForm.product_price}
                         onChange={(e) => setSaleForm({ ...saleForm, product_price: e.target.value })}
                       />
@@ -454,6 +492,7 @@ export function BillingPage() {
                     key={concept}
                     type="button"
                     className={`clinic-quick-chip${saleForm.service_description === concept ? " is-active" : ""}`}
+                    aria-pressed={saleForm.service_description === concept}
                     onClick={() => setSaleForm({ ...saleForm, service_description: concept })}
                   >
                     {t(`billing.saleConcepts.${concept}`, { defaultValue: concept })}
@@ -532,6 +571,7 @@ export function BillingPage() {
                     key={value}
                     type="button"
                     className={`clinic-quick-chip${saleForm.payment_method === value ? " is-active" : ""}`}
+                    aria-pressed={saleForm.payment_method === value}
                     onClick={() => setSaleForm({ ...saleForm, payment_method: value })}
                   >
                     {t(`billing.paymentMethods.${value}`, { defaultValue: value })}
@@ -577,11 +617,11 @@ export function BillingPage() {
               )}
               {detail.status !== "paid" && detail.status !== "cancelled" && (
                 <Button type="button" className="mt-4" onClick={() => markPaid(detail)}>
-                  <Receipt size={16} className="mr-1" /> {t("billing.markPaid")}
+                  <Receipt size={16} className="mr-1" aria-hidden /> {t("billing.markPaid")}
                 </Button>
               )}
               <Button type="button" variant="secondary" className="mt-4 ml-2" onClick={handleDownloadPdf}>
-                <FileDown size={16} className="mr-1" /> {t("billing.downloadPdf")}
+                <FileDown size={16} className="mr-1" aria-hidden /> {t("billing.downloadPdf")}
               </Button>
             </div>
           )}

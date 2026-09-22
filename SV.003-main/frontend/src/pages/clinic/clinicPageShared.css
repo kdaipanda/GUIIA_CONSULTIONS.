@@ -1164,7 +1164,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   gap: 6px;
   min-height: 2.75rem;
   padding: 8px 12px;
-  border-radius: 999px;
+  border-radius: 12px;
   border: 1px solid rgba(38, 91, 147, 0.18);
   background: #fff;
   font-size: 13px;
@@ -1188,6 +1188,31 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 .clinic-quick-chip:focus-visible {
   outline: 2px solid var(--clinic-blue);
   outline-offset: 2px;
+}
+
+.clinic-billing-page .clinic-table-row-click {
+  cursor: pointer;
+}
+
+.clinic-billing-page .clinic-table-row-click:focus-visible {
+  outline: 2px solid var(--clinic-blue, #265b93);
+  outline-offset: -2px;
+}
+
+.clinic-billing-page .clinic-table-row-click:hover {
+  background: rgba(38, 91, 147, 0.04);
+}
+
+@media (max-width: 1023px) {
+  .clinic-billing-page .clinic-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .clinic-billing-page .clinic-page-header > button {
+    min-height: 2.75rem;
+    width: 100%;
+  }
 }
 
 .clinic-owner-list {
@@ -1469,6 +1494,16 @@ html.dark .clinic-page-guiaa .clinic-owner-pets-table .clinic-table-row-click:ho
 
 [data-theme="dark"] .clinic-page-guiaa .clinic-owner-pets-table .clinic-table-row-click:focus-visible,
 html.dark .clinic-page-guiaa .clinic-owner-pets-table .clinic-table-row-click:focus-visible {
+  outline-color: #3d9b8f;
+}
+
+[data-theme="dark"] .clinic-billing-page .clinic-table-row-click:hover,
+html.dark .clinic-billing-page .clinic-table-row-click:hover {
+  background: rgba(61, 155, 143, 0.08) !important;
+}
+
+[data-theme="dark"] .clinic-billing-page .clinic-table-row-click:focus-visible,
+html.dark .clinic-billing-page .clinic-table-row-click:focus-visible {
   outline-color: #3d9b8f;
 }
 
