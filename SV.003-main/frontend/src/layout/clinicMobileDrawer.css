@@ -62,5 +62,16 @@ html.dark .clinic-mobile-drawer-org {
 
 [data-theme="dark"] .clinic-mobile-org,
 html.dark .clinic-mobile-org {
-  color: #cbd5e1;
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .clinic-mobile-drawer-title,
+html.dark .clinic-mobile-drawer-title {
+  color: #7eb6d6;
+}
+
+[data-theme="dark"] .clinic-mobile-drawer,
+html.dark .clinic-mobile-drawer {
+  background: var(--clinic-surface-elevated);
+  border-color: rgba(255, 255, 255, 0.1);
 }

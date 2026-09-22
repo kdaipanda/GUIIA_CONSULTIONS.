@@ -322,7 +322,6 @@ export function ClinicShell({ children, setView }) {
               {organization.name}
             </p>
           ) : null}
-          <LanguageSwitcher className="ml-auto" />
         </div>
 
         <ClinicMobileNavDrawer

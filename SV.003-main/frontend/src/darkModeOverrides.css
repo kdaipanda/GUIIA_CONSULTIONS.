@@ -166,9 +166,54 @@ html.dark .clinic-sidebar-link.nav-toned {
 
 [data-theme="dark"] .clinic-mobile-nav-toggle,
 html.dark .clinic-mobile-nav-toggle {
+  background: #265b93;
+  border-color: rgba(61, 155, 143, 0.4);
+  color: #ffffff;
+  box-shadow: 0 4px 14px -6px rgba(38, 91, 147, 0.55);
+}
+
+[data-theme="dark"] .clinic-mobile-nav-toggle:hover,
+html.dark .clinic-mobile-nav-toggle:hover {
+  background: #1e4d7a;
+  border-color: rgba(61, 155, 143, 0.55);
+}
+
+[data-theme="dark"] .clinic-mobile-toolbar,
+html.dark .clinic-mobile-toolbar {
   background: var(--clinic-surface-elevated);
-  border-color: var(--border-color);
+  border-bottom-color: var(--border-color);
+  box-shadow: 0 4px 16px -10px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="dark"] .clinic-mobile-org,
+html.dark .clinic-mobile-org {
   color: var(--text-primary);
+}
+
+/* Language switcher dentro del toolbar móvil */
+[data-theme="dark"] .clinic-mobile-toolbar [role="group"],
+html.dark .clinic-mobile-toolbar [role="group"] {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .clinic-mobile-toolbar [role="group"] button[aria-pressed="true"],
+html.dark .clinic-mobile-toolbar [role="group"] button[aria-pressed="true"] {
+  background: #3d9b8f !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .clinic-mobile-toolbar [role="group"] button[aria-pressed="false"],
+html.dark .clinic-mobile-toolbar [role="group"] button[aria-pressed="false"] {
+  background: transparent !important;
+  color: rgba(240, 244, 248, 0.78) !important;
+}
+
+[data-theme="dark"] .clinic-mobile-toolbar [role="group"] button[aria-pressed="false"]:hover,
+html.dark .clinic-mobile-toolbar [role="group"] button[aria-pressed="false"]:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] .clinic-sidebar.mobile-open,

@@ -12900,9 +12900,9 @@ html {
     min-height: 44px;
     padding: 10px 14px;
     border-radius: 12px;
-    border: 1px solid #dbeafe;
-    background: #f8fafc;
-    color: #1e40af;
+    border: 1px solid rgba(38, 91, 147, 0.28);
+    background: #0c2d4d;
+    color: #ffffff;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -12918,7 +12918,7 @@ html {
     font-size: 13px;
     font-weight: 600;
     line-height: 1.3;
-    color: #334155;
+    color: #0c2d4d;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
