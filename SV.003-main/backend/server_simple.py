@@ -2011,7 +2011,10 @@ async def get_current_profile(x_veterinarian_id: str = Header(None)):
     if isinstance(profile, dict):
         profile = password_auth.strip_sensitive_profile_fields(profile)
 
-    return _with_team_membership(profile)
+    enriched = _with_team_membership(profile)
+    if isinstance(enriched, dict):
+        enriched["platform_admin"] = auth_security.is_platform_admin_profile(enriched)
+    return enriched
 
 
 @app.get("/api/trial-survey/status")

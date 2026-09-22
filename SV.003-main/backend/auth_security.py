@@ -282,20 +282,11 @@ def platform_admin_emails_from_env() -> Set[str]:
 
 
 def is_platform_admin_profile(profile: Optional[dict]) -> bool:
+    """Solo emails en PLATFORM_ADMIN_EMAILS (default: carlos.hernandez@vetmed.com)."""
     if not profile:
         return False
     email = (profile.get("email") or "").lower().strip()
-    if email in platform_admin_emails_from_env():
-        return True
-    profile_id = profile.get("id")
-    if not profile_id:
-        return False
-    try:
-        from supabase_client import is_platform_admin_in_db
-
-        return is_platform_admin_in_db(profile_id, email)
-    except Exception:  # noqa: BLE001
-        return False
+    return bool(email) and email in platform_admin_emails_from_env()
 
 
 def is_public_api_route(method: str, path: str) -> bool:

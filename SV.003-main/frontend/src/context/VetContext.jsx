@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { getBackendUrl } from "../lib/backendUrl";
-import { fetchWithTimeout } from "../lib/fetchWithTimeout";
 import { parseJsonResponse } from "../lib/friendlyFetchError";
 import {
   getAuthHeaders,
@@ -17,6 +16,8 @@ import {
   persistAuthFromResponse,
   getAccessToken,
 } from "../lib/authHeaders";
+import { fetchAdminAccess } from "../lib/clinicApi";
+import { isPlatformAdminEmail } from "../lib/platformAdmin";
 import i18n from "../i18n";
 
 const DEV_AUTO_LOGIN = false;
@@ -85,6 +86,12 @@ export const VetProvider = ({ children }) => {
         if (updatedProfile) {
           setVeterinarian(updatedProfile);
           localStorage.setItem("veterinarian", JSON.stringify(updatedProfile));
+          const isCarlos = isPlatformAdminEmail(updatedProfile.email);
+          if (typeof updatedProfile.platform_admin === "boolean") {
+            setPlatformAdmin(isCarlos && updatedProfile.platform_admin);
+          } else {
+            setPlatformAdmin(isCarlos);
+          }
         }
         return;
       }
@@ -174,34 +181,56 @@ export const VetProvider = ({ children }) => {
   }, [veterinarian?.id, refreshProfile]);
 
   useEffect(() => {
-    if (!veterinarian?.id || !getAccessToken()) {
+    if (!veterinarian?.id) {
       setPlatformAdmin(false);
       return;
     }
 
-    let cancelled = false;
-    const backendUrl = getBackendUrl();
+    // Admin GUIAA: solo carlos.hernandez@vetmed.com
+    const isCarlos = isPlatformAdminEmail(veterinarian.email);
+    if (!isCarlos) {
+      setPlatformAdmin(false);
+      return;
+    }
 
-    fetchWithTimeout(
-      `${backendUrl}/api/admin/access`,
-      { headers: getAuthHeaders(veterinarian.id) },
-      { timeoutMs: 8000, retries: 1 },
-    )
-      .then(async (response) => {
-        if (!response.ok) return { platform_admin: false };
-        return parseJsonResponse(response, { platform_admin: false });
-      })
-      .then((data) => {
-        if (!cancelled) setPlatformAdmin(!!data.platform_admin);
-      })
-      .catch(() => {
-        if (!cancelled) setPlatformAdmin(false);
-      });
+    setPlatformAdmin(true);
+
+    let cancelled = false;
+    let retryTimer = null;
+    let stopTimer = null;
+
+    const resolveAccess = () => {
+      fetchAdminAccess(veterinarian.id)
+        .then((data) => {
+          if (!cancelled) {
+            setPlatformAdmin(isPlatformAdminEmail(veterinarian.email) && !!data.platform_admin);
+          }
+        })
+        .catch(() => {
+          /* Mantener visible para Carlos si la red falla; AdminPage revalida. */
+        });
+    };
+
+    if (getAccessToken()) {
+      resolveAccess();
+    } else {
+      retryTimer = window.setInterval(() => {
+        if (!getAccessToken()) return;
+        window.clearInterval(retryTimer);
+        retryTimer = null;
+        resolveAccess();
+      }, 400);
+      stopTimer = window.setTimeout(() => {
+        if (retryTimer) window.clearInterval(retryTimer);
+      }, 12000);
+    }
 
     return () => {
       cancelled = true;
+      if (retryTimer) window.clearInterval(retryTimer);
+      if (stopTimer) window.clearTimeout(stopTimer);
     };
-  }, [veterinarian?.id, veterinarian?.email]);
+  }, [veterinarian?.id, veterinarian?.email, authUser?.id]);
 
   const login = (vetData) => {
     persistAuthFromResponse(vetData);
@@ -217,6 +246,14 @@ export const VetProvider = ({ children }) => {
     setVeterinarian(nextProfile);
     localStorage.setItem("veterinarian", JSON.stringify(nextProfile));
     profileSyncedRef.current = true;
+    const isCarlos = isPlatformAdminEmail(nextProfile.email);
+    if (!isCarlos) {
+      setPlatformAdmin(false);
+    } else if (typeof nextProfile.platform_admin === "boolean") {
+      setPlatformAdmin(nextProfile.platform_admin);
+    } else {
+      setPlatformAdmin(true);
+    }
   };
 
   const logout = async () => {

@@ -30,6 +30,7 @@ import { OPEN_PLATFORM_ONBOARDING_EVENT } from "../lib/helpCenter";
 import { ClinicMobileNavDrawer } from "./ClinicMobileNavDrawer";
 import { PageEnter } from "../components/motion/PageEnter";
 import { canAccessFeature, MEMBERSHIP_FEATURES } from "../lib/membershipAccess";
+import { isPlatformAdminEmail } from "../lib/platformAdmin";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { warmClinicAppData } from "../lib/prefetchClinicApp";
@@ -258,13 +259,19 @@ export function ClinicShell({ children, setView }) {
       const allowed = canAccessFeature(veterinarian, item.feature, { platformAdmin });
       return { ...item, locked: !allowed };
     });
-    if (platformAdmin) {
-      items.push({
+    if (platformAdmin && isPlatformAdminEmail(veterinarian?.email)) {
+      const adminItem = {
         to: "/app/admin",
         label: t("nav.admin"),
         icon: Shield,
         view: "admin",
-      });
+      };
+      // Visible cerca del inicio: tras diagnóstico, no al final detrás de Perfil.
+      const insertAt = Math.max(
+        0,
+        items.findIndex((item) => item.view === "new-consultation") + 1,
+      );
+      items.splice(insertAt, 0, adminItem);
     }
     return items;
   }, [platformAdmin, veterinarian, BASE_NAV_ITEMS, t, role]);
