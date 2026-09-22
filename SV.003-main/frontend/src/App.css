@@ -12226,27 +12226,30 @@ html {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: rgba(38, 91, 147, 0.08);
+  color: #265b93;
 }
 
 .clinic-report-kpi-label {
-  font-size: 13px;
+  font-size: 11px;
   color: #64748b;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
 }
 
 .clinic-report-kpi-value {
   font-size: 28px;
   font-weight: 800;
-  color: #0f172a;
+  color: #0c2d4d;
   line-height: 1.1;
 }
 
 .clinic-report-kpi-hint {
   margin-top: 4px;
   font-size: 12px;
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .clinic-report-chart {
@@ -12274,7 +12277,7 @@ html {
   gap: 8px;
   margin: 0 0 14px;
   font-size: 16px;
-  color: #0f172a;
+  color: #0c2d4d;
 }
 
 .clinic-report-breakdown {
@@ -12375,9 +12378,22 @@ html {
   text-decoration: underline;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1023px) {
   .clinic-report-kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .clinic-reports-page .clinic-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .clinic-reports-page .clinic-report-period {
+    width: 100%;
+  }
+
+  .clinic-reports-page .clinic-report-period button {
+    min-height: 2.75rem;
   }
 }
 

@@ -1,14 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  BarChart3,
-  CalendarDays,
-  DollarSign,
-  PawPrint,
-  Stethoscope,
-  Users,
-  Package,
-  TrendingUp,
   FileDown,
   ArrowRight,
 } from "lucide-react";
@@ -82,7 +74,7 @@ function downloadReportCsv(overview, periodLabel, t) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `reporte-guiaa-${periodLabel.replace(/\s+/g, "-")}.csv`;
+  link.download = `${t("reports.csvFilenamePrefix")}-${periodLabel.replace(/\s+/g, "-")}.csv`;
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -134,15 +126,10 @@ function MiniAreaChart({ data, id, colorFrom, colorTo, ariaLabel }) {
   );
 }
 
-function KpiCard({ icon: Icon, label, value, hint, chart, chartId, colorFrom, colorTo, trendAria }) {
+function KpiCard({ label, value, hint, chart, chartId, colorFrom, colorTo, trendAria, ariaLabel }) {
   return (
-    <div className="clinic-report-kpi">
-      <div className="clinic-report-kpi-head">
-        <span className="clinic-report-kpi-icon">
-          <Icon size={18} aria-hidden />
-        </span>
-        <span className="clinic-report-kpi-label">{label}</span>
-      </div>
+    <div className="clinic-report-kpi" aria-label={ariaLabel || `${value} ${label}`}>
+      <span className="clinic-report-kpi-label">{label}</span>
       <div className="clinic-report-kpi-value">{value}</div>
       {hint && <div className="clinic-report-kpi-hint">{hint}</div>}
       {chart && (
@@ -243,14 +230,17 @@ export function ReportsPage() {
     <div className="clinic-page clinic-page-guiaa clinic-reports-page">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
           <div className="clinic-page-title-row">
             <h1>{t("reports.title")}</h1>
             <ModuleHelpTip topicId="reports" />
           </div>
           <p>{t("reports.lead")}</p>
         </div>
-        <div className="clinic-report-period clinic-reports-period">
+        <div
+          className="clinic-report-period clinic-reports-period"
+          role="group"
+          aria-label={t("reports.periodAria")}
+        >
           {periodOptions.map((opt) => (
             <Button
               key={opt.id}
@@ -258,6 +248,7 @@ export function ReportsPage() {
               variant={period === opt.id ? "default" : "secondary"}
               size="sm"
               className="min-h-11"
+              aria-pressed={period === opt.id}
               onClick={() => setPeriod(opt.id)}
             >
               {opt.label}
@@ -269,9 +260,10 @@ export function ReportsPage() {
             size="sm"
             className="min-h-11"
             disabled={!overview}
+            aria-label={t("reports.exportCsvAria")}
             onClick={() => downloadReportCsv(overview, periodLabel, t)}
           >
-            <FileDown size={14} className="mr-1" />
+            <FileDown size={14} className="mr-1" aria-hidden />
             {t("reports.exportCsv")}
           </Button>
         </div>
@@ -281,9 +273,8 @@ export function ReportsPage() {
         <ClinicReportsSkeleton />
       ) : (
         <>
-          <div className="clinic-report-kpi-grid">
+          <div className="clinic-report-kpi-grid" role="group" aria-label={t("reports.statsAria")}>
             <KpiCard
-              icon={CalendarDays}
               label={t("reports.kpiAppointments")}
               value={totals.appointments ?? 0}
               hint={t("reports.kpiAppointmentsHint", {
@@ -294,9 +285,12 @@ export function ReportsPage() {
               colorFrom="#265b93"
               colorTo="#93c5e8"
               trendAria={t("reports.chartTrendAria", { label: t("reports.kpiAppointments") })}
+              ariaLabel={t("reports.kpiAppointmentsAria", {
+                count: totals.appointments ?? 0,
+                pct: totals.occupancy_rate ?? 0,
+              })}
             />
             <KpiCard
-              icon={DollarSign}
               label={t("reports.kpiRevenue")}
               value={formatMoney(totals.revenue_paid, moneyLocale)}
               hint={t("reports.kpiRevenueHint", {
@@ -307,9 +301,12 @@ export function ReportsPage() {
               colorFrom="#3d9b8f"
               colorTo="#a7e0d8"
               trendAria={t("reports.chartTrendAria", { label: t("reports.kpiRevenue") })}
+              ariaLabel={t("reports.kpiRevenueAria", {
+                amount: formatMoney(totals.revenue_paid, moneyLocale),
+                count: totals.invoices ?? 0,
+              })}
             />
             <KpiCard
-              icon={Stethoscope}
               label={t("reports.kpiCds")}
               value={totals.consultations_ai ?? 0}
               chart={consSeries}
@@ -317,22 +314,25 @@ export function ReportsPage() {
               colorFrom="#0c2d4d"
               colorTo="#7ba3c4"
               trendAria={t("reports.chartTrendAria", { label: t("reports.kpiCds") })}
+              ariaLabel={t("reports.kpiCdsAria", { count: totals.consultations_ai ?? 0 })}
             />
             <KpiCard
-              icon={Users}
               label={t("reports.kpiOwners")}
               value={totals.clients ?? 0}
               hint={t("reports.kpiOwnersHint", {
                 count: totals.patients ?? 0,
               })}
+              ariaLabel={t("reports.kpiOwnersAria", {
+                owners: totals.clients ?? 0,
+                pets: totals.patients ?? 0,
+              })}
             />
             <KpiCard
-              icon={PawPrint}
               label={t("reports.kpiPets")}
               value={totals.patients ?? 0}
+              ariaLabel={t("reports.kpiPetsAria", { count: totals.patients ?? 0 })}
             />
             <KpiCard
-              icon={Package}
               label={t("reports.kpiLowStock")}
               value={totals.low_stock_products ?? 0}
               hint={
@@ -340,15 +340,13 @@ export function ReportsPage() {
                   ? t("reports.kpiLowHintWarn")
                   : t("reports.kpiLowHintOk")
               }
+              ariaLabel={t("reports.kpiLowStockAria", { count: totals.low_stock_products ?? 0 })}
             />
           </div>
 
           <div className="clinic-report-panels">
             <section className="clinic-report-panel">
-              <h2>
-                <TrendingUp size={18} aria-hidden />
-                {t("reports.byStatus")}
-              </h2>
+              <h2>{t("reports.byStatus")}</h2>
               {Object.keys(overview?.appointments_by_status || {}).length === 0 ? (
                 <p className="clinic-report-empty">{t("reports.emptyAppointments")}</p>
               ) : (
@@ -364,10 +362,7 @@ export function ReportsPage() {
             </section>
 
             <section className="clinic-report-panel">
-              <h2>
-                <BarChart3 size={18} aria-hidden />
-                {t("billing.statReceipts")}
-              </h2>
+              <h2>{t("billing.statReceipts")}</h2>
               {Object.keys(overview?.invoices_by_status || {}).length === 0 ? (
                 <p className="clinic-report-empty">{t("reports.emptyReceipts")}</p>
               ) : (
@@ -396,12 +391,9 @@ export function ReportsPage() {
           <div className="clinic-report-panels">
             <section className="clinic-report-panel">
               <div className="clinic-report-panel-head">
-                <h2>
-                  <Package size={18} aria-hidden />
-                  {t("reports.topProducts")}
-                </h2>
+                <h2>{t("reports.topProducts")}</h2>
                 <Button type="button" variant="ghost" size="sm" onClick={() => go("/app/facturacion")}>
-                  {t("reports.salesLink")} <ArrowRight size={14} />
+                  {t("reports.salesLink")} <ArrowRight size={14} aria-hidden />
                 </Button>
               </div>
               {(overview?.top_products || []).length === 0 ? (
@@ -422,12 +414,9 @@ export function ReportsPage() {
 
             <section className="clinic-report-panel">
               <div className="clinic-report-panel-head">
-                <h2>
-                  <Package size={18} aria-hidden />
-                  {t("reports.inventoryMovements")}
-                </h2>
+                <h2>{t("reports.inventoryMovements")}</h2>
                 <Button type="button" variant="ghost" size="sm" onClick={() => go("/app/inventario")}>
-                  {t("reports.inventoryLink")} <ArrowRight size={14} />
+                  {t("reports.inventoryLink")} <ArrowRight size={14} aria-hidden />
                 </Button>
               </div>
               <ul className="clinic-report-breakdown">
