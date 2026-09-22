@@ -532,7 +532,14 @@ export function ClientsPatientsPage({
                             onClick={() => openDetail(p)}
                             onKeyDown={(e) => onPetRowKeyDown(e, p)}
                           >
-                            <td><strong>{p.name}</strong></td>
+                            <td>
+                              <strong>{p.name}</strong>
+                              {p.is_hospitalized ? (
+                                <span className="clinic-pet-hosp-badge" style={{ marginLeft: 8 }}>
+                                  {t("clients.hospitalizedBadge")}
+                                </span>
+                              ) : null}
+                            </td>
                             <td>{speciesLabel(p.species)}</td>
                             <td>{p.breed || t("common.emDash")}</td>
                             <td className="clinic-table-actions" onClick={(e) => e.stopPropagation()}>
@@ -772,6 +779,11 @@ export function ClientsPatientsPage({
           <DialogHeader className="clinic-dialog-header clinic-patient-detail-header">
             <DialogTitle className="clinic-patient-detail-title">
               {detail?.patient?.name}
+              {detail?.patient?.is_hospitalized || detail?.hospitalization ? (
+                <span className="clinic-pet-hosp-badge" style={{ marginLeft: 10 }}>
+                  {t("clients.hospitalizedBadge")}
+                </span>
+              ) : null}
             </DialogTitle>
             {detail?.patient && (
               <p className="clinic-patient-detail-subtitle">

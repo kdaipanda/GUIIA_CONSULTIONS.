@@ -1,17 +1,17 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { CalendarDays, FileDown, FlaskConical, PawPrint, User } from "lucide-react";
+import { CalendarDays, FileDown, FlaskConical, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
 import {
   formatConsultationDateShort,
   formatConsultationFolio,
   getConsultationReasonPreview,
+  getConsultationSpeciesIcon,
   getConsultationSpeciesLabel,
   getConsultationStatusLabel,
   normalizeConsultationRecord,
 } from "../../lib/consultationDisplay";
-import { ConsultationSpeciesIcon } from "./ConsultationSpeciesIcon";
 
 export function ConsultationHistoryCard({
   consultation,
@@ -45,7 +45,7 @@ export function ConsultationHistoryCard({
 
         <div className="history-card-patient">
           <div className="history-avatar" aria-hidden>
-            <ConsultationSpeciesIcon consultation={record} size={22} />
+            {getConsultationSpeciesIcon(record)}
           </div>
           <div className="history-patient-info">
             <h3>{record.nombre_mascota?.trim() || getConsultationSpeciesLabel(record)}</h3>
@@ -62,7 +62,9 @@ export function ConsultationHistoryCard({
                 aria-label={t("history.card.ratingAria", { count: ratingValue })}
               >
                 {Array.from({ length: ratingValue }).map((_, idx) => (
-                  <PawPrint key={idx} size={14} className="paw-static filled" aria-hidden />
+                  <span key={idx} className="paw-static filled">
+                    🐾
+                  </span>
                 ))}
               </div>
             )}

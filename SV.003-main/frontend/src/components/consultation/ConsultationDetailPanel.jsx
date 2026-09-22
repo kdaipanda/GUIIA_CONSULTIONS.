@@ -1,25 +1,17 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import {
-  ArrowLeft,
-  Brain,
-  ClipboardList,
-  FileDown,
-  FlaskConical,
-  PawPrint,
-  Stethoscope,
-} from "lucide-react";
+import { ArrowLeft, Brain, ClipboardList, FileDown, FlaskConical, Stethoscope } from "lucide-react";
 import { Button } from "../ui/button";
 import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
 import {
   formatConsultationDateShort,
   formatConsultationFolio,
+  getConsultationSpeciesIcon,
   getConsultationSpeciesLabel,
   getConsultationStatusLabel,
 } from "../../lib/consultationDisplay";
 import { getLabStudyLabel } from "../../lib/clinicalTimeline";
 import { ConsultationFormDataView } from "../clinical/ConsultationFormDataView";
-import { ConsultationSpeciesIcon } from "./ConsultationSpeciesIcon";
 
 export function ConsultationDetailPanel({
   consultation,
@@ -31,6 +23,7 @@ export function ConsultationDetailPanel({
 }) {
   const { t } = useTranslation("clinic");
   const formData = consultation.form_data || {};
+  const speciesIcon = getConsultationSpeciesIcon(consultation);
   const statusClass = consultation.status || "draft";
   const ratingValue = consultation.rating || 0;
   const linkedStudies = consultation.linked_studies || [];
@@ -54,7 +47,7 @@ export function ConsultationDetailPanel({
           <div className="clinical-file-main">
             <div className="clinical-file-patient">
               <div className="clinical-file-avatar" aria-hidden>
-                <ConsultationSpeciesIcon consultation={consultation} size={32} />
+                {speciesIcon}
               </div>
               <div className="clinical-file-info">
                 <h1>{petName}</h1>
@@ -78,7 +71,9 @@ export function ConsultationDetailPanel({
                   aria-label={t("history.card.ratingAria", { count: ratingValue })}
                 >
                   {Array.from({ length: ratingValue }).map((_, idx) => (
-                    <PawPrint key={idx} size={14} className="paw-static filled" aria-hidden />
+                    <span key={idx} className="paw-static filled">
+                      🐾
+                    </span>
                   ))}
                 </div>
               )}

@@ -208,6 +208,35 @@ class AppointmentUpdate(BaseModel):
     notes: Optional[str] = None
 
 
+class HospitalizationCreate(BaseModel):
+    reason: Optional[str] = None
+    admitted_at: Optional[str] = None
+    notes_summary: Optional[str] = None
+
+
+class HospitalizationUpdate(BaseModel):
+    status: Optional[str] = None
+    reason: Optional[str] = None
+    admitted_at: Optional[str] = None
+    discharged_at: Optional[str] = None
+    notes_summary: Optional[str] = None
+
+
+class HospitalizationNoteCreate(BaseModel):
+    body: str
+    noted_at: Optional[str] = None
+
+
+class LabStudyAttach(BaseModel):
+    image_type: Optional[str] = "lab_study"
+    additional_context: Optional[str] = None
+    file_name: Optional[str] = None
+
+
+class MedicalImageLinkPatient(BaseModel):
+    patient_id: str
+
+
 def _require_vet_id(x_veterinarian_id: Optional[str]) -> str:
     return auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
 
@@ -605,6 +634,18 @@ async def api_delete_client(client_id: str, x_veterinarian_id: str = Header(None
     return {"message": "Cliente eliminado"}
 
 
+def _annotate_patients_hospitalized(
+    patients: list, organization_id: str
+) -> list:
+    active_ids, _ = clinic_db.list_active_hospitalization_patient_ids(organization_id)
+    if not active_ids:
+        return [{**p, "is_hospitalized": False} for p in patients]
+    return [
+        {**p, "is_hospitalized": p.get("id") in active_ids}
+        for p in patients
+    ]
+
+
 @clinic_router.get("/patients")
 async def api_list_patients(
     search: str = "",
@@ -617,7 +658,7 @@ async def api_list_patients(
     patients, err = clinic_db.list_patients(ctx["organization_id"], search=search, client_id=client_id, limit=limit)
     if err:
         raise HTTPException(status_code=500, detail=err)
-    return {"patients": patients}
+    return {"patients": _annotate_patients_hospitalized(patients, ctx["organization_id"])}
 
 
 @clinic_router.get("/clinic-registry")
@@ -635,7 +676,10 @@ async def api_clinic_registry(
     patients, err_patients = clinic_db.list_patients(org_id, limit=limit)
     if err_patients:
         raise HTTPException(status_code=500, detail=err_patients)
-    return {"clients": clients, "patients": patients}
+    return {
+        "clients": clients,
+        "patients": _annotate_patients_hospitalized(patients, org_id),
+    }
 
 
 @clinic_router.post("/patients")
@@ -675,11 +719,28 @@ async def api_get_patient(patient_id: str, x_veterinarian_id: str = Header(None)
         patient = {**patient, "clinical_chart": normalize_chart(patient.get("clinical_chart"))}
     except Exception:  # noqa: BLE001
         vitals_series = []
+
+    active_hosp, _ = clinic_db.get_active_hospitalization(patient_id, ctx["organization_id"])
+    hosp_history, _ = clinic_db.list_hospitalizations_for_patient(
+        patient_id, ctx["organization_id"], limit=8
+    )
+    hosp_notes: list = []
+    if active_hosp and active_hosp.get("id"):
+        hosp_notes, _ = clinic_db.list_hospitalization_notes(
+            active_hosp["id"], ctx["organization_id"]
+        )
+    patient = {
+        **patient,
+        "is_hospitalized": bool(active_hosp),
+    }
     return {
         "patient": patient,
         "consultations": serialized,
         "medical_images": medical_images,
         "vitals_series": vitals_series,
+        "hospitalization": active_hosp,
+        "hospitalizations": hosp_history,
+        "hospitalization_notes": hosp_notes,
     }
 
 
@@ -729,6 +790,206 @@ async def api_patch_patient_clinical_chart(
     if not patient:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
     return {"patient": patient}
+
+
+@clinic_router.post("/patients/{patient_id}/hospitalizations")
+async def api_admit_patient(
+    patient_id: str,
+    body: HospitalizationCreate,
+    x_veterinarian_id: str = Header(None),
+):
+    vet_id = _require_vet_id(x_veterinarian_id)
+    ctx = await _resolve_org_context(vet_id)
+    _check_write(ctx["role"])
+    patient, err = clinic_db.get_patient(patient_id, ctx["organization_id"])
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    if not patient:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    existing, _ = clinic_db.get_active_hospitalization(patient_id, ctx["organization_id"])
+    if existing:
+        raise HTTPException(status_code=409, detail="El paciente ya tiene una hospitalización activa")
+    row = {
+        "organization_id": ctx["organization_id"],
+        "patient_id": patient_id,
+        "status": "active",
+        "admitted_at": body.admitted_at or clinic_db._now_iso(),
+        "reason": (body.reason or "").strip() or None,
+        "notes_summary": (body.notes_summary or "").strip() or None,
+        "created_by": vet_id,
+    }
+    hosp, err = clinic_db.insert_hospitalization(row)
+    if err:
+        status = 503 if "migración" in err.lower() else 500
+        raise HTTPException(status_code=status, detail=err)
+    return {"hospitalization": hosp}
+
+
+@clinic_router.patch("/hospitalizations/{hospitalization_id}")
+async def api_update_hospitalization(
+    hospitalization_id: str,
+    body: HospitalizationUpdate,
+    x_veterinarian_id: str = Header(None),
+):
+    vet_id = _require_vet_id(x_veterinarian_id)
+    ctx = await _resolve_org_context(vet_id)
+    _check_write(ctx["role"])
+    hosp, err = clinic_db.get_hospitalization(hospitalization_id, ctx["organization_id"])
+    if err:
+        status = 503 if "migración" in err.lower() else 500
+        raise HTTPException(status_code=status, detail=err)
+    if not hosp:
+        raise HTTPException(status_code=404, detail="Hospitalización no encontrada")
+    fields = body.model_dump(exclude_none=True)
+    if fields.get("status") == "discharged" and not fields.get("discharged_at"):
+        fields["discharged_at"] = clinic_db._now_iso()
+    if fields.get("status") and fields["status"] not in ("active", "discharged"):
+        raise HTTPException(status_code=400, detail="Estado inválido")
+    updated, err = clinic_db.update_hospitalization(
+        hospitalization_id, ctx["organization_id"], fields
+    )
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    return {"hospitalization": updated}
+
+
+@clinic_router.get("/hospitalizations/{hospitalization_id}/notes")
+async def api_list_hospitalization_notes(
+    hospitalization_id: str,
+    x_veterinarian_id: str = Header(None),
+):
+    vet_id = _require_vet_id(x_veterinarian_id)
+    ctx = await _resolve_org_context(vet_id)
+    hosp, err = clinic_db.get_hospitalization(hospitalization_id, ctx["organization_id"])
+    if err:
+        status = 503 if "migración" in err.lower() else 500
+        raise HTTPException(status_code=status, detail=err)
+    if not hosp:
+        raise HTTPException(status_code=404, detail="Hospitalización no encontrada")
+    notes, err = clinic_db.list_hospitalization_notes(
+        hospitalization_id, ctx["organization_id"]
+    )
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    return {"notes": notes}
+
+
+@clinic_router.post("/hospitalizations/{hospitalization_id}/notes")
+async def api_add_hospitalization_note(
+    hospitalization_id: str,
+    body: HospitalizationNoteCreate,
+    x_veterinarian_id: str = Header(None),
+):
+    vet_id = _require_vet_id(x_veterinarian_id)
+    ctx = await _resolve_org_context(vet_id)
+    _check_write(ctx["role"])
+    hosp, err = clinic_db.get_hospitalization(hospitalization_id, ctx["organization_id"])
+    if err:
+        status = 503 if "migración" in err.lower() else 500
+        raise HTTPException(status_code=status, detail=err)
+    if not hosp:
+        raise HTTPException(status_code=404, detail="Hospitalización no encontrada")
+    if hosp.get("status") != "active":
+        raise HTTPException(status_code=400, detail="Solo se pueden agregar notas a una hospitalización activa")
+    text = (body.body or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="La nota no puede estar vacía")
+    note, err = clinic_db.insert_hospitalization_note(
+        {
+            "hospitalization_id": hospitalization_id,
+            "organization_id": ctx["organization_id"],
+            "noted_at": body.noted_at or clinic_db._now_iso(),
+            "body": text,
+            "created_by": vet_id,
+        }
+    )
+    if err:
+        status = 503 if "migración" in err.lower() else 500
+        raise HTTPException(status_code=status, detail=err)
+    return {"note": note}
+
+
+@clinic_router.post("/patients/{patient_id}/lab-studies")
+async def api_attach_lab_study(
+    patient_id: str,
+    body: LabStudyAttach,
+    x_veterinarian_id: str = Header(None),
+):
+    vet_id = _require_vet_id(x_veterinarian_id)
+    ctx = await _resolve_org_context(vet_id)
+    _check_write(ctx["role"])
+    patient, err = clinic_db.get_patient(patient_id, ctx["organization_id"])
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    if not patient:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    row, err = clinic_db.attach_lab_study_for_patient(
+        user_id=vet_id,
+        patient_id=patient_id,
+        patient_name=patient.get("name"),
+        image_type=body.image_type or "lab_study",
+        additional_context=body.additional_context,
+        file_name=body.file_name,
+    )
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    return {"medical_image": row}
+
+
+@clinic_router.get("/medical-images/unlinked")
+async def api_list_unlinked_medical_images(
+    search: str = "",
+    limit: int = 40,
+    x_veterinarian_id: str = Header(None),
+):
+    vet_id = _require_vet_id(x_veterinarian_id)
+    ctx = await _resolve_org_context(vet_id)
+    rows, err = clinic_db.list_unlinked_medical_images(
+        ctx["organization_id"], search=search, limit=min(limit, 100)
+    )
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    return {"medical_images": rows}
+
+
+@clinic_router.patch("/medical-images/{image_id}/link-patient")
+async def api_link_medical_image_patient(
+    image_id: str,
+    body: MedicalImageLinkPatient,
+    x_veterinarian_id: str = Header(None),
+):
+    vet_id = _require_vet_id(x_veterinarian_id)
+    ctx = await _resolve_org_context(vet_id)
+    _check_write(ctx["role"])
+    patient, err = clinic_db.get_patient(body.patient_id, ctx["organization_id"])
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    if not patient:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    image, err = clinic_db.get_medical_image(image_id)
+    if err:
+        raise HTTPException(status_code=500, detail=err)
+    if not image:
+        raise HTTPException(status_code=404, detail="Estudio no encontrado")
+    members, _ = clinic_db.list_members(ctx["organization_id"])
+    allowed = {m.get("profile_id") for m in members if m.get("profile_id")}
+    if image.get("user_id") and image.get("user_id") not in allowed:
+        raise HTTPException(status_code=403, detail="El estudio no pertenece a esta organización")
+    updated, err = clinic_db.update_medical_image(
+        image_id,
+        {
+            "patient_id": body.patient_id,
+            "patient_name": patient.get("name") or image.get("patient_name"),
+        },
+    )
+    if err:
+        if "patient_id" in str(err).lower() or "PGRST204" in str(err):
+            raise HTTPException(
+                status_code=503,
+                detail="Aplicar migración 20260615_medical_images_patient_id.sql",
+            )
+        raise HTTPException(status_code=500, detail=err)
+    return {"medical_image": updated}
 
 
 @clinic_router.patch("/patients/{patient_id}")

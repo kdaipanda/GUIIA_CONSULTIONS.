@@ -90,12 +90,9 @@
 }
 
 .premium-required-message .premium-required-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--guiaa-teal, #3d9b8f);
-  margin-bottom: 10px;
+  font-size: 2.5rem;
   line-height: 1;
+  margin-bottom: 10px;
 }
 
 .cedula-verification-status {

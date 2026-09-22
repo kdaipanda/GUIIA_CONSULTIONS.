@@ -12,7 +12,6 @@ import {
   Calculator,
   CalendarDays,
   ChartNoAxesColumn,
-  Check,
   CircleHelp,
   ClipboardList,
   Cloud,
@@ -88,7 +87,6 @@ import { VetProvider, useVet } from "./context/VetContext";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { LazySpeciesForm } from "./components/forms/LazySpeciesForm";
 import { PrivacyModal } from "./components/PrivacyModal";
-import { ConsultationSpeciesIcon } from "./components/consultation/ConsultationSpeciesIcon";
 import { TermsAndConditionsModal } from "./components/TermsAndConditionsModal";
 import { LandingScreenshotCapturePage } from "./pages/LandingScreenshotCapturePage";
 import { DashboardActivitySection } from "./components/dashboard/DashboardActivitySection";
@@ -3013,6 +3011,20 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
   );
 };
 
+const CONSULTATION_CATEGORY_ICONS = {
+  perros: "🐕",
+  gatos: "🐈",
+  conejos: "🐰",
+  aves: "🦜",
+  hamsters: "🐭",
+  cuyos: "🐹",
+  hurones: "🦡",
+  erizos: "🦔",
+  tortugas: "🐢",
+  iguanas: "🦎",
+  patos_pollos: "🐥",
+};
+
 const buildConsultationDataFromForm = (formData) => ({
   fecha: formData.fecha,
   nombre_mascota: formData.nombre_mascota,
@@ -3381,7 +3393,7 @@ const NewConsultation = ({
                 tabIndex={0}
               >
                 <span className="category-icon" aria-hidden>
-                  <ConsultationSpeciesIcon consultation={{ category: key }} size={18} />
+                  {CONSULTATION_CATEGORY_ICONS[key] || "🐾"}
                 </span>
                 <span className="category-label">
                   {tSpecies(`categories.${key}`, { defaultValue: category.name })}
@@ -3410,6 +3422,16 @@ const NewConsultation = ({
         // Set consultation ID
         setConsultationId(consultation.id);
         setSelectedCategory(consultation.category);
+
+        const linkedPatientId = consultation.patient_id || null;
+        const linkedClientId = consultation.client_id || null;
+        if (linkedPatientId && onClinicalContextChange) {
+          onClinicalContextChange({
+            patientId: linkedPatientId,
+            clientId: linkedClientId,
+            patient: clinicalContext?.patientId === linkedPatientId ? clinicalContext.patient : null,
+          });
+        }
         
         // Extraer datos del payload si existe
         const payload = consultation.payload || {};
@@ -3649,6 +3671,9 @@ const NewConsultation = ({
           ? t("consultation.reasonSavedExpert")
           : t("consultation.observationsSaved"),
       );
+      if (clinicalContext?.patientId) {
+        notifySuccess(t("patientChart.chartSynced"));
+      }
     } catch (err) {
       notifyError(err?.message || t("consultation.saveObservationsError"));
     } finally {
@@ -3732,6 +3757,9 @@ const NewConsultation = ({
       const result = await response.json();
       setAiAnalysis(cleanClinicalDisplayText(result.analysis));
       await refreshProfile?.();
+      if (clinicalContext?.patientId) {
+        notifySuccess(t("patientChart.chartSynced"));
+      }
     } catch (err) {
       notifyError(err.message || t("consultation.analysisError"));
     } finally {
@@ -3740,34 +3768,25 @@ const NewConsultation = ({
   };
 
   const steps = [
-    { number: 1, label: t("consultation.stepData"), Icon: PawPrint },
-    { number: 2, label: t("consultation.stepReason"), Icon: ClipboardList },
-    { number: 3, label: t("consultation.stepDiagnosis"), Icon: FlaskConical },
+    { number: 1, label: t("consultation.stepData"), icon: "🐾" },
+    { number: 2, label: t("consultation.stepReason"), icon: "📝" },
+    { number: 3, label: t("consultation.stepDiagnosis"), icon: "🔬" },
   ];
 
   const renderStepper = (currentStep) => (
     <div className="step-indicator">
       <div className="step-progress-line" style={{ width: `${(currentStep - 1) * 50}%` }}></div>
-      {steps.map((s) => {
-        const StepIcon = s.Icon;
-        const isCompleted = currentStep > s.number;
-        const isActive = currentStep === s.number;
-        return (
-          <div
-            key={s.number}
-            className={`step${isActive ? " active" : ""}${isCompleted ? " completed" : ""}`}
-          >
-            <div className="step-icon-wrapper" aria-hidden>
-              {isCompleted ? (
-                <Check size={16} strokeWidth={2.5} className="check-icon" />
-              ) : (
-                <StepIcon size={16} strokeWidth={2} />
-              )}
-            </div>
-            <div className="step-label">{s.label}</div>
+      {steps.map((s) => (
+        <div
+          key={s.number}
+          className={`step${currentStep === s.number ? " active" : ""}${currentStep > s.number ? " completed" : ""}`}
+        >
+          <div className="step-icon-wrapper" aria-hidden>
+            {currentStep > s.number ? <span className="check-icon">✓</span> : s.icon}
           </div>
-        );
-      })}
+          <div className="step-label">{s.label}</div>
+        </div>
+      ))}
     </div>
   );
 
@@ -4160,9 +4179,7 @@ const NewConsultation = ({
                     </div>
                   ) : (
                     <div className="premium-required-message">
-                      <div className="premium-required-icon" aria-hidden="true">
-                        <Crown size={28} strokeWidth={1.75} />
-                      </div>
+                      <div className="premium-required-icon" aria-hidden="true">⭐</div>
                       <h4>{t("consultation.l5PremiumTitle")}</h4>
                       <p>
                         {t("consultation.l5PremiumBody")}
@@ -4199,7 +4216,7 @@ const NewConsultation = ({
                             disabled={savingRating}
                             aria-label={t("consultation.rateValueAria", { value })}
                           >
-                            <PawPrint size={18} strokeWidth={selected ? 2.25 : 2} aria-hidden />
+                            🐾
                           </button>
                         );
                       })}

@@ -286,6 +286,49 @@ export async function fetchPatient(veterinarianId, patientId) {
   return clinicFetch(`/api/patients/${patientId}`, veterinarianId);
 }
 
+export async function admitPatientHospitalization(veterinarianId, patientId, data) {
+  return clinicFetch(`/api/patients/${patientId}/hospitalizations`, veterinarianId, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateHospitalization(veterinarianId, hospitalizationId, data) {
+  return clinicFetch(`/api/hospitalizations/${hospitalizationId}`, veterinarianId, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function addHospitalizationNote(veterinarianId, hospitalizationId, data) {
+  return clinicFetch(`/api/hospitalizations/${hospitalizationId}/notes`, veterinarianId, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function attachPatientLabStudy(veterinarianId, patientId, data) {
+  return clinicFetch(`/api/patients/${patientId}/lab-studies`, veterinarianId, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function fetchUnlinkedMedicalImages(veterinarianId, { search = "", limit = 40 } = {}) {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  if (limit) params.set("limit", String(limit));
+  const q = params.toString() ? `?${params}` : "";
+  return clinicFetch(`/api/medical-images/unlinked${q}`, veterinarianId);
+}
+
+export async function linkMedicalImagePatient(veterinarianId, imageId, patientId) {
+  return clinicFetch(`/api/medical-images/${imageId}/link-patient`, veterinarianId, {
+    method: "PATCH",
+    body: JSON.stringify({ patient_id: patientId }),
+  });
+}
+
 export async function createPatient(veterinarianId, data) {
   return clinicFetch("/api/patients", veterinarianId, {
     method: "POST",

@@ -1,3 +1,16 @@
+.patient-clinical-chart {
+  --chart-ink: var(--clinic-navy, #0c2d4d);
+  --chart-blue: var(--clinic-blue, #265b93);
+  --chart-green: var(--clinic-green, #3d9b8f);
+  --chart-muted: var(--clinic-ink-muted, #64748b);
+  --chart-border: rgba(38, 91, 147, 0.12);
+  --chart-surface: #fff;
+  --chart-surface-muted: #f8fafc;
+  --chart-hosp-fg: #7a3b0a;
+  --chart-hosp-bg: #fff4e5;
+  --chart-hosp-border: rgba(245, 158, 11, 0.35);
+}
+
 .patient-clinical-chart .patient-chart-header {
   display: flex;
   flex-wrap: wrap;
@@ -7,24 +20,39 @@
   margin-bottom: 20px;
 }
 
+.patient-chart-header-copy {
+  min-width: 0;
+  flex: 1 1 16rem;
+}
+
 .patient-clinical-chart .patient-chart-header h1 {
   margin: 0;
   font-size: 1.625rem;
   font-weight: 800;
-  color: #0c2d4d;
+  color: var(--chart-ink);
   letter-spacing: -0.02em;
   overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 .patient-clinical-chart .patient-chart-header p {
   margin: 0.35rem 0 0;
   font-size: 0.9375rem;
-  color: #64748b;
+  color: var(--chart-muted);
   line-height: 1.45;
   max-width: 40rem;
 }
 
 .patient-chart-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  max-width: 100%;
+}
+
+.patient-chart-actions-primary,
+.patient-chart-actions-secondary {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -33,6 +61,7 @@
 
 .patient-chart-action-btn {
   min-height: 2.75rem;
+  touch-action: manipulation;
 }
 
 .patient-chart-summary {
@@ -41,9 +70,9 @@
 
 .patient-chart-species-form {
   margin-bottom: 20px;
-  border: 1px solid rgba(38, 91, 147, 0.12);
+  border: 1px solid var(--chart-border);
   border-radius: 12px;
-  background: #fff;
+  background: var(--chart-surface);
   padding: 14px 16px;
   box-shadow: 0 2px 12px -6px rgba(12, 45, 77, 0.08);
 }
@@ -61,11 +90,11 @@
   margin: 0 0 4px;
   font-size: 1rem;
   font-weight: 700;
-  color: #0c2d4d;
+  color: var(--chart-ink);
 }
 
 .patient-chart-species-form-head .clinic-muted {
-  color: #64748b;
+  color: var(--chart-muted);
 }
 
 .patient-chart-species-form-actions {
@@ -81,13 +110,13 @@
   border-radius: 12px;
   border: 1px solid rgba(38, 91, 147, 0.2);
   padding: 0 10px;
-  background: #fff;
-  color: #0c2d4d;
+  background: var(--chart-surface);
+  color: var(--chart-ink);
   font-size: 0.875rem;
 }
 
 .patient-chart-species-select select:focus-visible {
-  outline: 2px solid #265b93;
+  outline: 2px solid var(--chart-blue);
   outline-offset: 2px;
 }
 
@@ -110,11 +139,12 @@
 }
 
 .patient-chart-summary h2,
-.patient-chart-timeline h2 {
+.patient-chart-timeline h2,
+.patient-chart-panel-head h2 {
   margin: 0 0 10px;
   font-size: 1rem;
   font-weight: 700;
-  color: #0c2d4d;
+  color: var(--chart-ink);
 }
 
 .patient-chart-summary-meta {
@@ -132,6 +162,16 @@
   margin-bottom: 24px;
 }
 
+@media (min-width: 1024px) {
+  .patient-chart-actions {
+    align-items: flex-end;
+  }
+
+  .patient-chart-actions-secondary {
+    justify-content: flex-end;
+  }
+}
+
 @media (max-width: 1023px) {
   .patient-chart-grid {
     grid-template-columns: 1fr;
@@ -146,13 +186,19 @@
     font-size: 1.375rem;
   }
 
-  .patient-chart-actions {
+  .patient-chart-actions,
+  .patient-chart-actions-primary,
+  .patient-chart-actions-secondary {
     width: 100%;
   }
 
-  .patient-chart-actions .patient-chart-action-btn {
+  .patient-chart-actions-primary .patient-chart-action-btn {
+    width: 100%;
+  }
+
+  .patient-chart-actions-secondary .patient-chart-action-btn {
     flex: 1 1 auto;
-    min-width: min(100%, 10rem);
+    min-width: min(100%, 9.5rem);
   }
 
   .patient-chart-species-form-actions {
@@ -166,12 +212,22 @@
   .patient-chart-species-select select {
     width: 100%;
   }
+
+  .patient-chart-panel-actions {
+    width: 100%;
+  }
+
+  .patient-chart-panel-actions .patient-chart-action-btn {
+    flex: 1 1 auto;
+    min-width: min(100%, 9.5rem);
+  }
 }
 
 .patient-chart-panel {
-  border: 1px solid rgba(38, 91, 147, 0.12);
+  margin-bottom: 20px;
+  border: 1px solid var(--chart-border);
   border-radius: 12px;
-  background: #fff;
+  background: var(--chart-surface);
   padding: 14px 16px;
   box-shadow: 0 2px 12px -6px rgba(12, 45, 77, 0.08);
 }
@@ -180,7 +236,7 @@
 .patient-chart-list-editor h3 {
   margin: 0 0 8px;
   font-size: 0.9375rem;
-  color: #0c2d4d;
+  color: var(--chart-ink);
 }
 
 .patient-chart-list-editor + .patient-chart-list-editor {
@@ -210,6 +266,7 @@
   border-radius: 12px;
   background: rgba(38, 91, 147, 0.05);
   font-size: 0.875rem;
+  min-width: 0;
 }
 
 .patient-chart-problems li.is-closed {
@@ -227,21 +284,22 @@
 .patient-chart-icon-btn {
   border: none;
   background: transparent;
-  color: #64748b;
+  color: var(--chart-muted);
   cursor: pointer;
   min-width: 2.75rem;
   min-height: 2.75rem;
   padding: 8px;
   border-radius: 12px;
+  touch-action: manipulation;
 }
 
 .patient-chart-icon-btn:hover {
-  color: #0c2d4d;
+  color: var(--chart-ink);
   background: rgba(38, 91, 147, 0.08);
 }
 
 .patient-chart-icon-btn:focus-visible {
-  outline: 2px solid #265b93;
+  outline: 2px solid var(--chart-blue);
   outline-offset: 2px;
 }
 
@@ -254,15 +312,15 @@
 }
 
 .patient-chart-timeline .clinic-timeline-hint {
-  color: #64748b;
+  color: var(--chart-muted);
 }
 
 .patient-chart-consultation-detail {
   margin-top: 14px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(38, 91, 147, 0.12);
-  background: #fff;
+  border: 1px solid var(--chart-border);
+  background: var(--chart-surface);
 }
 
 .patient-chart-consultation-detail-head {
@@ -276,7 +334,7 @@
 .patient-chart-consultation-detail-head h3 {
   margin: 0;
   font-size: 0.9375rem;
-  color: #0c2d4d;
+  color: var(--chart-ink);
 }
 
 .consultation-form-data-toggle {
@@ -287,22 +345,23 @@
   gap: 8px;
   min-height: 2.75rem;
   border: none;
-  background: #f8fafc;
+  background: var(--chart-surface-muted);
   border-radius: 12px;
   padding: 10px 12px;
   cursor: pointer;
   font-weight: 600;
-  color: #0c2d4d;
+  color: var(--chart-ink);
+  touch-action: manipulation;
 }
 
 .consultation-form-data-toggle:focus-visible {
-  outline: 2px solid #265b93;
+  outline: 2px solid var(--chart-blue);
   outline-offset: 2px;
 }
 
 .consultation-form-data-species {
   font-weight: 500;
-  color: #64748b;
+  color: var(--chart-muted);
 }
 
 .consultation-form-data-body {
@@ -317,7 +376,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--chart-muted);
 }
 
 .consultation-form-data-section dl {
@@ -334,13 +393,13 @@
 }
 
 .consultation-form-data-row dt {
-  color: #64748b;
+  color: var(--chart-muted);
   font-weight: 600;
 }
 
 .consultation-form-data-row dd {
   margin: 0;
-  color: #0c2d4d;
+  color: var(--chart-ink);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -359,22 +418,210 @@
   }
 }
 
+.patient-chart-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.patient-chart-hosp-badge,
+.clinic-pet-hosp-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--chart-hosp-fg, #7a3b0a);
+  background: var(--chart-hosp-bg, #fff4e5);
+  border: 1px solid var(--chart-hosp-border, rgba(245, 158, 11, 0.35));
+}
+
+.patient-chart-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.patient-chart-panel-head h2 {
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.patient-chart-panel-icon {
+  flex-shrink: 0;
+  color: var(--chart-blue);
+}
+
+.patient-chart-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.patient-chart-lab-count {
+  margin: 6px 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--chart-green);
+}
+
+.patient-chart-dialog-hint {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.patient-chart-hosp-meta {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.patient-chart-hosp-meta dt {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--chart-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.patient-chart-hosp-meta dd {
+  margin: 2px 0 0;
+  color: var(--chart-ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.patient-chart-hosp-note-form {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.patient-chart-hosp-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.patient-chart-hosp-notes li {
+  border: 1px solid rgba(38, 91, 147, 0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--chart-surface-muted);
+  min-width: 0;
+}
+
+.patient-chart-hosp-notes time {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--chart-muted);
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.patient-chart-hosp-notes p {
+  margin: 0;
+  color: var(--chart-ink);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.patient-chart-lab-unlinked {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  max-height: min(50vh, 22rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.patient-chart-lab-unlinked li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid rgba(38, 91, 147, 0.1);
+  border-radius: 10px;
+  background: var(--chart-surface-muted);
+  min-width: 0;
+}
+
+.patient-chart-lab-unlinked li strong {
+  color: var(--chart-ink);
+}
+
+.patient-chart-lab-unlinked li span {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--chart-muted);
+}
+
+.patient-chart-lab-link-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.patient-chart-lab-link-search input {
+  flex: 1 1 12rem;
+  min-height: 2.75rem;
+  min-width: 0;
+}
+
+[data-theme="dark"] .patient-clinical-chart,
+html.dark .patient-clinical-chart {
+  --chart-surface: #152032;
+  --chart-surface-muted: #141e2c;
+  --chart-border: rgba(255, 255, 255, 0.1);
+  --chart-hosp-fg: #ffd7b8;
+  --chart-hosp-bg: rgba(245, 158, 11, 0.18);
+  --chart-hosp-border: rgba(245, 158, 11, 0.28);
+}
+
 [data-theme="dark"] .patient-clinical-chart .patient-chart-header h1,
 [data-theme="dark"] .patient-chart-species-form-head h2,
 [data-theme="dark"] .patient-chart-summary h2,
 [data-theme="dark"] .patient-chart-timeline h2,
 [data-theme="dark"] .patient-chart-panel h3,
+[data-theme="dark"] .patient-chart-panel-head h2,
 [data-theme="dark"] .patient-chart-consultation-detail-head h3,
 [data-theme="dark"] .consultation-form-data-toggle,
 [data-theme="dark"] .consultation-form-data-row dd,
+[data-theme="dark"] .patient-chart-hosp-notes p,
+[data-theme="dark"] .patient-chart-hosp-meta dd,
+[data-theme="dark"] .patient-chart-lab-unlinked li strong,
 html.dark .patient-clinical-chart .patient-chart-header h1,
 html.dark .patient-chart-species-form-head h2,
 html.dark .patient-chart-summary h2,
 html.dark .patient-chart-timeline h2,
 html.dark .patient-chart-panel h3,
+html.dark .patient-chart-panel-head h2,
 html.dark .patient-chart-consultation-detail-head h3,
 html.dark .consultation-form-data-toggle,
-html.dark .consultation-form-data-row dd {
+html.dark .consultation-form-data-row dd,
+html.dark .patient-chart-hosp-notes p,
+html.dark .patient-chart-hosp-meta dd,
+html.dark .patient-chart-lab-unlinked li strong {
   color: var(--text-primary, #f1f5f9);
 }
 
@@ -399,16 +646,20 @@ html.dark .consultation-form-data-row dt {
 html.dark .patient-chart-species-form,
 html.dark .patient-chart-panel,
 html.dark .patient-chart-consultation-detail {
-  background: #152032;
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--chart-surface);
+  border-color: var(--chart-border);
   box-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.55);
 }
 
 [data-theme="dark"] .patient-chart-species-select select,
 [data-theme="dark"] .consultation-form-data-toggle,
+[data-theme="dark"] .patient-chart-hosp-notes li,
+[data-theme="dark"] .patient-chart-lab-unlinked li,
 html.dark .patient-chart-species-select select,
-html.dark .consultation-form-data-toggle {
-  background: #141e2c;
+html.dark .consultation-form-data-toggle,
+html.dark .patient-chart-hosp-notes li,
+html.dark .patient-chart-lab-unlinked li {
+  background: var(--chart-surface-muted);
   border-color: rgba(255, 255, 255, 0.12);
   color: var(--text-primary, #f1f5f9);
 }

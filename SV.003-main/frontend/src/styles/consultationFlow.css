@@ -183,16 +183,9 @@
 }
 
 .category-card--chip .category-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--guiaa-blue, #265b93);
+  font-size: 1.15rem;
   line-height: 1;
   filter: none;
-}
-
-.category-card--chip.selected .category-icon {
-  color: #0f4c5c;
 }
 
 .category-card--chip .category-label,
@@ -306,30 +299,16 @@
   background: #f8fafc !important;
   border: 2px solid rgba(38, 91, 147, 0.14) !important;
   box-shadow: none !important;
-  color: var(--guiaa-blue, #265b93);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .consultation-page .step.active .step-icon-wrapper {
   background: rgba(61, 155, 143, 0.14) !important;
   border-color: rgba(61, 155, 143, 0.5) !important;
-  color: #0f4c5c;
 }
 
 .consultation-page .step.completed .step-icon-wrapper {
   background: rgba(61, 155, 143, 0.22) !important;
   border-color: rgba(61, 155, 143, 0.45) !important;
-  color: #0f4c5c;
-}
-
-.consultation-page .premium-required-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--guiaa-teal, #3d9b8f);
-  margin-bottom: 8px;
 }
 
 .consultation-page .premium-icon {

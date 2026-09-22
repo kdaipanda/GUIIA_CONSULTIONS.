@@ -2018,3 +2018,258 @@ def count_table_rows(table: str) -> Tuple[int, Optional[str]]:
         return (resp.count or 0, None)
     except Exception as exc:  # noqa: BLE001
         return (0, str(exc))
+
+
+def _hospitalization_table_unavailable(err: str) -> bool:
+    lowered = (err or "").lower()
+    return (
+        "patient_hospitalizations" in lowered
+        or "patient_hospitalization_notes" in lowered
+    ) and (
+        "does not exist" in lowered
+        or "could not find the table" in lowered
+        or "pgrst205" in lowered
+        or "schema cache" in lowered
+    )
+
+
+def list_active_hospitalization_patient_ids(
+    organization_id: str,
+) -> Tuple[set, Optional[str]]:
+    try:
+        resp = (
+            _table("patient_hospitalizations")
+            .select("patient_id")
+            .eq("organization_id", organization_id)
+            .eq("status", "active")
+            .execute()
+        )
+        return ({row.get("patient_id") for row in (resp.data or []) if row.get("patient_id")}, None)
+    except Exception as exc:  # noqa: BLE001
+        err = str(exc)
+        if _hospitalization_table_unavailable(err):
+            return (set(), None)
+        return (set(), err)
+
+
+def get_active_hospitalization(
+    patient_id: str, organization_id: str
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    try:
+        resp = (
+            _table("patient_hospitalizations")
+            .select("*")
+            .eq("patient_id", patient_id)
+            .eq("organization_id", organization_id)
+            .eq("status", "active")
+            .order("admitted_at", desc=True)
+            .limit(1)
+            .execute()
+        )
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        err = str(exc)
+        if _hospitalization_table_unavailable(err):
+            return (None, None)
+        return (None, err)
+
+
+def list_hospitalizations_for_patient(
+    patient_id: str, organization_id: str, limit: int = 10
+) -> Tuple[List[Dict[str, Any]], Optional[str]]:
+    try:
+        resp = (
+            _table("patient_hospitalizations")
+            .select("*")
+            .eq("patient_id", patient_id)
+            .eq("organization_id", organization_id)
+            .order("admitted_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        return (resp.data or [], None)
+    except Exception as exc:  # noqa: BLE001
+        err = str(exc)
+        if _hospitalization_table_unavailable(err):
+            return ([], None)
+        return ([], err)
+
+
+def get_hospitalization(
+    hospitalization_id: str, organization_id: str
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    try:
+        resp = (
+            _table("patient_hospitalizations")
+            .select("*")
+            .eq("id", hospitalization_id)
+            .eq("organization_id", organization_id)
+            .limit(1)
+            .execute()
+        )
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        err = str(exc)
+        if _hospitalization_table_unavailable(err):
+            return (None, "Aplicar migración 20260922_patient_hospitalizations.sql")
+        return (None, err)
+
+
+def insert_hospitalization(row: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    try:
+        resp = _table("patient_hospitalizations").insert(row, returning="representation").execute()
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        err = str(exc)
+        if _hospitalization_table_unavailable(err):
+            return (None, "Aplicar migración 20260922_patient_hospitalizations.sql")
+        if "idx_patient_hospitalizations_one_active" in err or "unique" in err.lower():
+            return (None, "El paciente ya tiene una hospitalización activa")
+        return (None, err)
+
+
+def update_hospitalization(
+    hospitalization_id: str, organization_id: str, fields: Dict[str, Any]
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    fields = {**fields, "updated_at": _now_iso()}
+    try:
+        resp = (
+            _table("patient_hospitalizations")
+            .update(fields)
+            .eq("id", hospitalization_id)
+            .eq("organization_id", organization_id)
+            .execute()
+        )
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def list_hospitalization_notes(
+    hospitalization_id: str, organization_id: str, limit: int = 60
+) -> Tuple[List[Dict[str, Any]], Optional[str]]:
+    try:
+        resp = (
+            _table("patient_hospitalization_notes")
+            .select("*")
+            .eq("hospitalization_id", hospitalization_id)
+            .eq("organization_id", organization_id)
+            .order("noted_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        return (resp.data or [], None)
+    except Exception as exc:  # noqa: BLE001
+        err = str(exc)
+        if _hospitalization_table_unavailable(err):
+            return ([], None)
+        return ([], err)
+
+
+def insert_hospitalization_note(row: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    try:
+        resp = (
+            _table("patient_hospitalization_notes")
+            .insert(row, returning="representation")
+            .execute()
+        )
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        err = str(exc)
+        if _hospitalization_table_unavailable(err):
+            return (None, "Aplicar migración 20260922_patient_hospitalizations.sql")
+        return (None, err)
+
+
+def get_medical_image(image_id: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    try:
+        resp = _table("medical_images").select("*").eq("id", image_id).limit(1).execute()
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def update_medical_image(
+    image_id: str, fields: Dict[str, Any]
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    try:
+        resp = _table("medical_images").update(fields).eq("id", image_id).execute()
+        return (resp.data[0] if resp.data else None, None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, str(exc))
+
+
+def list_unlinked_medical_images(
+    organization_id: str,
+    search: str = "",
+    limit: int = 40,
+) -> Tuple[List[Dict[str, Any]], Optional[str]]:
+    members, err = list_members(organization_id)
+    if err:
+        return ([], err)
+    profile_ids = [m.get("profile_id") for m in members if m.get("profile_id")]
+    if not profile_ids:
+        return ([], None)
+    try:
+        q = (
+            _table("medical_images")
+            .select(
+                "id, user_id, patient_id, patient_name, image_type, analysis, "
+                "additional_context, created_at, findings, recommendations"
+            )
+            .in_("user_id", profile_ids)
+            .is_("patient_id", "null")
+            .order("created_at", desc=True)
+            .limit(limit)
+        )
+        if search.strip():
+            term = search.strip().replace("%", "").replace(",", " ")
+            q = q.ilike("patient_name", f"%{term}%")
+        resp = q.execute()
+        return (resp.data or [], None)
+    except Exception as exc:  # noqa: BLE001
+        err = str(exc)
+        if "patient_id" in err.lower() or "PGRST204" in err:
+            return ([], None)
+        return ([], err)
+
+
+def attach_lab_study_for_patient(
+    *,
+    user_id: str,
+    patient_id: str,
+    patient_name: Optional[str],
+    image_type: str = "lab_study",
+    additional_context: Optional[str] = None,
+    file_name: Optional[str] = None,
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    """Crea un registro de estudio en medical_images vinculado al paciente (sin IA)."""
+    import uuid
+
+    from supabase_client import insert_medical_image
+
+    context_parts = []
+    if file_name and str(file_name).strip():
+        context_parts.append(f"Archivo: {str(file_name).strip()}")
+    if additional_context and str(additional_context).strip():
+        context_parts.append(str(additional_context).strip())
+    context = "\n".join(context_parts) or None
+
+    row = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "consultation_id": None,
+        "image_type": image_type or "lab_study",
+        "patient_name": patient_name,
+        "patient_id": patient_id,
+        "image_url": None,
+        "analysis": "Estudio adjunto desde ficha clínica. Pendiente de interpretación con IA.",
+        "findings": [],
+        "recommendations": [],
+        "created_at": _now_iso(),
+        "extraction_method": "chart_attach",
+    }
+    if context:
+        row["additional_context"] = context
+
+    return insert_medical_image(row)

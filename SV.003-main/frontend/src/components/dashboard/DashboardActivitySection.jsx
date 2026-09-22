@@ -15,9 +15,9 @@ import {
   formatConsultationFolio,
   getConsultationPatientTitle,
   getConsultationReasonPreview,
+  getConsultationSpeciesIcon,
   getConsultationStatusLabel,
 } from "../../lib/consultationDisplay";
-import { ConsultationSpeciesIcon } from "../consultation/ConsultationSpeciesIcon";
 import "./dashboardActivity.css";
 
 function ActivityCard({ consultation, embedded, onOpen, continueLabel, viewLabel }) {
@@ -37,7 +37,7 @@ function ActivityCard({ consultation, embedded, onOpen, continueLabel, viewLabel
 
       <div className="dashboard-activity-main">
         <span className="dashboard-activity-species" aria-hidden>
-          <ConsultationSpeciesIcon consultation={consultation} size={18} />
+          {getConsultationSpeciesIcon(consultation)}
         </span>
         <div className="dashboard-activity-body">
           <h3>{getConsultationPatientTitle(consultation)}</h3>

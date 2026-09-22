@@ -133,14 +133,15 @@
 
 .dashboard-activity-species {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 12px;
   background: color-mix(in srgb, var(--guiaa-blue, #265b93) 8%, transparent);
-  color: var(--guiaa-blue, #265b93);
+  font-size: 22px;
+  line-height: 1;
 }
 
 .dashboard-activity-body {

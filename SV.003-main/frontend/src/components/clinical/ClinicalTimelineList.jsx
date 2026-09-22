@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { FileDown, ExternalLink, FlaskConical, Stethoscope } from "lucide-react";
 import { Button } from "../ui/button";
 import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
@@ -15,19 +16,19 @@ function truncateText(text, max = 180) {
   return cleaned.length > max ? `${cleaned.slice(0, max)}…` : cleaned;
 }
 
-function consultationMotivo(consultation) {
+function consultationMotivo(consultation, fallback) {
   return (
     consultation?.detalle_paciente ||
     consultation?.motivo_consulta ||
     consultation?.form_data?.motivo_consulta ||
-    "Sin motivo registrado"
+    fallback
   );
 }
 
 export function ClinicalTimelineList({
   consultations = [],
   medicalImages = [],
-  emptyMessage = "Aún no hay registros clínicos para esta mascota.",
+  emptyMessage,
   onViewConsultation,
   onDownloadConsultationPdf,
   pdfLoadingId,
@@ -35,10 +36,12 @@ export function ClinicalTimelineList({
   onSelectConsultation,
   onOpenPatientChart,
 }) {
+  const { t } = useTranslation("clinic");
   const timeline = buildClinicalTimeline(consultations, medicalImages);
+  const resolvedEmpty = emptyMessage || t("timeline.empty");
 
   if (!timeline.length) {
-    return <p className="clinic-muted">{emptyMessage}</p>;
+    return <p className="clinic-muted">{resolvedEmpty}</p>;
   }
 
   return (
@@ -50,8 +53,8 @@ export function ClinicalTimelineList({
             <li key={`consultation-${item.id}`} className="clinic-timeline-item">
               <div className="clinic-timeline-head">
                 <span className="clinic-timeline-type">
-                  <Stethoscope size={14} aria-hidden />
-                  Consulta CDS
+                  <Stethoscope size={14} aria-hidden="true" />
+                  {t("timeline.cdsConsult")}
                 </span>
                 <span className="clinic-timeline-folio">{formatConsultationFolio(consultation)}</span>
                 <span className={`clinic-timeline-status status-${consultation.status || "draft"}`}>
@@ -59,7 +62,9 @@ export function ClinicalTimelineList({
                 </span>
               </div>
               <p className="clinic-timeline-date">{formatConsultationDateShort(consultation.created_at)}</p>
-              <p className="clinic-timeline-motivo">{consultationMotivo(consultation)}</p>
+              <p className="clinic-timeline-motivo">
+                {consultationMotivo(consultation, t("timeline.noReason"))}
+              </p>
               {consultation.analysis && (
                 <p className="clinic-timeline-analysis">{truncateText(consultation.analysis, 180)}</p>
               )}
@@ -68,7 +73,7 @@ export function ClinicalTimelineList({
                   {item.linkedStudies.map((study) => (
                     <li key={study.id} className="clinic-timeline-linked-study">
                       <span className="clinic-timeline-linked-label">
-                        <FlaskConical size={12} aria-hidden />
+                        <FlaskConical size={12} aria-hidden="true" />
                         {getLabStudyLabel(study)}
                       </span>
                       <span className="clinic-timeline-linked-date">
@@ -91,7 +96,7 @@ export function ClinicalTimelineList({
                     size="sm"
                     onClick={() => onSelectConsultation(consultation)}
                   >
-                    Formulario
+                    {t("timeline.viewForm")}
                   </Button>
                 )}
                 {onViewConsultation && (
@@ -104,7 +109,8 @@ export function ClinicalTimelineList({
                       onViewConsultation(consultation.id);
                     }}
                   >
-                    <ExternalLink size={14} className="mr-1" /> Ver consulta
+                    <ExternalLink size={14} className="mr-1" aria-hidden="true" />{" "}
+                    {t("timeline.viewConsultation")}
                   </Button>
                 )}
                 {onOpenPatientChart && consultation.patient_id && (
@@ -117,7 +123,7 @@ export function ClinicalTimelineList({
                       onOpenPatientChart(consultation.patient_id);
                     }}
                   >
-                    Expediente
+                    {t("timeline.openChart")}
                   </Button>
                 )}
                 {onDownloadConsultationPdf && (
@@ -128,8 +134,10 @@ export function ClinicalTimelineList({
                     disabled={pdfLoadingId === consultation.id}
                     onClick={() => onDownloadConsultationPdf(consultation)}
                   >
-                    <FileDown size={14} className="mr-1" />
-                    {pdfLoadingId === consultation.id ? "Generando..." : "PDF"}
+                    <FileDown size={14} className="mr-1" aria-hidden="true" />
+                    {pdfLoadingId === consultation.id
+                      ? t("timeline.generatingPdf")
+                      : t("timeline.pdf")}
                   </Button>
                 )}
               </div>
@@ -142,8 +150,8 @@ export function ClinicalTimelineList({
           <li key={`lab-${item.id}`} className="clinic-timeline-item clinic-timeline-item-study">
             <div className="clinic-timeline-head">
               <span className="clinic-timeline-type">
-                <FlaskConical size={14} aria-hidden />
-                Interpretación de laboratorio
+                <FlaskConical size={14} aria-hidden="true" />
+                {t("timeline.labInterpretation")}
               </span>
               <span className="clinic-timeline-folio">{getLabStudyLabel(study)}</span>
             </div>
@@ -162,7 +170,7 @@ export function ClinicalTimelineList({
                     onOpenPatientChart(study.patient_id);
                   }}
                 >
-                  Expediente
+                  {t("timeline.openChart")}
                 </Button>
               </div>
             )}

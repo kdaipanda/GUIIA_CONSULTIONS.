@@ -2,6 +2,8 @@
   --clinic-navy: #0c2d4d;
   --clinic-blue: #265b93;
   --clinic-green: #3d9b8f;
+  --clinic-ink-muted: #64748b;
+  --clinic-warning: #f59e0b;
 }
 
 .clinic-page-guiaa .clinic-page-header h1 {
@@ -147,6 +149,28 @@
 .clinic-status-pill--cancelled {
   background: rgba(239, 68, 68, 0.1);
   color: #b91c1c;
+}
+
+.clinic-pet-hosp-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #7a3b0a;
+  background: #fff4e5;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  vertical-align: middle;
+}
+
+[data-theme="dark"] .clinic-pet-hosp-badge,
+html.dark .clinic-pet-hosp-badge {
+  color: #ffd7b8;
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.28);
 }
 
 @media (max-width: 1023px) {
