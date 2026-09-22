@@ -193,6 +193,38 @@
   color: var(--clinic-dash-green);
 }
 
+.clinic-dashboard-page.clinic-page-guiaa .clinic-dashboard-quick-btn--expert {
+  border-color: color-mix(in srgb, var(--clinic-dash-green) 28%, transparent);
+}
+
+.clinic-dashboard-page.clinic-page-guiaa .clinic-dashboard-quick-btn--expert svg {
+  color: var(--clinic-dash-green);
+}
+
+.clinic-dashboard-page .clinic-dashboard-quick-btn--locked {
+  opacity: 0.88;
+}
+
+.clinic-dashboard-page .clinic-dashboard-quick-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.clinic-dashboard-page .clinic-dashboard-quick-lock {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--clinic-dash-blue) 12%, transparent);
+  color: var(--clinic-dash-blue);
+}
+
 .clinic-dashboard-page .clinic-dashboard-actions {
   display: flex;
   flex-wrap: wrap;

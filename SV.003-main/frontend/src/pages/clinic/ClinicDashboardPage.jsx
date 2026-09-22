@@ -13,6 +13,9 @@ import {
   BarChart3,
   User,
   Zap,
+  Brain,
+  ClipboardList,
+  FlaskConical,
 } from "lucide-react";
 import { useVet } from "../../context/VetContext";
 import { useClinic } from "../../context/ClinicContext";
@@ -106,7 +109,7 @@ function SectionSkeleton() {
   );
 }
 
-export function ClinicDashboardPage({ setView, onStartConsultation }) {
+export function ClinicDashboardPage({ setView, onStartConsultation, onExpertConsultation }) {
   const { t, i18n } = useTranslation("clinic");
   const lang = i18n.language;
   const navigate = useNavigate();
@@ -183,10 +186,40 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
     MEMBERSHIP_FEATURES.reports,
     accessOptions,
   );
+  const canUseExpert = canAccessFeature(
+    veterinarian,
+    MEMBERSHIP_FEATURES.expertMode,
+    accessOptions,
+  );
+  const canUseLab = canAccessFeature(
+    veterinarian,
+    MEMBERSHIP_FEATURES.medicalImages,
+    accessOptions,
+  );
 
   const go = (view, path) => {
     setView?.(view);
     navigate(path);
+  };
+
+  const startExpertConsultation = () => {
+    if (!canUseExpert) {
+      go("membership", "/app/membresia");
+      return;
+    }
+    if (!canCreateConsultation(veterinarian, accessOptions)) {
+      notifyQuotaError(getTrialExhaustedMessage(), () => go("membership", "/app/membresia"));
+      return;
+    }
+    onExpertConsultation?.();
+  };
+
+  const openLab = () => {
+    if (!canUseLab) {
+      go("membership", "/app/membresia");
+      return;
+    }
+    go("medical-images", "/app/imagenes");
   };
 
   const today = dashboard?.today || {};
@@ -584,6 +617,56 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                 <button
                   type="button"
                   className="clinic-dashboard-quick-btn clinic-dashboard-quick-btn--accent"
+                  onClick={startNewConsultation}
+                >
+                  <Stethoscope size={20} aria-hidden />
+                  {t("dashboard.quickConsultation")}
+                </button>
+                <button
+                  type="button"
+                  className={`clinic-dashboard-quick-btn clinic-dashboard-quick-btn--expert${!canUseExpert ? " clinic-dashboard-quick-btn--locked" : ""}`}
+                  onClick={startExpertConsultation}
+                  aria-label={
+                    canUseExpert
+                      ? t("dashboard.quickExpert")
+                      : t("dashboard.quickExpertLocked")
+                  }
+                >
+                  <Brain size={20} aria-hidden />
+                  <span className="clinic-dashboard-quick-label">
+                    {t("dashboard.quickExpert")}
+                    {!canUseExpert && (
+                      <span className="clinic-dashboard-quick-lock">{t("dashboard.quickPremium")}</span>
+                    )}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="clinic-dashboard-quick-btn"
+                  onClick={() => go("consultation-history", "/app/historial")}
+                >
+                  <ClipboardList size={20} aria-hidden />
+                  {t("dashboard.quickHistory")}
+                </button>
+                <button
+                  type="button"
+                  className={`clinic-dashboard-quick-btn${!canUseLab ? " clinic-dashboard-quick-btn--locked" : ""}`}
+                  onClick={openLab}
+                  aria-label={
+                    canUseLab ? t("dashboard.quickLab") : t("dashboard.quickLabLocked")
+                  }
+                >
+                  <FlaskConical size={20} aria-hidden />
+                  <span className="clinic-dashboard-quick-label">
+                    {t("dashboard.quickLab")}
+                    {!canUseLab && (
+                      <span className="clinic-dashboard-quick-lock">{t("dashboard.quickPremium")}</span>
+                    )}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="clinic-dashboard-quick-btn"
                   onClick={() => setQuickDialogOpen(true)}
                 >
                   <Zap size={20} aria-hidden />

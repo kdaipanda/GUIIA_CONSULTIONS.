@@ -863,6 +863,7 @@ const Router = () => {
           <ClinicDashboardPage
             setView={navigateSetView}
             onStartConsultation={openConsultationWithPatient}
+            onExpertConsultation={openExpertConsultation}
           />
           <div className="clinic-dashboard-cds-bridge" id="dashboard-cds-panel">
           <Dashboard
