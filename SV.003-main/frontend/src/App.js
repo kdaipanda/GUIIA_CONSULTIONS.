@@ -2609,7 +2609,8 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
         </div>
         )}
 
-        <div className={`today-summary-panel${embedded ? " clinic-settings-card clinic-dashboard-summary" : ""}`}>
+        {!embedded && (
+        <div className="today-summary-panel">
           <div className="today-summary-left">
             <div className="today-title">{t("dashLegacy.todayTitle")}</div>
             <div className="today-subtitle">
@@ -2640,13 +2641,12 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
             >
               <span className="pill-label">{t("dashLegacy.pillMembership")}</span>
               <span className="pill-value">
-                {embedded
-                  ? membershipStatus.status
-                  : `${membershipStatus.status} · ${membershipConsultationsLabel}`}
+                {`${membershipStatus.status} · ${membershipConsultationsLabel}`}
               </span>
             </button>
           </div>
         </div>
+        )}
 
         {membershipStatus.trialExhausted && !embedded && (
           <div className="dashboard-trial-banner" role="alert">
@@ -2662,16 +2662,21 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
           </div>
         )}
 
-        <div className={`dashboard-grid${embedded ? " clinic-dashboard-cds-grid" : ""}`}>
+        <div className={`dashboard-grid${embedded ? " clinic-dashboard-cds-grid clinic-dashboard-cds-grid--slim" : ""}`}>
           {dashboardLoading ? (
-            <div className={`stats-cards${embedded ? " clinic-report-kpi-grid" : ""}`}>
+            <div className={`stats-cards${embedded ? " clinic-report-kpi-grid clinic-dashboard-cds-stats--slim" : ""}`}>
               <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
-              <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
-              <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
+              {!embedded && (
+                <>
+                  <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
+                  <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
+                </>
+              )}
             </div>
           ) : (
-          <div className={`stats-cards${embedded ? " clinic-report-kpi-grid" : ""}`}>
-            <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip={t("dashLegacy.tipTotal")}>
+          <div className={`stats-cards${embedded ? " clinic-report-kpi-grid clinic-dashboard-cds-stats--slim" : ""}`}>
+            {!embedded && (
+            <Card className="stat-card border-0 shadow-none" data-tooltip={t("dashLegacy.tipTotal")}>
               <div className="stat-icon"><BarChart3 /></div>
               <div className="stat-content">
                 <h3>
@@ -2692,8 +2697,10 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 />
               </div>
             </Card>
+            )}
 
-            <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip={t("dashLegacy.tipMonth")}>
+            {!embedded && (
+            <Card className="stat-card border-0 shadow-none" data-tooltip={t("dashLegacy.tipMonth")}>
               <div className="stat-icon"><CalendarDays /></div>
               <div className="stat-content">
                 <h3>
@@ -2718,27 +2725,19 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 </div>
               </div>
             </Card>
+            )}
 
             <Card
-              className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""} cursor-pointer transition hover:border-guiaa-brand-blue/20`}
+              className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi clinic-dashboard-membership-card" : ""}`}
               data-tooltip={t("dashLegacy.tipMembership")}
-              role="button"
-              tabIndex={0}
-              onClick={() => setView("membership")}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setView("membership");
-                }
-              }}
             >
-              <div className="stat-icon"><Gem /></div>
+              <div className="stat-icon" aria-hidden><Gem /></div>
               <div className="stat-content">
                 <h3>{membershipStatus.consultations}</h3>
                 <p>{t("dashLegacy.kpiPlan", { status: membershipStatus.status })}</p>
                 {membershipStatus.maxConsultations > 0 && (
                   <div className="membership-progress">
-                    <div className="progress-bar">
+                    <div className="progress-bar" aria-hidden>
                       <div
                         className={`progress-fill progress-fill--${membershipProgressTone}`}
                         style={{
@@ -2755,23 +2754,29 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 <div className="buy-consultations-label">{t("dashLegacy.reloadConsultations")}</div>
                 <div className="buy-consultations-group">
                   <Button
+                    type="button"
                     disabled={buyingConsultations}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleBuyConsultations("credits_10");
-                    }}
+                    onClick={() => handleBuyConsultations("credits_10")}
                   >
                     {buyingConsultations ? t("dashLegacy.processing") : t("dashLegacy.buy10")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setView("membership")}
+                  >
+                    {t("dashLegacy.viewMembershipPlans")}
                   </Button>
                 </div>
               </div>
             </Card>
 
             {weatherLoading && !embedded && (
-              <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`}><div className="skeleton skeleton-card" style={{width:'100%'}}></div></Card>
+              <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-card" style={{width:'100%'}}></div></Card>
             )}
             {weatherData && !weatherLoading && !embedded && (
-              <Card className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi" : ""}`} data-tooltip={t("dashLegacy.tipWeather")}>
+              <Card className="stat-card border-0 shadow-none" data-tooltip={t("dashLegacy.tipWeather")}>
                 <div className="stat-icon">
                   {weatherData.weather[0].main === 'Clear' ? <Sun /> :
                    weatherData.weather[0].main === 'Clouds' ? <Cloud /> :
@@ -2786,14 +2791,15 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
           </div>
           )}
 
-          <section className={`dashboard-block dashboard-block-actions${embedded ? " clinic-settings-card" : ""}`}>
-          <div className={`quick-actions dashboard-quick-actions${embedded ? " clinic-dashboard-quick-section" : ""}`}>
+          {!embedded && (
+          <section className="dashboard-block dashboard-block-actions">
+          <div className="quick-actions dashboard-quick-actions">
             <h2>{t("dashLegacy.quickActions")}</h2>
-            <div className={`action-cards${embedded ? " clinic-dashboard-quick-grid" : ""}`}>
+            <div className="action-cards">
               <Card
                 role="button"
                 tabIndex={0}
-                className={`action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2${embedded ? " clinic-dashboard-quick-btn" : ""}`}
+                className="action-card cursor-pointer border-0 shadow-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 onClick={handleNewConsultation}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -2931,6 +2937,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
             </div>
           </div>
           </section>
+          )}
 
           <DashboardActivitySection
             recentConsultations={recentConsultations}

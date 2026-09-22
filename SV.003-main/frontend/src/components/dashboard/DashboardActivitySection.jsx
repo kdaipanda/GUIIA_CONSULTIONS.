@@ -28,15 +28,6 @@ function ActivityCard({ consultation, embedded, onOpen, continueLabel, viewLabel
   return (
     <article
       className={`dashboard-activity-card${embedded ? " dashboard-activity-card--embedded" : ""}`}
-      onClick={() => onOpen?.(consultation.id)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onOpen?.(consultation.id);
-        }
-      }}
-      role="button"
-      tabIndex={0}
     >
       <div className="dashboard-activity-card-top">
         <span className="dashboard-activity-folio">{formatConsultationFolio(consultation)}</span>
@@ -62,10 +53,7 @@ function ActivityCard({ consultation, embedded, onOpen, continueLabel, viewLabel
               variant="guiaaPrimarySm"
               size="compactGradient"
               className="dashboard-activity-action"
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpen?.(consultation.id);
-              }}
+              onClick={() => onOpen?.(consultation.id)}
             >
               {actionLabel}
             </Button>
@@ -265,7 +253,7 @@ export function DashboardActivitySection({
                     <Icon size={18} aria-hidden />
                   </span>
                   <span className="dashboard-shortcut-label">{item.label}</span>
-                  <kbd>{item.key}</kbd>
+                  <kbd aria-hidden="true">{item.key}</kbd>
                   {locked && <span className="dashboard-shortcut-lock">{t("dashActivity.premium")}</span>}
                 </button>
               );

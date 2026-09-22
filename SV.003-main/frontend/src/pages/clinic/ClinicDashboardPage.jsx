@@ -383,6 +383,10 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                   go("agenda", "/app/agenda");
                 }
               }}
+              aria-label={t("dashboard.kpiPendingAria", {
+                requests: today.pending_requests ?? 0,
+                stock: canUseInventory ? (today.low_stock_count ?? 0) : 0,
+              })}
             >
               <div className="clinic-report-kpi-head">
                 <span className="clinic-report-kpi-icon">
@@ -425,7 +429,18 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                 </Button>
               </div>
               {upcoming.length === 0 ? (
-                <p className="clinic-dashboard-empty">{t("dashboard.noAppointments")}</p>
+                <div className="clinic-dashboard-empty-state">
+                  <p className="clinic-dashboard-empty">{t("dashboard.noAppointments")}</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => go("agenda", "/app/agenda")}
+                  >
+                    <Plus size={14} aria-hidden />
+                    {t("dashboard.emptyAppointmentsCta")}
+                  </Button>
+                </div>
               ) : (
                 <ul className="clinic-dashboard-list">
                   {upcoming.map((appt) => (
@@ -480,7 +495,18 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                 </Button>
               </div>
               {pendingRequests.length === 0 ? (
-                <p className="clinic-dashboard-empty">{t("dashboard.noRequests")}</p>
+                <div className="clinic-dashboard-empty-state">
+                  <p className="clinic-dashboard-empty">{t("dashboard.noRequests")}</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => go("agenda", "/app/agenda")}
+                  >
+                    {t("dashboard.emptyRequestsCta")}
+                    <ArrowRight size={14} aria-hidden />
+                  </Button>
+                </div>
               ) : (
                 <ul className="clinic-dashboard-list">
                   {pendingRequests.map((req) => (
@@ -519,7 +545,18 @@ export function ClinicDashboardPage({ setView, onStartConsultation }) {
                 </Button>
               </div>
               {lowStock.length === 0 ? (
-                <p className="clinic-dashboard-empty">{t("dashboard.stockOk")}</p>
+                <div className="clinic-dashboard-empty-state">
+                  <p className="clinic-dashboard-empty">{t("dashboard.stockOk")}</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => go("inventory", "/app/inventario")}
+                  >
+                    {t("dashboard.emptyStockCta")}
+                    <ArrowRight size={14} aria-hidden />
+                  </Button>
+                </div>
               ) : (
                 <ul className="clinic-dashboard-list">
                   {lowStock.map((product) => (
