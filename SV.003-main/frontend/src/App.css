@@ -11757,63 +11757,7 @@ html {
   }
 }
 
-.portal-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  position: relative;
-  background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 100%);
-}
-
-.portal-lang {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 2;
-}
-
-.portal-card {
-  width: min(480px, 100%);
-  background: #fff;
-  border-radius: 16px;
-  padding: 28px;
-  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
-  border: 1px solid #e2e8f0;
-}
-
-.portal-brand {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.portal-logo {
-  width: 48px;
-  height: 48px;
-}
-
-.portal-brand h1 {
-  margin: 0;
-  font-size: 22px;
-}
-
-.portal-brand p {
-  margin: 4px 0 0;
-  color: #64748b;
-  font-size: 14px;
-}
-
-.portal-select {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  font-size: 14px;
-}
+/* Portal styles: see pages/clinic/appointmentRequestPortal.css */
 
 .clinic-sidebar {
   width: 240px;
@@ -13119,16 +13063,6 @@ html {
   .support-chat-input-row button {
     flex: 1 1 auto;
     min-height: 40px;
-  }
-
-  .portal-page {
-    padding: 16px;
-    align-items: flex-start;
-    padding-top: max(16px, env(safe-area-inset-top, 0));
-  }
-
-  .portal-card {
-    padding: 20px;
   }
 
   .clinic-shell-main .dashboard-page.dashboard-embedded {

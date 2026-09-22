@@ -8,49 +8,59 @@ import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { GuiaaLogoImg } from "../../components/GuiaaBrandLockup";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher";
+import "./appointmentRequestPortal.css";
 
 const SPECIES = ["perros", "gatos", "conejos", "aves", "otros"];
+
+const EMPTY_FORM = {
+  client_name: "",
+  phone: "",
+  email: "",
+  patient_name: "",
+  species: "perros",
+  preferred_starts_at: "",
+  reason: "",
+};
 
 export function AppointmentRequestPortal({ organizationId }) {
   const { t } = useTranslation("clinic");
   const [orgName, setOrgName] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    client_name: "",
-    phone: "",
-    email: "",
-    patient_name: "",
-    species: "perros",
-    preferred_starts_at: "",
-    reason: "",
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
 
   const invalidLink = !organizationId;
 
   useEffect(() => {
     if (invalidLink) {
-      notifyError(t("portal.invalidLink"));
       setLoading(false);
       return;
     }
     fetchPublicOrganization(organizationId)
       .then((data) => setOrgName(data.organization?.name || t("portal.defaultOrg")))
-      .catch((err) => notifyError(err.message))
+      .catch((err) => notifyError(err.message || t("portal.loadError")))
       .finally(() => setLoading(false));
   }, [organizationId, invalidLink, t]);
 
   const speciesOptions = useMemo(
-    () => SPECIES.map((value) => ({
-      value,
-      label: t(`portal.speciesOptions.${value}`),
-    })),
+    () =>
+      SPECIES.map((value) => ({
+        value,
+        label: t(`portal.speciesOptions.${value}`),
+      })),
     [t],
   );
 
+  const updateField = (key) => (e) => {
+    setForm((prev) => ({ ...prev, [key]: e.target.value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.client_name.trim() || !form.patient_name.trim()) return;
+    if (!form.client_name.trim() || !form.patient_name.trim()) {
+      notifyError(t("portal.missingRequired"));
+      return;
+    }
     setSubmitting(true);
     try {
       const data = await submitAppointmentRequest({
@@ -61,17 +71,9 @@ export function AppointmentRequestPortal({ organizationId }) {
           : null,
       });
       notifySuccess(data.message || t("portal.success"));
-      setForm({
-        client_name: "",
-        phone: "",
-        email: "",
-        patient_name: "",
-        species: "perros",
-        preferred_starts_at: "",
-        reason: "",
-      });
+      setForm(EMPTY_FORM);
     } catch (err) {
-      notifyError(err.message);
+      notifyError(err.message || t("portal.submitError"));
     } finally {
       setSubmitting(false);
     }
@@ -84,52 +86,80 @@ export function AppointmentRequestPortal({ organizationId }) {
       </div>
       <div className="portal-card">
         <div className="portal-brand">
-          <GuiaaLogoImg className="portal-logo-full logo-image logo-image-full" tone="on-light" />
+          <GuiaaLogoImg
+            className="portal-logo-full logo-image logo-image-full"
+            tone="on-light"
+          />
           <div>
             <h1>{t("portal.title")}</h1>
-            <p>{loading ? t("portal.loading") : orgName}</p>
+            {loading ? (
+              <p role="status">{t("portal.loading")}</p>
+            ) : (
+              <p>{invalidLink ? t("portal.unavailable") : orgName}</p>
+            )}
           </div>
         </div>
 
+        {invalidLink && !loading && (
+          <div className="portal-empty" role="alert">
+            <p>{t("portal.invalidLinkBody")}</p>
+          </div>
+        )}
+
         {!loading && !invalidLink && (
-          <form onSubmit={handleSubmit} className="clinic-form portal-form">
+          <form onSubmit={handleSubmit} className="clinic-form portal-form" noValidate>
             <div className="form-group">
-              <Label>{t("portal.clientName")}</Label>
+              <Label htmlFor="portal-client-name">{t("portal.clientName")}</Label>
               <Input
+                id="portal-client-name"
+                name="client_name"
+                autoComplete="name"
                 value={form.client_name}
-                onChange={(e) => setForm({ ...form, client_name: e.target.value })}
+                onChange={updateField("client_name")}
                 required
               />
             </div>
             <div className="form-group">
-              <Label>{t("portal.phone")}</Label>
+              <Label htmlFor="portal-phone">{t("portal.phone")}</Label>
               <Input
+                id="portal-phone"
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
                 value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                onChange={updateField("phone")}
               />
             </div>
             <div className="form-group">
-              <Label>{t("portal.email")}</Label>
+              <Label htmlFor="portal-email">{t("portal.email")}</Label>
               <Input
+                id="portal-email"
+                name="email"
                 type="email"
+                autoComplete="email"
+                inputMode="email"
                 value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                onChange={updateField("email")}
               />
             </div>
             <div className="form-group">
-              <Label>{t("portal.petName")}</Label>
+              <Label htmlFor="portal-pet-name">{t("portal.petName")}</Label>
               <Input
+                id="portal-pet-name"
+                name="patient_name"
                 value={form.patient_name}
-                onChange={(e) => setForm({ ...form, patient_name: e.target.value })}
+                onChange={updateField("patient_name")}
                 required
               />
             </div>
             <div className="form-group">
-              <Label>{t("portal.species")}</Label>
+              <Label htmlFor="portal-species">{t("portal.species")}</Label>
               <select
+                id="portal-species"
                 className="portal-select"
                 value={form.species}
-                onChange={(e) => setForm({ ...form, species: e.target.value })}
+                onChange={updateField("species")}
               >
                 {speciesOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -139,22 +169,30 @@ export function AppointmentRequestPortal({ organizationId }) {
               </select>
             </div>
             <div className="form-group">
-              <Label>{t("portal.preferredDate")}</Label>
+              <Label htmlFor="portal-preferred-date">{t("portal.preferredDate")}</Label>
               <Input
+                id="portal-preferred-date"
+                name="preferred_starts_at"
                 type="datetime-local"
                 value={form.preferred_starts_at}
-                onChange={(e) => setForm({ ...form, preferred_starts_at: e.target.value })}
+                onChange={updateField("preferred_starts_at")}
               />
             </div>
             <div className="form-group">
-              <Label>{t("portal.reason")}</Label>
+              <Label htmlFor="portal-reason">{t("portal.reason")}</Label>
               <Textarea
+                id="portal-reason"
+                name="reason"
                 value={form.reason}
-                onChange={(e) => setForm({ ...form, reason: e.target.value })}
+                onChange={updateField("reason")}
                 rows={3}
               />
             </div>
-            <Button type="submit" disabled={submitting} className="w-full">
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="w-full portal-submit-btn"
+            >
               {submitting ? t("portal.submitting") : t("portal.submit")}
             </Button>
           </form>
