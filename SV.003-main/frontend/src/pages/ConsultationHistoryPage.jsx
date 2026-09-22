@@ -78,7 +78,7 @@ export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatie
         const data = await consultationsRes.json();
         setConsultations(data.consultations || []);
       } else {
-        notifyError("No se pudo cargar el historial clínico. Intenta de nuevo.");
+        notifyError(t("history.loadError"));
       }
 
       if (imagesRes.ok) {
@@ -87,10 +87,10 @@ export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatie
       } else if (consultationsRes.ok) {
         setMedicalImages([]);
       } else {
-        notifyError("No se pudo cargar el historial clínico completo.");
+        notifyError(t("history.loadPartialError"));
       }
     } catch (error) {
-      notifyError("No se pudo cargar el historial. Revisa tu conexión.");
+      notifyError(t("history.loadNetworkError"));
     } finally {
       setLoading(false);
     }
@@ -145,11 +145,11 @@ export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatie
       const response = await fetch(`${BACKEND_URL}/api/consultation/${consultationId}`, {
         headers: getAuthHeaders(veterinarian.id),
       });
-      if (!response.ok) throw new Error("No se pudo cargar la consulta para exportar");
+      if (!response.ok) throw new Error(t("history.pdfLoadError"));
       const consultation = await response.json();
       await downloadConsultationPdf(consultation, { veterinarian });
     } catch (error) {
-      const message = error.message || "Error al generar el PDF";
+      const message = error.message || t("history.pdfGenericError");
       setPdfError(message);
       notifyError(message);
     } finally {
@@ -164,9 +164,11 @@ export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatie
       });
       if (response.ok) {
         setSelectedConsultation(await response.json());
+      } else {
+        notifyError(t("history.detailLoadError"));
       }
     } catch (error) {
-      console.error("Error loading consultation details:", error);
+      notifyError(t("history.detailLoadError"));
     }
   };
 
@@ -190,7 +192,6 @@ export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatie
       <div className="container">
         <header className="history-page-header">
           <div>
-            <p className="history-page-eyebrow">{t("history.eyebrow")}</p>
             <div className="clinic-page-title-row">
               <h1>{t("history.title")}</h1>
               <ModuleHelpTip topicId="history" setView={setView} />
@@ -203,7 +204,7 @@ export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatie
           </Button>
         </header>
 
-        <div className="history-stats-row" role="group" aria-label={t("history.summaryAria")}>
+        <div className="history-stats-row" role="group" aria-label={t("history.filterAria")}>
           {statusFilters.map(({ id, label }) => (
             <button
               key={id}
@@ -211,6 +212,7 @@ export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatie
               className={`history-stat-pill${statusFilter === id ? " is-active" : ""}`}
               onClick={() => setStatusFilter(id)}
               aria-pressed={statusFilter === id}
+              aria-label={`${label}: ${stats[id] ?? 0}`}
             >
               <span className="history-stat-value">{stats[id] ?? 0}</span>
               <span className="history-stat-label">{label}</span>
@@ -240,24 +242,9 @@ export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatie
                 onClick={() => setSearchQuery("")}
                 aria-label={t("history.clearSearch")}
               >
-                <X size={16} />
+                <X size={16} aria-hidden />
               </button>
             )}
-          </div>
-
-          <div className="history-filter-tabs" role="tablist" aria-label={t("history.filterAria")}>
-            {statusFilters.map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={statusFilter === id}
-                className={`history-filter-tab${statusFilter === id ? " is-active" : ""}`}
-                onClick={() => setStatusFilter(id)}
-              >
-                {label}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -272,14 +259,15 @@ export function ConsultationHistoryPage({ setView, openConsultation, onOpenPatie
         ) : filteredTimeline.length > 0 ? (
           <>
             <p className="history-results-count">
-              {filteredTimeline.length} registro
-              {filteredTimeline.length !== 1 ? "s" : ""}
-              {searchQuery || statusFilter !== "all" ? " encontrados" : " en total"}
+              {t(
+                searchQuery || statusFilter !== "all"
+                  ? "history.resultsFiltered"
+                  : "history.resultsTotal",
+                { count: filteredTimeline.length },
+              )}
               {standaloneLabCount > 0 && statusFilter === "all" && (
                 <span className="history-results-subcount">
-                  {" "}
-                  · {standaloneLabCount} interpretación{standaloneLabCount !== 1 ? "es" : ""} de
-                  laboratorio
+                  {t("history.labStandalone", { count: standaloneLabCount })}
                 </span>
               )}
             </p>

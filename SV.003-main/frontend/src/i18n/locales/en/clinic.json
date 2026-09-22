@@ -364,7 +364,6 @@
     }
   },
   "history": {
-    "eyebrow": "Clinical record",
     "title": "Clinical history",
     "lead": "CDS consultations and lab interpretations in one place, with folio, status, and PDF export.",
     "newConsultation": "New consultation",
@@ -383,7 +382,19 @@
     "emptyDesc": "Start a CDS consultation or interpret a lab study.",
     "emptySearchTitle": "No records found",
     "emptySearchDesc": "Try another term or change the status filter.",
-    "interpretStudy": "Interpret study"
+    "interpretStudy": "Interpret study",
+    "loadError": "Could not load clinical history. Please try again.",
+    "loadPartialError": "Could not load the full clinical history.",
+    "loadNetworkError": "Could not load history. Check your connection.",
+    "pdfLoadError": "Could not load the consultation for export",
+    "pdfGenericError": "Error generating the PDF",
+    "detailLoadError": "Could not open the consultation detail.",
+    "resultsTotal_one": "{{count}} record in total",
+    "resultsTotal_other": "{{count}} records in total",
+    "resultsFiltered_one": "{{count}} record found",
+    "resultsFiltered_other": "{{count}} records found",
+    "labStandalone_one": " · {{count}} lab interpretation",
+    "labStandalone_other": " · {{count}} lab interpretations"
   },
   "membership": {
     "eyebrow": "GUIAA clinical platform",

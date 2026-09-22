@@ -364,7 +364,6 @@
     }
   },
   "history": {
-    "eyebrow": "Expediente clínico",
     "title": "Historial clínico",
     "lead": "Consultas CDS e interpretaciones de laboratorio en un solo lugar, con folio, estado y exportación PDF.",
     "newConsultation": "Nueva consulta",
@@ -383,7 +382,19 @@
     "emptyDesc": "Inicia una consulta CDS o interpreta un estudio de laboratorio.",
     "emptySearchTitle": "No se encontraron registros",
     "emptySearchDesc": "Prueba otro término o cambia el filtro de estado.",
-    "interpretStudy": "Interpretar estudio"
+    "interpretStudy": "Interpretar estudio",
+    "loadError": "No se pudo cargar el historial clínico. Intenta de nuevo.",
+    "loadPartialError": "No se pudo cargar el historial clínico completo.",
+    "loadNetworkError": "No se pudo cargar el historial. Revisa tu conexión.",
+    "pdfLoadError": "No se pudo cargar la consulta para exportar",
+    "pdfGenericError": "Error al generar el PDF",
+    "detailLoadError": "No se pudo abrir el detalle de la consulta.",
+    "resultsTotal_one": "{{count}} registro en total",
+    "resultsTotal_other": "{{count}} registros en total",
+    "resultsFiltered_one": "{{count}} registro encontrado",
+    "resultsFiltered_other": "{{count}} registros encontrados",
+    "labStandalone_one": " · {{count}} interpretación de laboratorio",
+    "labStandalone_other": " · {{count}} interpretaciones de laboratorio"
   },
   "membership": {
     "eyebrow": "Plataforma clínica GUIAA",

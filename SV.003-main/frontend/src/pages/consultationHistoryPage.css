@@ -40,7 +40,7 @@
 
 .history-stats-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 10px;
   margin-bottom: 16px;
 }
@@ -206,7 +206,7 @@
   color: #64748b;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1023px) {
   .history-page-header {
     flex-direction: column;
     align-items: stretch;
@@ -219,6 +219,12 @@
 
   .history-stats-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .history-stats-row {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -371,31 +377,6 @@
 }
 
 @media (max-width: 768px) {
-  .history-page-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .history-page-header button {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .history-stats-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .history-filter-tabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 4px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .history-filter-tab {
-    flex-shrink: 0;
-  }
-
   .history-card-guiaa:hover {
     transform: none;
   }
@@ -411,7 +392,7 @@
 
 @media (max-width: 480px) {
   .history-stats-row {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 }
 
