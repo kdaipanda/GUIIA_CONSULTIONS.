@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Lock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,13 +18,13 @@ export function PrivacyModal({ isOpen, onAccept }) {
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent
-        className="[&>button.absolute]:hidden sm:max-w-lg"
+        className="privacy-gate-dialog [&>button.absolute]:hidden sm:max-w-lg"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <span aria-hidden>🔒</span>
+          <DialogTitle className="flex items-center gap-2 text-[var(--guiaa-navy,#0c2d4d)]">
+            <Lock size={18} strokeWidth={2} aria-hidden className="text-[var(--guiaa-blue,#265b93)]" />
             {t("privacyModal.title")}
           </DialogTitle>
           <DialogDescription asChild>
@@ -48,7 +49,7 @@ export function PrivacyModal({ isOpen, onAccept }) {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button type="button" onClick={onAccept}>
+          <Button type="button" className="min-h-11" onClick={onAccept}>
             {t("privacyModal.accept")}
           </Button>
         </DialogFooter>

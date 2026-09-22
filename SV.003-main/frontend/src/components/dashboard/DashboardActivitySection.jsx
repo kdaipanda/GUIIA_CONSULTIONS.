@@ -2,12 +2,17 @@ import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import * as Tabs from "@radix-ui/react-tabs";
 import {
+  Bird,
   Brain,
   CalendarDays,
+  Cat,
   ClipboardList,
   Crown,
+  Dog,
+  PawPrint,
   Plus,
-  Stethoscope,
+  Rabbit,
+  Turtle,
   User,
 } from "lucide-react";
 import { Button } from "../ui/button";
@@ -16,10 +21,26 @@ import {
   formatConsultationFolio,
   getConsultationPatientTitle,
   getConsultationReasonPreview,
-  getConsultationSpeciesIcon,
+  getConsultationSpeciesKey,
   getConsultationStatusLabel,
 } from "../../lib/consultationDisplay";
 import "./dashboardActivity.css";
+
+const SPECIES_LUCIDE = {
+  perros: Dog,
+  gatos: Cat,
+  aves: Bird,
+  conejos: Rabbit,
+  patos_pollos: Bird,
+  tortugas: Turtle,
+  iguanas: Turtle,
+};
+
+function SpeciesIcon({ consultation }) {
+  const key = getConsultationSpeciesKey(consultation);
+  const Icon = SPECIES_LUCIDE[key] || PawPrint;
+  return <Icon size={18} strokeWidth={2} aria-hidden />;
+}
 
 function ActivityCard({ consultation, embedded, onOpen, continueLabel, viewLabel }) {
   const status = consultation.status;
@@ -38,7 +59,7 @@ function ActivityCard({ consultation, embedded, onOpen, continueLabel, viewLabel
 
       <div className="dashboard-activity-main">
         <span className="dashboard-activity-species" aria-hidden>
-          {getConsultationSpeciesIcon(consultation)}
+          <SpeciesIcon consultation={consultation} />
         </span>
         <div className="dashboard-activity-body">
           <h3>{getConsultationPatientTitle(consultation)}</h3>
@@ -147,10 +168,7 @@ export function DashboardActivitySection({
         <Tabs.Content className="tabs-content" value="activity">
           <div className="dashboard-activity-panel">
             <div className="dashboard-activity-panel-head">
-              <h3>
-                <ClipboardList size={18} aria-hidden />
-                {t("dashActivity.recentTitle")}
-              </h3>
+              <h3>{t("dashActivity.recentTitle")}</h3>
               {recentConsultations.length > 0 && (
                 <Button
                   type="button"
@@ -188,9 +206,6 @@ export function DashboardActivitySection({
               </div>
             ) : (
               <div className="dashboard-activity-empty">
-                <div className="dashboard-activity-empty-icon">
-                  <Stethoscope size={40} aria-hidden />
-                </div>
                 <h3>{t("dashActivity.emptyTitle")}</h3>
                 <p>{t("dashActivity.emptyBody")}</p>
                 <Button
@@ -228,9 +243,6 @@ export function DashboardActivitySection({
               </div>
             ) : (
               <div className="dashboard-activity-empty dashboard-activity-empty--inline">
-                <div className="dashboard-activity-empty-icon" aria-hidden>
-                  <ClipboardList size={28} />
-                </div>
                 <p>{t("dashActivity.followupEmpty")}</p>
               </div>
             )}
@@ -248,13 +260,20 @@ export function DashboardActivitySection({
                   type="button"
                   className={`dashboard-shortcut-card${locked ? " dashboard-shortcut-card--locked" : ""}`}
                   onClick={() => handleShortcut(item)}
+                  aria-label={
+                    locked
+                      ? `${item.label} (${t("dashActivity.premium")})`
+                      : `${item.label}, ${item.key}`
+                  }
                 >
-                  <span className="dashboard-shortcut-icon">
-                    <Icon size={18} aria-hidden />
+                  <span className="dashboard-shortcut-icon" aria-hidden>
+                    <Icon size={18} strokeWidth={2} />
                   </span>
                   <span className="dashboard-shortcut-label">{item.label}</span>
                   <kbd aria-hidden="true">{item.key}</kbd>
-                  {locked && <span className="dashboard-shortcut-lock">{t("dashActivity.premium")}</span>}
+                  {locked && (
+                    <span className="dashboard-shortcut-lock">{t("dashActivity.premium")}</span>
+                  )}
                 </button>
               );
             })}

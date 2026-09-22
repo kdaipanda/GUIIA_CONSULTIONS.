@@ -5,6 +5,7 @@
   "switchToEs": "Switch to Spanish",
   "switchToEn": "Switch to English",
   "loading": "Loading…",
+  "loadingGuiaa": "Loading GUIAA…",
   "errors": {
     "server": "Server error",
     "serverStatus": "Server error: {{status}}",

@@ -202,7 +202,14 @@
 .loading-screen-shell p {
   margin: 0;
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-screen-shell .loading-spinner,
+  .loading-screen-shell .premium-loading-dots span {
+    animation: none !important;
+  }
 }
 
 /* —— Modo oscuro (opaco, sin liquid glass) —— */

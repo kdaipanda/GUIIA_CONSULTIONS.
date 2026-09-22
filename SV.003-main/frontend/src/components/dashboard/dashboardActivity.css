@@ -41,7 +41,7 @@
   margin: 4px 0 0;
   font-size: 13px;
   line-height: 1.45;
-  color: #64748b;
+  color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
 }
 
 .dashboard-activity-panel-head--stacked {
@@ -68,12 +68,10 @@
 }
 
 .dashboard-activity-card {
-  border: 1px solid var(--liquid-glass-border-color, rgba(38, 91, 147, 0.12));
-  border-radius: 14px;
-  background: var(--liquid-glass-bg, rgba(255, 255, 255, 0.92));
-  backdrop-filter: blur(14px) saturate(1.06);
-  -webkit-backdrop-filter: blur(14px) saturate(1.06);
-  box-shadow: var(--liquid-glass-shadow-soft, 0 2px 12px -8px rgba(12, 45, 77, 0.1));
+  border: 1px solid color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 12%, transparent);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 16px -10px rgba(12, 45, 77, 0.18);
   padding: 14px 16px;
   transition:
     border-color 0.15s ease,
@@ -81,8 +79,8 @@
 }
 
 .dashboard-activity-card:hover {
-  border-color: rgba(38, 91, 147, 0.28);
-  box-shadow: 0 8px 24px -12px rgba(12, 45, 77, 0.18);
+  border-color: color-mix(in srgb, var(--guiaa-blue, #265b93) 32%, transparent);
+  box-shadow: 0 8px 22px -12px rgba(12, 45, 77, 0.22);
 }
 
 .dashboard-activity-card-top {
@@ -96,8 +94,8 @@
 .dashboard-activity-folio {
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  color: #64748b;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 55%, transparent);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -106,8 +104,8 @@
 
 .dashboard-activity-status {
   flex-shrink: 0;
-  padding: 3px 8px;
-  border-radius: 999px;
+  padding: 4px 8px;
+  border-radius: 6px;
   font-size: 11px;
   font-weight: 600;
 }
@@ -135,16 +133,14 @@
 
 .dashboard-activity-species {
   flex-shrink: 0;
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(232, 244, 252, 0.9) 0%, rgba(240, 249, 255, 0.75) 100%);
-  border: 1px solid rgba(38, 91, 147, 0.1);
-  font-size: 22px;
-  line-height: 1;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--guiaa-blue, #265b93) 8%, transparent);
+  color: var(--guiaa-blue, #265b93);
 }
 
 .dashboard-activity-body {
@@ -164,7 +160,7 @@
   margin: 0 0 10px;
   font-size: 13px;
   line-height: 1.45;
-  color: #64748b;
+  color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -184,7 +180,7 @@
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: #94a3b8;
+  color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 55%, transparent);
   min-width: 0;
 }
 
@@ -210,9 +206,9 @@
 .dashboard-activity-empty {
   text-align: center;
   padding: 28px 16px;
-  border: 1px dashed rgba(38, 91, 147, 0.2);
-  border-radius: 14px;
-  background: rgba(232, 244, 252, 0.35);
+  border: 1px solid color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 12%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--guiaa-sky-soft, #e8f4fc) 55%, #fff);
 }
 
 .dashboard-activity-empty--inline {
@@ -225,42 +221,24 @@
   min-height: 120px;
 }
 
-.dashboard-activity-empty--inline .dashboard-activity-empty-icon {
-  width: 52px;
-  height: 52px;
-  margin-bottom: 10px;
-}
-
 .dashboard-activity-empty--inline p {
   margin: 0;
   max-width: 28rem;
   font-size: 14px;
   line-height: 1.5;
-  color: #64748b;
+  color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
 }
 
 .dashboard-activity-muted {
   margin: 0;
   padding: 16px 18px;
   border-radius: 12px;
-  border: 1px dashed rgba(38, 91, 147, 0.18);
-  background: rgba(232, 244, 252, 0.35);
-  color: #64748b;
+  border: 1px solid color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 12%, transparent);
+  background: color-mix(in srgb, var(--guiaa-sky-soft, #e8f4fc) 55%, #fff);
+  color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
   font-size: 14px;
   line-height: 1.5;
   text-align: center;
-}
-
-.dashboard-activity-empty-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 12px;
-  border-radius: 16px;
-  background: rgba(38, 91, 147, 0.08);
-  color: #265b93;
 }
 
 .dashboard-activity-empty h3 {
@@ -272,7 +250,7 @@
 .dashboard-activity-empty p {
   margin: 0 0 16px;
   font-size: 14px;
-  color: #64748b;
+  color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
 }
 
 .dashboard-followup-list {
@@ -333,7 +311,7 @@
 
 .dashboard-followup-text span {
   font-size: 13px;
-  color: #64748b;
+  color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -343,7 +321,7 @@
 .dashboard-followup-date {
   flex-shrink: 0;
   font-size: 12px;
-  color: #94a3b8;
+  color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 55%, transparent);
 }
 
 .dashboard-shortcuts-grid {
@@ -389,11 +367,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(38, 91, 147, 0.08);
-  color: #265b93;
+  color: var(--guiaa-blue, #265b93);
 }
 
 .dashboard-shortcut-label {
@@ -408,17 +382,15 @@
   border-radius: 6px;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
-  color: #64748b;
+  color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 55%, transparent);
 }
 
 .dashboard-shortcut-lock {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 11px;
+  font-weight: 600;
   color: #b45309;
 }
 
@@ -432,7 +404,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .dashboard-block-activity .tabs-list {
     overflow-x: auto;
     flex-wrap: nowrap;
@@ -447,6 +419,7 @@
 
   .dashboard-activity-view-all {
     align-self: flex-start;
+    min-height: 44px;
   }
 
   .dashboard-activity-card:hover {
@@ -459,6 +432,7 @@
 
   .dashboard-activity-action {
     width: 100%;
+    min-height: 44px;
   }
 
   .dashboard-followup-item {
@@ -506,7 +480,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .dashboard-activity-grid {
     grid-template-columns: 1fr;
   }

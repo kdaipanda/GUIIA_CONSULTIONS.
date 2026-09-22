@@ -355,13 +355,13 @@
   padding: 0.5625rem 0.75rem !important;
   border-radius: 10px !important;
   border: 1px solid rgba(38, 91, 147, 0.16) !important;
-  background: rgba(255, 255, 255, 0.5) !important;
+  background: #fff !important;
   color: var(--clinic-navy, #0c2d4d) !important;
   font-size: 0.875rem !important;
   line-height: 1.35 !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   appearance: none;
   transition:
     border-color 0.2s ease,
@@ -578,17 +578,17 @@ html.dark .clinic-quick-register-dialog .clinic-quick-hint {
 .clinic-quick-register-dialog .clinic-quick-chip {
   justify-content: center;
   width: 100%;
-  min-height: 2.25rem;
+  min-height: 2.75rem;
   padding: 0.4rem 0.5rem;
-  border-radius: 999px;
+  border-radius: 8px;
   border: 1px solid rgba(38, 91, 147, 0.16);
-  background: rgba(255, 255, 255, 0.48);
+  background: #fff;
   font-size: 0.75rem;
   font-weight: 600;
   color: rgba(12, 45, 77, 0.82);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
 }
 
 .clinic-quick-register-dialog .clinic-quick-chip:hover {

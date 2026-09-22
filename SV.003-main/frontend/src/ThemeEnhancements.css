@@ -616,30 +616,26 @@ kbd {
    ============================================ */
 .privacy-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
+  inset: 0;
+  background: rgba(12, 45, 77, 0.78);
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .privacy-modal {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  box-shadow: var(--shadow-lg);
+  background: var(--bg-primary, #fff);
+  border: 1px solid color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 14%, transparent);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(12, 45, 77, 0.22);
   max-width: 600px;
   width: 100%;
   max-height: 80vh;
   overflow-y: auto;
-  animation: slideDown 0.3s ease;
+  animation: slideDown 0.2s ease-out;
 }
 
 .privacy-modal-header {

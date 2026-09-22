@@ -10,9 +10,9 @@
     max(0.75rem, env(safe-area-inset-right))
     max(0.75rem, env(safe-area-inset-bottom))
     max(0.75rem, env(safe-area-inset-left)) !important;
-  background-color: rgba(12, 45, 77, 0.72) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(12, 45, 77, 0.78) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .legal-modal.terms-modal {
@@ -48,9 +48,11 @@
 .legal-modal .legal-modal__close {
   color: #fff !important;
   background: rgba(255, 255, 255, 0.12) !important;
-  border-radius: 999px !important;
-  width: 2.5rem !important;
-  height: 2.5rem !important;
+  border-radius: 8px !important;
+  width: 2.75rem !important;
+  height: 2.75rem !important;
+  min-width: 2.75rem !important;
+  min-height: 2.75rem !important;
   font-size: inherit !important;
 }
 
@@ -106,19 +108,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition: background 0.15s ease;
 }
 
 .legal-modal__close:hover {
   background: rgba(255, 255, 255, 0.22);
-  transform: scale(1.04);
 }
 
 .legal-modal__body {
