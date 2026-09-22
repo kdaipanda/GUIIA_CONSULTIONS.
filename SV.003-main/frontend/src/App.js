@@ -114,7 +114,7 @@ const VIEW_TO_PATH = {
   inventory: "/app/inventario",
   billing: "/app/facturacion",
   reports: "/app/reportes",
-  tools: "/app/configuracion",
+  tools: "/app/herramientas",
   settings: "/app/configuracion",
   admin: "/app/admin",
   "new-consultation": "/app/consultas/nueva",
@@ -129,11 +129,10 @@ const VIEW_TO_PATH = {
 const PATH_TO_VIEW = {
   ...Object.fromEntries(
     Object.entries(VIEW_TO_PATH)
-      .filter(([view]) => view !== "patients" && view !== "tools")
+      .filter(([view]) => view !== "patients")
       .map(([view, path]) => [path, view]),
   ),
   "/app/pacientes": "clients",
-  "/app/herramientas": "settings",
 };
 
 const AUTH_REDIRECT_KEY = "guiaa_auth_redirect";
@@ -224,6 +223,9 @@ const ReportsPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import("./pages/clinic/SettingsPage").then((m) => ({ default: m.SettingsPage })),
 );
+const ToolsPage = lazy(() =>
+  import("./pages/clinic/ToolsPage").then((m) => ({ default: m.ToolsPage })),
+);
 const AdminPage = lazy(() =>
   import("./pages/clinic/AdminPage").then((m) => ({ default: m.AdminPage })),
 );
@@ -303,6 +305,14 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       shortcut: "",
       feature: MEMBERSHIP_FEATURES.reports,
       action: () => setView("reports"),
+    },
+    {
+      id: "tools",
+      title: t("commandPalette.toolsTitle"),
+      description: t("commandPalette.toolsDesc"),
+      icon: "🧮",
+      shortcut: "",
+      action: () => setView("tools"),
     },
     {
       id: "settings",
@@ -728,10 +738,6 @@ const Router = () => {
       navigate(VIEW_TO_PATH.clients, { replace: true });
       return;
     }
-    if (location.pathname === "/app/herramientas") {
-      navigate(VIEW_TO_PATH.settings, { replace: true });
-      return;
-    }
     const view = PATH_TO_VIEW[location.pathname];
     if (view && veterinarian) {
       setCurrentView(view);
@@ -934,7 +940,7 @@ const Router = () => {
     ),
     tools: (
       <ClinicShell setView={navigateSetView}>
-        <SettingsPage setView={navigateSetView} />
+        <ToolsPage setView={navigateSetView} />
       </ClinicShell>
     ),
     settings: (

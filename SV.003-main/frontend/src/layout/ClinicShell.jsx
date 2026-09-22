@@ -16,6 +16,7 @@ import {
   Menu,
   FlaskConical,
   CircleHelp,
+  Calculator,
 } from "lucide-react";
 import { Header } from "../components/Header";
 import { NotificationBell } from "../components/clinic/NotificationBell";
@@ -74,6 +75,7 @@ const NAV_ITEM_DEFS = [
     view: "medical-images",
     feature: MEMBERSHIP_FEATURES.medicalImages,
   },
+  { to: "/app/herramientas", labelKey: "nav.tools", icon: Calculator, view: "tools" },
   { to: "/app/configuracion", labelKey: "nav.settings", icon: Settings, view: "settings" },
   { to: "/app/ayuda", labelKey: "nav.help", icon: CircleHelp, view: "help" },
   { to: "/app/historial", labelKey: "nav.history", icon: ClipboardList, view: "consultation-history" },

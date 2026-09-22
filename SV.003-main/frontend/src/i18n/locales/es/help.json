@@ -135,6 +135,17 @@
         "Guarda: queda en el historial de interpretaciones del módulo."
       ]
     },
+    "tools": {
+      "title": "Herramientas clínicas",
+      "summary": "Calculadora de dosis y referencias externas para apoyo en consulta.",
+      "tip": "Ingresa peso y dosis mg/kg; añade concentración si quieres volumen o unidades a administrar.",
+      "steps": [
+        "Abre Herramientas desde el menú clínico.",
+        "Captura peso (kg) y dosis (mg/kg).",
+        "Elige presentación y concentración si aplica.",
+        "Revisa el resultado y confirma con ficha técnica antes de prescribir."
+      ]
+    },
     "settings": {
       "title": "Configuración",
       "summary": "Datos del consultorio, equipo, portal de citas y contraseña.",

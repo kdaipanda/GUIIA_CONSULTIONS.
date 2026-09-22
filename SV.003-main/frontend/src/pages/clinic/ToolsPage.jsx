@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Calculator, FlaskConical, Scale, ExternalLink } from "lucide-react";
-import "./clinicPageShared.css";
-import "./toolsPage.css";
+import { FlaskConical, Scale, ExternalLink } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { ModuleHelpTip } from "../../components/clinic/ModuleHelpTip";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import {
@@ -11,14 +11,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import "./clinicPageShared.css";
+import "./helpCenterPage.css";
+import "./toolsPage.css";
 
 const REFERENCE_LINKS = [
-  { label: "Plumb's Veterinary Drugs", url: "https://www.plumbsveterinarydrugs.com/" },
-  { label: "Merck Veterinary Manual", url: "https://www.merckvetmanual.com/" },
-  { label: "VIN (Veterinary Information Network)", url: "https://www.vin.com/" },
+  {
+    labelKey: "tools.refPlumb",
+    url: "https://www.plumbsveterinarydrugs.com/",
+  },
+  {
+    labelKey: "tools.refMerck",
+    url: "https://www.merckvetmanual.com/",
+  },
+  {
+    labelKey: "tools.refVin",
+    url: "https://www.vin.com/",
+  },
 ];
 
-export function ToolsPage() {
+export function ToolsPage({ setView }) {
+  const { t } = useTranslation("clinic");
   const [weight, setWeight] = useState("");
   const [dosePerKg, setDosePerKg] = useState("");
   const [concentration, setConcentration] = useState("");
@@ -43,52 +56,54 @@ export function ToolsPage() {
     return {
       totalMg: totalMg.toFixed(2),
       volumeOrUnits: volumeOrUnits != null ? volumeOrUnits.toFixed(3) : null,
-      unitLabel: unitType === "mg_ml" ? "ml" : "unidades",
+      unitLabel:
+        unitType === "mg_ml" ? t("tools.unitMl") : t("tools.unitTablet"),
     };
-  }, [weight, dosePerKg, concentration, unitType]);
+  }, [weight, dosePerKg, concentration, unitType, t]);
+
+  const concUnit =
+    unitType === "mg_ml" ? t("tools.concMgMl") : t("tools.concMgUnit");
 
   return (
     <div className="clinic-page clinic-page-guiaa clinic-tools-page clinic-tools-page-guiaa">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">Consultorio</p>
-          <h1>Herramientas clínicas</h1>
-          <p>Calculadoras y referencias rápidas para apoyo en consulta.</p>
+          <div className="clinic-page-title-row">
+            <h1>{t("tools.title")}</h1>
+            <ModuleHelpTip topicId="tools" setView={setView} />
+          </div>
+          <p>{t("tools.lead")}</p>
         </div>
       </div>
 
       <div className="clinic-tools-grid">
-        <section className="clinic-tools-card">
-          <div className="clinic-tools-card-head">
-            <Calculator size={20} aria-hidden />
-            <h2>Calculadora de dosis</h2>
-          </div>
-          <p className="clinic-muted clinic-tools-desc">
-            Calcula la dosis total a partir del peso, dosis mg/kg y concentración del fármaco.
-            Verifica siempre con la ficha técnica y el peso actual de la mascota.
-          </p>
+        <section className="clinic-tools-card" aria-labelledby="tools-dose-title">
+          <h2 id="tools-dose-title">{t("tools.doseTitle")}</h2>
+          <p className="clinic-muted clinic-tools-desc">{t("tools.doseLead")}</p>
 
           <div className="clinic-form-grid-2">
             <div className="form-group">
-              <Label htmlFor="tool-weight">Peso de la mascota (kg)</Label>
+              <Label htmlFor="tool-weight">{t("tools.weightLabel")}</Label>
               <Input
                 id="tool-weight"
                 type="number"
                 min="0"
                 step="0.01"
-                placeholder="Ej. 12.5"
+                inputMode="decimal"
+                placeholder={t("tools.weightPlaceholder")}
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
               />
             </div>
             <div className="form-group">
-              <Label htmlFor="tool-dose">Dosis (mg/kg)</Label>
+              <Label htmlFor="tool-dose">{t("tools.doseLabel")}</Label>
               <Input
                 id="tool-dose"
                 type="number"
                 min="0"
                 step="0.01"
-                placeholder="Ej. 10"
+                inputMode="decimal"
+                placeholder={t("tools.dosePlaceholder")}
                 value={dosePerKg}
                 onChange={(e) => setDosePerKg(e.target.value)}
               />
@@ -97,25 +112,32 @@ export function ToolsPage() {
 
           <div className="clinic-form-grid-2">
             <div className="form-group">
-              <Label>Presentación</Label>
+              <Label htmlFor="tool-presentation">{t("tools.presentationLabel")}</Label>
               <Select value={unitType} onValueChange={setUnitType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="tool-presentation" aria-label={t("tools.presentationLabel")}>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mg_ml">mg/ml (líquido)</SelectItem>
-                  <SelectItem value="mg_unit">mg por tableta/cápsula</SelectItem>
+                  <SelectItem value="mg_ml">{t("tools.presentationLiquid")}</SelectItem>
+                  <SelectItem value="mg_unit">{t("tools.presentationSolid")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="form-group">
               <Label htmlFor="tool-conc">
-                Concentración ({unitType === "mg_ml" ? "mg/ml" : "mg/unidad"})
+                {t("tools.concentrationLabel", { unit: concUnit })}
               </Label>
               <Input
                 id="tool-conc"
                 type="number"
                 min="0"
                 step="0.01"
-                placeholder={unitType === "mg_ml" ? "Ej. 50" : "Ej. 250"}
+                inputMode="decimal"
+                placeholder={
+                  unitType === "mg_ml"
+                    ? t("tools.concPlaceholderLiquid")
+                    : t("tools.concPlaceholderSolid")
+                }
                 value={concentration}
                 onChange={(e) => setConcentration(e.target.value)}
               />
@@ -123,16 +145,18 @@ export function ToolsPage() {
           </div>
 
           {result ? (
-            <div className="clinic-tools-result">
+            <div className="clinic-tools-result" role="status" aria-live="polite">
               <div className="clinic-tools-result-row">
                 <Scale size={16} aria-hidden />
-                <span>Dosis total:</span>
-                <strong>{result.totalMg} mg</strong>
+                <span>{t("tools.totalDose")}</span>
+                <strong>
+                  {result.totalMg} {t("tools.unitMg")}
+                </strong>
               </div>
               {result.volumeOrUnits && (
                 <div className="clinic-tools-result-row">
                   <FlaskConical size={16} aria-hidden />
-                  <span>A administrar:</span>
+                  <span>{t("tools.toAdminister")}</span>
                   <strong>
                     {result.volumeOrUnits} {result.unitLabel}
                   </strong>
@@ -140,33 +164,28 @@ export function ToolsPage() {
               )}
             </div>
           ) : (
-            <p className="clinic-tools-placeholder">
-              Ingresa peso y dosis mg/kg para ver el resultado.
-            </p>
+            <p className="clinic-tools-placeholder">{t("tools.placeholder")}</p>
           )}
         </section>
 
-        <section className="clinic-tools-card">
-          <div className="clinic-tools-card-head">
-            <FlaskConical size={20} aria-hidden />
-            <h2>Referencias</h2>
-          </div>
-          <p className="clinic-muted clinic-tools-desc">
-            Enlaces útiles para consultar protocolos, interacciones y dosificación.
-          </p>
+        <section className="clinic-tools-card" aria-labelledby="tools-refs-title">
+          <h2 id="tools-refs-title">{t("tools.refsTitle")}</h2>
+          <p className="clinic-muted clinic-tools-desc">{t("tools.refsLead")}</p>
           <ul className="clinic-tools-links">
             {REFERENCE_LINKS.map((link) => (
               <li key={link.url}>
                 <a href={link.url} target="_blank" rel="noopener noreferrer">
-                  <span>{link.label}</span>
-                  <ExternalLink size={14} aria-hidden className="clinic-tools-link-icon" />
+                  <span>{t(link.labelKey)}</span>
+                  <ExternalLink
+                    size={14}
+                    aria-hidden
+                    className="clinic-tools-link-icon"
+                  />
                 </a>
               </li>
             ))}
           </ul>
-          <p className="clinic-report-note">
-            GUIAA CDS complementa pero no sustituye el criterio clínico ni la prescripción formal.
-          </p>
+          <p className="clinic-report-note">{t("tools.disclaimer")}</p>
         </section>
       </div>
     </div>

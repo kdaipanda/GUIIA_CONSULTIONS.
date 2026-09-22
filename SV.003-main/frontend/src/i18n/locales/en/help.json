@@ -135,6 +135,17 @@
         "Save: it appears in this module’s interpretation history."
       ]
     },
+    "tools": {
+      "title": "Clinical tools",
+      "summary": "Dose calculator and external references for consultation support.",
+      "tip": "Enter weight and mg/kg dose; add concentration if you need volume or units to administer.",
+      "steps": [
+        "Open Tools from the clinic menu.",
+        "Enter weight (kg) and dose (mg/kg).",
+        "Choose presentation and concentration if needed.",
+        "Review the result and confirm with the label before prescribing."
+      ]
+    },
     "settings": {
       "title": "Settings",
       "summary": "Clinic details, team, booking portal, and password.",
