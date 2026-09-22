@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { fetchNotifications } from "../../lib/clinicApi";
 import {
   isNotificationRead,
@@ -9,11 +10,13 @@ import {
 import { dispatchOpenSupport } from "../../lib/supportReadState";
 
 export function NotificationBell({ veterinarianId, onNavigate }) {
+  const { t, i18n } = useTranslation("clinic");
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const panelRef = useRef(null);
   const toggleRef = useRef(null);
+  const locale = (i18n.language || "es").startsWith("en") ? "en-US" : "es-MX";
 
   const withReadState = useCallback(
     (items) =>
@@ -55,8 +58,18 @@ export function NotificationBell({ veterinarianId, onNavigate }) {
         setOpen(false);
       }
     };
+    const handleKeyDown = (event) => {
+      if (open && event.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [open]);
 
   const applyRead = useCallback(
@@ -106,6 +119,7 @@ export function NotificationBell({ veterinarianId, onNavigate }) {
   };
 
   const unread = notifications.filter((n) => !n.read).length;
+  const panelId = "clinic-notification-panel";
 
   return (
     <div className="notification-bell-wrap">
@@ -114,37 +128,62 @@ export function NotificationBell({ veterinarianId, onNavigate }) {
         ref={toggleRef}
         onClick={handleToggle}
         className="icon-btn notification-bell-btn"
-        aria-label={open ? "Cerrar notificaciones" : "Abrir notificaciones"}
+        aria-label={
+          open
+            ? t("notifications.closeAria")
+            : unread > 0
+              ? t("notifications.openAriaUnread", { count: unread })
+              : t("notifications.openAria")
+        }
         aria-expanded={open}
+        aria-controls={panelId}
+        aria-haspopup="dialog"
       >
         <Bell size={18} aria-hidden />
-        {unread > 0 && <span className="notification-badge">{unread}</span>}
+        {unread > 0 && (
+          <span className="notification-badge" aria-hidden>
+            {unread > 99 ? "99+" : unread}
+          </span>
+        )}
       </button>
 
       {open && (
-        <div ref={panelRef} className="notification-panel notification-panel-floating">
+        <div
+          ref={panelRef}
+          id={panelId}
+          className="notification-panel notification-panel-floating"
+          role="dialog"
+          aria-label={t("notifications.title")}
+        >
           <div className="notification-panel-header">
-            <h3>Notificaciones</h3>
+            <h3>{t("notifications.title")}</h3>
           </div>
           {loading ? (
-            <div className="notification-empty">Cargando...</div>
+            <div className="notification-empty" role="status">
+              {t("notifications.loading")}
+            </div>
           ) : notifications.length === 0 ? (
-            <div className="notification-empty">No hay notificaciones</div>
+            <div className="notification-empty">{t("notifications.empty")}</div>
           ) : (
-            <div className="notification-panel-body">
+            <div className="notification-panel-body" role="list">
               {notifications.map((notif) => (
                 <div
                   key={notif.id}
-                  role="button"
+                  role="listitem"
                   tabIndex={0}
                   onClick={() => markRead(notif)}
-                  onKeyDown={(e) => e.key === "Enter" && markRead(notif)}
-                  className={`notification-item ${notif.read ? "" : "unread"}`}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      markRead(notif);
+                    }
+                  }}
+                  className={`notification-item${notif.read ? "" : " unread"}`}
                 >
                   <div className="notification-title">{notif.title}</div>
                   <div className="notification-description">{notif.description}</div>
                   <div className="notification-timestamp">
-                    {new Date(notif.timestamp).toLocaleString("es-MX")}
+                    {new Date(notif.timestamp).toLocaleString(locale)}
                   </div>
                 </div>
               ))}

@@ -24,7 +24,6 @@ export function MembershipFeatureGate({ feature, setView, children }) {
         <div className="membership-feature-gate-icon" aria-hidden>
           <Lock size={22} />
         </div>
-        <p className="membership-feature-gate-eyebrow">{t("featureGate.eyebrow")}</p>
         <h2>{t("featureGate.title")}</h2>
         <p>{getFeatureUpgradeMessage(feature)}</p>
         <Button

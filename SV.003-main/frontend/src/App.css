@@ -7353,6 +7353,7 @@ html.dark .password-requirements-examples {
   position: relative;
   width: auto;
   height: auto;
+  min-height: 2.75rem;
   padding: 0 0 4px;
   border: none;
   background: transparent;
@@ -7363,11 +7364,11 @@ html.dark .password-requirements-examples {
   align-items: center;
   gap: 0.35rem;
   box-shadow: none;
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition: filter 0.15s ease;
 }
 
 .support-chat-toggle:not(.is-open):hover {
-  transform: translateY(-2px);
+  transform: none;
 }
 
 .support-chat-toggle:not(.is-open):focus-visible {
@@ -7377,24 +7378,25 @@ html.dark .password-requirements-examples {
 }
 
 .support-chat-toggle.is-open {
-  width: 48px;
-  height: 48px;
+  width: 2.75rem;
+  height: 2.75rem;
   padding: 0;
-  border-radius: 999px;
-  background: rgba(12, 45, 77, 0.92);
+  border-radius: 12px;
+  background: #0c2d4d;
   border: 1px solid rgba(61, 155, 143, 0.35);
   align-items: center;
   justify-content: center;
   color: #f8fafc;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(12px) saturate(1.1);
-  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  box-shadow: 0 4px 16px -6px rgba(12, 45, 77, 0.35);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .support-chat-toggle-close {
-  font-size: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
-  font-weight: 600;
 }
 
 .support-chat-plumitas {
@@ -7403,24 +7405,24 @@ html.dark .password-requirements-examples {
   height: 4.75rem;
   object-fit: contain;
   object-position: center;
-  filter: drop-shadow(0 8px 16px rgba(12, 45, 77, 0.22));
+  filter: drop-shadow(0 6px 12px rgba(12, 45, 77, 0.18));
   animation: support-plumitas-fly 4.2s ease-in-out infinite;
   transform-origin: center center;
   pointer-events: none;
 }
 
 .support-chat-plumitas-hint {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: #0c2d4d;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(10px) saturate(1.08);
-  -webkit-backdrop-filter: blur(10px) saturate(1.08);
-  border: 1px solid rgba(61, 155, 143, 0.28);
-  padding: 0.24rem 0.62rem 0.28rem;
-  border-radius: 999px;
-  box-shadow: 0 4px 14px -6px rgba(12, 45, 77, 0.22);
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(38, 91, 147, 0.16);
+  padding: 0.35rem 0.7rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px -4px rgba(12, 45, 77, 0.12);
   line-height: 1.2;
 }
 
@@ -7489,6 +7491,7 @@ html.dark .password-requirements-examples {
   flex: 1;
   border: none;
   background: transparent;
+  min-height: 2.75rem;
   padding: 10px 8px;
   font-size: 13px;
   font-weight: 600;
@@ -7501,8 +7504,8 @@ html.dark .password-requirements-examples {
 }
 
 .support-chat-tabs button.active {
-  color: #2563eb;
-  box-shadow: inset 0 -2px 0 #2563eb;
+  color: #0c2d4d;
+  box-shadow: inset 0 -2px 0 #3d9b8f;
 }
 
 .support-chat-tab-badge {
@@ -7555,13 +7558,13 @@ html.dark .password-requirements-examples {
 }
 
 .support-chat-ticket-item:hover {
-  border-color: #93c5fd;
-  background: #eff6ff;
+  border-color: rgba(61, 155, 143, 0.4);
+  background: rgba(61, 155, 143, 0.06);
 }
 
 .support-chat-ticket-item.unread {
-  border-color: #2563eb;
-  background: #eff6ff;
+  border-color: rgba(61, 155, 143, 0.55);
+  background: rgba(61, 155, 143, 0.08);
 }
 
 .support-chat-ticket-item-top {
@@ -7608,11 +7611,12 @@ html.dark .password-requirements-examples {
   align-self: flex-start;
   border: none;
   background: transparent;
-  color: #2563eb;
+  color: #265b93;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  padding: 4px 0 8px;
+  min-height: 2.75rem;
+  padding: 4px 0;
 }
 
 .support-chat-ticket-detail-head {
@@ -7630,17 +7634,19 @@ html.dark .password-requirements-examples {
 }
 
 .support-chat-status {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 999px;
+  padding: 4px 8px;
+  border-radius: 8px;
   white-space: nowrap;
+  text-transform: none;
+  letter-spacing: -0.01em;
 }
 
 .support-chat-status-open,
 .support-chat-status-in_progress {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: rgba(38, 91, 147, 0.12);
+  color: #265b93;
 }
 
 .support-chat-status-resolved {
@@ -7704,10 +7710,11 @@ html.dark .password-requirements-examples {
 }
 
 .support-chat-thread-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  color: #64748b;
 }
 
 .support-chat-ticket-reply {
@@ -7731,11 +7738,12 @@ html.dark .password-requirements-examples {
 .support-chat-ticket-reply button {
   align-self: flex-end;
   border: none;
-  border-radius: 8px;
-  background: #2563eb;
+  border-radius: 10px;
+  background: #3d9b8f;
   color: #fff;
+  min-height: 2.75rem;
   padding: 8px 14px;
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -7750,9 +7758,9 @@ html.dark .password-requirements-examples {
   height: min(520px, calc(100vh - 100px));
   margin-bottom: 10px;
   background: #ffffff;
-  border: 1px solid #dbeafe;
+  border: 1px solid rgba(38, 91, 147, 0.14);
   border-radius: 14px;
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 12px 36px -14px rgba(12, 45, 77, 0.22);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -7763,9 +7771,26 @@ html.dark .password-requirements-examples {
   align-items: center;
   justify-content: space-between;
   padding: 12px 14px;
-  background: #eff6ff;
-  border-bottom: 1px solid #dbeafe;
-  color: #1e3a8a;
+  background: #f8fafc;
+  border-bottom: 1px solid rgba(38, 91, 147, 0.12);
+  color: #0c2d4d;
+}
+
+.support-chat-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  color: #0c2d4d;
+}
+
+.support-chat-close:hover {
+  background: rgba(38, 91, 147, 0.08);
 }
 
 .support-chat-header button {
@@ -7773,7 +7798,7 @@ html.dark .password-requirements-examples {
   background: transparent;
   font-size: 16px;
   cursor: pointer;
-  color: #1e3a8a;
+  color: #0c2d4d;
 }
 
 .support-chat-messages {
@@ -7803,7 +7828,7 @@ html.dark .password-requirements-examples {
 
 .support-chat-bubble.user {
   align-self: flex-end;
-  background: #2563eb;
+  background: #265b93;
   color: #ffffff;
 }
 
@@ -7823,18 +7848,20 @@ html.dark .password-requirements-examples {
 .support-chat-input-row input {
   flex: 1;
   min-width: 0;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  min-height: 2.75rem;
+  border: 1px solid rgba(38, 91, 147, 0.18);
+  border-radius: 10px;
   padding: 10px;
   font-size: 14px;
 }
 
 .support-chat-input-row button {
   border: none;
-  border-radius: 8px;
-  background: #2563eb;
+  border-radius: 10px;
+  background: #3d9b8f;
   color: #fff;
-  padding: 0 12px;
+  min-height: 2.75rem;
+  padding: 0 14px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -10373,9 +10400,11 @@ html {
 }
 
 .header-actions-slot .notification-bell-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 8px;
 }
 
 .header-actions-slot .notification-badge {
@@ -10436,23 +10465,23 @@ html {
   flex-shrink: 0;
 }
 
-/* Barra clínica: mantener estilo claro al hacer scroll (no heredar navbar oscuro del landing) */
+/* Barra clínica: opaca al scroll (sin glass ni gradient text) */
 .clinic-shell > .header.scrolled {
-  background: rgba(255, 255, 255, 0.96) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08) !important;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 1px 0 rgba(12, 45, 77, 0.04) !important;
+  border-bottom: 1px solid rgba(38, 91, 147, 0.12);
   padding: 6px 0;
 }
 
 .clinic-shell > .header.scrolled .nav-brand h1 {
   font-size: 18px;
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  background: none;
+  background-clip: unset;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #0c2d4d;
+  color: #0c2d4d;
 }
 
 .clinic-shell > .header.scrolled .logo-image.logo-image-full,

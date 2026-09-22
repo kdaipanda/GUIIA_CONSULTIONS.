@@ -471,6 +471,14 @@
     "closeUserMenu": "Cerrar menú de usuario",
     "openUserMenu": "Abrir menú de usuario"
   },
+  "notifications": {
+    "title": "Notificaciones",
+    "openAria": "Abrir notificaciones",
+    "openAriaUnread": "Abrir notificaciones, {{count}} sin leer",
+    "closeAria": "Cerrar notificaciones",
+    "loading": "Cargando…",
+    "empty": "No hay notificaciones"
+  },
   "membershipPlans": {
     "planNames": {
       "basic": "Básica",
@@ -664,6 +672,9 @@
   },
   "commandPalette": {
     "searchPlaceholder": "Buscar comandos...",
+    "dialogLabel": "Paleta de comandos",
+    "resultsLabel": "Comandos disponibles",
+    "empty": "No se encontraron comandos",
     "dashboardTitle": "Dashboard",
     "dashboardDesc": "Resumen operativo del consultorio",
     "clientsTitle": "Dueños y mascotas",

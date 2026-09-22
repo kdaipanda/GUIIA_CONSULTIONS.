@@ -6,7 +6,35 @@
   lazy,
   Suspense,
 } from "react";
-import { BarChart3, CalendarDays, Gem, Sun, Cloud, CloudRain, CloudSun, Thermometer, Plus, ClipboardList, FlaskConical, Crown, Moon, Brain, FileDown, User, Stethoscope, Microscope, Lock } from "lucide-react";
+import {
+  BarChart3,
+  Brain,
+  Calculator,
+  CalendarDays,
+  ChartNoAxesColumn,
+  CircleHelp,
+  ClipboardList,
+  Cloud,
+  CloudRain,
+  CloudSun,
+  Crown,
+  FlaskConical,
+  Gem,
+  Lock,
+  Microscope,
+  Moon,
+  Package,
+  PawPrint,
+  Plus,
+  Receipt,
+  Search,
+  Settings,
+  Shield,
+  Stethoscope,
+  Sun,
+  Thermometer,
+  User,
+} from "lucide-react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import "./App.css";
@@ -51,7 +79,6 @@ import {
   trackMetaCompleteRegistration,
   trackMetaInitiateCheckout,
 } from "./lib/metaPixel";
-import { clinicNavIsHero, clinicNavThemeStyle } from "./lib/clinicNavTheme";
 import { LATAM_COUNTRIES, countryLabel } from "./lib/latamCountries";
 import { shouldShowTrialSurvey } from "./lib/trialSurvey";
 import { TrialSurveyModal } from "./components/TrialSurveyModal";
@@ -258,7 +285,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "dashboard",
       title: t("commandPalette.dashboardTitle"),
       description: t("commandPalette.dashboardDesc"),
-      icon: "📊",
+      icon: BarChart3,
       shortcut: "",
       action: () => setView("dashboard"),
     },
@@ -266,7 +293,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "clients",
       title: t("commandPalette.clientsTitle"),
       description: t("commandPalette.clientsDesc"),
-      icon: "🐾",
+      icon: PawPrint,
       shortcut: "",
       action: () => setView("clients"),
     },
@@ -274,7 +301,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "agenda",
       title: t("commandPalette.agendaTitle"),
       description: t("commandPalette.agendaDesc"),
-      icon: "📅",
+      icon: CalendarDays,
       shortcut: "",
       action: () => setView("agenda"),
     },
@@ -282,7 +309,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "inventory",
       title: t("commandPalette.inventoryTitle"),
       description: t("commandPalette.inventoryDesc"),
-      icon: "📦",
+      icon: Package,
       shortcut: "",
       feature: MEMBERSHIP_FEATURES.inventory,
       action: () => setView("inventory"),
@@ -291,7 +318,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "billing",
       title: t("commandPalette.billingTitle"),
       description: t("commandPalette.billingDesc"),
-      icon: "🧾",
+      icon: Receipt,
       shortcut: "",
       feature: MEMBERSHIP_FEATURES.billing,
       action: () => setView("billing"),
@@ -300,7 +327,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "reports",
       title: t("commandPalette.reportsTitle"),
       description: t("commandPalette.reportsDesc"),
-      icon: "📈",
+      icon: ChartNoAxesColumn,
       shortcut: "",
       feature: MEMBERSHIP_FEATURES.reports,
       action: () => setView("reports"),
@@ -309,7 +336,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "tools",
       title: t("commandPalette.toolsTitle"),
       description: t("commandPalette.toolsDesc"),
-      icon: "🧮",
+      icon: Calculator,
       shortcut: "",
       action: () => setView("tools"),
     },
@@ -317,7 +344,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "settings",
       title: t("commandPalette.settingsTitle"),
       description: t("commandPalette.settingsDesc"),
-      icon: "⚙️",
+      icon: Settings,
       shortcut: "",
       action: () => setView("settings"),
     },
@@ -325,7 +352,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "help",
       title: t("commandPalette.helpTitle"),
       description: t("commandPalette.helpDesc"),
-      icon: "❓",
+      icon: CircleHelp,
       shortcut: "",
       action: () => setView("help"),
     },
@@ -333,7 +360,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "new-consultation",
       title: t("commandPalette.diagnosisTitle"),
       description: t("commandPalette.diagnosisDesc"),
-      icon: "🩺",
+      icon: Stethoscope,
       shortcut: "N",
       action: () => setView("new-consultation"),
     },
@@ -341,7 +368,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "consultation-history",
       title: t("commandPalette.historyTitle"),
       description: t("commandPalette.historyDesc"),
-      icon: "📋",
+      icon: ClipboardList,
       shortcut: "H",
       action: () => setView("consultation-history"),
     },
@@ -349,7 +376,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "medical-images",
       title: t("commandPalette.labTitle"),
       description: t("commandPalette.labDesc"),
-      icon: "🔬",
+      icon: FlaskConical,
       shortcut: "",
       feature: MEMBERSHIP_FEATURES.medicalImages,
       action: () => setView("medical-images"),
@@ -358,7 +385,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "membership",
       title: t("commandPalette.membershipTitle"),
       description: t("commandPalette.membershipDesc"),
-      icon: "⭐",
+      icon: Crown,
       shortcut: "M",
       action: () => setView("membership"),
     },
@@ -366,7 +393,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "profile",
       title: t("commandPalette.profileTitle"),
       description: t("commandPalette.profileDesc"),
-      icon: "👤",
+      icon: User,
       shortcut: "P",
       action: () => setView("profile"),
     },
@@ -377,7 +404,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "admin",
       title: t("commandPalette.adminTitle"),
       description: t("commandPalette.adminDesc"),
-      icon: "🛡️",
+      icon: Shield,
       shortcut: "",
       action: () => setView("admin"),
     });
@@ -390,7 +417,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       id: "expert-consultation",
       title: t("commandPalette.expertTitle"),
       description: t("commandPalette.expertDesc"),
-      icon: "🧠",
+      icon: Brain,
       shortcut: "E",
       action: () => openExpertConsultation?.(),
     });
@@ -443,14 +470,31 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
   if (!isOpen) return null;
 
   return (
-    <div className="command-palette-overlay" onClick={onClose}>
-      <div className="command-palette" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="command-palette-overlay"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="command-palette"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("commandPalette.dialogLabel")}
+      >
         <div className="command-palette-input-wrapper">
+          <Search
+            className="command-palette-search-icon"
+            size={18}
+            strokeWidth={2}
+            aria-hidden
+          />
           <input
             ref={inputRef}
             type="text"
             className="command-palette-input"
             placeholder={t("commandPalette.searchPlaceholder")}
+            aria-label={t("commandPalette.searchPlaceholder")}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -458,38 +502,47 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
             }}
           />
         </div>
-        <div className="command-palette-results">
+        <div
+          className="command-palette-results"
+          role="listbox"
+          aria-label={t("commandPalette.resultsLabel")}
+        >
           {filteredCommands.length > 0 ? (
-            filteredCommands.map((cmd, index) => (
-              <div
-                key={cmd.id}
-                style={{
-                  ...clinicNavThemeStyle(cmd.id),
-                  animationDelay: `${index * 0.08}s`,
-                }}
-                className={`command-palette-item nav-toned nav-pulse${clinicNavIsHero(cmd.id) ? " nav-hero" : ""}${index === activeIndex ? " active" : ""}`}
-                onClick={() => {
-                  cmd.action();
-                  onClose();
-                }}
-              >
-                <div className="command-palette-item-icon">{cmd.icon}</div>
-                <div className="command-palette-item-content">
-                  <div className="command-palette-item-title">{cmd.title}</div>
-                  <div className="command-palette-item-description">
-                    {cmd.description}
+            filteredCommands.map((cmd, index) => {
+              const Icon = cmd.icon;
+              const isActive = index === activeIndex;
+              return (
+                <div
+                  key={cmd.id}
+                  role="option"
+                  aria-selected={isActive}
+                  className={`command-palette-item${isActive ? " active" : ""}`}
+                  onClick={() => {
+                    cmd.action();
+                    onClose();
+                  }}
+                  onMouseEnter={() => setActiveIndex(index)}
+                >
+                  <div className="command-palette-item-icon" aria-hidden>
+                    <Icon size={18} strokeWidth={2} />
                   </div>
+                  <div className="command-palette-item-content">
+                    <div className="command-palette-item-title">{cmd.title}</div>
+                    <div className="command-palette-item-description">
+                      {cmd.description}
+                    </div>
+                  </div>
+                  {cmd.shortcut && (
+                    <div className="command-palette-item-shortcut">
+                      <kbd>{cmd.shortcut}</kbd>
+                    </div>
+                  )}
                 </div>
-                {cmd.shortcut && (
-                  <div className="command-palette-item-shortcut">
-                    <kbd>{cmd.shortcut}</kbd>
-                  </div>
-                )}
-              </div>
-            ))
+              );
+            })
           ) : (
             <div className="command-palette-empty">
-              No se encontraron comandos
+              {t("commandPalette.empty")}
             </div>
           )}
         </div>

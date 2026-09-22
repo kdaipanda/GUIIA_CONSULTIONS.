@@ -5,8 +5,13 @@ import { preloadDeferredNamespaces } from "../lib/loadI18nNamespace";
 
 /**
  * Compact ES | EN language toggle for landing, auth, and clinic shell.
+ * variant="menu" — full-width row for account dropdown.
  */
-export function LanguageSwitcher({ className = "", tone = "default" }) {
+export function LanguageSwitcher({
+  className = "",
+  tone = "default",
+  variant = "default",
+}) {
   const { i18n, t } = useTranslation("common");
   const current = (i18n.language || "en").startsWith("es") ? "es" : "en";
 
@@ -15,6 +20,40 @@ export function LanguageSwitcher({ className = "", tone = "default" }) {
     syncDocumentLocale(lng);
     await preloadDeferredNamespaces();
   };
+
+  if (variant === "menu") {
+    return (
+      <div className={`header-lang-menu ${className}`.trim()} role="none">
+        <span className="header-lang-menu-label" id="header-lang-label">
+          {t("language")}
+        </span>
+        <div
+          className="header-lang-menu-toggle"
+          role="group"
+          aria-labelledby="header-lang-label"
+        >
+          <button
+            type="button"
+            className={`header-lang-menu-btn${current === "es" ? " is-active" : ""}`}
+            onClick={() => setLang("es")}
+            aria-pressed={current === "es"}
+            title={t("switchToEs")}
+          >
+            ES
+          </button>
+          <button
+            type="button"
+            className={`header-lang-menu-btn${current === "en" ? " is-active" : ""}`}
+            onClick={() => setLang("en")}
+            aria-pressed={current === "en"}
+            title={t("switchToEn")}
+          >
+            EN
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const base =
     tone === "on-dark"

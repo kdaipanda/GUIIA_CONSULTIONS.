@@ -505,24 +505,11 @@ html.dark .clinic-dialog-guiaa [class*="DialogTitle"] {
 }
 
 .clinic-quick-register-dialog .clinic-quick-dialog-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin: 0 0 0.5rem;
-  padding: 0.22rem 0.55rem;
-  border-radius: 999px;
-  border: 1px solid rgba(61, 155, 143, 0.24);
-  background: rgba(61, 155, 143, 0.1);
-  color: #267a70;
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  line-height: 1.2;
+  display: none;
 }
 
 .clinic-quick-register-dialog .clinic-quick-dialog-eyebrow svg {
-  color: #3d9b8f;
-  flex-shrink: 0;
+  display: none;
 }
 
 .clinic-quick-register-dialog .clinic-quick-dialog-title {
@@ -699,15 +686,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 }
 
 .clinic-quick-dialog-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0 0 4px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--clinic-blue, #265b93);
+  display: none;
 }
 
 .clinic-quick-dialog-mascot.guiaa-mascot-wrap {
@@ -1118,12 +1097,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 }
 
 .membership-feature-gate-eyebrow {
-  margin: 0 0 6px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #265b93;
+  display: none;
 }
 
 .membership-feature-gate-card h2 {
@@ -1141,6 +1115,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 .membership-feature-gate-cta {
   margin-top: 18px;
   gap: 8px;
+  min-height: 2.75rem;
 }
 
 .clinic-header-actions {

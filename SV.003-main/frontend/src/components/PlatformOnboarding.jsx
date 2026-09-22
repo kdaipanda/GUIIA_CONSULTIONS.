@@ -37,6 +37,7 @@ export function PlatformOnboarding({ isOpen, onClose, veterinarianId, setView })
   const step = steps[stepIndex];
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === steps.length - 1;
+  const StepIcon = step?.Icon;
 
   const finish = () => {
     markPlatformOnboardingComplete(veterinarianId);
@@ -79,7 +80,17 @@ export function PlatformOnboarding({ isOpen, onClose, veterinarianId, setView })
     >
       <DialogContent className="platform-onboarding-dialog sm:max-w-lg">
         <DialogHeader>
-          <div className="platform-onboarding-progress" aria-hidden>
+          <div
+            className="platform-onboarding-progress"
+            role="progressbar"
+            aria-valuemin={1}
+            aria-valuemax={steps.length}
+            aria-valuenow={stepIndex + 1}
+            aria-label={t("onboarding.stepOf", {
+              current: stepIndex + 1,
+              total: steps.length,
+            })}
+          >
             {steps.map((s, idx) => (
               <span
                 key={s.id}
@@ -91,9 +102,11 @@ export function PlatformOnboarding({ isOpen, onClose, veterinarianId, setView })
             {t("onboarding.stepOf", { current: stepIndex + 1, total: steps.length })}
           </p>
           <DialogTitle className="platform-onboarding-title">
-            <span className="platform-onboarding-icon" aria-hidden>
-              {step.icon}
-            </span>
+            {StepIcon ? (
+              <span className="platform-onboarding-icon" aria-hidden>
+                <StepIcon size={22} strokeWidth={1.75} />
+              </span>
+            ) : null}
             {t(`onboarding.steps.${step.id}.title`)}
           </DialogTitle>
           <DialogDescription asChild>
@@ -111,21 +124,36 @@ export function PlatformOnboarding({ isOpen, onClose, veterinarianId, setView })
         <DialogFooter className="platform-onboarding-footer">
           <div className="platform-onboarding-footer-left">
             {!isFirst && (
-              <Button type="button" variant="ghost" onClick={handleBack}>
+              <Button
+                type="button"
+                variant="ghost"
+                className="min-h-11"
+                onClick={handleBack}
+              >
                 {t("onboarding.previous")}
               </Button>
             )}
-            <Button type="button" variant="ghost" onClick={handleSkip}>
+            <Button
+              type="button"
+              variant="ghost"
+              className="min-h-11"
+              onClick={handleSkip}
+            >
               {t("onboarding.skip")}
             </Button>
           </div>
           <div className="platform-onboarding-footer-right">
             {step.actionView && (
-              <Button type="button" variant="secondary" onClick={goToAction}>
+              <Button
+                type="button"
+                variant="secondary"
+                className="min-h-11"
+                onClick={goToAction}
+              >
                 {t(`onboarding.steps.${step.id}.actionLabel`)}
               </Button>
             )}
-            <Button type="button" onClick={handleNext}>
+            <Button type="button" className="min-h-11" onClick={handleNext}>
               {isLast ? t("onboarding.start") : t("onboarding.next")}
             </Button>
           </div>

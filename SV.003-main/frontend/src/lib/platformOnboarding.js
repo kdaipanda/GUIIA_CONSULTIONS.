@@ -1,3 +1,13 @@
+import {
+  BarChart3,
+  CalendarDays,
+  MessageCircle,
+  Package,
+  PawPrint,
+  Sparkles,
+  Stethoscope,
+} from "lucide-react";
+
 const ONBOARDING_VERSION = 1;
 
 export function platformOnboardingStorageKey(vetId) {
@@ -25,32 +35,32 @@ export function markPlatformOnboardingComplete(vetId) {
 export const PLATFORM_ONBOARDING_STEPS = [
   {
     id: "welcome",
-    icon: "👋",
+    Icon: Sparkles,
   },
   {
     id: "diagnosis",
-    icon: "🩺",
+    Icon: Stethoscope,
     hint: "N",
     actionView: "new-consultation",
   },
   {
     id: "patients",
-    icon: "🐾",
+    Icon: PawPrint,
   },
   {
     id: "agenda",
-    icon: "📅",
+    Icon: CalendarDays,
   },
   {
     id: "inventory-sales",
-    icon: "📦",
+    Icon: Package,
   },
   {
     id: "reports",
-    icon: "📈",
+    Icon: BarChart3,
   },
   {
     id: "support",
-    icon: "💬",
+    Icon: MessageCircle,
   },
 ];

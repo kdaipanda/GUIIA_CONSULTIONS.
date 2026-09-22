@@ -1,5 +1,8 @@
 .platform-onboarding-dialog {
   gap: 0;
+  border: 1px solid rgba(38, 91, 147, 0.12);
+  background: #ffffff;
+  box-shadow: 0 12px 40px -16px rgba(12, 45, 77, 0.2);
 }
 
 .platform-onboarding-progress {
@@ -12,25 +15,25 @@
   flex: 1;
   height: 4px;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.35);
-  transition: background 0.2s ease;
+  background: rgba(38, 91, 147, 0.12);
+  transition: background 0.15s ease;
 }
 
 .platform-onboarding-dot.active {
-  background: linear-gradient(90deg, #3b82f6, #10b981);
+  background: #3d9b8f;
 }
 
 .platform-onboarding-dot.done {
-  background: rgba(16, 185, 129, 0.55);
+  background: rgba(61, 155, 143, 0.45);
 }
 
 .platform-onboarding-step-label {
   margin: 0 0 8px;
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--text-tertiary, #64748b);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  color: #64748b;
+  text-transform: none;
+  letter-spacing: -0.01em;
 }
 
 .platform-onboarding-title {
@@ -38,35 +41,45 @@
   align-items: center;
   gap: 10px;
   text-align: left;
+  color: #0c2d4d;
+  letter-spacing: -0.02em;
 }
 
 .platform-onboarding-icon {
-  font-size: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: rgba(38, 91, 147, 0.1);
+  color: #0c2d4d;
   line-height: 1;
 }
 
 .platform-onboarding-body p {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.9375rem;
   line-height: 1.55;
-  color: var(--text-secondary, #475569);
+  color: #475569;
 }
 
 .platform-onboarding-hint {
   margin-top: 12px !important;
-  font-size: 13px !important;
-  color: var(--text-tertiary, #64748b) !important;
+  font-size: 0.8125rem !important;
+  color: #64748b !important;
 }
 
 .platform-onboarding-hint kbd {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 6px;
-  background: rgba(59, 130, 246, 0.12);
-  border: 1px solid rgba(59, 130, 246, 0.25);
+  background: rgba(38, 91, 147, 0.1);
+  border: 1px solid rgba(38, 91, 147, 0.2);
   font-size: 12px;
   font-weight: 700;
-  color: #2563eb;
+  color: #265b93;
 }
 
 .platform-onboarding-footer {
@@ -84,14 +97,64 @@
   align-items: center;
 }
 
+.platform-onboarding-footer .btn,
+.platform-onboarding-footer button {
+  min-height: 2.75rem;
+}
+
+[data-theme="dark"] .platform-onboarding-dialog,
+html.dark .platform-onboarding-dialog {
+  background: #121a26;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 [data-theme="dark"] .platform-onboarding-dot,
 html.dark .platform-onboarding-dot {
   background: rgba(148, 163, 184, 0.2);
 }
 
+[data-theme="dark"] .platform-onboarding-dot.active,
+html.dark .platform-onboarding-dot.active {
+  background: #3d9b8f;
+}
+
+[data-theme="dark"] .platform-onboarding-title,
+html.dark .platform-onboarding-title {
+  color: #f0f4f8;
+}
+
+[data-theme="dark"] .platform-onboarding-icon,
+html.dark .platform-onboarding-icon {
+  background: rgba(61, 155, 143, 0.16);
+  color: #a7f3ec;
+}
+
+[data-theme="dark"] .platform-onboarding-body p,
+html.dark .platform-onboarding-body p {
+  color: #a8b4c4;
+}
+
 [data-theme="dark"] .platform-onboarding-hint kbd,
 html.dark .platform-onboarding-hint kbd {
-  background: rgba(59, 130, 246, 0.2);
-  border-color: rgba(96, 165, 250, 0.35);
-  color: #93c5fd;
+  background: rgba(61, 155, 143, 0.16);
+  border-color: rgba(61, 155, 143, 0.35);
+  color: #a7f3ec;
+}
+
+@media (max-width: 1023px) {
+  .platform-onboarding-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .platform-onboarding-footer-left,
+  .platform-onboarding-footer-right {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .platform-onboarding-footer-left > *,
+  .platform-onboarding-footer-right > * {
+    flex: 1;
+  }
 }

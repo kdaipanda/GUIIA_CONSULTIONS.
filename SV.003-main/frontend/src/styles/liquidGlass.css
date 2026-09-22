@@ -392,67 +392,56 @@ html:not(.dark):not([data-theme="dark"]) .category-selector-glass-panel {
 /* —— Chrome global (header, nav, notificaciones) —— */
 
 .header {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.72) 0%,
-    rgba(255, 255, 255, 0.55) 100%
-  ) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.65) !important;
-  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
-  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
-  box-shadow:
-    0 8px 32px -20px rgba(12, 45, 77, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-bottom: 1px solid rgba(38, 91, 147, 0.1) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 1px 0 rgba(12, 45, 77, 0.04) !important;
 }
 
 .header.scrolled {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(248, 252, 255, 0.82) 100%
-  ) !important;
-  backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate)) !important;
-  -webkit-backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(var(--liquid-glass-saturate)) !important;
-  border-bottom-color: rgba(255, 255, 255, 0.75) !important;
-  box-shadow:
-    0 12px 40px -16px rgba(12, 45, 77, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom-color: rgba(38, 91, 147, 0.12) !important;
+  box-shadow: 0 1px 0 rgba(12, 45, 77, 0.06) !important;
+}
+
+.clinic-shell > .header,
+.clinic-shell > .header.scrolled {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .nav-menu.mobile-open {
-  background: linear-gradient(
-    165deg,
-    rgba(255, 255, 255, 0.94) 0%,
-    rgba(232, 244, 252, 0.88) 100%
-  ) !important;
-  backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(1.15) !important;
-  -webkit-backdrop-filter: blur(var(--liquid-glass-blur-strong)) saturate(1.15) !important;
-  border: 1px solid rgba(255, 255, 255, 0.7) !important;
-  box-shadow: var(--liquid-glass-shadow) !important;
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(38, 91, 147, 0.12) !important;
+  box-shadow: 0 8px 28px -12px rgba(12, 45, 77, 0.18) !important;
 }
 
 .notification-panel {
-  background: var(--liquid-glass-bg-strong) !important;
-  border: 1px solid var(--liquid-glass-border-color) !important;
-  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
-  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate)) !important;
-  box-shadow: var(--liquid-glass-shadow) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(38, 91, 147, 0.12) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 8px 28px -12px rgba(12, 45, 77, 0.18) !important;
 }
 
 .notification-panel-header {
-  background: rgba(255, 255, 255, 0.45) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #f8fafc !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .icon-btn {
-  background: rgba(255, 255, 255, 0.58) !important;
-  border: 1px solid rgba(255, 255, 255, 0.82) !important;
-  backdrop-filter: blur(10px) saturate(1.08);
-  -webkit-backdrop-filter: blur(10px) saturate(1.08);
-  box-shadow:
-    0 4px 12px -6px rgba(12, 45, 77, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  background: #f8fafc !important;
+  border: 1px solid rgba(38, 91, 147, 0.16) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
 }
 
 /* —— Dashboard (fondo + paneles) —— */

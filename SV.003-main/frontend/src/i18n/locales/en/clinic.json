@@ -471,6 +471,14 @@
     "closeUserMenu": "Close user menu",
     "openUserMenu": "Open user menu"
   },
+  "notifications": {
+    "title": "Notifications",
+    "openAria": "Open notifications",
+    "openAriaUnread": "Open notifications, {{count}} unread",
+    "closeAria": "Close notifications",
+    "loading": "Loading…",
+    "empty": "No notifications"
+  },
   "membershipPlans": {
     "planNames": {
       "basic": "Basic",
@@ -664,6 +672,9 @@
   },
   "commandPalette": {
     "searchPlaceholder": "Search commands…",
+    "dialogLabel": "Command palette",
+    "resultsLabel": "Available commands",
+    "empty": "No commands found",
     "dashboardTitle": "Dashboard",
     "dashboardDesc": "Practice operations overview",
     "clientsTitle": "Owners and pets",

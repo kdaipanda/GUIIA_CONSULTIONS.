@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Users, PawPrint, Zap } from "lucide-react";
+import { Users, PawPrint } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { clinicDialogClass } from "./ClinicPageUi";
 import { DoctorPlumitas } from "../brand/DoctorPlumitas";
@@ -79,10 +79,6 @@ export function QuickClientPatientDialog({
           <div className="clinic-quick-dialog-hero">
             <DoctorPlumitas size="xs" badge={false} className="clinic-quick-dialog-mascot" />
             <div className="clinic-quick-dialog-intro">
-              <p className="clinic-quick-dialog-eyebrow">
-                <Zap size={12} aria-hidden />
-                {t("quickRegister.eyebrow")}
-              </p>
               <DialogTitle className="clinic-quick-dialog-title">
                 {t("quickRegister.title")}
               </DialogTitle>

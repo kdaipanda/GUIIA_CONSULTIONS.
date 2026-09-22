@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { X } from "lucide-react";
 import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
 import {
@@ -258,8 +259,13 @@ export function SupportChatWidget({ currentView }) {
         <div className="support-chat-panel">
           <div className="support-chat-header">
             <strong>{t("supportWidget.header")}</strong>
-            <button type="button" onClick={() => setIsOpen(false)} aria-label={t("supportWidget.closeChat")}>
-              ✕
+            <button
+              type="button"
+              className="support-chat-close"
+              onClick={() => setIsOpen(false)}
+              aria-label={t("supportWidget.closeChat")}
+            >
+              <X size={18} strokeWidth={1.75} aria-hidden />
             </button>
           </div>
 
@@ -488,7 +494,7 @@ export function SupportChatWidget({ currentView }) {
       >
         {isOpen ? (
           <span className="support-chat-toggle-close" aria-hidden>
-            ✕
+            <X size={20} strokeWidth={1.75} />
           </span>
         ) : (
           <>

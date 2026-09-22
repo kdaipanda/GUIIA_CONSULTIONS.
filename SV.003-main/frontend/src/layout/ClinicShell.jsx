@@ -33,7 +33,6 @@ import { PageEnter } from "../components/motion/PageEnter";
 import { canAccessFeature, MEMBERSHIP_FEATURES } from "../lib/membershipAccess";
 import { isPlatformAdminEmail } from "../lib/platformAdmin";
 import { useTranslation } from "react-i18next";
-import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { warmClinicAppData } from "../lib/prefetchClinicApp";
 import { clinicCacheKey, loadClinicData, readClinicDataCache } from "../lib/clinicDataCache";
 
@@ -304,13 +303,10 @@ export function ClinicShell({ children, setView }) {
       <Header
         setView={handleBrandNav}
         actions={
-          <>
-            <LanguageSwitcher />
-            <NotificationBell
-              veterinarianId={veterinarian?.id}
-              onNavigate={handleNotificationNavigate}
-            />
-          </>
+          <NotificationBell
+            veterinarianId={veterinarian?.id}
+            onNavigate={handleNotificationNavigate}
+          />
         }
       />
       <div ref={spacerRef} className="clinic-header-spacer" aria-hidden="true" />

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Crown, LogOut, Menu, User, X } from "lucide-react";
 import { useVet } from "../context/VetContext";
 import { getPlanDisplayName } from "../lib/membershipPlans";
 import { GuiaaBrandLockup } from "./GuiaaBrandLockup";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import "./headerToolbar.css";
 
 export function Header({ setView, showAuth = true, actions }) {
@@ -82,6 +84,14 @@ export function Header({ setView, showAuth = true, actions }) {
         <div
           className="nav-brand"
           onClick={() => setView(veterinarian ? "dashboard" : "landing")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setView(veterinarian ? "dashboard" : "landing");
+            }
+          }}
+          role="button"
+          tabIndex={0}
         >
           <GuiaaBrandLockup variant="header" />
         </div>
@@ -105,15 +115,15 @@ export function Header({ setView, showAuth = true, actions }) {
                       aria-haspopup="menu"
                       aria-label={t("header.accountAria", { name: veterinarian.nombre })}
                     >
-                      <div className="user-avatar">
+                      <div className="user-avatar" aria-hidden>
                         {veterinarian.nombre.charAt(0).toUpperCase()}
                       </div>
                     </button>
 
                     {isUserMenuOpen && (
-                      <div className="user-dropdown-menu">
+                      <div className="user-dropdown-menu" role="menu">
                         <div className="user-dropdown-header">
-                          <div className="user-avatar-large">
+                          <div className="user-avatar-large" aria-hidden>
                             {veterinarian.nombre.charAt(0).toUpperCase()}
                           </div>
                           <div className="user-dropdown-info">
@@ -128,8 +138,12 @@ export function Header({ setView, showAuth = true, actions }) {
                             </span>
                           </div>
                         </div>
-                        <div className="user-dropdown-divider"></div>
+                        <div className="user-dropdown-divider" />
+                        <LanguageSwitcher variant="menu" />
+                        <div className="user-dropdown-divider" />
                         <button
+                          type="button"
+                          role="menuitem"
                           onClick={() => {
                             setView("profile");
                             setIsUserMenuOpen(false);
@@ -137,10 +151,12 @@ export function Header({ setView, showAuth = true, actions }) {
                           }}
                           className="user-dropdown-item"
                         >
-                          <span className="dropdown-icon">👤</span>
+                          <User size={16} strokeWidth={1.75} aria-hidden />
                           {t("header.myProfile")}
                         </button>
                         <button
+                          type="button"
+                          role="menuitem"
                           onClick={() => {
                             setView("membership");
                             setIsUserMenuOpen(false);
@@ -148,11 +164,13 @@ export function Header({ setView, showAuth = true, actions }) {
                           }}
                           className="user-dropdown-item"
                         >
-                          <span className="dropdown-icon">⭐</span>
+                          <Crown size={16} strokeWidth={1.75} aria-hidden />
                           {t("header.myMembership")}
                         </button>
-                        <div className="user-dropdown-divider"></div>
+                        <div className="user-dropdown-divider" />
                         <button
+                          type="button"
+                          role="menuitem"
                           onClick={() => {
                             logout();
                             setView("landing");
@@ -161,7 +179,7 @@ export function Header({ setView, showAuth = true, actions }) {
                           }}
                           className="user-dropdown-item logout-item"
                         >
-                          <span className="dropdown-icon">🚪</span>
+                          <LogOut size={16} strokeWidth={1.75} aria-hidden />
                           {t("header.logout")}
                         </button>
                       </div>
@@ -183,31 +201,35 @@ export function Header({ setView, showAuth = true, actions }) {
                 isMenuOpen ? t("header.closeUserMenu") : t("header.openUserMenu")
               }
             >
-              {isMenuOpen ? "✕" : "☰"}
+              {isMenuOpen ? (
+                <X size={20} strokeWidth={1.75} aria-hidden />
+              ) : (
+                <Menu size={20} strokeWidth={1.75} aria-hidden />
+              )}
             </button>
             {!veterinarian && (
-            <nav
-              className={`nav-menu ${isMenuOpen ? "mobile-open" : ""}`}
-            >
-                  <button
-                    onClick={() => {
-                      setView("login");
-                      setIsMenuOpen(false);
-                    }}
-                    className="nav-link"
-                  >
-                    {t("header.login")}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setView("register");
-                      setIsMenuOpen(false);
-                    }}
-                    className="btn btn-primary"
-                  >
-                    {t("header.register")}
-                  </button>
-            </nav>
+              <nav className={`nav-menu ${isMenuOpen ? "mobile-open" : ""}`}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setView("login");
+                    setIsMenuOpen(false);
+                  }}
+                  className="nav-link"
+                >
+                  {t("header.login")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setView("register");
+                    setIsMenuOpen(false);
+                  }}
+                  className="btn btn-primary"
+                >
+                  {t("header.register")}
+                </button>
+              </nav>
             )}
           </div>
         )}
