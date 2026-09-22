@@ -1134,12 +1134,12 @@
     "noAnalysis": "No hay análisis disponible"
   },
   "profile": {
-    "eyebrow": "Cuenta MVZ",
     "title": "Perfil profesional",
     "lead": "Datos de tu registro, verificación y plan clínico en GUIAA.",
     "specialtyFallback": "Medicina Veterinaria",
     "verified": "MVZ verificado",
     "pending": "Verificación pendiente",
+    "email": "Email",
     "phone": "Teléfono",
     "license": "Registro profesional",
     "experience": "Experiencia",

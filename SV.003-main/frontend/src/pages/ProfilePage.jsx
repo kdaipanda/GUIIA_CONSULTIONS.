@@ -76,17 +76,29 @@ export function ProfilePage({ setView }) {
       expiry,
       hasPlan: Boolean(quota.planKey),
     };
-  }, [veterinarian, packages, i18n.language]);
+  }, [veterinarian, packages, locale]);
 
-  if (!veterinarian) return null;
+  if (!veterinarian) {
+    return (
+      <div className="profile-page-guiaa">
+        <div className="container">
+          <p className="profile-page-loading" role="status">
+            {t("common.loading")}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const verified = Boolean(veterinarian.verified);
+  const displayName = (veterinarian.nombre || "").trim() || t("common.doctorFallback");
+  const avatarInitial = displayName.charAt(0).toUpperCase();
+  const progressValue = Math.max(0, Math.min(100, membershipSummary?.progress ?? 0));
 
   return (
     <div className="profile-page-guiaa">
       <div className="container">
         <header className="profile-page-header">
-          <p className="membership-eyebrow">{t("profile.eyebrow")}</p>
           <div className="clinic-page-title-row">
             <h1>{t("profile.title")}</h1>
             <ModuleHelpTip topicId="profile" setView={setView} />
@@ -98,10 +110,10 @@ export function ProfilePage({ setView }) {
           <article className="profile-card-guiaa">
             <div className="profile-card-guiaa-header">
               <div className="profile-avatar-guiaa" aria-hidden>
-                {veterinarian.nombre.charAt(0).toUpperCase()}
+                {avatarInitial}
               </div>
-              <div>
-                <h2>{veterinarian.nombre}</h2>
+              <div className="profile-card-guiaa-identity">
+                <h2>{displayName}</h2>
                 <p className="profile-specialty-guiaa">
                   {veterinarian.especialidad || t("profile.specialtyFallback")}
                 </p>
@@ -119,7 +131,11 @@ export function ProfilePage({ setView }) {
             </div>
 
             <div className="profile-details-guiaa">
-              <DetailRow icon={Mail} label="Email" value={veterinarian.email} />
+              <DetailRow
+                icon={Mail}
+                label={t("profile.email")}
+                value={veterinarian.email || t("profile.notRegistered")}
+              />
               <DetailRow
                 icon={Phone}
                 label={t("profile.phone")}
@@ -163,12 +179,7 @@ export function ProfilePage({ setView }) {
           </article>
 
           <aside className="profile-membership-card">
-            <div className="profile-membership-card-head">
-              <span className="profile-membership-card-icon" aria-hidden>
-                <Gem size={18} />
-              </span>
-              <h3>{t("profile.yourMembership")}</h3>
-            </div>
+            <h3>{t("profile.yourMembership")}</h3>
             <p className="profile-membership-plan">
               {membershipSummary?.hasPlan
                 ? membershipSummary.planName
@@ -195,10 +206,17 @@ export function ProfilePage({ setView }) {
 
             {membershipSummary?.hasPlan && membershipSummary.max > 0 && (
               <div className="profile-membership-progress">
-                <div className="profile-membership-progress-bar">
+                <div
+                  className="profile-membership-progress-bar"
+                  role="progressbar"
+                  aria-valuenow={progressValue}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={t("profile.quotaLabel")}
+                >
                   <div
                     className="profile-membership-progress-fill"
-                    style={{ width: `${membershipSummary.progress}%` }}
+                    style={{ width: `${progressValue}%` }}
                   />
                 </div>
                 <p className="profile-membership-progress-label">

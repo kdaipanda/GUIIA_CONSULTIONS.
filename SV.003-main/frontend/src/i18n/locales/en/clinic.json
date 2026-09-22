@@ -1134,12 +1134,12 @@
     "noAnalysis": "No analysis available"
   },
   "profile": {
-    "eyebrow": "Vet account",
     "title": "Professional profile",
     "lead": "Your registration details, verification, and clinical plan on GUIAA.",
     "specialtyFallback": "Veterinary medicine",
     "verified": "Verified veterinarian",
     "pending": "Verification pending",
+    "email": "Email",
     "phone": "Phone",
     "license": "Professional license",
     "experience": "Experience",
