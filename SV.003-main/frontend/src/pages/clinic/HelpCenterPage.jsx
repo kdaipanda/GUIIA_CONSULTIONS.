@@ -2,8 +2,6 @@ import React, { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  BookOpen,
-  CircleHelp,
   PlayCircle,
   Search,
   ArrowRight,
@@ -74,7 +72,6 @@ export function HelpCenterPage({ setView }) {
       <div className="clinic-page clinic-page-guiaa help-center-page">
         <div className="clinic-page-header">
           <div>
-            <p className="clinic-page-eyebrow">{t("eyebrow")}</p>
             <h1>{selected.title}</h1>
             <p>{selected.summary}</p>
           </div>
@@ -120,7 +117,6 @@ export function HelpCenterPage({ setView }) {
     <div className="clinic-page clinic-page-guiaa help-center-page">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">{t("eyebrow")}</p>
           <h1>{t("title")}</h1>
           <p>{t("lead")}</p>
         </div>
@@ -146,7 +142,18 @@ export function HelpCenterPage({ setView }) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="help-center-empty">{t("emptySearch")}</p>
+        <div className="help-center-empty-block" role="status">
+          <p className="help-center-empty">{t("emptySearch")}</p>
+          <div className="help-center-empty-actions">
+            <Button type="button" variant="secondary" onClick={() => setQuery("")}>
+              {t("clearSearch")}
+            </Button>
+            <Button type="button" variant="outline" onClick={openTour}>
+              <PlayCircle size={16} aria-hidden />
+              {t("openTour")}
+            </Button>
+          </div>
+        </div>
       ) : (
         <div className="help-center-grid">
           {filtered.map((topic) => (
@@ -156,9 +163,6 @@ export function HelpCenterPage({ setView }) {
               className="help-center-card"
               onClick={() => openTopic(topic.id)}
             >
-              <span className="help-center-card-icon" aria-hidden>
-                {topic.id === "getting-started" ? <BookOpen size={18} /> : <CircleHelp size={18} />}
-              </span>
               <span className="help-center-card-title">{topic.title}</span>
               <span className="help-center-card-summary">{topic.summary}</span>
               <span className="help-center-card-cta">
