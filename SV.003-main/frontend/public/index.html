@@ -4,6 +4,10 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#0c2d4d" />
+        <meta name="color-scheme" content="light" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="description" content="GUIAA — Plataforma clínica multiespecie con soporte CDS L4 y L5 para médicos veterinarios certificados en Latinoamérica." />
         <meta name="keywords" content="veterinaria, CDS, decisión clínica, expediente clínico, multiespecie, MVZ, GUIAA, Latinoamérica" />
         <meta name="author" content="GUIAA" />
@@ -58,10 +62,28 @@
     -->
         <title>GUIAA — Plataforma clínica CDS para MVZ</title>
         <!--
-        These two scripts have been added for the testing, please do not edit or remove them
+          Recorders de sesión (rrweb): solo en web.
+          En Capacitor bloquean el scroll táctil del WebView.
         -->
-        <script src="https://unpkg.com/rrweb@latest/dist/rrweb.min.js"></script>
-        <script src="https://d2adkz2s9zrlge.cloudfront.net/rrweb-recorder-20250919-1.js"></script>
+        <script>
+            (function () {
+                var isNative =
+                    (window.Capacitor &&
+                        typeof window.Capacitor.isNativePlatform === "function" &&
+                        window.Capacitor.isNativePlatform()) ||
+                    /Capacitor/i.test(navigator.userAgent || "");
+                window.__GUIAA_NATIVE_SHELL__ = !!isNative;
+                if (isNative) return;
+                var a = document.createElement("script");
+                a.src = "https://unpkg.com/rrweb@latest/dist/rrweb.min.js";
+                a.async = false;
+                document.head.appendChild(a);
+                var b = document.createElement("script");
+                b.src = "https://d2adkz2s9zrlge.cloudfront.net/rrweb-recorder-20250919-1.js";
+                b.async = false;
+                document.head.appendChild(b);
+            })();
+        </script>
     </head>
     <body>
         <noscript>Activa JavaScript para usar esta aplicación.</noscript>

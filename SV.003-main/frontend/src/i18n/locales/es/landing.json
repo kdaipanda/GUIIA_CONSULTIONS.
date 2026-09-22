@@ -419,7 +419,7 @@
   },
   "product": {
     "eyebrow": "Interfaz veterinaria",
-    "title": "La pantalla de consulta, no un brochure",
+    "title": "La pantalla de consulta real",
     "lead": "Especie, anamnesis y panel MVZ — la misma interfaz que usas con el paciente enfrente.",
     "tabsAria": "Vistas del producto",
     "bullets": [
@@ -448,7 +448,7 @@
   "brandBand": {
     "aria": "Marca GUIAA",
     "title": "Plumitas en el consultorio",
-    "lead": "La mascota de GUIAA marca un tono cercano — el software sigue siendo clínico y serio."
+    "lead": "La mascota de GUIAA acompaña al MVZ en el consultorio con cercanía, sin restar rigor clínico."
   },
   "guiaConsultas": {
     "badge": "ADSGuiaa",

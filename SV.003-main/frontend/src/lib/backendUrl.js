@@ -1,5 +1,16 @@
+import { Capacitor } from "@capacitor/core";
+
 const PRODUCTION_API = "https://api.guiaa.vet";
 const LOCAL_API = "http://localhost:8000";
+
+/** Capacitor WebView (Android/iOS): hostname suele ser localhost — no usar API local. */
+function isNativeShell() {
+  try {
+    return Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
+}
 
 function isPrivateLanHost(hostname) {
   return (
@@ -67,6 +78,10 @@ export function getBackendUrl() {
   const envUrl = process.env.REACT_APP_BACKEND_URL?.trim()?.replace(/\/$/, "");
 
   try {
+    if (isNativeShell()) {
+      return envUrl || PRODUCTION_API;
+    }
+
     const hostname = window.location.hostname;
 
     if (isProductionHost(hostname)) {

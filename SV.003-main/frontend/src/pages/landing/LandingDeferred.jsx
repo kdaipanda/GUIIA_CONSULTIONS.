@@ -16,13 +16,18 @@ export function LandingDeferred({ children, rootMargin = "280px 0px", minHeight 
       return undefined;
     }
 
+    const scrollRoot =
+      document.documentElement.classList.contains("guiaa-native-app")
+        ? document.getElementById("root")
+        : null;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
         setReady(true);
         observer.disconnect();
       },
-      { rootMargin, threshold: 0.01 },
+      { root: scrollRoot, rootMargin, threshold: 0.01 },
     );
 
     observer.observe(node);
@@ -33,7 +38,7 @@ export function LandingDeferred({ children, rootMargin = "280px 0px", minHeight 
     <div
       ref={ref}
       className="landing-deferred"
-      style={ready ? undefined : { minHeight, contentVisibility: "auto", containIntrinsicSize: `auto ${minHeight}px` }}
+      style={ready ? undefined : { minHeight }}
     >
       {ready ? children : null}
     </div>

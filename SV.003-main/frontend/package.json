@@ -2,8 +2,15 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "./",
   "proxy": "http://127.0.0.1:8000",
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-accordion": "^1.2.8",
     "@radix-ui/react-alert-dialog": "^1.1.11",
@@ -66,7 +73,11 @@
     "build": "craco build",
     "test": "craco test",
     "capture:landing": "node scripts/capture-landing-screenshots.mjs",
-    "compress:hero-video": "node scripts/compress_hero_video.js"
+    "compress:hero-video": "node scripts/compress_hero_video.js",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "android:build": "npm run build && npx cap sync android",
+    "android:open": "npm run android:build && npx cap open android"
   },
   "browserslist": {
     "production": [
@@ -82,6 +93,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@capacitor/cli": "^8.5.2",
     "@craco/craco": "^7.1.0",
     "@eslint/js": "9.23.0",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
@@ -93,7 +105,8 @@
     "globals": "15.15.0",
     "playwright": "^1.61.0",
     "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "typescript": "^7.0.2"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

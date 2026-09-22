@@ -40,14 +40,19 @@
 }
 
 .landing-preview-viewport {
+  container-type: inline-size;
+  container-name: landing-preview;
   height: 100%;
+  width: 100%;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .landing-preview-scaler {
   width: 760px;
   transform: scale(0.52);
   transform-origin: top left;
+  pointer-events: none;
 }
 
 @media (min-width: 640px) {
@@ -642,12 +647,14 @@
 
 @media (max-width: 639px) {
   .landing-preview-panel {
-    height: 240px;
+    /* Más alto y legible en teléfono */
+    height: min(72vw, 360px);
   }
 
   .landing-preview-scaler {
-    width: 680px;
-    transform: scale(0.42);
+    width: 720px;
+    /* Escala al ancho real del contenedor (WebView Android incluido) */
+    transform: scale(calc(100cqw / 720));
   }
 
   .landing-app-preview-page .consultation-layout {
@@ -656,6 +663,31 @@
 
   .landing-app-preview-page .consultation-sidebar {
     display: none;
+  }
+
+  .landing-app-preview-page .page-title-header {
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+  }
+
+  .landing-app-preview-page .page-title-content h1,
+  .landing-app-preview-page .page-title-content h2 {
+    font-size: 1.05rem !important;
+    line-height: 1.25 !important;
+  }
+}
+
+/* Fallback si el WebView no soporta cqw en transform */
+@supports not (width: 1cqw) {
+  @media (max-width: 639px) {
+    .landing-preview-panel {
+      height: 300px;
+    }
+
+    .landing-preview-scaler {
+      width: 680px;
+      transform: scale(0.48);
+    }
   }
 }
 

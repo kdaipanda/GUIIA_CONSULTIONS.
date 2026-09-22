@@ -5,6 +5,7 @@ import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 import { LandingBrandLockup } from "./LandingBrandLockup";
 import { onLandingAnchorClick, productTabHref } from "./landingScroll";
 import { useLandingScrollSpy } from "./useLandingScrollSpy";
+import { getAppScrollRoot, getAppScrollY, onAppScroll } from "../../lib/appScrollRoot";
 
 const SPY_SECTIONS = ["product", "features", "pricing", "faq"];
 
@@ -32,7 +33,7 @@ export function LandingNavbar({ setView, hero = false }) {
   useEffect(() => {
     const updateScrollUi = () => {
       frameRef.current = 0;
-      const y = window.scrollY;
+      const y = getAppScrollY();
       const nextScrolled = y > 16;
       if (nextScrolled !== scrolledRef.current) {
         scrolledRef.current = nextScrolled;
@@ -41,8 +42,10 @@ export function LandingNavbar({ setView, hero = false }) {
 
       const progressNode = progressRef.current;
       if (progressNode) {
-        const doc = document.documentElement;
-        const scrollable = doc.scrollHeight - doc.clientHeight;
+        const root = getAppScrollRoot();
+        const scrollable = root
+          ? root.scrollHeight - root.clientHeight
+          : document.documentElement.scrollHeight - document.documentElement.clientHeight;
         const progress = scrollable > 0 ? y / scrollable : 0;
         progressNode.style.transform = `scaleX(${Math.min(1, Math.max(0, progress))})`;
       }
@@ -54,9 +57,9 @@ export function LandingNavbar({ setView, hero = false }) {
     };
 
     updateScrollUi();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const detach = onAppScroll(onScroll, { passive: true });
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      detach();
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
   }, []);

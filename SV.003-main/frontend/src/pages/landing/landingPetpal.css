@@ -2,7 +2,7 @@
 
 .landing-petpal-top {
   position: relative;
-  overflow: clip;
+  overflow: visible;
   color: #fff;
   background:
     radial-gradient(ellipse 70% 55% at 88% 18%, rgba(61, 155, 143, 0.28), transparent 58%),
@@ -337,6 +337,18 @@
   object-fit: cover;
   object-position: center;
   border-radius: 1.15rem;
+}
+
+/* WebView móvil: el <video> intercepta el pan vertical */
+.landing-hero-video-frame video,
+.landing-hero-video-frame .landing-hero-video-poster {
+  pointer-events: none;
+  touch-action: pan-y;
+}
+
+.landing-hero-video-play-overlay {
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .landing-hero-video-frame .landing-hero-video-wrap {

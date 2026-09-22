@@ -16,13 +16,18 @@ export function LandingReveal({ children, className = "", delay = 0, as: Tag = "
       return undefined;
     }
 
+    const scrollRoot =
+      document.documentElement.classList.contains("guiaa-native-app")
+        ? document.getElementById("root")
+        : null;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
         setVisible(true);
         observer.disconnect();
       },
-      { threshold: 0.1, rootMargin: "0px 0px -6% 0px" },
+      { root: scrollRoot, threshold: 0.1, rootMargin: "0px 0px -6% 0px" },
     );
 
     observer.observe(node);

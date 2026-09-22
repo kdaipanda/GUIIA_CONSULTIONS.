@@ -12,6 +12,11 @@ export function useLandingScrollSpy(sectionIds, { rootMargin = "-24% 0px -58% 0p
 
     if (!elements.length) return undefined;
 
+    const scrollRoot =
+      document.documentElement.classList.contains("guiaa-native-app")
+        ? document.getElementById("root")
+        : null;
+
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -23,7 +28,11 @@ export function useLandingScrollSpy(sectionIds, { rootMargin = "-24% 0px -58% 0p
           setActiveId((prev) => (prev === nextId ? prev : nextId));
         }
       },
-      { rootMargin, threshold: [0, 0.15, 0.35, 0.55] },
+      {
+        root: scrollRoot,
+        rootMargin,
+        threshold: [0, 0.15, 0.35, 0.55],
+      },
     );
 
     elements.forEach((element) => observer.observe(element));

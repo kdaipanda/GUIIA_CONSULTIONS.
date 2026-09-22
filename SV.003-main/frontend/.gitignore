@@ -11,6 +11,11 @@
 # production
 /build
 
+# Capacitor local tooling
+.capacitor
+*.keystore
+*.jks
+
 # misc
 .DS_Store
 .env.local

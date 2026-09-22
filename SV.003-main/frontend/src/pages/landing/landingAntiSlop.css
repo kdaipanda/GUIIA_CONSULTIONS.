@@ -822,6 +822,33 @@ html.dark .landing-footer-v2-eyebrow {
   max-width: 36rem !important;
 }
 
+@media (max-width: 1023px) {
+  .landing-product-shot {
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  #product .landing-section-title {
+    font-size: clamp(1.35rem, 6.5vw, 1.75rem);
+    line-height: 1.2;
+  }
+
+  #product .landing-lead {
+    max-width: none;
+  }
+
+  .landing-product-caption {
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+
+  .landing-product-bullets li {
+    font-size: 0.875rem;
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+  }
+}
+
 .landing-product-bullets {
   margin: 0;
   padding: 0;
@@ -1117,7 +1144,7 @@ html.dark .landing-feature-strip {
 /* —— Móvil: landing sin overflow horizontal —— */
 @media (max-width: 639px) {
   .landing-shell.landing-shell--page {
-    overflow-x: clip;
+    overflow: visible;
     padding-inline: 0.65rem;
     padding-bottom: 1.25rem;
   }

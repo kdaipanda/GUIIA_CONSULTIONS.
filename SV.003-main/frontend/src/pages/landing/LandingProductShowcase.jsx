@@ -88,20 +88,22 @@ export function LandingProductShowcase() {
   const activeLabel = t(`product.shots.${activeShot.id}.label`);
   const activeCaption = t(`product.shots.${activeShot.id}.caption`);
   const bullets = t("product.bullets", { returnObjects: true });
+  const bulletItems = Array.isArray(bullets) ? bullets : [];
 
   return (
     <section id="product" className="landing-section border-y border-guiaa-brand-navy/8">
       <div className="landing-container">
         <div className="landing-product-layout">
           <div className="landing-product-copy lg:sticky lg:top-24">
-            <h2 className="landing-section-title text-guiaa-brand-navy">
+            <h2 className="landing-section-title text-guiaa-brand-navy text-balance">
               {t("product.title")}
             </h2>
-            <p className="landing-lead mt-4 text-sm sm:text-base text-pretty">
+            <p className="landing-lead mt-3 text-sm sm:mt-4 sm:text-base text-pretty">
               {t("product.lead")}
             </p>
-            <ul className="landing-product-bullets mt-6">
-              {(Array.isArray(bullets) ? bullets : []).map((item) => (
+
+            <ul className="landing-product-bullets mt-5 hidden lg:block">
+              {bulletItems.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
@@ -113,7 +115,7 @@ export function LandingProductShowcase() {
           </div>
 
           <div className="landing-product-visual">
-            <div className="landing-product-tabs-mobile mb-4 lg:hidden">
+            <div className="landing-product-tabs-mobile mb-3 lg:hidden">
               <ProductTabs activeId={activeId} setActiveId={setActiveId} t={t} />
             </div>
 
@@ -140,7 +142,15 @@ export function LandingProductShowcase() {
               </div>
             </div>
 
-            <p className="mt-3 text-sm text-guiaa-brand-ink-muted lg:hidden">{activeCaption}</p>
+            <p className="landing-product-caption mt-3 text-sm text-guiaa-brand-ink-muted lg:hidden">
+              {activeCaption}
+            </p>
+
+            <ul className="landing-product-bullets mt-4 lg:hidden">
+              {bulletItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

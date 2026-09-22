@@ -1,5 +1,52 @@
 /* Correcciones móvil / tablet clínica (≤1023px) */
 
+/* Capacitor: el documento NO scrollea; #root es el scroller (fiable en WebView Android) */
+html.guiaa-native-app,
+html.guiaa-native-app body {
+  height: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  position: relative !important;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  background-color: #0c2d4d;
+  touch-action: manipulation;
+}
+
+html.guiaa-native-app #root {
+  height: 100% !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y pinch-zoom;
+  background-color: #f8fafc;
+}
+
+html.guiaa-native-app .app-main {
+  min-height: 100%;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* El video del hero captura gestos en WebView Android */
+html.guiaa-native-app .landing-hero-video-frame video,
+html.guiaa-native-app .landing-hero-video-frame .landing-hero-video-poster,
+html.guiaa-native-app .landing-hero-video-frame img {
+  pointer-events: none !important;
+}
+
+html.guiaa-native-app .landing-hero-video-play-overlay {
+  pointer-events: auto !important;
+}
+
+html.guiaa-native-app .landing-shell {
+  touch-action: pan-y pinch-zoom;
+}
+
 @media (max-width: 1023px) {
   .clinic-shell > .header {
     padding-top: max(8px, env(safe-area-inset-top, 0px));

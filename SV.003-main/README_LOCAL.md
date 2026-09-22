@@ -72,6 +72,18 @@ npm start
 
 La aplicación se abrirá en: http://localhost:3000
 
+## 📱 App Android (Capacitor)
+
+Ver guía completa: [`frontend/ANDROID.md`](frontend/ANDROID.md)
+
+```bash
+cd frontend
+npm run android:build
+npm run cap:open
+```
+
+Requiere Android Studio. La app usa la API de producción `https://api.guiaa.vet`.
+
 ## 🎯 Funcionalidades Disponibles
 
 ### ✅ Funcionalidades Completas (Modo Local)

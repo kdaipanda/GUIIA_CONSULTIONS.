@@ -528,6 +528,6 @@
   }
 
   .landing-shell.landing-shell--page {
-    overflow-x: clip;
+    overflow: visible;
   }
 }

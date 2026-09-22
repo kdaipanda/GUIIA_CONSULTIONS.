@@ -6,8 +6,10 @@ import "./lib/loadI18nNamespace";
 import "./index.css";
 import App from "./App";
 import { initMetaPixel } from "./lib/metaPixel";
+import { initNativeApp } from "./lib/nativeApp";
 
 initMetaPixel();
+void initNativeApp();
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

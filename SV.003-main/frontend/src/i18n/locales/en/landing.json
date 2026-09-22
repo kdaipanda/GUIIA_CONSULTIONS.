@@ -428,7 +428,7 @@
   },
   "product": {
     "eyebrow": "Veterinary interface",
-    "title": "The consult screen — not a brochure",
+    "title": "The real consult screen",
     "lead": "Species, history-taking, and vet panel — the same UI you use with the patient in front of you.",
     "tabsAria": "Product views",
     "bullets": [
@@ -457,7 +457,7 @@
   "brandBand": {
     "aria": "GUIAA brand",
     "title": "Plumitas in the clinic",
-    "lead": "GUIAA's mascot keeps the tone approachable — the software stays clinical and serious."
+    "lead": "GUIAA's mascot stands with the veterinarian in clinic — approachable, without losing clinical rigor."
   },
   "guiaConsultas": {
     "badge": "ADSGuiaa",
