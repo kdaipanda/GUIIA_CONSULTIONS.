@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Users, Building2, Gem, PawPrint, Inbox, Star, Stethoscope, Circle, MessageCircle } from "lucide-react";
+import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Inbox, Star, MessageCircle } from "lucide-react";
 import "./clinicPageShared.css";
 import "./adminPage.css";
 import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
@@ -796,11 +796,7 @@ export function AdminPage() {
       <div className="clinic-page clinic-page-guiaa clinic-admin-page clinic-admin-page-guiaa">
         <div className="clinic-page-header">
           <div>
-            <p className="clinic-page-eyebrow">{t("admin.eyebrow")}</p>
-            <h1>
-              <Shield size={22} aria-hidden />
-              {t("admin.title")}
-            </h1>
+            <h1>{t("admin.title")}</h1>
             <p>{t("admin.lead")}</p>
           </div>
         </div>
@@ -832,11 +828,7 @@ export function AdminPage() {
       <div className="clinic-page clinic-page-guiaa clinic-admin-page clinic-admin-page-guiaa">
         <div className="clinic-page-header">
           <div>
-            <p className="clinic-page-eyebrow">{t("admin.eyebrow")}</p>
-            <h1>
-              <Shield size={22} aria-hidden />
-              {t("admin.title")}
-            </h1>
+            <h1>{t("admin.title")}</h1>
             <p>{t("admin.restrictedLead")}</p>
           </div>
         </div>
@@ -855,11 +847,7 @@ export function AdminPage() {
     <div className="clinic-page clinic-page-guiaa clinic-admin-page clinic-admin-page-guiaa">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">{t("admin.eyebrow")}</p>
-          <h1>
-            <Shield size={22} aria-hidden />
-            {t("admin.title")}
-          </h1>
+          <h1>{t("admin.title")}</h1>
           <p>{t("admin.leadProfiles")}</p>
         </div>
       </div>
@@ -867,49 +855,42 @@ export function AdminPage() {
       <div className="clinic-report-kpi-grid">
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
-            <span className="clinic-report-kpi-icon"><Users size={18} aria-hidden /></span>
             <span className="clinic-report-kpi-label">{t("admin.kpiUsers")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.users_total ?? 0}</div>
         </div>
         <div className="clinic-report-kpi clinic-admin-kpi-online">
           <div className="clinic-report-kpi-head">
-            <span className="clinic-report-kpi-icon"><Circle size={18} aria-hidden /></span>
             <span className="clinic-report-kpi-label">{t("admin.kpiOnline")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.users_online ?? 0}</div>
         </div>
         <div className="clinic-report-kpi clinic-admin-kpi-offline">
           <div className="clinic-report-kpi-head">
-            <span className="clinic-report-kpi-icon"><Circle size={18} aria-hidden /></span>
             <span className="clinic-report-kpi-label">{t("admin.kpiOffline")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.users_offline ?? 0}</div>
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
-            <span className="clinic-report-kpi-icon"><Building2 size={18} aria-hidden /></span>
             <span className="clinic-report-kpi-label">{t("admin.kpiClinics")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.organizations_total ?? 0}</div>
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
-            <span className="clinic-report-kpi-icon"><Gem size={18} aria-hidden /></span>
             <span className="clinic-report-kpi-label">{t("admin.kpiPremium")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.premium_users ?? 0}</div>
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
-            <span className="clinic-report-kpi-icon"><PawPrint size={18} aria-hidden /></span>
             <span className="clinic-report-kpi-label">{t("admin.kpiPets")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.patients_total ?? 0}</div>
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
-            <span className="clinic-report-kpi-icon"><Stethoscope size={18} aria-hidden /></span>
             <span className="clinic-report-kpi-label">{t("admin.kpiCdsUsed")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.consultations_total ?? 0}</div>
@@ -922,21 +903,18 @@ export function AdminPage() {
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
-            <span className="clinic-report-kpi-icon"><MessageSquare size={18} aria-hidden /></span>
             <span className="clinic-report-kpi-label">{t("admin.kpiSupportOpen")}</span>
           </div>
           <div className="clinic-report-kpi-value">{supportOpenCount}</div>
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
-            <span className="clinic-report-kpi-icon"><Inbox size={18} aria-hidden /></span>
             <span className="clinic-report-kpi-label">{t("admin.kpiAdsGuiaa")}</span>
           </div>
           <div className="clinic-report-kpi-value">{guiaLeadsNewCount}</div>
         </div>
         <div className="clinic-report-kpi">
           <div className="clinic-report-kpi-head">
-            <span className="clinic-report-kpi-icon"><Star size={18} aria-hidden /></span>
             <span className="clinic-report-kpi-label">{t("admin.kpiTrialSurveys")}</span>
           </div>
           <div className="clinic-report-kpi-value">{stats.trial_surveys_total ?? trialSurveysCount}</div>
@@ -1448,17 +1426,26 @@ export function AdminPage() {
                       <td>
                         <div
                           className="clinic-admin-consultation-usage"
-                          aria-label={`${u.consultations_used ?? 0} consultas usadas; ${
-                            u.consultations_unlimited
-                              ? "ilimitadas"
-                              : `${u.consultations_remaining ?? 0} disponibles`
-                          }`}
+                          aria-label={t("admin.consultationsAria", {
+                            used: u.consultations_used ?? 0,
+                            remaining: u.consultations_unlimited
+                              ? t("admin.unlimited")
+                              : t("admin.remainingCount", {
+                                  count: u.consultations_remaining ?? 0,
+                                }),
+                          })}
                         >
-                          <strong>{u.consultations_used ?? 0} usadas</strong>
+                          <strong>
+                            {t("admin.usedCount", {
+                              count: u.consultations_used ?? 0,
+                            })}
+                          </strong>
                           <span>
                             {u.consultations_unlimited
-                              ? "Ilimitadas"
-                              : `${u.consultations_remaining ?? 0} disponibles`}
+                              ? t("admin.unlimited")
+                              : t("admin.remainingCount", {
+                                  count: u.consultations_remaining ?? 0,
+                                })}
                           </span>
                         </div>
                       </td>
@@ -1473,7 +1460,7 @@ export function AdminPage() {
                               title={t("admin.remindOffer")}
                             >
                               <MessageCircle size={14} aria-hidden />
-                              WA
+                              {t("admin.waShort")}
                             </Button>
                           )}
                           <Button
@@ -1484,7 +1471,7 @@ export function AdminPage() {
                             title={t("admin.viewHistory")}
                           >
                             <ClipboardList size={14} aria-hidden />
-                            Historial
+                            {t("admin.historyShort")}
                           </Button>
                           {u.cedula_document_url && (
                             <Button
@@ -1495,7 +1482,7 @@ export function AdminPage() {
                               title={t("admin.viewLicenseDoc")}
                             >
                               <Eye size={14} aria-hidden />
-                              Ver
+                              {t("admin.viewShort")}
                             </Button>
                           )}
                           {(u.profesional_pais || "MX").toUpperCase() === "MX" && (
@@ -1530,7 +1517,7 @@ export function AdminPage() {
                               variant="ghost"
                               disabled={busy}
                               onClick={() => handleRejectCedula(u)}
-                              title="Rechazar"
+                              title={t("admin.reject")}
                             >
                               <XCircle size={14} aria-hidden />
                             </Button>
@@ -1623,21 +1610,25 @@ export function AdminPage() {
               </DialogHeader>
               <div className="clinic-admin-cedula-preview-body">
                 {cedulaPreviewLoading && (
-                  <p className="clinic-muted">Cargando documento...</p>
+                  <p className="clinic-muted">{t("admin.loadingDocument")}</p>
                 )}
                 {!cedulaPreviewLoading && cedulaPreviewUrl && (
                   cedulaPreviewKind === "pdf" ||
                   (cedulaPreviewKind !== "image" &&
                     cedulaDocKind(cedulaPreview.cedula_document_url) === "pdf") ? (
                     <iframe
-                      title={`Cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
+                      title={t("admin.cedulaPreviewTitle", {
+                        name: cedulaPreview.nombre || cedulaPreview.email,
+                      })}
                       src={cedulaPreviewUrl}
                       className="clinic-admin-cedula-preview-frame"
                     />
                   ) : (
                     <img
                       src={cedulaPreviewUrl}
-                      alt={`Documento de cédula de ${cedulaPreview.nombre || cedulaPreview.email}`}
+                      alt={t("admin.cedulaPreviewAlt", {
+                        name: cedulaPreview.nombre || cedulaPreview.email,
+                      })}
                       className="clinic-admin-cedula-preview-image"
                     />
                   )
@@ -1673,17 +1664,19 @@ export function AdminPage() {
               <DialogHeader>
                 <div className="clinic-admin-history-dialog-head">
                   <div>
-                    <DialogTitle>Historial de consultas</DialogTitle>
+                    <DialogTitle>{t("admin.historyDialogTitle")}</DialogTitle>
                     <DialogDescription>
                       {historyUser.nombre || historyUser.email}
                       {historyUser.email && historyUser.nombre ? ` · ${historyUser.email}` : ""}
                       {!historyLoading
-                        ? ` · ${historyTotal} consulta${historyTotal === 1 ? "" : "s"} usada${historyTotal === 1 ? "" : "s"}`
+                        ? ` · ${t("admin.historyUsedCount", { count: historyTotal })}`
                         : ""}
                       {!historyLoading && historyUser.consultations_unlimited
-                        ? " · cupo ilimitado"
+                        ? ` · ${t("admin.historyUnlimitedQuota")}`
                         : !historyLoading && historyUser.consultations_remaining != null
-                          ? ` · ${historyUser.consultations_remaining} disponible${historyUser.consultations_remaining === 1 ? "" : "s"}`
+                          ? ` · ${t("admin.historyRemaining", {
+                              count: historyUser.consultations_remaining,
+                            })}`
                           : ""}
                       {!historyLoading && historyTruncated
                         ? ` · mostrando ${historyConsultations.length}`
@@ -1706,7 +1699,7 @@ export function AdminPage() {
               </DialogHeader>
               <div className="clinic-admin-history-body">
                 {historyLoading && (
-                  <p className="clinic-muted">Cargando historial...</p>
+                  <p className="clinic-muted">{t("admin.loadingHistory")}</p>
                 )}
                 {!historyLoading && historyConsultations.length === 0 && (
                   <p className="clinic-muted">Este usuario aún no tiene consultas registradas.</p>
@@ -1844,7 +1837,7 @@ export function AdminPage() {
                 </DialogDescription>
               </DialogHeader>
               {ticketActing && !ticketDetail && (
-                <p className="clinic-muted">Cargando conversación...</p>
+                <p className="clinic-muted">{t("admin.loadingConversation")}</p>
               )}
               {ticketDetail && (
                 <>

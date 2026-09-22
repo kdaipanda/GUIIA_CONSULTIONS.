@@ -5,21 +5,15 @@
 }
 
 .clinic-admin-page-guiaa .clinic-page-header h1 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   color: var(--admin-navy);
   letter-spacing: -0.02em;
+  font-size: 1.625rem;
+  font-weight: 800;
 }
 
 .clinic-admin-page-guiaa .clinic-report-kpi {
   border-color: rgba(38, 91, 147, 0.12);
   box-shadow: 0 2px 10px -4px rgba(12, 45, 77, 0.06);
-}
-
-.clinic-admin-page-guiaa .clinic-report-kpi-icon {
-  background: rgba(38, 91, 147, 0.08);
-  color: var(--admin-blue);
 }
 
 .clinic-admin-page-guiaa .clinic-report-kpi-value {
@@ -32,13 +26,11 @@
   line-height: 1.3;
 }
 
-.clinic-admin-kpi-online .clinic-report-kpi-icon {
-  background: rgba(61, 155, 143, 0.12);
+.clinic-admin-kpi-online .clinic-report-kpi-label {
   color: var(--admin-green);
 }
 
-.clinic-admin-kpi-offline .clinic-report-kpi-icon {
-  background: rgba(100, 116, 139, 0.12);
+.clinic-admin-kpi-offline .clinic-report-kpi-label {
   color: #64748b;
 }
 
@@ -160,7 +152,7 @@
 .clinic-admin-page-guiaa .clinic-admin-support-status {
   display: inline-flex;
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: 12px;
   font-size: 11px;
   font-weight: 600;
 }
@@ -233,9 +225,9 @@
   word-break: break-word;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .clinic-admin-page-guiaa .clinic-page-header h1 {
-    font-size: 1.35rem;
+    font-size: 1.375rem;
   }
 
   .clinic-admin-page-guiaa .clinic-admin-search {
@@ -251,6 +243,7 @@
   .clinic-admin-page-guiaa .clinic-admin-plan-filters button {
     flex: 1 1 auto;
     min-width: 0;
+    min-height: 2.75rem;
   }
 
   .clinic-admin-page-guiaa .clinic-admin-delete-form {
@@ -266,7 +259,7 @@
   .clinic-admin-page-guiaa .clinic-admin-delete-form button {
     width: 100%;
     justify-content: center;
-    min-height: 44px;
+    min-height: 2.75rem;
   }
 
   .clinic-admin-users-table-wrap {
@@ -278,6 +271,18 @@
     min-width: 980px;
   }
 
+  .clinic-admin-row-actions {
+    flex-wrap: wrap;
+  }
+
+  .clinic-admin-row-actions button {
+    min-height: 2.75rem;
+  }
+
+  .clinic-admin-wa-layout {
+    grid-template-columns: 1fr;
+  }
+
   .clinic-admin-page-guiaa .clinic-admin-row-actions {
     flex-direction: column;
     align-items: stretch;
@@ -287,7 +292,7 @@
   .clinic-admin-page-guiaa .clinic-admin-row-actions button {
     width: 100%;
     justify-content: center;
-    min-height: 40px;
+    min-height: 2.75rem;
   }
 
   .clinic-admin-cedula-sep {
@@ -358,5 +363,11 @@
     justify-content: center;
     min-height: 44px;
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clinic-admin-page-guiaa * {
+    transition: none !important;
   }
 }
