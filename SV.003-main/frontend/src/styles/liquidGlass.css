@@ -58,7 +58,7 @@
   border-radius: var(--liquid-glass-radius-md) !important;
 }
 
-.consultation-form > .form-section:not(.category-selector-glass-wrap) {
+.consultation-form > .form-section:not(.category-selector-wrap):not(.category-selector-glass-wrap) {
   background: var(--liquid-glass-bg) !important;
   border: 1px solid var(--liquid-glass-border-color) !important;
   backdrop-filter: blur(16px) saturate(1.08);
@@ -362,22 +362,16 @@ html:not(.dark):not([data-theme="dark"]) .history-detail-guiaa .clinical-file-he
   box-shadow: var(--liquid-glass-shadow-soft);
 }
 
-.category-selector-glass-wrap {
+.category-selector-glass-wrap,
+.category-selector-wrap {
   position: relative;
   isolation: isolate;
 }
 
-.category-selector-glass-wrap::before {
-  content: "";
-  position: absolute;
-  inset: -12% -4% -8%;
-  z-index: -1;
-  border-radius: var(--liquid-glass-radius-lg);
-  background:
-    radial-gradient(ellipse 45% 55% at 12% 40%, rgba(61, 155, 143, 0.2), transparent 68%),
-    radial-gradient(ellipse 40% 50% at 88% 30%, rgba(155, 110, 243, 0.16), transparent 65%),
-    radial-gradient(ellipse 35% 45% at 55% 85%, rgba(240, 138, 93, 0.12), transparent 62%);
-  pointer-events: none;
+.category-selector-glass-wrap::before,
+.category-selector-wrap::before {
+  content: none;
+  display: none;
 }
 
 html:not(.dark):not([data-theme="dark"]) .category-selector-glass-panel {

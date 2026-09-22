@@ -6,7 +6,7 @@
   lazy,
   Suspense,
 } from "react";
-import { BarChart3, CalendarDays, Gem, Sun, Cloud, CloudRain, CloudSun, Thermometer, Plus, ClipboardList, FlaskConical, Crown, Moon, Brain, FileDown, User } from "lucide-react";
+import { BarChart3, CalendarDays, Gem, Sun, Cloud, CloudRain, CloudSun, Thermometer, Plus, ClipboardList, FlaskConical, Crown, Moon, Brain, FileDown, User, Stethoscope, Microscope, Lock } from "lucide-react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import "./App.css";
@@ -3318,23 +3318,23 @@ const NewConsultation = ({
   const renderCategorySelector = (titleKey = "categoryTitle") => {
     const speciesCount = Object.keys(categories).length;
     const heading = tSpecies(titleKey);
-    const defaultHeading = tSpecies("categoryTitle");
     return (
-      <div className="form-section category-selector-glass-wrap">
-        <div className="category-selector-glass-head">
-          {heading !== defaultHeading ? <h3>{heading}</h3> : null}
-          <span className="category-selector-glass-badge">
-            {tSpecies("categoryBadge", { count: speciesCount })}
-          </span>
+      <div className="form-section category-selector-wrap">
+        <div className="category-selector-head">
+          <h3>{heading}</h3>
         </div>
-        <div className="category-selector-glass-panel">
-          <div className="category-grid category-grid--liquid" role="listbox" aria-label={tSpecies("categoryAria")}>
+        <div className="category-selector-panel">
+          <div
+            className="category-grid category-grid--chips"
+            role="listbox"
+            aria-label={tSpecies("categoryAria", { count: speciesCount })}
+          >
             {Object.entries(categories).map(([key, category]) => (
               <div
                 key={key}
                 role="option"
                 aria-selected={selectedCategory === key}
-                className={`category-card category-card--liquid ${selectedCategory === key ? "selected" : ""}`}
+                className={`category-card category-card--chip ${selectedCategory === key ? "selected" : ""}`}
                 onClick={() => setSelectedCategory(key)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -3760,7 +3760,9 @@ const NewConsultation = ({
       <div className="consultation-page">
         <div className="container">
           <div className="premium-required">
-            <div className="premium-icon">🔒</div>
+            <div className="premium-icon" aria-hidden>
+              <Lock size={28} strokeWidth={1.75} />
+            </div>
             <h2>{t("consultation.expertPremiumTitle")}</h2>
             <p>
               {t("consultation.expertPremiumBody")}
@@ -3782,7 +3784,9 @@ const NewConsultation = ({
       <div className="consultation-page">
         <div className="container">
           <div className="premium-required">
-            <div className="premium-icon">🔒</div>
+            <div className="premium-icon" aria-hidden>
+              <Lock size={28} strokeWidth={1.75} />
+            </div>
             <h2>{t("consultation.trialTitle")}</h2>
             <p>{getTrialExhaustedMessage()}</p>
             <Button type="button" onClick={() => setView("membership")}>
@@ -3801,7 +3805,9 @@ const NewConsultation = ({
         <div className="page-title-header">
           <div className="container">
             <div className="page-title-content">
-              <div className="page-title-icon">🩺</div>
+              <div className="page-title-icon" aria-hidden>
+                <Stethoscope size={26} strokeWidth={1.75} />
+              </div>
               <div className="page-title-text">
                 <div className="clinic-page-title-row">
                   <h1>
@@ -3929,7 +3935,9 @@ const NewConsultation = ({
         <div className="page-title-header">
           <div className="container">
             <div className="page-title-content">
-              <div className="page-title-icon">📝</div>
+              <div className="page-title-icon" aria-hidden>
+                <ClipboardList size={26} strokeWidth={1.75} />
+              </div>
               <div className="page-title-text">
                 <div className="clinic-page-title-row">
                   <h1>
@@ -4021,7 +4029,9 @@ const NewConsultation = ({
         <div className="page-title-header">
           <div className="container">
             <div className="page-title-content">
-              <div className="page-title-icon">🔬</div>
+              <div className="page-title-icon" aria-hidden>
+                <Microscope size={26} strokeWidth={1.75} />
+              </div>
               <div className="page-title-text">
                 <div className="clinic-page-title-row">
                   <h1>{t("consultation.analysisTitle")}</h1>

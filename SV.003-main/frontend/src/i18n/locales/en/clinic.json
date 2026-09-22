@@ -623,7 +623,7 @@
     "continueAnalysis": "Continue to analysis",
     "analysisTitle": "Diagnostic analysis",
     "analysisLead": "Specialized clinical analysis results",
-    "detailLabel": "RECORD THE PET'S DETAILS AS THOROUGHLY AS POSSIBLE.",
+    "detailLabel": "Record the pet's details as thoroughly as possible.",
     "detailPlaceholder": "Write all details about the pet, chief complaint, symptoms, clinical observations, vital signs, prior treatments, history, studies, behavior, and any other information relevant to the diagnosis…",
     "petDetailTitle": "Pet details",
     "expertBanner": "Expert Mode: describe the clinical case now. You can complete pet details (step 1) afterward.",

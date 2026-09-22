@@ -146,7 +146,7 @@ html.dark .membership-page {
 
 [data-theme="dark"] .consultation-form-container,
 [data-theme="dark"] .consultation-sidebar,
-[data-theme="dark"] .consultation-form > .form-section:not(.category-selector-glass-wrap),
+[data-theme="dark"] .consultation-form > .form-section:not(.category-selector-wrap):not(.category-selector-glass-wrap),
 [data-theme="dark"] .step-indicator,
 [data-theme="dark"] .consultation-mobile-context,
 [data-theme="dark"] .patient-antecedents,
@@ -154,7 +154,7 @@ html.dark .membership-page {
 [data-theme="dark"] .analysis-content,
 html.dark .consultation-form-container,
 html.dark .consultation-sidebar,
-html.dark .consultation-form > .form-section:not(.category-selector-glass-wrap),
+html.dark .consultation-form > .form-section:not(.category-selector-wrap):not(.category-selector-glass-wrap),
 html.dark .step-indicator,
 html.dark .consultation-mobile-context,
 html.dark .patient-antecedents,

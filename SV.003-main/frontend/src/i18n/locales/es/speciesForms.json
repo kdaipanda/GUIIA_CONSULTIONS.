@@ -28,7 +28,7 @@
   "categoryTitle": "Categoría Animal",
   "speciesTitle": "Especie de la mascota",
   "categoryBadge": "Multiespecie veterinaria · {{count}} formularios clínicos",
-  "categoryAria": "Especie",
+  "categoryAria": "Especie de la mascota, {{count}} formularios disponibles",
   "titles": {
     "perros": "Datos Generales del Perro",
     "gatos": "Datos Generales del Gato",

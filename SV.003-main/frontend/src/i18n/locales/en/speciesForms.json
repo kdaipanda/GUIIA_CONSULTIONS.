@@ -28,7 +28,7 @@
   "categoryTitle": "Animal category",
   "speciesTitle": "Pet species",
   "categoryBadge": "Multi-species veterinary · {{count}} clinical forms",
-  "categoryAria": "Species",
+  "categoryAria": "Pet species, {{count}} clinical forms available",
   "titles": {
     "perros": "General dog details",
     "gatos": "General cat details",
