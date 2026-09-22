@@ -406,7 +406,40 @@
     "resultsFiltered_one": "{{count}} registro encontrado",
     "resultsFiltered_other": "{{count}} registros encontrados",
     "labStandalone_one": " · {{count}} interpretación de laboratorio",
-    "labStandalone_other": " · {{count}} interpretaciones de laboratorio"
+    "labStandalone_other": " · {{count}} interpretaciones de laboratorio",
+    "card": {
+      "ownerUnspecified": "No especificado",
+      "owner": "Propietario",
+      "date": "Fecha",
+      "reason": "Motivo de consulta",
+      "analysis": "Análisis clínico",
+      "labStudies_one": "{{count}} estudio de laboratorio vinculado",
+      "labStudies_other": "{{count}} estudios de laboratorio vinculados",
+      "continue": "Continuar consulta",
+      "viewRecord": "Ver ficha",
+      "chart": "Expediente",
+      "pdf": "PDF",
+      "pdfGenerating": "Generando PDF…",
+      "ratingAria": "Calificación {{count}} de 5"
+    },
+    "detail": {
+      "back": "Volver al historial",
+      "petFallback": "Mascota",
+      "openChart": "Abrir expediente",
+      "clinicalData": "Datos clínicos",
+      "owner": "Propietario",
+      "sex": "Sexo",
+      "reproductive": "Estado reproductivo",
+      "bodyCondition": "Condición corporal",
+      "vaccines": "Vacunas",
+      "symptoms": "Síntomas",
+      "reason": "Motivo de consulta",
+      "noExtra": "Sin información adicional",
+      "analysis": "Análisis clínico",
+      "linkedLab": "Interpretaciones de laboratorio vinculadas",
+      "close": "Cerrar ficha",
+      "downloadPdf": "Descargar PDF"
+    }
   },
   "membership": {
     "eyebrow": "Plataforma clínica GUIAA",

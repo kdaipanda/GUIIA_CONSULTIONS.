@@ -406,7 +406,40 @@
     "resultsFiltered_one": "{{count}} record found",
     "resultsFiltered_other": "{{count}} records found",
     "labStandalone_one": " · {{count}} lab interpretation",
-    "labStandalone_other": " · {{count}} lab interpretations"
+    "labStandalone_other": " · {{count}} lab interpretations",
+    "card": {
+      "ownerUnspecified": "Not specified",
+      "owner": "Owner",
+      "date": "Date",
+      "reason": "Chief complaint",
+      "analysis": "Clinical analysis",
+      "labStudies_one": "{{count}} linked lab study",
+      "labStudies_other": "{{count}} linked lab studies",
+      "continue": "Continue consultation",
+      "viewRecord": "View record",
+      "chart": "Patient chart",
+      "pdf": "PDF",
+      "pdfGenerating": "Generating PDF…",
+      "ratingAria": "Rating {{count}} of 5"
+    },
+    "detail": {
+      "back": "Back to history",
+      "petFallback": "Pet",
+      "openChart": "Open patient chart",
+      "clinicalData": "Clinical data",
+      "owner": "Owner",
+      "sex": "Sex",
+      "reproductive": "Reproductive status",
+      "bodyCondition": "Body condition",
+      "vaccines": "Vaccines",
+      "symptoms": "Symptoms",
+      "reason": "Chief complaint",
+      "noExtra": "No additional information",
+      "analysis": "Clinical analysis",
+      "linkedLab": "Linked lab interpretations",
+      "close": "Close record",
+      "downloadPdf": "Download PDF"
+    }
   },
   "membership": {
     "eyebrow": "GUIAA clinical platform",

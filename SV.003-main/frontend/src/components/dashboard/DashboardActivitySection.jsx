@@ -2,17 +2,11 @@ import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import * as Tabs from "@radix-ui/react-tabs";
 import {
-  Bird,
   Brain,
   CalendarDays,
-  Cat,
   ClipboardList,
   Crown,
-  Dog,
-  PawPrint,
   Plus,
-  Rabbit,
-  Turtle,
   User,
 } from "lucide-react";
 import { Button } from "../ui/button";
@@ -21,26 +15,10 @@ import {
   formatConsultationFolio,
   getConsultationPatientTitle,
   getConsultationReasonPreview,
-  getConsultationSpeciesKey,
   getConsultationStatusLabel,
 } from "../../lib/consultationDisplay";
+import { ConsultationSpeciesIcon } from "../consultation/ConsultationSpeciesIcon";
 import "./dashboardActivity.css";
-
-const SPECIES_LUCIDE = {
-  perros: Dog,
-  gatos: Cat,
-  aves: Bird,
-  conejos: Rabbit,
-  patos_pollos: Bird,
-  tortugas: Turtle,
-  iguanas: Turtle,
-};
-
-function SpeciesIcon({ consultation }) {
-  const key = getConsultationSpeciesKey(consultation);
-  const Icon = SPECIES_LUCIDE[key] || PawPrint;
-  return <Icon size={18} strokeWidth={2} aria-hidden />;
-}
 
 function ActivityCard({ consultation, embedded, onOpen, continueLabel, viewLabel }) {
   const status = consultation.status;
@@ -59,7 +37,7 @@ function ActivityCard({ consultation, embedded, onOpen, continueLabel, viewLabel
 
       <div className="dashboard-activity-main">
         <span className="dashboard-activity-species" aria-hidden>
-          <SpeciesIcon consultation={consultation} />
+          <ConsultationSpeciesIcon consultation={consultation} size={18} />
         </span>
         <div className="dashboard-activity-body">
           <h3>{getConsultationPatientTitle(consultation)}</h3>
