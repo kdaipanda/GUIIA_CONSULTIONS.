@@ -18,21 +18,9 @@
   padding-top: 8px;
 }
 
-.medical-images-eyebrow {
-  margin: 0 0 6px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #265b93;
-}
-
 .medical-images-page-guiaa .medical-images-header h1 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   margin: 0;
-  font-size: clamp(1.35rem, 4.5vw, 1.85rem);
+  font-size: 1.625rem;
   font-weight: 800;
   color: #0c2d4d;
   letter-spacing: -0.02em;
@@ -41,7 +29,7 @@
 .medical-images-page-guiaa .medical-images-header p {
   margin: 6px 0 0;
   font-size: 14px;
-  color: rgba(12, 45, 77, 0.55);
+  color: #64748b;
   max-width: 36rem;
   line-height: 1.45;
 }
@@ -64,7 +52,7 @@
   grid-area: panel;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1024px) {
   .medical-lab-layout {
     grid-template-areas: "form panel";
     grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
@@ -88,7 +76,7 @@
 }
 
 /* Resumen compacto móvil */
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .medical-images-page-guiaa .medical-lab-summary {
     position: static;
     top: auto;
@@ -126,7 +114,7 @@
   .medical-lab-summary-item .side-panel-label {
     font-size: 9px;
     margin-bottom: 4px;
-    color: rgba(12, 45, 77, 0.5);
+    color: #64748b;
   }
 
   .medical-lab-summary-item .side-panel-main {
@@ -167,7 +155,7 @@
 
   .medical-lab-summary-consult {
     margin-top: 8px;
-    color: rgba(12, 45, 77, 0.55);
+    color: #64748b;
   }
 
   .medical-lab-summary-consult span {
@@ -175,7 +163,7 @@
   }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1024px) {
   .medical-lab-summary-grid {
     display: block;
   }
@@ -196,7 +184,7 @@
 .medical-lab-input-tabs .clinic-quick-chip {
   justify-content: center;
   width: 100%;
-  min-height: 42px;
+  min-height: 2.75rem;
   border-radius: 10px;
   padding: 8px 6px;
   font-size: 12px;
@@ -258,7 +246,7 @@
 
 .medical-lab-upload-hint {
   font-size: 12px;
-  color: rgba(12, 45, 77, 0.5);
+  color: #64748b;
 }
 
 .medical-lab-preview {
@@ -353,7 +341,7 @@
   display: block;
   margin-top: 8px;
   font-size: 12px;
-  color: rgba(12, 45, 77, 0.5);
+  color: #64748b;
 }
 
 .medical-lab-context-area {
@@ -408,7 +396,7 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions {
   display: block;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .medical-lab-optional-toggle {
     display: flex;
     align-items: center;
@@ -443,7 +431,7 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions {
 }
 
 /* Acciones sticky en móvil */
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .medical-images-page-guiaa .medical-lab-form-actions,
   .medical-images-page-guiaa .medical-lab-result-actions {
     position: static;
@@ -555,7 +543,7 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions {
 
   .medical-images-page-guiaa .history-card button {
     width: 100%;
-    min-height: 42px;
+    min-height: 2.75rem;
     margin-top: 10px;
   }
 }
@@ -569,7 +557,7 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions {
   margin: -12px auto 20px;
   max-width: 28rem;
   padding: 0.4rem 0.75rem;
-  border-radius: 999px;
+  border-radius: 12px;
   background: rgba(38, 91, 147, 0.1);
   color: #265b93;
   font-size: 12px;
@@ -581,7 +569,7 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions {
   margin: -8px auto 16px;
   max-width: 28rem;
   padding: 0.35rem 0.75rem;
-  border-radius: 999px;
+  border-radius: 12px;
   background: rgba(47, 133, 122, 0.12);
   color: #2f857a;
   font-size: 11px;
@@ -614,7 +602,7 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions {
   color: #b45309;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .medical-lab-extract-badge {
     margin: -8px 0 16px;
     text-align: left;
@@ -626,7 +614,7 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions {
   }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1024px) {
   .medical-lab-detailed-analysis {
     max-height: 600px;
     overflow-y: auto;
@@ -672,9 +660,9 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions {
   margin-top: 1.25rem;
   padding: 1.25rem 1.375rem;
   border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.72);
+  background: #fff;
   border: 1px solid rgba(38, 91, 147, 0.12);
-  box-shadow: var(--liquid-glass-shadow-soft, 0 8px 24px -12px rgba(12, 45, 77, 0.12));
+  box-shadow: 0 2px 12px -6px rgba(12, 45, 77, 0.08);
 }
 
 .medical-images-page-guiaa .medical-lab-history h2 {
@@ -715,7 +703,7 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions {
   align-self: flex-start;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .medical-images-page-guiaa .medical-images-header {
     flex-direction: column;
     align-items: stretch;
@@ -735,19 +723,14 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions {
 [data-theme="dark"] .medical-images-page-guiaa .interpretation-history,
 html.dark .medical-images-page-guiaa .medical-lab-history,
 html.dark .medical-images-page-guiaa .interpretation-history {
-  background: var(--liquid-glass-bg) !important;
-  border-color: var(--liquid-glass-border-color) !important;
-  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  background: #152032 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.55) !important;
 }
 
 [data-theme="dark"] .medical-images-page-guiaa .medical-lab-history h2,
 html.dark .medical-images-page-guiaa .medical-lab-history h2 {
   color: var(--text-primary) !important;
-}
-
-[data-theme="dark"] .medical-images-page-guiaa .medical-images-eyebrow,
-html.dark .medical-images-page-guiaa .medical-images-eyebrow {
-  color: #6ee7d9;
 }
 
 [data-theme="dark"] .medical-images-page-guiaa .medical-lab-header-toggle,
@@ -780,7 +763,7 @@ html.dark .medical-images-page-guiaa .history-date {
 [data-theme="dark"] .medical-images-page-guiaa .history-card,
 html.dark .medical-images-page-guiaa .history-card {
   background: rgba(14, 22, 34, 0.72) !important;
-  border-color: var(--liquid-glass-border-color) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
 }
 
@@ -825,8 +808,8 @@ html.dark .medical-images-page-guiaa .empty-state {
 
 [data-theme="dark"] .medical-images-page-guiaa .medical-images-premium-gate,
 html.dark .medical-images-page-guiaa .medical-images-premium-gate {
-  background: var(--liquid-glass-bg) !important;
-  border-color: var(--liquid-glass-border-color) !important;
+  background: #152032 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* —— Resultado del análisis (evitar texto claro sobre fondo blanco) —— */
@@ -870,10 +853,10 @@ html.dark .medical-images-page-guiaa .medical-images-premium-gate {
 
 [data-theme="dark"] .medical-images-page-guiaa .interpretation-result.medical-lab-result,
 html.dark .medical-images-page-guiaa .interpretation-result.medical-lab-result {
-  background: var(--liquid-glass-bg) !important;
-  border: 1px solid var(--liquid-glass-border-color) !important;
-  border-top: 1px solid var(--liquid-glass-border-color) !important;
-  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  background: #152032 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.55) !important;
 }
 
 [data-theme="dark"] .medical-images-page-guiaa .result-section.detailed,
@@ -919,4 +902,92 @@ html.dark .medical-images-page-guiaa .medical-lab-result-actions button {
 [data-theme="dark"] .medical-images-page-guiaa .interpretation-result .result-content,
 html.dark .medical-images-page-guiaa .interpretation-result .result-content {
   color: var(--text-primary) !important;
+}
+
+.side-panel-type-icon,
+.type-glyph {
+  flex-shrink: 0;
+  color: #265b93;
+}
+
+.medical-images-page-guiaa .type-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.medical-images-page-guiaa .history-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.medical-lab-empty {
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px dashed rgba(38, 91, 147, 0.2);
+  background: #f8fafc;
+  text-align: left;
+}
+
+.medical-lab-empty h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  color: #0c2d4d;
+}
+
+.medical-lab-empty p {
+  margin: 0 0 1rem;
+  color: #64748b;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.medical-lab-help-toggle,
+.medical-lab-optional-toggle {
+  min-height: 2.75rem;
+}
+
+.medical-lab-upload-zone:focus-visible,
+.medical-lab-help-toggle:focus-visible,
+.medical-lab-optional-toggle:focus-visible,
+.medical-lab-history-link:focus-visible {
+  outline: 2px solid #265b93;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .medical-lab-help-chevron,
+  .medical-lab-upload-zone,
+  .medical-images-page-guiaa .history-card {
+    transition: none;
+  }
+
+  [data-theme="dark"] .medical-images-page-guiaa .history-card:hover,
+  html.dark .medical-images-page-guiaa .history-card:hover {
+    transform: none;
+  }
+}
+
+[data-theme="dark"] .medical-lab-empty,
+html.dark .medical-lab-empty {
+  background: #141e2c;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .medical-lab-empty h3,
+html.dark .medical-lab-empty h3 {
+  color: var(--text-primary, #f1f5f9);
+}
+
+[data-theme="dark"] .medical-lab-empty p,
+html.dark .medical-lab-empty p {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .side-panel-type-icon,
+[data-theme="dark"] .type-glyph,
+html.dark .side-panel-type-icon,
+html.dark .type-glyph {
+  color: #6ee7d9;
 }

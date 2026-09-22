@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronDown, FileUp, FlaskConical, ImageIcon, Link2 } from "lucide-react";
+import {
+  Camera,
+  ChevronDown,
+  CircleHelp,
+  Droplets,
+  FileText,
+  FileUp,
+  ImageIcon,
+  Link2,
+  Microscope,
+  TestTube,
+} from "lucide-react";
 import { useVet } from "../context/VetContext";
 import { notifyError, notifySuccess } from "../lib/appToast";
 import { BACKEND_URL } from "../lib/backendUrl";
@@ -26,12 +37,28 @@ const EXTRACTION_LABEL_KEYS = {
   text: "lab.sourceText",
 };
 
+function historyTypeMeta(imageType, t) {
+  switch (imageType) {
+    case "blood_test":
+      return { Icon: Droplets, label: t("labTypes.blood_test.label") };
+    case "urinalysis":
+      return { Icon: TestTube, label: t("labTypes.urinalysis.label") };
+    case "pdf_report":
+      return { Icon: FileText, label: t("lab.typePdf") };
+    case "xray":
+      return { Icon: Camera, label: t("lab.typeImage") };
+    default:
+      return { Icon: Microscope, label: t("lab.studyDefault") };
+  }
+}
+
 export function MedicalImagesPage({
   setView,
   clinicalContext = null,
   onClinicalContextChange,
 }) {
-  const { t } = useTranslation("clinic");
+  const { t, i18n } = useTranslation("clinic");
+  const locale = (i18n.language || "en").startsWith("es") ? "es-MX" : "en-US";
   const { veterinarian } = useVet();
   const [imageType, setImageType] = useState("blood_test");
   const [inputMode, setInputMode] = useState("pdf");
@@ -39,7 +66,7 @@ export function MedicalImagesPage({
   const [imageClinicalContext, setImageClinicalContext] = useState(clinicalContext);
   const [additionalContext, setAdditionalContext] = useState("");
   const [consultationId, setConsultationId] = useState("");
-  const [pastedStudyData, setPastedStudyData] = useState("");  // Datos de estudio pegados
+  const [pastedStudyData, setPastedStudyData] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -53,19 +80,21 @@ export function MedicalImagesPage({
   const typeMeta = {
     blood_test: {
       label: t("labTypes.blood_test.label"),
-      icon: "🩸",
+      Icon: Droplets,
       hint: t("labTypes.blood_test.hint"),
     },
     urinalysis: {
       label: t("labTypes.urinalysis.label"),
-      icon: "🧪",
+      Icon: TestTube,
       hint: t("labTypes.urinalysis.hint"),
     },
   };
 
   const imageMeta = typeMeta[imageType] || typeMeta.blood_test;
+  const TypeIcon = imageMeta.Icon;
 
   useEffect(() => {
+    if (!veterinarian?.id) return;
     loadHistory();
   }, [veterinarian?.id]);
 
@@ -88,6 +117,10 @@ export function MedicalImagesPage({
   };
 
   const loadHistory = async () => {
+    if (!veterinarian?.id) {
+      setHistory([]);
+      return;
+    }
     try {
       const response = await fetch(
         `${BACKEND_URL}/api/medical-images/history?limit=50`,
@@ -96,7 +129,9 @@ export function MedicalImagesPage({
       if (!response.ok) {
         const errText = await response.text().catch(() => "");
         throw new Error(
-          errText ? errText.slice(0, 200) : `Error del servidor: ${response.status}`,
+          errText
+            ? errText.slice(0, 200)
+            : t("lab.serverError", { status: response.status }),
         );
       }
       const json = await response.json();
@@ -104,7 +139,7 @@ export function MedicalImagesPage({
       setHistory(rows || []);
     } catch (error) {
       console.error("Error loading history:", error);
-      setHistory([]); // Asegurar que history sea un array vacío en caso de error
+      setHistory([]);
     }
   };
 
@@ -143,7 +178,6 @@ export function MedicalImagesPage({
     }
 
     setLoading(true);
-    notifyError("");
     setResult(null);
 
     try {
@@ -184,7 +218,7 @@ export function MedicalImagesPage({
       );
 
       if (!response.ok) {
-        let errorMessage = `Error del servidor: ${response.status}`;
+        let errorMessage = t("lab.serverError", { status: response.status });
         try {
           const errorData = await response.json();
           if (errorData) {
@@ -207,20 +241,18 @@ export function MedicalImagesPage({
             /* mensaje por defecto */
           }
         }
-        // Asegurar que errorMessage sea siempre un string
-        const finalErrorMessage = typeof errorMessage === 'string' 
-          ? errorMessage 
-          : JSON.stringify(errorMessage);
+        const finalErrorMessage =
+          typeof errorMessage === "string"
+            ? errorMessage
+            : JSON.stringify(errorMessage);
         throw new Error(finalErrorMessage);
       }
 
       const data = await response.json();
       setResult(data);
       notifySuccess(t("lab.success"));
-      // Recargar historial después de crear un nuevo análisis
       await loadHistory();
 
-      // Clear form
       setPastedStudyData("");
       setImageFile(null);
       setImagePreview(null);
@@ -231,22 +263,18 @@ export function MedicalImagesPage({
       setConsultationId("");
     } catch (err) {
       console.error("Error en handleSubmit:", err);
-      // Asegurar que el error siempre sea un string
       let errorMessage = t("lab.processError");
-      
+
       if (err instanceof Error) {
         errorMessage = err.message || errorMessage;
-      } else if (typeof err === 'string') {
+      } else if (typeof err === "string") {
         errorMessage = err;
-      } else if (err && typeof err === 'object') {
-        // Si es un objeto, intentar extraer el mensaje
+      } else if (err && typeof err === "object") {
         errorMessage = err.message || err.detail || err.error || JSON.stringify(err);
       }
-      
-      // Asegurar que sea string y no esté vacío
+
       errorMessage = String(errorMessage || t("lab.unknownError"));
       notifyError(errorMessage);
-      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -257,12 +285,8 @@ export function MedicalImagesPage({
       <div className="container">
         <header className="medical-images-header">
           <div>
-            <p className="medical-images-eyebrow">{t("lab.eyebrow")}</p>
             <div className="clinic-page-title-row">
-              <h1>
-                <FlaskConical size={28} aria-hidden />
-                {t("lab.title")}
-              </h1>
+              <h1>{t("lab.title")}</h1>
               <ModuleHelpTip topicId="lab" setView={setView} />
             </div>
             <p>{t("lab.lead")}</p>
@@ -279,20 +303,20 @@ export function MedicalImagesPage({
 
         {!showHistory ? (
           <div className="image-interpretation-layout medical-lab-layout">
-            <aside className="image-side-panel medical-lab-summary" aria-label={t("lab.summaryTitle")}>
+            <aside
+              className="image-side-panel medical-lab-summary"
+              aria-label={t("lab.summaryTitle")}
+            >
               <div className="side-panel-header">
-                <span className="side-panel-pill">{t("lab.panelPill")}</span>
                 <h3>{t("lab.summaryTitle")}</h3>
-                <p className="medical-lab-summary-lead">
-                  {t("lab.summaryLead")}
-                </p>
+                <p className="medical-lab-summary-lead">{t("lab.summaryLead")}</p>
               </div>
 
               <div className="medical-lab-summary-grid">
                 <div className="side-panel-section medical-lab-summary-item">
                   <div className="side-panel-label">{t("lab.type")}</div>
                   <div className="side-panel-main">
-                    <span className="side-panel-icon">{imageMeta.icon}</span>
+                    <TypeIcon size={16} className="side-panel-type-icon" aria-hidden />
                     <span className="side-panel-text">{imageMeta.label}</span>
                   </div>
                 </div>
@@ -300,7 +324,9 @@ export function MedicalImagesPage({
                 <div className="side-panel-section medical-lab-summary-item">
                   <div className="side-panel-label">{t("lab.pet")}</div>
                   <div className="side-panel-chip">
-                    {imageClinicalContext?.patient?.name || patientName || t("lab.unassigned")}
+                    {imageClinicalContext?.patient?.name ||
+                      patientName ||
+                      t("lab.unassigned")}
                   </div>
                 </div>
 
@@ -308,6 +334,7 @@ export function MedicalImagesPage({
                   <div className="side-panel-label">{t("lab.status")}</div>
                   <div
                     className={`side-panel-status ${loading ? "loading" : result ? "done" : "idle"}`}
+                    role="status"
                   >
                     {loading
                       ? t("lab.analyzing")
@@ -323,402 +350,436 @@ export function MedicalImagesPage({
               <p className="side-panel-hint medical-lab-summary-hint">{imageMeta.hint}</p>
               {consultationId && (
                 <div className="side-panel-sub medical-lab-summary-consult">
-                  Consulta: <span>#{consultationId}</span>
+                  {t("lab.consultationLinked", { id: consultationId })}
                 </div>
               )}
             </aside>
 
             <div className="image-interpretation-form medical-lab-form">
               <form onSubmit={handleSubmit} className="medical-lab-form-inner">
-              <div className="form-section">
-                <h3>Tipo de Estudio</h3>
-                <div className="image-type-selector">
-                  <label
-                    className={`type-option ${imageType === "blood_test" ? "selected" : ""}`}
-                  >
-                    <input
-                      type="radio"
-                      value="blood_test"
-                      checked={imageType === "blood_test"}
-                      onChange={(e) => setImageType(e.target.value)}
-                    />
-                    <div className="type-content">
-                      <div className="type-icon">🩸</div>
-                      <span>Análisis de Sangre</span>
-                    </div>
-                  </label>
-                  <label
-                    className={`type-option ${imageType === "urinalysis" ? "selected" : ""}`}
-                  >
-                    <input
-                      type="radio"
-                      value="urinalysis"
-                      checked={imageType === "urinalysis"}
-                      onChange={(e) => setImageType(e.target.value)}
-                    />
-                    <div className="type-content">
-                      <div className="type-icon">🧪</div>
-                      <span>Urianálisis</span>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <div className="form-section medical-lab-patient-section">
-                <h3>{t("lab.petSectionTitle")}</h3>
-                <p className="medical-lab-patient-hint">
-                  {t("lab.petSectionHint")}
-                </p>
-                <PatientSelector
-                  value={imageClinicalContext?.patientId}
-                  onChange={handlePatientContextChange}
-                />
-                {imageClinicalContext?.patientId ? (
-                  <p className="medical-lab-patient-linked">
-                    <Link2 size={14} aria-hidden />
-                    {t("lab.linkedTo", {
-                      name: imageClinicalContext.patient?.name || t("lab.registeredPatient"),
-                    })}
-                  </p>
-                ) : (
-                  <p className="medical-lab-patient-unlinked">
-                    {t("lab.unlinkedHint")}
-                  </p>
-                )}
-              </div>
-
-              <div className="form-section">
-                <h3>{t("lab.uploadTitle")}</h3>
-
-                <div className="clinic-sale-mode-toggle medical-lab-input-tabs">
-                  <button
-                    type="button"
-                    className={`clinic-quick-chip${inputMode === "pdf" ? " is-active" : ""}`}
-                    onClick={() => setInputMode("pdf")}
-                  >
-                    {t("lab.tabPdf")}
-                  </button>
-                  <button
-                    type="button"
-                    className={`clinic-quick-chip${inputMode === "image" ? " is-active" : ""}`}
-                    onClick={() => setInputMode("image")}
-                  >
-                    {t("lab.tabImage")}
-                  </button>
-                  <button
-                    type="button"
-                    className={`clinic-quick-chip${inputMode === "text" ? " is-active" : ""}`}
-                    onClick={() => setInputMode("text")}
-                  >
-                    {t("lab.tabText")}
-                  </button>
-                </div>
-
-                {(inputMode === "pdf" || inputMode === "image") && (
-                  <div className="form-group">
-                    <label htmlFor="lab-file-upload">
-                      {inputMode === "pdf" ? t("lab.filePdfLabel") : t("lab.fileImageLabel")}
+                <div className="form-section">
+                  <h3>{t("lab.studyTypeTitle")}</h3>
+                  <div className="image-type-selector" role="radiogroup" aria-label={t("lab.studyTypeTitle")}>
+                    <label
+                      className={`type-option ${imageType === "blood_test" ? "selected" : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="lab-study-type"
+                        value="blood_test"
+                        checked={imageType === "blood_test"}
+                        onChange={(e) => setImageType(e.target.value)}
+                      />
+                      <div className="type-content">
+                        <Droplets size={18} className="type-glyph" aria-hidden />
+                        <span>{t("labTypes.blood_test.label")}</span>
+                      </div>
                     </label>
-                    <input
-                      ref={fileInputRef}
-                      id="lab-file-upload"
-                      type="file"
-                      accept={inputMode === "pdf" ? "application/pdf,.pdf" : "image/*"}
-                      capture={inputMode === "image" ? "environment" : undefined}
-                      onChange={handleLabFileChange}
-                      className="medical-lab-file-input-hidden"
-                    />
+                    <label
+                      className={`type-option ${imageType === "urinalysis" ? "selected" : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="lab-study-type"
+                        value="urinalysis"
+                        checked={imageType === "urinalysis"}
+                        onChange={(e) => setImageType(e.target.value)}
+                      />
+                      <div className="type-content">
+                        <TestTube size={18} className="type-glyph" aria-hidden />
+                        <span>{t("labTypes.urinalysis.label")}</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="form-section medical-lab-patient-section">
+                  <h3>{t("lab.petSectionTitle")}</h3>
+                  <p className="medical-lab-patient-hint">{t("lab.petSectionHint")}</p>
+                  <PatientSelector
+                    value={imageClinicalContext?.patientId}
+                    onChange={handlePatientContextChange}
+                  />
+                  {imageClinicalContext?.patientId ? (
+                    <p className="medical-lab-patient-linked">
+                      <Link2 size={14} aria-hidden />
+                      {t("lab.linkedTo", {
+                        name:
+                          imageClinicalContext.patient?.name ||
+                          t("lab.registeredPatient"),
+                      })}
+                    </p>
+                  ) : (
+                    <p className="medical-lab-patient-unlinked">
+                      {t("lab.unlinkedHint")}
+                    </p>
+                  )}
+                </div>
+
+                <div className="form-section">
+                  <h3>{t("lab.uploadTitle")}</h3>
+
+                  <div
+                    className="clinic-sale-mode-toggle medical-lab-input-tabs"
+                    role="tablist"
+                    aria-label={t("lab.uploadTitle")}
+                  >
                     <button
                       type="button"
-                      className="medical-lab-upload-zone"
-                      onClick={() => fileInputRef.current?.click()}
+                      role="tab"
+                      aria-selected={inputMode === "pdf"}
+                      className={`clinic-quick-chip${inputMode === "pdf" ? " is-active" : ""}`}
+                      onClick={() => setInputMode("pdf")}
                     >
-                      <span className="medical-lab-upload-icon" aria-hidden>
-                        {inputMode === "pdf" ? <FileUp size={22} /> : <ImageIcon size={22} />}
-                      </span>
-                      <span className="medical-lab-upload-text">
-                        {imageFile
-                          ? labFileLabel(imageFile)
-                          : inputMode === "pdf"
-                            ? t("lab.pickPdf")
-                            : t("lab.pickImage")}
-                      </span>
-                      <span className="medical-lab-upload-hint">
-                        {inputMode === "pdf"
-                          ? t("lab.pdfHint")
-                          : t("lab.imageHint")}
-                      </span>
+                      {t("lab.tabPdf")}
                     </button>
-                    {imagePreview && inputMode === "image" && (
-                      <img
-                        src={imagePreview}
-                        alt={t("lab.previewAlt")}
-                        className="medical-lab-preview"
-                      />
-                    )}
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={inputMode === "image"}
+                      className={`clinic-quick-chip${inputMode === "image" ? " is-active" : ""}`}
+                      onClick={() => setInputMode("image")}
+                    >
+                      {t("lab.tabImage")}
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={inputMode === "text"}
+                      className={`clinic-quick-chip${inputMode === "text" ? " is-active" : ""}`}
+                      onClick={() => setInputMode("text")}
+                    >
+                      {t("lab.tabText")}
+                    </button>
                   </div>
-                )}
 
-                {inputMode === "text" && (
-                <>
-                <div className="medical-lab-help">
+                  {(inputMode === "pdf" || inputMode === "image") && (
+                    <div className="form-group">
+                      <label htmlFor="lab-file-upload">
+                        {inputMode === "pdf"
+                          ? t("lab.filePdfLabel")
+                          : t("lab.fileImageLabel")}
+                      </label>
+                      <input
+                        ref={fileInputRef}
+                        id="lab-file-upload"
+                        type="file"
+                        accept={
+                          inputMode === "pdf" ? "application/pdf,.pdf" : "image/*"
+                        }
+                        capture={inputMode === "image" ? "environment" : undefined}
+                        onChange={handleLabFileChange}
+                        className="medical-lab-file-input-hidden"
+                      />
+                      <button
+                        type="button"
+                        className="medical-lab-upload-zone"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <span className="medical-lab-upload-icon" aria-hidden>
+                          {inputMode === "pdf" ? (
+                            <FileUp size={22} />
+                          ) : (
+                            <ImageIcon size={22} />
+                          )}
+                        </span>
+                        <span className="medical-lab-upload-text">
+                          {imageFile
+                            ? labFileLabel(imageFile)
+                            : inputMode === "pdf"
+                              ? t("lab.pickPdf")
+                              : t("lab.pickImage")}
+                        </span>
+                        <span className="medical-lab-upload-hint">
+                          {inputMode === "pdf"
+                            ? t("lab.pdfHint")
+                            : t("lab.imageHint")}
+                        </span>
+                      </button>
+                      {imagePreview && inputMode === "image" && (
+                        <img
+                          src={imagePreview}
+                          alt={t("lab.previewAlt")}
+                          className="medical-lab-preview"
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {inputMode === "text" && (
+                    <>
+                      <div className="medical-lab-help">
+                        <button
+                          type="button"
+                          className="medical-lab-help-toggle"
+                          onClick={() => setShowHelp(!showHelp)}
+                          aria-expanded={showHelp}
+                        >
+                          <span className="medical-lab-help-toggle-label">
+                            <CircleHelp size={16} aria-hidden />
+                            {t("lab.helpToggle")}
+                          </span>
+                          <ChevronDown
+                            size={18}
+                            className={`medical-lab-help-chevron${showHelp ? " is-open" : ""}`}
+                            aria-hidden
+                          />
+                        </button>
+
+                        {showHelp && (
+                          <div className="medical-lab-help-body">
+                            <div className="medical-lab-help-block">
+                              <strong>{t("lab.helpCase1Title")}</strong>
+                              <p>{t("lab.helpCase1Adobe")}</p>
+                              <p>{t("lab.helpCase1Browser")}</p>
+                            </div>
+                            <div className="medical-lab-help-block">
+                              <strong>{t("lab.helpCase2Title")}</strong>
+                              <p>{t("lab.helpCase2Body")}</p>
+                            </div>
+                            <div className="medical-lab-help-block">
+                              <strong>{t("lab.helpCase3Title")}</strong>
+                              <p>{t("lab.helpCase3Body")}</p>
+                            </div>
+                            <div className="medical-lab-help-block">
+                              <strong>{t("lab.helpAltTitle")}</strong>
+                              <p>{t("lab.helpAltBody")}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="lab-paste-data">{t("lab.pasteLabel")}</label>
+                        <Textarea
+                          id="lab-paste-data"
+                          value={pastedStudyData}
+                          onChange={(e) => setPastedStudyData(e.target.value)}
+                          placeholder={t("lab.pastePlaceholder")}
+                          rows={6}
+                          className="medical-lab-paste-area"
+                        />
+                        <small className="medical-lab-paste-hint">
+                          {t("lab.pasteHint")}
+                        </small>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div
+                  className={`medical-lab-optional${showAdvanced ? " is-open" : ""}`}
+                >
                   <button
                     type="button"
-                    className="medical-lab-help-toggle"
-                    onClick={() => setShowHelp(!showHelp)}
-                    aria-expanded={showHelp}
+                    className="medical-lab-optional-toggle"
+                    onClick={() => setShowAdvanced((open) => !open)}
+                    aria-expanded={showAdvanced}
                   >
-                    <span className="medical-lab-help-toggle-label">
-                      <span aria-hidden>ℹ️</span>
-                      {t("lab.helpToggle")}
-                    </span>
+                    {showAdvanced ? t("lab.hideOptions") : t("lab.moreOptions")}
                     <ChevronDown
-                      size={18}
-                      className={`medical-lab-help-chevron${showHelp ? " is-open" : ""}`}
+                      size={16}
+                      className={`medical-lab-help-chevron${showAdvanced ? " is-open" : ""}`}
                       aria-hidden
                     />
                   </button>
 
-                  {showHelp && (
-                    <div className="medical-lab-help-body">
-                      <div className="medical-lab-help-block">
-                        <strong>{t("lab.helpCase1Title")}</strong>
-                        <p>{t("lab.helpCase1Adobe")}</p>
-                        <p>{t("lab.helpCase1Browser")}</p>
+                  <div className="medical-lab-optional-body">
+                    {!imageClinicalContext?.patientId && (
+                      <div className="form-group">
+                        <label htmlFor="lab-patient-name">
+                          {t("lab.freeNameLabel")}
+                        </label>
+                        <input
+                          id="lab-patient-name"
+                          type="text"
+                          value={patientName}
+                          onChange={(e) => setPatientName(e.target.value)}
+                          placeholder={t("lab.freeNamePlaceholder")}
+                        />
+                        <small className="medical-lab-paste-hint">
+                          {t("lab.freeNameHint")}
+                        </small>
                       </div>
-                      <div className="medical-lab-help-block">
-                        <strong>{t("lab.helpCase2Title")}</strong>
-                        <p>{t("lab.helpCase2Body")}</p>
-                      </div>
-                      <div className="medical-lab-help-block">
-                        <strong>{t("lab.helpCase3Title")}</strong>
-                        <p>{t("lab.helpCase3Body")}</p>
-                      </div>
-                      <div className="medical-lab-help-block">
-                        <strong>{t("lab.helpAltTitle")}</strong>
-                        <p>{t("lab.helpAltBody")}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="lab-paste-data">{t("lab.pasteLabel")}</label>
-                  <Textarea
-                    id="lab-paste-data"
-                    value={pastedStudyData}
-                    onChange={(e) => setPastedStudyData(e.target.value)}
-                    placeholder={t("lab.pastePlaceholder")}
-                    rows={6}
-                    className="medical-lab-paste-area"
-                  />
-                  <small className="medical-lab-paste-hint">
-                    {t("lab.pasteHint")}
-                  </small>
-                </div>
-                </>
-                )}
-              </div>
-
-              <div className={`medical-lab-optional${showAdvanced ? " is-open" : ""}`}>
-                <button
-                  type="button"
-                  className="medical-lab-optional-toggle"
-                  onClick={() => setShowAdvanced((open) => !open)}
-                  aria-expanded={showAdvanced}
-                >
-                  {showAdvanced ? t("lab.hideOptions") : t("lab.moreOptions")}
-                  <ChevronDown
-                    size={16}
-                    className={`medical-lab-help-chevron${showAdvanced ? " is-open" : ""}`}
-                    aria-hidden
-                  />
-                </button>
-
-                <div className="medical-lab-optional-body">
-                  {!imageClinicalContext?.patientId && (
-                    <div className="form-group">
-                      <label htmlFor="lab-patient-name">{t("lab.freeNameLabel")}</label>
-                      <input
-                        id="lab-patient-name"
-                        type="text"
-                        value={patientName}
-                        onChange={(e) => setPatientName(e.target.value)}
-                        placeholder={t("lab.freeNamePlaceholder")}
-                      />
-                      <small className="medical-lab-paste-hint">
-                        {t("lab.freeNameHint")}
-                      </small>
-                    </div>
-                  )}
-
-                  <div className="form-row medical-lab-form-row">
-                    <div className="form-group medical-lab-consultation-field">
-                      <label htmlFor="lab-consultation-id">{t("lab.consultationIdLabel")}</label>
-                      <input
-                        id="lab-consultation-id"
-                        type="text"
-                        value={consultationId}
-                        onChange={(e) => setConsultationId(e.target.value)}
-                        placeholder={t("lab.consultationIdPlaceholder")}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="lab-additional-context">{t("lab.contextLabel")}</label>
-                    <Textarea
-                      id="lab-additional-context"
-                      value={additionalContext}
-                      onChange={(e) => setAdditionalContext(e.target.value)}
-                      placeholder={t("lab.contextPlaceholder")}
-                      rows={3}
-                      className="medical-lab-context-area"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {!result && (
-              <div className="form-actions medical-lab-form-actions">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setView("dashboard")}
-                >
-                  {t("lab.cancel")}
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={loading || !canSubmit}
-                  className="medical-lab-submit-btn"
-                >
-                  {loading
-                    ? inputMode === "pdf"
-                      ? t("lab.extractingPdf")
-                      : t("lab.analyzing")
-                    : t("lab.interpret")}
-                  </Button>
-              </div>
-              )}
-            </form>
-
-            {result && (
-              <div className="interpretation-result medical-lab-result">
-                <h2>{t("lab.detailedAnalysis")}</h2>
-                {result.extraction_method && EXTRACTION_LABEL_KEYS[result.extraction_method] && (
-                  <p className="medical-lab-extract-badge">
-                    {t(EXTRACTION_LABEL_KEYS[result.extraction_method])}
-                  </p>
-                )}
-                {result.prompt_source && (
-                  <p className="medical-lab-prompt-badge">
-                    {t("lab.cdsEngine", { source: result.prompt_source })}
-                    {result.instructions_chars
-                      ? ` ${t("lab.instructionsK", { count: Math.round(result.instructions_chars / 1000) })}`
-                      : ""}
-                  </p>
-                )}
-
-                <div className="result-section detailed medical-lab-result-only">
-                  <div className="result-content detailed-analysis medical-lab-detailed-analysis">
-                    {result.analysis ? (
-                      <pre>{cleanClinicalDisplayText(result.analysis)}</pre>
-                    ) : result.detailed_analysis ? (
-                      <pre>{cleanClinicalDisplayText(result.detailed_analysis)}</pre>
-                    ) : (
-                      <div className="medical-lab-result-fallback">{t("lab.noAnalysis")}</div>
                     )}
+
+                    <div className="form-row medical-lab-form-row">
+                      <div className="form-group medical-lab-consultation-field">
+                        <label htmlFor="lab-consultation-id">
+                          {t("lab.consultationIdLabel")}
+                        </label>
+                        <input
+                          id="lab-consultation-id"
+                          type="text"
+                          value={consultationId}
+                          onChange={(e) => setConsultationId(e.target.value)}
+                          placeholder={t("lab.consultationIdPlaceholder")}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="lab-additional-context">
+                        {t("lab.contextLabel")}
+                      </label>
+                      <Textarea
+                        id="lab-additional-context"
+                        value={additionalContext}
+                        onChange={(e) => setAdditionalContext(e.target.value)}
+                        placeholder={t("lab.contextPlaceholder")}
+                        rows={3}
+                        className="medical-lab-context-area"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="result-actions medical-lab-result-actions">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setResult(null)}
-                  >
-                    Nueva interpretación
-                  </Button>
-                  <Button type="button" onClick={() => setShowHistory(true)}>
-                    Ver historial
-                  </Button>
+                {!result && (
+                  <div className="form-actions medical-lab-form-actions">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setView("dashboard")}
+                    >
+                      {t("lab.cancel")}
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={loading || !canSubmit}
+                      className="medical-lab-submit-btn"
+                    >
+                      {loading
+                        ? inputMode === "pdf"
+                          ? t("lab.extractingPdf")
+                          : t("lab.analyzing")
+                        : t("lab.interpret")}
+                    </Button>
+                  </div>
+                )}
+              </form>
+
+              {result && (
+                <div className="interpretation-result medical-lab-result">
+                  <h2>{t("lab.detailedAnalysis")}</h2>
+                  {result.extraction_method &&
+                    EXTRACTION_LABEL_KEYS[result.extraction_method] && (
+                      <p className="medical-lab-extract-badge">
+                        {t(EXTRACTION_LABEL_KEYS[result.extraction_method])}
+                      </p>
+                    )}
+                  {result.prompt_source && (
+                    <p className="medical-lab-prompt-badge">
+                      {t("lab.cdsEngine", { source: result.prompt_source })}
+                      {result.instructions_chars
+                        ? ` ${t("lab.instructionsK", {
+                            count: Math.round(result.instructions_chars / 1000),
+                          })}`
+                        : ""}
+                    </p>
+                  )}
+
+                  <div className="result-section detailed medical-lab-result-only">
+                    <div className="result-content detailed-analysis medical-lab-detailed-analysis">
+                      {result.analysis ? (
+                        <pre>{cleanClinicalDisplayText(result.analysis)}</pre>
+                      ) : result.detailed_analysis ? (
+                        <pre>
+                          {cleanClinicalDisplayText(result.detailed_analysis)}
+                        </pre>
+                      ) : (
+                        <div className="medical-lab-result-fallback">
+                          {t("lab.noAnalysis")}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="result-actions medical-lab-result-actions">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setResult(null)}
+                    >
+                      {t("lab.newInterpretation")}
+                    </Button>
+                    <Button type="button" onClick={() => setShowHistory(true)}>
+                      {t("lab.viewHistory")}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
         ) : (
           <div className="interpretation-history medical-lab-history">
-            <h2>Historial de interpretaciones</h2>
+            <h2>{t("lab.historyTitle")}</h2>
             <p className="medical-lab-history-hint">
-              También puedes ver consultas CDS y laboratorio juntos en{" "}
+              {t("lab.historyHintBefore")}{" "}
               <button
                 type="button"
                 className="medical-lab-history-link"
                 onClick={() => setView("consultation-history")}
               >
-                Historial clínico
+                {t("lab.historyHintLink")}
               </button>
               .
             </p>
             {history.length > 0 ? (
               <div className="history-grid">
-                {history.map((item) => (
-                  <div key={item.id} className="history-card">
-                    <div className="history-header">
-                      <div className="history-type">
-                        {item.image_type === "blood_test" &&
-                          "🩸 Análisis de Sangre"}
-                        {item.image_type === "urinalysis" && "🧪 Urianálisis"}
-                        {item.image_type === "pdf_report" && "📄 PDF laboratorio"}
-                        {item.image_type === "xray" && "📷 Imagen médica"}
+                {history.map((item) => {
+                  const meta = historyTypeMeta(item.image_type, t);
+                  const HistoryIcon = meta.Icon;
+                  const raw = item.analysis
+                    ? item.analysis
+                    : item.detailed_analysis
+                      ? item.detailed_analysis
+                      : "";
+                  return (
+                    <article key={item.id} className="history-card">
+                      <div className="history-header">
+                        <div className="history-type">
+                          <HistoryIcon size={14} aria-hidden />
+                          {meta.label}
+                        </div>
+                        <div className="history-date">
+                          {new Date(item.created_at).toLocaleDateString(locale, {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </div>
                       </div>
-                      <div className="history-date">
-                        {new Date(item.created_at).toLocaleDateString("es-MX", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </div>
-                    </div>
-                    {item.patient_name && (
-                      <div className="history-patient">
-                        <strong>Mascota:</strong> {item.patient_name}
-                      </div>
-                    )}
-                    <div className="history-preview">
-                      {(() => {
-                        const raw = item.analysis
-                          ? item.analysis
-                          : item.detailed_analysis
-                            ? item.detailed_analysis
-                            : "";
-                        return raw
+                      {item.patient_name && (
+                        <div className="history-patient">
+                          <strong>{t("lab.historyPet")}:</strong>{" "}
+                          {item.patient_name}
+                        </div>
+                      )}
+                      <div className="history-preview">
+                        {raw
                           ? clinicalTextPreview(raw, 150)
-                          : "Sin análisis disponible";
-                      })()}
-                    </div>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      className="history-card-action"
-                      onClick={() => {
-                        setResult(item);
-                        setShowHistory(false);
-                      }}
-                    >
-                      Ver Completo
-                    </Button>
-                  </div>
-                ))}
+                          : t("lab.historyNoAnalysis")}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="history-card-action"
+                        onClick={() => {
+                          setResult(item);
+                          setShowHistory(false);
+                        }}
+                      >
+                        {t("lab.historyViewFull")}
+                      </Button>
+                    </article>
+                  );
+                })}
               </div>
             ) : (
-              <div className="empty-state">
-                <div className="empty-icon">🔬</div>
-                <h3>No hay interpretaciones aún</h3>
-                <p>Comienza pegando los datos de tu primer estudio</p>
+              <div className="empty-state medical-lab-empty">
+                <h3>{t("lab.historyEmptyTitle")}</h3>
+                <p>{t("lab.historyEmptyBody")}</p>
                 <Button type="button" onClick={() => setShowHistory(false)}>
                   {t("lab.newBtn")}
                 </Button>
