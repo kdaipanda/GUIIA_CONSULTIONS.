@@ -39,9 +39,12 @@ export function ClinicEmptyState({ icon: Icon, title, description, actionLabel, 
   );
 }
 
-export function ClinicStatPill({ value, label, warn }) {
+export function ClinicStatPill({ value, label, warn, ariaLabel }) {
   return (
-    <div className={`clinic-stat-pill premium-card-lift${warn ? " clinic-stat-pill--warn" : ""}`}>
+    <div
+      className={`clinic-stat-pill premium-card-lift${warn ? " clinic-stat-pill--warn" : ""}`}
+      aria-label={ariaLabel || `${value} ${label}`}
+    >
       <span className="clinic-stat-value">{value}</span>
       <span className="clinic-stat-label">{label}</span>
     </div>

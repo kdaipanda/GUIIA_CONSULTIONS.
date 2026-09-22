@@ -7,7 +7,6 @@ import {
   FileDown,
   PawPrint,
   Zap,
-  Users,
   FlaskConical,
   FolderOpen,
 } from "lucide-react";
@@ -319,6 +318,13 @@ export function ClientsPatientsPage({
     }
   };
 
+  const onPetRowKeyDown = (e, patient) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openDetail(patient);
+    }
+  };
+
   const handleSavePatient = async (e) => {
     e.preventDefault();
     if (!patientForm.name.trim() || !patientForm.client_id) return;
@@ -392,7 +398,6 @@ export function ClientsPatientsPage({
     <div className="clinic-page clinic-page-guiaa">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
           <div className="clinic-page-title-row">
             <h1>{t("clients.title")}</h1>
             <ModuleHelpTip topicId="clients" />
@@ -401,15 +406,17 @@ export function ClientsPatientsPage({
         </div>
         <div className="clinic-header-actions">
           <Button type="button" onClick={() => setQuickDialogOpen(true)}>
-            <Zap size={16} className="mr-1" /> {t("clients.newRecord")}
+            <Zap size={16} className="mr-1" aria-hidden /> {t("clients.newRecord")}
           </Button>
         </div>
       </div>
 
       <div className="clinic-toolbar">
         <div className="clinic-search">
-          <Search size={16} />
+          <Search size={16} aria-hidden />
           <Input
+            type="search"
+            aria-label={t("clients.searchAria")}
             placeholder={t("clients.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -418,10 +425,22 @@ export function ClientsPatientsPage({
       </div>
 
       {!loading && clients.length > 0 && (
-        <div className="clinic-stats-row">
-          <ClinicStatPill value={stats.owners} label={t("clients.statOwners")} />
-          <ClinicStatPill value={stats.pets} label={t("clients.statPets")} />
-          <ClinicStatPill value={stats.species} label={t("clients.statSpecies")} />
+        <div className="clinic-stats-row" role="group" aria-label={t("clients.statsAria")}>
+          <ClinicStatPill
+            value={stats.owners}
+            label={t("clients.statOwners")}
+            ariaLabel={t("clients.statOwnersAria", { count: stats.owners })}
+          />
+          <ClinicStatPill
+            value={stats.pets}
+            label={t("clients.statPets")}
+            ariaLabel={t("clients.statPetsAria", { count: stats.pets })}
+          />
+          <ClinicStatPill
+            value={stats.species}
+            label={t("clients.statSpecies")}
+            ariaLabel={t("clients.statSpeciesAria", { count: stats.species })}
+          />
         </div>
       )}
 
@@ -445,11 +464,8 @@ export function ClientsPatientsPage({
           {visibleClients.map((client) => {
             const pets = petsForClient(client.id);
             return (
-              <section key={client.id} className="clinic-owner-card">
+              <section key={client.id} className="clinic-owner-card" aria-label={client.name}>
                 <header className="clinic-owner-card-head">
-                  <div className="clinic-owner-card-icon" aria-hidden>
-                    <Users size={18} />
-                  </div>
                   <div className="clinic-owner-card-info">
                     <strong>{client.name}</strong>
                     <span>
@@ -462,15 +478,28 @@ export function ClientsPatientsPage({
                       variant="ghost"
                       size="sm"
                       title={t("clients.addPet")}
+                      aria-label={t("clients.addPetAria", { name: client.name })}
                       onClick={() => openCreatePatient(client.id)}
                     >
-                      <PawPrint size={14} />
+                      <PawPrint size={14} aria-hidden />
                     </Button>
-                    <Button type="button" variant="ghost" size="sm" onClick={() => openEditClient(client)}>
-                      <Pencil size={14} />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      aria-label={t("clients.editOwnerAria", { name: client.name })}
+                      onClick={() => openEditClient(client)}
+                    >
+                      <Pencil size={14} aria-hidden />
                     </Button>
-                    <Button type="button" variant="ghost" size="sm" onClick={() => handleDeleteClient(client)}>
-                      <Trash2 size={14} />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      aria-label={t("clients.deleteOwnerAria", { name: client.name })}
+                      onClick={() => handleDeleteClient(client)}
+                    >
+                      <Trash2 size={14} aria-hidden />
                     </Button>
                   </div>
                 </header>
@@ -495,7 +524,14 @@ export function ClientsPatientsPage({
                       </thead>
                       <tbody>
                         {pets.map((p) => (
-                          <tr key={p.id} className="clinic-table-row-click" onClick={() => openDetail(p)}>
+                          <tr
+                            key={p.id}
+                            className="clinic-table-row-click"
+                            tabIndex={0}
+                            aria-label={t("clients.openPetDetailAria", { name: p.name })}
+                            onClick={() => openDetail(p)}
+                            onKeyDown={(e) => onPetRowKeyDown(e, p)}
+                          >
                             <td><strong>{p.name}</strong></td>
                             <td>{speciesLabel(p.species)}</td>
                             <td>{p.breed || t("common.emDash")}</td>
@@ -506,6 +542,7 @@ export function ClientsPatientsPage({
                                   variant="ghost"
                                   size="sm"
                                   title={t("clients.startConsultation")}
+                                  aria-label={t("clients.startConsultationAria", { name: p.name })}
                                   onClick={() =>
                                     onStartConsultation({
                                       patientId: p.id,
@@ -514,14 +551,26 @@ export function ClientsPatientsPage({
                                     })
                                   }
                                 >
-                                  <Stethoscope size={14} />
+                                  <Stethoscope size={14} aria-hidden />
                                 </Button>
                               )}
-                              <Button type="button" variant="ghost" size="sm" onClick={() => openEditPatient(p)}>
-                                <Pencil size={14} />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                aria-label={t("clients.editPetAria", { name: p.name })}
+                                onClick={() => openEditPatient(p)}
+                              >
+                                <Pencil size={14} aria-hidden />
                               </Button>
-                              <Button type="button" variant="ghost" size="sm" onClick={() => handleDeletePatient(p)}>
-                                <Trash2 size={14} />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                aria-label={t("clients.deletePetAria", { name: p.name })}
+                                onClick={() => handleDeletePatient(p)}
+                              >
+                                <Trash2 size={14} aria-hidden />
                               </Button>
                             </td>
                           </tr>
@@ -713,39 +762,76 @@ export function ClientsPatientsPage({
       />
 
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className={clinicDialogClass("max-w-xl", "max-h-[86vh]", "overflow-y-auto")}>
-          <DialogHeader>
-            <DialogTitle>{detail?.patient?.name}</DialogTitle>
+        <DialogContent
+          className={clinicDialogClass(
+            "clinic-dialog",
+            "clinic-dialog-compact",
+            "clinic-patient-detail-dialog",
+          )}
+        >
+          <DialogHeader className="clinic-dialog-header clinic-patient-detail-header">
+            <DialogTitle className="clinic-patient-detail-title">
+              {detail?.patient?.name}
+            </DialogTitle>
+            {detail?.patient && (
+              <p className="clinic-patient-detail-subtitle">
+                {[
+                  speciesLabel(detail.patient.species),
+                  detail.patient.breed || null,
+                  detail.patient.clients?.name
+                    ? t("clients.detailOwnerValue", { name: detail.patient.clients.name })
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            )}
           </DialogHeader>
           {detail?.patient && (
-            <div className="clinic-detail">
-              <div className="clinic-detail-grid">
-                <p><strong>{t("clients.detailOwner")}</strong> {detail.patient.clients?.name}</p>
-                <p><strong>{t("clients.detailSpecies")}</strong> {speciesLabel(detail.patient.species)}</p>
-                <p><strong>{t("clients.detailBreed")}</strong> {detail.patient.breed || t("common.emDash")}</p>
-                <p><strong>{t("clients.detailRecords")}</strong> {(detail.consultations?.length || 0) + (detail.medical_images?.length || 0)}</p>
-                <p className="clinic-muted clinic-timeline-summary">
-                  {t("clients.consultationCount", { count: detail.consultations?.length || 0 })} ·{" "}
-                  {t("clients.labCount", { count: detail.medical_images?.length || 0 })}
-                </p>
+            <div className="clinic-patient-detail">
+              <div className="clinic-patient-detail-meta" role="list">
+                <div className="clinic-patient-detail-field" role="listitem">
+                  <span className="clinic-patient-detail-label">{t("clients.detailOwnerLabel")}</span>
+                  <span className="clinic-patient-detail-value">
+                    {detail.patient.clients?.name || t("common.emDash")}
+                  </span>
+                </div>
+                <div className="clinic-patient-detail-field" role="listitem">
+                  <span className="clinic-patient-detail-label">{t("clients.detailSpeciesLabel")}</span>
+                  <span className="clinic-patient-detail-value">
+                    {speciesLabel(detail.patient.species)}
+                  </span>
+                </div>
+                <div className="clinic-patient-detail-field" role="listitem">
+                  <span className="clinic-patient-detail-label">{t("clients.detailBreedLabel")}</span>
+                  <span className="clinic-patient-detail-value">
+                    {detail.patient.breed || t("common.emDash")}
+                  </span>
+                </div>
+                <div className="clinic-patient-detail-field" role="listitem">
+                  <span className="clinic-patient-detail-label">{t("clients.detailRecordsLabel")}</span>
+                  <span className="clinic-patient-detail-value">
+                    {(detail.consultations?.length || 0) + (detail.medical_images?.length || 0)}
+                  </span>
+                </div>
               </div>
 
-              <div className="clinic-detail-actions">
-                {onOpenPatientChart && (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      setDetailOpen(false);
-                      onOpenPatientChart(detail.patient.id);
-                    }}
-                  >
-                    <FolderOpen size={16} className="mr-1" /> {t("clients.openChart")}
-                  </Button>
-                )}
+              <div className="clinic-patient-detail-stats" aria-label={t("clients.detailStatsAria")}>
+                <ClinicStatPill
+                  value={detail.consultations?.length || 0}
+                  label={t("clients.statCds")}
+                />
+                <ClinicStatPill
+                  value={detail.medical_images?.length || 0}
+                  label={t("clients.statLab")}
+                />
+              </div>
+
+              <div className="clinic-patient-detail-actions">
                 {onStartConsultation && (
                   <Button
                     type="button"
+                    className="clinic-patient-detail-cta"
                     onClick={() => {
                       setDetailOpen(false);
                       onStartConsultation({
@@ -755,43 +841,55 @@ export function ClientsPatientsPage({
                       });
                     }}
                   >
-                    <Stethoscope size={16} className="mr-1" /> {t("clients.startConsultation")}
+                    <Stethoscope size={16} aria-hidden /> {t("clients.startConsultation")}
                   </Button>
                 )}
-                {onStartLabAnalysis && (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      setDetailOpen(false);
-                      onStartLabAnalysis({
-                        patientId: detail.patient.id,
-                        clientId: detail.patient.client_id,
-                        patient: detail.patient,
-                      });
-                    }}
-                  >
-                    <FlaskConical size={16} className="mr-1" /> {t("clients.interpretStudy")}
-                  </Button>
-                )}
-                {(detail.consultations?.length || detail.medical_images?.length) > 0 && (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={historyPdfLoading}
-                    onClick={handleDownloadHistoryPdf}
-                  >
-                    <FileDown size={16} className="mr-1" />
-                    {historyPdfLoading ? t("clients.generatingPdf") : t("clients.downloadHistoryPdf")}
-                  </Button>
-                )}
+                <div className="clinic-patient-detail-secondary">
+                  {onOpenPatientChart && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => {
+                        setDetailOpen(false);
+                        onOpenPatientChart(detail.patient.id);
+                      }}
+                    >
+                      <FolderOpen size={16} aria-hidden /> {t("clients.openChart")}
+                    </Button>
+                  )}
+                  {onStartLabAnalysis && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => {
+                        setDetailOpen(false);
+                        onStartLabAnalysis({
+                          patientId: detail.patient.id,
+                          clientId: detail.patient.client_id,
+                          patient: detail.patient,
+                        });
+                      }}
+                    >
+                      <FlaskConical size={16} aria-hidden /> {t("clients.interpretStudy")}
+                    </Button>
+                  )}
+                  {(detail.consultations?.length || detail.medical_images?.length) > 0 && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={historyPdfLoading}
+                      onClick={handleDownloadHistoryPdf}
+                    >
+                      <FileDown size={16} aria-hidden />
+                      {historyPdfLoading ? t("clients.generatingPdf") : t("clients.downloadHistoryPdf")}
+                    </Button>
+                  )}
+                </div>
               </div>
 
-              <div className="clinic-timeline clinic-timeline-unified">
+              <div className="clinic-timeline clinic-timeline-unified clinic-patient-detail-history">
                 <h3>{t("clients.clinicalHistory")}</h3>
-                <p className="clinic-muted clinic-timeline-hint">
-                  {t("clients.clinicalHistoryHint")}
-                </p>
+                <p className="clinic-timeline-hint">{t("clients.clinicalHistoryHint")}</p>
                 <ClinicalTimelineList
                   consultations={detail.consultations || []}
                   medicalImages={detail.medical_images || []}
