@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, Search, Pencil, Trash2, PackageMinus, History, AlertTriangle, Package, DollarSign } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, PackageMinus, History, AlertTriangle, Package } from "lucide-react";
 import "./clinicPageShared.css";
 import "./inventoryPage.css";
 import "./helpCenterPage.css";
@@ -273,7 +273,6 @@ export function InventoryPage() {
     <div className="clinic-page clinic-page-guiaa clinic-inventory-page">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
           <div className="clinic-page-title-row">
             <h1>{t("inventory.title")}</h1>
             <ModuleHelpTip topicId="inventory" />
@@ -281,40 +280,46 @@ export function InventoryPage() {
           <p>{t("inventory.lead")}</p>
         </div>
         <Button type="button" onClick={openCreate}>
-          <Plus size={16} className="mr-1" /> {t("inventory.newProduct")}
+          <Plus size={16} className="mr-1" aria-hidden /> {t("inventory.newProduct")}
         </Button>
       </div>
 
       {migrationHint && (
-        <div className="info-message">
-          Aplica la migración <code>20260617_inventory_billing.sql</code> en Supabase para activar inventario.
+        <div className="info-message" role="status">
+          {t("inventory.migrationHint")}
         </div>
       )}
 
       {summary && (
-        <div className="clinic-report-kpi-grid clinic-inventory-kpis">
-          <div className="clinic-report-kpi">
-            <div className="clinic-report-kpi-head">
-              <span className="clinic-report-kpi-icon"><Package size={18} /></span>
-              <span className="clinic-report-kpi-label">{t("inventory.kpiProducts")}</span>
-            </div>
+        <div
+          className="clinic-report-kpi-grid clinic-inventory-kpis"
+          role="group"
+          aria-label={t("inventory.statsAria")}
+        >
+          <div
+            className="clinic-report-kpi"
+            aria-label={t("inventory.kpiProductsAria", { count: summary.product_count ?? 0 })}
+          >
+            <span className="clinic-report-kpi-label">{t("inventory.kpiProducts")}</span>
             <div className="clinic-report-kpi-value">{summary.product_count ?? 0}</div>
           </div>
-          <div className={`clinic-report-kpi${lowStockCount > 0 ? " clinic-report-kpi-warn" : ""}`}>
-            <div className="clinic-report-kpi-head">
-              <span className="clinic-report-kpi-icon"><AlertTriangle size={18} /></span>
-              <span className="clinic-report-kpi-label">{t("inventory.kpiLowStock")}</span>
-            </div>
+          <div
+            className={`clinic-report-kpi${lowStockCount > 0 ? " clinic-report-kpi-warn" : ""}`}
+            aria-label={t("inventory.kpiLowStockAria", { count: lowStockCount })}
+          >
+            <span className="clinic-report-kpi-label">{t("inventory.kpiLowStock")}</span>
             <div className="clinic-report-kpi-value">{lowStockCount}</div>
             {lowStockCount > 0 && (
               <p className="clinic-report-kpi-hint">{t("inventory.kpiLowHint")}</p>
             )}
           </div>
-          <div className="clinic-report-kpi">
-            <div className="clinic-report-kpi-head">
-              <span className="clinic-report-kpi-icon"><DollarSign size={18} /></span>
-              <span className="clinic-report-kpi-label">{t("inventory.kpiValue")}</span>
-            </div>
+          <div
+            className="clinic-report-kpi"
+            aria-label={t("inventory.kpiValueAria", {
+              amount: formatMoney(summary.inventory_value, locale),
+            })}
+          >
+            <span className="clinic-report-kpi-label">{t("inventory.kpiValue")}</span>
             <div className="clinic-report-kpi-value">{formatMoney(summary.inventory_value, locale)}</div>
             <p className="clinic-report-kpi-hint">{t("inventory.kpiValueHint")}</p>
           </div>
@@ -323,8 +328,10 @@ export function InventoryPage() {
 
       <div className="clinic-toolbar">
         <div className="clinic-search">
-          <Search size={16} />
+          <Search size={16} aria-hidden />
           <Input
+            type="search"
+            aria-label={t("inventory.searchAria")}
             placeholder={t("inventory.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -335,9 +342,10 @@ export function InventoryPage() {
           variant={lowStockOnly ? "default" : "secondary"}
           size="sm"
           className={lowStockOnly ? "clinic-inventory-filter clinic-inventory-filter--active" : "clinic-inventory-filter"}
+          aria-pressed={lowStockOnly}
           onClick={() => setLowStockOnly((v) => !v)}
         >
-          <AlertTriangle size={14} className="mr-1" />
+          <AlertTriangle size={14} className="mr-1" aria-hidden />
           {lowStockOnly ? t("inventory.filterAll") : t("inventory.filterLow")}
         </Button>
       </div>
@@ -380,19 +388,45 @@ export function InventoryPage() {
                     {isLowStock(p) && <span className="clinic-badge-warning">{t("inventory.lowBadge")}</span>}
                   </td>
                   <td>{p.min_stock}</td>
-                  <td>${Number(p.price || 0).toFixed(2)}</td>
+                  <td>{formatMoney(p.price, locale)}</td>
                   <td className="clinic-table-actions">
-                    <Button type="button" variant="ghost" size="sm" title={t("inventory.titleHistory")} onClick={() => openHistory(p)}>
-                      <History size={14} />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      title={t("inventory.titleHistory")}
+                      aria-label={t("inventory.historyAria", { name: p.name })}
+                      onClick={() => openHistory(p)}
+                    >
+                      <History size={14} aria-hidden />
                     </Button>
-                    <Button type="button" variant="ghost" size="sm" title={t("inventory.titleMovement")} onClick={() => openStock(p)}>
-                      <PackageMinus size={14} />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      title={t("inventory.titleMovement")}
+                      aria-label={t("inventory.movementAria", { name: p.name })}
+                      onClick={() => openStock(p)}
+                    >
+                      <PackageMinus size={14} aria-hidden />
                     </Button>
-                    <Button type="button" variant="ghost" size="sm" onClick={() => openEdit(p)}>
-                      <Pencil size={14} />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      aria-label={t("inventory.editAria", { name: p.name })}
+                      onClick={() => openEdit(p)}
+                    >
+                      <Pencil size={14} aria-hidden />
                     </Button>
-                    <Button type="button" variant="ghost" size="sm" onClick={() => handleDelete(p)}>
-                      <Trash2 size={14} />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      aria-label={t("inventory.deleteAria", { name: p.name })}
+                      onClick={() => handleDelete(p)}
+                    >
+                      <Trash2 size={14} aria-hidden />
                     </Button>
                   </td>
                 </tr>

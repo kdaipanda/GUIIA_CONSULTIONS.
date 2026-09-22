@@ -5,25 +5,26 @@
 }
 
 .clinic-inventory-page .clinic-report-kpi {
-  background: var(--liquid-glass-bg, rgba(255, 255, 255, 0.88));
-  backdrop-filter: blur(14px) saturate(1.06);
-  -webkit-backdrop-filter: blur(14px) saturate(1.06);
-  box-shadow: var(--liquid-glass-shadow-soft, 0 2px 12px -8px rgba(12, 45, 77, 0.1));
-  min-height: 120px;
+  background: #fff;
+  border: 1px solid rgba(38, 91, 147, 0.12);
+  box-shadow: 0 2px 12px -6px rgba(12, 45, 77, 0.08);
+  min-height: auto;
+  padding: 14px 16px;
+  gap: 6px;
+}
+
+.clinic-inventory-page .clinic-report-kpi-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
 }
 
 .clinic-inventory-page .clinic-report-kpi-warn {
   border-color: rgba(245, 158, 11, 0.4);
-  background: linear-gradient(
-    145deg,
-    rgba(255, 251, 235, 0.92) 0%,
-    rgba(255, 255, 255, 0.88) 100%
-  );
-}
-
-.clinic-inventory-page .clinic-report-kpi-warn .clinic-report-kpi-icon {
-  background: rgba(245, 158, 11, 0.15);
-  color: #d97706;
+  background: rgba(255, 251, 235, 0.85);
 }
 
 .clinic-inventory-page .clinic-toolbar {
@@ -68,7 +69,6 @@
 
 .clinic-inventory-page .clinic-row-warning {
   background: rgba(255, 251, 235, 0.85);
-  box-shadow: inset 3px 0 0 #f59e0b;
 }
 
 .clinic-inventory-page .clinic-row-warning td {
@@ -76,12 +76,27 @@
 }
 
 .clinic-inventory-page .clinic-badge-warning {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
   background: rgba(245, 158, 11, 0.18);
   color: #b45309;
   border: 1px solid rgba(245, 158, 11, 0.28);
 }
 
+.clinic-inventory-page .clinic-table-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  align-items: center;
+}
+
 .clinic-inventory-page .clinic-table-actions button {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
   color: #64748b;
 }
 
@@ -90,19 +105,23 @@
   background: rgba(38, 91, 147, 0.08);
 }
 
+@media (max-width: 1023px) {
+  .clinic-inventory-page .clinic-toolbar {
+    flex-direction: column;
+  }
+
+  .clinic-inventory-filter {
+    width: 100%;
+  }
+}
+
 /* —— Modo oscuro —— */
 
 [data-theme="dark"] .clinic-inventory-page .clinic-report-kpi,
 html.dark .clinic-inventory-page .clinic-report-kpi {
   background: rgba(14, 22, 34, 0.78) !important;
   border-color: var(--liquid-glass-border-color) !important;
-  box-shadow: var(--liquid-glass-shadow-soft) !important;
-}
-
-[data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-icon,
-html.dark .clinic-inventory-page .clinic-report-kpi-icon {
-  background: rgba(61, 155, 143, 0.14) !important;
-  color: #6ee7d9 !important;
+  box-shadow: 0 2px 12px -6px rgba(0, 0, 0, 0.35) !important;
 }
 
 [data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-label,
@@ -119,21 +138,8 @@ html.dark .clinic-inventory-page .clinic-report-kpi-value {
 
 [data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-warn,
 html.dark .clinic-inventory-page .clinic-report-kpi-warn {
-  background: linear-gradient(
-    145deg,
-    rgba(68, 48, 16, 0.35) 0%,
-    rgba(14, 22, 34, 0.78) 100%
-  ) !important;
+  background: rgba(68, 48, 16, 0.35) !important;
   border-color: rgba(245, 158, 11, 0.38) !important;
-  box-shadow:
-    0 0 0 1px rgba(245, 158, 11, 0.08),
-    var(--liquid-glass-shadow-soft) !important;
-}
-
-[data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-warn .clinic-report-kpi-icon,
-html.dark .clinic-inventory-page .clinic-report-kpi-warn .clinic-report-kpi-icon {
-  background: rgba(245, 158, 11, 0.18) !important;
-  color: #fcd34d !important;
 }
 
 [data-theme="dark"] .clinic-inventory-page .clinic-report-kpi-warn .clinic-report-kpi-value,
@@ -181,7 +187,7 @@ html.dark .clinic-inventory-page .clinic-inventory-filter--active {
 html.dark .clinic-inventory-page .clinic-table-wrap {
   background: rgba(14, 22, 34, 0.72) !important;
   border-color: var(--liquid-glass-border-color) !important;
-  box-shadow: var(--liquid-glass-shadow-soft) !important;
+  box-shadow: 0 2px 12px -6px rgba(0, 0, 0, 0.35) !important;
 }
 
 [data-theme="dark"] .clinic-inventory-page .clinic-table thead th,
@@ -199,13 +205,12 @@ html.dark .clinic-inventory-page .clinic-table tbody td {
 
 [data-theme="dark"] .clinic-inventory-page .clinic-inventory-category,
 html.dark .clinic-inventory-page .clinic-inventory-category {
-  color: #94a3b8 !important;
+  color: #cbd5e1 !important;
 }
 
 [data-theme="dark"] .clinic-inventory-page .clinic-row-warning,
 html.dark .clinic-inventory-page .clinic-row-warning {
   background: rgba(245, 158, 11, 0.1) !important;
-  box-shadow: inset 3px 0 0 #f59e0b;
 }
 
 [data-theme="dark"] .clinic-inventory-page .clinic-row-warning td,
@@ -229,7 +234,7 @@ html.dark .clinic-inventory-page .clinic-badge-warning {
 
 [data-theme="dark"] .clinic-inventory-page .clinic-table-actions button,
 html.dark .clinic-inventory-page .clinic-table-actions button {
-  color: #94a3b8 !important;
+  color: #cbd5e1 !important;
 }
 
 [data-theme="dark"] .clinic-inventory-page .clinic-table-actions button:hover,
@@ -255,9 +260,4 @@ html.dark .clinic-inventory-page .clinic-inventory-history-item {
 html.dark .clinic-inventory-page .clinic-inventory-history-item time,
 html.dark .clinic-inventory-page .clinic-inventory-history-item .clinic-muted {
   color: var(--text-secondary) !important;
-}
-
-[data-theme="dark"] .clinic-inventory-page .clinic-page-eyebrow,
-html.dark .clinic-inventory-page .clinic-page-eyebrow {
-  color: #6ee7d9 !important;
 }
