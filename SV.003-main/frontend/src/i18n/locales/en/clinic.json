@@ -1164,6 +1164,8 @@
     "saveChanges": "Save changes",
     "portalTitle": "Appointment request portal",
     "portalDesc": "Share this link so owners can request appointments without signing in.",
+    "portalUrlLabel": "Appointment portal link",
+    "portalUrlAria": "Appointment request portal link",
     "copy": "Copy",
     "team": "Team",
     "teamDesc": "This is how you add people to your GUIAA practice. They do not need to sign up alone first: you invite them and they finish registration with the link.",
@@ -1182,12 +1184,14 @@
     "inviteLinkCopyFailed": "Could not copy. Select the link and copy it manually.",
     "lastInviteTitle": "Latest invite link",
     "lastInviteBody": "Share it with {{email}} if the email does not arrive (check spam). Shown only this once.",
+    "inviteUrlLabel": "Invite link",
+    "inviteUrlAria": "Latest team invite link",
     "pendingInvites": "Pending invites",
     "inviteExpires": "Expires",
     "revokeInviteTitle": "Cancel invite",
     "revokeInviteDesc": "Cancel the invite to {{email}}?",
     "revokeInviteConfirm": "Cancel",
-    "revokeInviteAria": "Cancel invite",
+    "revokeInviteAria": "Cancel invite to {{email}}",
     "inviteRevoked": "Invite cancelled.",
     "roleHintVeterinarian": "CDS consults, records, patients, and schedule.",
     "roleHintReceptionist": "Schedule, clients, and patients. No CDS consults.",
@@ -1218,7 +1222,7 @@
     "memberEmail": "Email",
     "memberRole": "Role",
     "memberSince": "Joined",
-    "removeMemberAria": "Remove member"
+    "removeMemberAria": "Remove {{name}} from the practice"
   },
   "labTypes": {
     "blood_test": {

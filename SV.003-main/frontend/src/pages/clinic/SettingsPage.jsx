@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Copy, Save, Users, UserPlus, Trash2, Settings, ShieldAlert, BookOpen, PlayCircle } from "lucide-react";
+import { Copy, Save, Users, UserPlus, Trash2, ShieldAlert, BookOpen, PlayCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "./clinicPageShared.css";
 import { ConfirmActionDialog } from "../../components/clinic/ConfirmActionDialog";
@@ -201,20 +201,23 @@ export function SettingsPage({ setView }) {
     ? `${window.location.origin}/solicitar-cita/${org.id}`
     : "";
 
-  const copyPortal = () => {
+  const copyPortal = async () => {
     if (!portalUrl) return;
-    navigator.clipboard.writeText(portalUrl);
-    notifySuccess(t("settings.portalCopied"));
+    try {
+      await navigator.clipboard.writeText(portalUrl);
+      notifySuccess(t("settings.portalCopied"));
+    } catch {
+      notifyError(t("settings.inviteLinkCopyFailed"));
+    }
   };
 
   const extraMembers = members.filter((m) => m.role !== "owner");
 
   if (!isOrgAdmin) {
     return (
-      <div className="clinic-page clinic-page-guiaa">
+      <div className="clinic-page clinic-page-guiaa clinic-settings-page">
         <div className="clinic-page-header">
           <div>
-            <p className="clinic-page-eyebrow">{t("settings.accountEyebrow")}</p>
             <div className="clinic-page-title-row">
               <h1>{t("settings.title")}</h1>
               <ModuleHelpTip topicId="settings" setView={setView} />
@@ -250,10 +253,9 @@ export function SettingsPage({ setView }) {
   }
 
   return (
-    <div className="clinic-page clinic-page-guiaa">
+    <div className="clinic-page clinic-page-guiaa clinic-settings-page">
       <div className="clinic-page-header">
         <div>
-          <p className="clinic-page-eyebrow">{t("shell.eyebrow")}</p>
           <div className="clinic-page-title-row">
             <h1>{t("settings.titleAdmin")}</h1>
             <ModuleHelpTip topicId="settings" setView={setView} />
@@ -286,10 +288,7 @@ export function SettingsPage({ setView }) {
       ) : (
         <>
           <form onSubmit={handleSave} className="clinic-settings-card clinic-form">
-            <h2>
-              <Settings size={18} aria-hidden />
-              {t("settings.general")}
-            </h2>
+            <h2>{t("settings.general")}</h2>
             <div className="clinic-form-grid-2">
               <div className="form-group">
                 <Label htmlFor="org-name">{t("settings.orgName")}</Label>
@@ -319,7 +318,15 @@ export function SettingsPage({ setView }) {
             <h2>{t("settings.portalTitle")}</h2>
             <p className="clinic-team-note">{t("settings.portalDesc")}</p>
             <div className="clinic-settings-portal">
-              <Input readOnly value={portalUrl} />
+              <Label htmlFor="settings-portal-url" className="sr-only">
+                {t("settings.portalUrlLabel")}
+              </Label>
+              <Input
+                id="settings-portal-url"
+                readOnly
+                value={portalUrl}
+                aria-label={t("settings.portalUrlAria")}
+              />
               <Button type="button" variant="secondary" onClick={copyPortal}>
                 <Copy size={16} aria-hidden />
                 {t("settings.copy")}
@@ -328,10 +335,7 @@ export function SettingsPage({ setView }) {
           </section>
 
           <section className="clinic-settings-card">
-            <h2>
-              <Users size={18} aria-hidden />
-              {t("settings.team")}
-            </h2>
+            <h2>{t("settings.team")}</h2>
             <div className="clinic-team-guide">
               <p className="clinic-team-lead">{t("settings.teamDesc")}</p>
               <ol className="clinic-team-steps" aria-label={t("settings.teamHowToAria")}>
@@ -391,13 +395,21 @@ export function SettingsPage({ setView }) {
             </div>
 
             {lastInviteUrl ? (
-              <div className="clinic-team-callout" style={{ marginTop: "1rem" }}>
+              <div className="clinic-team-callout clinic-settings-last-invite">
                 <p className="clinic-team-step-title">{t("settings.lastInviteTitle")}</p>
                 <p className="clinic-team-step-body">
                   {t("settings.lastInviteBody", { email: lastInviteEmail || t("common.emDash") })}
                 </p>
-                <div className="clinic-settings-portal" style={{ marginTop: "0.75rem" }}>
-                  <Input readOnly value={lastInviteUrl} />
+                <div className="clinic-settings-portal clinic-settings-portal--spaced">
+                  <Label htmlFor="settings-invite-url" className="sr-only">
+                    {t("settings.inviteUrlLabel")}
+                  </Label>
+                  <Input
+                    id="settings-invite-url"
+                    readOnly
+                    value={lastInviteUrl}
+                    aria-label={t("settings.inviteUrlAria")}
+                  />
                   <Button type="button" variant="secondary" onClick={copyLastInvite}>
                     <Copy size={16} aria-hidden />
                     {t("settings.copy")}
@@ -430,15 +442,17 @@ export function SettingsPage({ setView }) {
                               : t("common.emDash")}
                           </td>
                           <td>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRevokeInvite(invite)}
-                              aria-label={t("settings.revokeInviteAria")}
-                            >
-                              <Trash2 size={16} aria-hidden />
-                            </Button>
+                            <div className="clinic-table-actions">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRevokeInvite(invite)}
+                                aria-label={t("settings.revokeInviteAria", { email: invite.email })}
+                              >
+                                <Trash2 size={16} aria-hidden />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -471,31 +485,36 @@ export function SettingsPage({ setView }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {members.map((member) => (
-                        <tr key={member.id}>
-                          <td>{member.nombre || t("common.emDash")}</td>
-                          <td>{member.email || t("common.emDash")}</td>
-                          <td>{t(`settings.roles.${member.role}`, { defaultValue: member.role })}</td>
-                          <td>
-                            {member.created_at
-                              ? new Date(member.created_at).toLocaleDateString(dateLocale)
-                              : t("common.emDash")}
-                          </td>
-                          <td>
-                            {member.role !== "owner" && member.profile_id !== veterinarian?.id && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleRemoveMember(member)}
-                                aria-label={t("settings.removeMemberAria")}
-                              >
-                                <Trash2 size={16} aria-hidden />
-                              </Button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
+                      {members.map((member) => {
+                        const memberLabel = member.nombre || member.email || t("settings.thisMember");
+                        return (
+                          <tr key={member.id}>
+                            <td>{member.nombre || t("common.emDash")}</td>
+                            <td>{member.email || t("common.emDash")}</td>
+                            <td>{t(`settings.roles.${member.role}`, { defaultValue: member.role })}</td>
+                            <td>
+                              {member.created_at
+                                ? new Date(member.created_at).toLocaleDateString(dateLocale)
+                                : t("common.emDash")}
+                            </td>
+                            <td>
+                              {member.role !== "owner" && member.profile_id !== veterinarian?.id && (
+                                <div className="clinic-table-actions">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleRemoveMember(member)}
+                                    aria-label={t("settings.removeMemberAria", { name: memberLabel })}
+                                  >
+                                    <Trash2 size={16} aria-hidden />
+                                  </Button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

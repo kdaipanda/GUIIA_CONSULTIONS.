@@ -842,6 +842,20 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.clinic-page-guiaa .clinic-settings-portal input {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.clinic-page-guiaa .clinic-settings-portal--spaced {
+  margin-top: 0.75rem;
+}
+
+.clinic-page-guiaa .clinic-settings-last-invite {
+  margin-top: 1rem;
 }
 
 .clinic-page-guiaa .clinic-invite-form {
@@ -888,7 +902,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: 12px;
   background: var(--clinic-navy);
   color: #fff;
   font-size: 13px;
@@ -935,10 +949,9 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 .clinic-page-guiaa .clinic-team-add h3 {
   margin: 0 0 12px;
   color: var(--clinic-navy);
-  font-size: 13px;
+  font-size: 0.9375rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: -0.01em;
 }
 
 .clinic-page-guiaa .clinic-team-role-hint {
@@ -948,7 +961,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   color: #2b4458;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .clinic-page-guiaa .clinic-invite-form {
     grid-template-columns: 1fr;
   }
@@ -957,6 +970,27 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
     grid-template-columns: 1fr;
     gap: 14px;
   }
+
+  .clinic-settings-page .clinic-settings-portal {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .clinic-settings-page .clinic-settings-portal button {
+    min-height: 2.75rem;
+    width: 100%;
+  }
+}
+
+.clinic-settings-page .clinic-table-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.clinic-settings-page .clinic-table-actions button {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
 }
 
 .clinic-settings-skeleton {

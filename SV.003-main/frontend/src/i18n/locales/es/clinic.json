@@ -1164,6 +1164,8 @@
     "saveChanges": "Guardar cambios",
     "portalTitle": "Portal de solicitud de citas",
     "portalDesc": "Comparte este enlace con los dueños para que soliciten cita sin iniciar sesión.",
+    "portalUrlLabel": "Enlace del portal de citas",
+    "portalUrlAria": "Enlace del portal de solicitud de citas",
     "copy": "Copiar",
     "team": "Equipo",
     "teamDesc": "Así agregas a tu equipo en GUIAA. No hace falta que se den de alta solos primero: tú los invitas y ellos terminan el registro con el enlace.",
@@ -1182,12 +1184,14 @@
     "inviteLinkCopyFailed": "No se pudo copiar. Selecciona el enlace y cópialo manualmente.",
     "lastInviteTitle": "Enlace de la última invitación",
     "lastInviteBody": "Compártelo con {{email}} si el correo no llega (revisa spam). Solo se muestra esta vez.",
+    "inviteUrlLabel": "Enlace de invitación",
+    "inviteUrlAria": "Enlace de la última invitación al equipo",
     "pendingInvites": "Invitaciones pendientes",
     "inviteExpires": "Vence",
     "revokeInviteTitle": "Cancelar invitación",
     "revokeInviteDesc": "¿Cancelar la invitación a {{email}}?",
     "revokeInviteConfirm": "Cancelar",
-    "revokeInviteAria": "Cancelar invitación",
+    "revokeInviteAria": "Cancelar invitación a {{email}}",
     "inviteRevoked": "Invitación cancelada.",
     "roleHintVeterinarian": "Consultas CDS, expediente, pacientes y agenda.",
     "roleHintReceptionist": "Agenda, dueños y pacientes. Sin consultas CDS.",
@@ -1218,7 +1222,7 @@
     "memberEmail": "Email",
     "memberRole": "Rol",
     "memberSince": "Alta",
-    "removeMemberAria": "Quitar miembro"
+    "removeMemberAria": "Quitar a {{name}} del consultorio"
   },
   "labTypes": {
     "blood_test": {
