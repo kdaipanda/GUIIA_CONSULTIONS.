@@ -26,6 +26,32 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_patient_hospitalizations_one_active
   ON public.patient_hospitalizations(patient_id)
   WHERE status = 'active';
 
+-- Enforce tenant consistency for direct Supabase/RLS writes. The backend already
+-- validates the patient, but authenticated clients can reach public tables.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_patients_org_id_id
+  ON public.patients(organization_id, id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_patient_hospitalizations_org_id_id
+  ON public.patient_hospitalizations(organization_id, id);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'patient_hospitalizations_org_patient_fk'
+      AND conrelid = 'public.patient_hospitalizations'::regclass
+  ) THEN
+    ALTER TABLE public.patient_hospitalizations
+      ADD CONSTRAINT patient_hospitalizations_org_patient_fk
+      FOREIGN KEY (organization_id, patient_id)
+      REFERENCES public.patients(organization_id, id)
+      ON DELETE CASCADE
+      NOT VALID;
+  END IF;
+END
+$$;
+
 CREATE TABLE IF NOT EXISTS public.patient_hospitalization_notes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   hospitalization_id uuid NOT NULL REFERENCES public.patient_hospitalizations(id) ON DELETE CASCADE,
@@ -42,6 +68,24 @@ CREATE INDEX IF NOT EXISTS idx_patient_hospitalization_notes_hosp
 
 CREATE INDEX IF NOT EXISTS idx_patient_hospitalization_notes_org
   ON public.patient_hospitalization_notes(organization_id);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'patient_hospitalization_notes_org_hosp_fk'
+      AND conrelid = 'public.patient_hospitalization_notes'::regclass
+  ) THEN
+    ALTER TABLE public.patient_hospitalization_notes
+      ADD CONSTRAINT patient_hospitalization_notes_org_hosp_fk
+      FOREIGN KEY (organization_id, hospitalization_id)
+      REFERENCES public.patient_hospitalizations(organization_id, id)
+      ON DELETE CASCADE
+      NOT VALID;
+  END IF;
+END
+$$;
 
 COMMENT ON TABLE public.patient_hospitalizations IS 'Internamientos de pacientes (activo / alta)';
 COMMENT ON TABLE public.patient_hospitalization_notes IS 'Notas diarias de evolución durante hospitalización';
