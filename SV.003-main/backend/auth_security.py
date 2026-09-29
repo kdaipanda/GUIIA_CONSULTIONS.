@@ -1,8 +1,11 @@
 """Autenticación JWT, admins de plataforma y utilidades de seguridad."""
 from __future__ import annotations
 
+import hashlib
+import hmac
 import os
 import re
+import secrets
 import uuid
 from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
@@ -225,6 +228,25 @@ def create_invite_register_pending_token(
         "jti": str(uuid.uuid4()),
     }
     return jwt.encode(payload, secret, algorithm=ALGORITHM)
+
+
+def create_invite_register_code_challenge(code: str) -> Tuple[str, str]:
+    """Crea un desafío OTP no verificable offline desde el JWT público."""
+    salt = secrets.token_urlsafe(16)
+    return salt, _invite_register_code_digest(code, salt)
+
+
+def verify_invite_register_code(code: str, salt: str, expected_digest: str) -> bool:
+    if not salt or not expected_digest:
+        return False
+    got = _invite_register_code_digest(code, salt)
+    return hmac.compare_digest(got, expected_digest)
+
+
+def _invite_register_code_digest(code: str, salt: str) -> str:
+    normalized = (code or "").strip()
+    msg = f"invite-register:{salt}:{normalized}".encode("utf-8")
+    return hmac.new(_jwt_secret().encode("utf-8"), msg, hashlib.sha256).hexdigest()
 
 
 def verify_invite_register_pending_token(token: Optional[str]) -> Dict[str, Any]:
