@@ -47,6 +47,7 @@ import {
 import { cleanClinicalDisplayText, downloadUserConsultationsHistoryPdf } from "../../lib/consultationPdf";
 import { countryLabel } from "../../lib/latamCountries";
 import i18n from "../../i18n";
+import { AdminMetricsSection } from "../../components/clinic/AdminMetricsSection";
 
 const PLAN_FILTER_IDS = ["all", "trial", "paid"];
 const PRESENCE_FILTER_IDS = ["all", "online", "offline"];
@@ -920,6 +921,8 @@ export function AdminPage() {
           <div className="clinic-report-kpi-value">{stats.trial_surveys_total ?? trialSurveysCount}</div>
         </div>
       </div>
+
+      <AdminMetricsSection veterinarianId={veterinarian?.id} enabled={!!allowed} />
 
       <section className="clinic-settings-card">
         <div className="clinic-admin-users-head">

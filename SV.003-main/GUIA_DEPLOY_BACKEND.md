@@ -99,6 +99,12 @@ ANTHROPIC_MODEL=claude-sonnet-4-20250514
 # Stripe (para pagos reales)
 STRIPE_API_KEY=sk_live_xxxxx
 STRIPE_WEBHOOK_SECRET=whsec_xxxxx
+
+# PostHog (métricas de tráfico en Admin GUIAA)
+POSTHOG_PERSONAL_API_KEY=phx_xxxxx
+POSTHOG_PROJECT_ID=12345
+# Opcional: POSTHOG_HOST=https://us.posthog.com
+# Opcional: POSTHOG_DASHBOARD_URL=https://us.posthog.com/project/12345/web
 ```
 
 #### 📝 Cómo obtener cada variable:
@@ -114,6 +120,11 @@ STRIPE_WEBHOOK_SECRET=whsec_xxxxx
 - Crea una cuenta o inicia sesión
 - Ve a API Keys → Create Key
 - Copia la clave (solo se muestra una vez)
+
+**POSTHOG_PERSONAL_API_KEY / POSTHOG_PROJECT_ID:**
+- PostHog → Settings → Personal API Keys → Create (scopes `query:read` y `web_analytics:read`)
+- Project ID: Settings → Project → Project ID (número)
+- El snippet `phc_...` del frontend ya captura visitas; estas variables solo permiten leerlas en Admin GUIAA
 
 **STRIPE_API_KEY:**
 - Ve a https://stripe.com

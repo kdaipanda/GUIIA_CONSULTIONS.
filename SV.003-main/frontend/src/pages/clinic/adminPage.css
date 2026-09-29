@@ -77,6 +77,159 @@
   font-size: 0.75rem;
 }
 
+.clinic-admin-metrics {
+  margin-top: 1.25rem;
+}
+
+.clinic-admin-metrics-periods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.clinic-admin-metrics-block {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(38, 91, 147, 0.1);
+}
+
+.clinic-admin-metrics-block:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.clinic-admin-metrics-block h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--admin-navy);
+}
+
+.clinic-admin-metrics-block h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.clinic-admin-metric-change {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.clinic-admin-metric-change.is-up {
+  color: var(--admin-green);
+}
+
+.clinic-admin-metric-change.is-down {
+  color: #b45309;
+}
+
+.clinic-admin-metrics-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.clinic-admin-minibars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 72px;
+  padding: 0.35rem 0.25rem 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(38, 91, 147, 0.04), rgba(12, 45, 77, 0.02));
+}
+
+.clinic-admin-minibar {
+  flex: 1 1 0;
+  min-width: 3px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.clinic-admin-minibar-fill {
+  width: 100%;
+  border-radius: 3px 3px 1px 1px;
+  background: linear-gradient(180deg, var(--admin-blue), var(--admin-navy));
+  opacity: 0.85;
+}
+
+.clinic-admin-metrics-lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.clinic-admin-metrics-lists ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.clinic-admin-metrics-lists li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+  font-size: 0.8125rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(38, 91, 147, 0.08);
+}
+
+.clinic-admin-metrics-path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--admin-navy);
+}
+
+.clinic-admin-metrics-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--admin-blue);
+  text-decoration: none;
+}
+
+.clinic-admin-metrics-link:hover {
+  text-decoration: underline;
+}
+
+.clinic-admin-metrics-setup,
+.clinic-admin-metrics-error {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: rgba(38, 91, 147, 0.05);
+  border: 1px solid rgba(38, 91, 147, 0.1);
+}
+
+.clinic-admin-metrics-error {
+  background: rgba(180, 83, 9, 0.06);
+  border-color: rgba(180, 83, 9, 0.18);
+}
+
+.clinic-admin-metrics-empty {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+}
+
 .clinic-admin-whatsapp-promo .clinic-admin-users-head h2 {
   display: inline-flex;
   align-items: center;

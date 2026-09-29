@@ -16,6 +16,7 @@ import email_notifications
 import presence
 import trial_survey
 import whatsapp_promo
+import admin_metrics
 from membership_access import has_unlimited_consultations, require_feature_for_profile
 from supabase_client import (
     count_consultations_by_users,
@@ -2046,6 +2047,16 @@ async def admin_overview(x_veterinarian_id: str = Header(None)):
             "online_window_seconds": presence.ONLINE_WINDOW_SECONDS,
         }
     }
+
+
+@clinic_router.get("/admin/metrics")
+async def admin_platform_metrics(
+    days: int = 30,
+    x_veterinarian_id: str = Header(None),
+):
+    """Métricas de negocio (Supabase) + tráfico web (PostHog) para Admin GUIAA."""
+    await _require_platform_admin(_require_vet_id(x_veterinarian_id))
+    return await admin_metrics.get_admin_platform_metrics(days=days)
 
 
 @clinic_router.get("/admin/users")

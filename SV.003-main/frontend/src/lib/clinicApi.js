@@ -99,6 +99,13 @@ export async function fetchAdminOverview(veterinarianId) {
   return clinicFetch("/api/admin/overview", veterinarianId);
 }
 
+export async function fetchAdminMetrics(veterinarianId, days = 30) {
+  const params = new URLSearchParams();
+  if (days) params.set("days", String(days));
+  const q = params.toString() ? `?${params}` : "";
+  return clinicFetch(`/api/admin/metrics${q}`, veterinarianId);
+}
+
 export async function fetchAdminUsers(
   veterinarianId,
   search = "",
