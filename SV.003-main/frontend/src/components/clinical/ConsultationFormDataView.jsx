@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, ClipboardList } from "lucide-react";
+import "./consultationFormDataView.css";
 
 const SECTION_FIELD_MAP = {
   identification: [
@@ -95,6 +96,8 @@ const SECTION_I18N = {
   other: "patientChart.formSections.other",
 };
 
+const LONG_TEXT_FIELDS = new Set(["detalle_paciente", "motivo_consulta", "sintomas", "alergias", "alergia"]);
+
 function isEmptyValue(value) {
   if (value == null) return true;
   if (typeof value === "string") return !value.trim();
@@ -104,9 +107,26 @@ function isEmptyValue(value) {
   return false;
 }
 
+function normalizeYesNo(value) {
+  if (typeof value === "boolean") return value ? "yes" : "no";
+  if (typeof value === "number") return null;
+  if (typeof value !== "string") return null;
+  const lower = value.trim().toLowerCase();
+  if (lower === "true" || lower === "si" || lower === "sí" || lower === "yes") return "yes";
+  if (lower === "false" || lower === "no") return "no";
+  return null;
+}
+
 function formatValue(value) {
-  if (typeof value === "boolean") return value ? "Sí" : "No";
-  if (typeof value === "object") {
+  const yn = normalizeYesNo(value);
+  if (yn === "yes") return "Sí";
+  if (yn === "no") return "No";
+  if (typeof value === "number") return String(value);
+  if (typeof value === "string") return value.trim();
+  if (Array.isArray(value)) {
+    return value.map((item) => formatValue(item)).filter(Boolean).join(", ");
+  }
+  if (typeof value === "object" && value != null) {
     try {
       return JSON.stringify(value);
     } catch {
@@ -114,6 +134,34 @@ function formatValue(value) {
     }
   }
   return String(value);
+}
+
+function FieldRow({ field, value, label }) {
+  const yn = normalizeYesNo(value);
+  const display = formatValue(value);
+  const isLong = LONG_TEXT_FIELDS.has(field) || (typeof value === "string" && value.length > 120);
+
+  if (isLong) {
+    return (
+      <div className="cfd-field cfd-field--prose">
+        <div className="cfd-field-label">{label}</div>
+        <div className="cfd-field-prose">{display}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="cfd-field">
+      <div className="cfd-field-label">{label}</div>
+      <div className="cfd-field-value">
+        {yn ? (
+          <span className={`cfd-pill cfd-pill--${yn}`}>{display}</span>
+        ) : (
+          display
+        )}
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -166,43 +214,53 @@ export function ConsultationFormDataView({
     return <p className="clinic-muted">{t("patientChart.formEmpty")}</p>;
   }
 
+  const speciesLabel = category
+    ? tSpecies(`categories.${category}`, { defaultValue: category })
+    : null;
+
   return (
-    <div className={`consultation-form-data-view${compact ? " is-compact" : ""}`}>
+    <div className={`cfd-root${compact ? " cfd-root--compact" : ""}${open ? " is-open" : ""}`}>
       <button
         type="button"
-        className="consultation-form-data-toggle"
+        className="cfd-toggle"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
       >
-        <span>
-          {t("patientChart.formDataTitle")}
-          {category ? (
-            <span className="consultation-form-data-species">
-              {" "}
-              · {tSpecies(`categories.${category}`, { defaultValue: category })}
-            </span>
-          ) : null}
+        <span className="cfd-toggle-left">
+          <span className="cfd-toggle-icon" aria-hidden>
+            <ClipboardList size={18} />
+          </span>
+          <span className="cfd-toggle-copy">
+            <span className="cfd-toggle-title">{t("patientChart.formDataTitle")}</span>
+            {speciesLabel ? <span className="cfd-toggle-species">{speciesLabel}</span> : null}
+          </span>
         </span>
-        {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        <span className="cfd-toggle-chevron" aria-hidden>
+          {open ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </span>
       </button>
 
-      {open && (
-        <div className="consultation-form-data-body">
+      {open ? (
+        <div className="cfd-body">
           {sections.map((section) => (
-            <div key={section.key} className="consultation-form-data-section">
-              <h4>{t(SECTION_I18N[section.key] || SECTION_I18N.other)}</h4>
-              <dl>
+            <section key={section.key} className="cfd-section">
+              <h4 className="cfd-section-title">
+                {t(SECTION_I18N[section.key] || SECTION_I18N.other)}
+              </h4>
+              <div className={`cfd-grid${section.key === "exam" ? " cfd-grid--chips" : ""}`}>
                 {section.rows.map(({ field, value }) => (
-                  <div key={field} className="consultation-form-data-row">
-                    <dt>{labelFor(field)}</dt>
-                    <dd>{formatValue(value)}</dd>
-                  </div>
+                  <FieldRow
+                    key={field}
+                    field={field}
+                    value={value}
+                    label={labelFor(field)}
+                  />
                 ))}
-              </dl>
-            </div>
+              </div>
+            </section>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -1,0 +1,271 @@
+/* Consultation form data — self-contained clinical report layout */
+
+.cfd-root {
+  --cfd-navy: #0c2d4d;
+  --cfd-blue: #265b93;
+  --cfd-teal: #3d9b8f;
+  --cfd-ink: #1e293b;
+  --cfd-muted: #64748b;
+  --cfd-line: rgba(12, 45, 77, 0.12);
+  --cfd-soft: #f1f7fb;
+  --cfd-card: #ffffff;
+  display: block;
+  width: 100%;
+}
+
+.cfd-toggle {
+  width: 100%;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 3rem;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--cfd-line) !important;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f7fbfe 0%, #eef5fa 100%) !important;
+  color: var(--cfd-navy) !important;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 4px 14px -10px rgba(12, 45, 77, 0.35);
+}
+
+.cfd-toggle:hover {
+  border-color: rgba(38, 91, 147, 0.28) !important;
+  background: linear-gradient(180deg, #ffffff 0%, #e8f3fa 100%) !important;
+}
+
+.cfd-toggle:focus-visible {
+  outline: 2px solid var(--cfd-blue);
+  outline-offset: 2px;
+}
+
+.cfd-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cfd-toggle-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(38, 91, 147, 0.1);
+  color: var(--cfd-blue);
+}
+
+.cfd-toggle-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cfd-toggle-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--cfd-navy);
+  line-height: 1.25;
+}
+
+.cfd-toggle-species {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cfd-muted);
+}
+
+.cfd-toggle-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: rgba(12, 45, 77, 0.06);
+  color: var(--cfd-muted);
+  flex-shrink: 0;
+}
+
+.cfd-body {
+  margin-top: 14px;
+  display: grid;
+  gap: 14px;
+}
+
+.cfd-section {
+  border: 1px solid var(--cfd-line);
+  border-radius: 14px;
+  background: var(--cfd-card);
+  overflow: hidden;
+  box-shadow: 0 6px 18px -14px rgba(12, 45, 77, 0.28);
+}
+
+.cfd-section-title {
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cfd-blue);
+  background: var(--cfd-soft);
+  border-bottom: 1px solid var(--cfd-line);
+}
+
+.cfd-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
+
+.cfd-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--cfd-line);
+  border-right: 1px solid var(--cfd-line);
+  min-width: 0;
+}
+
+.cfd-field:nth-child(2n) {
+  border-right: none;
+}
+
+.cfd-field--prose {
+  grid-column: 1 / -1;
+  border-right: none;
+  background: linear-gradient(180deg, #fcfeff 0%, #f5fafc 100%);
+}
+
+.cfd-field-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cfd-muted);
+}
+
+.cfd-field-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--cfd-ink);
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.cfd-field-prose {
+  margin-top: 2px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(38, 91, 147, 0.12);
+  background: #fff;
+  color: var(--cfd-ink);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cfd-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.cfd-pill--yes {
+  background: rgba(61, 155, 143, 0.14);
+  color: #1f6f66;
+  border: 1px solid rgba(61, 155, 143, 0.28);
+}
+
+.cfd-pill--no {
+  background: rgba(100, 116, 139, 0.1);
+  color: #475569;
+  border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+.cfd-root--compact .cfd-grid {
+  grid-template-columns: 1fr;
+}
+
+.cfd-root--compact .cfd-field {
+  border-right: none;
+}
+
+@media (max-width: 720px) {
+  .cfd-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cfd-field {
+    border-right: none;
+  }
+}
+
+[data-theme="dark"] .cfd-root,
+html.dark .cfd-root {
+  --cfd-navy: #e2e8f0;
+  --cfd-blue: #7dd3c0;
+  --cfd-ink: #f1f5f9;
+  --cfd-muted: #94a3b8;
+  --cfd-line: rgba(255, 255, 255, 0.1);
+  --cfd-soft: rgba(255, 255, 255, 0.04);
+  --cfd-card: rgba(20, 32, 51, 0.72);
+}
+
+[data-theme="dark"] .cfd-toggle,
+html.dark .cfd-toggle {
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: var(--cfd-ink) !important;
+}
+
+[data-theme="dark"] .cfd-toggle:hover,
+html.dark .cfd-toggle:hover {
+  background: rgba(61, 155, 143, 0.12) !important;
+}
+
+[data-theme="dark"] .cfd-toggle-title,
+html.dark .cfd-toggle-title {
+  color: var(--cfd-ink);
+}
+
+[data-theme="dark"] .cfd-field-prose,
+html.dark .cfd-field-prose {
+  background: rgba(10, 16, 24, 0.45);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: var(--cfd-ink);
+}
+
+[data-theme="dark"] .cfd-pill--yes,
+html.dark .cfd-pill--yes {
+  background: rgba(61, 155, 143, 0.2);
+  color: #9ae6d8;
+  border-color: rgba(61, 155, 143, 0.35);
+}
+
+[data-theme="dark"] .cfd-pill--no,
+html.dark .cfd-pill--no {
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+/* Legacy class aliases (patient chart still references some) */
+.consultation-form-data-view {
+  display: block;
+  width: 100%;
+}

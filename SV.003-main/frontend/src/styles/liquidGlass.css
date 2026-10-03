@@ -296,14 +296,15 @@ html:not(.dark):not([data-theme="dark"]) .action-card:hover {
 /* —— Historial consultas (glass solo en modo claro; oscuro en consultationHistoryPage.css) —— */
 
 html:not(.dark):not([data-theme="dark"]) .history-card-guiaa,
-html:not(.dark):not([data-theme="dark"]) .history-detail-guiaa .clinical-section,
-html:not(.dark):not([data-theme="dark"]) .history-detail-guiaa .clinical-file-header {
+html:not(.dark):not([data-theme="dark"]) .history-detail-guiaa .clinical-section {
   background: var(--liquid-glass-bg) !important;
   border: 1px solid var(--liquid-glass-border-color) !important;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: var(--liquid-glass-shadow-soft) !important;
 }
+
+/* Cabecera de ficha: conservar gradiente navy (texto blanco). No aplicar glass claro. */
 
 .history-stat-pill,
 .history-filter-tab {
