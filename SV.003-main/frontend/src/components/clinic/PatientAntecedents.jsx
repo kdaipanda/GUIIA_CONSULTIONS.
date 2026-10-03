@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, FolderOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { fetchPatient } from "../../lib/clinicApi";
-import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
+import { clinicalTextPreview } from "../../lib/consultationPdf";
 import { buildClinicalTimeline, getLabStudyLabel } from "../../lib/clinicalTimeline";
 import { formatConsultationDateShort } from "../../lib/consultationDisplay";
 import {
@@ -129,12 +129,7 @@ export function PatientAntecedents({
                             {formatConsultationDateShort(consultation.created_at)}
                             {consultation.analysis && (
                               <p className="patient-antecedents-analysis">
-                                {(() => {
-                                  const preview = cleanClinicalDisplayText(consultation.analysis);
-                                  return preview.length > 160
-                                    ? `${preview.slice(0, 160).trim()}…`
-                                    : preview;
-                                })()}
+                                {clinicalTextPreview(consultation.analysis, 160)}
                               </p>
                             )}
                           </li>

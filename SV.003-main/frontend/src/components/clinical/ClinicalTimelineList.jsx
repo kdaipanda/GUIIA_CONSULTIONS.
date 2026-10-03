@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FileDown, ExternalLink, FlaskConical, Stethoscope } from "lucide-react";
 import { Button } from "../ui/button";
-import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
+import { clinicalTextPreview } from "../../lib/consultationPdf";
 import {
   formatConsultationDateShort,
   formatConsultationFolio,
@@ -11,9 +11,7 @@ import {
 import { buildClinicalTimeline, getLabStudyLabel } from "../../lib/clinicalTimeline";
 
 function truncateText(text, max = 180) {
-  if (!text) return "";
-  const cleaned = cleanClinicalDisplayText(text);
-  return cleaned.length > max ? `${cleaned.slice(0, max)}…` : cleaned;
+  return clinicalTextPreview(text, max);
 }
 
 function consultationMotivo(consultation, fallback) {

@@ -130,7 +130,10 @@ function BlockView({ block, index }) {
  * No altera el texto fuente ni el prompt: solo la presentación.
  */
 export function ClinicalAnalysisView({ text, className = "" }) {
-  const cleaned = useMemo(() => cleanClinicalDisplayText(text || ""), [text]);
+  const cleaned = useMemo(() => {
+    const raw = String(text || "").replace(/\\n/g, "\n").replace(/\\t/g, "\t");
+    return cleanClinicalDisplayText(raw);
+  }, [text]);
   const blocks = useMemo(() => parseBlocks(cleaned), [cleaned]);
 
   if (!cleaned) return null;

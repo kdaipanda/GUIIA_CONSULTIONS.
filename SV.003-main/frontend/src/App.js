@@ -46,6 +46,7 @@ import "./styles/clinicMobileFixes.css";
 import "./styles/clinicPolish.css";
 import "./styles/consultationFlow.css";
 import "./components/clinical/consultationFormDataView.css";
+import "./components/consultation/clinicalAnalysisView.css";
 import "./PlatformOnboarding.css";
 import "./styles/dashboardDarkMode.css";
 import "./styles/dashboardPolish.css";

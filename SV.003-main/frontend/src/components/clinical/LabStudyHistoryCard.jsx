@@ -1,11 +1,11 @@
 import React from "react";
 import { CalendarDays, FlaskConical, User } from "lucide-react";
-import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
+import { clinicalTextPreview } from "../../lib/consultationPdf";
 import { formatConsultationDateShort } from "../../lib/consultationDisplay";
 import { getLabStudyLabel } from "../../lib/clinicalTimeline";
 
 export function LabStudyHistoryCard({ study }) {
-  const analysisPreview = study.analysis ? cleanClinicalDisplayText(study.analysis) : "";
+  const analysisPreview = study.analysis ? clinicalTextPreview(study.analysis, 220) : "";
   const patientName = study.patient_name?.trim() || "Paciente no especificado";
 
   return (
@@ -56,11 +56,7 @@ export function LabStudyHistoryCard({ study }) {
         {analysisPreview && (
           <div className="history-extra-card highlight">
             <span className="history-extra-label">Interpretación clínica</span>
-            <p>
-              {analysisPreview.length > 220
-                ? `${analysisPreview.slice(0, 220).trim()}…`
-                : analysisPreview}
-            </p>
+            <p>{analysisPreview}</p>
           </div>
         )}
       </div>

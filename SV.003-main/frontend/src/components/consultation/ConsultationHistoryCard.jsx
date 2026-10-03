@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { CalendarDays, FileDown, FlaskConical, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { StarRating } from "../ui/star-rating";
-import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
+import { clinicalTextPreview } from "../../lib/consultationPdf";
 import {
   formatConsultationDateShort,
   formatConsultationFolio,
@@ -29,7 +29,7 @@ export function ConsultationHistoryCard({
   const ownerName = record.nombre_dueno || t("history.card.ownerUnspecified");
   const medicalImages = record.medical_images || [];
   const analysisPreview = record.analysis
-    ? cleanClinicalDisplayText(record.analysis)
+    ? clinicalTextPreview(record.analysis, 220)
     : "";
 
   return (
@@ -108,11 +108,7 @@ export function ConsultationHistoryCard({
         {analysisPreview && (
           <div className="history-extra-card highlight">
             <span className="history-extra-label">{t("history.card.analysis")}</span>
-            <p>
-              {analysisPreview.length > 220
-                ? `${analysisPreview.slice(0, 220).trim()}…`
-                : analysisPreview}
-            </p>
+            <p>{analysisPreview}</p>
           </div>
         )}
 

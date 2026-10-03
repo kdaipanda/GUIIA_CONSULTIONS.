@@ -124,10 +124,17 @@ export function cleanClinicalDisplayText(text) {
 export function clinicalTextPreview(text, maxLength = 150) {
   if (!text) return "";
   let plain = cleanClinicalDisplayText(text)
+    .replace(/\\n/g, "\n")
     .replace(/^#{1,6}\s+/gm, "")
     .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/\*([^*\n]+)\*/g, "$1")
+    .replace(/_([^_\n]+)_/g, "$1")
     .replace(/^---+$/gm, "")
+    .replace(/^\*\*\*+$/gm, "")
+    .replace(/^[-*•]\s+/gm, "")
+    .replace(/^\d+[.)]\s+/gm, "")
+    .replace(/`([^`]+)`/g, "$1")
     .replace(/\s+/g, " ")
     .trim();
   if (plain.length <= maxLength) return plain;
