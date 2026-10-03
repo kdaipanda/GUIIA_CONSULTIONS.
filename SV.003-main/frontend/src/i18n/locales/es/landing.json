@@ -259,6 +259,23 @@
     "ownerConsult": "Soy dueño de mascota",
     "haveAccount": "Ya tengo cuenta"
   },
+  "resources": {
+    "eyebrow": "Centro de recursos",
+    "title": "Guías clínicas y operativas para MVZ",
+    "lead": "CDS L4-L5, primeros pasos y módulos del consultorio — sin cuenta para leer. El chat de soporte vive dentro de la app.",
+    "searchPlaceholder": "Buscar CDS, consulta, agenda, membresía…",
+    "backHome": "Volver al inicio",
+    "quickFaq": "Preguntas frecuentes",
+    "quickFaqLead": "Respuestas cortas de la landing",
+    "quickPricing": "Planes y precios",
+    "quickPricingLead": "Trial, Premium y qué incluye",
+    "quickSupport": "Escribir a soporte",
+    "empty": "No hay guías con ese término. Prueba con “CDS”, “consulta” o “agenda”.",
+    "ctaTitle": "¿Listo para documentar tu próxima consulta?",
+    "ctaLead": "3 consultas CDS gratis con cédula profesional. Sin tarjeta para empezar.",
+    "ctaRegister": "Crear cuenta",
+    "ctaLogin": "Iniciar sesión"
+  },
   "footer": {
     "eyebrow": "Comunidad GUIAA",
     "headlineBefore": "¡Impulsando la práctica veterinaria con",
@@ -268,6 +285,7 @@
     "features": "Características",
     "pricing": "Precios",
     "faq": "FAQ",
+    "resources": "Recursos",
     "newsletterTitle": "Novedades clínicas",
     "newsletterLead": "Actualizaciones del producto y tips para tu práctica.",
     "socialTitle": "Síguenos",

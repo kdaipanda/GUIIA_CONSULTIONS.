@@ -665,6 +665,8 @@ const Router = () => {
       navigate("/login");
     } else if (view === "register") {
       navigate("/registro");
+    } else if (view === "resources") {
+      navigate("/recursos");
     }
   };
 
@@ -812,6 +814,7 @@ const Router = () => {
     }
     if (location.pathname === "/login") setCurrentView("login");
     if (location.pathname === "/registro") setCurrentView("register");
+    if (location.pathname === "/recursos") setCurrentView("resources");
     if (location.pathname === "/payment-success") {
       setCurrentView(veterinarian ? "payment-success" : "login");
     }
@@ -849,8 +852,21 @@ const Router = () => {
         setIsInitialized(true);
         return;
       }
-      setCurrentView("landing");
-      setIsInitialized(false);
+      if (
+        location.pathname === "/login" ||
+        location.pathname === "/registro" ||
+        location.pathname === "/recursos" ||
+        location.pathname === "/payment-success" ||
+        location.pathname === "/captura-landing" ||
+        isAppointmentRequestPath(location.pathname)
+      ) {
+        setIsInitialized(true);
+        return;
+      }
+      if (location.pathname === "/" || !isKnownRoutePath(location.pathname)) {
+        setCurrentView(location.pathname === "/" ? "landing" : "not-found");
+      }
+      setIsInitialized(true);
     }
   }, [veterinarian, loading, location.pathname, navigate]);
 
@@ -890,6 +906,16 @@ const Router = () => {
       if (isProtectedAppPath(path)) {
         storeAuthRedirect(path);
         setCurrentView("login");
+      } else if (path === "/login") {
+        setCurrentView("login");
+      } else if (path === "/registro") {
+        setCurrentView("register");
+      } else if (path === "/recursos") {
+        setCurrentView("resources");
+      } else if (path === "/payment-success") {
+        setCurrentView("login");
+      } else if (!isKnownRoutePath(path) && path !== "/") {
+        setCurrentView("not-found");
       } else {
         setCurrentView("landing");
       }
@@ -899,6 +925,11 @@ const Router = () => {
 
   const views = {
     landing: <LandingPage setView={handleSetView} />,
+    resources: (
+      <AppShell fullBleed>
+        <LandingResourcesPage setView={handleSetView} />
+      </AppShell>
+    ),
     register: (
       <AppShell fullBleed>
         <RegisterEntryPage

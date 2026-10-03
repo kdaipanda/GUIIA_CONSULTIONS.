@@ -259,6 +259,23 @@
     "ownerConsult": "I'm a pet owner",
     "haveAccount": "I already have an account"
   },
+  "resources": {
+    "eyebrow": "Resource hub",
+    "title": "Clinical and ops guides for licensed vets",
+    "lead": "CDS L4–L5, getting started, and practice modules — readable without an account. In-app support chat lives inside the product.",
+    "searchPlaceholder": "Search CDS, consult, schedule, membership…",
+    "backHome": "Back to home",
+    "quickFaq": "FAQ",
+    "quickFaqLead": "Short answers from the landing page",
+    "quickPricing": "Plans and pricing",
+    "quickPricingLead": "Trial, Premium, and what’s included",
+    "quickSupport": "Email support",
+    "empty": "No guides match that term. Try “CDS”, “consult”, or “schedule”.",
+    "ctaTitle": "Ready to document your next consult?",
+    "ctaLead": "3 free CDS consults with a professional license. No card to start.",
+    "ctaRegister": "Create account",
+    "ctaLogin": "Sign in"
+  },
   "footer": {
     "eyebrow": "GUIAA community",
     "headlineBefore": "Powering veterinary practice with",
@@ -268,6 +285,7 @@
     "features": "Features",
     "pricing": "Pricing",
     "faq": "FAQ",
+    "resources": "Resources",
     "newsletterTitle": "Clinical updates",
     "newsletterLead": "Product news and clinical tips for your practice.",
     "socialTitle": "Follow us",

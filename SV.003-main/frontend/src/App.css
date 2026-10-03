@@ -109,6 +109,7 @@ body {
 
 body:has(.clinic-shell),
 body:has(.landing-shell),
+body:has(.landing-resources),
 body:has(.auth-page),
 body:has(.auth-shell),
 body:has(.loading-screen),

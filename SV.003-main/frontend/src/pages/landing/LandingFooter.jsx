@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation, useNavigate } from "react-router-dom";
 import { TermsAndConditionsModal } from "../../components/TermsAndConditionsModal";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 import { GuiaaLogoImg } from "../../components/GuiaaBrandLockup";
@@ -82,18 +83,43 @@ function SocialIcon({ id }) {
 
 export function LandingFooter() {
   const { t } = useTranslation("landing");
+  const navigate = useNavigate();
+  const location = useLocation();
   const year = new Date().getFullYear();
   const [legalModal, setLegalModal] = useState(null);
   const isDark = useDocumentDarkTheme();
   const chromeTone = isDark ? "on-dark" : "on-light";
   const switcherTone = isDark ? "on-dark" : "default";
+  const onLandingHome = location.pathname === "/";
 
   const primaryNav = [
-    { label: t("footer.product"), href: productTabHref("species"), productTab: "species" },
-    { label: t("footer.features"), href: "#features" },
-    { label: t("footer.pricing"), href: "#pricing" },
-    { label: t("footer.faq"), href: "#faq" },
+    {
+      label: t("footer.product"),
+      href: onLandingHome ? productTabHref("species") : "/#product-species",
+      productTab: "species",
+    },
+    { label: t("footer.features"), href: onLandingHome ? "#features" : "/#features" },
+    { label: t("footer.pricing"), href: onLandingHome ? "#pricing" : "/#pricing" },
+    { label: t("footer.faq"), href: onLandingHome ? "#faq" : "/#faq" },
+    { label: t("footer.resources"), href: "/recursos", route: "resources" },
   ];
+
+  const handleNavClick = (event, item) => {
+    if (item.route === "resources") {
+      if (event.defaultPrevented) return;
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+      event.preventDefault();
+      navigate("/recursos");
+      return;
+    }
+    if (onLandingHome) {
+      onLandingAnchorClick(event, { productTab: item.productTab });
+      return;
+    }
+    // Off landing: let the browser go to /#section (LandingPage will scroll on hash).
+  };
 
   return (
     <footer className="landing-footer-min" aria-label="GUIAA">
@@ -137,13 +163,13 @@ export function LandingFooter() {
 
           <div className="landing-footer-min-links">
             <nav className="landing-footer-min-nav" aria-label={t("nav.main")}>
-              {primaryNav.map(({ label, href, productTab }) => (
+              {primaryNav.map((item) => (
                 <a
-                  key={label}
-                  href={href}
-                  onClick={(event) => onLandingAnchorClick(event, { productTab })}
+                  key={item.label}
+                  href={item.href}
+                  onClick={(event) => handleNavClick(event, item)}
                 >
-                  {label}
+                  {item.label}
                 </a>
               ))}
             </nav>

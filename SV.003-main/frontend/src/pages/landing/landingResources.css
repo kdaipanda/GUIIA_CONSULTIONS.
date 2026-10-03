@@ -1,0 +1,419 @@
+.landing-resources {
+  --res-navy: #0c2d4d;
+  --res-teal: #3d9b8f;
+  --res-blue: #265b93;
+  --res-ink: #0f2740;
+  --res-muted: #64748b;
+  --res-line: rgba(12, 45, 77, 0.1);
+  --res-bg: #f4f7fa;
+  --res-card: #ffffff;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  background:
+    radial-gradient(ellipse 55% 40% at 100% 0%, rgba(61, 155, 143, 0.12), transparent 55%),
+    radial-gradient(ellipse 45% 35% at 0% 20%, rgba(38, 91, 147, 0.08), transparent 50%),
+    linear-gradient(180deg, #eef3f8 0%, var(--res-bg) 40%, #e8eef4 100%);
+  color: var(--res-ink);
+}
+
+/* Evita franja blanca del body/#root detrás de Recursos */
+html:has(.landing-resources),
+body:has(.landing-resources),
+#root:has(.landing-resources),
+.app-main:has(.landing-resources),
+.app-shell:has(.landing-resources),
+.app-shell--full:has(.landing-resources) {
+  background: #eef3f8 !important;
+  background-color: #eef3f8 !important;
+}
+
+.landing-resources-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0.85rem clamp(1rem, 4vw, 1.5rem);
+}
+
+.landing-resources-brand {
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.landing-resources-logo {
+  display: block;
+  height: 2.75rem;
+  width: auto;
+  max-width: 7.5rem;
+  object-fit: contain;
+}
+
+.landing-resources-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Compact language toggle — evita el min-h-11 que desborda el header */
+.landing-resources-header-actions .landing-resources-lang {
+  flex-shrink: 0;
+}
+
+.landing-resources-header-actions .landing-resources-lang button {
+  min-height: 2rem;
+  min-width: 2rem;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.landing-resources-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.35rem;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--res-line);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--res-navy);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .landing-resources-back span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .landing-resources-back {
+    min-width: 2.35rem;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+.landing-resources-main {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0.5rem clamp(1rem, 4vw, 1.5rem) 2rem;
+}
+
+.landing-resources-hero {
+  max-width: 42rem;
+  margin-bottom: 1.75rem;
+}
+
+.landing-resources-eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--res-muted);
+}
+
+.landing-resources-hero h1 {
+  margin: 0;
+  font-family: "Source Serif 4", Georgia, serif;
+  font-size: clamp(1.85rem, 4vw, 2.75rem);
+  line-height: 1.15;
+  color: var(--res-navy);
+}
+
+.landing-resources-lead {
+  margin: 0.85rem 0 0;
+  color: var(--res-muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.landing-resources-search {
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 3rem;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--res-line);
+  background: var(--res-card);
+  color: var(--res-muted);
+  box-shadow: 0 8px 24px -18px rgba(12, 45, 77, 0.35);
+}
+
+.landing-resources-search input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--res-ink);
+  font-size: 0.95rem;
+  min-width: 0;
+}
+
+.landing-resources-quick {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .landing-resources-quick {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.landing-resources-quick-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.05rem;
+  border-radius: 1rem;
+  border: 1px solid var(--res-line);
+  background: var(--res-card);
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 10px 28px -20px rgba(12, 45, 77, 0.35);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.landing-resources-quick-card:hover {
+  border-color: rgba(61, 155, 143, 0.45);
+  transform: translateY(-1px);
+}
+
+.landing-resources-quick-card span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.landing-resources-quick-card strong {
+  font-size: 0.92rem;
+  color: var(--res-navy);
+}
+
+.landing-resources-quick-card em {
+  font-style: normal;
+  font-size: 0.8rem;
+  color: var(--res-muted);
+}
+
+.landing-resources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.landing-resources-empty {
+  margin: 0;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  border: 1px dashed var(--res-line);
+  color: var(--res-muted);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.landing-resources-card {
+  border-radius: 1.1rem;
+  border: 1px solid var(--res-line);
+  background: var(--res-card);
+  overflow: hidden;
+  box-shadow: 0 10px 28px -20px rgba(12, 45, 77, 0.3);
+}
+
+.landing-resources-card-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.05rem 1.15rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.landing-resources-card-head span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.landing-resources-card-head strong {
+  font-size: 1rem;
+  color: var(--res-navy);
+}
+
+.landing-resources-card-head em {
+  font-style: normal;
+  font-size: 0.875rem;
+  color: var(--res-muted);
+  line-height: 1.4;
+}
+
+.landing-resources-card-chevron {
+  color: var(--res-blue);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.landing-resources-card.is-open .landing-resources-card-chevron {
+  transform: rotate(90deg);
+}
+
+.landing-resources-card-body {
+  padding: 0 1.15rem 1.2rem;
+  border-top: 1px solid var(--res-line);
+}
+
+.landing-resources-tip {
+  margin: 1rem 0 0.75rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.85rem;
+  background: rgba(61, 155, 143, 0.08);
+  color: var(--res-navy);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.landing-resources-card-body p {
+  margin: 0.65rem 0 0;
+  color: var(--res-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.landing-resources-card-body h3 {
+  margin: 1rem 0 0.4rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--res-navy);
+}
+
+.landing-resources-card-body ol {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--res-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.landing-resources-card-body li + li {
+  margin-top: 0.35rem;
+}
+
+.landing-resources-cta {
+  margin-top: 1.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.35rem;
+  border-radius: 1.2rem;
+  border: 1px solid rgba(61, 155, 143, 0.28);
+  background:
+    linear-gradient(135deg, rgba(61, 155, 143, 0.1), rgba(38, 91, 147, 0.08)),
+    #fff;
+}
+
+.landing-resources-cta h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--res-navy);
+}
+
+.landing-resources-cta p {
+  margin: 0.35rem 0 0;
+  color: var(--res-muted);
+  font-size: 0.9rem;
+}
+
+.landing-resources-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.landing-resources-btn-primary,
+.landing-resources-btn-secondary {
+  min-height: 2.75rem;
+  padding: 0 1.15rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.landing-resources-btn-primary {
+  border: 0;
+  background: var(--res-teal);
+  color: #fff;
+}
+
+.landing-resources-btn-secondary {
+  border: 1px solid var(--res-line);
+  background: #fff;
+  color: var(--res-navy);
+}
+
+html.dark .landing-resources,
+[data-theme="dark"] .landing-resources {
+  --res-bg: #07111a;
+  --res-card: #0f1c2a;
+  --res-ink: #e8eef4;
+  --res-muted: #9aa8b8;
+  --res-line: rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(ellipse 55% 40% at 100% 0%, rgba(61, 155, 143, 0.16), transparent 55%),
+    radial-gradient(ellipse 45% 35% at 0% 20%, rgba(38, 91, 147, 0.14), transparent 50%),
+    linear-gradient(180deg, #061018 0%, #0a1520 45%, #07111a 100%);
+}
+
+html.dark .landing-resources-hero h1,
+[data-theme="dark"] .landing-resources-hero h1,
+html.dark .landing-resources-card-head strong,
+[data-theme="dark"] .landing-resources-card-head strong,
+html.dark .landing-resources-cta h2,
+[data-theme="dark"] .landing-resources-cta h2,
+html.dark .landing-resources-quick-card strong,
+[data-theme="dark"] .landing-resources-quick-card strong {
+  color: #f4f8fc;
+}
+
+html.dark .landing-resources-back,
+[data-theme="dark"] .landing-resources-back,
+html.dark .landing-resources-btn-secondary,
+[data-theme="dark"] .landing-resources-btn-secondary {
+  background: rgba(255, 255, 255, 0.04);
+  color: #e8eef4;
+}
