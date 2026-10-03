@@ -24,6 +24,7 @@ export const LANDING_IMAGES = {
     corgi: "/landing/pets/corgi.png",
     catGinger: "/landing/pets/cat-ginger.png",
     catBlack: "/landing/pets/cat-black.png",
+    exoticMacaw: "/landing/pets/exotic-macaw.png",
   },
 };
 

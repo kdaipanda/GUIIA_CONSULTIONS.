@@ -13,7 +13,7 @@ const PRACTICE_OUTCOMES = [
   {
     id: "carlos",
     name: "Dr. Carlos R.",
-    petImage: "/landing/pets/cat-tabby.png",
+    petImage: "/landing/pets/exotic-macaw.png",
     tone: "green",
     rating: 5,
   },
