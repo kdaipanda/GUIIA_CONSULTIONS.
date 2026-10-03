@@ -108,6 +108,7 @@ import { InviteRegisterPage } from "./pages/InviteRegisterPage";
 import { Header } from "./components/Header";
 import { AppShell } from "./layout/AppShell";
 import { AuthPageShell } from "./layout/AuthPageShell";
+import { SignIn } from "./components/auth/SignIn";
 import { ClinicShell } from "./layout/ClinicShell";
 import { ClinicProvider } from "./context/ClinicContext";
 import { AppointmentRequestPortal } from "./pages/clinic/AppointmentRequestPortal";
@@ -1739,137 +1740,21 @@ const LoginPage = ({ setView, setCedulaFlow, onAuthSuccess }) => {
 
   return (
     <>
-      <AuthPageShell setView={setView}>
-          <h2>{t("login.title")}</h2>
-          <p>
-            {legacyLogin
-              ? t("login.subtitleLegacy")
-              : t("login.subtitlePassword")}
-          </p>
-
-          {!pending2FA ? (
-            <form onSubmit={handleSubmit} className="auth-form">
-              <div className="form-group">
-                <Label htmlFor="login-email">{t("login.email")}</Label>
-                <Input
-                  id="login-email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  placeholder={t("login.emailPlaceholder")}
-                  className="mt-1.5 h-11 min-h-11 bg-background"
-                />
-              </div>
-
-              {!legacyLogin ? (
-                <div className="form-group">
-                  <Label htmlFor="login-password">{t("login.password")}</Label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    required
-                    autoComplete="current-password"
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    placeholder={t("login.passwordPlaceholder")}
-                    className="mt-1.5 h-11 min-h-11 bg-background"
-                  />
-                </div>
-              ) : (
-                <div className="form-group">
-                  <Label htmlFor="login-cedula">{t("login.license")}</Label>
-                  <Input
-                    id="login-cedula"
-                    type="text"
-                    required
-                    autoComplete="off"
-                    value={formData.cedula_profesional}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        cedula_profesional: e.target.value,
-                      })
-                    }
-                    placeholder={t("login.licensePlaceholder")}
-                    className="mt-1.5 h-11 min-h-11 bg-background"
-                  />
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full"
-              >
-                {loading ? t("login.submitting") : t("login.submit")}
-              </Button>
-
-              <button
-                type="button"
-                className="link-btn mt-3 w-full text-center text-sm"
-                onClick={() => {
-                  setLegacyLogin((prev) => !prev);
-                  notifyError("");
-                }}
-              >
-                {legacyLogin
-                  ? t("login.usePassword")
-                  : t("login.useLegacy")}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerify2FA} className="auth-form">
-              <div className="form-group">
-                <Label htmlFor="login-2fa">{t("twoFactor.label")}</Label>
-                <Input
-                  id="login-2fa"
-                  type="text"
-                  required
-                  inputMode="numeric"
-                  value={twoFactorCode}
-                  onChange={(e) => setTwoFactorCode(e.target.value)}
-                  placeholder={t("twoFactor.placeholder")}
-                  maxLength={6}
-                  autoFocus
-                  className="mt-1.5 h-11 min-h-11 bg-background tracking-widest"
-                />
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {t("twoFactor.hint")}
-                </p>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={verifying2FA}
-                className="w-full"
-              >
-                {verifying2FA ? t("twoFactor.submitting") : t("twoFactor.submit")}
-              </Button>
-
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={resetToLogin}
-                className="mt-2.5 w-full"
-              >
-                {t("twoFactor.back")}
-              </Button>
-            </form>
-          )}
-
-          <div className="auth-footer">
-            {t("login.noAccount")}{" "}
-            <button onClick={() => setView("register")} className="link-btn">
-              {t("login.registerLink")}
-            </button>
-          </div>
-      </AuthPageShell>
+      <SignIn
+        setView={setView}
+        formData={formData}
+        setFormData={setFormData}
+        legacyLogin={legacyLogin}
+        setLegacyLogin={setLegacyLogin}
+        loading={loading}
+        pending2FA={pending2FA}
+        twoFactorCode={twoFactorCode}
+        setTwoFactorCode={setTwoFactorCode}
+        verifying2FA={verifying2FA}
+        onSubmit={handleSubmit}
+        onVerify2FA={handleVerify2FA}
+        onResetToLogin={resetToLogin}
+      />
       <PrivacyModal isOpen={showPrivacyModal} onAccept={handlePrivacyAccept} />
     </>
   );
