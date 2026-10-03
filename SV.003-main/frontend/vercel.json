@@ -62,7 +62,7 @@
       "destination": "https://api.guiaa.vet/api/:path*"
     },
     {
-      "source": "/((?!static/|.*\\.mp4$).*)",
+      "source": "/((?!static/|.*\\.[^/]+$).*)",
       "destination": "/index.html"
     }
   ],
