@@ -1,4 +1,4 @@
-﻿import React, {
+import React, {
   useState,
   useEffect,
   useRef,
@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { isPetOwnerProfile } from "./lib/ownerApi";
 import "./App.css";
 import "./Custom.css";
 import "./ThemeEnhancements.css";
@@ -83,6 +84,7 @@ import { LATAM_COUNTRIES, countryLabel } from "./lib/latamCountries";
 import { shouldShowTrialSurvey } from "./lib/trialSurvey";
 import { TrialSurveyModal } from "./components/TrialSurveyModal";
 import { SupportChatWidget } from "./components/SupportChatWidget";
+import { dispatchOpenHelp } from "./lib/supportReadState";
 import { VetProvider, useVet } from "./context/VetContext";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { LazySpeciesForm } from "./components/forms/LazySpeciesForm";
@@ -116,6 +118,7 @@ import { PatientSelector } from "./components/clinic/PatientSelector";
 import { PatientAntecedents } from "./components/clinic/PatientAntecedents";
 import { ModuleHelpTip } from "./components/clinic/ModuleHelpTip";
 import { Button } from "./components/ui/button";
+import { StarRating } from "./components/ui/star-rating";
 import { Card } from "./components/ui/card";
 import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
@@ -187,8 +190,36 @@ function isProtectedAppPath(pathname) {
   return pathname === "/app" || pathname.startsWith("/app/");
 }
 
+function isOwnerConsultaPath(pathname) {
+  return pathname === "/consulta" || pathname.startsWith("/consulta/");
+}
+
 function isPatientChartPath(pathname) {
   return /^\/app\/pacientes\/[^/]+$/.test(pathname || "");
+}
+
+function isAppointmentRequestPath(pathname) {
+  return /^\/solicitar-cita\/[^/]+/.test(pathname || "");
+}
+
+function isKnownRoutePath(pathname) {
+  if (!pathname) return false;
+  if (
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname === "/registro" ||
+    pathname === "/recursos" ||
+    pathname === "/payment-success" ||
+    pathname === "/captura-landing"
+  ) {
+    return true;
+  }
+  if (PATH_TO_VIEW[pathname]) return true;
+  if (isPatientChartPath(pathname)) return true;
+  if (isOwnerConsultaPath(pathname)) return true;
+  if (isAppointmentRequestPath(pathname)) return true;
+  if (pathname === "/app" || pathname === "/app/") return true;
+  return false;
 }
 
 function readAuthRedirect() {
@@ -222,20 +253,17 @@ function consumeAuthRedirect() {
   return path;
 }
 
-function initialViewFromPath(pathname, hasVeterinarian) {
-  if (hasVeterinarian) return "dashboard";
-  if (pathname === "/login") return "login";
-  if (pathname === "/registro") return "register";
-  if (pathname === "/payment-success") return "payment-success";
-  if (pathname === "/captura-landing") return "captura-landing";
-  if (/^\/solicitar-cita\/[^/]+/.test(pathname || "")) return "appointment-request";
-  if (PATH_TO_VIEW[pathname]) return PATH_TO_VIEW[pathname];
-  return "landing";
-}
-
 
 const LandingPage = lazy(() =>
   import("./pages/LandingPage").then((m) => ({ default: m.LandingPage })),
+);
+const LandingResourcesPage = lazy(() =>
+  import("./pages/landing/LandingResourcesPage").then((m) => ({
+    default: m.LandingResourcesPage,
+  })),
+);
+const NotFoundPage = lazy(() =>
+  import("./pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })),
 );
 const ClinicDashboardPage = lazy(() =>
   import("./pages/clinic/ClinicDashboardPage").then((m) => ({ default: m.ClinicDashboardPage })),
@@ -272,6 +300,9 @@ const MembershipPage = lazy(() =>
 );
 const PaymentSuccessPage = lazy(() =>
   import("./pages/PaymentSuccessPage").then((m) => ({ default: m.PaymentSuccessPage })),
+);
+const OwnerApp = lazy(() =>
+  import("./pages/owner/OwnerApp").then((m) => ({ default: m.OwnerApp })),
 );
 const ProfilePage = lazy(() =>
   import("./pages/ProfilePage").then((m) => ({ default: m.ProfilePage })),
@@ -366,7 +397,7 @@ const CommandPalette = ({ isOpen, onClose, setView, openExpertConsultation, vete
       description: t("commandPalette.helpDesc"),
       icon: CircleHelp,
       shortcut: "",
-      action: () => setView("help"),
+      action: () => dispatchOpenHelp(),
     },
     {
       id: "new-consultation",
@@ -587,8 +618,8 @@ const Router = () => {
   const { veterinarian, loading, platformAdmin, refreshProfile, patchVeterinarian } = useVet();
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentView, setCurrentView] = useState(() =>
-    initialViewFromPath(location.pathname, Boolean(veterinarian)),
+  const [currentView, setCurrentView] = useState(
+    veterinarian ? "dashboard" : "landing",
   );
   const [isCmdkOpen, setCmdkOpen] = useState(false);
   const [selectedConsultationId, setSelectedConsultationId] = useState(null);
@@ -751,6 +782,12 @@ const Router = () => {
     (freshVetData) => {
       setCedulaFlow(null);
 
+      if (isPetOwnerProfile(freshVetData)) {
+        setIsInitialized(true);
+        navigate("/consulta");
+        return;
+      }
+
       const pendingCheckout = readCheckoutSessionId();
       if (pendingCheckout) {
         setCurrentView("payment-success");
@@ -809,14 +846,29 @@ const Router = () => {
       setCurrentView(view);
     }
     if (location.pathname === "/" && veterinarian) {
+      if (isPetOwnerProfile(veterinarian)) {
+        navigate("/consulta", { replace: true });
+        return;
+      }
       setCurrentView("dashboard");
       navigate(VIEW_TO_PATH.dashboard, { replace: true });
+    }
+    if (isProtectedAppPath(location.pathname) && isPetOwnerProfile(veterinarian)) {
+      navigate("/consulta", { replace: true });
+      return;
     }
     if (location.pathname === "/login") setCurrentView("login");
     if (location.pathname === "/registro") setCurrentView("register");
     if (location.pathname === "/recursos") setCurrentView("resources");
     if (location.pathname === "/payment-success") {
       setCurrentView(veterinarian ? "payment-success" : "login");
+    }
+    if (
+      !portalOrganizationId &&
+      !isKnownRoutePath(location.pathname) &&
+      !(isProtectedAppPath(location.pathname) && !veterinarian)
+    ) {
+      setCurrentView("not-found");
     }
   }, [location.pathname, veterinarian, navigate, portalOrganizationId]);
 
@@ -852,13 +904,15 @@ const Router = () => {
         setIsInitialized(true);
         return;
       }
+      // No pisar rutas públicas (login, registro, recursos, etc.)
       if (
         location.pathname === "/login" ||
         location.pathname === "/registro" ||
         location.pathname === "/recursos" ||
         location.pathname === "/payment-success" ||
         location.pathname === "/captura-landing" ||
-        isAppointmentRequestPath(location.pathname)
+        isAppointmentRequestPath(location.pathname) ||
+        isOwnerConsultaPath(location.pathname)
       ) {
         setIsInitialized(true);
         return;
@@ -1103,6 +1157,11 @@ const Router = () => {
         <ProfilePage setView={navigateSetView} />
       </ClinicShell>
     ),
+    "not-found": (
+      <AppShell fullBleed>
+        <NotFoundPage setView={handleSetView} />
+      </AppShell>
+    ),
   };
 
   return (
@@ -1110,6 +1169,12 @@ const Router = () => {
       {location.pathname === "/captura-landing" ? (
         <main id="main-content" className="app-main">
           <LandingScreenshotCapturePage />
+        </main>
+      ) : isOwnerConsultaPath(location.pathname) ? (
+        <main id="main-content" className="app-main app-main--owner">
+          <Suspense fallback={<LoadingScreen />}>
+            <OwnerApp />
+          </Suspense>
         </main>
       ) : (
         <>
@@ -1120,7 +1185,7 @@ const Router = () => {
           </AppShell>
         ) : (
           <Suspense fallback={<LoadingScreen />}>
-            {views[currentView] || <LandingPage setView={handleSetView} />}
+            {views[currentView] || <NotFoundPage setView={handleSetView} />}
           </Suspense>
         )}
       </main>
@@ -1132,7 +1197,7 @@ const Router = () => {
         openExpertConsultation={openExpertConsultation}
         veterinarian={veterinarian}
       />
-      {veterinarian ? (
+      {veterinarian && !isPetOwnerProfile(veterinarian) ? (
         <TrialSurveyModal
           open={trialSurveyVisible}
           mandatory={trialSurveyRequired}
@@ -2522,24 +2587,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
   return (
     <div className={`dashboard-page dashboard-${timeOfDay}${embedded ? " dashboard-embedded" : ""}`}>
       <div className="container">
-        {embedded ? (
-          <div className="clinic-dashboard-section-head clinic-dashboard-cds-head">
-            <div>
-              <h2>{t("dashLegacy.cdsPanelTitle")}</h2>
-              <p className="clinic-dashboard-cds-sub">
-                {t("dashLegacy.cdsPanelSub")}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="clinic-dashboard-theme-btn"
-              aria-label={theme === "dark" ? t("dashLegacy.themeLight") : t("dashLegacy.themeDark")}
-            >
-              {theme === "dark" ? <Sun size={18} aria-hidden /> : <Moon size={18} aria-hidden />}
-            </button>
-          </div>
-        ) : (
+        {!embedded && (
         <div className="dashboard-header">
           <div className="dashboard-header-row">
             <div className="hero-welcome">
@@ -2645,19 +2693,14 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
         )}
 
         <div className={`dashboard-grid${embedded ? " clinic-dashboard-cds-grid clinic-dashboard-cds-grid--slim" : ""}`}>
-          {dashboardLoading ? (
-            <div className={`stats-cards${embedded ? " clinic-report-kpi-grid clinic-dashboard-cds-stats--slim" : ""}`}>
+          {!embedded && (dashboardLoading ? (
+            <div className="stats-cards">
               <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
-              {!embedded && (
-                <>
-                  <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
-                  <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
-                </>
-              )}
+              <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
+              <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-text" style={{width:'40%'}}></div><div className="skeleton skeleton-text" style={{width:'20%'}}></div><div className="skeleton skeleton-card"></div></Card>
             </div>
           ) : (
-          <div className={`stats-cards${embedded ? " clinic-report-kpi-grid clinic-dashboard-cds-stats--slim" : ""}`}>
-            {!embedded && (
+          <div className="stats-cards">
             <Card className="stat-card border-0 shadow-none" data-tooltip={t("dashLegacy.tipTotal")}>
               <div className="stat-icon"><BarChart3 /></div>
               <div className="stat-content">
@@ -2679,9 +2722,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 />
               </div>
             </Card>
-            )}
 
-            {!embedded && (
             <Card className="stat-card border-0 shadow-none" data-tooltip={t("dashLegacy.tipMonth")}>
               <div className="stat-icon"><CalendarDays /></div>
               <div className="stat-content">
@@ -2707,10 +2748,9 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
                 </div>
               </div>
             </Card>
-            )}
 
             <Card
-              className={`stat-card border-0 shadow-none${embedded ? " clinic-report-kpi clinic-dashboard-membership-card" : ""}`}
+              className="stat-card border-0 shadow-none"
               data-tooltip={t("dashLegacy.tipMembership")}
             >
               <div className="stat-icon" aria-hidden><Gem /></div>
@@ -2754,10 +2794,10 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
               </div>
             </Card>
 
-            {weatherLoading && !embedded && (
+            {weatherLoading && (
               <Card className="stat-card border-0 shadow-none"><div className="skeleton skeleton-card" style={{width:'100%'}}></div></Card>
             )}
-            {weatherData && !weatherLoading && !embedded && (
+            {weatherData && !weatherLoading && (
               <Card className="stat-card border-0 shadow-none" data-tooltip={t("dashLegacy.tipWeather")}>
                 <div className="stat-icon">
                   {weatherData.weather[0].main === 'Clear' ? <Sun /> :
@@ -2771,7 +2811,7 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
               </Card>
             )}
           </div>
-          )}
+          ))}
 
           {!embedded && (
           <section className="dashboard-block dashboard-block-actions">
@@ -4130,23 +4170,17 @@ const NewConsultation = ({
 
                   <div className="consultation-rating">
                     <div className="consultation-rating-title">{t("consultation.rateTitle")}</div>
-                    <div className="consultation-rating-paws" aria-label={t("consultation.rateAria")}>
-                      {Array.from({ length: 5 }).map((_, idx) => {
-                        const value = idx + 1;
-                        const selected = (rating || 0) >= value;
-                        return (
-                          <button
-                            key={value}
-                            type="button"
-                            className={`paw-btn ${selected ? "selected" : ""}`}
-                            onClick={() => handleSetRating(value)}
-                            disabled={savingRating}
-                            aria-label={t("consultation.rateValueAria", { value })}
-                          >
-                            🐾
-                          </button>
-                        );
-                      })}
+                    <div className="consultation-rating-paws">
+                      <StarRating
+                        value={rating || 0}
+                        max={5}
+                        size="lg"
+                        color="#3d9b8f"
+                        disabled={savingRating}
+                        aria-label={t("consultation.rateAria")}
+                        getStarAriaLabel={(value) => t("consultation.rateValueAria", { value })}
+                        onChange={handleSetRating}
+                      />
                       {ratingSaved && <span className="consultation-rating-saved">{t("consultation.ratingSaved")}</span>}
                     </div>
                   </div>
