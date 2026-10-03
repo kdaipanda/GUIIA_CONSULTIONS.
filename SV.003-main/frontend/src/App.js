@@ -191,6 +191,29 @@ function isPatientChartPath(pathname) {
   return /^\/app\/pacientes\/[^/]+$/.test(pathname || "");
 }
 
+function isAppointmentRequestPath(pathname) {
+  return /^\/solicitar-cita\/[^/]+/.test(pathname || "");
+}
+
+function isKnownRoutePath(pathname) {
+  if (!pathname) return false;
+  if (
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname === "/registro" ||
+    pathname === "/recursos" ||
+    pathname === "/payment-success" ||
+    pathname === "/captura-landing"
+  ) {
+    return true;
+  }
+  if (PATH_TO_VIEW[pathname]) return true;
+  if (isPatientChartPath(pathname)) return true;
+  if (isAppointmentRequestPath(pathname)) return true;
+  if (pathname === "/app" || pathname === "/app/") return true;
+  return false;
+}
+
 function readAuthRedirect() {
   try {
     const stored = sessionStorage.getItem(AUTH_REDIRECT_KEY);
