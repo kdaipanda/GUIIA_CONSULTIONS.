@@ -30,6 +30,7 @@ import { LandingFeatures } from "./landing/LandingFeatures";
 import { LandingTestimonials } from "./landing/LandingTestimonials";
 import { LandingSpeciesMarquee } from "./landing/LandingSpeciesMarquee";
 import { LandingTrustStrip } from "./landing/LandingTrustStrip";
+import { LandingAwardSeal } from "./landing/LandingAwardSeal";
 import { LandingPricing } from "./landing/LandingPricing";
 import { LandingFaq } from "./landing/LandingFaq";
 import { LandingCta } from "./landing/LandingCta";
@@ -95,6 +96,12 @@ export function LandingPage({ setView }) {
             <LandingDeferred minHeight={360}>
               <LandingReveal>
                 <LandingTestimonials />
+              </LandingReveal>
+            </LandingDeferred>
+
+            <LandingDeferred minHeight={240}>
+              <LandingReveal>
+                <LandingAwardSeal />
               </LandingReveal>
             </LandingDeferred>
 

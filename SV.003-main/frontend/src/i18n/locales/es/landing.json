@@ -389,6 +389,14 @@
       }
     }
   },
+  "award": {
+    "aria": "Reconocimiento Startup World Cup 2026",
+    "tier": "Gold",
+    "title": "Nominado",
+    "event": "Startup World Cup 2026",
+    "lead": "Reconocimiento internacional al producto clínico GUIAA entre startups de impacto.",
+    "caption": "GUIAA nominado en Startup World Cup 2026"
+  },
   "testimonials": {
     "eyebrow": "Práctica MVZ",
     "title": "Resultados en consultorio",

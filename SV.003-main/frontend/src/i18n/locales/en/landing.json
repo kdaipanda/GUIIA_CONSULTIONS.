@@ -389,6 +389,14 @@
       }
     }
   },
+  "award": {
+    "aria": "Startup World Cup 2026 recognition",
+    "tier": "Gold",
+    "title": "Nominee",
+    "event": "Startup World Cup 2026",
+    "lead": "International recognition for GUIAA’s clinical product among high-impact startups.",
+    "caption": "GUIAA nominated at Startup World Cup 2026"
+  },
   "testimonials": {
     "eyebrow": "Vet practice",
     "title": "Outcomes in the clinic",
