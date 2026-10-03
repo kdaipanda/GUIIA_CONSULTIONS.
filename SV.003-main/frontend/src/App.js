@@ -221,6 +221,17 @@ function consumeAuthRedirect() {
   return path;
 }
 
+function initialViewFromPath(pathname, hasVeterinarian) {
+  if (hasVeterinarian) return "dashboard";
+  if (pathname === "/login") return "login";
+  if (pathname === "/registro") return "register";
+  if (pathname === "/payment-success") return "payment-success";
+  if (pathname === "/captura-landing") return "captura-landing";
+  if (/^\/solicitar-cita\/[^/]+/.test(pathname || "")) return "appointment-request";
+  if (PATH_TO_VIEW[pathname]) return PATH_TO_VIEW[pathname];
+  return "landing";
+}
+
 
 const LandingPage = lazy(() =>
   import("./pages/LandingPage").then((m) => ({ default: m.LandingPage })),
@@ -575,8 +586,8 @@ const Router = () => {
   const { veterinarian, loading, platformAdmin, refreshProfile, patchVeterinarian } = useVet();
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentView, setCurrentView] = useState(
-    veterinarian ? "dashboard" : "landing",
+  const [currentView, setCurrentView] = useState(() =>
+    initialViewFromPath(location.pathname, Boolean(veterinarian)),
   );
   const [isCmdkOpen, setCmdkOpen] = useState(false);
   const [selectedConsultationId, setSelectedConsultationId] = useState(null);

@@ -53,7 +53,7 @@
       "destination": "https://api.guiaa.vet/api/:path*"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!static/).*)",
       "destination": "/index.html"
     }
   ],
