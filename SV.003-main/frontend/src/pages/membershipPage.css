@@ -209,11 +209,27 @@
   flex-direction: column;
   width: 100%;
   min-width: 0;
-  border-radius: 12px;
+  border-radius: 14px;
   border: 1px solid rgba(12, 45, 77, 0.1);
   background: #fff;
   box-shadow: 0 4px 18px rgba(12, 45, 77, 0.06);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  overflow: visible;
+}
+
+/* Neutraliza el badge duplicado y estilos legacy de App.css */
+.membership-page .pricing-card:nth-child(2),
+.membership-page .pricing-card:nth-child(3) {
+  border: 1px solid rgba(12, 45, 77, 0.1);
+  box-shadow: 0 4px 18px rgba(12, 45, 77, 0.06);
+  z-index: auto;
+}
+
+.membership-page .pricing-card:nth-child(2)::before,
+.membership-page .pricing-card:nth-child(3)::before,
+.membership-page .pricing-card::before {
+  content: none !important;
+  display: none !important;
 }
 
 .membership-page .pricing-card:hover {
@@ -222,25 +238,42 @@
 }
 
 .membership-page .pricing-card--featured {
-  border: 2px solid #265b93;
-  box-shadow: 0 10px 28px rgba(38, 91, 147, 0.14);
+  border: 1.5px solid color-mix(in srgb, #265b93 55%, transparent);
+  box-shadow:
+    0 12px 32px rgba(38, 91, 147, 0.12),
+    0 0 0 1px color-mix(in srgb, #265b93 8%, transparent);
+  background: linear-gradient(180deg, #f5f9fc 0%, #ffffff 42%);
+}
+
+.membership-page .pricing-card--featured:hover {
+  box-shadow:
+    0 16px 36px rgba(38, 91, 147, 0.16),
+    0 0 0 1px color-mix(in srgb, #265b93 12%, transparent);
 }
 
 .membership-featured-badge {
   position: absolute;
   top: 0;
   left: 50%;
-  z-index: 1;
+  z-index: 2;
   transform: translate(-50%, -50%);
-  padding: 0.35rem 0.85rem;
-  border-radius: 12px;
-  background: #265b93;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, #265b93 35%, white);
+  background: linear-gradient(135deg, #265b93 0%, #1e4a78 100%);
   color: #fff;
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
+  line-height: 1;
+  box-shadow: 0 6px 16px -6px rgba(38, 91, 147, 0.55);
+  pointer-events: none;
 }
 
 .membership-page .pricing-card.current {
@@ -253,7 +286,7 @@
   top: 1rem;
   right: 1rem;
   padding: 0.35rem 0.75rem;
-  border-radius: 12px;
+  border-radius: 999px;
   background: #3d9b8f;
   color: #fff;
   font-size: 0.625rem;
@@ -269,7 +302,7 @@
 }
 
 .membership-page .pricing-card--featured .pricing-header {
-  padding-top: 2.25rem;
+  padding-top: 2.35rem;
 }
 
 .membership-page .pricing-header h3 {
@@ -290,7 +323,11 @@
 .membership-page .currency {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #3d9b8f;
+  color: #265b93;
+}
+
+.membership-page .pricing-card--featured .currency {
+  color: #265b93;
 }
 
 .membership-page .amount {
@@ -298,6 +335,7 @@
   font-weight: 800;
   line-height: 1;
   color: #0c2d4d;
+  letter-spacing: -0.03em;
 }
 
 .membership-page .period {
@@ -777,8 +815,10 @@ html.dark .membership-page .membership-credit-card {
 
 [data-theme="dark"] .membership-featured-badge,
 html.dark .membership-featured-badge {
-  background: #3d9b8f !important;
+  background: linear-gradient(135deg, #3d9b8f 0%, #2f857a 100%) !important;
+  border-color: color-mix(in srgb, #7dd3c5 40%, transparent) !important;
   color: #fff !important;
+  box-shadow: 0 6px 16px -6px rgba(61, 155, 143, 0.55) !important;
 }
 
 [data-theme="dark"] .membership-page .pricing-card--featured,

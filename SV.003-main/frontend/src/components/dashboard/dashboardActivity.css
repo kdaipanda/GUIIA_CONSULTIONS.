@@ -64,7 +64,7 @@
 
 .dashboard-activity-grid {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 .dashboard-activity-card {
@@ -83,6 +83,436 @@
   box-shadow: 0 8px 22px -12px rgba(12, 45, 77, 0.22);
 }
 
+/* —— Project-style consultation cards (claro / oscuro GUIAA) —— */
+
+.dashboard-activity-card--project {
+  --card-accent: #3d9b8f;
+  --card-accent-soft: rgba(61, 155, 143, 0.18);
+  --card-bg-a: #ffffff;
+  --card-bg-b: #f7fafc;
+  --card-ink: #0c2d4d;
+  --card-ink-strong: #0c2d4d;
+  --card-muted: #64748b;
+  --card-muted-soft: rgba(12, 45, 77, 0.55);
+  --card-border: rgba(12, 45, 77, 0.1);
+  --card-border-hover: rgba(61, 155, 143, 0.35);
+  --card-shadow: 0 12px 28px -16px rgba(12, 45, 77, 0.18);
+  --card-shadow-hover: 0 18px 36px -14px rgba(12, 45, 77, 0.2);
+  --card-track: rgba(12, 45, 77, 0.08);
+  --card-surface: rgba(12, 45, 77, 0.04);
+  --card-surface-border: rgba(12, 45, 77, 0.08);
+  --card-avatar-ring: #ffffff;
+  --card-chip-ok-bg: rgba(61, 155, 143, 0.14);
+  --card-chip-ok-ink: #2a7a70;
+  --card-chip-run-bg: rgba(38, 91, 147, 0.12);
+  --card-chip-run-ink: #265b93;
+  --card-chip-draft-bg: rgba(232, 163, 23, 0.16);
+  --card-chip-draft-ink: #b45309;
+  --card-chip-draft-border: rgba(180, 83, 9, 0.22);
+  --card-cta: #3d9b8f;
+  --card-cta-hover: #358a7f;
+
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-height: 17.5rem;
+  padding: 1.1rem 1.15rem 1rem;
+  border-radius: 1.35rem;
+  border: 1px solid var(--card-border) !important;
+  background:
+    radial-gradient(ellipse 70% 55% at 92% 0%, var(--card-accent-soft), transparent 58%),
+    linear-gradient(165deg, var(--card-bg-a) 0%, var(--card-bg-b) 100%) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: var(--card-shadow) !important;
+  color: var(--card-ink) !important;
+}
+
+.dashboard-activity-card--project.accent-teal {
+  --card-accent: #3d9b8f;
+  --card-accent-soft: rgba(61, 155, 143, 0.2);
+}
+
+.dashboard-activity-card--project.accent-blue {
+  --card-accent: #265b93;
+  --card-accent-soft: rgba(38, 91, 147, 0.16);
+}
+
+.dashboard-activity-card--project.accent-amber {
+  --card-accent: #d97706;
+  --card-accent-soft: rgba(217, 119, 6, 0.16);
+}
+
+.dashboard-activity-card--project:hover {
+  border-color: var(--card-border-hover) !important;
+  box-shadow:
+    var(--card-shadow-hover),
+    0 0 0 1px color-mix(in srgb, var(--card-accent) 18%, transparent) !important;
+  transform: translateY(-2px);
+}
+
+.dashboard-activity-card-glow {
+  pointer-events: none;
+  position: absolute;
+  top: -20%;
+  right: -12%;
+  width: 55%;
+  height: 55%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--card-accent-soft), transparent 70%);
+  filter: blur(2px);
+  opacity: 0.85;
+}
+
+.dashboard-activity-card--project .dashboard-activity-card-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.dashboard-activity-card--project .dashboard-activity-date {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--card-muted) !important;
+}
+
+.dashboard-activity-progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--card-ink-strong) !important;
+}
+
+.dashboard-activity-card--project .dashboard-activity-folio {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--card-muted-soft) !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 55%;
+}
+
+.dashboard-activity-progress-pct {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--card-ink) !important;
+}
+
+.dashboard-activity-time-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: var(--card-surface);
+  border: 1px solid var(--card-surface-border);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--card-ink) !important;
+  white-space: nowrap;
+}
+
+.clinic-dashboard-unified .dashboard-activity-card--embedded.dashboard-activity-card--project {
+  background:
+    radial-gradient(ellipse 70% 55% at 92% 0%, var(--card-accent-soft), transparent 58%),
+    linear-gradient(165deg, var(--card-bg-a) 0%, var(--card-bg-b) 100%) !important;
+  color: var(--card-ink) !important;
+}
+
+.dashboard-activity-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.65rem;
+  background: var(--card-surface);
+  color: var(--card-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dashboard-activity-more:hover {
+  background: color-mix(in srgb, var(--card-accent) 14%, transparent);
+  color: var(--card-ink);
+}
+
+.dashboard-activity-more:focus-visible {
+  outline: 2px solid var(--card-accent);
+  outline-offset: 2px;
+}
+
+.dashboard-activity-hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.25rem 0.25rem;
+}
+
+.dashboard-activity-card--project .dashboard-activity-species {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.25rem;
+  border-radius: 999px;
+  background: var(--card-surface);
+  border: 1px solid var(--card-surface-border);
+  font-size: 1.45rem;
+}
+
+.dashboard-activity-title {
+  margin: 0;
+  max-width: 100%;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  color: var(--card-ink-strong) !important;
+  text-wrap: balance;
+}
+
+.dashboard-activity-subtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--card-muted) !important;
+}
+
+.dashboard-activity-preview {
+  margin: 0.15rem 0 0;
+  max-width: 100%;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--card-muted-soft) !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dashboard-activity-progress {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: auto;
+}
+
+.dashboard-activity-progress-track {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: var(--card-track);
+  overflow: hidden;
+}
+
+.dashboard-activity-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 75%, #fff));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--card-accent) 35%, transparent);
+  transition: width 0.35s ease;
+}
+
+.dashboard-activity-progress-foot {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dashboard-activity-card--project .dashboard-activity-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dashboard-activity-avatars {
+  display: inline-flex;
+  align-items: center;
+}
+
+.dashboard-activity-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 2px solid var(--card-avatar-ring);
+}
+
+.dashboard-activity-avatar--species {
+  background: var(--card-surface);
+  font-size: 0.95rem;
+  margin-right: -0.35rem;
+}
+
+.dashboard-activity-avatar--add {
+  padding: 0;
+  border-color: var(--card-avatar-ring);
+  background: var(--card-accent);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.dashboard-activity-avatar--add:hover {
+  transform: scale(1.06);
+  filter: brightness(1.06);
+}
+
+.dashboard-activity-avatar--add:focus-visible {
+  outline: 2px solid var(--card-accent);
+  outline-offset: 2px;
+}
+
+.dashboard-activity-cta-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding-top: 0.15rem;
+}
+
+.dashboard-activity-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.dashboard-activity-chip--completed {
+  background: var(--card-chip-ok-bg) !important;
+  color: var(--card-chip-ok-ink) !important;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 28%, transparent);
+}
+
+.dashboard-activity-chip--in_progress {
+  background: var(--card-chip-run-bg) !important;
+  color: var(--card-chip-run-ink) !important;
+  border: 1px solid rgba(38, 91, 147, 0.22);
+}
+
+.dashboard-activity-chip--draft {
+  background: var(--card-chip-draft-bg) !important;
+  color: var(--card-chip-draft-ink) !important;
+  border: 1px solid var(--card-chip-draft-border);
+}
+
+.dashboard-activity-card--project .dashboard-activity-action {
+  flex-shrink: 0;
+  min-width: 4.75rem;
+  background: var(--card-cta) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--card-cta) 65%, transparent) !important;
+}
+
+.dashboard-activity-card--project .dashboard-activity-action:hover {
+  background: var(--card-cta-hover) !important;
+  background-image: none !important;
+  filter: none !important;
+}
+
+.dashboard-activity-card--project .dashboard-activity-action:focus-visible {
+  outline: 2px solid var(--card-cta) !important;
+  outline-offset: 2px;
+}
+
+.dashboard-activity-skeleton--project {
+  min-height: 17.5rem;
+  border-radius: 1.35rem;
+  border-color: rgba(12, 45, 77, 0.1);
+  background: #f1f5f9;
+}
+
+/* Oscuro */
+[data-theme="dark"] .dashboard-activity-card--project,
+html.dark .dashboard-activity-card--project,
+[data-theme="dark"] .clinic-dashboard-unified .dashboard-activity-card--embedded.dashboard-activity-card--project,
+html.dark .clinic-dashboard-unified .dashboard-activity-card--embedded.dashboard-activity-card--project {
+  --card-accent-soft: rgba(61, 155, 143, 0.38);
+  --card-bg-a: #1c2433;
+  --card-bg-b: #10161f;
+  --card-ink: #e8eef4;
+  --card-ink-strong: #f8fafc;
+  --card-muted: rgba(232, 238, 244, 0.7);
+  --card-muted-soft: rgba(232, 238, 244, 0.55);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-border-hover: rgba(61, 155, 143, 0.4);
+  --card-shadow: 0 18px 40px -18px rgba(6, 12, 20, 0.55);
+  --card-shadow-hover: 0 22px 48px -16px rgba(6, 12, 20, 0.6);
+  --card-track: rgba(255, 255, 255, 0.08);
+  --card-surface: rgba(255, 255, 255, 0.06);
+  --card-surface-border: rgba(255, 255, 255, 0.08);
+  --card-avatar-ring: #141b28;
+  --card-chip-ok-bg: rgba(61, 155, 143, 0.22);
+  --card-chip-ok-ink: #b6f0e6;
+  --card-chip-run-bg: rgba(38, 91, 147, 0.28);
+  --card-chip-run-ink: #bfdbfe;
+  --card-chip-draft-bg: rgba(232, 163, 23, 0.28);
+  --card-chip-draft-ink: #fff7ed;
+  --card-chip-draft-border: rgba(252, 211, 77, 0.35);
+  --card-cta: #3d9b8f;
+  --card-cta-hover: #358a7f;
+  background:
+    radial-gradient(ellipse 70% 55% at 92% 0%, var(--card-accent-soft), transparent 58%),
+    linear-gradient(165deg, #1c2433 0%, #141b28 48%, #10161f 100%) !important;
+}
+
+[data-theme="dark"] .dashboard-activity-card--project.accent-teal,
+html.dark .dashboard-activity-card--project.accent-teal {
+  --card-accent: #3d9b8f;
+  --card-accent-soft: rgba(61, 155, 143, 0.42);
+}
+
+[data-theme="dark"] .dashboard-activity-card--project.accent-blue,
+html.dark .dashboard-activity-card--project.accent-blue {
+  --card-accent: #5b9bd5;
+  --card-accent-soft: rgba(91, 155, 213, 0.35);
+}
+
+[data-theme="dark"] .dashboard-activity-card--project.accent-amber,
+html.dark .dashboard-activity-card--project.accent-amber {
+  --card-accent: #e8a317;
+  --card-accent-soft: rgba(232, 163, 23, 0.38);
+}
+
+[data-theme="dark"] .dashboard-activity-skeleton--project,
+html.dark .dashboard-activity-skeleton--project {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: #152033;
+}
+
+/* legacy flat card pieces kept for non-project variants */
 .dashboard-activity-card-top {
   display: flex;
   align-items: center;
@@ -190,9 +620,12 @@
   min-width: 4.5rem;
 }
 
-/* legacy footer — conservado por si hay referencias */
 .dashboard-activity-footer {
   display: none;
+}
+
+.dashboard-activity-card--project .dashboard-activity-footer {
+  display: flex;
 }
 
 .dashboard-activity-skeleton {
@@ -395,7 +828,7 @@
   color: #b45309;
 }
 
-.clinic-dashboard-unified .dashboard-activity-card--embedded {
+.clinic-dashboard-unified .dashboard-activity-card--embedded:not(.dashboard-activity-card--project) {
   background: #fff;
 }
 
@@ -427,13 +860,25 @@
     transform: none;
   }
 
+  .dashboard-activity-card--project:hover {
+    transform: none;
+  }
+
   .dashboard-activity-meta {
     flex-wrap: wrap;
   }
 
+  .dashboard-activity-cta-row {
+    flex-wrap: wrap;
+  }
+
   .dashboard-activity-action {
-    width: 100%;
+    width: auto;
     min-height: 44px;
+  }
+
+  .dashboard-activity-card--project .dashboard-activity-action {
+    margin-left: auto;
   }
 
   .dashboard-followup-item {

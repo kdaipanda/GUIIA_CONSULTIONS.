@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { X } from "lucide-react";
+import { Check, Copy, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { useVet } from "../context/VetContext";
 import { BACKEND_URL } from "../lib/backendUrl";
 import {
@@ -14,8 +14,10 @@ import {
   markTicketMessagesRead,
   SUPPORT_OPEN_EVENT,
 } from "../lib/supportReadState";
+import { SupportHelpPanel } from "./SupportHelpPanel";
 
 const PLUMITAS_FLYING_SRC = "/brand/doctor-plumitas-flying-cutout.png";
+const PLUMITAS_AVATAR_SRC = "/brand/doctor-plumitas-clean.png";
 
 const LANDING_VIEWS = new Set(["landing"]);
 const AUTH_VIEWS = new Set(["login", "register", "cedula-verification"]);
@@ -32,6 +34,72 @@ function formatTicketDate(iso, locale) {
   } catch {
     return "";
   }
+}
+
+function SupportChatMessage({
+  role,
+  content,
+  userInitial,
+  feedback,
+  onFeedback,
+  onCopy,
+  copied,
+  t,
+}) {
+  const isUser = role === "user";
+
+  return (
+    <div
+      className={`support-chat-msg${isUser ? " support-chat-msg--user" : " support-chat-msg--assistant"}`}
+    >
+      <div className="support-chat-msg-avatar" aria-hidden>
+        {isUser ? (
+          <span className="support-chat-msg-initial">{userInitial}</span>
+        ) : (
+          <img
+            src={PLUMITAS_AVATAR_SRC}
+            alt=""
+            className="support-chat-msg-plumitas"
+            width={36}
+            height={36}
+            decoding="async"
+          />
+        )}
+      </div>
+      <div className="support-chat-msg-bubble">{content}</div>
+      {!isUser && (
+        <div className="support-chat-msg-actions">
+          <button
+            type="button"
+            className="support-chat-msg-action"
+            onClick={() => onCopy(content)}
+            aria-label={copied ? t("supportWidget.copied") : t("supportWidget.copy")}
+            title={copied ? t("supportWidget.copied") : t("supportWidget.copy")}
+          >
+            {copied ? <Check size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
+          </button>
+          <button
+            type="button"
+            className={`support-chat-msg-action${feedback === "up" ? " is-active" : ""}`}
+            onClick={() => onFeedback("up")}
+            aria-label={t("supportWidget.feedbackUp")}
+            aria-pressed={feedback === "up"}
+          >
+            <ThumbsUp size={14} aria-hidden />
+          </button>
+          <button
+            type="button"
+            className={`support-chat-msg-action${feedback === "down" ? " is-active" : ""}`}
+            onClick={() => onFeedback("down")}
+            aria-label={t("supportWidget.feedbackDown")}
+            aria-pressed={feedback === "down"}
+          >
+            <ThumbsDown size={14} aria-hidden />
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function SupportChatWidget({ currentView }) {
@@ -54,13 +122,45 @@ export function SupportChatWidget({ currentView }) {
   const [ticketDetailLoading, setTicketDetailLoading] = useState(false);
   const [ticketReply, setTicketReply] = useState("");
   const [ticketReplySending, setTicketReplySending] = useState(false);
+  const [helpTopicId, setHelpTopicId] = useState(null);
+  const [helpPanelKey, setHelpPanelKey] = useState(0);
+  const [copiedIndex, setCopiedIndex] = useState(null);
+  const [feedbackByIndex, setFeedbackByIndex] = useState({});
   const listRef = useRef(null);
   const ticketThreadRef = useRef(null);
+
+  const userInitial = (
+    veterinarian?.nombre?.trim()?.charAt(0) ||
+    t("supportWidget.you").charAt(0) ||
+    "V"
+  ).toUpperCase();
 
   const statusLabel = useCallback(
     (status) => t(`supportWidget.status.${status}`, { defaultValue: status }),
     [t],
   );
+
+  const handleCopy = useCallback(
+    async (content, index) => {
+      try {
+        await navigator.clipboard.writeText(content);
+        setCopiedIndex(index);
+        window.setTimeout(() => {
+          setCopiedIndex((current) => (current === index ? null : current));
+        }, 1600);
+      } catch {
+        /* ignore */
+      }
+    },
+    [],
+  );
+
+  const handleFeedback = useCallback((index, value) => {
+    setFeedbackByIndex((prev) => ({
+      ...prev,
+      [index]: prev[index] === value ? null : value,
+    }));
+  }, []);
 
   useEffect(() => {
     setMessages([{ role: "assistant", content: t("supportWidget.greeting") }]);
@@ -90,10 +190,18 @@ export function SupportChatWidget({ currentView }) {
 
   useEffect(() => {
     const handler = (event) => {
+      const detail = event.detail || {};
       setIsOpen(true);
-      setActiveTab("tickets");
-      const ticketId = event.detail?.ticketId;
-      if (ticketId) setSelectedTicketId(ticketId);
+      const tab = detail.tab || (detail.ticketId ? "tickets" : "chat");
+      setActiveTab(tab);
+      if (tab === "help") {
+        setHelpTopicId(detail.topicId || null);
+        setHelpPanelKey((k) => k + 1);
+      }
+      if (detail.ticketId) {
+        setSelectedTicketId(detail.ticketId);
+        setActiveTab("tickets");
+      }
     };
     window.addEventListener(SUPPORT_OPEN_EVENT, handler);
     return () => window.removeEventListener(SUPPORT_OPEN_EVENT, handler);
@@ -272,6 +380,17 @@ export function SupportChatWidget({ currentView }) {
           <div className="support-chat-tabs">
             <button
               type="button"
+              className={activeTab === "help" ? "active" : ""}
+              onClick={() => {
+                setActiveTab("help");
+                setHelpTopicId(null);
+                setHelpPanelKey((k) => k + 1);
+              }}
+            >
+              {t("supportWidget.tabHelp")}
+            </button>
+            <button
+              type="button"
               className={activeTab === "chat" ? "active" : ""}
               onClick={() => setActiveTab("chat")}
             >
@@ -293,18 +412,41 @@ export function SupportChatWidget({ currentView }) {
             </button>
           </div>
 
-          {activeTab === "chat" ? (
+          {activeTab === "help" ? (
+            <SupportHelpPanel key={helpPanelKey} initialTopicId={helpTopicId} />
+          ) : activeTab === "chat" ? (
             <>
               <div className="support-chat-messages" ref={listRef}>
                 {messages.map((msg, idx) => (
-                  <div
+                  <SupportChatMessage
                     key={`${msg.role}-${idx}`}
-                    className={`support-chat-bubble ${msg.role === "user" ? "user" : "assistant"}`}
-                  >
-                    {msg.content}
-                  </div>
+                    role={msg.role}
+                    content={msg.content}
+                    userInitial={userInitial}
+                    feedback={feedbackByIndex[idx]}
+                    onFeedback={(value) => handleFeedback(idx, value)}
+                    onCopy={(content) => handleCopy(content, idx)}
+                    copied={copiedIndex === idx}
+                    t={t}
+                  />
                 ))}
-                {isSending && <div className="support-chat-typing">{t("supportWidget.typing")}</div>}
+                {isSending && (
+                  <div className="support-chat-msg support-chat-msg--assistant">
+                    <div className="support-chat-msg-avatar" aria-hidden>
+                      <img
+                        src={PLUMITAS_AVATAR_SRC}
+                        alt=""
+                        className="support-chat-msg-plumitas"
+                        width={36}
+                        height={36}
+                        decoding="async"
+                      />
+                    </div>
+                    <div className="support-chat-msg-bubble support-chat-msg-bubble--typing">
+                      {t("supportWidget.typing")}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="support-chat-input-row">
                 <input

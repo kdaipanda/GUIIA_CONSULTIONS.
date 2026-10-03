@@ -21,13 +21,16 @@
   "hero": {
     "brand": "GUIAA",
     "kicker": "GUIAA Diagnosis · Unique in Latin America",
+    "announcement": "3 free CDS consultations when you create your vet account",
+    "announcementCta": "See plans",
     "title": "Document the consult without losing clinical thread.",
     "titleBefore": "Document the consult",
     "titleAccent": "",
-    "titleAfter": " without losing clinical thread.",
+    "titleAfter": "without losing clinical thread.",
     "lead": "History-taking, exam, and CDS L4·L5 reasoning in one flow — for licensed veterinarians who need real clinic traceability, not scattered notes.",
     "leadExtended": "We are the only platform in Latin America focused on structured, verifiable clinical diagnosis for licensed veterinarians — with records, inventory, and sales in the same flow.",
     "ctaRegister": "Try with 3 free CDS consultations",
+    "ctaOwner": "Consult for your pet",
     "ctaHint": "License verification · no card required for the first 3",
     "explore": "Explore the interface without signing up",
     "playVideo": "See how it works",
@@ -143,14 +146,21 @@
     "lead": "Choose CDS consultation volume for your schedule. Every plan includes license verification and the full clinical flow.",
     "trialNote": "3 free CDS consultations on signup — no card — so you can measure the flow in your own clinic.",
     "roiNote": "Typical ROI: structured history-taking in minutes, without rebuilding the case between visits or jumping between Word, WhatsApp, and loose notes.",
-    "ctaRegister": "Start with this plan",
+    "ctaRegister": "Get started",
     "ctaPlan": "Choose plan",
     "billingNote": "monthly or annual billing",
     "annual": "Annual",
+    "annualFrom": "from {{price}}/mo annually",
     "askPrice": "Contact us",
     "pricePerMonth": "/mo",
     "badgeFeatured": "Most popular",
     "badgeConsultations": "{{count}} CDS/mo",
+    "lockedSection": "Higher-tier features",
+    "audienceBadge": {
+      "basic": "Small animals",
+      "professional": "Multi-species",
+      "premium": "High volume"
+    },
     "creditAddonDesc": "Additional CDS consultations without changing your plan. Credits are added to your current balance.",
     "trustNote": "Register with your professional license and get 3 free CDS consultations. Certified veterinarians only.",
     "comparePlans": "Compare plans in detail →",
@@ -161,45 +171,82 @@
     }
   },
   "faq": {
-    "eyebrow": "Before you register",
-    "title": "Before you register your license",
-    "lead": "Vet access, species, security, and the 3 trial CDS consultations.",
-    "moreTitle": "Can't find your answer?",
-    "moreLead": "Write to us and we'll help before you register.",
+    "eyebrow": "Frequently asked questions",
+    "title": "Clinical and platform support",
+    "lead": "What CDS is, how a consult flows, species coverage, security, and veterinary access — written so a practicing vet can understand the tool before using it.",
+    "moreTitle": "Need more detail?",
+    "moreLead": "The help center lives in Doctor Plumitas chat: guides by module (consult, CDS, records, schedule, inventory, and more).",
+    "helpCenterCta": "Open help center",
     "emailCta": "Email support",
     "empty": "Frequently asked questions are unavailable right now.",
     "items": [
       {
-        "q": "Who can register on GUIAA?",
-        "a": "Only licensed veterinarians. During registration we verify your professional license to keep a clinical-only environment."
-      },
-      {
-        "q": "Do I get free CDS consultations when I register?",
-        "a": "Yes. When you create your veterinarian account you receive 3 free CDS consultations to try the full clinical flow. After that you can choose the plan that fits your practice."
-      },
-      {
-        "q": "What makes GUIAA Diagnosis different?",
-        "a": "GUIAA Diagnosis structures history-taking, physical exam, and CDS L4·L5 reasoning for precise, real diagnosis in consult. It is the only platform in Latin America focused on this level of veterinary diagnostic support — always under your professional judgment."
+        "q": "What is CDS in GUIAA?",
+        "a": [
+          "CDS means Clinical Decision Support. In GUIAA it is not an “automatic diagnosis” and it does not replace your judgment: it is a structured workflow that helps you organize case information — chief complaint, history, physical exam, findings, and documentation — so you can reason more clearly and leave traceable records.",
+          "The goal is fewer omissions, species-adapted capture, and a clinical record that is useful for the next visit, referral, or follow-up. You decide the diagnosis, the plan, and what gets documented."
+        ]
       },
       {
         "q": "What are CDS L4 and L5?",
-        "a": "They are clinical decision support levels: L4 helps structure diagnostic hypotheses; L5 extends reasoning toward evidence-based treatment plans. Always under your professional judgment."
+        "a": [
+          "They are depth levels of clinical support within the same consult. L4 focuses on structuring diagnostic reasoning: organizing signs, history, and findings so differential hypotheses are clear and reviewable.",
+          "L5 moves toward the plan: therapeutic and follow-up guidance documented from what you captured in the consult, always as support — not as a closed order. In both levels the final decision is yours as the responsible veterinarian."
+        ]
+      },
+      {
+        "q": "What does a CDS consult look like?",
+        "a": [
+          "You select or register the patient and species. You complete chief complaint, signs, and physical exam with adapted forms. Then you move through CDS support (L4/L5) to organize hypotheses and plan, and save the consult.",
+          "It lands in History and on the patient chart. You can reopen cases, export PDF when needed, and connect clinical activity with the rest of the practice (schedule, records, lab)."
+        ]
+      },
+      {
+        "q": "Who can register on GUIAA?",
+        "a": [
+          "Only licensed veterinarians. During registration we verify your professional license or registration to keep a clinical-only environment among colleagues.",
+          "Pet owners do not use the clinical panel: they have a separate portal for appointment requests or guidance depending on what your clinic offers."
+        ]
+      },
+      {
+        "q": "Do I get trial CDS consultations when I register?",
+        "a": [
+          "Yes. When you create your veterinarian account you receive 3 trial CDS consultations to walk through the full clinical flow with a real or practice case.",
+          "Then you choose a plan (Basic, Professional, or Premium) based on consult volume and modules: records, schedule, inventory, sales, reports, lab, and Expert Mode."
+        ]
+      },
+      {
+        "q": "What makes GUIAA Diagnosis different?",
+        "a": [
+          "It unites history-taking, physical exam, and CDS L4·L5 support in one clinical flow, with species-specific forms and traceable records — not scattered notes or human-medicine templates.",
+          "It is built for veterinary practice in Latin America: daily work, follow-up, and professional documentation, always under your clinical judgment."
+        ]
       },
       {
         "q": "Which species does the platform cover?",
-        "a": "Dogs, cats, rabbits, birds, reptiles, ferrets, hedgehogs, hamsters, guinea pigs, iguanas, and poultry. Each species unlocks an adapted veterinary form in the consultation."
+        "a": [
+          "Dogs, cats, rabbits, birds, reptiles, ferrets, hedgehogs, hamsters, guinea pigs, iguanas, and poultry, among other clinical profiles available.",
+          "Each species unlocks adapted fields and sections (signs, exam, history) so you are not forced into a single “dog” form for non-conventional species."
+        ]
       },
       {
         "q": "Are my clinical data secure?",
-        "a": "We apply security and privacy best practices. Records and consultations are managed with access controls per professional account."
+        "a": [
+          "Records and consultations are tied to your professional account with access controls. We apply security and privacy practices oriented to clinical use.",
+          "Your clinic can invite the team with roles (for example reception or veterinarian) without sharing your password. Legal detail is in the platform notices and terms."
+        ]
       },
       {
-        "q": "Can I use GUIAA in-clinic and on house calls?",
-        "a": "Yes. It is a web platform: it works in a fixed clinic or on external visits from a tablet or laptop with a modern browser."
+        "q": "Can I use it in-clinic and on house calls?",
+        "a": "Yes. It is a web platform: it works in a fixed clinic or on external visits from a laptop or tablet with a modern browser and internet. It does not replace hands-on clinical work; it organizes and documents what you capture in the case."
       },
       {
         "q": "Do I need to install anything?",
-        "a": "No. You access it from the browser. You only need an internet connection and a verified veterinarian account."
+        "a": "No. You sign in from the browser with your verified veterinarian account. We recommend an up-to-date browser and a stable connection, especially when exporting PDF or working with lab interpretations."
+      },
+      {
+        "q": "Where is the full help center?",
+        "a": "In Doctor Plumitas chat (Help tab) you will find guides by module: getting started, what CDS is, diagnostic consult, owners and pets, schedule, inventory, sales, reports, history, lab, membership, and shortcuts. You can also replay the welcome tour from Settings."
       }
     ]
   },
@@ -209,6 +256,7 @@
     "lead": "We verify your license, give you 3 free CDS consultations, and you document the case with clinical traceability from day one.",
     "faqLink": "See frequently asked questions",
     "createAccount": "Create account with 3 free CDS consultations",
+    "ownerConsult": "I'm a pet owner",
     "haveAccount": "I already have an account"
   },
   "footer": {
@@ -232,7 +280,9 @@
     "terms": "Terms",
     "privacy": "Privacy",
     "rights": "All rights reserved.",
-    "tagline": "Veterinary clinical software"
+    "tagline": "Veterinary clinical software",
+    "taglinePrimary": "A vast universe of animal intelligence.",
+    "taglineSecondary": "Advanced CDS clinical decision support, L4 and L5 grade."
   },
   "features": {
     "eyebrow": "Practice modules",
@@ -323,6 +373,7 @@
     "title": "Outcomes in the clinic",
     "lead": "Realistic practice profiles: what changes when CDS and the clinical record live in the same flow.",
     "listAria": "Colleague practice outcomes",
+    "ratingAria": "{{rating}} out of 5 — {{name}}",
     "caseOf": "Case of {{name}}",
     "resultLabel": "Outcome",
     "disclaimerMobile": "Swipe for more · ",
@@ -456,8 +507,12 @@
   },
   "brandBand": {
     "aria": "GUIAA brand",
-    "title": "Plumitas in the clinic",
-    "lead": "GUIAA's mascot stands with the veterinarian in clinic — approachable, without losing clinical rigor."
+    "title": "A vast universe of animal intelligence.",
+    "lead": "Advanced CDS clinical decision support, L4 and L5 grade."
+  },
+  "brand": {
+    "taglinePrimary": "A vast universe of animal intelligence.",
+    "taglineSecondary": "Advanced CDS clinical decision support, L4 and L5 grade."
   },
   "guiaConsultas": {
     "badge": "ADSGuiaa",

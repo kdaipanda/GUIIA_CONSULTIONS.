@@ -55,6 +55,7 @@ import { notifyError, notifySuccess } from "../../lib/appToast";
 import { loadI18nNamespace } from "../../lib/loadI18nNamespace";
 import "./clinicPageShared.css";
 import "./patientClinicalChartPage.css";
+import { FormCombobox } from "../../components/ui/combobox";
 
 function formatChartDate(value, emptyLabel = "—") {
   if (!value) return emptyLabel;
@@ -659,7 +660,7 @@ export default function PatientClinicalChartPage({
           <div className="patient-chart-species-form-actions">
             <label className="patient-chart-species-select">
               <span className="sr-only">{t("patientChart.speciesLabel")}</span>
-              <select
+              <FormCombobox
                 value={speciesCategory}
                 onChange={(e) => {
                   speciesDirtyRef.current = true;
@@ -672,7 +673,7 @@ export default function PatientClinicalChartPage({
                     {tSpecies(`categories.${key}`, { defaultValue: key })}
                   </option>
                 ))}
-              </select>
+              </FormCombobox>
             </label>
             <Button
               type="button"

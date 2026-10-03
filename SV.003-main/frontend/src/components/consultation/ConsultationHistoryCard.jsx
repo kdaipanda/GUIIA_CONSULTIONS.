@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { CalendarDays, FileDown, FlaskConical, User } from "lucide-react";
 import { Button } from "../ui/button";
+import { StarRating } from "../ui/star-rating";
 import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
 import {
   formatConsultationDateShort,
@@ -57,15 +58,14 @@ export function ConsultationHistoryCard({
               {record.edad && <span className="history-meta-item">{record.edad}</span>}
             </div>
             {ratingValue > 0 && (
-              <div
-                className="history-rating"
-                aria-label={t("history.card.ratingAria", { count: ratingValue })}
-              >
-                {Array.from({ length: ratingValue }).map((_, idx) => (
-                  <span key={idx} className="paw-static filled">
-                    🐾
-                  </span>
-                ))}
+              <div className="history-rating">
+                <StarRating
+                  value={ratingValue}
+                  max={5}
+                  size="sm"
+                  readOnly
+                  aria-label={t("history.card.ratingAria", { count: ratingValue })}
+                />
               </div>
             )}
           </div>

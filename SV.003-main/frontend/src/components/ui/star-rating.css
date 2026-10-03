@@ -1,0 +1,181 @@
+/* StarRating — tokens GUIAA (claro / oscuro) */
+
+.star-rating {
+  --star-rating-fill: #f5c518;
+  --star-rating-empty: rgba(12, 45, 77, 0.35);
+  --star-rating-label: #64748b;
+  --star-rating-gap: 0.2rem;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--star-rating-empty);
+  line-height: 1;
+}
+
+.star-rating--stack {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.star-rating--inline {
+  flex-direction: row;
+  align-items: center;
+}
+
+.star-rating__stars {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--star-rating-gap);
+}
+
+.star-rating__star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.star-rating__star--btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0.15rem;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 0.35rem;
+  color: var(--star-rating-empty);
+  transition:
+    transform 0.12s ease,
+    color 0.12s ease;
+}
+
+.star-rating__star--btn:hover,
+.star-rating__star--btn:focus-visible,
+.star-rating__star--btn.is-active {
+  color: var(--star-rating-active, var(--star-rating-fill));
+}
+
+.star-rating__star--btn:focus-visible {
+  outline: 2px solid #3d9b8f;
+  outline-offset: 2px;
+}
+
+.star-rating__star--btn:active {
+  transform: scale(0.94);
+}
+
+.star-rating--disabled .star-rating__star--btn {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.star-rating__glyph {
+  display: block;
+}
+
+.star-rating__label {
+  font-family: var(--landing-font-body, "Source Sans 3", system-ui, sans-serif);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--star-rating-label);
+  white-space: nowrap;
+}
+
+.star-rating--sm {
+  --star-rating-gap: 0.12rem;
+}
+
+.star-rating--sm .star-rating__label {
+  font-size: 0.6875rem;
+}
+
+.star-rating--md {
+  --star-rating-gap: 0.2rem;
+}
+
+.star-rating--lg {
+  --star-rating-gap: 0.28rem;
+}
+
+.star-rating--lg .star-rating__label {
+  font-size: 0.8125rem;
+}
+
+/* Tema oscuro */
+[data-theme="dark"] .star-rating,
+html.dark .star-rating {
+  --star-rating-fill: #ffffff;
+  --star-rating-empty: rgba(255, 255, 255, 0.45);
+  --star-rating-label: #9ec5d8;
+}
+
+/* Contextos clínicos / landing que fuerzan color vía style/prop siguen ganando */
+
+.trial-survey-stars-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.trial-survey-stars-wrap .star-rating {
+  --star-rating-fill: #f5c518;
+  --star-rating-empty: rgba(12, 45, 77, 0.28);
+}
+
+[data-theme="dark"] .trial-survey-stars-wrap .star-rating,
+html.dark .trial-survey-stars-wrap .star-rating {
+  --star-rating-fill: #f5c518;
+  --star-rating-empty: rgba(255, 255, 255, 0.35);
+}
+
+.consultation-rating .star-rating {
+  --star-rating-fill: #3d9b8f;
+  --star-rating-empty: rgba(12, 45, 77, 0.28);
+}
+
+[data-theme="dark"] .consultation-rating .star-rating,
+html.dark .consultation-rating .star-rating {
+  --star-rating-fill: #6ee7d9;
+  --star-rating-empty: rgba(255, 255, 255, 0.35);
+}
+
+.history-rating .star-rating,
+.clinical-rating .star-rating {
+  --star-rating-fill: #f5c518;
+  --star-rating-empty: rgba(12, 45, 77, 0.25);
+}
+
+[data-theme="dark"] .history-rating .star-rating,
+[data-theme="dark"] .clinical-rating .star-rating,
+html.dark .history-rating .star-rating,
+html.dark .clinical-rating .star-rating {
+  --star-rating-fill: #f5c518;
+  --star-rating-empty: rgba(255, 255, 255, 0.35);
+}
+
+.landing-colleague-rating {
+  margin: 0 0 0.65rem;
+}
+
+.landing-colleague-rating .star-rating {
+  --star-rating-fill: #f5c518;
+  --star-rating-empty: rgba(12, 45, 77, 0.22);
+}
+
+[data-theme="dark"] .landing-colleague-rating .star-rating,
+html.dark .landing-colleague-rating .star-rating {
+  --star-rating-fill: #f5c518;
+  --star-rating-empty: rgba(255, 255, 255, 0.35);
+}
+
+.clinic-admin-trial-survey-stars .star-rating,
+.clinic-admin-history-item-meta .star-rating {
+  --star-rating-fill: #f5c518;
+  vertical-align: middle;
+}

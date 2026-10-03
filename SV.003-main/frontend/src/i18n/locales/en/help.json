@@ -2,8 +2,8 @@
   "navLabel": "Help",
   "title": "Help center",
   "eyebrow": "Learn GUIAA",
-  "lead": "Short, plain guides so you can use every platform feature without slowing down.",
-  "searchPlaceholder": "Search a feature…",
+  "lead": "Clinical and operational guides to understand CDS, the structured consult, and every practice module — without confusing shortcuts.",
+  "searchPlaceholder": "Search CDS, consult, schedule, inventory…",
   "openTour": "Replay welcome tour",
   "openGuide": "Open full guide",
   "tipAria": "How to use this module",
@@ -11,58 +11,94 @@
   "backToList": "All guides",
   "goToModule": "Go to module",
   "contactSupport": "Open support chat",
-  "stepsLabel": "Easy steps",
-  "emptySearch": "No guides match that term. Try “schedule”, “consult”, or “inventory”.",
+  "stepsLabel": "Practical steps",
+  "bodyLabel": "In detail",
+  "emptySearch": "No guides match that term. Try “CDS”, “consult”, “schedule”, or “inventory”.",
   "clearSearch": "Clear search",
   "supportHint": "Still stuck? Use the support chat (bottom corner) or email soporte@guiaa.vet.",
   "restartTourHint": "You can replay the tour anytime from here or from Settings.",
   "settingsCardTitle": "Help & learning",
-  "settingsCardLead": "Module guides and the welcome tour — replay anytime.",
-  "settingsOpenHelp": "Open help center",
+  "settingsCardLead": "Guides in Doctor Plumitas chat and the welcome tour — replay anytime.",
+  "settingsOpenHelp": "Open help chat",
+  "openingChat": "Opening the help center in chat…",
   "topics": {
     "getting-started": {
       "title": "Getting started",
-      "summary": "The essentials to start working in GUIAA the same day.",
-      "tip": "Start on the Dashboard, register an owner with a pet, then open your first consult in GUIAA Diagnosis.",
+      "summary": "From sign-in to your first CDS consult the same day.",
+      "tip": "Recommended order: Dashboard → owner + pet → GUIAA Diagnosis. CDS organizes the case; you define the diagnosis and plan.",
+      "body": [
+        "GUIAA is a clinical platform for licensed veterinarians. The core is a structured consult with CDS (Clinical Decision Support): it helps you capture and organize the case by species — it does not replace your professional judgment.",
+        "Beyond diagnosis you can run schedule, records, inventory, sales, and reports depending on your plan. Start with a real or practice patient and complete one consult end to end."
+      ],
       "steps": [
         "Sign in with your verified veterinary account.",
-        "Check the Dashboard: today’s appointments and quick actions.",
+        "Check the Dashboard: today’s appointments, alerts, and quick actions.",
         "Create an owner and pet under Owners & pets.",
-        "Open GUIAA Diagnosis and complete the consult step by step.",
+        "Open GUIAA Diagnosis, pick the correct species, and complete the consult.",
+        "Save the case and confirm it in History or on the patient chart.",
         "Use Ctrl+K (⌘K on Mac) if you can’t find a module."
+      ]
+    },
+    "cds": {
+      "title": "What CDS is (L4 and L5)",
+      "summary": "Clinical decision support: what it means, what it does, and what it does not do.",
+      "tip": "CDS structures case reasoning. L4 organizes hypotheses; L5 supports the plan. You validate, adjust, and take clinical responsibility for the outcome.",
+      "body": [
+        "CDS means Clinical Decision Support. In GUIAA it is the workflow that accompanies you during the consult so information stays complete, ordered, and traceable — chief complaint, history, exam, findings, hypotheses, and plan.",
+        "It is not an automatic diagnosis and not a closed order. It does not replace examination, complementary tests, or your judgment. If something does not match the patient in front of you, your criterion prevails.",
+        "L4 focuses on diagnostic reasoning: helping organize signs and history into reviewable differentials. L5 moves toward therapeutic and follow-up guidance documented from what you captured.",
+        "Use CDS when you want a complete, reproducible consult. In emergencies on Premium, Expert Mode lets you describe the case first and then land in the clinical structure."
+      ],
+      "steps": [
+        "Open a new consult and select species and patient.",
+        "Complete chief complaint, signs, and physical exam with clinical honesty (don’t leave critical gaps).",
+        "Move to the CDS block: review L4 hypotheses and adjust them to your impression.",
+        "If applicable, document plan and follow-up in L5 according to your decision.",
+        "Save and confirm the case appears in History and on the chart."
       ]
     },
     "dashboard": {
       "title": "Dashboard",
-      "summary": "Your day at a glance: appointments, clinical activity, and shortcuts.",
-      "tip": "Jump to consults, schedule, or membership from here. Watch stock and appointment alerts.",
+      "summary": "Day overview: appointments, clinical activity, and shortcuts into the CDS flow.",
+      "tip": "Jump to consults, schedule, or membership from here. Check stock and appointment alerts before you see patients.",
+      "body": [
+        "The Dashboard concentrates daily operations and recent clinical activity. Use it as an entry board, not as the chart: case detail lives in Diagnosis, History, and the patient record."
+      ],
       "steps": [
-        "Review today’s appointments and your plan status.",
-        "Use “New consult” or the quick owner/pet registration.",
-        "Scroll to the CDS panel to continue a recent consult.",
+        "Review today’s appointments and your plan / consult quota.",
+        "Use “New consult” or quick owner/pet registration.",
+        "Review recent activity to reopen a case or follow up.",
         "Open inventory or schedule alerts from the side menu when shown."
       ]
     },
     "diagnosis": {
       "title": "GUIAA Diagnosis",
-      "summary": "Clinical consult with CDS support (it does not replace your judgment).",
-      "tip": "Pick species → capture history → examine → document diagnosis and plan. You can export a PDF at the end.",
+      "summary": "Structured clinical consult with CDS support — under your judgment.",
+      "tip": "Species → history → exam → CDS (hypotheses/plan) → save. You can export a PDF at the end.",
+      "body": [
+        "This module is the clinical core of GUIAA. Forms change by species so you don’t miss relevant findings in dogs, cats, or non-conventional species.",
+        "CDS support organizes reasoning; you decide diagnosis, differentials, treatment, and what to tell the owner. The consult stays linked to the patient for the next visit."
+      ],
       "steps": [
-        "Select or create the pet and choose the correct species.",
+        "Select or create the pet and confirm the correct species.",
         "Complete chief complaint, signs, and physical exam.",
-        "Use the CDS flow to structure hypotheses and the plan (L4/L5).",
+        "Use the CDS flow to structure hypotheses (L4) and plan (L5) based on your reading of the case.",
         "Save the consult; it appears in History and on the patient chart.",
-        "On Premium, Expert Mode lets you describe the case first (emergencies)."
+        "Export PDF if you need to deliver or archive the summary.",
+        "On Premium, Expert Mode lets you describe the case first (useful in emergencies)."
       ]
     },
     "clients": {
       "title": "Owners & pets",
       "summary": "Owner and patient records in one place.",
-      "tip": "Register the owner first, then add pets. Open the clinical chart for antecedents, problems, and timeline.",
+      "tip": "Register the owner first, then add pets. Open the chart for history, problems, and timeline.",
+      "body": [
+        "This is where tutor and patient identity live. A solid record prevents orphan consults and lets you resume history, allergies, and open problems on the next visit."
+      ],
       "steps": [
         "Tap “New record” to create owner + pet together.",
         "Search by name, phone, or pet in the top bar.",
-        "Open the pet sheet and tap “Open chart” for the full clinical chart.",
+        "Open the file and tap “Open chart” for the full clinical chart.",
         "Edit allergies, vaccines, surgeries, and problems; the timeline shows consults and lab.",
         "Start a consult or lab interpretation from the patient."
       ]
@@ -70,100 +106,127 @@
     "agenda": {
       "title": "Schedule",
       "summary": "Weekly appointments, statuses, and online requests.",
-      "tip": "Create appointments, update status, and share the portal link so owners can request visits.",
+      "tip": "Create appointments, update status, and share the portal link so owners can request slots.",
+      "body": [
+        "The schedule connects clinic operations with clinical care. Keep statuses current so the team knows who is arriving and who was already seen."
+      ],
       "steps": [
-        "Move through the week with the arrows or jump to “Today”.",
-        "Tap “New appointment” and pick patient, time, and notes.",
+        "Move through the week with arrows or jump to “Today”.",
+        "Tap “New appointment” and choose patient, time, and notes.",
         "Update status: scheduled, confirmed, completed, and so on.",
-        "Copy the portal link for owner booking requests.",
+        "Copy the portal link for owner requests.",
         "Review pending requests (menu badge) and accept or decline them."
       ]
     },
     "inventory": {
       "title": "Inventory",
-      "summary": "Products, stock levels, and low-stock alerts (Professional/Premium).",
-      "tip": "Add products with units and a minimum stock level. Sales can deduct inventory.",
+      "summary": "Products, stock, and low-stock alerts (Professional/Premium).",
+      "tip": "Add products with unit and minimum stock. Sales can deduct inventory.",
+      "body": [
+        "Keep medicines and supplies with alert thresholds so you don’t discover shortages mid-consult. Link stock to sales when you charge clinic products."
+      ],
       "steps": [
-        "Add a product (medication, supply, or service).",
+        "Add a product (medicine, supply, or service).",
         "Set quantity, unit, and low-stock threshold.",
-        "Check the summary: product count and alerts.",
-        "Adjust stock with movements when you receive supplies."
+        "Review the summary: product totals and alerts.",
+        "Correct stock with movements when merchandise arrives."
       ]
     },
     "billing": {
       "title": "Billing / Sales",
-      "summary": "Clinical receipts linked to owners, patients, and inventory (no tax invoice).",
-      "tip": "Create a sale, add product or service lines, then save the receipt.",
+      "summary": "Clinical receipts linked to owner, patient, and inventory (not tax invoicing).",
+      "tip": "Create a sale, add product or service lines, and save the receipt.",
+      "body": [
+        "Use this to document clinic charges tied to the case. It does not issue formal tax invoices; it is GUIAA’s operational receipt."
+      ],
       "steps": [
-        "Tap “New sale” and select owner/patient when needed.",
-        "Add inventory products or free-text services.",
+        "Tap “New sale” and select owner/patient if applicable.",
+        "Add inventory products or free-form concepts.",
         "Set payment method and receipt notes.",
-        "Save: the receipt appears in the list and may update stock."
+        "Save: the receipt appears in the list and may affect stock."
       ]
     },
     "reports": {
       "title": "Reports",
       "summary": "Practice KPIs by period (Professional/Premium).",
-      "tip": "Pick 7, 30, or 90 days to review consults, revenue, and top products.",
+      "tip": "Choose 7, 30, or 90 days to see consults, revenue, and top products.",
+      "body": [
+        "Use reports to see CDS consult volume, sales activity, and inventory. It is a management board, not a formal accounting close."
+      ],
       "steps": [
-        "Select the period at the top of the page.",
-        "Review KPIs for consults, sales, and inventory.",
-        "Spot top-selling products and trends.",
+        "Select the period at the top.",
+        "Review consult, sales, and inventory KPIs.",
+        "Identify top products and trends.",
         "Export CSV if you need the numbers in Excel."
       ]
     },
     "history": {
-      "title": "Consultation history",
-      "summary": "All previous CDS consults, with filters and a link to the pet chart.",
-      "tip": "Filter by status, search by patient, reopen a consult, or jump to the pet’s clinical chart.",
+      "title": "Consult history",
+      "summary": "Past CDS consults, with filters and a link to the chart.",
+      "tip": "Filter by status, search by patient, reopen a consult, or jump to the pet chart.",
+      "body": [
+        "History is your clinical work archive. Use it for follow-up, case continuity, and internal documentation review."
+      ],
       "steps": [
         "Use status filters (all, draft, completed…).",
         "Search by pet or owner name.",
-        "Open a consult to review the species form and CDS detail.",
-        "If the consult has a linked patient, use “Chart” for the clinical chart.",
+        "Open a consult to see the species form and CDS detail.",
+        "If the consult has a linked patient, use “Chart” for the clinical record.",
         "Start a new consult from the top button when needed."
       ]
     },
     "lab": {
-      "title": "Images / lab",
+      "title": "Imaging / laboratory",
       "summary": "Interpret studies and save clinical notes linked to the patient.",
-      "tip": "Choose patient and study type, then paste or describe findings. You can use PDF text as context.",
+      "tip": "Pick patient, study type, and paste or describe findings. You can add PDF context.",
+      "body": [
+        "Complement the CDS consult with lab or imaging interpretations. The note stays on the patient so reviews keep clinical thread."
+      ],
       "steps": [
         "Select or search the patient.",
-        "Choose the study type (lab, imaging, etc.).",
-        "Paste result text or write your interpretation.",
-        "Save: it appears in this module’s interpretation history."
+        "Set the study type (lab, imaging, etc.).",
+        "Paste result text or write your clinical interpretation.",
+        "Save: it appears in the module interpretation history."
       ]
     },
     "tools": {
       "title": "Clinical tools",
-      "summary": "Dose calculator and external references for consultation support.",
+      "summary": "Dose calculator and external references for consult support.",
       "tip": "Enter weight and mg/kg dose; add concentration if you need volume or units to administer.",
+      "body": [
+        "These are calculation and reference aids. Always confirm with the product insert, real weight, and patient context before prescribing."
+      ],
       "steps": [
-        "Open Tools from the clinic menu.",
+        "Open Tools from the clinical menu.",
         "Enter weight (kg) and dose (mg/kg).",
-        "Choose presentation and concentration if needed.",
-        "Review the result and confirm with the label before prescribing."
+        "Choose presentation and concentration if applicable.",
+        "Review the result and confirm with the insert before administration."
       ]
     },
     "settings": {
       "title": "Settings",
-      "summary": "Clinic details, team, booking portal, and password.",
-      "tip": "Only owners/admins edit the clinic. Invite your team by email with the right role.",
+      "summary": "Clinic data, team, appointment portal, and password.",
+      "tip": "Only owner/admin edit the clinic. Invite the team by email with the right role.",
+      "body": [
+        "Configure your clinic identity and who can operate each area. The appointment portal lets owners request times without entering the clinical panel."
+      ],
       "steps": [
-        "Update the clinic name and timezone.",
-        "Copy the owner booking portal link.",
+        "Update clinic name and time zone.",
+        "Copy the owner appointment portal link.",
         "Invite receptionists, veterinarians, or admins by email.",
         "Manage pending members and change your account password.",
-        "You can also replay the welcome tour from here."
+        "From here you can also reopen the welcome tour."
       ]
     },
     "membership": {
       "title": "Membership",
-      "summary": "Plans, consult quota, and Premium features.",
+      "summary": "Plans, consult quota, and practice modules.",
       "tip": "Compare Basic, Professional, and Premium. Trial limits consults; activate a plan to continue.",
+      "body": [
+        "Your plan defines how many CDS consults you can document and which operational modules you get (inventory, sales, reports, lab, Expert Mode, and more)."
+      ],
       "steps": [
-        "Check your current plan and remaining consults.",
+        "Review your current plan and remaining consults.",
         "Compare which modules each plan includes.",
         "Choose monthly or yearly and complete secure checkout.",
         "After payment, locked features unlock automatically."
@@ -171,24 +234,30 @@
     },
     "profile": {
       "title": "Profile",
-      "summary": "Your professional details and verification status.",
-      "tip": "Confirm name, license, and contact info are correct; verification enables clinical use.",
+      "summary": "Your professional data and verification status.",
+      "tip": "Confirm name, license, and contact are correct; verification enables clinical use.",
+      "body": [
+        "Your professional profile supports veterinarian-only access. Keep license and contact details current."
+      ],
       "steps": [
-        "Review your veterinary details and specialty.",
-        "Check your professional license verification status.",
-        "Update phone or contact info when they change.",
+        "Review your veterinary data and specialty.",
+        "Check your professional license status.",
+        "Update phone or details if they change.",
         "Go to Membership if you need to change plans."
       ]
     },
     "shortcuts": {
       "title": "Shortcuts & support",
       "summary": "Move faster and get help when you need it.",
-      "tip": "Ctrl+K opens the command palette. Support chat sits in the bottom-right corner.",
+      "tip": "Ctrl+K opens the command palette. Support chat is at the bottom right.",
+      "body": [
+        "If you get stuck in a module, return to this guide or write to support. Chat covers login, payments, and platform use."
+      ],
       "steps": [
-        "Press Ctrl+K (⌘K on Mac) and type a module name.",
-        "In Diagnosis, N can also open a new consult (depending on context).",
-        "Open support chat for login, payments, or how-to questions.",
-        "Return to this Help center or the tour whenever you want a refresher."
+        "Press Ctrl+K (⌘K on Mac) and type the module name.",
+        "In Diagnosis, N may also open a new consult (depending on context).",
+        "Open support chat for login, payments, or platform use.",
+        "Return to this Help center or the tour whenever you want a refresh."
       ]
     }
   }

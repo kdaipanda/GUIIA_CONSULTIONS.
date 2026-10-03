@@ -1,5 +1,4 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { CircleHelp } from "lucide-react";
 import {
@@ -8,22 +7,20 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { helpCenterPath } from "../../lib/helpCenter";
+import { dispatchOpenHelp } from "../../lib/supportReadState";
 import "../../pages/clinic/helpCenterPage.css";
 
 /**
- * Tip contextual (?) en cabeceras de módulo.
+ * Tip contextual (?) en cabeceras de módulo — abre la guía en el chat de ayuda.
  * @param {{ topicId: string, setView?: (view: string) => void }} props
  */
-export function ModuleHelpTip({ topicId, setView }) {
+export function ModuleHelpTip({ topicId }) {
   const { t } = useTranslation("help");
-  const navigate = useNavigate();
 
   if (!topicId) return null;
 
   const openGuide = () => {
-    setView?.("help");
-    navigate(helpCenterPath(topicId));
+    dispatchOpenHelp(topicId);
   };
 
   return (

@@ -1,0 +1,195 @@
+/* GUIAA alert banners — pill claro + icono de estado */
+
+.guiaa-alert-banner {
+  --alert-fg: #0c2d4d;
+  --alert-muted: #64748b;
+  --alert-bg: #f1f5f9;
+  --alert-border: rgba(12, 45, 77, 0.08);
+  --alert-icon-bg: #e2e8f0;
+  --alert-icon-fg: #94a3b8;
+
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.65rem 0.85rem 0.65rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--alert-border);
+  background: var(--alert-bg);
+  color: var(--alert-fg);
+  box-shadow: 0 8px 24px rgba(12, 45, 77, 0.06);
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+
+.guiaa-alert-banner__main {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.guiaa-alert-banner__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: var(--alert-icon-bg);
+  color: var(--alert-icon-fg);
+}
+
+.guiaa-alert-banner__icon-svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.guiaa-alert-banner__bang {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1;
+  color: inherit;
+}
+
+.guiaa-alert-banner__message {
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.011em;
+  line-height: 1.35;
+  color: var(--alert-fg);
+}
+
+.guiaa-alert-banner__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-shrink: 0;
+}
+
+.guiaa-alert-banner__action {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--alert-fg);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.guiaa-alert-banner__action:hover {
+  color: #265b93;
+}
+
+.guiaa-alert-banner__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--alert-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.guiaa-alert-banner__close:hover {
+  background: rgba(12, 45, 77, 0.06);
+  color: var(--alert-fg);
+}
+
+.guiaa-alert-banner__close:focus-visible,
+.guiaa-alert-banner__action:focus-visible {
+  outline: 2px solid rgba(38, 91, 147, 0.5);
+  outline-offset: 2px;
+}
+
+/* —— Variantes (icono coloreado; cáscara neutra como la referencia) —— */
+
+.guiaa-alert-banner--primary {
+  --alert-icon-bg: #e2e8f0;
+  --alert-icon-fg: #94a3b8;
+}
+
+.guiaa-alert-banner--success {
+  --alert-icon-bg: #3d9b8f;
+  --alert-icon-fg: #ffffff;
+}
+
+.guiaa-alert-banner--destructive {
+  --alert-icon-bg: #ef6b6b;
+  --alert-icon-fg: #ffffff;
+}
+
+.guiaa-alert-banner--info {
+  --alert-icon-bg: #265b93;
+  --alert-icon-fg: #ffffff;
+}
+
+.guiaa-alert-banner--info .guiaa-alert-banner__icon {
+  border-radius: 0;
+  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+}
+
+.guiaa-alert-banner--warning {
+  --alert-icon-bg: #e8a317;
+  --alert-icon-fg: #ffffff;
+}
+
+/* Toast host: el banner ya trae su forma */
+.guiaa-toaster [data-sonner-toast].guiaa-toast-banner {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: min(420px, calc(100vw - 1.5rem)) !important;
+}
+
+.guiaa-toaster [data-sonner-toast].guiaa-toast-banner [data-close-button],
+.guiaa-toaster [data-sonner-toast].guiaa-toast-banner [data-button] {
+  display: none !important;
+}
+
+[data-theme="dark"] .guiaa-alert-banner,
+html.dark .guiaa-alert-banner {
+  --alert-fg: #e8eef4;
+  --alert-muted: #94a3b8;
+  --alert-bg: #1a2332;
+  --alert-border: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .guiaa-alert-banner--primary {
+  --alert-icon-bg: #2a3548;
+  --alert-icon-fg: #94a3b8;
+}
+
+[data-theme="dark"] .guiaa-alert-banner__action:hover,
+html.dark .guiaa-alert-banner__action:hover {
+  color: #9ec5e8;
+}
+
+@media (max-width: 480px) {
+  .guiaa-alert-banner {
+    border-radius: 1.15rem;
+    align-items: flex-start;
+    padding: 0.75rem;
+  }
+
+  .guiaa-alert-banner__actions {
+    padding-top: 0.15rem;
+  }
+}

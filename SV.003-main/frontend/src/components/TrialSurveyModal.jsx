@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { StarRating } from "@/components/ui/star-rating";
 import { getBackendUrl } from "../lib/backendUrl";
 import { getAuthHeaders } from "../lib/authHeaders";
 import { submitTrialSurvey } from "../lib/trialSurvey";
@@ -26,7 +27,6 @@ export function TrialSurveyModal({
 }) {
   const { t } = useTranslation("clinic");
   const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
   const [phase, setPhase] = useState("survey");
   const [submitting, setSubmitting] = useState(false);
@@ -43,7 +43,6 @@ export function TrialSurveyModal({
     if (!open) return;
     setPhase("survey");
     setRating(0);
-    setHoverRating(0);
     setComment("");
     setError("");
     setLocalOffer(offer || null);
@@ -119,7 +118,6 @@ export function TrialSurveyModal({
 
   const activeOffer = localOffer || offer;
   const promoCode = activeOffer?.promo_code;
-  const displayRating = hoverRating || rating;
   const surveyMandatory = phase === "survey" && mandatory;
 
   return (
@@ -140,28 +138,24 @@ export function TrialSurveyModal({
               <DialogDescription>{t("trialSurvey.surveyDesc")}</DialogDescription>
             </DialogHeader>
 
-            <div className="trial-survey-stars" role="radiogroup" aria-label={t("trialSurvey.ratingAria")}>
-              {[1, 2, 3, 4, 5].map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={`trial-survey-star${displayRating >= value ? " is-active" : ""}`}
-                  onClick={() => setRating(value)}
-                  onMouseEnter={() => setHoverRating(value)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  aria-label={t("trialSurvey.starAria", {
+            <div className="trial-survey-stars-wrap">
+              <StarRating
+                value={rating}
+                max={5}
+                size="lg"
+                layout="stack"
+                color="#f5c518"
+                aria-label={t("trialSurvey.ratingAria")}
+                getStarAriaLabel={(value) =>
+                  t("trialSurvey.starAria", {
                     value,
                     label: starLabels[value - 1],
-                  })}
-                  aria-pressed={rating === value}
-                >
-                  ★
-                </button>
-              ))}
+                  })
+                }
+                onChange={setRating}
+                label={rating > 0 ? starLabels[rating - 1] : undefined}
+              />
             </div>
-            {displayRating > 0 ? (
-              <p className="trial-survey-star-label">{starLabels[displayRating - 1]}</p>
-            ) : null}
 
             <label className="trial-survey-label" htmlFor="trial-survey-comment">
               {t("trialSurvey.comments")}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import YesNoChips from '../ui/yes-no-chips';
 import { useSpeciesFormI18n } from '../../hooks/useSpeciesFormI18n';
 import { normalizePetSex } from '../../lib/petSex';
+import { FormCombobox } from "../../components/ui/combobox";
 
 const HuronesForm = ({ formData, setFormData }) => {
   const { t, field, placeholder, section, title } = useSpeciesFormI18n('hurones');
@@ -123,19 +124,19 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('sexo')}</label>
-            <select required value={sexo || ''} onChange={(e) => handleChange('sexo', e.target.value)}>
+            <FormCombobox required value={sexo || ''} onChange={(e) => handleChange('sexo', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="macho">{t('options.macho')}</option>
               <option value="hembra">{t('options.hembra')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('esterilizado')}</label>
-            <select required value={formData.esterilizado || ''} onChange={(e) => handleChange('esterilizado', e.target.value)}>
+            <FormCombobox required value={formData.esterilizado || ''} onChange={(e) => handleChange('esterilizado', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="intacta">{t('options.intacta')}</option>
               <option value="esterilizado">{t('options.esterilizado')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
@@ -153,34 +154,34 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('indice_de_condicion_corporal')}</label>
-            <select required value={formData.condicion_corporal || ''} onChange={(e) => handleChange('condicion_corporal', e.target.value)}>
+            <FormCombobox required value={formData.condicion_corporal || ''} onChange={(e) => handleChange('condicion_corporal', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="1-3">{t('options.n_1_3_emaciado')}</option>
               <option value="4-5">{t('options.n_4_5_delgado')}</option>
               <option value="6-7">{t('options.n_6_7_ideal')}</option>
               <option value="8-9">{t('options.n_8_9_sobrepeso')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('se_extrajeron_glandulas_anales')}</label>
-            <select required value={formData.glandulas_anales || ''} onChange={(e) => handleChange('glandulas_anales', e.target.value)}>
+            <FormCombobox required value={formData.glandulas_anales || ''} onChange={(e) => handleChange('glandulas_anales', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="SI">{t('yes')}</option>
               <option value="NO">{t('no')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
         <div className="form-group">
           <label>{field('duracion_del_problema')}</label>
-          <select required value={formData.duracion_problema || ''} onChange={(e) => handleChange('duracion_problema', e.target.value)}>
+          <FormCombobox required value={formData.duracion_problema || ''} onChange={(e) => handleChange('duracion_problema', e.target.value)}>
             <option value="">{t('select')}</option>
             <option value="<12h">{t('options.lt_12_horas')}</option>
             <option value="12-24h">{t('options.n_12_24_horas')}</option>
             <option value="2-3dias">{t('options.n_2_3_dias')}</option>
             <option value="4-7dias">{t('options.n_4_7_dias')}</option>
             <option value=">1semana">{t('options.gt_1_semana')}</option>
-          </select>
+          </FormCombobox>
         </div>
       </div>
 
@@ -190,12 +191,12 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('moquillo')}</label>
-            <select required value={formData.vacuna_moquillo || ''} onChange={(e) => handleChange('vacuna_moquillo', e.target.value)}>
+            <FormCombobox required value={formData.vacuna_moquillo || ''} onChange={(e) => handleChange('vacuna_moquillo', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="completa">{t('options.completa')}</option>
               <option value="incompleta">{t('options.incompleta')}</option>
               <option value="nunca">{t('options.nunca')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('rabia')}</label>
@@ -230,12 +231,12 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('tipo_de_dieta_2')}</label>
-            <select required value={formData.tipo_dieta || ''} onChange={(e) => handleChange('tipo_dieta', e.target.value)}>
+            <FormCombobox required value={formData.tipo_dieta || ''} onChange={(e) => handleChange('tipo_dieta', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="comercial">{t('options.comercial_especifica')}</option>
               <option value="casera">{t('options.casera')}</option>
               <option value="mixta">{t('options.mixta')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('marca_composicion')}</label>
@@ -264,21 +265,21 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('casa')}</label>
-            <select required value={formData.habitat || ''} onChange={(e) => handleChange('habitat', e.target.value)}>
+            <FormCombobox required value={formData.habitat || ''} onChange={(e) => handleChange('habitat', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="jaula">{t('options.jaula')}</option>
               <option value="corral">{t('options.corral')}</option>
               <option value="libre">{t('options.libre')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('ubicacion_2')}</label>
-            <select required value={formData.ubicacion || ''} onChange={(e) => handleChange('ubicacion', e.target.value)}>
+            <FormCombobox required value={formData.ubicacion || ''} onChange={(e) => handleChange('ubicacion', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="interior">{t('options.habitat_interior')}</option>
               <option value="exterior">{t('options.habitat_exterior')}</option>
               <option value="habitacion">{t('options.habitacion_especifica')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
@@ -289,13 +290,13 @@ const HuronesForm = ({ formData, setFormData }) => {
           </div>
           <div className="form-group">
             <label>{field('superficie')}</label>
-            <select value={formData.superficie || ''} onChange={(e) => handleChange('superficie', e.target.value)}>
+            <FormCombobox value={formData.superficie || ''} onChange={(e) => handleChange('superficie', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="alfombra">{t('options.alfombra')}</option>
               <option value="piso_duro">{t('options.piso_duro')}</option>
               <option value="jaula_barrotes">{t('options.jaula_con_barrotes')}</option>
               <option value="sustrato">{t('options.sustrato_aserrin')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
       </div>
@@ -314,7 +315,7 @@ const HuronesForm = ({ formData, setFormData }) => {
           </div>
           <div className="form-group">
             <label>{field('tipo_de_juguetes')}</label>
-            <select
+            <FormCombobox
               value={formData.tipo_juguetes || ''}
               onChange={(e) => handleChange('tipo_juguetes', e.target.value)}
             >
@@ -322,7 +323,7 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="tuneles">{t('options.tuneles')}</option>
               <option value="pelotas">{t('options.pelotas')}</option>
               <option value="objetos_pequenos">{t('options.objetos_pequenos')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
@@ -343,7 +344,7 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('vive')}</label>
-            <select
+            <FormCombobox
               value={formData.socializacion_tipo || ''}
               onChange={(e) => handleChange('socializacion_tipo', e.target.value)}
             >
@@ -351,7 +352,7 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="solo">{t('options.solo')}</option>
               <option value="pareja">{t('options.pareja')}</option>
               <option value="grupo">{t('options.grupo')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('peleas_recientes_2')}</label>
@@ -380,7 +381,7 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('limpieza_de_jaula')}</label>
-            <select
+            <FormCombobox
               value={formData.limpieza_jaula || ''}
               onChange={(e) => handleChange('limpieza_jaula', e.target.value)}
             >
@@ -388,18 +389,18 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="diaria">{t('options.diaria')}</option>
               <option value="cada_2_dias">{t('options.cada_2_dias')}</option>
               <option value="semanal">{t('options.semanal')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('lavado_de_comederos_bebederos')}</label>
-            <select
+            <FormCombobox
               value={formData.lavado_comederos || ''}
               onChange={(e) => handleChange('lavado_comederos', e.target.value)}
             >
               <option value="">{t('select')}</option>
               <option value="diario">{t('options.diario')}</option>
               <option value="cada_2_dias">{t('options.cada_2_dias')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
@@ -445,12 +446,12 @@ const HuronesForm = ({ formData, setFormData }) => {
           </div>
           <div className="form-group">
             <label>{field('color_de_mucosas_2')}</label>
-            <select value={formData.mucosas || 'rosado'} onChange={(e) => handleChange('mucosas', e.target.value)}>
+            <FormCombobox value={formData.mucosas || 'rosado'} onChange={(e) => handleChange('mucosas', e.target.value)}>
               <option value="rosado">{t('options.rosado')}</option>
               <option value="palido">{t('options.palido')}</option>
               <option value="icterico">{t('options.icterico')}</option>
               <option value="cianotico">{t('options.cianotico')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
       </div>
@@ -461,7 +462,7 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('perdida_de_pelo')}</label>
-            <select
+            <FormCombobox
               required
               value={formData.perdida_pelo || 'NO'}
               onChange={(e) => handleChange('perdida_pelo', e.target.value)}
@@ -470,18 +471,18 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="cola_base">{t('options.solo_en_cola_base')}</option>
               <option value="simetrico">{t('options.lateralmente_simetrico')}</option>
               <option value="total">{t('options.total_excepto_cabeza')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('progresion')}</label>
-            <select
+            <FormCombobox
               value={formData.progresion_endocrina || ''}
               onChange={(e) => handleChange('progresion_endocrina', e.target.value)}
             >
               <option value="">{t('select')}</option>
               <option value="lenta">{t('options.lenta_meses')}</option>
               <option value="rapida">{t('options.rapida_semanas')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
@@ -495,7 +496,7 @@ const HuronesForm = ({ formData, setFormData }) => {
           </div>
           <div className="form-group">
             <label>{field('debilidad_colapso')}</label>
-            <select
+            <FormCombobox
               required
               value={formData.debilidad || 'NO'}
               onChange={(e) => handleChange('debilidad', e.target.value)}
@@ -504,7 +505,7 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="mananas">{t('options.mananas_en_ayunas')}</option>
               <option value="post_ejercicio">{t('options.post_ejercicio')}</option>
               <option value="aleatorio">{t('options.aleatorio')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
@@ -528,14 +529,14 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('hinchazon_abdominal_3')}</label>
-            <select
+            <FormCombobox
               value={formData.hinchazon_abdominal || ''}
               onChange={(e) => handleChange('hinchazon_abdominal', e.target.value)}
             >
               <option value="">{t('select')}</option>
               <option value="difusa">{t('options.difusa')}</option>
               <option value="localizada">{t('options.localizada')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('palpacion_de_masa')}</label>
@@ -574,32 +575,32 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('apetito')}</label>
-            <select required value={formData.apetito || 'normal'} onChange={(e) => handleChange('apetito', e.target.value)}>
+            <FormCombobox required value={formData.apetito || 'normal'} onChange={(e) => handleChange('apetito', e.target.value)}>
               <option value="normal">{t('options.normal')}</option>
               <option value="hiperfagia">{t('options.hiperfagia_come_mas')}</option>
               <option value="hipofagia">{t('options.hipofagia_come_menos')}</option>
               <option value="anorexia">{t('options.anorexia')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('come_pero_pierde_peso')}</label>
-            <select required value={formData.come_pierde_peso || 'NO'} onChange={(e) => handleChange('come_pierde_peso', e.target.value)}>
+            <FormCombobox required value={formData.come_pierde_peso || 'NO'} onChange={(e) => handleChange('come_pierde_peso', e.target.value)}>
               <option value="NO">{t('no')}</option>
               <option value="SI">{t('yes')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>{field('vomitos_regurgitacion')}</label>
-            <select required value={formData.vomitos || 'NO'} onChange={(e) => handleChange('vomitos', e.target.value)}>
+            <FormCombobox required value={formData.vomitos || 'NO'} onChange={(e) => handleChange('vomitos', e.target.value)}>
               <option value="NO">{t('no')}</option>
               <option value="alimentos">{t('options.alimentos_no_digeridos')}</option>
               <option value="bilis">{t('options.bilis')}</option>
               <option value="sangre">{t('options.sangre')}</option>
               <option value="material_oscuro">{t('options.material_oscuro_heces')}</option>
-            </select>
+            </FormCombobox>
           </div>
           {formData.vomitos !== 'NO' && (
             <div className="form-group">
@@ -612,28 +613,28 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('heces')}</label>
-            <select required value={formData.heces || 'normal'} onChange={(e) => handleChange('heces', e.target.value)}>
+            <FormCombobox required value={formData.heces || 'normal'} onChange={(e) => handleChange('heces', e.target.value)}>
               <option value="normal">{t('options.normal')}</option>
               <option value="diarrea_aguda">{t('options.diarrea_aguda_lt_3_dias')}</option>
               <option value="diarrea_cronica">{t('options.diarrea_cronica_gt_1_semana')}</option>
               <option value="estrenimiento">{t('options.estrenimiento')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('color_de_heces')}</label>
-            <select value={formData.heces_color || 'normal'} onChange={(e) => handleChange('heces_color', e.target.value)}>
+            <FormCombobox value={formData.heces_color || 'normal'} onChange={(e) => handleChange('heces_color', e.target.value)}>
               <option value="normal">{t('options.normal')}</option>
               <option value="negras">{t('options.negras')}</option>
               <option value="rojas">{t('options.rojas')}</option>
               <option value="palidas">{t('options.palidas')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>{field('consistencia_de_heces')}</label>
-            <select
+            <FormCombobox
               value={formData.heces_consistencia || ''}
               onChange={(e) => handleChange('heces_consistencia', e.target.value)}
             >
@@ -642,7 +643,7 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="pastosas">{t('options.pastosas')}</option>
               <option value="formadas">{t('options.formadas')}</option>
               <option value="con_moco">{t('options.con_moco')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
@@ -693,14 +694,14 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('convulsiones')}</label>
-            <select
+            <FormCombobox
               value={formData.convulsiones || ''}
               onChange={(e) => handleChange('convulsiones', e.target.value)}
             >
               <option value="">{t('select')}</option>
               <option value="completa">{t('options.completa_perdida_de_conciencia')}</option>
               <option value="parcial">{t('options.parcial_solo_una_extremidad')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('duracion_segundos_minutos')}</label>
@@ -715,7 +716,7 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('ataxia')}</label>
-            <select
+            <FormCombobox
               value={formData.ataxia || ''}
               onChange={(e) => handleChange('ataxia', e.target.value)}
             >
@@ -723,7 +724,7 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="borracho">{t('options.movimientos_como_borracho')}</option>
               <option value="caidas_laterales">{t('options.caidas_laterales')}</option>
               <option value="no_puede_pararse">{t('options.no_puede_pararse')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('mejora_con_azucar')}</label>
@@ -741,7 +742,7 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('debilidad_posterior')}</label>
-            <select
+            <FormCombobox
               value={formData.debilidad_posterior || ''}
               onChange={(e) => handleChange('debilidad_posterior', e.target.value)}
             >
@@ -749,7 +750,7 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="dificultad_saltar">{t('options.dificultad_para_saltar')}</option>
               <option value="arrastre_patas_traseras">{t('options.arrastre_de_patas_traseras')}</option>
               <option value="no_puede_pararse">{t('options.no_puede_pararse')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('mejora_temporal_con_estimulacion')}</label>
@@ -770,7 +771,7 @@ const HuronesForm = ({ formData, setFormData }) => {
           </div>
           <div className="form-group">
             <label>{field('postura_anormal')}</label>
-            <select
+            <FormCombobox
               value={formData.postura_anormal || ''}
               onChange={(e) => handleChange('postura_anormal', e.target.value)}
             >
@@ -778,7 +779,7 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="posicion_rana">{t('options.posicion_de_rana')}</option>
               <option value="espalda_arqueada">{t('options.espalda_arqueada')}</option>
               <option value="cuello_rigido">{t('options.cuello_rigido')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
@@ -821,7 +822,7 @@ const HuronesForm = ({ formData, setFormData }) => {
             <div className="form-row">
               <div className="form-group">
                 <label>{field('genitales_hembras')}</label>
-                <select
+                <FormCombobox
                   value={formData.genitales_hembras || ''}
                   onChange={(e) => handleChange('genitales_hembras', e.target.value)}
                 >
@@ -829,7 +830,7 @@ const HuronesForm = ({ formData, setFormData }) => {
                   <option value="hinchazon_vulvar_persistente">{t('options.hinchazon_vulvar_persistente')}</option>
                   <option value="secrecion_sanguinolenta">{t('options.secrecion_sanguinolenta')}</option>
                   <option value="olor_fetido">{t('options.olor_fetido')}</option>
-                </select>
+                </FormCombobox>
               </div>
             </div>
 
@@ -853,7 +854,7 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('miccion')}</label>
-            <select
+            <FormCombobox
               value={formData.miccion || ''}
               onChange={(e) => handleChange('miccion', e.target.value)}
             >
@@ -861,11 +862,11 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="frecuencia_aumentada">{t('options.frecuencia_aumentada')}</option>
               <option value="esfuerzo">{t('options.esfuerzo')}</option>
               <option value="grito_al_orinar">{t('options.grito_al_orinar')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('color_de_orina')}</label>
-            <select
+            <FormCombobox
               value={formData.orina_color || ''}
               onChange={(e) => handleChange('orina_color', e.target.value)}
             >
@@ -875,14 +876,14 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="rojiza">{t('options.rojiza')}</option>
               <option value="turbia">{t('options.turbia')}</option>
               <option value="sedimentos">{t('options.con_sedimentos')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>{field('olor_de_la_orina')}</label>
-            <select
+            <FormCombobox
               value={formData.orina_olor || ''}
               onChange={(e) => handleChange('orina_olor', e.target.value)}
             >
@@ -890,7 +891,7 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="normal">{t('options.normal')}</option>
               <option value="amoniaco">{t('options.amonico')}</option>
               <option value="fetido">{t('options.fetido')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
@@ -898,7 +899,7 @@ const HuronesForm = ({ formData, setFormData }) => {
           <div className="form-row">
             <div className="form-group">
               <label>{field('signos_en_machos')}</label>
-              <select
+              <FormCombobox
                 value={formData.signos_machos_uro || ''}
                 onChange={(e) => handleChange('signos_machos_uro', e.target.value)}
               >
@@ -906,7 +907,7 @@ const HuronesForm = ({ formData, setFormData }) => {
                 <option value="dificultad_orinar">{t('options.dificultad_para_orinar')}</option>
                 <option value="goteo_continuo">{t('options.goteo_continuo')}</option>
                 <option value="hinchazon_perineal">{t('options.hinchazon_perineal')}</option>
-              </select>
+              </FormCombobox>
             </div>
           </div>
         )}
@@ -924,7 +925,7 @@ const HuronesForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('duracion_exacta_del_problema')}</label>
-            <select
+            <FormCombobox
               value={formData.duracion_problema_uro || ''}
               onChange={(e) => handleChange('duracion_problema_uro', e.target.value)}
             >
@@ -934,11 +935,11 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="2-3dias">{t('options.n_2_3_dias')}</option>
               <option value="4-7dias">{t('options.n_4_7_dias')}</option>
               <option value=">1semana">{t('options.gt_1_semana')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('progresion')}</label>
-            <select
+            <FormCombobox
               value={formData.progresion_uro || ''}
               onChange={(e) => handleChange('progresion_uro', e.target.value)}
             >
@@ -947,7 +948,7 @@ const HuronesForm = ({ formData, setFormData }) => {
               <option value="estable">{t('options.estable')}</option>
               <option value="empeora_rapido">{t('options.empeora_rapidamente')}</option>
               <option value="intermitente">{t('options.intermitente')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
       </div>

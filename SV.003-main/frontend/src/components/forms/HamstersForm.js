@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import YesNoChips from '../ui/yes-no-chips';
 import { useSpeciesFormI18n } from '../../hooks/useSpeciesFormI18n';
 import { normalizePetSex } from '../../lib/petSex';
+import { FormCombobox } from "../../components/ui/combobox";
 
 const HamstersForm = ({ formData, setFormData }) => {
   const { t, field, placeholder, section, title } = useSpeciesFormI18n('hamsters');
@@ -119,7 +120,7 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('especie_exacta')}</label>
-            <select required value={formData.especie_exacta || ''} onChange={(e) => handleChange('especie_exacta', e.target.value)}>
+            <FormCombobox required value={formData.especie_exacta || ''} onChange={(e) => handleChange('especie_exacta', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="sirio">{t('options.sirio')}</option>
               <option value="enano">{t('options.enano')}</option>
@@ -127,7 +128,7 @@ const HamstersForm = ({ formData, setFormData }) => {
               <option value="campbell">{t('options.campbell')}</option>
               <option value="chino">{t('options.chino')}</option>
               <option value="ruso">{t('options.ruso')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('edad_meses')}</label>
@@ -138,19 +139,19 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('sexo')}</label>
-            <select required value={sexo || ''} onChange={(e) => handleChange('sexo', e.target.value)}>
+            <FormCombobox required value={sexo || ''} onChange={(e) => handleChange('sexo', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="macho">{t('options.macho')}</option>
               <option value="hembra">{t('options.hembra')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('esterilizado')}</label>
-            <select required value={formData.esterilizado || ''} onChange={(e) => handleChange('esterilizado', e.target.value)}>
+            <FormCombobox required value={formData.esterilizado || ''} onChange={(e) => handleChange('esterilizado', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="SI">{t('yes')}</option>
               <option value="NO">{t('no')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
@@ -172,20 +173,20 @@ const HamstersForm = ({ formData, setFormData }) => {
           </div>
           <div className="form-group">
             <label>{field('indice_de_condicion_corporal')}</label>
-            <select required value={formData.condicion_corporal || ''} onChange={(e) => handleChange('condicion_corporal', e.target.value)}>
+            <FormCombobox required value={formData.condicion_corporal || ''} onChange={(e) => handleChange('condicion_corporal', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="1-3">{t('options.n_1_3_emaciado')}</option>
               <option value="4-5">{t('options.n_4_5_delgado')}</option>
               <option value="6-7">{t('options.n_6_7_ideal')}</option>
               <option value="8-9">{t('options.n_8_9_sobrepeso')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
         
         <div className="form-row">
           <div className="form-group">
             <label>{field('temperamento')}</label>
-            <select
+            <FormCombobox
               value={formData.temperamento || ''}
               onChange={(e) => handleChange('temperamento', e.target.value)}
             >
@@ -195,25 +196,25 @@ const HamstersForm = ({ formData, setFormData }) => {
               <option value="agresivo">{t('options.agresivo')}</option>
               <option value="timido">{t('options.timido')}</option>
               <option value="hiperactivo">{t('options.hiperactivo')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>{field('duracion_del_problema')}</label>
-            <select required value={formData.duracion_problema || ''} onChange={(e) => handleChange('duracion_problema', e.target.value)}>
+            <FormCombobox required value={formData.duracion_problema || ''} onChange={(e) => handleChange('duracion_problema', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="<12h">{t('options.lt_12_horas')}</option>
               <option value="12-24h">{t('options.n_12_24_horas')}</option>
               <option value="2-3dias">{t('options.n_2_3_dias')}</option>
               <option value="4-7dias">{t('options.n_4_7_dias')}</option>
               <option value=">1semana">{t('options.gt_1_semana')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('progresion_del_problema')}</label>
-            <select
+            <FormCombobox
               value={formData.progresion_problema || ''}
               onChange={(e) => handleChange('progresion_problema', e.target.value)}
             >
@@ -222,7 +223,7 @@ const HamstersForm = ({ formData, setFormData }) => {
               <option value="estable">{t('options.estable')}</option>
               <option value="empeora_rapido">{t('options.empeora_rapidamente')}</option>
               <option value="intermitente">{t('options.intermitente')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
       </div>
@@ -269,12 +270,12 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('tipo_de_dieta_2')}</label>
-            <select required value={formData.tipo_dieta || ''} onChange={(e) => handleChange('tipo_dieta', e.target.value)}>
+            <FormCombobox required value={formData.tipo_dieta || ''} onChange={(e) => handleChange('tipo_dieta', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="balanceado">{t('options.balanceado_comercial')}</option>
               <option value="mezcla_semillas">{t('options.mezcla_de_semillas')}</option>
               <option value="casera">{t('options.casera')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('marca_y_composicion')}</label>
@@ -336,12 +337,12 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('habitat')}</label>
-            <select required value={formData.habitat || ''} onChange={(e) => handleChange('habitat', e.target.value)}>
+            <FormCombobox required value={formData.habitat || ''} onChange={(e) => handleChange('habitat', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="jaula_alambre">{t('options.jaula_de_alambre')}</option>
               <option value="acuario">{t('options.acuario')}</option>
               <option value="tunel_modular">{t('options.tunel_modular')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('tamano_de_espacio_cm')}</label>
@@ -363,13 +364,13 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('piso_sustrato')}</label>
-            <select required value={formData.piso || ''} onChange={(e) => handleChange('piso', e.target.value)}>
+            <FormCombobox required value={formData.piso || ''} onChange={(e) => handleChange('piso', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="aserrin">{t('options.aserrin')}</option>
               <option value="papel">{t('options.papel_reciclado')}</option>
               <option value="viruta">{t('options.viruta_aromatica')}</option>
               <option value="otro">{t('options.otro')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('rueda_de_ejercicio')}</label>
@@ -399,7 +400,7 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('tipo_de_ejercicio_principal')}</label>
-            <select
+            <FormCombobox
               value={formData.tipo_ejercicio || ''}
               onChange={(e) => handleChange('tipo_ejercicio', e.target.value)}
             >
@@ -407,18 +408,18 @@ const HamstersForm = ({ formData, setFormData }) => {
               <option value="rueda">{t('options.rueda')}</option>
               <option value="tuneles">{t('options.tuneles')}</option>
               <option value="libre_habitacion">{t('options.libre_en_habitacion')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
         <div className="form-group">
           <label>{field('limpieza_de_jaula_3')}</label>
-          <select required value={formData.limpieza_jaula || ''} onChange={(e) => handleChange('limpieza_jaula', e.target.value)}>
+          <FormCombobox required value={formData.limpieza_jaula || ''} onChange={(e) => handleChange('limpieza_jaula', e.target.value)}>
             <option value="">{t('select')}</option>
             <option value="diaria">{t('options.diaria')}</option>
             <option value="cada_2_dias">{t('options.cada_2_dias')}</option>
             <option value="semanal">{t('options.semanal')}</option>
-          </select>
+          </FormCombobox>
         </div>
       </div>
 
@@ -443,25 +444,25 @@ const HamstersForm = ({ formData, setFormData }) => {
           </div>
           <div className="form-group">
             <label>{field('hidratacion')}</label>
-            <select value={formData.hidratacion || ''} onChange={(e) => handleChange('hidratacion', e.target.value)}>
+            <FormCombobox value={formData.hidratacion || ''} onChange={(e) => handleChange('hidratacion', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="5">{t('options.n_5_piel_vuelve_rapido')}</option>
               <option value="6-8">{t('options.n_6_8_piel_lenta')}</option>
               <option value=">10%">{t('options.gt_10_piel_no_vuelve')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>{field('color_de_mucosas_2')}</label>
-            <select value={formData.mucosas || ''} onChange={(e) => handleChange('mucosas', e.target.value)}>
+            <FormCombobox value={formData.mucosas || ''} onChange={(e) => handleChange('mucosas', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="rosado">{t('options.rosado')}</option>
               <option value="palido">{t('options.palido')}</option>
               <option value="icterico">{t('options.icterico')}</option>
               <option value="cianotico">{t('options.cianotico')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
       </div>
@@ -472,11 +473,11 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('apetito')}</label>
-            <select required value={formData.apetito || 'normal'} onChange={(e) => handleChange('apetito', e.target.value)}>
+            <FormCombobox required value={formData.apetito || 'normal'} onChange={(e) => handleChange('apetito', e.target.value)}>
               <option value="normal">{t('options.normal')}</option>
               <option value="anorexia_total">{t('options.totalmente_anorexico_gt_12h')}</option>
               <option value="anorexia_parcial">{t('options.parcialmente_anorexico')}</option>
-            </select>
+            </FormCombobox>
           </div>
           {(formData.apetito === 'anorexia_total' || formData.apetito === 'anorexia_parcial') && (
             <div className="form-group">
@@ -516,12 +517,12 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('heces')}</label>
-            <select required value={formData.heces || 'normal'} onChange={(e) => handleChange('heces', e.target.value)}>
+            <FormCombobox required value={formData.heces || 'normal'} onChange={(e) => handleChange('heces', e.target.value)}>
               <option value="normal">{t('options.normal')}</option>
               <option value="ausentes">{t('options.ausentes_gt_24h')}</option>
               <option value="blandas">{t('options.blandas_pastosas')}</option>
               <option value="liquidas">{t('options.liquidas_humedas')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('frecuencia_veces_dia')}</label>
@@ -532,20 +533,20 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('color_de_heces')}</label>
-            <select value={formData.heces_color || ''} onChange={(e) => handleChange('heces_color', e.target.value)}>
+            <FormCombobox value={formData.heces_color || ''} onChange={(e) => handleChange('heces_color', e.target.value)}>
               <option value="">{t('select')}</option>
               <option value="marron_oscuro">{t('options.marron_oscuro')}</option>
               <option value="amarillo">{t('options.amarillo')}</option>
               <option value="verde">{t('options.verde')}</option>
               <option value="rojizo">{t('options.rojizo_sangre')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>{field('localizacion_de_heces')}</label>
-            <select
+            <FormCombobox
               value={formData.heces_localizacion || ''}
               onChange={(e) => handleChange('heces_localizacion', e.target.value)}
             >
@@ -553,7 +554,7 @@ const HamstersForm = ({ formData, setFormData }) => {
               <option value="en_jaula">{t('options.en_jaula')}</option>
               <option value="pegadas_ano">{t('options.pegadas_al_ano')}</option>
               <option value="en_cola">{t('options.en_cola')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('presencia_de_moco')}</label>
@@ -567,7 +568,7 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('abdomen')}</label>
-            <select
+            <FormCombobox
               value={formData.abdomen || ''}
               onChange={(e) => handleChange('abdomen', e.target.value)}
             >
@@ -575,7 +576,7 @@ const HamstersForm = ({ formData, setFormData }) => {
               <option value="distendido">{t('options.distendido')}</option>
               <option value="doloroso">{t('options.doloroso_al_tacto')}</option>
               <option value="ruidos_ausentes">{t('options.ruidos_intestinales_ausentes')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
@@ -596,21 +597,21 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('secrecion_nasal')}</label>
-            <select required value={formData.secrecion_nasal || 'NO'} onChange={(e) => handleChange('secrecion_nasal', e.target.value)}>
+            <FormCombobox required value={formData.secrecion_nasal || 'NO'} onChange={(e) => handleChange('secrecion_nasal', e.target.value)}>
               <option value="NO">{t('no')}</option>
               <option value="clara">{t('options.clara_moco')}</option>
               <option value="purulenta">{t('options.purulenta_amarilla_verde')}</option>
               <option value="sangre">{t('options.sangre')}</option>
-            </select>
+            </FormCombobox>
           </div>
           {formData.secrecion_nasal !== 'NO' && (
             <div className="form-group">
               <label>{field('localizacion')}</label>
-              <select value={formData.secrecion_localizacion || ''} onChange={(e) => handleChange('secrecion_localizacion', e.target.value)}>
+              <FormCombobox value={formData.secrecion_localizacion || ''} onChange={(e) => handleChange('secrecion_localizacion', e.target.value)}>
                 <option value="">{t('select')}</option>
                 <option value="unilateral">{t('options.unilateral')}</option>
                 <option value="bilateral">{t('options.bilateral')}</option>
-              </select>
+              </FormCombobox>
             </div>
           )}
         </div>
@@ -618,12 +619,12 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('respiracion')}</label>
-            <select required value={formData.respiracion || 'normal'} onChange={(e) => handleChange('respiracion', e.target.value)}>
+            <FormCombobox required value={formData.respiracion || 'normal'} onChange={(e) => handleChange('respiracion', e.target.value)}>
               <option value="normal">{t('options.normal')}</option>
               <option value="ruidosa">{t('options.ruidosa')}</option>
               <option value="dificultad_inhalar">{t('options.dificultad_para_inhalar')}</option>
               <option value="dificultad_exhalar">{t('options.dificultad_para_exhalar')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
       </div>
@@ -634,12 +635,12 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('temblor_convulsiones')}</label>
-            <select required value={formData.convulsiones || 'NO'} onChange={(e) => handleChange('convulsiones', e.target.value)}>
+            <FormCombobox required value={formData.convulsiones || 'NO'} onChange={(e) => handleChange('convulsiones', e.target.value)}>
               <option value="NO">{t('no')}</option>
               <option value="temblor_generalizado">{t('options.temblor_generalizado')}</option>
               <option value="focales">{t('options.convulsiones_focales')}</option>
               <option value="generalizadas">{t('options.convulsiones_generalizadas')}</option>
-            </select>
+            </FormCombobox>
           </div>
           {formData.convulsiones !== 'NO' && (
             <div className="form-group">
@@ -652,12 +653,12 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('incoordinacion_2')}</label>
-            <select required value={formData.incoordinacion || 'NO'} onChange={(e) => handleChange('incoordinacion', e.target.value)}>
+            <FormCombobox required value={formData.incoordinacion || 'NO'} onChange={(e) => handleChange('incoordinacion', e.target.value)}>
               <option value="NO">{t('no')}</option>
               <option value="caidas">{t('options.caidas_laterales')}</option>
               <option value="rodar">{t('options.rodar_sin_control')}</option>
               <option value="no_mantiene">{t('options.no_puede_mantenerse_derecho')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
       </div>
@@ -668,32 +669,32 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('pelo_piel')}</label>
-            <select required value={formData.pelo_piel || 'normal'} onChange={(e) => handleChange('pelo_piel', e.target.value)}>
+            <FormCombobox required value={formData.pelo_piel || 'normal'} onChange={(e) => handleChange('pelo_piel', e.target.value)}>
               <option value="normal">{t('options.normal')}</option>
               <option value="alopecia_simetrica">{t('options.alopecia_simetrica')}</option>
               <option value="costras">{t('options.costras_en_cabeza_orejas')}</option>
               <option value="ulceras">{t('options.ulceras_faciales')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('prurito_intenso_2')}</label>
-            <select required value={formData.prurito || 'NO'} onChange={(e) => handleChange('prurito', e.target.value)}>
+            <FormCombobox required value={formData.prurito || 'NO'} onChange={(e) => handleChange('prurito', e.target.value)}>
               <option value="NO">{t('no')}</option>
               <option value="leve">{t('options.leve')}</option>
               <option value="intenso">{t('options.intenso')}</option>
-            </select>
+            </FormCombobox>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>{field('orejas_2')}</label>
-            <select required value={formData.orejas || 'normales'} onChange={(e) => handleChange('orejas', e.target.value)}>
+            <FormCombobox required value={formData.orejas || 'normales'} onChange={(e) => handleChange('orejas', e.target.value)}>
               <option value="normales">{t('options.normales')}</option>
               <option value="costras">{t('options.costras_en_interior')}</option>
               <option value="secrecion">{t('options.secrecion_marron')}</option>
               <option value="mal_olor">{t('options.mal_olor')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('acaros_visibles_3')}</label>
@@ -711,13 +712,13 @@ const HamstersForm = ({ formData, setFormData }) => {
         <div className="form-row">
           <div className="form-group">
             <label>{field('dientes_frontales')}</label>
-            <select required value={formData.dientes || 'normales'} onChange={(e) => handleChange('dientes', e.target.value)}>
+            <FormCombobox required value={formData.dientes || 'normales'} onChange={(e) => handleChange('dientes', e.target.value)}>
               <option value="normales">{t('options.normales')}</option>
               <option value="amarillentos">{t('options.amarillentos')}</option>
               <option value="curvados">{t('options.curvados')}</option>
               <option value="rotos">{t('options.rotos')}</option>
               <option value="sangrantes">{t('options.sangrantes')}</option>
-            </select>
+            </FormCombobox>
           </div>
           <div className="form-group">
             <label>{field('dificultad_para_comer_2')}</label>

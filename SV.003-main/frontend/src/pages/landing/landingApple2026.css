@@ -11,20 +11,20 @@
     0 2px 6px rgba(12, 45, 77, 0.04);
 }
 
-/* Shell: navy clínico (oscuro) */
+/* Shell: atmósfera clara GUIAA (blanco → gris clínico suave) */
 .landing-shell {
   background:
-    radial-gradient(ellipse 70% 50% at 50% -8%, rgba(61, 155, 143, 0.14), transparent 55%),
-    linear-gradient(180deg, #06121c 0%, #0c2d4d 55%, #0f3548 100%);
+    radial-gradient(ellipse 85% 55% at 50% -5%, rgba(232, 244, 252, 0.95), transparent 58%),
+    linear-gradient(180deg, #ffffff 0%, #f5f8fb 46%, #e8eef5 100%);
 }
 
 .landing-page-card {
   border-radius: 1.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(12, 45, 77, 0.06);
   box-shadow:
-    0 32px 80px -24px rgba(0, 0, 0, 0.45),
-    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
-  background: #ffffff;
+    0 28px 64px -28px rgba(12, 45, 77, 0.18),
+    0 8px 24px -12px rgba(12, 45, 77, 0.08);
+  background: linear-gradient(180deg, #ffffff 0%, #f7fafc 52%, #eef3f8 100%);
 }
 
 @media (min-width: 1024px) {
@@ -35,11 +35,13 @@
 
 .landing-body-wrap {
   background:
-    linear-gradient(180deg, #ffffff 0%, #f7fafc 42%, #f4f8f7 100%);
+    radial-gradient(ellipse 90% 40% at 50% 0%, rgba(255, 255, 255, 0.9), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 38%, #eef4f8 100%);
 }
 
+
 .landing-body-wrap::before {
-  opacity: 0.18;
+  opacity: 0.12;
   background-size: 28px 28px;
 }
 
@@ -176,11 +178,11 @@
   box-shadow: var(--landing-shadow-lift);
 }
 
-/* Nav sólido sobre hero */
+/* Nav hero: ligera al hacer scroll */
 .landing-nav-hero.landing-nav-scrolled {
-  background: #071622 !important;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  background: rgba(7, 22, 34, 0.5) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom-color: rgba(255, 255, 255, 0.1) !important;
 }
 

@@ -72,6 +72,7 @@ export const ANNUAL_CONSULTATIONS = {
 
 export const FEATURED_PLAN_KEY = "professional";
 
+/** Módulos base — todos los planes MVZ */
 const SHARED_CORE = [
   "GUIAA Diagnóstico con soporte CDS L4 · L5",
   "Expediente e historial clínico",
@@ -80,56 +81,37 @@ const SHARED_CORE = [
   "Exportación PDF de consultas",
 ];
 
+/** Profesional+ (inventario, ventas, reportes, multiespecie) */
+const PROFESSIONAL_MODULES = [
+  "Todas las especies (11+ categorías)",
+  "Inventario con alertas de stock",
+  "Ventas, recibos y facturación",
+  "Reportes de actividad clínica",
+  "Soporte prioritario por correo",
+];
+
+/** Solo Premium (Manejo Experto, lab, CDS L5) */
+const PREMIUM_MODULES = [
+  "Manejo Experto (consulta acelerada)",
+  "Interpretación de laboratorio (PDF y estudios)",
+  "Síntesis clínica avanzada CDS L5",
+  "Onboarding guiado prioritario",
+];
+
+/**
+ * Listas de fallback (sin cupo: getPlanFeatureList antepone las consultas).
+ * Premium incluye todos los módulos de la plataforma.
+ */
 export const PLAN_FEATURES = {
-  basic: [
-    "30 consultas CDS al mes",
-    "Especies: perros y gatos",
-    ...SHARED_CORE,
-  ],
-  professional: [
-    "35 consultas CDS al mes",
-    "Todas las especies (11+ categorías)",
-    ...SHARED_CORE,
-    "Inventario con alertas de stock",
-    "Ventas, recibos y facturación",
-    "Reportes de actividad clínica",
-    "Soporte prioritario por correo",
-  ],
-  premium: [
-    "150 consultas CDS al mes",
-    "Todas las especies (11+ categorías)",
-    ...SHARED_CORE,
-    "Inventario, ventas y reportes",
-    "Manejo Experto (consulta acelerada)",
-    "Interpretación de laboratorio (PDF y estudios)",
-    "Onboarding guiado prioritario",
-  ],
+  basic: ["Especies: perros y gatos", ...SHARED_CORE],
+  professional: [...SHARED_CORE, ...PROFESSIONAL_MODULES],
+  premium: [...SHARED_CORE, ...PROFESSIONAL_MODULES, ...PREMIUM_MODULES],
 };
 
 export const PLAN_ANNUAL_FEATURES = {
-  basic: [
-    "300 consultas CDS al año",
-    "Especies: perros y gatos",
-    ...SHARED_CORE,
-  ],
-  professional: [
-    "350 consultas CDS al año",
-    "Todas las especies (11+ categorías)",
-    ...SHARED_CORE,
-    "Inventario con alertas de stock",
-    "Ventas, recibos y facturación",
-    "Reportes de actividad clínica",
-    "Soporte prioritario por correo",
-  ],
-  premium: [
-    "1500 consultas CDS al año",
-    "Todas las especies (11+ categorías)",
-    ...SHARED_CORE,
-    "Inventario, ventas y reportes",
-    "Manejo Experto (consulta acelerada)",
-    "Interpretación de laboratorio (PDF y estudios)",
-    "Onboarding guiado prioritario",
-  ],
+  basic: ["Especies: perros y gatos", ...SHARED_CORE],
+  professional: [...SHARED_CORE, ...PROFESSIONAL_MODULES],
+  premium: [...SHARED_CORE, ...PROFESSIONAL_MODULES, ...PREMIUM_MODULES],
 };
 
 export const MEMBERSHIP_INFO_ITEMS = [

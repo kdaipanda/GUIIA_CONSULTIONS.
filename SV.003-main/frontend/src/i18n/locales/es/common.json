@@ -6,6 +6,15 @@
   "switchToEn": "Cambiar a inglés",
   "loading": "Cargando…",
   "loadingGuiaa": "Cargando GUIAA…",
+  "notFound": {
+    "kicker": "GUIAA Diagnóstico",
+    "title": "Página no encontrada",
+    "lead": "Esta ruta no existe en GUIAA. Puede que el enlace esté desactualizado o haya un error tipográfico.",
+    "searchPlaceholder": "Buscar en GUIAA…",
+    "search": "Buscar",
+    "goBack": "Volver",
+    "goHome": "Ir al inicio"
+  },
   "errors": {
     "server": "Error del servidor",
     "serverStatus": "Error del servidor: {{status}}",

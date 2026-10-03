@@ -4,13 +4,31 @@ import { buildClinicalTimeline, getLabStudyLabel } from "./clinicalTimeline";
 import {
   drawPdfBrandHeader,
   embedGuiaaLogo,
+  measurePdfLogo,
   PDF_BRAND_COLOR,
   PDF_LINE_COLOR,
+  PDF_MUTED_COLOR,
 } from "./pdfLogo";
 
 const PAGE = { width: 595.28, height: 841.89 };
-const MARGIN = 50;
+const MARGIN = 48;
 const CONTENT_WIDTH = PAGE.width - MARGIN * 2;
+const FOOTER_SAFE = 68;
+const CARD = rgb(0.95, 0.97, 0.99);
+
+const SPECIES_LABELS = {
+  perros: "Perro",
+  gatos: "Gato",
+  conejos: "Conejo",
+  aves: "Ave",
+  hamsters: "Hamster",
+  cuyos: "Cuyo",
+  hurones: "Huron",
+  erizos: "Erizo",
+  tortugas: "Tortuga",
+  iguanas: "Iguana",
+  patos_pollos: "Patos y pollos",
+};
 
 function pdfT(key, options) {
   return i18n.t(key, { ns: "pdf", ...options });
@@ -127,7 +145,7 @@ function collectClinicalFields(consultation) {
 
   const addRow = (label, value) => {
     const normalized = value == null ? "" : String(value).trim();
-    if (!normalized) return;
+    if (!normalized || normalized.toUpperCase() === "NO") return;
     const key = `${label}:${normalized}`;
     if (seen.has(key)) return;
     seen.add(key);
@@ -164,15 +182,34 @@ function wrapText(text, font, fontSize, maxWidth) {
       return;
     }
 
-    let current = words[0];
-    for (let i = 1; i < words.length; i += 1) {
-      const candidate = `${current} ${words[i]}`;
+    const pieces = [];
+    words.forEach((word) => {
+      if (font.widthOfTextAtSize(word, fontSize) <= maxWidth) {
+        pieces.push(word);
+        return;
+      }
+      let chunk = "";
+      for (const char of word) {
+        const next = chunk + char;
+        if (font.widthOfTextAtSize(next, fontSize) <= maxWidth) {
+          chunk = next;
+        } else {
+          if (chunk) pieces.push(chunk);
+          chunk = char;
+        }
+      }
+      if (chunk) pieces.push(chunk);
+    });
+
+    let current = pieces[0];
+    for (let i = 1; i < pieces.length; i += 1) {
+      const candidate = `${current} ${pieces[i]}`;
       const width = font.widthOfTextAtSize(candidate, fontSize);
       if (width <= maxWidth) {
         current = candidate;
       } else {
         lines.push(current);
-        current = words[i];
+        current = pieces[i];
       }
     }
     lines.push(current);
@@ -185,14 +222,48 @@ class PdfWriter {
   constructor(pdfDoc, fonts) {
     this.pdfDoc = pdfDoc;
     this.fonts = fonts;
+    this.logoImage = null;
     this.page = pdfDoc.addPage([PAGE.width, PAGE.height]);
-    this.y = PAGE.height - MARGIN;
+    this.y = PAGE.height - 36;
   }
 
   ensureSpace(height) {
-    if (this.y - height >= MARGIN) return;
+    if (this.y - height >= FOOTER_SAFE) return;
     this.page = this.pdfDoc.addPage([PAGE.width, PAGE.height]);
-    this.y = PAGE.height - MARGIN;
+    this.drawContinuationHeader();
+  }
+
+  drawContinuationHeader() {
+    const { width: logoW, height: logoH } = measurePdfLogo(this.logoImage, {
+      maxHeight: 22,
+      maxWidth: 110,
+    });
+    const top = PAGE.height - 28;
+    if (this.logoImage) {
+      this.page.drawImage(this.logoImage, {
+        x: MARGIN,
+        y: top - logoH,
+        width: logoW,
+        height: logoH,
+      });
+    }
+    const title = "GUIAA Diagnostico";
+    const titleW = this.fonts.bold.widthOfTextAtSize(title, 11);
+    this.page.drawText(title, {
+      x: PAGE.width - MARGIN - titleW,
+      y: top - 14,
+      size: 11,
+      font: this.fonts.bold,
+      color: PDF_BRAND_COLOR,
+    });
+    const lineY = top - Math.max(logoH, 16) - 8;
+    this.page.drawLine({
+      start: { x: MARGIN, y: lineY },
+      end: { x: PAGE.width - MARGIN, y: lineY },
+      thickness: 0.8,
+      color: PDF_LINE_COLOR,
+    });
+    this.y = lineY - 18;
   }
 
   drawLine(text, options = {}) {
@@ -205,30 +276,32 @@ class PdfWriter {
     } = options;
     const activeFont = this.fonts[font] || this.fonts.regular;
     const lines = wrapText(toPdfSafeText(text), activeFont, size, CONTENT_WIDTH - indent);
-    this.ensureSpace(lines.length * lineHeight + 4);
     lines.forEach((line) => {
-      this.page.drawText(line, {
-        x: MARGIN + indent,
-        y: this.y,
-        size,
-        font: activeFont,
-        color,
-      });
-      this.y -= lineHeight;
+      this.ensureSpace(lineHeight);
+      if (line) {
+        this.page.drawText(line, {
+          x: MARGIN + indent,
+          y: this.y,
+          size,
+          font: activeFont,
+          color,
+        });
+      }
+      this.y -= line ? lineHeight : 6;
     });
   }
 
   drawSectionTitle(title) {
-    this.ensureSpace(28);
+    this.ensureSpace(32);
     this.y -= 8;
-    this.page.drawText(title, {
+    this.page.drawText(toPdfSafeText(title), {
       x: MARGIN,
       y: this.y,
       size: 13,
       font: this.fonts.bold,
       color: PDF_BRAND_COLOR,
     });
-    this.y -= 10;
+    this.y -= 8;
     this.page.drawLine({
       start: { x: MARGIN, y: this.y },
       end: { x: PAGE.width - MARGIN, y: this.y },
@@ -239,48 +312,147 @@ class PdfWriter {
   }
 
   drawKeyValue(label, value) {
-    const labelFont = this.fonts.bold;
-    const valueFont = this.fonts.regular;
-    const size = 10.5;
-    const labelText = `${toPdfSafeText(label)}:`;
-    const valueLines = wrapText(toPdfSafeText(value), valueFont, size, CONTENT_WIDTH - 150);
-    const blockHeight = Math.max(1, valueLines.length) * (size + 3) + 6;
-    this.ensureSpace(blockHeight);
-
-    this.page.drawText(labelText, {
-      x: MARGIN,
-      y: this.y,
-      size,
-      font: labelFont,
-      color: rgb(0.25, 0.32, 0.42),
-    });
-
+    const size = 10;
+    const labelText = toPdfSafeText(label);
+    const labelW = Math.min(168, this.fonts.bold.widthOfTextAtSize(`${labelText}  `, size));
+    const valueLines = wrapText(toPdfSafeText(value), this.fonts.regular, size, CONTENT_WIDTH - labelW - 8);
+    const lineHeight = size + 4;
     valueLines.forEach((line, index) => {
+      this.ensureSpace(lineHeight);
+      if (index === 0) {
+        this.page.drawText(labelText, {
+          x: MARGIN,
+          y: this.y,
+          size,
+          font: this.fonts.bold,
+          color: rgb(0.28, 0.36, 0.46),
+        });
+      }
       this.page.drawText(line, {
-        x: MARGIN + 150,
-        y: this.y - index * (size + 3),
+        x: MARGIN + labelW + 6,
+        y: this.y,
         size,
-        font: valueFont,
+        font: this.fonts.regular,
         color: rgb(0.12, 0.16, 0.22),
       });
+      this.y -= lineHeight;
     });
-    this.y -= blockHeight;
+    this.y -= 2;
+  }
+
+  drawPair(leftLabel, leftValue, rightLabel, rightValue) {
+    const size = 10;
+    const col = CONTENT_WIDTH / 2;
+    this.ensureSpace(18);
+    const draw = (label, value, x) => {
+      const labelText = `${toPdfSafeText(label)}  `;
+      this.page.drawText(labelText, {
+        x,
+        y: this.y,
+        size,
+        font: this.fonts.bold,
+        color: rgb(0.28, 0.36, 0.46),
+      });
+      const offset = this.fonts.bold.widthOfTextAtSize(labelText, size);
+      const max = Math.max(40, col - offset - 10);
+      const valueText = wrapText(toPdfSafeText(value || "—"), this.fonts.regular, size, max)[0] || "—";
+      this.page.drawText(valueText, {
+        x: x + offset,
+        y: this.y,
+        size,
+        font: this.fonts.regular,
+        color: rgb(0.12, 0.16, 0.22),
+      });
+    };
+    draw(leftLabel, leftValue, MARGIN);
+    if (rightLabel) draw(rightLabel, rightValue, MARGIN + col);
+    this.y -= 16;
   }
 
   drawBrandHeader(logoImage) {
-    this.ensureSpace(96);
-    this.y = drawPdfBrandHeader(
-      this.page,
-      this.fonts,
-      this.y,
-      logoImage,
-      {
-        pageWidth: PAGE.width,
-        margin: MARGIN,
-        subtitle: pdfT("consultation.brandSubtitle"),
-      },
-    );
+    this.logoImage = logoImage;
+    this.y = drawPdfBrandHeader(this.page, this.fonts, this.y, logoImage, {
+      pageWidth: PAGE.width,
+      margin: MARGIN,
+      subtitle: pdfT("consultation.brandSubtitle"),
+    });
   }
+
+  stampFooters() {
+    const pages = this.pdfDoc.getPages();
+    const total = pages.length;
+    pages.forEach((page, index) => {
+      page.drawLine({
+        start: { x: MARGIN, y: 40 },
+        end: { x: PAGE.width - MARGIN, y: 40 },
+        thickness: 0.6,
+        color: PDF_LINE_COLOR,
+      });
+      page.drawText(toPdfSafeText(pdfT("consultation.footerBrand")), {
+        x: MARGIN,
+        y: 26,
+        size: 8,
+        font: this.fonts.regular,
+        color: PDF_MUTED_COLOR,
+      });
+      const pageLabel = toPdfSafeText(pdfT("consultation.page", { current: index + 1, total }));
+      const width = this.fonts.regular.widthOfTextAtSize(pageLabel, 8);
+      page.drawText(pageLabel, {
+        x: PAGE.width - MARGIN - width,
+        y: 26,
+        size: 8,
+        font: this.fonts.regular,
+        color: PDF_MUTED_COLOR,
+      });
+    });
+  }
+}
+
+function formatClinicalAnalysis(raw) {
+  const source = cleanAnalysisText(raw);
+  if (!source) return [];
+
+  const text = source
+    .replace(/\r/g, "")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1$2")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  const blocks = [];
+  text.split("\n").forEach((rawLine) => {
+    const line = rawLine.trim();
+    if (!line || /^[-_*]{3,}$/.test(line)) {
+      if (blocks.length && blocks[blocks.length - 1].kind !== "gap") {
+        blocks.push({ kind: "gap" });
+      }
+      return;
+    }
+
+    const heading = line.match(/^#{1,6}\s+(.+)$/);
+    if (heading) {
+      blocks.push({ kind: "heading", text: heading[1].replace(/[*_#]+/g, "").trim() });
+      return;
+    }
+
+    const bullet = line.match(/^(?:[-•]|\d+[.)])\s+(.+)$/);
+    if (bullet) {
+      const marker = line.match(/^\d+[.)]/) ? line.match(/^\d+[.)]/)[0] : "•";
+      blocks.push({
+        kind: "bullet",
+        text: `${marker}  ${bullet[1].replace(/[*_#]+/g, "").trim()}`,
+      });
+      return;
+    }
+
+    blocks.push({
+      kind: "text",
+      text: line.replace(/[*_#]+/g, "").replace(/\s{2,}/g, " ").trim(),
+    });
+  });
+
+  return blocks.filter((block, index) => block.kind !== "gap" || index !== 0);
 }
 
 function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
@@ -288,27 +460,45 @@ function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
   const patientName =
     formData.nombre_mascota || consultation.nombre_mascota || pdfT("consultation.petDefault");
   const consultationId = formatConsultationId(consultation);
-  const statusLabel =
-    getConsultationStatusLabel(consultation.status);
+  const statusLabel = getConsultationStatusLabel(consultation.status);
+  const speciesKey = consultation.category || consultation.especie || formData.especie || "";
+  const species = SPECIES_LABELS[speciesKey] || speciesKey || "—";
 
-  writer.drawLine(`${pdfT("consultation.folio")}: ${consultationId}`, { size: 11, font: "bold" });
-  writer.drawLine(`${pdfT("consultation.pet")}: ${patientName}`, { size: 11 });
-  writer.drawLine(`${pdfT("consultation.species")}: ${consultation.category || consultation.especie || "—"}`, {
-    size: 11,
+  writer.ensureSpace(92);
+  const cardTop = writer.y;
+  const cardHeight = 88;
+  writer.page.drawRectangle({
+    x: MARGIN,
+    y: cardTop - cardHeight,
+    width: CONTENT_WIDTH,
+    height: cardHeight,
+    color: CARD,
+    borderColor: PDF_LINE_COLOR,
+    borderWidth: 0.8,
   });
-  writer.drawLine(`${pdfT("consultation.status")}: ${statusLabel}`, { size: 11 });
-  writer.drawLine(`${pdfT("consultation.date")}: ${formatDate(consultation.created_at)}`, { size: 11 });
+  writer.y = cardTop - 16;
+  writer.drawPair(pdfT("consultation.folio"), consultationId, pdfT("consultation.date"), formatDate(consultation.created_at));
+  writer.drawPair(pdfT("consultation.pet"), patientName, pdfT("consultation.species"), species);
+  writer.drawPair(pdfT("consultation.owner"), formData.nombre_dueño || formData.nombre_dueno || "—", pdfT("consultation.breed"), formData.raza || "—");
+  writer.drawPair(pdfT("consultation.status"), statusLabel, pdfT("consultation.vet"), veterinarian?.nombre || "—");
+  writer.y = cardTop - cardHeight - 12;
 
-  if (veterinarian?.nombre || veterinarian?.email) {
-    writer.drawLine(
-      `${pdfT("consultation.vet")}: ${veterinarian.nombre || "—"}${veterinarian.email ? ` (${veterinarian.email})` : ""}`,
-      { size: 10.5, color: rgb(0.35, 0.42, 0.52) },
+  const identity = new Set([
+    "nombre_mascota",
+    "nombre_dueño",
+    "nombre_dueno",
+    "especie",
+    "raza",
+    "fecha",
+  ]);
+  const clinicalRows = collectClinicalFields(consultation).filter((row) => {
+    const key = Object.keys(getClinicalFieldLabels()).find(
+      (field) => getClinicalFieldLabels()[field] === row.label,
     );
-  }
+    return !identity.has(key || "");
+  });
 
-  writer.y -= 8;
   writer.drawSectionTitle(pdfT("consultation.sectionClinicalData"));
-  const clinicalRows = collectClinicalFields(consultation);
   if (clinicalRows.length) {
     clinicalRows.forEach(({ label, value }) => writer.drawKeyValue(label, value));
   } else {
@@ -323,9 +513,9 @@ function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
     formData.motivo_consulta ||
     consultation.motivo_consulta ||
     "";
-  if (motivo) {
+  if (motivo && String(motivo).trim().toUpperCase() !== "NO") {
     writer.drawSectionTitle(pdfT("consultation.sectionReason"));
-    writer.drawLine(motivo, { size: 10.5, lineHeight: 14 });
+    writer.drawLine(motivo, { size: 10.5, lineHeight: 15 });
   }
 
   const extraSections = [
@@ -336,15 +526,31 @@ function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
   ];
 
   extraSections.forEach(([title, value]) => {
-    if (!value) return;
+    if (!value || String(value).trim().toUpperCase() === "NO") return;
     writer.drawSectionTitle(title);
-    writer.drawLine(String(value), { size: 10.5, lineHeight: 14 });
+    writer.drawLine(String(value), { size: 10.5, lineHeight: 15 });
   });
 
-  const analysis = cleanAnalysisText(consultation.analysis);
-  if (analysis) {
+  const analysis = formatClinicalAnalysis(consultation.analysis);
+  if (analysis.length) {
     writer.drawSectionTitle(pdfT("consultation.sectionAnalysis"));
-    writer.drawLine(analysis, { size: 10, lineHeight: 13.5 });
+    analysis.forEach((block) => {
+      if (block.kind === "heading") {
+        writer.ensureSpace(78);
+        writer.drawSectionTitle(block.text);
+        return;
+      }
+      if (block.kind === "gap") {
+        writer.ensureSpace(10);
+        writer.y -= 6;
+        return;
+      }
+      writer.drawLine(block.text, {
+        size: block.kind === "bullet" ? 10.5 : 10.5,
+        lineHeight: 15,
+        indent: block.kind === "bullet" ? 14 : 0,
+      });
+    });
   }
 
   if (consultation.rating) {
@@ -357,7 +563,7 @@ function appendConsultationDetail(writer, consultation, { veterinarian } = {}) {
 }
 
 function appendPdfFooter(writer) {
-  writer.ensureSpace(24);
+  writer.y -= 8;
   writer.drawLine(pdfT("consultation.footerGenerated", { date: formatDate(new Date().toISOString()) }), {
     size: 9,
     color: rgb(0.5, 0.55, 0.62),
@@ -366,6 +572,7 @@ function appendPdfFooter(writer) {
     size: 9,
     color: rgb(0.5, 0.55, 0.62),
   });
+  writer.stampFooters();
 }
 
 function triggerPdfDownload(pdfBytes, filename) {
@@ -386,6 +593,8 @@ export async function downloadConsultationPdf(consultation, { veterinarian } = {
   }
 
   const pdfDoc = await PDFDocument.create();
+  pdfDoc.setTitle("GUIAA Diagnostico");
+  pdfDoc.setAuthor("GUIAA");
   const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const writer = new PdfWriter(pdfDoc, { regular, bold });

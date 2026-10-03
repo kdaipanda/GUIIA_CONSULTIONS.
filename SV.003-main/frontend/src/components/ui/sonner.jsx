@@ -23,17 +23,16 @@ const Toaster = ({ ...props }) => {
   return (
     <Sonner
       theme={theme === "dark" ? "dark" : "light"}
-      position="top-right"
-      closeButton
-      richColors
+      position="top-center"
+      closeButton={false}
+      richColors={false}
       expand
       visibleToasts={4}
       gap={10}
       className="guiaa-toaster"
       toastOptions={{
         classNames: {
-          toast:
-            "guiaa-toast group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
+          toast: "guiaa-toast",
           description: "group-[.toast]:text-muted-foreground",
           actionButton:
             "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",

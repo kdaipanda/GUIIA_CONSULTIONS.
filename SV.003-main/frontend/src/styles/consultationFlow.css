@@ -270,6 +270,12 @@
   box-shadow: 0 0 0 2px rgba(61, 155, 143, 0.18) !important;
 }
 
+.consultation-page .consultation-form .guiaa-combobox-content input:focus,
+.consultation-page .consultation-form .guiaa-combobox-content [cmdk-input]:focus {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
 .consultation-page .page-title-icon {
   background: rgba(38, 91, 147, 0.1);
   color: #0c2d4d;

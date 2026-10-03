@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import * as Tabs from "@radix-ui/react-tabs";
 import {
   Brain,
-  CalendarDays,
   ClipboardList,
   Crown,
+  MoreVertical,
   Plus,
   User,
 } from "lucide-react";
@@ -16,48 +16,141 @@ import {
   getConsultationPatientTitle,
   getConsultationReasonPreview,
   getConsultationSpeciesIcon,
+  getConsultationSpeciesLabel,
   getConsultationStatusLabel,
 } from "../../lib/consultationDisplay";
 import "./dashboardActivity.css";
 
-function ActivityCard({ consultation, embedded, onOpen, continueLabel, viewLabel }) {
-  const status = consultation.status;
-  const actionLabel = status === "draft" ? continueLabel : viewLabel;
+const ACCENT_BY_STATUS = {
+  completed: "teal",
+  in_progress: "blue",
+  draft: "amber",
+};
+
+function consultationProgress(status) {
+  if (status === "completed") return 100;
+  if (status === "in_progress") return 65;
+  return 30;
+}
+
+function relativeTimeLabel(iso, t) {
+  if (!iso) return t("dashActivity.badgeDraft");
+  const diffMs = Date.now() - new Date(iso).getTime();
+  if (Number.isNaN(diffMs) || diffMs < 0) return formatConsultationDateShort(iso);
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return t("dashActivity.timeJustNow");
+  if (mins < 60) return t("dashActivity.timeMinutes", { count: mins });
+  const hours = Math.floor(mins / 60);
+  if (hours < 48) return t("dashActivity.timeHours", { count: hours });
+  const days = Math.floor(hours / 24);
+  if (days < 14) return t("dashActivity.timeDays", { count: days });
+  return t("dashActivity.timeWeeks", { count: Math.floor(days / 7) });
+}
+
+function statusBadgeLabel(status, t) {
+  if (status === "completed") return t("dashActivity.badgeCompleted");
+  if (status === "in_progress") return t("dashActivity.badgeInProgress");
+  return t("dashActivity.badgeDraft");
+}
+
+function ActivityCard({ consultation, embedded, onOpen, continueLabel, viewLabel, t }) {
+  const status = consultation.status || "draft";
+  const accent = ACCENT_BY_STATUS[status] || "blue";
+  const progress = consultationProgress(status);
+  const actionLabel = status === "draft" || status === "in_progress" ? continueLabel : viewLabel;
+  const title = getConsultationPatientTitle(consultation);
+  const species = getConsultationSpeciesLabel(consultation);
+  const preview = getConsultationReasonPreview(consultation, 72);
 
   return (
     <article
-      className={`dashboard-activity-card${embedded ? " dashboard-activity-card--embedded" : ""}`}
+      className={`dashboard-activity-card dashboard-activity-card--project accent-${accent}${
+        embedded ? " dashboard-activity-card--embedded" : ""
+      }`}
     >
+      <div className="dashboard-activity-card-glow" aria-hidden />
+
       <div className="dashboard-activity-card-top">
-        <span className="dashboard-activity-folio">{formatConsultationFolio(consultation)}</span>
-        <span className={`dashboard-activity-status dashboard-activity-status--${status || "draft"}`}>
-          {getConsultationStatusLabel(status)}
-        </span>
+        <time className="dashboard-activity-date" dateTime={consultation.created_at || undefined}>
+          {formatConsultationDateShort(consultation.created_at)}
+        </time>
+        <button
+          type="button"
+          className="dashboard-activity-more"
+          aria-label={t("dashActivity.openMenu")}
+          onClick={() => onOpen?.(consultation.id)}
+        >
+          <MoreVertical size={16} strokeWidth={2} aria-hidden />
+        </button>
       </div>
 
-      <div className="dashboard-activity-main">
+      <div className="dashboard-activity-hero">
         <span className="dashboard-activity-species" aria-hidden>
           {getConsultationSpeciesIcon(consultation)}
         </span>
-        <div className="dashboard-activity-body">
-          <h3>{getConsultationPatientTitle(consultation)}</h3>
-          <p>{getConsultationReasonPreview(consultation)}</p>
-          <div className="dashboard-activity-meta">
-            <span className="dashboard-activity-date">
-              <CalendarDays size={14} aria-hidden />
-              {formatConsultationDateShort(consultation.created_at)}
-            </span>
-            <Button
-              type="button"
-              variant="guiaaPrimarySm"
-              size="compactGradient"
-              className="dashboard-activity-action"
-              onClick={() => onOpen?.(consultation.id)}
-            >
-              {actionLabel}
-            </Button>
-          </div>
+        <h3 className="dashboard-activity-title">{title}</h3>
+        <p className="dashboard-activity-subtitle">
+          {species}
+          {status ? ` · ${getConsultationStatusLabel(status)}` : ""}
+        </p>
+        <p className="dashboard-activity-preview">{preview}</p>
+      </div>
+
+      <div className="dashboard-activity-progress">
+        <div className="dashboard-activity-progress-head">
+          <span>{t("dashActivity.progress")}</span>
+          <span className="dashboard-activity-folio">{formatConsultationFolio(consultation)}</span>
         </div>
+        <div
+          className="dashboard-activity-progress-track"
+          role="progressbar"
+          aria-valuenow={progress}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={t("dashActivity.progress")}
+        >
+          <span
+            className="dashboard-activity-progress-fill"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="dashboard-activity-progress-foot">
+          <span className="dashboard-activity-progress-pct">{progress}%</span>
+        </div>
+      </div>
+
+      <div className="dashboard-activity-footer">
+        <div className="dashboard-activity-avatars" aria-hidden>
+          <span className="dashboard-activity-avatar dashboard-activity-avatar--species">
+            {getConsultationSpeciesIcon(consultation)}
+          </span>
+          <button
+            type="button"
+            className="dashboard-activity-avatar dashboard-activity-avatar--add"
+            onClick={() => onOpen?.(consultation.id)}
+            aria-label={actionLabel}
+          >
+            <Plus size={14} strokeWidth={2.5} />
+          </button>
+        </div>
+        <span className="dashboard-activity-time-badge">
+          {relativeTimeLabel(consultation.created_at, t)}
+        </span>
+      </div>
+
+      <div className="dashboard-activity-cta-row">
+        <span className={`dashboard-activity-chip dashboard-activity-chip--${status}`}>
+          {statusBadgeLabel(status, t)}
+        </span>
+        <Button
+          type="button"
+          variant="guiaaPrimarySm"
+          size="compactGradient"
+          className="dashboard-activity-action"
+          onClick={() => onOpen?.(consultation.id)}
+        >
+          {actionLabel}
+        </Button>
       </div>
     </article>
   );
@@ -119,10 +212,12 @@ export function DashboardActivitySection({
 
   return (
     <section className={`dashboard-block dashboard-block-activity${embedded ? " clinic-settings-card" : ""}`}>
-      <div className="dashboard-block-head">
-        <h2>{t("dashActivity.title")}</h2>
-        <p>{t("dashActivity.lead")}</p>
-      </div>
+      {!embedded && (
+        <div className="dashboard-block-head">
+          <h2>{t("dashActivity.title")}</h2>
+          <p>{t("dashActivity.lead")}</p>
+        </div>
+      )}
 
       <Tabs.Root className="tabs-root" defaultValue="activity">
         <Tabs.List className="tabs-list dashboard-activity-tabs" aria-label={t("dashActivity.tabsAria")}>
@@ -162,7 +257,7 @@ export function DashboardActivitySection({
             {dashboardLoading ? (
               <div className="dashboard-activity-grid">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="dashboard-activity-skeleton">
+                  <div key={i} className="dashboard-activity-skeleton dashboard-activity-skeleton--project">
                     <div className="skeleton skeleton-text short" />
                     <div className="skeleton skeleton-text medium" />
                     <div className="skeleton skeleton-text long" />
@@ -179,6 +274,7 @@ export function DashboardActivitySection({
                     onOpen={openConsultation}
                     continueLabel={t("dashActivity.continue")}
                     viewLabel={t("dashActivity.view")}
+                    t={t}
                   />
                 ))}
               </div>

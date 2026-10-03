@@ -14,6 +14,7 @@ import {
   PLATFORM_ONBOARDING_STEPS,
   markPlatformOnboardingComplete,
 } from "../lib/platformOnboarding";
+import { dispatchOpenHelp } from "../lib/supportReadState";
 
 const VIEW_TO_PATH = {
   dashboard: "/app/dashboard",
@@ -26,7 +27,6 @@ const VIEW_TO_PATH = {
   "consultation-history": "/app/historial",
   membership: "/app/membresia",
   profile: "/app/perfil",
-  help: "/app/ayuda",
 };
 
 export function PlatformOnboarding({ isOpen, onClose, veterinarianId, setView }) {
@@ -47,6 +47,11 @@ export function PlatformOnboarding({ isOpen, onClose, veterinarianId, setView })
 
   const goToAction = () => {
     if (!step?.actionView) return;
+    if (step.actionView === "help") {
+      dispatchOpenHelp();
+      finish();
+      return;
+    }
     setView?.(step.actionView);
     const path = VIEW_TO_PATH[step.actionView];
     if (path) navigate(path);

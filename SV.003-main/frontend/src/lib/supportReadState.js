@@ -53,8 +53,26 @@ export function countUnreadFromTickets(tickets, vetId) {
 
 export const SUPPORT_OPEN_EVENT = "guiaa:open-support";
 
-export function dispatchOpenSupport(ticketId) {
-  window.dispatchEvent(
-    new CustomEvent(SUPPORT_OPEN_EVENT, { detail: { ticketId: ticketId || null } }),
-  );
+/**
+ * Abre el widget de soporte.
+ * - string/number → ticketId (pestaña tickets)
+ * - object → { ticketId?, tab?: "chat"|"tickets"|"help", topicId? }
+ */
+export function dispatchOpenSupport(detail = null) {
+  let payload = { ticketId: null, tab: "chat", topicId: null };
+  if (typeof detail === "string" || typeof detail === "number") {
+    payload = { ticketId: detail, tab: "tickets", topicId: null };
+  } else if (detail && typeof detail === "object") {
+    payload = {
+      ticketId: detail.ticketId || null,
+      tab: detail.tab || (detail.ticketId ? "tickets" : "chat"),
+      topicId: detail.topicId || null,
+    };
+  }
+  window.dispatchEvent(new CustomEvent(SUPPORT_OPEN_EVENT, { detail: payload }));
+}
+
+/** Abre el centro de ayuda dentro del chat. */
+export function dispatchOpenHelp(topicId = null) {
+  dispatchOpenSupport({ tab: "help", topicId: topicId || null });
 }

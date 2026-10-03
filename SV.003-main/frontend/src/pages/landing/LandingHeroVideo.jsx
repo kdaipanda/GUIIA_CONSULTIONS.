@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   LANDING_HERO_VIDEO,
   LANDING_HERO_VIDEO_POSTER,
+  resolveLandingHeroVideoSrc,
 } from "./landingBrandAssets";
 
 async function tryPlay(video, { retries = 2 } = {}) {
@@ -42,6 +43,7 @@ export function LandingHeroVideo({ onFailed }) {
   const [playBlocked, setPlayBlocked] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [heroVideoSrc, setHeroVideoSrc] = useState(LANDING_HERO_VIDEO);
   const [reduceMotion, setReduceMotion] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -50,10 +52,17 @@ export function LandingHeroVideo({ onFailed }) {
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1023px)");
-    const update = () => setIsMobile(mq.matches);
+    const update = () => {
+      setIsMobile(mq.matches);
+      setHeroVideoSrc(resolveLandingHeroVideoSrc());
+    };
     update();
     mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
+    window.addEventListener("resize", update, { passive: true });
+    return () => {
+      mq.removeEventListener("change", update);
+      window.removeEventListener("resize", update);
+    };
   }, []);
 
   useEffect(() => {
@@ -209,7 +218,7 @@ export function LandingHeroVideo({ onFailed }) {
     <div ref={wrapRef} className="landing-hero-video-wrap">
       {canLoadVideo ? (
         <video
-          key={LANDING_HERO_VIDEO}
+          key={heroVideoSrc}
           ref={videoRef}
           loop={!reduceMotion}
           muted
@@ -224,7 +233,7 @@ export function LandingHeroVideo({ onFailed }) {
             }
           }}
         >
-          <source src={LANDING_HERO_VIDEO} type="video/mp4" />
+          <source src={heroVideoSrc} type="video/mp4" />
         </video>
       ) : (
         <img

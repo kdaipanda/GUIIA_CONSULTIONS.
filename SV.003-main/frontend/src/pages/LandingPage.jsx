@@ -11,15 +11,16 @@ import "./landing/landingColleaguesBento.css";
 import "./landing/landingHero3d.css";
 import "./landing/landingInteractions.css";
 import "./landing/landingDarkMode.css";
-import "./landing/landingPricing.css";
 import "./landing/landingApple2026.css";
 import "./landing/landingAntiSlop.css";
 import "./landing/landingFrontendDesign.css";
 import "./landing/landingUiUxProMax.css";
 import "./landing/landingAnimate.css";
+/* Pricing al final: cards dark GUIAA no las pisan anti-slop / uipro */
+import "./landing/landingPricing.css";
 
-import { LandingNavbar } from "./landing/LandingNavbar";
-import { LandingHero } from "./landing/LandingHero";
+import { LandingFluidHero, LandingHeroCapabilities } from "./landing/LandingFluidHero";
+import { LandingBrandTagline } from "./landing/LandingBrandTagline";
 import { LandingHeroStats } from "./landing/LandingHeroStats";
 import { LandingHowItWorks } from "./landing/LandingHowItWorks";
 import { LandingClinicalWorkflow } from "./landing/LandingClinicalWorkflow";
@@ -39,6 +40,7 @@ import { LandingDeferred } from "./landing/LandingDeferred";
 import { LandingSeo } from "./landing/LandingSeo";
 import { useLandingInteractionQuiet } from "./landing/useLandingInteractionQuiet";
 import { trackMetaPageView } from "../lib/metaPixel";
+import "./landing/landingFluidHero.css";
 
 export function LandingPage({ setView }) {
   const { t } = useTranslation("landing");
@@ -60,19 +62,18 @@ export function LandingPage({ setView }) {
   );
 
   return (
-    <div className="landing-shell landing-shell--page min-h-screen p-3 pb-5 antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
+    <div className="landing-shell landing-shell--page landing-shell--fluid-hero min-h-screen p-3 pb-5 antialiased sm:p-5 sm:pb-20 lg:pb-6 lg:p-6">
       <LandingSeo />
 
       <a href="#landing-main" className="landing-skip-link">
         {t("nav.skipToContent")}
       </a>
 
-      <div className="landing-page-card mx-auto max-w-[82rem]">
-        <div className="landing-petpal-top">
-          <LandingNavbar setView={setViewDeferred} hero />
-          <LandingHero setView={setViewDeferred} />
-        </div>
+      <LandingFluidHero setView={setViewDeferred} />
 
+      <div className="landing-page-card mx-auto max-w-[82rem]">
+        <LandingHeroCapabilities />
+        <LandingBrandTagline variant="strip" />
         <LandingHeroStats />
 
         <div className="landing-body-wrap">
@@ -121,10 +122,10 @@ export function LandingPage({ setView }) {
               </LandingReveal>
             </LandingDeferred>
           </main>
-
-          <LandingFooter />
         </div>
       </div>
+
+      <LandingFooter />
 
       <LandingSocialRail />
     </div>

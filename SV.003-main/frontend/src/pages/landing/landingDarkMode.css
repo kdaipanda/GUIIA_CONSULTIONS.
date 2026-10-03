@@ -8,25 +8,31 @@
 [data-theme="dark"] .landing-shell,
 html.dark .landing-shell {
   color-scheme: dark;
-  background: linear-gradient(
-    165deg,
-    #060a10 0%,
-    #0a1018 38%,
-    #0c1520 100%
-  ) !important;
+  /* Glow central suave → navy casi negro (ref. radial premium) */
+  background:
+    radial-gradient(
+      ellipse 72% 58% at 50% 42%,
+      #2a3548 0%,
+      #1a2332 38%,
+      #0e1520 68%,
+      #060a12 100%
+    ) !important;
 }
 
 [data-theme="dark"] .landing-page-card,
 html.dark .landing-page-card {
-  background: linear-gradient(
-    180deg,
-    rgba(18, 26, 38, 0.98) 0%,
-    rgba(14, 20, 30, 0.96) 100%
-  ) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  background:
+    radial-gradient(
+      ellipse 78% 62% at 50% 32%,
+      #2c384c 0%,
+      #1c2636 42%,
+      #121a26 72%,
+      #0c121c 100%
+    ) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
   box-shadow:
-    0 24px 80px -12px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    0 28px 72px -20px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -34,9 +40,10 @@ html.dark .landing-page-card {
 [data-theme="dark"] .landing-body-wrap,
 html.dark .landing-body-wrap {
   background:
-    radial-gradient(ellipse 90% 50% at 50% 0%, rgba(61, 155, 143, 0.12), transparent 55%),
-    radial-gradient(ellipse 60% 45% at 100% 40%, rgba(38, 91, 147, 0.1), transparent 52%),
-    linear-gradient(180deg, #0e1622 0%, #0a1018 45%, #0c121c 100%) !important;
+    radial-gradient(ellipse 85% 55% at 50% 28%, rgba(42, 53, 72, 0.95) 0%, transparent 62%),
+    radial-gradient(ellipse 50% 40% at 85% 70%, rgba(38, 91, 147, 0.08), transparent 55%),
+    radial-gradient(ellipse 45% 35% at 12% 75%, rgba(61, 155, 143, 0.06), transparent 50%),
+    linear-gradient(180deg, #141c28 0%, #0c121c 55%, #080c14 100%) !important;
 }
 
 [data-theme="dark"] .landing-body-wrap::before,
@@ -72,8 +79,8 @@ html.dark .landing-petpal-cta-hint {
 
 [data-theme="dark"] .landing-nav-hero,
 html.dark .landing-nav-hero {
-  background: rgba(14, 22, 34, 0.72) !important;
-  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  background: transparent !important;
+  border-bottom-color: transparent !important;
 }
 
 [data-theme="dark"] .landing-hero-window,
@@ -84,7 +91,7 @@ html.dark .landing-hero-window {
 
 [data-theme="dark"] .landing-nav-hero.landing-nav-scrolled,
 html.dark .landing-nav-hero.landing-nav-scrolled {
-  background: rgba(10, 16, 24, 0.62) !important;
+  background: rgba(10, 16, 24, 0.55) !important;
   backdrop-filter: blur(20px) saturate(1.15);
   -webkit-backdrop-filter: blur(20px) saturate(1.15);
   border-bottom-color: rgba(255, 255, 255, 0.08) !important;
@@ -158,10 +165,16 @@ html.dark .landing-body-wrap .landing-section-alt {
 html.dark .landing-body-wrap .landing-section-band {
   background: linear-gradient(
     90deg,
-    rgba(61, 155, 143, 0.12) 0%,
-    rgba(38, 91, 147, 0.08) 50%,
-    rgba(61, 155, 143, 0.12) 100%
+    rgba(61, 155, 143, 0.1) 0%,
+    rgba(38, 91, 147, 0.07) 50%,
+    rgba(61, 155, 143, 0.1) 100%
   ) !important;
+}
+
+/* Capabilities / band fuera de body-wrap: no slab claro */
+[data-theme="dark"] .landing-page-card > .landing-section-band,
+html.dark .landing-page-card > .landing-section-band {
+  background: transparent !important;
 }
 
 [data-theme="dark"] .landing-page-card .border-guiaa-brand-navy\/8,
@@ -325,6 +338,33 @@ html.dark .landing-testimonial-card {
 html.dark .landing-body-wrap .landing-card-interactive:hover {
   border-color: rgba(61, 155, 143, 0.35) !important;
   box-shadow: 0 16px 40px -16px rgba(61, 155, 143, 0.2) !important;
+}
+
+/* Cómo funciona — rail de pasos legible en oscuro */
+[data-theme="dark"] .landing-how-rail-title,
+html.dark .landing-how-rail-title {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .landing-how-rail-detail,
+html.dark .landing-how-rail-detail {
+  color: rgba(226, 232, 240, 0.72) !important;
+}
+
+[data-theme="dark"] .landing-how-rail-num,
+html.dark .landing-how-rail-num {
+  background: rgba(61, 155, 143, 0.22) !important;
+  color: #e8fffb !important;
+  box-shadow: inset 0 0 0 1px rgba(94, 196, 182, 0.35);
+}
+
+[data-theme="dark"] .landing-how-rail-line,
+html.dark .landing-how-rail-line {
+  background: linear-gradient(
+    180deg,
+    rgba(61, 155, 143, 0.55),
+    rgba(255, 255, 255, 0.08)
+  ) !important;
 }
 
 [data-theme="dark"] .landing-body-wrap .landing-btn-secondary,

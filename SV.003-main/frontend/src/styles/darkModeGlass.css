@@ -258,12 +258,12 @@ html.dark .category-card--liquid.selected h4 {
 /* —— Dashboard —— */
 
 [data-theme="dark"] .action-card,
-[data-theme="dark"] .dashboard-activity-card,
+[data-theme="dark"] .dashboard-activity-card:not(.dashboard-activity-card--project),
 [data-theme="dark"] .dashboard-shortcut-card,
 [data-theme="dark"] .dashboard-followup-item,
 [data-theme="dark"] .dashboard-page .dashboard-block,
 html.dark .action-card,
-html.dark .dashboard-activity-card,
+html.dark .dashboard-activity-card:not(.dashboard-activity-card--project),
 html.dark .dashboard-shortcut-card,
 html.dark .dashboard-followup-item,
 html.dark .dashboard-page .dashboard-block {

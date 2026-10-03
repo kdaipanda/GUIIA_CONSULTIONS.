@@ -102,19 +102,17 @@
   box-shadow: 0 4px 14px rgba(47, 133, 122, 0.28) !important;
 }
 
-/* Pricing / panels: opaco, no glass */
-.landing-pricing-card:not(.landing-pricing-card--featured),
+/* Footer panel: opaco, no glass (pricing cards: ver landingPricing.css) */
 .landing-footer-v2-panel {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   background: #ffffff !important;
 }
 
+.landing-pricing-card,
 .landing-pricing-card--featured {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  background: #f8fafc !important;
-  border-color: rgba(61, 155, 143, 0.45) !important;
 }
 
 /* Featured: borde sólido, no barra gradient */
@@ -383,17 +381,16 @@
   display: none !important;
 }
 
-/* Pricing: opaco + badge sólido */
-.landing-pricing-card {
-  border-radius: 1rem !important;
-  box-shadow: 0 10px 28px rgba(12, 45, 77, 0.07) !important;
-}
-
-.landing-pricing-badge,
+/* Pricing: radius/sombra en landingPricing.css; pills de servicios sí */
 .landing-body-wrap .landing-service-pill {
   border-radius: 0.4rem !important;
   background: rgba(61, 155, 143, 0.12) !important;
   color: #0c2d4d !important;
+  text-transform: none !important;
+  letter-spacing: -0.01em !important;
+}
+
+.landing-pricing-badge {
   text-transform: none !important;
   letter-spacing: -0.01em !important;
 }
@@ -815,11 +812,7 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
   background: #3d9b8f !important;
 }
 
-/* Featured pricing: mismo layout que el resto, solo acento */
-.landing-pricing-card--featured {
-  box-shadow: 0 12px 36px -18px rgba(12, 45, 77, 0.16) !important;
-}
-
+/* Featured pricing: tipografía body (colores/sombra en landingPricing.css) */
 .landing-pricing-card--featured .landing-pricing-plan-name,
 .landing-pricing-card--featured .landing-pricing-price {
   font-family: var(--landing-font-body, inherit) !important;
@@ -1063,11 +1056,17 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28) !important;
 }
 
-/* Nav hero: opaco editorial */
+/* Nav hero: transparente sobre video */
 .landing-nav-hero {
-  background: #071622 !important;
+  background: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+.landing-nav-hero.landing-nav-scrolled {
+  background: rgba(7, 22, 34, 0.55) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
 }
 
 /* Product preview: no heredar opacity:0 de App.css fadeInUp */

@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Header } from "../components/Header";
 import { NotificationBell } from "../components/clinic/NotificationBell";
-import { dispatchOpenSupport } from "../lib/supportReadState";
+import { dispatchOpenSupport, dispatchOpenHelp } from "../lib/supportReadState";
 import { fetchAdminSupportTickets, fetchAppointmentRequests, fetchInventorySummary, sendPresenceHeartbeat } from "../lib/clinicApi";
 import { useClinic } from "../context/ClinicContext";
 import { useVet } from "../context/VetContext";
@@ -366,6 +366,11 @@ export function ClinicShell({ children, setView }) {
                     e.preventDefault();
                     setView?.("membership");
                     navigate("/app/membresia");
+                    return;
+                  }
+                  if (view === "help") {
+                    e.preventDefault();
+                    dispatchOpenHelp();
                     return;
                   }
                   setView?.(view);

@@ -1,18 +1,38 @@
-import React, { useState } from "react";
-import { ArrowUpRight, Mail } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TermsAndConditionsModal } from "../../components/TermsAndConditionsModal";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher";
+import { GuiaaLogoImg } from "../../components/GuiaaBrandLockup";
+import { LandingBrandTagline } from "./LandingBrandTagline";
 import { onLandingAnchorClick, productTabHref } from "./landingScroll";
-import {
-  LANDING_NEWSLETTER_EMAIL,
-  LANDING_SOCIAL_LINKS,
-} from "./landingBrandAssets";
+import { LANDING_SOCIAL_LINKS } from "./landingBrandAssets";
+import { readStoredTheme } from "../../lib/themeSync";
+import "./landingFooterMinimal.css";
 
+function useDocumentDarkTheme() {
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof document === "undefined") return readStoredTheme() === "dark";
+    const root = document.documentElement;
+    return root.classList.contains("dark") || root.getAttribute("data-theme") === "dark";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => {
+      setIsDark(root.classList.contains("dark") || root.getAttribute("data-theme") === "dark");
+    };
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ["class", "data-theme"] });
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+}
 function SocialIcon({ id }) {
   const common = {
-    width: 18,
-    height: 18,
+    width: 16,
+    height: 16,
     viewBox: "0 0 24 24",
     fill: "currentColor",
     "aria-hidden": true,
@@ -63,174 +83,77 @@ function SocialIcon({ id }) {
 export function LandingFooter() {
   const { t } = useTranslation("landing");
   const year = new Date().getFullYear();
-  const [email, setEmail] = useState("");
-  const [newsletterState, setNewsletterState] = useState("idle");
   const [legalModal, setLegalModal] = useState(null);
+  const isDark = useDocumentDarkTheme();
+  const chromeTone = isDark ? "on-dark" : "on-light";
+  const switcherTone = isDark ? "on-dark" : "default";
 
-  const footerNav = [
+  const primaryNav = [
     { label: t("footer.product"), href: productTabHref("species"), productTab: "species" },
     { label: t("footer.features"), href: "#features" },
     { label: t("footer.pricing"), href: "#pricing" },
     { label: t("footer.faq"), href: "#faq" },
   ];
 
-  const handleNewsletterSubmit = (event) => {
-    event.preventDefault();
-    const trimmed = email.trim();
-    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setNewsletterState("error");
-      return;
-    }
-
-    const subject = encodeURIComponent(t("footer.newsletterSubject"));
-    const body = encodeURIComponent(t("footer.newsletterBody", { email: trimmed }));
-    window.location.href = `mailto:${LANDING_NEWSLETTER_EMAIL}?subject=${subject}&body=${body}`;
-    setNewsletterState("sent");
-    setEmail("");
-  };
-
   return (
-    <footer className="landing-footer-v2">
-      <div className="landing-footer-v2-inner landing-container">
-        <div className="landing-footer-v2-panel">
-          <header className="landing-footer-v2-hero">
-            <span className="landing-footer-v2-eyebrow">{t("footer.eyebrow")}</span>
-            <h2 className="landing-footer-v2-headline">
-              {t("footer.headlineBefore")}{" "}
-              <span className="landing-footer-v2-accent">{t("footer.headlineAccent")}</span>
-              {t("footer.headlineAfter")}
-            </h2>
-          </header>
-
-          <div className="landing-footer-v2-grid">
-            <section className="landing-footer-v2-connect" aria-labelledby="footer-social-title">
-              <div className="mb-4">
-                <LanguageSwitcher />
-              </div>
-              <h3 id="footer-social-title" className="landing-footer-v2-label">
-                {t("footer.socialTitle")}
-              </h3>
-              <div className="landing-footer-v2-social-grid">
-                {LANDING_SOCIAL_LINKS.map(({ id, label, href, subtitle }) => (
-                  <a
-                    key={id}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="landing-footer-v2-social-card"
-                    aria-label={`${label}${subtitle ? ` — ${subtitle}` : ""}`}
-                  >
-                    <span className="landing-footer-v2-social-icon" aria-hidden>
-                      <SocialIcon id={id} />
-                    </span>
-                    <span className="landing-footer-v2-social-text">
-                      <span className="landing-footer-v2-social-name">{label}</span>
-                      {subtitle && (
-                        <span className="landing-footer-v2-social-sub">{subtitle}</span>
-                      )}
-                    </span>
-                    <ArrowUpRight
-                      size={14}
-                      className="landing-footer-v2-social-arrow"
-                      aria-hidden
-                    />
-                  </a>
-                ))}
-              </div>
-
-              <nav className="landing-footer-v2-nav" aria-label={t("nav.main")}>
-                {footerNav.map(({ label, href, productTab }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    onClick={(event) => onLandingAnchorClick(event, { productTab })}
-                  >
-                    {label}
-                  </a>
-                ))}
-              </nav>
-            </section>
-
-            <section
-              className="landing-footer-v2-mailbox"
-              aria-labelledby="footer-mailbox-title"
-            >
-              <div className="landing-footer-v2-mailbox-card">
-                <div className="landing-footer-v2-mailbox-head">
-                  <span className="landing-footer-v2-mailbox-icon" aria-hidden>
-                    <Mail size={18} />
-                  </span>
-                  <div>
-                    <h3 id="footer-mailbox-title" className="landing-footer-v2-label">
-                      {t("footer.newsletterTitle")}
-                    </h3>
-                    <p className="landing-footer-v2-mailbox-hint">
-                      {t("footer.newsletterLead")}
-                    </p>
-                  </div>
-                </div>
-
-                <form className="landing-footer-v2-form" onSubmit={handleNewsletterSubmit}>
-                  <label htmlFor="landing-newsletter-email" className="sr-only">
-                    {t("footer.newsletterPlaceholder")}
-                  </label>
-                  <input
-                    id="landing-newsletter-email"
-                    type="email"
-                    name="email"
-                    autoComplete="email"
-                    placeholder={t("footer.newsletterPlaceholder")}
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      if (newsletterState !== "idle") setNewsletterState("idle");
-                    }}
-                    spellCheck={false}
-                    className="landing-footer-v2-input"
-                    disabled={newsletterState === "sent"}
-                  />
-                  <button type="submit" className="landing-footer-v2-submit">
-                    {t("footer.newsletterSubmit")}
-                  </button>
-                </form>
-
-                {newsletterState === "error" && (
-                  <p
-                    className="landing-footer-v2-form-msg landing-footer-v2-form-msg--error"
-                    role="alert"
-                  >
-                    {t("footer.newsletterError")}
-                  </p>
-                )}
-                {newsletterState === "sent" && (
-                  <p
-                    className="landing-footer-v2-form-msg landing-footer-v2-form-msg--ok"
-                    role="status"
-                  >
-                    {t("footer.newsletterSent")}
-                  </p>
-                )}
-              </div>
-            </section>
+    <footer className="landing-footer-min" aria-label="GUIAA">
+      <div className="landing-footer-min-inner">
+        <div className="landing-footer-min-top">
+          <div className="landing-footer-min-brand-block">
+            <a href="#landing-main" className="landing-footer-min-brand">
+              <GuiaaLogoImg tone={chromeTone} className="landing-footer-min-logo" alt="" />
+              <span className="landing-footer-min-brand-name">GUIAA</span>
+            </a>
+            <LandingBrandTagline variant="footer" />
           </div>
 
-          <div className="landing-footer-v2-bottom">
-            <p className="landing-footer-v2-copy">
-              © {year} GUIAA. {t("footer.rights")}
-            </p>
-            <div className="landing-footer-v2-legal">
-              <button type="button" onClick={() => setLegalModal("terms")}>
-                {t("footer.terms")}
-              </button>
-              <span className="landing-footer-v2-legal-dot" aria-hidden>
-                ·
-              </span>
+          <div className="landing-footer-min-social" role="list">
+            {LANDING_SOCIAL_LINKS.map(({ id, label, href }) => (
+              <a
+                key={id}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="landing-footer-min-social-btn"
+                aria-label={label}
+                role="listitem"
+              >
+                <SocialIcon id={id} />
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <div className="landing-footer-min-rule" aria-hidden />
+
+        <div className="landing-footer-min-bottom">
+          <div className="landing-footer-min-copy">
+            <p>© {year} GUIAA</p>
+            <p>{t("footer.rights")}</p>
+            <div className="landing-footer-min-lang">
+              <LanguageSwitcher tone={switcherTone} />
+            </div>
+          </div>
+
+          <div className="landing-footer-min-links">
+            <nav className="landing-footer-min-nav" aria-label={t("nav.main")}>
+              {primaryNav.map(({ label, href, productTab }) => (
+                <a
+                  key={label}
+                  href={href}
+                  onClick={(event) => onLandingAnchorClick(event, { productTab })}
+                >
+                  {label}
+                </a>
+              ))}
+            </nav>
+            <div className="landing-footer-min-legal">
               <button type="button" onClick={() => setLegalModal("privacy")}>
                 {t("footer.privacy")}
               </button>
-              <span className="landing-footer-v2-legal-dot" aria-hidden>
-                ·
-              </span>
+              <button type="button" onClick={() => setLegalModal("terms")}>
+                {t("footer.terms")}
+              </button>
               <a href="mailto:soporte@guiaa.vet">soporte@guiaa.vet</a>
             </div>
           </div>

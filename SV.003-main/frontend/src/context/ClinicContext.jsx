@@ -49,6 +49,15 @@ export function ClinicProvider({ children }) {
         return;
       }
 
+      // Dueños B2C no tienen org clínica — no llamar ensure_organization.
+      if ((veterinarian?.account_kind || "").toLowerCase() === "pet_owner") {
+        setOrganization(null);
+        setMembers([]);
+        setMembership(null);
+        setLoading(false);
+        return;
+      }
+
       const key = clinicCacheKey(vetId, "organization");
       const cached = !force ? readClinicDataCache(key) : null;
       if (cached) {
@@ -75,7 +84,7 @@ export function ClinicProvider({ children }) {
         setLoading(false);
       }
     },
-    [applyOrgData, vetId],
+    [applyOrgData, vetId, veterinarian?.account_kind],
   );
 
   useEffect(() => {

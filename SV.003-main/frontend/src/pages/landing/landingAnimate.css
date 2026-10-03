@@ -513,10 +513,10 @@
   }
 }
 
-/* Móvil — refuerzo final de cascada (después de UiUxProMax) */
+/* Móvil — refuerzo final de cascada */
 @media (max-width: 639px) {
-  #pricing .landing-pricing-card-head {
-    flex-direction: column;
+  #pricing .landing-pricing-card-meta {
+    flex-wrap: wrap;
     align-items: flex-start;
     gap: 0.55rem;
   }

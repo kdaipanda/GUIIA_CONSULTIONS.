@@ -1,6 +1,19 @@
 import React, { useState } from "react";
-import { ChevronDown, Mail } from "lucide-react";
+import { ArrowRight, ChevronDown, Mail } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { dispatchOpenHelp } from "../../lib/supportReadState";
+
+function FaqAnswer({ a }) {
+  const paragraphs = Array.isArray(a) ? a.filter(Boolean) : a ? [a] : [];
+  if (paragraphs.length === 0) return null;
+  return (
+    <div className="landing-faq-panel-inner space-y-3 pb-4 pr-8 text-sm leading-relaxed text-guiaa-brand-ink-muted">
+      {paragraphs.map((paragraph) => (
+        <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+      ))}
+    </div>
+  );
+}
 
 function FaqItem({ id, q, a, isOpen, onToggle }) {
   const panelId = `${id}-panel`;
@@ -32,9 +45,7 @@ function FaqItem({ id, q, a, isOpen, onToggle }) {
         className="landing-faq-panel"
         hidden={!isOpen}
       >
-        <div className="landing-faq-panel-inner pb-4 pr-8 text-sm leading-relaxed text-guiaa-brand-ink-muted">
-          {a}
-        </div>
+        <FaqAnswer a={a} />
       </div>
     </li>
   );
@@ -50,17 +61,33 @@ export function LandingFaq() {
       <div className="landing-container">
         <div className="landing-faq-layout">
           <div className="landing-faq-intro">
-            <h2 className="landing-section-title text-guiaa-brand-navy">
+            <p className="landing-faq-eyebrow text-xs font-semibold uppercase tracking-[0.14em] text-guiaa-brand-ink-muted">
+              {t("faq.eyebrow")}
+            </p>
+            <h2 className="landing-section-title mt-2 text-guiaa-brand-navy">
               {t("faq.title")}
             </h2>
             <p className="landing-lead mt-3 text-sm sm:text-base">{t("faq.lead")}</p>
-            <a
-              href="mailto:soporte@guiaa.vet"
-              className="landing-link-quiet mt-6 inline-flex min-h-11 items-center gap-2"
-            >
-              <Mail size={15} aria-hidden />
-              {t("faq.emailCta")}
-            </a>
+            <p className="mt-4 text-sm leading-relaxed text-guiaa-brand-ink-muted">
+              {t("faq.moreLead")}
+            </p>
+            <div className="mt-6 flex flex-col items-start gap-3">
+              <button
+                type="button"
+                onClick={() => dispatchOpenHelp()}
+                className="landing-faq-help-cta inline-flex min-h-11 items-center gap-2 rounded-full border border-guiaa-brand-navy/15 bg-white px-5 text-sm font-semibold text-guiaa-brand-navy shadow-sm transition hover:border-guiaa-brand-green/45 hover:bg-guiaa-brand-green/5"
+              >
+                {t("faq.helpCenterCta")}
+                <ArrowRight size={16} aria-hidden />
+              </button>
+              <a
+                href="mailto:soporte@guiaa.vet"
+                className="landing-link-quiet inline-flex min-h-11 items-center gap-2"
+              >
+                <Mail size={15} aria-hidden />
+                {t("faq.emailCta")}
+              </a>
+            </div>
           </div>
 
           <ul className="landing-faq-list" aria-label={t("faq.title")}>

@@ -9,6 +9,7 @@ import { Textarea } from "../../components/ui/textarea";
 import { GuiaaLogoImg } from "../../components/GuiaaBrandLockup";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 import "./appointmentRequestPortal.css";
+import { FormCombobox } from "../../components/ui/combobox";
 
 const SPECIES = ["perros", "gatos", "conejos", "aves", "otros"];
 
@@ -155,7 +156,7 @@ export function AppointmentRequestPortal({ organizationId }) {
             </div>
             <div className="form-group">
               <Label htmlFor="portal-species">{t("portal.species")}</Label>
-              <select
+              <FormCombobox
                 id="portal-species"
                 className="portal-select"
                 value={form.species}
@@ -166,7 +167,7 @@ export function AppointmentRequestPortal({ organizationId }) {
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </FormCombobox>
             </div>
             <div className="form-group">
               <Label htmlFor="portal-preferred-date">{t("portal.preferredDate")}</Label>

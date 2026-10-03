@@ -10,6 +10,7 @@ import {
 } from "../components/ui/drawer";
 import { clinicNavIsHero, clinicNavThemeStyle } from "../lib/clinicNavTheme";
 import { CLINIC_COMPACT_MEDIA_QUERY } from "../lib/clinicBreakpoints";
+import { dispatchOpenHelp } from "../lib/supportReadState";
 import "./clinicMobileDrawer.css";
 
 export function ClinicMobileNavDrawer({
@@ -68,6 +69,12 @@ export function ClinicMobileNavDrawer({
                 if (locked) {
                   e.preventDefault();
                   setView?.("membership");
+                  close();
+                  return;
+                }
+                if (view === "help") {
+                  e.preventDefault();
+                  dispatchOpenHelp();
                   close();
                   return;
                 }

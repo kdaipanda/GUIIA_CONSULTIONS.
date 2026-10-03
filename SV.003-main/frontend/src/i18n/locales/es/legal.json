@@ -4,9 +4,9 @@
     "intro": "GUIAA se compromete a proteger tu privacidad y la de tus mascotas. Al usar esta plataforma:",
     "items": [
       "Los datos de las consultas se almacenan de forma segura y encriptada",
-      "Solo tú tienes acceso a la información de tus mascotas",
-      "No compartimos información con terceros sin tu consentimiento",
-      "Cumplimos con todas las normativas de protección de datos",
+      "Solo tú tienes acceso a la información de tus mascotas o pacientes, según tu tipo de cuenta",
+      "No compartimos información con terceros sin tu consentimiento, salvo proveedores necesarios del servicio o mandato legal",
+      "Cumplimos con normativas de protección de datos aplicables en Latinoamérica",
       "Puedes solicitar la eliminación de tus datos en cualquier momento"
     ],
     "moreInfo": "Para más información, consulta nuestra",
@@ -16,8 +16,8 @@
   "termsModal": {
     "titleTerms": "Términos y Condiciones",
     "titlePrivacy": "Política de Privacidad",
-    "subtitleTerms": "Condiciones de uso de la plataforma GUIAA para MVZ certificados.",
-    "subtitlePrivacy": "Cómo protegemos y tratamos tus datos profesionales y clínicos.",
+    "subtitleTerms": "Condiciones de uso de GUIAA para veterinarios (MVZ) y dueños de mascotas (Clientes).",
+    "subtitlePrivacy": "Cómo protegemos y tratamos tus datos personales, profesionales y de mascotas.",
     "close": "Cerrar",
     "closeAria": "Cerrar",
     "cancel": "Cancelar",
@@ -25,47 +25,48 @@
     "scrollHint": "Desplázate para leer todos los términos"
   },
   "intro": {
-    "title": "Plataforma GUIAA — Soporte a la Decisión Clínica (CDS)",
-    "grade": "Avanzado grado L4 y L5",
-    "privacyDoc": "Documento de privacidad y tratamiento de datos para profesionales veterinarios.",
-    "termsDoc": "Términos legales de uso para profesionales veterinarios certificados.",
-    "updated": "Última actualización: 28 de diciembre de 2025 · Vigente desde el 1 de enero de 2026"
+    "title": "Plataforma GUIAA — MVZ y Clientes",
+    "grade": "CDS clínico para MVZ · Orientación clínica informativa para dueños",
+    "privacyDoc": " Documento de privacidad y tratamiento de datos para veterinarios y dueños de mascotas.",
+    "termsDoc": " Términos legales de uso para profesionales veterinarios y clientes dueños de mascotas.",
+    "updated": "Última actualización: 22 de septiembre de 2026 · Versión 2.0 (MVZ + Clientes)"
   },
   "privacyPolicy": {
     "title": "Protección de datos y privacidad",
     "frameworkTitle": "Marco legal aplicable",
-    "frameworkIntro": "La Plataforma cumple con:",
+    "frameworkIntro": "La Plataforma cumple, según corresponda, con:",
     "frameworkItems": [
-      "Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)",
-      "Reglamento General de Protección de Datos (GDPR) para usuarios en la Unión Europea",
-      "Normativa de protección de datos de salud aplicable",
-      "Estándares internacionales de seguridad de información (ISO 27001, ISO 27799)"
+      "Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) — México",
+      "Principios equivalentes de protección de datos personales en otros países de Latinoamérica donde se ofrezca el servicio",
+      "Reglamento General de Protección de Datos (GDPR) cuando resulte aplicable",
+      "Estándares razonables de seguridad de la información"
     ],
     "collectedTitle": "Datos recopilados",
-    "collectedIntro": "Recopilamos:",
+    "collectedIntro": "Según el tipo de cuenta, podemos recopilar:",
     "collectedItems": [
-      "Datos de identificación profesional (nombre, país, registro, institución)",
-      "Datos de contacto (correo electrónico, teléfono)",
-      "Datos de uso de la Plataforma",
-      "Datos clínicos anonimizados con fines de mejora del sistema"
+      "MVZ: identificación profesional (nombre, país, registro, institución), contacto y uso clínico de la Plataforma",
+      "Cliente / dueño: nombre, correo, teléfono (opcional), datos de la mascota, síntomas reportados e historial de orientaciones",
+      "Datos de pago necesarios para membresías (MVZ) o consultas B2C (Cliente)",
+      "Datos técnicos de uso para seguridad y operación",
+      "Datos anonimizados o agregados para mejorar el servicio"
     ],
     "useTitle": "Uso de datos",
     "useIntro": "Los datos se utilizan para:",
     "useItems": [
-      "Proporcionar y mejorar el servicio",
-      "Verificación de credenciales profesionales",
-      "Análisis estadístico y mejora de algoritmos",
-      "Cumplimiento de obligaciones legales",
+      "Proporcionar y mejorar el servicio (CDS clínico o orientación clínica informativa)",
+      "Verificación de credenciales profesionales (solo MVZ) y autenticación de cuentas",
+      "Procesar pagos y obligaciones fiscales aplicables",
+      "Soporte, seguridad, prevención de fraude y cumplimiento legal",
       "Comunicaciones relacionadas con el servicio"
     ],
     "securityTitle": "Seguridad",
     "securityIntro": "Implementamos medidas de seguridad que incluyen:",
     "securityItems": [
-      "Encriptación de datos en tránsito y en reposo (TLS 1.3, AES-256)",
-      "Autenticación multifactor",
-      "Controles de acceso basados en roles",
-      "Auditorías de seguridad periódicas",
-      "Protocolos de respuesta a incidentes"
+      "Encriptación de datos en tránsito y controles de acceso",
+      "Separación de capas MVZ y Cliente (historiales y cupos no se mezclan)",
+      "Proveedores de pago certificados reciben solo lo necesario para cobrar",
+      "Auditorías y protocolos de respuesta a incidentes",
+      "No vendemos datos personales"
     ],
     "rightsTitle": "Derechos del usuario",
     "rightsIntro": "Usted tiene derecho a:",
@@ -74,7 +75,7 @@
       "Rectificar datos inexactos",
       "Cancelar su cuenta y datos",
       "Oponerse al tratamiento de datos",
-      "Portabilidad de datos",
+      "Portabilidad de datos cuando aplique",
       "Revocar consentimientos otorgados"
     ],
     "contact": "Para ejercer sus derechos ARCO o consultas de privacidad, escríbenos a",

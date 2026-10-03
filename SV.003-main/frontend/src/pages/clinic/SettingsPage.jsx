@@ -22,6 +22,7 @@ import {
 } from "../../lib/clinicApi";
 import { notifyError, notifySuccess } from "../../lib/appToast";
 import { requestPlatformOnboarding } from "../../lib/helpCenter";
+import { dispatchOpenHelp } from "../../lib/supportReadState";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -232,7 +233,7 @@ export function SettingsPage({ setView }) {
             <p>{tHelp("settingsCardLead")}</p>
           </div>
           <div className="clinic-settings-help-actions">
-            <Button type="button" variant="secondary" onClick={() => setView?.("help")}>
+            <Button type="button" variant="secondary" onClick={() => dispatchOpenHelp()}>
               <BookOpen size={16} aria-hidden />
               {tHelp("settingsOpenHelp")}
             </Button>
@@ -270,7 +271,7 @@ export function SettingsPage({ setView }) {
           <p>{tHelp("settingsCardLead")}</p>
         </div>
         <div className="clinic-settings-help-actions">
-          <Button type="button" variant="secondary" onClick={() => setView?.("help")}>
+          <Button type="button" variant="secondary" onClick={() => dispatchOpenHelp()}>
             <BookOpen size={16} aria-hidden />
             {tHelp("settingsOpenHelp")}
           </Button>

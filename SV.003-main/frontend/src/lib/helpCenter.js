@@ -2,7 +2,7 @@
 
 export const HELP_TOPIC_IDS = [
   "getting-started",
-  "dashboard",
+  "cds",
   "diagnosis",
   "clients",
   "agenda",
@@ -39,6 +39,7 @@ export const VIEW_TO_HELP_TOPIC = {
 /** Vista destino al pulsar “Ir al módulo” desde una guía. */
 export const HELP_TOPIC_TO_VIEW = {
   "getting-started": "dashboard",
+  cds: "new-consultation",
   dashboard: "dashboard",
   diagnosis: "new-consultation",
   clients: "clients",

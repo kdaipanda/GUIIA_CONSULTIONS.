@@ -31,8 +31,11 @@ import {
   getTrialExhaustedMessage,
 } from "../../lib/membershipAccess";
 import { Button } from "../../components/ui/button";
+import { AlertBanner } from "../../components/ui/alert-banner";
 import { QuickClientPatientDialog } from "../../components/clinic/QuickClientPatientDialog";
 import { ModuleHelpTip } from "../../components/clinic/ModuleHelpTip";
+import { DashboardGlareCards } from "../../components/dashboard/DashboardGlareCards";
+import { DashboardCdsBalanceCard } from "../../components/dashboard/DashboardCdsBalanceCard";
 import { useTranslation } from "react-i18next";
 import "./clinicDashboardPage.css";
 import "./clinicPageShared.css";
@@ -309,17 +312,16 @@ export function ClinicDashboardPage({ setView, onStartConsultation, onExpertCons
       </div>
 
       {membershipQuota.trialExhausted && (
-        <div className="clinic-dashboard-trial-banner" role="alert">
-          <div>
-            <strong>{t("dashboard.trialBannerTitle")}</strong>
-            <p>
-              {t("dashboard.trialBannerBody", { message: getTrialExhaustedMessage() })}
-            </p>
-          </div>
-          <Button type="button" size="sm" onClick={() => go("membership", "/app/membresia")}>
-            {t("dashboard.viewPlans")}
-          </Button>
-        </div>
+        <AlertBanner
+          variant="warning"
+          className="clinic-dashboard-trial-banner"
+          actionLabel={t("dashboard.viewPlans")}
+          onAction={() => go("membership", "/app/membresia")}
+        >
+          <strong>{t("dashboard.trialBannerTitle")}</strong>
+          {" — "}
+          {t("dashboard.trialBannerBody", { message: getTrialExhaustedMessage() })}
+        </AlertBanner>
       )}
 
       {loading ? (
@@ -442,6 +444,19 @@ export function ClinicDashboardPage({ setView, onStartConsultation, onExpertCons
             </button>
             )}
           </div>
+
+          <DashboardGlareCards
+            today={today}
+            week={week}
+            onOpenCds={scrollToCdsPanel}
+            onOpenLab={openLab}
+            onOpenAgenda={() => go("agenda", "/app/agenda")}
+          />
+
+          <DashboardCdsBalanceCard
+            membershipPackages={membershipPackages}
+            onOpenMembership={() => go("membership", "/app/membresia")}
+          />
 
           <div className="clinic-dashboard-grid">
             <section className="clinic-settings-card">

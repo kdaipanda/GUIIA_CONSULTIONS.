@@ -2,8 +2,8 @@
   "navLabel": "Ayuda",
   "title": "Centro de ayuda",
   "eyebrow": "Aprende GUIAA",
-  "lead": "Guías cortas y claras para usar cada función de la plataforma sin perder tiempo.",
-  "searchPlaceholder": "Buscar una función…",
+  "lead": "Guías clínicas y operativas para entender CDS, la consulta estructurada y cada módulo del consultorio — sin atajos confusos.",
+  "searchPlaceholder": "Buscar CDS, consulta, agenda, inventario…",
   "openTour": "Ver tour de bienvenida",
   "openGuide": "Ver guía completa",
   "tipAria": "Cómo usar este módulo",
@@ -11,66 +11,105 @@
   "backToList": "Todas las guías",
   "goToModule": "Ir al módulo",
   "contactSupport": "Abrir chat de soporte",
-  "stepsLabel": "Pasos fáciles",
-  "emptySearch": "No hay guías con ese término. Prueba con “agenda”, “consulta” o “inventario”.",
+  "stepsLabel": "Pasos prácticos",
+  "bodyLabel": "En detalle",
+  "emptySearch": "No hay guías con ese término. Prueba con “CDS”, “consulta”, “agenda” o “inventario”.",
   "clearSearch": "Limpiar búsqueda",
   "supportHint": "¿Sigues con dudas? Usa el chat de soporte (esquina inferior) o escribe a soporte@guiaa.vet.",
   "restartTourHint": "Puedes repetir el tour cuando quieras desde aquí o desde Configuración.",
   "settingsCardTitle": "Ayuda y aprendizaje",
-  "settingsCardLead": "Guías de cada módulo y el tour de bienvenida, cuando quieras repetirlos.",
-  "settingsOpenHelp": "Abrir centro de ayuda",
+  "settingsCardLead": "Guías en el chat de Doctor Plumitas y el tour de bienvenida, cuando quieras repetirlos.",
+  "settingsOpenHelp": "Abrir chat de ayuda",
+  "openingChat": "Abriendo el centro de ayuda en el chat…",
   "topics": {
     "getting-started": {
       "title": "Primeros pasos",
-      "summary": "Lo esencial para empezar a trabajar en GUIAA el mismo día.",
-      "tip": "Empieza por el Dashboard, registra un dueño con su mascota y abre tu primera consulta en GUIAA Diagnóstico.",
+      "summary": "Del login a tu primera consulta CDS el mismo día.",
+      "tip": "Orden recomendado: Dashboard → dueño + mascota → GUIAA Diagnóstico. El CDS ordena el caso; el diagnóstico y el plan los defines tú.",
+      "body": [
+        "GUIAA es una plataforma clínica para MVZ certificados. El núcleo es la consulta estructurada con soporte CDS (Clinical Decision Support): te ayuda a capturar y ordenar el caso por especie, no a reemplazar tu criterio profesional.",
+        "Además del diagnóstico, puedes operar agenda, expediente, inventario, ventas y reportes según tu plan. Empieza con un paciente real o de práctica y completa una consulta de punta a punta."
+      ],
       "steps": [
         "Entra con tu correo de MVZ verificado.",
-        "Revisa el Dashboard: citas del día y accesos rápidos.",
+        "Revisa el Dashboard: citas del día, alertas y accesos rápidos.",
         "Crea un dueño y una mascota en Dueños y mascotas.",
-        "Abre GUIAA Diagnóstico y completa la consulta paso a paso.",
+        "Abre GUIAA Diagnóstico, elige la especie correcta y completa la consulta.",
+        "Guarda el caso y confírmalo en Historial o en la ficha del paciente.",
         "Usa Ctrl+K (⌘K en Mac) si no encuentras un módulo."
+      ]
+    },
+    "cds": {
+      "title": "Qué es CDS (L4 y L5)",
+      "summary": "Soporte a la decisión clínica: qué significa, qué hace y qué no hace.",
+      "tip": "CDS estructura el razonamiento del caso. L4 ordena hipótesis; L5 apoya el plan. Tú validas, ajustas y firmas clínicamente el resultado.",
+      "body": [
+        "CDS significa Clinical Decision Support: soporte a la decisión clínica. En GUIAA es el flujo que te acompaña durante la consulta para que la información quede completa, ordenada y trazable — motivo, anamnesis, examen, hallazgos, hipótesis y plan.",
+        "No es un diagnóstico automático ni una indicación cerrada. No sustituye exploración, pruebas complementarias ni tu juicio. Si algo no encaja con el paciente frente a ti, prevalece tu criterio.",
+        "L4 se centra en el razonamiento diagnóstico: ayuda a organizar signos y antecedentes para plantear diferenciales revisables. L5 avanza hacia orientación terapéutica y de seguimiento documentada a partir de lo que tú capturaste.",
+        "Usa CDS cuando quieras consulta completa y reproducible. En urgencias con Premium, Manejo Experto permite describir el caso primero y luego aterrizar en la estructura clínica."
+      ],
+      "steps": [
+        "Abre una consulta nueva y selecciona especie y paciente.",
+        "Completa motivo, signos y examen físico con honestidad clínica (no dejes huecos críticos).",
+        "Avanza al bloque CDS: revisa hipótesis L4 y ajústalas a tu impresión.",
+        "Si aplica, documenta plan y seguimiento en L5 según tu decisión.",
+        "Guarda y verifica que el caso quede en Historial y en el expediente."
       ]
     },
     "dashboard": {
       "title": "Dashboard",
-      "summary": "Tu resumen del día: citas, actividad clínica y atajos.",
-      "tip": "Desde aquí saltas a consulta, agenda o membresía. Revisa alertas de stock y citas pendientes.",
+      "summary": "Resumen del día: citas, actividad clínica y atajos al flujo CDS.",
+      "tip": "Desde aquí saltas a consulta, agenda o membresía. Revisa alertas de stock y citas pendientes antes de atender.",
+      "body": [
+        "El Dashboard concentra lo operativo del día y la actividad clínica reciente. Úsalo como tablero de entrada, no como expediente: el detalle del caso vive en Diagnóstico, Historial y la ficha del paciente."
+      ],
       "steps": [
-        "Mira las citas de hoy y el estado de tu plan.",
+        "Mira las citas de hoy y el estado de tu plan / cupo de consultas.",
         "Usa “Nueva consulta” o el registro rápido de dueño/mascota.",
-        "Baja al panel CDS si quieres continuar una consulta reciente.",
-        "Si ves alertas de inventario o agenda, ábrelas desde el menú."
+        "Revisa la actividad reciente para retomar un caso o dar seguimiento.",
+        "Si ves alertas de inventario o agenda, ábrelas desde el menú lateral."
       ]
     },
     "diagnosis": {
       "title": "GUIAA Diagnóstico",
-      "summary": "Consulta clínica con soporte CDS (no sustituye tu criterio).",
-      "tip": "Elige especie → captura datos y motivo → examina → documenta diagnóstico y plan. Al final puedes exportar PDF.",
+      "summary": "Consulta clínica estructurada con soporte CDS — bajo tu criterio.",
+      "tip": "Especie → datos y motivo → examen → CDS (hipótesis/plan) → guardar. Puedes exportar PDF al final.",
+      "body": [
+        "Este módulo es el corazón clínico de GUIAA. Los formularios cambian según la especie para no perder hallazgos relevantes en perros, gatos o especies no convencionales.",
+        "El soporte CDS ordena el razonamiento; tú decides diagnóstico, diferencial, tratamiento y qué comunicar al tutor. La consulta queda vinculada al paciente para la siguiente visita."
+      ],
       "steps": [
-        "Selecciona o crea la mascota y la especie correcta.",
+        "Selecciona o crea la mascota y confirma la especie correcta.",
         "Completa motivo de consulta, signos y examen físico.",
-        "Usa el flujo CDS para estructurar hipótesis y plan (L4/L5).",
+        "Usa el flujo CDS para estructurar hipótesis (L4) y plan (L5) según tu lectura del caso.",
         "Guarda la consulta; queda en Historial y en la ficha del paciente.",
-        "En Premium, Manejo Experto permite describir el caso primero (urgencias)."
+        "Exporta PDF si necesitas entregar o archivar el resumen.",
+        "En Premium, Manejo Experto permite describir el caso primero (útil en urgencias)."
       ]
     },
     "clients": {
       "title": "Dueños y mascotas",
       "summary": "Expediente de tutores y pacientes en un solo lugar.",
-      "tip": "Registra primero el dueño; luego agrega mascotas. Abre el expediente clínico para antecedentes, problemas y timeline.",
+      "tip": "Registra primero el dueño; luego agrega mascotas. Abre el expediente para antecedentes, problemas y timeline.",
+      "body": [
+        "Aquí vive la identidad del tutor y del paciente. Un buen registro evita consultas “huérfanas” y permite retomar historia clínica, alergias y problemas abiertos en la siguiente visita."
+      ],
       "steps": [
         "Pulsa “Nuevo registro” para crear dueño + mascota juntos.",
         "Busca por nombre, teléfono o mascota en la barra superior.",
         "Abre la ficha y pulsa “Abrir expediente” para el chart clínico completo.",
         "Edita alergias, vacunas, cirugías y problemas; el timeline muestra consultas y lab.",
-        "Inicia una consulta o interpretación de lab desde el paciente."
+        "Inicia una consulta o interpretación de laboratorio desde el paciente."
       ]
     },
     "agenda": {
       "title": "Agenda",
       "summary": "Citas de la semana, estados y solicitudes en línea.",
       "tip": "Crea citas, cambia su estado y comparte el enlace del portal para que dueños pidan cita.",
+      "body": [
+        "La agenda conecta la operación del consultorio con la atención clínica. Confirma estados para que el equipo sepa qué casos llegan y cuáles ya se atendieron."
+      ],
       "steps": [
         "Navega la semana con las flechas o ve a “Hoy”.",
         "Pulsa “Nueva cita” y elige paciente, horario y notas.",
@@ -83,6 +122,9 @@
       "title": "Inventario",
       "summary": "Productos, stock y alertas de existencias bajas (plan Profesional/Premium).",
       "tip": "Alta de productos con unidad y stock mínimo. Las ventas pueden descontar inventario.",
+      "body": [
+        "Mantén medicamentos e insumos con umbral de alerta para no descubrir faltantes en medio de la consulta. Vincula el stock con ventas cuando cobres productos del consultorio."
+      ],
       "steps": [
         "Agrega un producto (medicamento, insumo o servicio).",
         "Define cantidad, unidad y umbral de stock bajo.",
@@ -94,6 +136,9 @@
       "title": "Facturación / Ventas",
       "summary": "Recibos clínicos vinculados a dueño, paciente e inventario (sin CFDI).",
       "tip": "Crea una venta, agrega líneas de producto o servicio y guarda el recibo.",
+      "body": [
+        "Sirve para documentar cobros del consultorio ligados al caso. No emite CFDI fiscal; es el recibo operativo de GUIAA."
+      ],
       "steps": [
         "Pulsa “Nueva venta” y selecciona dueño/paciente si aplica.",
         "Agrega productos del inventario o conceptos libres.",
@@ -105,6 +150,9 @@
       "title": "Reportes",
       "summary": "KPIs del consultorio por periodo (plan Profesional/Premium).",
       "tip": "Elige 7, 30 o 90 días para ver consultas, ingresos y productos top.",
+      "body": [
+        "Usa reportes para ver volumen de consultas CDS, actividad de ventas e inventario. Es un tablero de gestión, no un cierre contable formal."
+      ],
       "steps": [
         "Selecciona el periodo en la parte superior.",
         "Revisa KPIs de consultas, ventas e inventario.",
@@ -114,8 +162,11 @@
     },
     "history": {
       "title": "Historial de consultas",
-      "summary": "Todas tus consultas CDS anteriores, con filtros y enlace al expediente.",
+      "summary": "Consultas CDS anteriores, con filtros y enlace al expediente.",
       "tip": "Filtra por estado, busca por paciente, reabre una consulta o salta al expediente de la mascota.",
+      "body": [
+        "El historial es tu archivo de trabajo clínico. Úsalo para seguimiento, continuidad de caso y auditoría interna de documentación."
+      ],
       "steps": [
         "Usa los filtros de estado (todas, borrador, completadas…).",
         "Busca por nombre de mascota o dueño.",
@@ -128,10 +179,13 @@
       "title": "Imágenes / laboratorio",
       "summary": "Interpreta estudios y guarda notas clínicas ligadas al paciente.",
       "tip": "Elige paciente, tipo de estudio y pega o describe hallazgos. Puedes adjuntar contexto del PDF.",
+      "body": [
+        "Complementa la consulta CDS con interpretaciones de laboratorio o imagen. La nota queda asociada al paciente para no perder el hilo en revisiones."
+      ],
       "steps": [
         "Selecciona o busca el paciente.",
         "Indica el tipo de estudio (lab, imagen, etc.).",
-        "Pega el texto del resultado o escribe tu interpretación.",
+        "Pega el texto del resultado o escribe tu interpretación clínica.",
         "Guarda: queda en el historial de interpretaciones del módulo."
       ]
     },
@@ -139,17 +193,23 @@
       "title": "Herramientas clínicas",
       "summary": "Calculadora de dosis y referencias externas para apoyo en consulta.",
       "tip": "Ingresa peso y dosis mg/kg; añade concentración si quieres volumen o unidades a administrar.",
+      "body": [
+        "Son ayudas de cálculo y referencia. Siempre confirma con ficha técnica, peso real y contexto del paciente antes de prescribir."
+      ],
       "steps": [
         "Abre Herramientas desde el menú clínico.",
         "Captura peso (kg) y dosis (mg/kg).",
         "Elige presentación y concentración si aplica.",
-        "Revisa el resultado y confirma con ficha técnica antes de prescribir."
+        "Revisa el resultado y confirma con ficha técnica antes de administrar."
       ]
     },
     "settings": {
       "title": "Configuración",
       "summary": "Datos del consultorio, equipo, portal de citas y contraseña.",
-      "tip": "Solo owner/admin editan la clínica. Invitá al equipo por correo con el rol adecuado.",
+      "tip": "Solo owner/admin editan la clínica. Invita al equipo por correo con el rol adecuado.",
+      "body": [
+        "Configura la identidad de tu clínica y quién puede operar cada área. El portal de citas permite que tutores soliciten horarios sin entrar al panel clínico."
+      ],
       "steps": [
         "Actualiza el nombre y la zona horaria del consultorio.",
         "Copia el enlace del portal de citas para dueños.",
@@ -160,8 +220,11 @@
     },
     "membership": {
       "title": "Membresía",
-      "summary": "Planes, cupo de consultas y funciones Premium.",
+      "summary": "Planes, cupo de consultas y módulos del consultorio.",
       "tip": "Compara Básica, Profesional y Premium. El trial limita consultas; activa un plan para continuar.",
+      "body": [
+        "El plan define cuántas consultas CDS puedes documentar y qué módulos operativos tienes (inventario, ventas, reportes, laboratorio, Manejo Experto, etc.)."
+      ],
       "steps": [
         "Revisa tu plan actual y consultas restantes.",
         "Compara qué módulos incluye cada plan.",
@@ -173,6 +236,9 @@
       "title": "Perfil",
       "summary": "Tus datos profesionales y estado de verificación.",
       "tip": "Confirma que nombre, cédula y contacto estén correctos; la verificación habilita el uso clínico.",
+      "body": [
+        "Tu perfil profesional respalda el acceso exclusivo MVZ. Mantén cédula y datos de contacto al día."
+      ],
       "steps": [
         "Revisa tus datos de MVZ y especialidad.",
         "Verifica el estado de tu cédula profesional.",
@@ -184,6 +250,9 @@
       "title": "Atajos y soporte",
       "summary": "Navega más rápido y pide ayuda cuando la necesites.",
       "tip": "Ctrl+K abre la paleta de comandos. El chat de soporte está abajo a la derecha.",
+      "body": [
+        "Si te trabas en un módulo, vuelve a esta guía o escribe a soporte. El chat cubre login, pagos y uso de la plataforma."
+      ],
       "steps": [
         "Pulsa Ctrl+K (⌘K en Mac) y escribe el nombre del módulo.",
         "En Diagnóstico, la tecla N también puede abrir consulta nueva (según contexto).",

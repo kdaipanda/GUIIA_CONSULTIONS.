@@ -21,13 +21,16 @@
   "hero": {
     "brand": "GUIAA",
     "kicker": "GUIAA Diagnóstico · Única en Latinoamérica",
+    "announcement": "3 consultas CDS gratis al crear tu cuenta MVZ",
+    "announcementCta": "Ver planes",
     "title": "Documenta la consulta sin perder el hilo clínico.",
     "titleBefore": "Documenta la consulta",
     "titleAccent": "",
-    "titleAfter": " sin perder el hilo clínico.",
+    "titleAfter": "sin perder el hilo clínico.",
     "lead": "Anamnesis, examen y razonamiento CDS L4·L5 en un solo flujo — para MVZ certificados que necesitan trazabilidad real en el consultorio, no notas sueltas.",
     "leadExtended": "Somos la única plataforma en Latinoamérica orientada a un diagnóstico clínico estructurado y verificable para MVZ certificados — con expediente, inventario y ventas en el mismo flujo.",
     "ctaRegister": "Probar con 3 consultas CDS gratis",
+    "ctaOwner": "Consulta para tu mascota",
     "ctaHint": "Registro con cédula profesional · sin tarjeta para las primeras 3",
     "explore": "Explorar interfaz sin registro",
     "playVideo": "Ver cómo funciona",
@@ -143,14 +146,21 @@
     "lead": "Elige el volumen de consultas CDS según tu agenda. Cada plan incluye verificación de cédula y el flujo clínico completo.",
     "trialNote": "3 consultas CDS gratis al registrarte — sin tarjeta — para medir el flujo en tu propio consultorio.",
     "roiNote": "ROI típico: una anamnesis estructurada en minutos, sin reconstruir el caso entre visitas ni saltar entre Word, WhatsApp y hojas sueltas.",
-    "ctaRegister": "Empezar con este plan",
-    "ctaPlan": "Contratar plan",
+    "ctaRegister": "Empezar",
+    "ctaPlan": "Elegir plan",
     "billingNote": "facturación mensual o anual",
     "annual": "Anual",
+    "annualFrom": "desde {{price}}/mes anual",
     "askPrice": "Consultar",
     "pricePerMonth": "/mes",
     "badgeFeatured": "Más usado",
     "badgeConsultations": "{{count}} CDS/mes",
+    "lockedSection": "En planes superiores",
+    "audienceBadge": {
+      "basic": "Pequeñas especies",
+      "professional": "Multiespecie",
+      "premium": "Alto volumen"
+    },
     "creditAddonDesc": "Consultas CDS adicionales sin cambiar de plan. Se suman a tu saldo actual.",
     "trustNote": "Regístrate con cédula profesional y obtén 3 consultas CDS gratis. Solo médicos veterinarios certificados.",
     "comparePlans": "Comparar planes en detalle →",
@@ -161,45 +171,82 @@
     }
   },
   "faq": {
-    "eyebrow": "Antes de registrarte",
-    "title": "Antes de registrar tu cédula",
-    "lead": "Acceso MVZ, especies, seguridad y las 3 consultas CDS de prueba.",
-    "moreTitle": "¿No encuentras tu respuesta?",
-    "moreLead": "Escríbenos y te orientamos antes del registro.",
+    "eyebrow": "Preguntas frecuentes",
+    "title": "Soporte clínico y de plataforma",
+    "lead": "Qué es CDS, cómo fluye una consulta, especies, seguridad y acceso MVZ — pensado para que el médico veterinario entienda la herramienta antes de usarla.",
+    "moreTitle": "¿Necesitas más detalle?",
+    "moreLead": "El centro de ayuda vive en el chat de Doctor Plumitas: guías por módulo (consulta, CDS, expediente, agenda, inventario y más).",
+    "helpCenterCta": "Abrir centro de ayuda",
     "emailCta": "Escribir a soporte",
     "empty": "Las preguntas frecuentes no están disponibles por ahora.",
     "items": [
       {
-        "q": "¿Quién puede registrarse en GUIAA?",
-        "a": "Solo médicos veterinarios certificados. Durante el registro verificamos tu cédula profesional para garantizar un entorno clínico exclusivo."
+        "q": "¿Qué es CDS en GUIAA?",
+        "a": [
+          "CDS significa Clinical Decision Support: soporte a la decisión clínica. En GUIAA no es un “diagnóstico automático” ni sustituye tu juicio: es un flujo estructurado que te ayuda a ordenar la información del caso — motivo, anamnesis, examen físico, hallazgos y documentación — para que puedas razonar con más claridad y dejar trazabilidad en el expediente.",
+          "El objetivo es reducir omisiones, estandarizar la captura por especie y dejar un registro clínico útil para la siguiente visita, la referencia o el seguimiento. Tú decides el diagnóstico, el plan y qué se documenta."
+        ]
       },
       {
-        "q": "¿Hay consultas CDS gratis al registrarme?",
-        "a": "Sí. Al crear tu cuenta MVZ recibes 3 consultas CDS gratis para probar el flujo clínico completo. Después puedes elegir el plan que mejor se adapte a tu consultorio."
+        "q": "¿Qué son CDS L4 y L5?",
+        "a": [
+          "Son niveles de profundidad del soporte clínico dentro de la misma consulta. L4 se centra en estructurar el razonamiento diagnóstico: ordenar signos, antecedentes y hallazgos para plantear hipótesis diferenciales de forma clara y revisable.",
+          "L5 avanza hacia el plan: orientación terapéutica y de seguimiento documentada a partir de lo capturado en la consulta, siempre como apoyo — no como indicación cerrada. En ambos niveles la decisión final es tuya como MVZ responsable del caso."
+        ]
+      },
+      {
+        "q": "¿Cómo es el flujo de una consulta CDS?",
+        "a": [
+          "Eliges o registras al paciente y la especie. Completas motivo de consulta, signos y examen físico con formularios adaptados. Luego avanzas por el soporte CDS (L4/L5) para ordenar hipótesis y plan, y guardas la consulta.",
+          "Al finalizar queda en el historial y en la ficha del paciente. Puedes retomar casos, exportar PDF cuando lo necesites y vincular la actividad clínica con el resto del consultorio (agenda, expediente, laboratorio)."
+        ]
+      },
+      {
+        "q": "¿Quién puede registrarse en GUIAA?",
+        "a": [
+          "Solo médicos veterinarios certificados. Durante el registro verificamos la cédula o matrícula profesional para mantener un entorno clínico exclusivo entre colegas.",
+          "Dueños de mascota no usan el panel clínico: tienen un portal aparte para solicitar citas u orientación según lo que ofrezca tu clínica."
+        ]
+      },
+      {
+        "q": "¿Hay consultas CDS de prueba al registrarme?",
+        "a": [
+          "Sí. Al crear tu cuenta MVZ recibes 3 consultas CDS de prueba para recorrer el flujo clínico completo con un caso real o de práctica.",
+          "Después eliges el plan (Básica, Profesional o Premium) según cupo de consultas y módulos: expediente, agenda, inventario, ventas, reportes, laboratorio y Manejo Experto."
+        ]
       },
       {
         "q": "¿Qué hace diferente a GUIAA Diagnóstico?",
-        "a": "GUIAA Diagnóstico estructura anamnesis, examen físico y razonamiento CDS L4·L5 para un diagnóstico preciso y real en consulta. Es la única plataforma en Latinoamérica orientada a este nivel de soporte diagnóstico veterinario — siempre bajo tu criterio profesional."
-      },
-      {
-        "q": "¿Qué es CDS L4 y L5?",
-        "a": "Son niveles de soporte a la decisión clínica: L4 ayuda a estructurar hipótesis diagnósticas; L5 extiende el razonamiento hacia planes terapéuticos basados en evidencia. Siempre bajo tu criterio profesional."
+        "a": [
+          "Une anamnesis, examen físico y soporte CDS L4·L5 en un solo flujo clínico, con formularios por especie y trazabilidad en el expediente — no notas sueltas ni plantillas genéricas de humana.",
+          "Está pensado para el consultorio veterinario en Latinoamérica: trabajo diario, seguimiento y documentación profesional, siempre bajo tu criterio clínico."
+        ]
       },
       {
         "q": "¿Qué especies cubre la plataforma?",
-        "a": "Perros, gatos, conejos, aves, reptiles, hurones, erizos, hámsters, cuyos, iguanas y aves de corral. Cada especie activa un formulario veterinario adaptado en la consulta."
+        "a": [
+          "Perros, gatos, conejos, aves, reptiles, hurones, erizos, hámsters, cuyos, iguanas y aves de corral, entre otros perfiles clínicos disponibles.",
+          "Cada especie activa campos y secciones adaptadas (signos, examen, antecedentes) para no forzar un formulario único “de perro” en especies no convencionales."
+        ]
       },
       {
         "q": "¿Mis datos clínicos están seguros?",
-        "a": "Aplicamos buenas prácticas de seguridad y privacidad. Los expedientes y consultas se gestionan con controles de acceso por cuenta profesional."
+        "a": [
+          "Los expedientes y consultas se asocian a tu cuenta profesional con controles de acceso. Aplicamos prácticas de seguridad y privacidad orientadas a uso clínico.",
+          "Tu clínica puede invitar al equipo con roles (por ejemplo recepción o veterinario) sin compartir tu contraseña. El detalle legal está en avisos y términos de la plataforma."
+        ]
       },
       {
-        "q": "¿Puedo usar GUIAA en consultorio y a domicilio?",
-        "a": "Sí. Es una plataforma web: funciona en consultorio fijo o en visitas externas desde tablet o laptop con navegador moderno."
+        "q": "¿Puedo usarlo en consultorio y a domicilio?",
+        "a": "Sí. Es plataforma web: funciona en consultorio fijo o en visitas externas desde laptop o tablet con navegador moderno e internet. No sustituye el equipo clínico presencial; organiza y documenta lo que tú capturas en el caso."
       },
       {
         "q": "¿Necesito instalar algo?",
-        "a": "No. Accedes desde el navegador. Solo necesitas conexión a internet y tu cuenta MVZ verificada."
+        "a": "No. Entras desde el navegador con tu cuenta MVZ verificada. Recomendamos un navegador actualizado y conexión estable, sobre todo si exportas PDF o trabajas con interpretaciones de laboratorio."
+      },
+      {
+        "q": "¿Dónde está el centro de ayuda completo?",
+        "a": "En el chat de Doctor Plumitas (pestaña Ayuda) encontrarás guías por módulo: primeros pasos, qué es CDS, consulta diagnóstica, dueños y mascotas, agenda, inventario, ventas, reportes, historial, laboratorio, membresía y atajos. También puedes repetir el tour de bienvenida desde Configuración."
       }
     ]
   },
@@ -209,6 +256,7 @@
     "lead": "Verificamos tu cédula, te damos 3 consultas CDS gratis y documentas el caso con trazabilidad clínica desde el día uno.",
     "faqLink": "Ver preguntas frecuentes",
     "createAccount": "Crear cuenta con 3 consultas CDS gratis",
+    "ownerConsult": "Soy dueño de mascota",
     "haveAccount": "Ya tengo cuenta"
   },
   "footer": {
@@ -232,7 +280,9 @@
     "terms": "Términos",
     "privacy": "Privacidad",
     "rights": "Todos los derechos reservados.",
-    "tagline": "Software clínico veterinario"
+    "tagline": "Software clínico veterinario",
+    "taglinePrimary": "Gran universo de inteligencia animal.",
+    "taglineSecondary": "Soporte a la decisión clínica CDS avanzado grado L4 y L5."
   },
   "features": {
     "eyebrow": "Módulos del consultorio",
@@ -323,6 +373,7 @@
     "title": "Resultados en consultorio",
     "lead": "Perfiles de práctica realistas: qué cambia cuando el CDS y el expediente viven en el mismo flujo.",
     "listAria": "Resultados de colegas MVZ",
+    "ratingAria": "{{rating}} de 5 — {{name}}",
     "caseOf": "Caso de {{name}}",
     "resultLabel": "Resultado",
     "disclaimerMobile": "Desliza para ver más · ",
@@ -447,8 +498,12 @@
   },
   "brandBand": {
     "aria": "Marca GUIAA",
-    "title": "Plumitas en el consultorio",
-    "lead": "La mascota de GUIAA acompaña al MVZ en el consultorio con cercanía, sin restar rigor clínico."
+    "title": "Gran universo de inteligencia animal.",
+    "lead": "Soporte a la decisión clínica CDS avanzado grado L4 y L5."
+  },
+  "brand": {
+    "taglinePrimary": "Gran universo de inteligencia animal.",
+    "taglineSecondary": "Soporte a la decisión clínica CDS avanzado grado L4 y L5."
   },
   "guiaConsultas": {
     "badge": "ADSGuiaa",

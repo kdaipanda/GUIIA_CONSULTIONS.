@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { StarRating } from "../../components/ui/star-rating";
 
 const PRACTICE_OUTCOMES = [
   {
@@ -7,18 +8,21 @@ const PRACTICE_OUTCOMES = [
     name: "Dra. Ana M.",
     petImage: "/landing/pets/dog-golden.png",
     tone: "navy",
+    rating: 5,
   },
   {
     id: "carlos",
     name: "Dr. Carlos R.",
     petImage: "/landing/pets/cat-tabby.png",
     tone: "green",
+    rating: 5,
   },
   {
     id: "patricia",
     name: "Dra. Patricia V.",
     petImage: "/landing/pets/corgi.png",
     tone: "blue",
+    rating: 4.5,
   },
 ];
 
@@ -42,9 +46,19 @@ export function LandingTestimonials() {
         </div>
 
         <ul className="landing-colleagues-bento landing-colleagues-bento--outcomes" aria-label={t("testimonials.listAria")}>
-          {PRACTICE_OUTCOMES.map(({ id, name, petImage, tone }) => (
+          {PRACTICE_OUTCOMES.map(({ id, name, petImage, tone, rating }) => (
             <li key={id}>
               <figure className={`landing-colleague-card landing-colleague-card--${tone}`}>
+                <div className="landing-colleague-rating">
+                  <StarRating
+                    value={rating}
+                    max={5}
+                    size="sm"
+                    readOnly
+                    allowHalf
+                    aria-label={t("testimonials.ratingAria", { rating, name })}
+                  />
+                </div>
                 <p className="landing-colleague-result">
                   <span className="landing-colleague-result-label">
                     {t("testimonials.resultLabel")}

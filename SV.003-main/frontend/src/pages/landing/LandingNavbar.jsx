@@ -160,13 +160,6 @@ export function LandingNavbar({ setView, hero = false }) {
         <div className="flex shrink-0 items-center gap-1.5 lg:hidden">
           <button
             type="button"
-            onClick={() => setView("register")}
-            className="landing-btn-primary landing-nav-mobile-cta px-3.5 py-2 text-xs"
-          >
-            {t("nav.registerShort")}
-          </button>
-          <button
-            type="button"
             className={`landing-nav-mobile-toggle inline-flex items-center justify-center rounded-lg ${
               hero ? "text-white hover:bg-white/10" : "text-guiaa-brand-navy hover:bg-guiaa-brand-navy/5"
             }`}

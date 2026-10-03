@@ -27,9 +27,36 @@ export const LANDING_IMAGES = {
   },
 };
 
-export const LANDING_HERO_VIDEO = "/VG1-mobile.mp4";
+export const LANDING_HERO_VIDEO = "/VG1.mp4";
 export const LANDING_HERO_VIDEO_MOBILE = "/VG1-mobile.mp4";
+/** Upscale 2× (2520×2160) para monitores 2K/4K — se genera con npm run compress:hero-video */
+export const LANDING_HERO_VIDEO_4K = "/VG1-4k.mp4";
 export const LANDING_HERO_VIDEO_POSTER = LANDING_IMAGES.heroHub;
+
+/**
+ * Fuente según viewport:
+ * - móvil / tablet estrecha → VG1-mobile
+ * - escritorio → VG1
+ * - 4K / ultra-wide / alta densidad en pantalla grande → VG1-4k (fallback VG1)
+ */
+export function resolveLandingHeroVideoSrc({
+  mobileMaxWidth = 1023,
+  largeMinWidth = 1600,
+} = {}) {
+  if (typeof window === "undefined") return LANDING_HERO_VIDEO;
+
+  const isNarrow = window.matchMedia(`(max-width: ${mobileMaxWidth}px)`).matches;
+  if (isNarrow) return LANDING_HERO_VIDEO_MOBILE;
+
+  const isLarge =
+    window.matchMedia(`(min-width: ${largeMinWidth}px)`).matches ||
+    (typeof window.devicePixelRatio === "number" &&
+      window.devicePixelRatio >= 2 &&
+      window.matchMedia("(min-width: 1280px)").matches);
+
+  if (isLarge) return LANDING_HERO_VIDEO_4K;
+  return LANDING_HERO_VIDEO;
+}
 
 /** Presentación YouTube del botón "Ver presentación" (inicio en 0:39). */
 export const LANDING_PRESENTATION_YOUTUBE = {

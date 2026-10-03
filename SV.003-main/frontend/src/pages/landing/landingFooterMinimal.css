@@ -1,0 +1,268 @@
+/* Footer minimal GUIAA — claro + oscuro (mismos tokens de marca) */
+
+.landing-footer-min {
+  --footer-bg: #f4f7fa;
+  --footer-bg-mid: #eef3f8;
+  --footer-bg-deep: #e8eef4;
+  --footer-ink: #0c2d4d;
+  --footer-muted: #64748b;
+  --footer-line: rgba(12, 45, 77, 0.1);
+  --footer-icon-bg: #ffffff;
+  --footer-icon-border: rgba(12, 45, 77, 0.1);
+  --footer-teal: #3d9b8f;
+  --footer-blue: #265b93;
+  --footer-glow-teal: rgba(61, 155, 143, 0.1);
+  --footer-glow-blue: rgba(38, 91, 147, 0.08);
+  --footer-shadow: 0 12px 36px rgba(12, 45, 77, 0.08);
+
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 82rem;
+  margin: 1.25rem auto 0;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  padding:
+    clamp(2.25rem, 5vw, 3.25rem)
+    clamp(1.25rem, 4vw, 2rem)
+    max(1.75rem, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(ellipse 60% 45% at 100% 0%, var(--footer-glow-teal), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, var(--footer-glow-blue), transparent 50%),
+    linear-gradient(180deg, var(--footer-bg) 0%, var(--footer-bg-mid) 55%, var(--footer-bg-deep) 100%);
+  color: var(--footer-ink);
+  border: 1px solid var(--footer-line);
+  box-shadow: var(--footer-shadow);
+}
+
+.landing-shell--fluid-hero .landing-footer-min {
+  margin-top: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .landing-footer-min {
+    border-radius: 1.5rem;
+  }
+}
+
+.landing-footer-min-inner {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.landing-footer-min-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.landing-footer-min-brand-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.landing-footer-min-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  text-decoration: none;
+  color: var(--footer-ink);
+  min-height: 2.75rem;
+}
+
+.landing-footer-min-logo {
+  display: block;
+  height: 2.1rem;
+  width: auto;
+  max-width: 7.5rem;
+  object-fit: contain;
+}
+
+.landing-footer-min-brand-name {
+  font-family: var(--landing-font-body, "Source Sans 3", system-ui, sans-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--footer-ink);
+}
+
+.landing-footer-min-social {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-footer-min-social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: var(--footer-icon-bg);
+  border: 1px solid var(--footer-icon-border);
+  color: var(--footer-ink);
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.landing-footer-min-social-btn:hover {
+  background: color-mix(in srgb, var(--footer-teal) 22%, var(--footer-icon-bg));
+  border-color: rgba(61, 155, 143, 0.45);
+  color: var(--footer-ink);
+  transform: translateY(-1px);
+}
+
+.landing-footer-min-social-btn:focus-visible {
+  outline: 2px solid var(--footer-teal);
+  outline-offset: 2px;
+}
+
+.landing-footer-min-rule {
+  height: 1px;
+  margin: 1.5rem 0 1.35rem;
+  background: var(--footer-line);
+  border: 0;
+}
+
+.landing-footer-min-bottom {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem 2rem;
+  flex-wrap: wrap;
+}
+
+.landing-footer-min-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: min(100%, 12rem);
+}
+
+.landing-footer-min-copy p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--footer-muted);
+  font-family: var(--landing-font-body, "Source Sans 3", system-ui, sans-serif);
+}
+
+.landing-footer-min-lang {
+  margin-top: 0.85rem;
+}
+
+.landing-footer-min-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.65rem;
+  margin-left: auto;
+}
+
+.landing-footer-min-nav,
+.landing-footer-min-legal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem 1.15rem;
+}
+
+.landing-footer-min-nav a,
+.landing-footer-min-legal a,
+.landing-footer-min-legal button {
+  font-family: var(--landing-font-body, "Source Sans 3", system-ui, sans-serif);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+  cursor: pointer;
+  color: var(--footer-ink);
+  transition: color 0.15s ease;
+}
+
+.landing-footer-min-nav a:hover,
+.landing-footer-min-legal a:hover,
+.landing-footer-min-legal button:hover {
+  color: var(--footer-teal);
+}
+
+.landing-footer-min-nav a:focus-visible,
+.landing-footer-min-legal a:focus-visible,
+.landing-footer-min-legal button:focus-visible {
+  outline: 2px solid var(--footer-teal);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.landing-footer-min-legal a,
+.landing-footer-min-legal button {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--footer-muted);
+}
+
+@media (max-width: 720px) {
+  .landing-footer-min-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .landing-footer-min-bottom {
+    flex-direction: column;
+  }
+
+  .landing-footer-min-links {
+    align-items: flex-start;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .landing-footer-min-nav,
+  .landing-footer-min-legal {
+    justify-content: flex-start;
+  }
+}
+
+/* Modo oscuro — navy GUIAA */
+[data-theme="dark"] .landing-footer-min,
+html.dark .landing-footer-min {
+  --footer-bg: #06121c;
+  --footer-bg-mid: #0c2d4d;
+  --footer-bg-deep: #040a10;
+  --footer-ink: #f4f8fc;
+  --footer-muted: #8fa3b8;
+  --footer-line: rgba(255, 255, 255, 0.1);
+  --footer-icon-bg: #152436;
+  --footer-icon-border: rgba(255, 255, 255, 0.08);
+  --footer-glow-teal: rgba(61, 155, 143, 0.12);
+  --footer-glow-blue: rgba(38, 91, 147, 0.14);
+  --footer-shadow: 0 16px 48px rgba(6, 18, 28, 0.35);
+  border-color: transparent;
+  background:
+    radial-gradient(ellipse 60% 45% at 100% 0%, var(--footer-glow-teal), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, var(--footer-glow-blue), transparent 50%),
+    linear-gradient(180deg, #0c2d4d 0%, var(--footer-bg) 55%, #040a10 100%);
+}
+
+[data-theme="dark"] .landing-footer-min-social-btn:hover,
+html.dark .landing-footer-min-social-btn:hover {
+  color: #fff;
+}

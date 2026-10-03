@@ -37,6 +37,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { StarRating } from "../../components/ui/star-rating";
 import {
   Dialog,
   DialogContent,
@@ -48,6 +49,7 @@ import { cleanClinicalDisplayText, downloadUserConsultationsHistoryPdf } from ".
 import { countryLabel } from "../../lib/latamCountries";
 import i18n from "../../i18n";
 import { AdminMetricsSection } from "../../components/clinic/AdminMetricsSection";
+import { FormCombobox } from "../../components/ui/combobox";
 
 const PLAN_FILTER_IDS = ["all", "trial", "paid"];
 const PRESENCE_FILTER_IDS = ["all", "online", "offline"];
@@ -200,11 +202,6 @@ function formatTrialSurveyRating(rating) {
   const value = Number(rating);
   if (!Number.isFinite(value) || value < 1) return "—";
   return `${value}/5`;
-}
-
-function renderTrialSurveyStars(rating) {
-  const value = Math.min(5, Math.max(0, Number(rating) || 0));
-  return "★".repeat(value) + "☆".repeat(5 - value);
 }
 
 function consultationField(consultation, key) {
@@ -977,8 +974,8 @@ export function AdminPage() {
                       <div className="clinic-muted clinic-admin-support-email">{survey.email || "—"}</div>
                     </td>
                     <td>
-                      <span className="clinic-admin-trial-survey-stars" aria-hidden>
-                        {renderTrialSurveyStars(survey.rating)}
+                      <span className="clinic-admin-trial-survey-stars">
+                        <StarRating value={survey.rating} max={5} size="sm" readOnly />
                       </span>
                       <span className="clinic-muted"> {formatTrialSurveyRating(survey.rating)}</span>
                     </td>
@@ -1766,7 +1763,7 @@ export function AdminPage() {
                                 {formatConsultationStatus(status)}
                               </span>
                               {c.rating ? (
-                                <span className="clinic-muted">{c.rating}/5</span>
+                                <StarRating value={c.rating} max={5} size="sm" readOnly />
                               ) : null}
                               {expanded ? (
                                 <ChevronUp size={16} aria-hidden />
@@ -1848,7 +1845,7 @@ export function AdminPage() {
                     <span className={`clinic-admin-support-status status-${ticketDetail.status}`}>
                       {supportStatusLabel(ticketDetail.status)}
                     </span>
-                    <select
+                    <FormCombobox
                       className="clinic-admin-support-select"
                       value={ticketDetail.status}
                       disabled={ticketActing}
@@ -1859,7 +1856,7 @@ export function AdminPage() {
                           {label}
                         </option>
                       ))}
-                    </select>
+                    </FormCombobox>
                   </div>
                   <div className="clinic-admin-support-thread">
                     {(ticketDetail.messages || []).map((msg) => (
@@ -1921,7 +1918,7 @@ export function AdminPage() {
                 <span className={`clinic-admin-support-status status-${selectedLead.status}`}>
                   {leadStatusLabel(selectedLead.status)}
                 </span>
-                <select
+                <FormCombobox
                   className="clinic-admin-support-select"
                   value={selectedLead.status}
                   disabled={leadActing}
@@ -1932,7 +1929,7 @@ export function AdminPage() {
                       {label}
                     </option>
                   ))}
-                </select>
+                </FormCombobox>
               </div>
 
               <div className="clinic-admin-lead-detail">
@@ -1997,7 +1994,7 @@ export function AdminPage() {
                 <p>
                   <strong>Calificación:</strong>{" "}
                   <span className="clinic-admin-trial-survey-stars">
-                    {renderTrialSurveyStars(selectedSurvey.rating)}
+                    <StarRating value={selectedSurvey.rating} max={5} size="sm" readOnly />
                   </span>{" "}
                   ({formatTrialSurveyRating(selectedSurvey.rating)})
                 </p>

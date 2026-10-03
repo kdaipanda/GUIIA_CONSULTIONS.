@@ -87,6 +87,12 @@
     inset 0 1px 0 rgba(255, 255, 255, 1) !important;
 }
 
+.consultation-form .guiaa-combobox-content input:focus,
+.consultation-form .guiaa-combobox-content [cmdk-input]:focus {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
 .step-indicator {
   padding: 16px 20px !important;
   border-radius: var(--liquid-glass-radius-lg);
@@ -217,7 +223,7 @@ html:not(.dark):not([data-theme="dark"]) .action-card:hover {
     inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
 }
 
-.dashboard-activity-card,
+.dashboard-activity-card:not(.dashboard-activity-card--project),
 .dashboard-shortcut-card,
 .dashboard-followup-item {
   background: var(--liquid-glass-bg) !important;
@@ -227,7 +233,7 @@ html:not(.dark):not([data-theme="dark"]) .action-card:hover {
   box-shadow: var(--liquid-glass-shadow-soft) !important;
 }
 
-.dashboard-activity-card:hover,
+.dashboard-activity-card:not(.dashboard-activity-card--project):hover,
 .dashboard-shortcut-card:hover,
 .dashboard-followup-item:hover {
   border-color: rgba(61, 155, 143, 0.35) !important;
@@ -721,7 +727,8 @@ html:not(.dark):not([data-theme="dark"]) .clinic-page-guiaa .clinic-search input
   color: #0c2d4d !important;
 }
 
-.support-chat-bubble {
+.support-chat-bubble,
+.support-chat-msg-bubble {
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }

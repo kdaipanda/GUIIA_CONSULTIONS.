@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Brain, ClipboardList, FileDown, FlaskConical, Stethoscope } from "lucide-react";
 import { Button } from "../ui/button";
+import { StarRating } from "../ui/star-rating";
 import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
 import {
   formatConsultationDateShort,
@@ -66,15 +67,14 @@ export function ConsultationDetailPanel({
                 {getConsultationStatusLabel(statusClass)}
               </span>
               {ratingValue > 0 && (
-                <div
-                  className="clinical-rating"
-                  aria-label={t("history.card.ratingAria", { count: ratingValue })}
-                >
-                  {Array.from({ length: ratingValue }).map((_, idx) => (
-                    <span key={idx} className="paw-static filled">
-                      🐾
-                    </span>
-                  ))}
+                <div className="clinical-rating">
+                  <StarRating
+                    value={ratingValue}
+                    max={5}
+                    size="sm"
+                    readOnly
+                    aria-label={t("history.card.ratingAria", { count: ratingValue })}
+                  />
                 </div>
               )}
               <span className="clinical-file-date">

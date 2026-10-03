@@ -9,267 +9,242 @@ export function TermsLegalSectionsEn() {
         bound by these Terms and Conditions. If you do not agree with any part of these terms, you must
         not use the Platform.
       </p>
+      <p>
+        These terms apply both to <strong>licensed veterinarians (MVZ)</strong> and to{" "}
+        <strong>pet owners or caregivers (Clients)</strong> who use the services available on the
+        Platform.
+      </p>
 
       <h3>2. DEFINITIONS</h3>
       <ul>
         <li>
-          <strong>GUIAA Platform:</strong> Advanced L4 and L5 Clinical Decision Support (CDS) system for
-          veterinary professionals.
+          <strong>GUIAA Platform:</strong> GUIAA’s digital services, including the L4/L5 Clinical
+          Decision Support (CDS) system for veterinary professionals and informational clinical guidance
+          for pet owners.
         </li>
         <li>
-          <strong>User:</strong> Licensed veterinarian with a valid professional registration or license
-          in their country.
+          <strong>Veterinarian User (MVZ):</strong> a licensed veterinarian with a valid professional
+          registration who uses the clinical clinic / CDS.
         </li>
         <li>
-          <strong>CDS L4-L5:</strong> Level 4 and 5 clinical decision support system that provides
-          recommendations based on clinical data analysis.
+          <strong>Client User (Pet Owner):</strong> an adult who registers a pet-owner account to receive
+          informational clinical guidance about their animal.
         </li>
         <li>
-          <strong>Clinical Data:</strong> Information related to pets entered into the Platform.
+          <strong>User:</strong> any Veterinarian User or Client User.
+        </li>
+        <li>
+          <strong>CDS L4-L5:</strong> clinical decision support system intended for veterinarians.
+        </li>
+        <li>
+          <strong>Informational clinical guidance:</strong> advisory content for owners that{" "}
+          <strong>is not an official veterinary diagnosis</strong> and does not create a
+          veterinarian–patient relationship.
+        </li>
+        <li>
+          <strong>Pet / clinical data:</strong> animal information entered by an MVZ or a Client.
         </li>
       </ul>
 
-      <h3>3. ELIGIBILITY AND REGISTRATION</h3>
-      <h4>3.1 Eligibility Requirements</h4>
-      <p>To use the Platform, you must:</p>
+      <h3>3. ACCOUNT TYPES AND ELIGIBILITY</h3>
+      <h4>3.1 Veterinarian User (MVZ)</h4>
+      <p>To use the clinical clinic / CDS you must:</p>
       <ul>
         <li>Be a licensed veterinarian in Latin America</li>
-        <li>
-          Hold a valid professional license, registration, or credential issued by the competent authority
-          in your country
-        </li>
+        <li>Hold a valid professional license or registration from the competent authority</li>
         <li>Be legally authorized to practice veterinary medicine in your jurisdiction</li>
-        <li>Be of legal age under applicable laws</li>
-        <li>Have the legal capacity to enter into binding contracts</li>
-      </ul>
-
-      <h4>3.2 Verification Process</h4>
-      <ul>
-        <li>During registration, you must provide your country and professional registration number</li>
-        <li>
-          You must upload a document proving your credentials (degree, license, or professional
-          registration)
-        </li>
-        <li>
-          Our team will review the documentation; in Mexico, automatic validation with SEP is also
-          attempted
-        </li>
-        <li>We reserve the right to request additional documentation</li>
-        <li>Access will be granted only after successful verification</li>
-        <li>Verification may take up to 72 business hours</li>
-      </ul>
-
-      <h4>3.3 User Responsibilities</h4>
-      <p>You are responsible for:</p>
-      <ul>
-        <li>Maintaining the confidentiality of your access credentials</li>
-        <li>All activities performed under your account</li>
-        <li>Immediately notifying us of any unauthorized use</li>
-        <li>Updating your professional information when necessary</li>
-      </ul>
-
-      <h3>4. NATURE OF THE SERVICE</h3>
-      <h4>4.1 Support Tool</h4>
-      <p>The GUIAA Platform is a clinical decision SUPPORT tool that:</p>
-      <ul>
-        <li>Provides information based on scientific evidence</li>
-        <li>Offers algorithmic recommendations</li>
-        <li>Facilitates clinical data analysis</li>
-        <li>
-          <strong>DOES NOT replace the veterinarian's professional clinical judgment</strong>
-        </li>
-      </ul>
-
-      <h4>4.2 Limitations</h4>
-      <ul>
-        <li>Recommendations are advisory, not prescriptive</li>
-        <li>The veterinarian user is solely responsible for final clinical decisions</li>
-        <li>The Platform does not establish a veterinarian–pet relationship</li>
-        <li>
-          It does not provide definitive diagnoses or specific treatments without professional evaluation
-        </li>
-      </ul>
-
-      <h4>4.3 Professional Responsibility</h4>
-      <p>The veterinarian user:</p>
-      <ul>
-        <li>Retains exclusive responsibility for their clinical decisions</li>
-        <li>Must verify all information before applying it clinically</li>
-        <li>Must consider the individual circumstances of each case</li>
-        <li>Is responsible for compliance with applicable professional and ethical standards</li>
-      </ul>
-
-      <h3 id="legal-privacy">5. DATA PROTECTION AND PRIVACY</h3>
-      <h4>5.1 Applicable Legal Framework</h4>
-      <p>The Platform complies with:</p>
-      <ul>
-        <li>
-          Mexican Federal Law on Protection of Personal Data Held by Private Parties (LFPDPPP)
-        </li>
-        <li>General Data Protection Regulation (GDPR) for users in the European Union</li>
-        <li>Applicable health data protection regulations</li>
-        <li>International information security standards (ISO 27001, ISO 27799)</li>
-      </ul>
-
-      <h4>5.2 Data Collected</h4>
-      <p>We collect:</p>
-      <ul>
-        <li>Professional identification data (name, country, registration, institution)</li>
-        <li>Contact data (email, phone)</li>
-        <li>Platform usage data</li>
-        <li>Anonymized clinical data for system improvement purposes</li>
-      </ul>
-
-      <h4>5.3 Use of Data</h4>
-      <p>Data is used to:</p>
-      <ul>
-        <li>Provide and improve the service</li>
-        <li>Verify professional credentials</li>
-        <li>Conduct statistical analysis and improve algorithms</li>
-        <li>Comply with legal obligations</li>
-        <li>Send service-related communications</li>
-      </ul>
-
-      <h4>5.4 Security</h4>
-      <p>We implement security measures including:</p>
-      <ul>
-        <li>Encryption of data in transit and at rest (TLS 1.3, AES-256)</li>
-        <li>Multi-factor authentication</li>
-        <li>Role-based access controls</li>
-        <li>Periodic security audits</li>
-        <li>Incident response protocols</li>
-      </ul>
-
-      <h4>5.5 User Rights</h4>
-      <p>You have the right to:</p>
-      <ul>
-        <li>Access your personal data</li>
-        <li>Rectify inaccurate data</li>
-        <li>Cancel your account and data</li>
-        <li>Object to data processing</li>
-        <li>Data portability</li>
-        <li>Revoke granted consents</li>
+        <li>Be of legal age and have capacity to contract</li>
       </ul>
       <p>
-        To exercise your rights, contact: <strong>privacidad@guiaa.com</strong>
+        MVZ registration may require professional document verification (and, in Mexico, SEP validation
+        when applicable). Full access may depend on that verification.
+      </p>
+
+      <h4>3.2 Client User (Pet Owner)</h4>
+      <p>To use the owner consult you must:</p>
+      <ul>
+        <li>Be of legal age under applicable laws</li>
+        <li>Have legal capacity to enter into binding contracts</li>
+        <li>Provide accurate registration data (name, email, and phone if provided)</li>
+        <li>
+          Accept that the service provides <strong>informational clinical guidance</strong> and does not
+          replace in-person care by a licensed veterinarian
+        </li>
+      </ul>
+      <p>
+        Clients <strong>do not need a professional license</strong> and do not have access to the
+        veterinarian CDS clinic.
+      </p>
+
+      <h4>3.3 Shared responsibilities</h4>
+      <ul>
+        <li>Keep credentials confidential</li>
+        <li>All activity under your account</li>
+        <li>Report unauthorized use</li>
+        <li>Keep contact information up to date</li>
+        <li>Do not impersonate another user type or cross MVZ ↔ Client access layers</li>
+      </ul>
+
+      <h3>4. NATURE OF THE SERVICES</h3>
+      <h4>4.1 MVZ service (CDS / clinic)</h4>
+      <ul>
+        <li>Provides evidence-based clinical decision support</li>
+        <li>Offers algorithmic recommendations and clinic management tools</li>
+        <li>
+          <strong>DOES NOT replace the veterinarian’s professional clinical judgment</strong>
+        </li>
+        <li>The MVZ remains solely responsible for final clinical decisions</li>
+      </ul>
+
+      <h4>4.2 Client service (informational clinical guidance)</h4>
+      <ul>
+        <li>Provides informational clinical guidance based on data the owner submits</li>
+        <li>
+          <strong>Is not an official clinical diagnosis</strong>, veterinary consult, or prescription
+        </li>
+        <li>Does not create a veterinarian–pet relationship or replace in-person care</li>
+        <li>For emergencies or severe signs, seek a veterinary clinic immediately</li>
+        <li>
+          The Client is responsible for the accuracy of submitted information and for seeking professional
+          care when appropriate
+        </li>
+      </ul>
+
+      <h4>4.3 Layer separation</h4>
+      <p>
+        Data, histories, quotas, payments, and features of the MVZ flow and the Client flow are
+        segregated. A Client may not use the veterinarian CDS; an MVZ must not use the owner layer as a
+        substitute for professional practice.
+      </p>
+
+      <h3 id="legal-privacy">5. DATA PROTECTION AND PRIVACY</h3>
+      <h4>5.1 Applicable legal framework (LATAM)</h4>
+      <p>
+        We process personal data under applicable rules in the countries where we operate, including where
+        relevant:
+      </p>
+      <ul>
+        <li>
+          Mexico: Federal Law on Protection of Personal Data Held by Private Parties (LFPDPPP) and its
+          Regulations
+        </li>
+        <li>
+          Equivalent personal-data protection principles in other Latin American countries where the
+          service is offered
+        </li>
+        <li>GDPR when applicable to users in the European Union</li>
+        <li>Reasonable information-security standards</li>
+      </ul>
+
+      <h4>5.2 Data we may collect</h4>
+      <ul>
+        <li>
+          <strong>MVZ:</strong> professional identity, country, license, institution, contact, Platform
+          use, and clinical data linked to their practice
+        </li>
+        <li>
+          <strong>Client:</strong> name, email, phone (optional), pet data and reported symptoms,
+          guidance history, and B2C payment data
+        </li>
+        <li>Technical usage data for security and operations</li>
+        <li>Anonymized or aggregated data to improve the service</li>
+      </ul>
+
+      <h4>5.3 Purposes</h4>
+      <ul>
+        <li>Provide and improve contracted services</li>
+        <li>Verify professional identity (MVZ only) and authenticate accounts</li>
+        <li>Process payments and applicable taxes</li>
+        <li>Support, security, fraud prevention, and legal compliance</li>
+        <li>Service-related communications</li>
+      </ul>
+
+      <h4>5.4 Security and confidentiality</h4>
+      <ul>
+        <li>Reasonable technical and organizational measures (encryption in transit, access controls)</li>
+        <li>Client and MVZ histories remain in separate scopes</li>
+        <li>We do not sell personal data</li>
+        <li>Certified payment providers receive only what is needed to charge</li>
+      </ul>
+
+      <h4>5.5 Data-subject rights</h4>
+      <p>
+        You may request access, rectification, cancellation, objection, portability, or withdrawal of
+        consent under applicable law by emailing <strong>privacidad@guiaa.com</strong>.
       </p>
 
       <h3>6. INTELLECTUAL PROPERTY</h3>
-      <h4>6.1 Platform Rights</h4>
       <p>
-        All intellectual property rights in the Platform, including software, source code, algorithms,
-        design, content, text, graphics, materials, trademarks, and logos, are the exclusive property of
-        GUIAA or its licensors.
+        GUIAA software, brands, algorithms, design, and content are owned by GUIAA or its licensors. A
+        limited, non-exclusive, revocable license is granted to use the Platform according to account type
+        (professional or Client), without copying, reselling, or reverse engineering.
       </p>
-
-      <h4>6.2 License to Use</h4>
-      <p>
-        A limited, non-exclusive, non-transferable, and revocable license is granted to access and use the
-        Platform in accordance with these terms, solely for legitimate professional purposes.
-      </p>
-
-      <h4>6.3 Restrictions</h4>
-      <p>The following is strictly prohibited:</p>
-      <ul>
-        <li>Copying, modifying, or creating derivative works</li>
-        <li>Reverse engineering the software</li>
-        <li>Extracting data through web scraping or similar techniques</li>
-        <li>Commercializing or reselling access to the Platform</li>
-        <li>Removing intellectual property notices</li>
-      </ul>
 
       <h3>7. ACCEPTABLE USE</h3>
-      <h4>7.1 Permitted Conduct</h4>
-      <p>The Platform must be used exclusively for:</p>
+      <h4>7.1 Permitted</h4>
       <ul>
-        <li>Support in veterinary clinical decision-making</li>
-        <li>Consultation of up-to-date scientific information</li>
-        <li>Analysis of clinical cases for professional purposes</li>
-        <li>Education and continuing professional development</li>
-      </ul>
-
-      <h4>7.2 Prohibited Conduct</h4>
-      <p>The following is strictly prohibited:</p>
-      <ul>
-        <li>Sharing access credentials with unauthorized third parties</li>
-        <li>Using the Platform for non-veterinary purposes</li>
-        <li>Entering false or misleading information</li>
-        <li>Interfering with the operation of the Platform</li>
-        <li>Engaging in activities that violate applicable laws</li>
-        <li>Automating access through unauthorized bots or scripts</li>
-      </ul>
-
-      <h3>8. CLINICAL DECISION SUPPORT SYSTEM</h3>
-      <h4>8.1 Operation of CDS L4-L5</h4>
-      <p>The Platform uses:</p>
-      <ul>
-        <li>Computational algorithms trained on veterinary data</li>
-        <li>Clinical information processing models</li>
-        <li>Evidence-based recommendation systems</li>
-        <li>Predictive analysis of clinical patterns</li>
-      </ul>
-
-      <h4>8.2 System Limitations</h4>
-      <p>The user acknowledges that:</p>
-      <ul>
-        <li>Computational systems may make errors</li>
         <li>
-          Recommendations are based on historical data and may not apply to all cases
+          <strong>MVZ:</strong> clinical support, records, scheduling, and plan features
         </li>
-        <li>Technology is constantly evolving and improving</li>
-        <li>There is a margin of uncertainty in predictions</li>
+        <li>
+          <strong>Client:</strong> request and view informational clinical guidance about their pets
+        </li>
+      </ul>
+      <h4>7.2 Prohibited</h4>
+      <ul>
+        <li>Sharing credentials or impersonating others</li>
+        <li>Entering false or misleading information</li>
+        <li>Treating Client guidance as an official diagnosis or prescription</li>
+        <li>Interfering with the Platform, scraping data, or unauthorized automation</li>
+        <li>Illegal activity or infringement of third-party rights</li>
+      </ul>
+
+      <h3>8. TECHNOLOGY LIMITATIONS</h3>
+      <p>The User acknowledges that:</p>
+      <ul>
+        <li>Algorithmic systems may err or be incomplete</li>
+        <li>Recommendations depend on submitted information and evolving models</li>
+        <li>Uncertainty exists; for doubt or emergencies, prioritize in-person veterinary care</li>
       </ul>
 
       <h3>9. LIABILITY AND WARRANTIES</h3>
-      <h4>9.1 Disclaimer of Warranties</h4>
       <p>
-        The Platform is provided "AS IS" and "AS AVAILABLE", without warranties of any kind.
+        The Platform is provided "as is" and "as available". To the extent permitted by law, GUIAA is not
+        liable for MVZ clinical decisions, Client care decisions based on informational guidance,
+        indirect damages, data loss, or force-majeure interruptions.
       </p>
 
-      <h4>9.2 Limitation of Liability</h4>
-      <p>GUIAA shall not be liable for:</p>
+      <h3>10. FEES AND PAYMENTS</h3>
       <ul>
-        <li>Clinical decisions made by the user</li>
-        <li>Damages arising from the use or inability to use the Platform</li>
-        <li>Loss of data, profits, or information</li>
-        <li>Service interruptions due to force majeure</li>
+        <li>
+          <strong>MVZ:</strong> membership / credit model per published catalog
+        </li>
+        <li>
+          <strong>Client:</strong> pay-per-consult or other published B2C packages
+        </li>
+        <li>Prices, taxes, and refund terms are shown at checkout</li>
       </ul>
 
-      <h3>10. REGULATORY COMPLIANCE</h3>
-      <p>The user must comply with:</p>
-      <ul>
-        <li>Mexican Federal Animal Health Law</li>
-        <li>Applicable Mexican Official Standards</li>
-        <li>State and local veterinary practice regulations</li>
-        <li>Professional codes of ethics</li>
-      </ul>
-
-      <h3>11. FEES AND PAYMENTS</h3>
-      <ul>
-        <li>The Platform operates under a subscription model</li>
-        <li>Fees are specified on the website</li>
-        <li>Satisfaction guarantee period: 14 days</li>
-      </ul>
-
-      <h3>12. TERM AND TERMINATION</h3>
+      <h3>11. TERM AND TERMINATION</h3>
       <p>
-        The user may cancel their subscription at any time. GUIAA may suspend or terminate access for
-        violation of these terms.
+        You may cancel your account or stop using the service at any time. GUIAA may suspend or terminate
+        access for terms violations, fraud, or security risk.
       </p>
 
-      <h3>13. GENERAL PROVISIONS</h3>
+      <h3>12. GENERAL PROVISIONS</h3>
       <p>
-        These terms are governed by the laws of the United Mexican States. Any dispute shall be subject to
-        the exclusive jurisdiction of the courts of Mexico City.
+        These terms are governed by the laws of the United Mexican States, without prejudice to mandatory
+        consumer rights in your country of residence in Latin America. Disputes: competent courts in Mexico
+        City, unless consumer-protection rules require another forum.
       </p>
 
-      <h3>14. CONTACT</h3>
+      <h3>13. CONTACT</h3>
       <p>
         <strong>GUIAA Platform</strong>
         <br />
-        Email: soporte@guiaa.com
+        Support: soporte@guiaa.com
         <br />
-        Privacy and data: privacidad@guiaa.com
+        Privacy: privacidad@guiaa.com
         <br />
         Legal: legal@guiaa.com
       </p>
@@ -284,23 +259,26 @@ export function TermsLegalSectionsEn() {
         }}
       >
         <h3 style={{ marginTop: 0 }}>CONSENT</h3>
-        <p>
-          By checking the acceptance box and/or using the GUIAA Platform, you declare that:
-        </p>
+        <p>By checking the acceptance box and/or using the GUIAA Platform, you declare that:</p>
         <ul style={{ listStyle: "none", padding: 0 }}>
           <li>✓ You have read and understood these Terms and Conditions</li>
-          <li>✓ You are a licensed veterinarian with a valid professional registration</li>
+          <li>
+            ✓ If you are an MVZ: you are a licensed veterinarian and responsible for your clinical
+            decisions
+          </li>
+          <li>
+            ✓ If you are a Client: you understand you receive informational clinical guidance, not an
+            official diagnosis
+          </li>
           <li>✓ You agree to be legally bound by these terms</li>
-          <li>✓ You will use the Platform responsibly and ethically</li>
-          <li>✓ You understand that you are solely responsible for your clinical decisions</li>
           <li>✓ You have been informed about the processing of your personal data</li>
         </ul>
       </div>
 
       <p className="legal-modal__meta">
-        Last updated: December 28, 2025
+        Last updated: September 22, 2026
         <br />
-        Version: 1.0 - 2026
+        Version: 2.0 - 2026 (MVZ + Clients)
         <br />© 2026 GUIAA Platform. All rights reserved.
       </p>
     </>
