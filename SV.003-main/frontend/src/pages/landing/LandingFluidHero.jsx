@@ -1,10 +1,11 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LandingNavbar } from "./LandingNavbar";
 import {
   LANDING_HERO_VIDEO,
   LANDING_HERO_VIDEO_POSTER,
+  nextLandingHeroVideoSrc,
   resolveLandingHeroVideoSrc,
 } from "./landingBrandAssets";
 import "./landingFluidHero.css";
@@ -96,7 +97,14 @@ export function LandingFluidHero({ setView }) {
               loop
               playsInline
               preload="auto"
-              onError={() => setVideoFailed(true)}
+              onError={() => {
+                const fallback = nextLandingHeroVideoSrc(heroVideoSrc);
+                if (fallback) {
+                  setHeroVideoSrc(fallback);
+                  return;
+                }
+                setVideoFailed(true);
+              }}
             />
           ) : (
             <img
@@ -147,8 +155,8 @@ export function LandingFluidHero({ setView }) {
             >
               {t("hero.ctaRegister")}
             </button>
-            <a href="#product" className="landing-guiaa-hero-cta-secondary">
-              {t("how.ctaExplore")}
+            <a href="/consulta" className="landing-guiaa-hero-cta-secondary">
+              {t("hero.ctaOwner")}
             </a>
           </div>
 

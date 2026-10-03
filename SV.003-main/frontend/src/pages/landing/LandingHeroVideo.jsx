@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   LANDING_HERO_VIDEO,
   LANDING_HERO_VIDEO_POSTER,
+  nextLandingHeroVideoSrc,
   resolveLandingHeroVideoSrc,
 } from "./landingBrandAssets";
 
@@ -98,10 +99,17 @@ export function LandingHeroVideo({ onFailed }) {
   }, [inView, canLoadVideo, failed, reduceMotion, userStarted]);
 
   const handleError = useCallback(() => {
+    const fallback = nextLandingHeroVideoSrc(heroVideoSrc);
+    if (fallback) {
+      setHeroVideoSrc(fallback);
+      setFailed(false);
+      setPlayBlocked(false);
+      return;
+    }
     setFailed(true);
     setIsPlaying(false);
     onFailed?.();
-  }, [onFailed]);
+  }, [heroVideoSrc, onFailed]);
 
   const attemptPlayback = useCallback(async () => {
     const video = videoRef.current;

@@ -29,15 +29,17 @@ export const LANDING_IMAGES = {
 
 export const LANDING_HERO_VIDEO = "/VG1.mp4";
 export const LANDING_HERO_VIDEO_MOBILE = "/VG1-mobile.mp4";
-/** Upscale 2× (2520×2160) para monitores 2K/4K — se genera con npm run compress:hero-video */
+/** Upscale 2× (2520×2160) — solo si el archivo está desplegado en /public. */
 export const LANDING_HERO_VIDEO_4K = "/VG1-4k.mp4";
+/** En producción aún no siempre está VG1-4k; no lo elegir como src primario. */
+export const LANDING_HERO_VIDEO_4K_ENABLED = false;
 export const LANDING_HERO_VIDEO_POSTER = LANDING_IMAGES.heroHub;
 
 /**
  * Fuente según viewport:
  * - móvil / tablet estrecha → VG1-mobile
  * - escritorio → VG1
- * - 4K / ultra-wide / alta densidad en pantalla grande → VG1-4k (fallback VG1)
+ * - 4K / ultra-wide (opcional) → VG1-4k si LANDING_HERO_VIDEO_4K_ENABLED
  */
 export function resolveLandingHeroVideoSrc({
   mobileMaxWidth = 1023,
@@ -48,14 +50,23 @@ export function resolveLandingHeroVideoSrc({
   const isNarrow = window.matchMedia(`(max-width: ${mobileMaxWidth}px)`).matches;
   if (isNarrow) return LANDING_HERO_VIDEO_MOBILE;
 
-  const isLarge =
-    window.matchMedia(`(min-width: ${largeMinWidth}px)`).matches ||
-    (typeof window.devicePixelRatio === "number" &&
-      window.devicePixelRatio >= 2 &&
-      window.matchMedia("(min-width: 1280px)").matches);
+  if (LANDING_HERO_VIDEO_4K_ENABLED) {
+    const isLarge =
+      window.matchMedia(`(min-width: ${largeMinWidth}px)`).matches ||
+      (typeof window.devicePixelRatio === "number" &&
+        window.devicePixelRatio >= 2 &&
+        window.matchMedia("(min-width: 1280px)").matches);
+    if (isLarge) return LANDING_HERO_VIDEO_4K;
+  }
 
-  if (isLarge) return LANDING_HERO_VIDEO_4K;
   return LANDING_HERO_VIDEO;
+}
+
+/** Siguiente fuente si el video actual falla (4k → desktop → móvil → null). */
+export function nextLandingHeroVideoSrc(currentSrc) {
+  if (currentSrc === LANDING_HERO_VIDEO_4K) return LANDING_HERO_VIDEO;
+  if (currentSrc === LANDING_HERO_VIDEO) return LANDING_HERO_VIDEO_MOBILE;
+  return null;
 }
 
 /** Presentación YouTube del botón "Ver presentación" (inicio en 0:39). */
