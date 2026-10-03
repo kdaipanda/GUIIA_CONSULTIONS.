@@ -1,3 +1,5 @@
+import { isPlatformAdminEmail } from "./platformAdmin";
+
 /** Control de acceso por membresía — alineado con backend/membership_access.py */
 
 export const MEMBERSHIP_FEATURES = {
@@ -118,11 +120,14 @@ export function isTrialExhausted(veterinarian, options = {}) {
 
 /**
  * Membresía de pago con fecha de vencimiento ya pasada (p. ej. Premium sin renovar).
- * No aplica a trial sin membership_type.
+ * No aplica a trial sin membership_type ni a la cuenta master de plataforma.
  */
 export function isMembershipExpired(veterinarian, options = {}) {
   if (options.platformAdmin) return false;
   if (!veterinarian?.membership_type) return false;
+  if (isPlatformAdminEmail(veterinarian.email) || veterinarian.platform_admin === true) {
+    return false;
+  }
   if ((veterinarian.membership_source || "").toLowerCase() === "organization") {
     return false;
   }

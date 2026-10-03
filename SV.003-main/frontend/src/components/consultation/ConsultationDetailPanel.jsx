@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, Brain, ClipboardList, FileDown, FlaskConical, Stethoscope } from "lucide-react";
 import { Button } from "../ui/button";
 import { StarRating } from "../ui/star-rating";
-import { cleanClinicalDisplayText } from "../../lib/consultationPdf";
+import { ClinicalAnalysisView } from "./ClinicalAnalysisView";
 import {
   formatConsultationDateShort,
   formatConsultationFolio,
@@ -167,9 +167,7 @@ export function ConsultationDetailPanel({
                 <h2>{t("history.detail.analysis")}</h2>
               </div>
               <div className="clinical-analysis-content">
-                <pre className="clinical-analysis-text">
-                  {cleanClinicalDisplayText(consultation.analysis || "")}
-                </pre>
+                <ClinicalAnalysisView text={consultation.analysis || ""} />
               </div>
             </div>
           )}
@@ -188,9 +186,9 @@ export function ConsultationDetailPanel({
                       <span>{formatConsultationDateShort(study.created_at)}</span>
                     </div>
                     {study.analysis && (
-                      <pre className="clinical-analysis-text clinical-linked-study-text">
-                        {cleanClinicalDisplayText(study.analysis)}
-                      </pre>
+                      <div className="clinical-linked-study-text">
+                        <ClinicalAnalysisView text={study.analysis} />
+                      </div>
                     )}
                   </li>
                 ))}

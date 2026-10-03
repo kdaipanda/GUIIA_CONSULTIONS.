@@ -1,4 +1,4 @@
-﻿import React, {
+import React, {
   useState,
   useEffect,
   useRef,
@@ -106,6 +106,7 @@ import {
   getTrialExhaustedMessage,
 } from "./lib/membershipAccess";
 import { MembershipFeatureGate } from "./components/MembershipFeatureGate";
+import { ClinicalAnalysisView } from "./components/consultation/ClinicalAnalysisView";
 import { InviteRegisterPage } from "./pages/InviteRegisterPage";
 import { Header } from "./components/Header";
 import { AppShell } from "./layout/AppShell";
@@ -1148,7 +1149,7 @@ const Router = () => {
   ]);
   const showMembershipExpiredGate =
     Boolean(veterinarian) &&
-    isMembershipExpired(veterinarian) &&
+    isMembershipExpired(veterinarian, { platformAdmin }) &&
     !membershipExpiredAllowedViews.has(currentView);
   const expiredPlanName = veterinarian?.membership_type
     ? getPlanDisplayName(veterinarian.membership_type.toLowerCase())
@@ -4181,7 +4182,7 @@ const NewConsultation = ({
                 <div className="analysis-result">
                   <h3>{t("consultation.specializedAnalysis")}</h3>
                   <div className="analysis-content">
-                    <pre className="analysis-text">{aiAnalysis}</pre>
+                    <ClinicalAnalysisView text={aiAnalysis} />
                   </div>
 
                   <div className="consultation-rating">

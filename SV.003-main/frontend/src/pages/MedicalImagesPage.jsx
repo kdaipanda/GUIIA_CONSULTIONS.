@@ -15,7 +15,8 @@ import { useVet } from "../context/VetContext";
 import { notifyError, notifySuccess } from "../lib/appToast";
 import { BACKEND_URL } from "../lib/backendUrl";
 import { getAuthHeaders } from "../lib/authHeaders";
-import { cleanClinicalDisplayText, clinicalTextPreview } from "../lib/consultationPdf";
+import { clinicalTextPreview } from "../lib/consultationPdf";
+import { ClinicalAnalysisView } from "../components/consultation/ClinicalAnalysisView";
 import {
   fileToBase64Payload,
   labFileLabel,
@@ -681,11 +682,9 @@ export function MedicalImagesPage({
                   <div className="result-section detailed medical-lab-result-only">
                     <div className="result-content detailed-analysis medical-lab-detailed-analysis">
                       {result.analysis ? (
-                        <pre>{cleanClinicalDisplayText(result.analysis)}</pre>
+                        <ClinicalAnalysisView text={result.analysis} />
                       ) : result.detailed_analysis ? (
-                        <pre>
-                          {cleanClinicalDisplayText(result.detailed_analysis)}
-                        </pre>
+                        <ClinicalAnalysisView text={result.detailed_analysis} />
                       ) : (
                         <div className="medical-lab-result-fallback">
                           {t("lab.noAnalysis")}
