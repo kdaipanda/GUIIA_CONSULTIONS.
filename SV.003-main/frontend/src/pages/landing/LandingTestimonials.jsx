@@ -6,7 +6,7 @@ const PRACTICE_OUTCOMES = [
   {
     id: "ana",
     name: "Dra. Ana M.",
-    petImage: "/landing/pets/dog-golden.png",
+    petImage: "/landing/pets/cat-ginger.png",
     tone: "navy",
     rating: 5,
   },

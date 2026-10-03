@@ -25,6 +25,17 @@ export const LANDING_IMAGES = {
     catGinger: "/landing/pets/cat-ginger.png",
     catBlack: "/landing/pets/cat-black.png",
     exoticMacaw: "/landing/pets/exotic-macaw.png",
+    speciesPerros: "/landing/pets/species-perros.jpg",
+    speciesGatos: "/landing/pets/species-gatos.jpg",
+    speciesConejos: "/landing/pets/species-conejos.jpg",
+    speciesAves: "/landing/pets/species-aves.jpg",
+    speciesHamsters: "/landing/pets/species-hamsters.jpg",
+    speciesCuyos: "/landing/pets/species-cuyos.jpg",
+    speciesHurones: "/landing/pets/species-hurones.jpg",
+    speciesErizos: "/landing/pets/species-erizos.jpg",
+    speciesTortugas: "/landing/pets/species-tortugas.jpg",
+    speciesIguanas: "/landing/pets/species-iguanas.jpg",
+    speciesPatosPollos: "/landing/pets/species-patos-pollos.jpg",
   },
 };
 

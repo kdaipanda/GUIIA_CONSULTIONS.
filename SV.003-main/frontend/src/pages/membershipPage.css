@@ -99,6 +99,11 @@
   letter-spacing: 0.02em;
 }
 
+.membership-promo-offer {
+  margin-top: 0.85rem;
+  text-align: left;
+}
+
 .billing-toggle-wrapper {
   display: inline-flex;
   gap: 0.25rem;

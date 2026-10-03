@@ -65,6 +65,7 @@
     "eyebrow": "Cobertura clínica",
     "heading": "Multiespecie veterinaria · {{count}} formularios clínicos",
     "aria": "Especies disponibles en consulta",
+    "cardSubtitle": "Formulario clínico",
     "pause": "Pausar carrusel",
     "play": "Reanudar carrusel",
     "categories": {
@@ -168,7 +169,9 @@
       "basic": "Consultorio de pequeñas especies: CDS estructurado, expediente y agenda para perros y gatos.",
       "professional": "Práctica multiespecie activa con inventario, ventas y reportes clínicos integrados.",
       "premium": "Alto volumen de consultas con Manejo Experto y onboarding guiado prioritario."
-    }
+    },
+    "promoBadge": "Oferta exclusiva",
+    "promoMessage": "40% de descuento en Premium · cupón"
   },
   "faq": {
     "eyebrow": "Preguntas frecuentes",

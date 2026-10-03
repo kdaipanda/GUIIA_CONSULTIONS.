@@ -116,6 +116,23 @@ export function isTrialExhausted(veterinarian, options = {}) {
   return (veterinarian.consultations_remaining ?? 0) <= 0;
 }
 
+/**
+ * Membresía de pago con fecha de vencimiento ya pasada (p. ej. Premium sin renovar).
+ * No aplica a trial sin membership_type.
+ */
+export function isMembershipExpired(veterinarian, options = {}) {
+  if (options.platformAdmin) return false;
+  if (!veterinarian?.membership_type) return false;
+  if ((veterinarian.membership_source || "").toLowerCase() === "organization") {
+    return false;
+  }
+  const raw = veterinarian.membership_expires;
+  if (!raw) return false;
+  const expiry = new Date(raw);
+  if (Number.isNaN(expiry.getTime())) return false;
+  return expiry.getTime() < Date.now();
+}
+
 export function requiresProfessionalPlan(veterinarian, options = {}) {
   return (
     canAccessFeature(veterinarian, MEMBERSHIP_FEATURES.inventory, options) &&

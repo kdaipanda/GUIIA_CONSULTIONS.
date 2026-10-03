@@ -94,6 +94,7 @@ import {
   DEFAULT_PACKAGES,
   DEFAULT_CREDIT_PACKAGES,
   getMembershipQuota,
+  getPlanDisplayName,
   parseMembershipCatalogResponse,
 } from "./lib/membershipPlans";
 import {
@@ -101,6 +102,7 @@ import {
   MEMBERSHIP_FEATURES,
   canCreateConsultation,
   isTrialExhausted,
+  isMembershipExpired,
   getTrialExhaustedMessage,
 } from "./lib/membershipAccess";
 import { MembershipFeatureGate } from "./components/MembershipFeatureGate";
@@ -297,6 +299,11 @@ const AdminPage = lazy(() =>
 );
 const MembershipPage = lazy(() =>
   import("./pages/MembershipPage").then((m) => ({ default: m.MembershipPage })),
+);
+const MembershipAccessDeniedPage = lazy(() =>
+  import("./pages/MembershipAccessDeniedPage").then((m) => ({
+    default: m.MembershipAccessDeniedPage,
+  })),
 );
 const PaymentSuccessPage = lazy(() =>
   import("./pages/PaymentSuccessPage").then((m) => ({ default: m.PaymentSuccessPage })),
@@ -1133,6 +1140,20 @@ const Router = () => {
     ),
   };
 
+  const membershipExpiredAllowedViews = new Set([
+    "membership",
+    "payment-success",
+    "profile",
+    "help",
+  ]);
+  const showMembershipExpiredGate =
+    Boolean(veterinarian) &&
+    isMembershipExpired(veterinarian) &&
+    !membershipExpiredAllowedViews.has(currentView);
+  const expiredPlanName = veterinarian?.membership_type
+    ? getPlanDisplayName(veterinarian.membership_type.toLowerCase())
+    : null;
+
   return (
     <>
       {location.pathname === "/captura-landing" ? (
@@ -1145,6 +1166,13 @@ const Router = () => {
         {portalOrganizationId ? (
           <AppShell>
             <AppointmentRequestPortal organizationId={portalOrganizationId} />
+          </AppShell>
+        ) : showMembershipExpiredGate ? (
+          <AppShell fullBleed>
+            <MembershipAccessDeniedPage
+              setView={navigateSetView}
+              planName={expiredPlanName}
+            />
           </AppShell>
         ) : (
           <Suspense fallback={<LoadingScreen />}>

@@ -26,6 +26,8 @@ import { trackMetaInitiateCheckout } from "../lib/metaPixel";
 import { notifyError } from "../lib/appToast";
 import { useTranslation } from "react-i18next";
 import { ModuleHelpTip } from "../components/clinic/ModuleHelpTip";
+import { MembershipPromoOffer } from "../components/MembershipPromoOffer";
+import "../styles/membershipPromoOffer.css";
 import "./membershipPage.css";
 import "./clinic/helpCenterPage.css";
 const INFO_ICONS = {
@@ -89,11 +91,16 @@ function MembershipPlans({
               )}
               {isCurrent && <div className="current-plan-pill">{t("membership.currentPlan")}</div>}
               {key === "premium" && !isCurrent && premiumPromoCode && (
-                <p className="pricing-promo-hint">
-                  {premiumPromoAutoApply
-                    ? t("membership.promoAutoApply", { code: premiumPromoCode })
-                    : t("membership.promoManual", { code: premiumPromoCode })}
-                </p>
+                <MembershipPromoOffer
+                  className="membership-promo-offer"
+                  badge={t("membership.promoBadge")}
+                  message={
+                    premiumPromoAutoApply
+                      ? t("membership.promoAutoApplyMessage")
+                      : t("membership.promoManualMessage")
+                  }
+                  code={premiumPromoCode}
+                />
               )}
             </div>
             <div className="pricing-features">

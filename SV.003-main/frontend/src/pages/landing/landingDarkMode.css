@@ -617,6 +617,27 @@ html.dark .landing-species-chip:hover {
   border-color: rgba(61, 155, 143, 0.4) !important;
 }
 
+[data-theme="dark"] .landing-section-band .landing-species-cards-viewport.landing-marquee-fade::before,
+html.dark .landing-section-band .landing-species-cards-viewport.landing-marquee-fade::before {
+  background: linear-gradient(to right, #0b1220, transparent);
+}
+
+[data-theme="dark"] .landing-section-band .landing-species-cards-viewport.landing-marquee-fade::after,
+html.dark .landing-section-band .landing-species-cards-viewport.landing-marquee-fade::after {
+  background: linear-gradient(to left, #0b1220, transparent);
+}
+
+[data-theme="dark"] .landing-species-card,
+html.dark .landing-species-card {
+  border-color: rgba(148, 163, 184, 0.18);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .landing-species-card:focus-visible,
+html.dark .landing-species-card:focus-visible {
+  --tw-ring-offset-color: #0b1220;
+}
+
 /* Guía consultas */
 [data-theme="dark"] .landing-guia-consultas-panel,
 html.dark .landing-guia-consultas-panel {

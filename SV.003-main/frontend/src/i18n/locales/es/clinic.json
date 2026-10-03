@@ -498,6 +498,14 @@
       "downloadPdf": "Descargar PDF"
     }
   },
+  "accessDenied": {
+    "code": "Error 403",
+    "title": "Acceso denegado",
+    "body": "Tu membresía {{plan}} expiró y no se renovó. Renueva tu plan para volver a usar el panel clínico y las consultas CDS.",
+    "planFallback": "Premium",
+    "renewCta": "Renovar membresía",
+    "helpCta": "Solicitar ayuda"
+  },
   "membership": {
     "eyebrow": "Plataforma clínica GUIAA",
     "title": "Membresías por módulo y consulta",
@@ -530,6 +538,9 @@
     "priceEquivalent": "≈ ${{amount}} MXN/mes",
     "promoAutoApply": "Descuento {{code}} se aplica al pagar Premium.",
     "promoManual": "¿Tienes código? En el pago escribe {{code}}.",
+    "promoBadge": "Oferta exclusiva",
+    "promoAutoApplyMessage": "40% de descuento en Premium · cupón",
+    "promoManualMessage": "40% en Premium · escribe el cupón",
     "creditsLead": "¿Se agotaron las consultas de tu plan? Compra un paquete extra sin cambiar de membresía. Se suman a tu saldo actual.",
     "creditsDefaultNote": "{{credits}} consultas CDS · válidas con cuenta MVZ activa",
     "creditsMxnVat": "MXN + IVA",

@@ -498,6 +498,14 @@
       "downloadPdf": "Download PDF"
     }
   },
+  "accessDenied": {
+    "code": "Error 403",
+    "title": "Access denied",
+    "body": "Your {{plan}} membership expired and was not renewed. Renew your plan to regain the clinical panel and CDS consultations.",
+    "planFallback": "Premium",
+    "renewCta": "Renew membership",
+    "helpCta": "Request help"
+  },
   "membership": {
     "eyebrow": "GUIAA clinical platform",
     "title": "Memberships by module and consultation",
@@ -530,6 +538,9 @@
     "priceEquivalent": "≈ ${{amount}} MXN/month",
     "promoAutoApply": "Discount {{code}} applies when paying for Premium.",
     "promoManual": "Have a code? Enter {{code}} at checkout.",
+    "promoBadge": "Exclusive offer",
+    "promoAutoApplyMessage": "40% off Premium · coupon",
+    "promoManualMessage": "40% off Premium · enter coupon",
     "creditsLead": "Out of plan consultations? Buy an extra pack without changing your membership. Credits are added to your current balance.",
     "creditsDefaultNote": "{{credits}} CDS consultations · valid with an active vet account",
     "creditsMxnVat": "MXN + VAT",

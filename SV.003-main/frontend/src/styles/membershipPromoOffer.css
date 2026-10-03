@@ -1,0 +1,72 @@
+/* Oferta Premium FRIENDS40 — tokens GUIAA (navy / blue / teal) */
+
+.guiaa-promo-offer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.75rem;
+  width: 100%;
+  margin-top: 0.85rem;
+  padding: 0.4rem 0.55rem 0.4rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(61, 155, 143, 0.35);
+  background:
+    linear-gradient(135deg, rgba(12, 45, 77, 0.94), rgba(12, 45, 77, 0.88)),
+    #0c2d4d;
+  box-shadow: 0 8px 20px -12px rgba(12, 45, 77, 0.45);
+}
+
+.guiaa-promo-offer-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.65rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: #3d9b8f;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.guiaa-promo-offer-text {
+  margin: 0;
+  flex: 1 1 10rem;
+  min-width: 0;
+  padding-right: 0.45rem;
+  color: #e8f4fc;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.guiaa-promo-offer-code {
+  color: #7dd3c5;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Variante dentro de card clara de landing */
+.landing-pricing-card .guiaa-promo-offer {
+  margin-top: 0.75rem;
+}
+
+/* Dark mode: un poco más de contraste en el borde */
+[data-theme="dark"] .guiaa-promo-offer,
+html.dark .guiaa-promo-offer {
+  border-color: rgba(125, 211, 197, 0.4);
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.55);
+}
+
+@media (max-width: 420px) {
+  .guiaa-promo-offer {
+    border-radius: 1rem;
+    padding: 0.55rem;
+  }
+
+  .guiaa-promo-offer-text {
+    padding-right: 0;
+  }
+}

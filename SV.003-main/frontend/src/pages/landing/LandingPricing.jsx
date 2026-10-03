@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Coins, ShieldCheck, Stethoscope, PawPrint, Sparkles, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { MembershipPromoOffer } from "../../components/MembershipPromoOffer";
 import { getBackendUrl } from "../../lib/backendUrl";
 import { buildLandingPricingPlans } from "../../lib/landingPricingPlans";
 import { trackMetaViewContent } from "../../lib/metaPixel";
@@ -9,12 +10,15 @@ import {
   DEFAULT_CREDIT_PACKAGES,
   parseMembershipCatalogResponse,
 } from "../../lib/membershipPlans";
+import "../../styles/membershipPromoOffer.css";
 
 const PLAN_ICONS = {
   basic: PawPrint,
   professional: Stethoscope,
   premium: Sparkles,
 };
+
+const PREMIUM_PROMO_CODE = "FRIENDS40";
 
 export function LandingPricing({ setView }) {
   const { t, i18n } = useTranslation("landing");
@@ -159,6 +163,14 @@ export function LandingPricing({ setView }) {
                   </div>
 
                   {priceNote && <p className="landing-pricing-price-note">{priceNote}</p>}
+
+                  {key === "premium" && (
+                    <MembershipPromoOffer
+                      badge={t("pricing.promoBadge")}
+                      message={t("pricing.promoMessage")}
+                      code={PREMIUM_PROMO_CODE}
+                    />
+                  )}
 
                   <button
                     type="button"

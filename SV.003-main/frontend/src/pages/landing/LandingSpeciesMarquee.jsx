@@ -1,40 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Pause, Play } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CONSULTATION_CATEGORY_LIST } from "../../lib/consultationCategories";
+import { HoverRevealCard } from "./HoverRevealCards";
+import { LANDING_IMAGES } from "./landingBrandAssets";
 import { onLandingAnchorClick, productTabHref } from "./landingScroll";
 
-function SpeciesChip({ icon, name, href, onClick, decorative = false }) {
-  const className = "landing-species-chip";
-
-  const content = (
-    <>
-      <span className="landing-species-icon" aria-hidden>
-        {icon}
-      </span>
-      <span className="landing-species-label">{name}</span>
-    </>
-  );
-
-  if (decorative) {
-    return (
-      <span className={className} aria-hidden>
-        {content}
-      </span>
-    );
-  }
-
-  return (
-    <a href={href} onClick={onClick} className={className} aria-label={name}>
-      {content}
-    </a>
-  );
-}
+const SPECIES_IMAGES = {
+  perros: LANDING_IMAGES.pets.speciesPerros,
+  gatos: LANDING_IMAGES.pets.speciesGatos,
+  conejos: LANDING_IMAGES.pets.speciesConejos,
+  aves: LANDING_IMAGES.pets.speciesAves,
+  hamsters: LANDING_IMAGES.pets.speciesHamsters,
+  cuyos: LANDING_IMAGES.pets.speciesCuyos,
+  hurones: LANDING_IMAGES.pets.speciesHurones,
+  erizos: LANDING_IMAGES.pets.speciesErizos,
+  tortugas: LANDING_IMAGES.pets.speciesTortugas,
+  iguanas: LANDING_IMAGES.pets.speciesIguanas,
+  patos_pollos: LANDING_IMAGES.pets.speciesPatosPollos,
+};
 
 export function LandingSpeciesMarquee() {
   const { t } = useTranslation("landing");
   const speciesCount = CONSULTATION_CATEGORY_LIST.length;
-  const loopItems = [...CONSULTATION_CATEGORY_LIST, ...CONSULTATION_CATEGORY_LIST];
   const speciesHref = productTabHref("species");
   const [paused, setPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(
@@ -53,6 +41,19 @@ export function LandingSpeciesMarquee() {
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
+
+  const items = useMemo(
+    () =>
+      CONSULTATION_CATEGORY_LIST.map(({ key }) => ({
+        key,
+        title: t(`speciesMarquee.categories.${key}`, { defaultValue: key }),
+        subtitle: t("speciesMarquee.cardSubtitle"),
+        imageUrl: SPECIES_IMAGES[key],
+      })),
+    [t],
+  );
+
+  const loopItems = reduceMotion ? items : [...items, ...items];
 
   return (
     <section
@@ -84,26 +85,28 @@ export function LandingSpeciesMarquee() {
       </div>
 
       <div className="landing-species-panel landing-container">
-        <div className="landing-marquee-viewport landing-marquee-fade relative">
+        <div className="landing-marquee-viewport landing-marquee-fade landing-species-cards-viewport relative">
           <div
             id="landing-species-marquee-track"
-            className={`landing-marquee-track${paused || reduceMotion ? " is-paused" : ""}`}
+            role="list"
+            className={`landing-marquee-track landing-species-cards-track${
+              paused || reduceMotion ? " is-paused" : ""
+            }${reduceMotion ? " is-static-grid" : ""}`}
             aria-label={t("speciesMarquee.aria")}
           >
-            {(reduceMotion ? CONSULTATION_CATEGORY_LIST : loopItems).map(
-              ({ key, icon }, index) => (
-                <SpeciesChip
-                  key={`${key}-${index}`}
-                  icon={icon}
-                  name={t(`speciesMarquee.categories.${key}`, { defaultValue: key })}
-                  decorative={!reduceMotion && index >= speciesCount}
-                  href={speciesHref}
-                  onClick={(event) =>
-                    onLandingAnchorClick(event, { productTab: "species" })
-                  }
-                />
-              ),
-            )}
+            {loopItems.map((item, index) => (
+              <HoverRevealCard
+                key={`${item.key}-${index}`}
+                title={item.title}
+                subtitle={item.subtitle}
+                imageUrl={item.imageUrl}
+                decorative={!reduceMotion && index >= speciesCount}
+                href={speciesHref}
+                onClick={(event) =>
+                  onLandingAnchorClick(event, { productTab: "species" })
+                }
+              />
+            ))}
           </div>
         </div>
       </div>

@@ -65,6 +65,7 @@
     "eyebrow": "Clinical coverage",
     "heading": "Multi-species veterinary · {{count}} clinical forms",
     "aria": "Species available in consultation",
+    "cardSubtitle": "Clinical form",
     "pause": "Pause carousel",
     "play": "Resume carousel",
     "categories": {
@@ -168,7 +169,9 @@
       "basic": "Small-animal practice: structured CDS, records, and scheduling for dogs and cats.",
       "professional": "Active multi-species practice with inventory, sales, and integrated clinical reports.",
       "premium": "High consultation volume with Expert Mode and priority guided onboarding."
-    }
+    },
+    "promoBadge": "Exclusive offer",
+    "promoMessage": "40% off Premium · code"
   },
   "faq": {
     "eyebrow": "Frequently asked questions",
