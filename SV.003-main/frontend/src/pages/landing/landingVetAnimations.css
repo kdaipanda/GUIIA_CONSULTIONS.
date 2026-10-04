@@ -327,7 +327,7 @@
 .landing-vet-anim--body {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 0 !important;
   overflow: hidden;
   pointer-events: none;
 }
@@ -429,33 +429,14 @@
   animation: vet-clinical-pulse 0.9s ease;
 }
 
-/* Flujo clínico */
+/* Flujo clínico — pulso muy contenido (no loop llamativo) */
 .landing-clinical-step-icon {
-  animation: vet-clinical-pulse 3.5s ease-in-out infinite;
+  animation: none;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease;
 }
 
-.landing-clinical-step:nth-child(1) .landing-clinical-step-icon {
-  animation-delay: 0s;
-}
-
-.landing-clinical-step:nth-child(2) .landing-clinical-step-icon {
-  animation-delay: 0.4s;
-}
-
-.landing-clinical-step:nth-child(3) .landing-clinical-step-icon {
-  animation-delay: 0.8s;
-}
-
-.landing-clinical-step:nth-child(4) .landing-clinical-step-icon {
-  animation-delay: 1.2s;
-}
-
-.landing-clinical-step:nth-child(5) .landing-clinical-step-icon {
-  animation-delay: 1.6s;
-}
-
-.landing-clinical-step:nth-child(6) .landing-clinical-step-icon {
-  animation-delay: 2s;
+.landing-clinical-step:hover .landing-clinical-step-icon {
+  animation: vet-clinical-pulse 0.7s ease;
 }
 
 /* Especies marquee */
@@ -465,7 +446,153 @@
 }
 
 .landing-species-chip:hover .landing-species-icon {
-  animation: vet-species-wiggle 0.45s ease;
+  transform: translateY(-1px);
+  animation: none;
+}
+
+/* —— Clinical HUD profesional (entrada + presencia quieta) —— */
+
+@keyframes vet-scan-once {
+  0% {
+    transform: translate3d(-30%, 0, 0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(130%, 0, 0);
+  }
+}
+
+@keyframes vet-ecg-once {
+  0% {
+    stroke-dashoffset: 220;
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.55;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.28;
+  }
+}
+
+.landing-vet-anim--clinical {
+  z-index: 1;
+  color: #9ad9d0;
+}
+
+.landing-vet-scan {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 18%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(154, 217, 208, 0.05) 45%,
+    rgba(154, 217, 208, 0.18) 50%,
+    rgba(154, 217, 208, 0.05) 55%,
+    transparent 100%
+  );
+  mix-blend-mode: normal;
+  opacity: 0;
+  animation: vet-scan-once 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+}
+
+.landing-vet-hud {
+  position: absolute;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-color: rgba(154, 217, 208, 0.28);
+  border-style: solid;
+  opacity: 0.45;
+}
+
+.landing-vet-hud--tl {
+  top: 0.85rem;
+  left: 0.85rem;
+  border-width: 1px 0 0 1px;
+}
+
+.landing-vet-hud--tr {
+  top: 0.85rem;
+  right: 0.85rem;
+  border-width: 1px 1px 0 0;
+}
+
+.landing-vet-hud--bl {
+  bottom: 0.85rem;
+  left: 0.85rem;
+  border-width: 0 0 1px 1px;
+}
+
+.landing-vet-hud--br {
+  bottom: 0.85rem;
+  right: 0.85rem;
+  border-width: 0 1px 1px 0;
+}
+
+/* Sin anillo pulsante continuo: presencia estática muy suave */
+.landing-vet-vital-ring {
+  position: absolute;
+  top: 30%;
+  right: 14%;
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 999px;
+  border: 1px solid rgba(154, 217, 208, 0.18);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: none;
+}
+
+.landing-vet-ecg-svg {
+  position: absolute;
+  top: 34%;
+  right: 8%;
+  width: min(9.5rem, 36vw);
+  height: auto;
+  color: rgba(154, 217, 208, 0.55);
+  pointer-events: none;
+  filter: none;
+}
+
+.landing-vet-ecg-path {
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  animation: vet-ecg-once 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
+}
+
+.landing-vet-body-scan {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .landing-vet-vital-ring {
+    display: none;
+  }
+
+  .landing-vet-ecg-svg {
+    top: auto;
+    bottom: 40%;
+    right: 5%;
+    width: 6.5rem;
+    opacity: 0.55;
+  }
+
+  .landing-vet-hud {
+    width: 0.95rem;
+    height: 0.95rem;
+    opacity: 0.35;
+  }
+
+  .landing-vet-scan {
+    width: 28%;
+  }
 }
 
 /* Accesibilidad */
@@ -474,6 +601,11 @@
   .landing-vet-body-floater,
   .landing-vet-paw-step,
   .landing-vet-ecg,
+  .landing-vet-ecg-path,
+  .landing-vet-scan,
+  .landing-vet-hud,
+  .landing-vet-vital-ring,
+  .landing-vet-body-scan,
   .landing-petpal-glass,
   .landing-petpal-media-ring,
   .landing-petpal-mascot-hero,
@@ -485,6 +617,21 @@
   .landing-clinical-step-icon {
     animation: none !important;
     transition: none !important;
+  }
+
+  .landing-vet-ecg-path {
+    stroke-dashoffset: 0;
+    opacity: 0.28;
+  }
+
+  .landing-vet-hud {
+    opacity: 0.35;
+  }
+
+  .landing-vet-scan,
+  .landing-vet-vital-ring,
+  .landing-vet-body-scan {
+    display: none;
   }
 
   .landing-species-chip:hover .landing-species-icon {

@@ -205,7 +205,7 @@ export function LandingNavbar({ setView, hero = false }) {
                 {t("nav.login")}
               </button>
             </div>
-            <nav className="flex flex-col gap-1" aria-label={t("nav.main")}>
+            <nav className="flex flex-col gap-1" aria-label={t("nav.mobile")}>
               {navLinks.map(({ href, label, sectionId, productTab }) => (
                 <a
                   key={href}

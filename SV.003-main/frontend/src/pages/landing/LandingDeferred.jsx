@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { startTransition, useEffect, useRef, useState } from "react";
 
 /**
- * Mounts children only when near the viewport to keep the landing first paint light.
+ * Mounts children near the viewport. Large rootMargin so fast scroll
+ * does not hit empty placeholders mid-flight.
  */
-export function LandingDeferred({ children, rootMargin = "280px 0px", minHeight = 240 }) {
+export function LandingDeferred({ children, rootMargin = "720px 0px", minHeight = 240 }) {
   const ref = useRef(null);
   const [ready, setReady] = useState(false);
 
@@ -16,18 +17,17 @@ export function LandingDeferred({ children, rootMargin = "280px 0px", minHeight 
       return undefined;
     }
 
-    const scrollRoot =
-      document.documentElement.classList.contains("guiaa-native-app")
-        ? document.getElementById("root")
-        : null;
+    const scrollRoot = document.documentElement.classList.contains("guiaa-native-app")
+      ? document.getElementById("root")
+      : null;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
-        setReady(true);
+        startTransition(() => setReady(true));
         observer.disconnect();
       },
-      { root: scrollRoot, rootMargin, threshold: 0.01 },
+      { root: scrollRoot, rootMargin, threshold: 0 },
     );
 
     observer.observe(node);

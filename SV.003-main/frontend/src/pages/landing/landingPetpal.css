@@ -37,10 +37,10 @@
 }
 
 .landing-nav-hero.landing-nav-scrolled {
-  background: rgba(7, 22, 34, 0.55) !important;
+  background: rgba(7, 22, 34, 0.92) !important;
   border-bottom-color: rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .landing-nav-hero .landing-eyebrow,

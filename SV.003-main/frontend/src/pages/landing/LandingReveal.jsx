@@ -1,9 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 
+/**
+ * Subtle enter cue. Content stays visible (no opacity:0 trap) so fast
+ * scroll never paints blank sections.
+ */
 export function LandingReveal({ children, className = "", delay = 0, as: Tag = "div" }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    () =>
+      typeof window === "undefined" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
 
   useEffect(() => {
@@ -16,10 +22,9 @@ export function LandingReveal({ children, className = "", delay = 0, as: Tag = "
       return undefined;
     }
 
-    const scrollRoot =
-      document.documentElement.classList.contains("guiaa-native-app")
-        ? document.getElementById("root")
-        : null;
+    const scrollRoot = document.documentElement.classList.contains("guiaa-native-app")
+      ? document.getElementById("root")
+      : null;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -27,7 +32,7 @@ export function LandingReveal({ children, className = "", delay = 0, as: Tag = "
         setVisible(true);
         observer.disconnect();
       },
-      { root: scrollRoot, threshold: 0.1, rootMargin: "0px 0px -6% 0px" },
+      { root: scrollRoot, threshold: 0.01, rootMargin: "120px 0px" },
     );
 
     observer.observe(node);
@@ -37,8 +42,8 @@ export function LandingReveal({ children, className = "", delay = 0, as: Tag = "
   return (
     <Tag
       ref={ref}
-      className={`landing-reveal ${visible ? "is-visible" : ""} ${className}`.trim()}
-      style={visible ? undefined : { transitionDelay: `${delay}ms` }}
+      className={`landing-reveal${visible ? " is-visible" : ""} ${className}`.trim()}
+      style={!visible && delay ? { transitionDelay: `${delay}ms` } : undefined}
     >
       {children}
     </Tag>

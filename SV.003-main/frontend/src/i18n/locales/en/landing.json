@@ -11,6 +11,8 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "main": "Main",
+    "footer": "Footer",
+    "mobile": "Mobile menu",
     "skipToContent": "Skip to content"
   },
   "seo": {
@@ -19,7 +21,7 @@
     "audience": "Licensed veterinarians"
   },
   "hero": {
-    "brand": "GUIAA",
+    "brand": "Guiaa",
     "kicker": "GUIAA Diagnosis · Unique in Latin America",
     "announcement": "3 free CDS consultations when you create your vet account",
     "announcementCta": "See plans",

@@ -32,7 +32,7 @@ module.exports = {
   				'brand-gold': '#f5c842',
   				'bg-deep': '#102030',
   				'bg-circuit': '#103040',
-  				'brand-ink-muted': '#64748b',
+  				'brand-ink-muted': '#475569',
   				'brand-ink-subtle': '#94a3b8',
   				'sky-soft': '#e8f4fc',
   				'sky-mist': '#d4ebf7',

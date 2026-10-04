@@ -27,6 +27,12 @@
   background: linear-gradient(180deg, #ffffff 0%, #f7fafc 52%, #eef3f8 100%);
 }
 
+.landing-shell--fluid-hero .landing-page-card {
+  background: #ffffff;
+  box-shadow: none;
+  overflow: clip;
+}
+
 @media (min-width: 1024px) {
   .landing-page-card {
     border-radius: 2rem;
@@ -180,9 +186,9 @@
 
 /* Nav hero: ligera al hacer scroll */
 .landing-nav-hero.landing-nav-scrolled {
-  background: rgba(7, 22, 34, 0.5) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(7, 22, 34, 0.92) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border-bottom-color: rgba(255, 255, 255, 0.1) !important;
 }
 

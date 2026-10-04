@@ -1,7 +1,17 @@
 import React from "react";
-import { BarChart3, ClipboardList, Sun } from "lucide-react";
+import { BarChart3, ClipboardList, FolderOpen, Stethoscope, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { PREVIEW_CATEGORIES, PREVIEW_CATEGORY_ICONS } from "./landingPreviewData";
+import { LANDING_IMAGES } from "./landingBrandAssets";
+
+const SPECIES_PHOTOS = {
+  perros: LANDING_IMAGES.pets.speciesPerros,
+  gatos: LANDING_IMAGES.pets.speciesGatos,
+  conejos: LANDING_IMAGES.pets.speciesConejos,
+  aves: LANDING_IMAGES.pets.speciesAves,
+  hamsters: LANDING_IMAGES.pets.speciesHamsters,
+  cuyos: LANDING_IMAGES.pets.speciesCuyos,
+};
 
 function PreviewStepper({ currentStep }) {
   const { t } = useTranslation("landing");
@@ -50,21 +60,34 @@ function CategoryGrid({ selected = "perros" }) {
         {t("preview.multiSpeciesBadge", { count: speciesCount })}
       </p>
       <div className="landing-preview-species-grid">
-        {visible.map((key) => (
-          <div
-            key={key}
-            className={`landing-species-chip landing-preview-species-chip${
-              selected === key ? " is-selected" : ""
-            }`}
-          >
-            <span className="landing-species-icon" aria-hidden>
-              {PREVIEW_CATEGORY_ICONS[key]}
-            </span>
-            <span className="landing-species-label">
-              {t(`speciesMarquee.categories.${key}`, { defaultValue: key })}
-            </span>
-          </div>
-        ))}
+        {visible.map((key) => {
+          const photo = SPECIES_PHOTOS[key];
+          return (
+            <div
+              key={key}
+              className={`landing-species-chip landing-preview-species-chip${
+                selected === key ? " is-selected" : ""
+              }`}
+            >
+              {photo ? (
+                <img
+                  src={photo}
+                  alt=""
+                  className="landing-preview-species-photo"
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <span className="landing-species-icon" aria-hidden>
+                  {PREVIEW_CATEGORY_ICONS[key]}
+                </span>
+              )}
+              <span className="landing-species-label">
+                {t(`speciesMarquee.categories.${key}`, { defaultValue: key })}
+              </span>
+            </div>
+          );
+        })}
         {moreCount > 0 ? (
           <div className="landing-species-chip landing-preview-species-chip landing-preview-species-more">
             <span className="landing-species-label">+{moreCount}</span>
@@ -82,7 +105,10 @@ function ConsultationSidebar({
 }) {
   const { t } = useTranslation("landing");
   return (
-    <aside className="consultation-sidebar">
+    <aside className="consultation-sidebar landing-preview-id-card">
+      <div className="landing-preview-id-avatar" aria-hidden>
+        {PREVIEW_CATEGORY_ICONS.perros}
+      </div>
       <div className="sidebar-section">
         <div className="sidebar-label">{t("preview.sidebar.pet")}</div>
         <div className="sidebar-value">{petName}</div>
@@ -114,7 +140,7 @@ export function ConsultationSpeciesPreview() {
               {PREVIEW_CATEGORY_ICONS.perros}
             </div>
             <div className="page-title-text">
-              <h1>{t("preview.speciesTitle")}</h1>
+              <h2>{t("preview.speciesTitle")}</h2>
               <p>{t("preview.speciesLead")}</p>
             </div>
           </div>
@@ -127,17 +153,25 @@ export function ConsultationSpeciesPreview() {
               <PreviewStepper currentStep={1} />
               <form className="consultation-form">
                 <CategoryGrid selected="perros" />
-                <div className="form-section">
+                <div className="form-section landing-preview-section-accent">
                   <h3>{t("preview.basicInfo")}</h3>
                   <div className="form-group">
-                    <label>{t("preview.petName")}</label>
-                    <input type="text" value="Max" readOnly tabIndex={-1} />
+                    <label htmlFor="landing-preview-pet-name">{t("preview.petName")}</label>
+                    <input
+                      id="landing-preview-pet-name"
+                      type="text"
+                      value="Max"
+                      readOnly
+                      tabIndex={-1}
+                    />
                   </div>
                   <div className="form-group">
-                    <label>{t("preview.breed")}</label>
+                    <label htmlFor="landing-preview-breed">{t("preview.breed")}</label>
                     <input
+                      id="landing-preview-breed"
                       type="text"
-                      value={t("preview.breedValue")}
+                      value=""
+                      placeholder={t("preview.breed")}
                       readOnly
                       tabIndex={-1}
                     />
@@ -164,7 +198,7 @@ export function ConsultationFormPreview() {
               <ClipboardList size={22} strokeWidth={1.75} />
             </div>
             <div className="page-title-text">
-              <h1>{t("preview.reasonTitle")}</h1>
+              <h2>{t("preview.reasonTitle")}</h2>
               <p>{t("preview.reasonLead")}</p>
             </div>
           </div>
@@ -176,11 +210,12 @@ export function ConsultationFormPreview() {
             <div className="consultation-form-container">
               <PreviewStepper currentStep={2} />
               <form className="consultation-form">
-                <div className="form-section">
+                <div className="form-section landing-preview-section-accent">
                   <h3>{t("preview.petDetail")}</h3>
                   <div className="form-group">
-                    <label>{t("preview.petDetailLabel")}</label>
+                    <label htmlFor="landing-preview-pet-detail">{t("preview.petDetailLabel")}</label>
                     <textarea
+                      id="landing-preview-pet-detail"
                       readOnly
                       tabIndex={-1}
                       rows={4}
@@ -188,7 +223,7 @@ export function ConsultationFormPreview() {
                     />
                   </div>
                 </div>
-                <div className="form-section landing-preview-vitals">
+                <div className="form-section landing-preview-vitals landing-preview-section-accent">
                   <h3>{t("preview.vitalsTitle")}</h3>
                   <div className="landing-preview-vitals-grid">
                     <div>
@@ -209,7 +244,7 @@ export function ConsultationFormPreview() {
                     </div>
                   </div>
                 </div>
-                <div className="form-section landing-preview-cds">
+                <div className="form-section landing-preview-cds landing-preview-section-accent">
                   <h3>{t("preview.cdsTitle")}</h3>
                   <ol className="landing-preview-cds-list">
                     <li>{t("preview.cds.h1")}</li>
@@ -234,15 +269,20 @@ export function DashboardPreview() {
     { pet: "Luna", species: t("preview.recent.cats"), status: t("preview.recent.done") },
     { pet: "Kira", species: t("preview.sidebar.dogs"), status: t("preview.recent.open") },
   ];
+  const actions = [
+    { icon: Stethoscope, label: t("preview.actionNew") },
+    { icon: FolderOpen, label: t("preview.actionPatients") },
+    { icon: BarChart3, label: t("preview.actionReports") },
+  ];
 
   return (
-    <div className="dashboard-page dashboard-morning landing-app-preview-page">
+    <div className="dashboard-page dashboard-morning landing-app-preview-page landing-preview-dashboard">
       <div className="container">
         <div className="dashboard-header">
           <div className="dashboard-header-row">
             <div className="hero-welcome">
               <div className="hero-greeting">
-                <h1>{t("preview.dashboardGreeting")}</h1>
+                <h2>{t("preview.dashboardGreeting")}</h2>
                 <span className="greeting-icon">
                   <Sun size={18} aria-hidden />
                 </span>
@@ -261,20 +301,34 @@ export function DashboardPreview() {
             </div>
           </div>
         </div>
+
         <div className="landing-preview-stats">
           <div className="landing-preview-stat">
             <p className="landing-preview-stat-value">24</p>
             <p className="landing-preview-stat-label">{t("preview.statTotal")}</p>
+            <span className="landing-preview-stat-delta is-up">+12%</span>
           </div>
           <div className="landing-preview-stat">
             <p className="landing-preview-stat-value">8</p>
             <p className="landing-preview-stat-label">{t("preview.statMonth")}</p>
+            <span className="landing-preview-stat-delta is-up">+4</span>
           </div>
           <div className="landing-preview-stat">
             <p className="landing-preview-stat-value">3</p>
             <p className="landing-preview-stat-label">{t("preview.statToday")}</p>
+            <span className="landing-preview-stat-delta">hoy</span>
           </div>
         </div>
+
+        <div className="landing-preview-actions">
+          {actions.map(({ icon: Icon, label }) => (
+            <div key={label} className="landing-preview-action">
+              <Icon size={15} aria-hidden />
+              <span>{label}</span>
+            </div>
+          ))}
+        </div>
+
         <div className="landing-preview-recent">
           <p className="landing-preview-recent-title">{t("preview.recentTitle")}</p>
           <ul className="landing-preview-recent-list">

@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { MultiespecieCategoryIcons } from "./MultiespecieCategoryIcons";
 import { onLandingAnchorClick, productTabHref } from "./landingScroll";
+import { useLandingInView } from "./useLandingInView";
 
 const PRIMARY_FEATURES = [
   { id: "diagnostico", productTab: "consultation", featured: true },
@@ -17,7 +18,7 @@ const SECONDARY_FEATURES = [
   { id: "onboarding", productTab: "dashboard" },
 ];
 
-function FeatureCard({ children, productTab, className = "", ariaLabel }) {
+function FeatureCard({ children, productTab, className = "" }) {
   if (!productTab) {
     return <article className={className}>{children}</article>;
   }
@@ -27,7 +28,6 @@ function FeatureCard({ children, productTab, className = "", ariaLabel }) {
       href={productTabHref(productTab)}
       onClick={(event) => onLandingAnchorClick(event, { productTab })}
       className={`${className} group block w-full text-left landing-card landing-card-interactive`}
-      aria-label={ariaLabel}
     >
       {children}
     </a>
@@ -38,7 +38,7 @@ function ProductLink({ productTab, label }) {
   if (!productTab) return null;
 
   return (
-    <span className="landing-feature-link mt-4 text-xs font-semibold text-guiaa-brand-blue" aria-hidden>
+    <span className="landing-feature-link mt-4 text-xs font-semibold text-guiaa-brand-blue">
       {label}
     </span>
   );
@@ -47,11 +47,16 @@ function ProductLink({ productTab, label }) {
 /** Índice clínico: un bloque dominante + filas + franja densa (rompe grid SaaS). */
 export function LandingFeatures() {
   const { t } = useTranslation("landing");
+  const { ref, inView } = useLandingInView({ threshold: 0.12 });
   const featured = PRIMARY_FEATURES.find((f) => f.featured);
   const restPrimary = PRIMARY_FEATURES.filter((f) => !f.featured);
 
   return (
-    <section id="features" className="landing-section landing-features-section">
+    <section
+      ref={ref}
+      id="features"
+      className={`landing-section landing-features-section${inView ? " is-inview" : ""}`}
+    >
       <div className="landing-container">
         <div className="landing-features-head">
           <h2 className="landing-section-title text-guiaa-brand-navy">
@@ -72,9 +77,6 @@ export function LandingFeatures() {
         <FeatureCard
           productTab={featured.productTab}
           className="landing-feature-hero mt-10 p-6 sm:p-8 landing-card"
-          ariaLabel={t("features.seeInProductFor", {
-            title: t(`features.primary.${featured.id}.title`),
-          })}
         >
           <h3 className="text-xl font-semibold text-guiaa-brand-navy sm:text-2xl">
             {t(`features.primary.${featured.id}.title`)}
@@ -91,13 +93,6 @@ export function LandingFeatures() {
               key={id}
               productTab={productTab}
               className="landing-feature-row landing-card"
-              ariaLabel={
-                productTab
-                  ? t("features.seeInProductFor", {
-                      title: t(`features.primary.${id}.title`),
-                    })
-                  : undefined
-              }
             >
               <div className="min-w-0">
                 <h3 className="text-base font-semibold text-guiaa-brand-navy">
@@ -126,6 +121,9 @@ export function LandingFeatures() {
                 <span className="landing-feature-strip-desc">
                   {t(`features.secondary.${id}.description`)}
                 </span>
+                {productTab ? (
+                  <span className="landing-feature-strip-cta">{t("features.seeInProduct")}</span>
+                ) : null}
               </>
             );
 
@@ -136,7 +134,6 @@ export function LandingFeatures() {
                     href={productTabHref(productTab)}
                     onClick={(event) => onLandingAnchorClick(event, { productTab })}
                     className="landing-feature-strip-item"
-                    aria-label={t("features.seeInProductFor", { title })}
                   >
                     {body}
                   </a>

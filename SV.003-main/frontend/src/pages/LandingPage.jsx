@@ -18,13 +18,12 @@ import "./landing/landingUiUxProMax.css";
 import "./landing/landingAnimate.css";
 /* Pricing al final: cards dark GUIAA no las pisan anti-slop / uipro */
 import "./landing/landingPricing.css";
+import "./landing/landingVetAnimations.css";
 
 import { LandingFluidHero, LandingHeroCapabilities } from "./landing/LandingFluidHero";
-import { LandingBrandTagline } from "./landing/LandingBrandTagline";
 import { LandingHeroStats } from "./landing/LandingHeroStats";
 import { LandingHowItWorks } from "./landing/LandingHowItWorks";
 import { LandingClinicalWorkflow } from "./landing/LandingClinicalWorkflow";
-import { LandingBrandBand } from "./landing/LandingBrandBand";
 import { LandingProductShowcase } from "./landing/LandingProductShowcase";
 import { LandingFeatures } from "./landing/LandingFeatures";
 import { LandingTestimonials } from "./landing/LandingTestimonials";
@@ -36,12 +35,12 @@ import { LandingFaq } from "./landing/LandingFaq";
 import { LandingCta } from "./landing/LandingCta";
 import { LandingFooter } from "./landing/LandingFooter";
 import { LandingSocialRail } from "./landing/LandingSocialRail";
-import { LandingReveal } from "./landing/LandingReveal";
 import { LandingDeferred } from "./landing/LandingDeferred";
 import { LandingSeo } from "./landing/LandingSeo";
 import { useLandingInteractionQuiet } from "./landing/useLandingInteractionQuiet";
 import { trackMetaPageView } from "../lib/metaPixel";
 import "./landing/landingFluidHero.css";
+import "./landing/landingClinicalMotion.css";
 
 export function LandingPage({ setView }) {
   const { t } = useTranslation("landing");
@@ -74,35 +73,26 @@ export function LandingPage({ setView }) {
 
       <div className="landing-page-card mx-auto max-w-[82rem]">
         <LandingHeroCapabilities />
-        <LandingBrandTagline variant="strip" />
         <LandingHeroStats />
 
         <div className="landing-body-wrap">
-          <main id="landing-main" className="relative" tabIndex={-1}>
+          <div id="landing-main" className="relative" tabIndex={-1}>
             <LandingHowItWorks setView={setViewDeferred} />
             <LandingClinicalWorkflow />
-            <LandingBrandBand />
 
-            <LandingDeferred minHeight={420}>
-              <LandingReveal>
-                <LandingProductShowcase />
-              </LandingReveal>
-            </LandingDeferred>
+            {/* Product siempre montado: anclas #product / #product-species */}
+            <LandingProductShowcase />
 
             <LandingDeferred minHeight={520}>
               <LandingFeatures />
             </LandingDeferred>
 
             <LandingDeferred minHeight={360}>
-              <LandingReveal>
-                <LandingTestimonials />
-              </LandingReveal>
+              <LandingTestimonials />
             </LandingDeferred>
 
             <LandingDeferred minHeight={240}>
-              <LandingReveal>
-                <LandingAwardSeal />
-              </LandingReveal>
+              <LandingAwardSeal />
             </LandingDeferred>
 
             <LandingDeferred minHeight={100}>
@@ -114,9 +104,7 @@ export function LandingPage({ setView }) {
             </LandingDeferred>
 
             <LandingDeferred minHeight={520}>
-              <LandingReveal>
-                <LandingPricing setView={setViewDeferred} />
-              </LandingReveal>
+              <LandingPricing setView={setViewDeferred} />
             </LandingDeferred>
 
             <LandingDeferred minHeight={360}>
@@ -124,11 +112,9 @@ export function LandingPage({ setView }) {
             </LandingDeferred>
 
             <LandingDeferred minHeight={220}>
-              <LandingReveal>
-                <LandingCta setView={setViewDeferred} />
-              </LandingReveal>
+              <LandingCta setView={setViewDeferred} />
             </LandingDeferred>
-          </main>
+          </div>
         </div>
       </div>
 

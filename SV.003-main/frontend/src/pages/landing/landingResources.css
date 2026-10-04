@@ -3,7 +3,7 @@
   --res-teal: #3d9b8f;
   --res-blue: #265b93;
   --res-ink: #0f2740;
-  --res-muted: #64748b;
+  --res-muted: #475569;
   --res-line: rgba(12, 45, 77, 0.1);
   --res-bg: #f4f7fa;
   --res-card: #ffffff;
@@ -66,17 +66,14 @@ body:has(.landing-resources),
   margin-left: auto;
 }
 
-/* Compact language toggle — evita el min-h-11 que desborda el header */
+/* Compact language toggle — evita desbordar el header de Recursos */
 .landing-resources-header-actions .landing-resources-lang {
   flex-shrink: 0;
 }
 
-.landing-resources-header-actions .landing-resources-lang button {
-  min-height: 2rem;
-  min-width: 2rem;
-  padding: 0.25rem 0.55rem;
-  font-size: 0.7rem;
-  line-height: 1;
+.landing-resources-header-actions .landing-resources-lang.lang-switch {
+  width: 4.75rem;
+  height: 2.1rem;
 }
 
 .landing-resources-back {
@@ -391,7 +388,7 @@ html.dark .landing-resources,
   --res-bg: #07111a;
   --res-card: #0f1c2a;
   --res-ink: #e8eef4;
-  --res-muted: #9aa8b8;
+  --res-muted: #b6c2d0;
   --res-line: rgba(255, 255, 255, 0.1);
   background:
     radial-gradient(ellipse 55% 40% at 100% 0%, rgba(61, 155, 143, 0.16), transparent 55%),

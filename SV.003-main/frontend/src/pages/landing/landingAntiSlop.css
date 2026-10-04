@@ -47,8 +47,9 @@
   -webkit-backdrop-filter: none !important;
   border: 1px solid rgba(12, 45, 77, 0.1) !important;
   border-left-width: 3px !important;
-  border-radius: 1rem !important;
+  border-radius: 1.15rem !important;
   box-shadow: 0 10px 28px -18px rgba(12, 45, 77, 0.22) !important;
+  overflow: visible !important;
 }
 
 .landing-colleague-card--navy,
@@ -59,7 +60,18 @@
   border-left-color: #0c2d4d !important;
   background:
     radial-gradient(ellipse 70% 80% at 100% 100%, rgba(12, 45, 77, 0.08), transparent 55%),
-    #ffffff !important;
+    #f3f5f7 !important;
+  color: #0c2d4d !important;
+}
+
+.landing-colleague-card--teal,
+.landing-colleague-card--green {
+  --colleague-accent: #0e7490;
+  --colleague-wash: rgba(14, 116, 144, 0.1);
+  border-left-color: #0e7490 !important;
+  background:
+    radial-gradient(ellipse 70% 80% at 100% 100%, rgba(14, 116, 144, 0.1), transparent 55%),
+    #f3f5f7 !important;
   color: #0c2d4d !important;
 }
 
@@ -71,19 +83,18 @@
   border-left-color: #265b93 !important;
   background:
     radial-gradient(ellipse 70% 80% at 100% 100%, rgba(38, 91, 147, 0.1), transparent 55%),
-    #ffffff !important;
+    #f3f5f7 !important;
   color: #0c2d4d !important;
 }
 
-.landing-colleague-card--green,
 .landing-colleague-card--amber,
 .landing-colleague-card--violet {
-  --colleague-accent: #3d9b8f;
-  --colleague-wash: rgba(61, 155, 143, 0.12);
-  border-left-color: #3d9b8f !important;
+  --colleague-accent: #d4a017;
+  --colleague-wash: rgba(212, 160, 23, 0.12);
+  border-left-color: #d4a017 !important;
   background:
-    radial-gradient(ellipse 70% 80% at 100% 100%, rgba(61, 155, 143, 0.12), transparent 55%),
-    #ffffff !important;
+    radial-gradient(ellipse 70% 80% at 100% 100%, rgba(212, 160, 23, 0.12), transparent 55%),
+    #f3f5f7 !important;
   color: #0c2d4d !important;
 }
 
@@ -144,6 +155,13 @@
 .landing-page-card {
   border-radius: 1.25rem !important;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22) !important;
+}
+
+/* Fluid hero: sin sombra suave azul que sangra sobre el navy del video */
+.landing-shell--fluid-hero .landing-page-card {
+  background: #ffffff !important;
+  box-shadow: none !important;
+  overflow: clip;
 }
 
 @media (min-width: 1024px) {
@@ -280,7 +298,7 @@
   margin: 0.35rem 0 0;
   font-size: 0.875rem;
   line-height: 1.5;
-  color: #64748b;
+  color: #475569;
   max-width: 36rem;
 }
 
@@ -752,13 +770,13 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
   margin: 0.3rem 0 0;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: #64748b;
+  color: #475569;
 }
 
 .landing-clinical-workflow-foot {
   text-align: left;
   max-width: 40rem;
-  color: #64748b;
+  color: #475569;
 }
 
 /* Guia value props tipográficos */
@@ -793,9 +811,15 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
 
 .landing-colleague-pet {
   opacity: 1 !important;
-  max-width: 8.75rem !important;
-  max-height: 10rem !important;
-  filter: drop-shadow(0 10px 16px rgba(12, 45, 77, 0.22)) !important;
+  max-width: 10.25rem !important;
+  max-height: 11.5rem !important;
+  bottom: -1.35rem !important;
+  right: -0.35rem !important;
+  filter: drop-shadow(0 14px 18px rgba(12, 45, 77, 0.28)) !important;
+}
+
+.landing-colleagues-section {
+  overflow: visible !important;
 }
 
 .landing-colleague-curve,
@@ -964,6 +988,10 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.2) !important;
 }
 
+.landing-shell--fluid-hero .landing-page-card {
+  box-shadow: none !important;
+}
+
 .landing-body-wrap::before {
   opacity: 0.08 !important;
 }
@@ -1027,7 +1055,7 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
   border-top: 1px solid rgba(12, 45, 77, 0.08);
   font-size: 0.875rem;
   line-height: 1.45;
-  color: #64748b;
+  color: #475569;
 }
 
 .landing-product-bullets li::before {
@@ -1064,9 +1092,10 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
 }
 
 .landing-nav-hero.landing-nav-scrolled {
-  background: rgba(7, 22, 34, 0.55) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background: rgba(7, 22, 34, 0.92) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Product preview: no heredar opacity:0 de App.css fadeInUp */
@@ -1281,7 +1310,13 @@ a.landing-feature-strip-item:hover .landing-feature-strip-title {
   font-size: 0.72rem;
   font-weight: 500;
   line-height: 1.35;
-  color: rgba(12, 45, 77, 0.55);
+  color: #475569;
+}
+
+.landing-feature-strip-cta {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #265b93;
 }
 
 .landing-features-section .landing-feature-hero {
@@ -1305,7 +1340,12 @@ html.dark .landing-feature-strip-title {
 
 [data-theme="dark"] .landing-feature-strip-desc,
 html.dark .landing-feature-strip-desc {
-  color: rgba(232, 238, 244, 0.55);
+  color: rgba(232, 238, 244, 0.72);
+}
+
+[data-theme="dark"] .landing-feature-strip-cta,
+html.dark .landing-feature-strip-cta {
+  color: #9ec5ea;
 }
 
 [data-theme="dark"] .landing-feature-strip,

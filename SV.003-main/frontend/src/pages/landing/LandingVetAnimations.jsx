@@ -1,67 +1,38 @@
 import React from "react";
-import { Bone, Cat, Dog, Heart, PawPrint, Stethoscope, Syringe } from "lucide-react";
 
-const HERO_FLOATERS = [
-  { Icon: PawPrint, className: "vet-floater--paw-1", size: 34 },
-  { Icon: PawPrint, className: "vet-floater--paw-2", size: 22 },
-  { Icon: PawPrint, className: "vet-floater--paw-3", size: 26 },
-  { Icon: Stethoscope, className: "vet-floater--stethoscope", size: 30 },
-  { Icon: Heart, className: "vet-floater--heart", size: 24 },
-  { Icon: Syringe, className: "vet-floater--syringe", size: 22 },
-  { Icon: Dog, className: "vet-floater--dog", size: 28 },
-  { Icon: Cat, className: "vet-floater--cat", size: 26 },
-  { Icon: Bone, className: "vet-floater--bone", size: 20 },
-];
-
-const PAW_TRAIL = [
-  { className: "vet-paw-step--1", rotate: -18 },
-  { className: "vet-paw-step--2", rotate: 12 },
-  { className: "vet-paw-step--3", rotate: -14 },
-  { className: "vet-paw-step--4", rotate: 16 },
-  { className: "vet-paw-step--5", rotate: -10 },
-];
-
-const BODY_FLOATERS = [
-  { Icon: PawPrint, className: "vet-body-floater--1", size: 20 },
-  { Icon: Heart, className: "vet-body-floater--2", size: 18 },
-  { Icon: Stethoscope, className: "vet-body-floater--3", size: 22 },
-  { Icon: PawPrint, className: "vet-body-floater--4", size: 16 },
-];
-
+/**
+ * Capas de motion clínico profesional.
+ * Hero: HUD estático + una pasada de scan/ECG al cargar.
+ * Body: sin decoración loop (evita look “AI ambient”).
+ */
 export function LandingVetAnimations({ variant = "hero" }) {
-  if (variant === "hero") {
-    return (
-      <div className="landing-vet-anim landing-vet-anim--hero" aria-hidden>
-        <div className="landing-vet-paw-trail">
-          {PAW_TRAIL.map(({ className, rotate }) => (
-            <span
-              key={className}
-              className={`landing-vet-paw-step ${className}`}
-              style={{ "--vet-paw-rotate": `${rotate}deg` }}
-            >
-              <PawPrint size={16} strokeWidth={1.75} />
-            </span>
-          ))}
-        </div>
-
-        {HERO_FLOATERS.map(({ Icon, className, size }) => (
-          <span key={className} className={`landing-vet-floater ${className}`}>
-            <Icon size={size} strokeWidth={1.6} />
-          </span>
-        ))}
-
-        <span className="landing-vet-ecg" />
-      </div>
-    );
+  if (variant !== "hero") {
+    return null;
   }
 
   return (
-    <div className="landing-vet-anim landing-vet-anim--body" aria-hidden>
-      {BODY_FLOATERS.map(({ Icon, className, size }) => (
-        <span key={className} className={`landing-vet-body-floater ${className}`}>
-          <Icon size={size} strokeWidth={1.6} />
-        </span>
-      ))}
+    <div className="landing-vet-anim landing-vet-anim--hero landing-vet-anim--clinical" aria-hidden>
+      <span className="landing-vet-scan" />
+      <span className="landing-vet-hud landing-vet-hud--tl" />
+      <span className="landing-vet-hud landing-vet-hud--tr" />
+      <span className="landing-vet-hud landing-vet-hud--bl" />
+      <span className="landing-vet-hud landing-vet-hud--br" />
+      <span className="landing-vet-vital-ring" />
+      <svg
+        className="landing-vet-ecg-svg"
+        viewBox="0 0 160 36"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          className="landing-vet-ecg-path"
+          d="M0 18 H28 L36 18 L42 6 L50 30 L58 12 L66 22 L74 18 H160"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
     </div>
   );
 }

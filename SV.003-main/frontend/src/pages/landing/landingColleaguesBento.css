@@ -1,10 +1,11 @@
-/* Testimonios con presencia — mascotas vivas, tipografía editorial */
+/* Testimonios con presencia — cutouts apoyados en el borde (pop-out) */
 
 .landing-colleagues-section {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   isolation: isolate;
   background: #f8fafc;
+  padding-bottom: 1.75rem;
 }
 
 .landing-colleagues-section::before {
@@ -25,10 +26,16 @@
 .landing-colleagues-bento {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: 1.75rem 1.15rem;
   margin: 0;
-  padding: 0;
+  padding: 0 0 1.25rem;
   list-style: none;
+  overflow: visible;
+}
+
+.landing-colleagues-bento > li {
+  overflow: visible;
+  min-width: 0;
 }
 
 .landing-colleagues-bento--outcomes {
@@ -38,18 +45,19 @@
 @media (min-width: 768px) {
   .landing-colleagues-bento--outcomes {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.85rem 1.25rem;
   }
 }
 
 .landing-colleague-result {
   position: relative;
   z-index: 1;
-  margin: 0 0 0.75rem;
-  padding: 0.45rem 0.65rem;
+  margin: 0.55rem 0 0.85rem;
+  padding: 0.5rem 0.7rem;
   max-width: calc(100% - 5.5rem);
-  border-radius: 0.4rem;
-  background: rgba(12, 45, 77, 0.06);
-  border: 1px solid rgba(12, 45, 77, 0.1);
+  border-radius: 0.45rem;
+  background: rgba(12, 45, 77, 0.05);
+  border: 1px solid rgba(12, 45, 77, 0.08);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -77,7 +85,6 @@
 @media (min-width: 640px) {
   .landing-colleagues-bento {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.1rem;
   }
 }
 
@@ -93,16 +100,17 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 16.5rem;
+  min-height: 17.5rem;
   height: 100%;
   margin: 0;
-  padding: 1.35rem 1.2rem 1.4rem;
-  border-radius: 1rem;
-  overflow: hidden;
+  padding: 1.25rem 1.15rem 1.55rem;
+  border-radius: 1.15rem;
+  /* Visible: el cutout debe salir del borde inferior */
+  overflow: visible;
   color: #0c2d4d;
   background:
     radial-gradient(ellipse 70% 80% at 100% 100%, var(--colleague-wash), transparent 55%),
-    #ffffff;
+    #f3f5f7;
   border: 1px solid rgba(12, 45, 77, 0.1);
   border-left: 3px solid var(--colleague-accent);
   box-shadow: 0 10px 28px -18px rgba(12, 45, 77, 0.22);
@@ -113,9 +121,10 @@
     box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.landing-colleague-card--navy {
-  --colleague-accent: #0c2d4d;
-  --colleague-wash: rgba(12, 45, 77, 0.08);
+.landing-colleague-card--navy,
+.landing-colleague-card--teal {
+  --colleague-accent: #0e7490;
+  --colleague-wash: rgba(14, 116, 144, 0.1);
 }
 
 .landing-colleague-card--blue {
@@ -128,6 +137,11 @@
   --colleague-wash: rgba(61, 155, 143, 0.12);
 }
 
+.landing-colleague-card--amber {
+  --colleague-accent: #d4a017;
+  --colleague-wash: rgba(212, 160, 23, 0.12);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .landing-colleague-card:hover {
     transform: translateY(-4px);
@@ -135,14 +149,19 @@
   }
 }
 
+.landing-colleague-rating {
+  position: relative;
+  z-index: 1;
+}
+
 .landing-colleague-quote {
   position: relative;
   z-index: 1;
   margin: 0;
   max-width: 100%;
-  padding-right: 6.5rem;
+  padding-right: 7rem;
   font-family: var(--landing-font-display, Georgia, serif);
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   line-height: 1.45;
   font-weight: 600;
   letter-spacing: -0.015em;
@@ -160,8 +179,8 @@
   flex-direction: column;
   gap: 0.15rem;
   margin-top: auto;
-  padding-top: 1.1rem;
-  padding-right: 6.25rem;
+  padding-top: 1.15rem;
+  padding-right: 7rem;
 }
 
 .landing-colleague-name {
@@ -174,56 +193,57 @@
 .landing-colleague-role {
   font-size: 0.75rem;
   font-weight: 500;
-  color: #64748b;
+  color: #475569;
   max-width: none;
   opacity: 1;
   padding-top: 0;
 }
 
+/* Cutout apoyado en el borde inferior — sale de la card */
 .landing-colleague-pet {
   position: absolute;
-  right: -0.1rem;
-  bottom: -0.35rem;
-  z-index: 2;
+  right: -0.35rem;
+  bottom: -1.35rem;
+  z-index: 3;
   width: auto;
   height: auto;
-  max-width: 8.75rem;
-  max-height: 10rem;
+  max-width: 10.25rem;
+  max-height: 11.5rem;
   object-fit: contain;
   object-position: bottom right;
   opacity: 1;
-  filter: drop-shadow(0 10px 16px rgba(12, 45, 77, 0.22));
+  filter: drop-shadow(0 14px 18px rgba(12, 45, 77, 0.28));
   pointer-events: none;
   transform-origin: 70% 100%;
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Variedad leve por tarjeta */
-.landing-colleagues-bento > li:nth-child(2) .landing-colleague-pet,
-.landing-colleagues-bento > li:nth-child(5) .landing-colleague-pet {
-  max-width: 8rem;
-  max-height: 9.25rem;
-  right: 0.15rem;
+.landing-colleagues-bento > li:nth-child(2) .landing-colleague-pet {
+  max-width: 9.5rem;
+  max-height: 11rem;
+  right: -0.15rem;
+  bottom: -1.2rem;
 }
 
-.landing-colleagues-bento > li:nth-child(3) .landing-colleague-pet,
-.landing-colleagues-bento > li:nth-child(6) .landing-colleague-pet {
-  max-width: 9.25rem;
-  max-height: 10.5rem;
-  right: -0.25rem;
+.landing-colleagues-bento > li:nth-child(3) .landing-colleague-pet {
+  max-width: 10.75rem;
+  max-height: 12rem;
+  right: -0.45rem;
+  bottom: -1.45rem;
 }
 
+/* Sombra elíptica bajo las patas */
 .landing-colleague-card::after {
   content: "";
   position: absolute;
-  right: 1.6rem;
-  bottom: 0.15rem;
+  right: 1.35rem;
+  bottom: -0.15rem;
   z-index: 1;
-  width: 4.5rem;
-  height: 0.7rem;
+  width: 5.25rem;
+  height: 0.85rem;
   border-radius: 999px;
-  background: rgba(12, 45, 77, 0.12);
-  filter: blur(4px);
+  background: rgba(12, 45, 77, 0.16);
+  filter: blur(5px);
   pointer-events: none;
 }
 
@@ -237,7 +257,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .landing-colleague-card:hover .landing-colleague-pet {
-    transform: translateY(-8px) scale(1.04) rotate(-2deg);
+    transform: translateY(-10px) scale(1.04) rotate(-2deg);
   }
 
   .landing-colleague-card:hover::after {
@@ -275,14 +295,27 @@
 }
 
 .landing-colleagues-disclaimer {
-  margin-top: 1.25rem;
+  margin-top: 1.75rem;
   font-size: 0.75rem;
   line-height: 1.5;
-  color: #94a3b8;
+  color: #475569;
 }
 
 .landing-colleagues-scroll-hint-mobile {
   display: none;
+}
+
+@media (max-width: 639px) {
+  .landing-colleague-pet {
+    max-width: 8.5rem;
+    max-height: 9.75rem;
+    bottom: -1.1rem;
+  }
+
+  .landing-colleague-quote,
+  .landing-colleague-meta {
+    padding-right: 5.75rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

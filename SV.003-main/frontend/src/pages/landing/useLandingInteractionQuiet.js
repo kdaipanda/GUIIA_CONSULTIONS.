@@ -15,16 +15,18 @@ export function useLandingInteractionQuiet() {
       clearTimer = window.setTimeout(() => {
         root.classList.remove("landing-inp-quiet");
         clearTimer = 0;
-      }, 140);
+      }, 160);
     };
 
     const opts = { passive: true, capture: true };
     document.addEventListener("pointerdown", quiet, opts);
     document.addEventListener("keydown", quiet, opts);
+    document.addEventListener("wheel", quiet, opts);
 
     return () => {
       document.removeEventListener("pointerdown", quiet, opts);
       document.removeEventListener("keydown", quiet, opts);
+      document.removeEventListener("wheel", quiet, opts);
       if (clearTimer) window.clearTimeout(clearTimer);
       root.classList.remove("landing-inp-quiet");
     };

@@ -197,9 +197,9 @@ export function LandingPricing({ setView }) {
 
                   {locked.length > 0 && (
                     <>
-                      <div className="landing-pricing-divider" role="separator">
+                      <p className="landing-pricing-divider">
                         <span>{lockedLabel}</span>
-                      </div>
+                      </p>
                       <ul className="landing-pricing-features landing-pricing-features--locked">
                         {locked.map((feature) => (
                           <li key={feature} className="landing-pricing-feature landing-pricing-feature--locked">

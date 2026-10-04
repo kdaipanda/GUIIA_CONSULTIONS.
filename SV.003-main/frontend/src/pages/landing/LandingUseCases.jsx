@@ -40,7 +40,6 @@ export function LandingUseCases() {
                   className={`landing-usecase-row text-left ${
                     featured ? "landing-usecase-row--featured" : ""
                   }`}
-                  aria-label={title}
                 >
                   <p className="landing-usecase-tag">{t(`useCases.items.${id}.tag`)}</p>
                   <h3 className="landing-usecase-title">{title}</h3>

@@ -11,6 +11,8 @@
     "openMenu": "Abrir menú",
     "closeMenu": "Cerrar menú",
     "main": "Principal",
+    "footer": "Pie de página",
+    "mobile": "Menú móvil",
     "skipToContent": "Saltar al contenido"
   },
   "seo": {
@@ -19,7 +21,7 @@
     "audience": "Médicos veterinarios certificados"
   },
   "hero": {
-    "brand": "GUIAA",
+    "brand": "Guiaa",
     "kicker": "GUIAA Diagnóstico · Única en Latinoamérica",
     "announcement": "3 consultas CDS gratis al crear tu cuenta MVZ",
     "announcementCta": "Ver planes",

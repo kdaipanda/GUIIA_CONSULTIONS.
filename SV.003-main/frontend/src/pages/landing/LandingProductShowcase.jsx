@@ -7,6 +7,7 @@ import {
   setLandingProductTabHash,
   subscribeLandingProductTab,
 } from "./landingScroll";
+import { useLandingInView } from "./useLandingInView";
 
 function PreviewFrame({ previewId }) {
   const Preview = LANDING_PREVIEW_MAP[previewId];
@@ -21,7 +22,7 @@ function PreviewFrame({ previewId }) {
   );
 }
 
-function ProductTabs({ activeId, setActiveId, t }) {
+function ProductTabs({ activeId, setActiveId, t, idPrefix = "product-tab" }) {
   return (
     <div
       className="landing-product-tabs flex gap-2"
@@ -53,7 +54,7 @@ function ProductTabs({ activeId, setActiveId, t }) {
             key={shot.id}
             type="button"
             role="tab"
-            id={`product-tab-${shot.id}`}
+            id={`${idPrefix}-${shot.id}`}
             aria-selected={isActive}
             aria-controls="product-panel"
             tabIndex={isActive ? 0 : -1}
@@ -74,6 +75,7 @@ function ProductTabs({ activeId, setActiveId, t }) {
 export function LandingProductShowcase() {
   const { t } = useTranslation("landing");
   const [activeId, setActiveId] = useState(() => parseProductTabFromHash());
+  const { ref, inView } = useLandingInView({ threshold: 0.15 });
 
   useEffect(() => subscribeLandingProductTab(setActiveId), []);
 
@@ -91,7 +93,13 @@ export function LandingProductShowcase() {
   const bulletItems = Array.isArray(bullets) ? bullets : [];
 
   return (
-    <section id="product" className="landing-section border-y border-guiaa-brand-navy/8">
+    <section
+      ref={ref}
+      id="product"
+      className={`landing-section landing-product border-y border-guiaa-brand-navy/8${
+        inView ? " is-inview" : ""
+      }`}
+    >
       <div className="landing-container">
         <div className="landing-product-layout">
           <div className="landing-product-copy lg:sticky lg:top-24">
@@ -109,14 +117,24 @@ export function LandingProductShowcase() {
             </ul>
 
             <div className="landing-product-tabs-desktop mt-8 hidden lg:block">
-              <ProductTabs activeId={activeId} setActiveId={setActiveId} t={t} />
+              <ProductTabs
+                activeId={activeId}
+                setActiveId={setActiveId}
+                t={t}
+                idPrefix="product-tab-desktop"
+              />
               <p className="mt-4 text-sm text-guiaa-brand-ink-muted">{activeCaption}</p>
             </div>
           </div>
 
           <div className="landing-product-visual">
             <div className="landing-product-tabs-mobile mb-3 lg:hidden">
-              <ProductTabs activeId={activeId} setActiveId={setActiveId} t={t} />
+              <ProductTabs
+                activeId={activeId}
+                setActiveId={setActiveId}
+                t={t}
+                idPrefix="product-tab-mobile"
+              />
             </div>
 
             <div className="landing-product-shot w-full">
@@ -132,7 +150,7 @@ export function LandingProductShowcase() {
                     id="product-panel"
                     className="landing-preview-panel relative"
                     role="tabpanel"
-                    aria-labelledby={`product-tab-${activeShot.id}`}
+                    aria-label={activeLabel}
                   >
                     <div key={activeShot.id} className="landing-product-panel-enter h-full">
                       <PreviewFrame previewId={activeShot.id} />

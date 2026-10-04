@@ -145,7 +145,7 @@ export function LandingResourcesPage({ setView }) {
                         topic.body.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
                       {Array.isArray(topic.steps) && topic.steps.length > 0 && (
                         <>
-                          <h3>{t("help:stepsLabel")}</h3>
+                          <h2>{t("help:stepsLabel")}</h2>
                           <ol>
                             {topic.steps.map((step) => (
                               <li key={step}>{step}</li>

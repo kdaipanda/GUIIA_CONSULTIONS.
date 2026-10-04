@@ -1,14 +1,20 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { LandingNavbar } from "./LandingNavbar";
+import { LandingClinicalCursor } from "./LandingClinicalCursor";
+import { LandingVetAnimations } from "./LandingVetAnimations";
+import { WordsPullUp } from "./WordsPullUp";
 import {
-  LANDING_HERO_VIDEO,
+  LANDING_HERO_VIDEO_CINEMATIC,
   LANDING_HERO_VIDEO_POSTER,
   nextLandingHeroVideoSrc,
   resolveLandingHeroVideoSrc,
 } from "./landingBrandAssets";
 import "./landingFluidHero.css";
+import "./landingVetAnimations.css";
+import "./landingClinicalMotion.css";
 
 const HERO_CAPABILITIES = [
   { id: "diagnostico", group: "primary" },
@@ -20,6 +26,28 @@ const HERO_CAPABILITIES = [
 export function LandingHeroCapabilities() {
   const { t } = useTranslation("landing");
   const [lead, ...rest] = HERO_CAPABILITIES;
+  const panelRef = useRef(null);
+  const leadRef = useRef(null);
+  const [linkPath, setLinkPath] = useState("");
+  const [hotId, setHotId] = useState(null);
+
+  const drawLink = useCallback((itemEl) => {
+    const panel = panelRef.current;
+    const leadEl = leadRef.current;
+    if (!panel || !leadEl || !itemEl) return;
+
+    const p = panel.getBoundingClientRect();
+    const a = leadEl.getBoundingClientRect();
+    const b = itemEl.getBoundingClientRect();
+
+    const x1 = a.right - p.left - 8;
+    const y1 = a.top - p.top + a.height * 0.45;
+    const x2 = b.left - p.left + 4;
+    const y2 = b.top - p.top + b.height * 0.5;
+    const cx = (x1 + x2) / 2;
+
+    setLinkPath(`M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`);
+  }, []);
 
   return (
     <section
@@ -37,8 +65,15 @@ export function LandingHeroCapabilities() {
           <p className="landing-lead mt-4">{t("hero.capabilitiesLead")}</p>
         </div>
 
-        <div className="landing-fluid-cap-panel mt-10">
-          <div className="landing-fluid-cap-lead">
+        <div
+          ref={panelRef}
+          className={`landing-fluid-cap-panel mt-10${hotId ? " is-linked" : ""}`}
+        >
+          <svg className="landing-fluid-cap-link" aria-hidden>
+            <path d={linkPath} />
+          </svg>
+
+          <div className="landing-fluid-cap-lead" ref={leadRef}>
             <p className="landing-eyebrow">{t("features.uniqueBadge")}</p>
             <h3 className="landing-fluid-cap-title mt-3">
               {t(`features.${lead.group}.${lead.id}.title`)}
@@ -50,8 +85,21 @@ export function LandingHeroCapabilities() {
 
           <ul className="landing-fluid-cap-rail" aria-label={t("hero.capabilitiesTitle")}>
             {rest.map(({ id, group }) => (
-              <li key={id} className="landing-fluid-cap-rail-item">
-                <span className="landing-fluid-cap-rail-title">
+              <li
+                key={id}
+                className={`landing-fluid-cap-rail-item${hotId === id ? " is-hot" : ""}`}
+                onPointerEnter={(e) => {
+                  setHotId(id);
+                  drawLink(e.currentTarget);
+                }}
+                onPointerLeave={() => setHotId(null)}
+                onFocus={(e) => {
+                  setHotId(id);
+                  drawLink(e.currentTarget);
+                }}
+                onBlur={() => setHotId(null)}
+              >
+                <span className="landing-fluid-cap-rail-title" tabIndex={0}>
                   {t(`features.${group}.${id}.title`)}
                 </span>
               </li>
@@ -65,8 +113,11 @@ export function LandingHeroCapabilities() {
 
 export function LandingFluidHero({ setView }) {
   const { t } = useTranslation("landing");
-  const [heroVideoSrc, setHeroVideoSrc] = useState(LANDING_HERO_VIDEO);
+  const reduceMotion = useReducedMotion();
+  const [heroVideoSrc, setHeroVideoSrc] = useState(LANDING_HERO_VIDEO_CINEMATIC);
   const [videoFailed, setVideoFailed] = useState(false);
+  const videoRef = useRef(null);
+  const mediaRef = useRef(null);
 
   useEffect(() => {
     const update = () => {
@@ -78,89 +129,142 @@ export function LandingFluidHero({ setView }) {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  const titleBefore = t("hero.titleBefore") || t("hero.title");
-  const titleAfter = (t("hero.titleAfter") || "").trim();
-  const announcementHref = useMemo(() => "#pricing", []);
+  /* Pausa el video fuera de viewport — evita decode GPU al scrollear */
+  useEffect(() => {
+    const media = mediaRef.current;
+    const video = videoRef.current;
+    if (!media || !video || videoFailed) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.12) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: [0, 0.12, 0.35] },
+    );
+    observer.observe(media);
+    return () => observer.disconnect();
+  }, [heroVideoSrc, videoFailed]);
+
+  const brand = t("hero.brand");
+  const titleLine = [t("hero.titleBefore"), (t("hero.titleAfter") || "").trim()]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className="landing-fluid-hero-wrap">
-      <section className="landing-guiaa-hero" aria-labelledby="landing-hero-title">
-        <div className="landing-guiaa-hero-media" aria-hidden>
-          {!videoFailed ? (
-            <video
-              key={heroVideoSrc}
-              className="landing-fluid-hero-video landing-guiaa-hero-video"
-              src={heroVideoSrc}
-              poster={LANDING_HERO_VIDEO_POSTER}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              onError={() => {
-                const fallback = nextLandingHeroVideoSrc(heroVideoSrc);
-                if (fallback) {
-                  setHeroVideoSrc(fallback);
-                  return;
-                }
-                setVideoFailed(true);
-              }}
-            />
-          ) : (
-            <img
-              src={LANDING_HERO_VIDEO_POSTER}
-              alt=""
-              className="landing-guiaa-hero-poster"
-              loading="eager"
-              decoding="async"
-            />
-          )}
-          <div className="landing-fluid-hero-scrim landing-guiaa-hero-scrim" />
-        </div>
-
-        <div className="landing-guiaa-hero-glow" aria-hidden />
-        <div className="landing-guiaa-hero-grid" aria-hidden />
-
-        <LandingNavbar setView={setView} hero />
-
-        <div className="landing-guiaa-hero-inner">
-          <a href={announcementHref} className="landing-guiaa-hero-pill">
-            <span className="landing-guiaa-hero-pill-text">{t("hero.announcement")}</span>
-            <span className="landing-guiaa-hero-pill-cta">
-              {t("hero.announcementCta")}
-              <ArrowRight size={14} aria-hidden />
-            </span>
-          </a>
-
-          <p className="landing-guiaa-hero-brand" translate="no">
-            {t("hero.brand")}
-          </p>
-
-          <h1 id="landing-hero-title" className="landing-guiaa-hero-title">
-            <span className="landing-guiaa-hero-title-line">{titleBefore}</span>
-            {titleAfter ? (
-              <span className="landing-guiaa-hero-title-line landing-guiaa-hero-title-accent">
-                {titleAfter}
-              </span>
-            ) : null}
-          </h1>
-
-          <p className="landing-guiaa-hero-lead">{t("hero.lead")}</p>
-
-          <div className="landing-guiaa-hero-cta-row">
-            <button
-              type="button"
-              className="landing-guiaa-hero-cta-primary"
-              onClick={() => setView("register")}
-            >
-              {t("hero.ctaRegister")}
-            </button>
-            <a href="/consulta" className="landing-guiaa-hero-cta-secondary">
-              {t("hero.ctaOwner")}
-            </a>
+      <section className="landing-guiaa-hero landing-guiaa-hero--prisma" aria-labelledby="landing-hero-title">
+        <div className="landing-guiaa-hero-frame">
+          <div className="landing-guiaa-hero-media" aria-hidden ref={mediaRef}>
+            {!videoFailed ? (
+              <video
+                ref={videoRef}
+                key={heroVideoSrc}
+                className="landing-fluid-hero-video landing-guiaa-hero-video"
+                src={heroVideoSrc}
+                poster={LANDING_HERO_VIDEO_POSTER}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                onError={() => {
+                  const fallback = nextLandingHeroVideoSrc(heroVideoSrc);
+                  if (fallback) {
+                    setHeroVideoSrc(fallback);
+                    return;
+                  }
+                  setVideoFailed(true);
+                }}
+              />
+            ) : (
+              <img
+                src={LANDING_HERO_VIDEO_POSTER}
+                alt=""
+                className="landing-guiaa-hero-poster"
+                loading="eager"
+                decoding="async"
+              />
+            )}
+            <div className="landing-fluid-hero-scrim landing-guiaa-hero-scrim" />
+            <LandingVetAnimations variant="hero" />
           </div>
 
-          <p className="landing-guiaa-hero-hint">{t("hero.ctaHint")}</p>
+          <LandingClinicalCursor enabled={!reduceMotion} />
+
+          <LandingNavbar setView={setView} hero />
+
+          <div className="landing-guiaa-hero-stage">
+            <div className="landing-guiaa-hero-grid12">
+              <div className="landing-guiaa-hero-brand-col">
+                <h1 id="landing-hero-title" className="landing-guiaa-hero-mark">
+                  <WordsPullUp text={brand} showPaw className="landing-guiaa-hero-mark-pull" />
+                </h1>
+                <div className="landing-guiaa-hero-brandline">
+                  <p className="landing-guiaa-hero-brandline-primary">
+                    {t("brand.taglinePrimary")}
+                  </p>
+                  <p className="landing-guiaa-hero-brandline-secondary">
+                    {t("brand.taglineSecondary")}
+                  </p>
+                </div>
+                <p className="landing-guiaa-hero-submark sr-only">{titleLine}</p>
+              </div>
+
+              <div className="landing-guiaa-hero-copy-col">
+                <motion.p
+                  className="landing-guiaa-hero-kicker"
+                  initial={reduceMotion ? false : { y: 18, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {t("hero.kicker")}
+                </motion.p>
+
+                <motion.p
+                  className="landing-guiaa-hero-lead"
+                  initial={reduceMotion ? false : { y: 18, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.75, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {t("hero.lead")}
+                </motion.p>
+
+                <motion.div
+                  className="landing-guiaa-hero-cta-row"
+                  initial={reduceMotion ? false : { y: 18, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.75, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <button
+                    type="button"
+                    className="landing-guiaa-hero-cta-lab"
+                    onClick={() => setView("register")}
+                  >
+                    <span>{t("hero.ctaRegister")}</span>
+                    <span className="landing-guiaa-hero-cta-lab-icon" aria-hidden>
+                      <ArrowRight size={16} />
+                    </span>
+                  </button>
+                  <a href="/consulta" className="landing-guiaa-hero-cta-ghost">
+                    {t("hero.ctaOwner")}
+                  </a>
+                </motion.div>
+
+                <motion.p
+                  className="landing-guiaa-hero-hint"
+                  initial={reduceMotion ? false : { y: 12, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.7, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {t("hero.ctaHint")}
+                </motion.p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>

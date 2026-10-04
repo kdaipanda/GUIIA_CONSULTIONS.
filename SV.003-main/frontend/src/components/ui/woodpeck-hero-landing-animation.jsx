@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Menu, X, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAppScrollY, onAppScroll } from "@/lib/appScrollRoot";
@@ -293,7 +293,7 @@ function FloatingNavbar({
                 ? "text-[#0c2d4d] hover:bg-black/5"
                 : "text-white hover:bg-white/10",
           )}
-          aria-label={mobileMenuOpen ? "Cerrar menÃº" : "Abrir menÃº"}
+          aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
         >
           {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
@@ -519,7 +519,7 @@ function HeroBannerSection({
               )}
               {heroCtaSecondary && (
                 <a
-                  href={heroCtaSecondaryHref || "#product"}
+                  href={heroCtaSecondaryHref || "/consulta"}
                   className="rounded-full border border-white/35 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
                 >
                   {heroCtaSecondary}
@@ -566,7 +566,7 @@ export function FluidHeroNavbar({
   videoSrc,
   heroImage = "/brand/doctor-plumitas-hub.png",
   headlineFirst = "Documenta la consulta",
-  headlineSecond = "sin perder el hilo clÃ­nico.",
+  headlineSecond = "sin perder el hilo clínico.",
   headlineKicker = "",
   ctaText = "Registrarse",
   onCtaClick,
@@ -582,7 +582,7 @@ export function FluidHeroNavbar({
   heroCtaPrimary,
   onHeroCtaPrimary,
   heroCtaSecondary,
-  heroCtaSecondaryHref = "#product",
+  heroCtaSecondaryHref = "/consulta",
   heroHint,
   showIntroAnimation = true,
   showNavbar = true,

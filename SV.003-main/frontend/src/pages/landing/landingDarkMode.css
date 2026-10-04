@@ -74,7 +74,7 @@ html.dark .landing-petpal-title {
 [data-theme="dark"] .landing-petpal-cta-hint,
 html.dark .landing-petpal-lead,
 html.dark .landing-petpal-cta-hint {
-  color: #94a3b8;
+  color: #b6c2d0;
 }
 
 [data-theme="dark"] .landing-nav-hero,
@@ -91,9 +91,9 @@ html.dark .landing-hero-window {
 
 [data-theme="dark"] .landing-nav-hero.landing-nav-scrolled,
 html.dark .landing-nav-hero.landing-nav-scrolled {
-  background: rgba(10, 16, 24, 0.55) !important;
-  backdrop-filter: blur(20px) saturate(1.15);
-  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  background: rgba(10, 16, 24, 0.94) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   border-bottom-color: rgba(255, 255, 255, 0.08) !important;
 }
 
@@ -129,7 +129,7 @@ html.dark .landing-petpal-stat-value {
 
 [data-theme="dark"] .landing-petpal-stat-desc,
 html.dark .landing-petpal-stat-desc {
-  color: #94a3b8;
+  color: #b6c2d0;
 }
 
 /* —— Tipografía y secciones —— */
@@ -210,7 +210,7 @@ html.dark .landing-body-wrap [class*="text-guiaa-brand-navy/"] {
 
 [data-theme="dark"] .landing-body-wrap .text-guiaa-brand-ink-muted,
 html.dark .landing-body-wrap .text-guiaa-brand-ink-muted {
-  color: #94a3b8 !important;
+  color: #b6c2d0 !important;
 }
 
 [data-theme="dark"] .landing-body-wrap .text-guiaa-brand-ink-subtle,
@@ -425,7 +425,7 @@ html.dark .landing-trust-strip .text-guiaa-brand-navy {
 
 [data-theme="dark"] .landing-trust-strip .text-guiaa-brand-ink-muted,
 html.dark .landing-trust-strip .text-guiaa-brand-ink-muted {
-  color: #94a3b8;
+  color: #b6c2d0;
 }
 
 [data-theme="dark"] .landing-body-wrap .landing-tab,
@@ -456,7 +456,7 @@ html.dark .landing-product-chrome {
 
 [data-theme="dark"] .landing-product-chrome .landing-kicker,
 html.dark .landing-product-chrome .landing-kicker {
-  color: #94a3b8;
+  color: #b6c2d0;
 }
 
 [data-theme="dark"] .landing-body-wrap .landing-pricing-featured,
@@ -489,7 +489,7 @@ html.dark .landing-body-wrap .landing-clinical-note {
 
 [data-theme="dark"] .landing-body-wrap .landing-clinical-note-label,
 html.dark .landing-body-wrap .landing-clinical-note-label {
-  color: #94a3b8;
+  color: #b6c2d0;
 }
 
 [data-theme="dark"] .landing-body-wrap .landing-clinical-note-value,
@@ -519,7 +519,7 @@ html.dark .landing-brand-band-title {
 [data-theme="dark"] .landing-brand-band-lead,
 html.dark .landing-brand-band span,
 html.dark .landing-brand-band-lead {
-  color: #94a3b8;
+  color: #b6c2d0;
 }
 
 /* Testimonios — superficie editorial en oscuro */
@@ -552,7 +552,7 @@ html.dark .landing-colleague-name {
 
 [data-theme="dark"] .landing-colleague-role,
 html.dark .landing-colleague-role {
-  color: #94a3b8 !important;
+  color: #b6c2d0 !important;
 }
 
 [data-theme="dark"] .landing-colleagues-disclaimer,
@@ -663,7 +663,7 @@ html.dark .landing-guia-consultas-title {
 [data-theme="dark"] .landing-guia-consultas-lead,
 html.dark .landing-guia-consultas-eyebrow,
 html.dark .landing-guia-consultas-lead {
-  color: #94a3b8;
+  color: #b6c2d0;
 }
 
 [data-theme="dark"] .landing-guia-consultas-form-col,
@@ -693,7 +693,7 @@ html.dark .landing-guia-form-kicker {
 [data-theme="dark"] .landing-guia-privacy,
 html.dark .landing-guia-form-sub,
 html.dark .landing-guia-privacy {
-  color: #94a3b8;
+  color: #b6c2d0;
 }
 
 /* FAQ */
@@ -898,7 +898,7 @@ html.dark .landing-preview-stat-value {
 
 [data-theme="dark"] .landing-preview-stat-label,
 html.dark .landing-preview-stat-label {
-  color: #94a3b8 !important;
+  color: #b6c2d0 !important;
 }
 
 [data-theme="dark"] .landing-body-wrap .landing-card,

@@ -7,20 +7,20 @@ const PRACTICE_OUTCOMES = [
     id: "ana",
     name: "Dra. Ana M.",
     petImage: "/landing/pets/cat-ginger.png",
-    tone: "navy",
+    tone: "teal",
     rating: 5,
   },
   {
     id: "carlos",
     name: "Dr. Carlos R.",
     petImage: "/landing/pets/exotic-macaw.png",
-    tone: "green",
+    tone: "amber",
     rating: 5,
   },
   {
     id: "patricia",
     name: "Dra. Patricia V.",
-    petImage: "/landing/pets/corgi.png",
+    petImage: "/landing/pets/dog-golden.png",
     tone: "blue",
     rating: 4.5,
   },
@@ -45,7 +45,10 @@ export function LandingTestimonials() {
           <p className="landing-lead mt-4 max-w-xl">{t("testimonials.lead")}</p>
         </div>
 
-        <ul className="landing-colleagues-bento landing-colleagues-bento--outcomes" aria-label={t("testimonials.listAria")}>
+        <ul
+          className="landing-colleagues-bento landing-colleagues-bento--outcomes"
+          aria-label={t("testimonials.listAria")}
+        >
           {PRACTICE_OUTCOMES.map(({ id, name, petImage, tone, rating }) => (
             <li key={id}>
               <figure className={`landing-colleague-card landing-colleague-card--${tone}`}>

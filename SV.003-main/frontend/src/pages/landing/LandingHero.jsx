@@ -1,4 +1,4 @@
-﻿import React, { memo, useState } from "react";
+import React, { memo, useState } from "react";
 import { Play } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LandingVideoModal } from "./LandingVideoModal";
@@ -6,7 +6,7 @@ import { LandingHeroVideo } from "./LandingHeroVideo";
 
 const MemoHeroVideo = memo(LandingHeroVideo);
 
-/** One lead capability + three companions â€” keeps first viewport lean. */
+/** One lead capability + three companions — keeps first viewport lean. */
 const HERO_CAPABILITIES = [
   { id: "diagnostico", group: "primary" },
   { id: "expediente", group: "primary" },
@@ -60,6 +60,9 @@ export function LandingHero({ setView }) {
               >
                 {t("hero.ctaRegister")}
               </button>
+              <a href="/consulta" className="landing-petpal-cta-secondary">
+                {t("hero.ctaOwner")}
+              </a>
               <HeroVideoControls />
             </div>
 

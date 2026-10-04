@@ -109,6 +109,61 @@
     animation: landing-focal-rise 0.48s var(--animate-ease) both;
     animation-delay: 520ms;
   }
+
+  /* Focal Prisma hero — clinical entrance */
+  .landing-guiaa-hero--prisma .landing-guiaa-hero-mark {
+    animation: landing-focal-soft var(--animate-focal) var(--animate-ease-expo) both;
+    animation-delay: 60ms;
+  }
+
+  .landing-guiaa-hero--prisma .landing-guiaa-hero-brandline {
+    animation: none;
+    opacity: 1;
+  }
+
+  .landing-guiaa-hero--prisma .landing-words-pullup__paw {
+    /* Una sola presencia: sin loop “vital” infinito */
+    animation: none;
+    opacity: 0.9;
+  }
+
+  .landing-fluid-capabilities .landing-fluid-cap-lead {
+    animation: landing-focal-soft 0.65s var(--animate-ease-expo) both;
+  }
+
+  .landing-fluid-capabilities .landing-fluid-cap-rail-item {
+    animation: landing-focal-rise 0.48s var(--animate-ease) both;
+  }
+
+  .landing-fluid-capabilities .landing-fluid-cap-rail-item:nth-child(1) {
+    animation-delay: 80ms;
+  }
+
+  .landing-fluid-capabilities .landing-fluid-cap-rail-item:nth-child(2) {
+    animation-delay: 140ms;
+  }
+
+  .landing-fluid-capabilities .landing-fluid-cap-rail-item:nth-child(3) {
+    animation-delay: 200ms;
+  }
+}
+
+@keyframes landing-paw-vital {
+  0%,
+  100% {
+    transform: rotate(-18deg) scale(1);
+    opacity: 0.85;
+    color: #9ad9d0;
+  }
+  40% {
+    transform: rotate(-18deg) scale(1.12);
+    opacity: 1;
+    color: #c8f0ea;
+  }
+  55% {
+    transform: rotate(-18deg) scale(1);
+    opacity: 0.9;
+  }
 }
 
 /* —— Continuity: proof stats (after hero) —— */
@@ -476,6 +531,11 @@
   .landing-petpal-hero .landing-hero-capabilities-head,
   .landing-petpal-hero .landing-hero-cap-secondary,
   .landing-petpal-hero .landing-hero-cap-more,
+  .landing-guiaa-hero--prisma .landing-guiaa-hero-mark,
+  .landing-guiaa-hero--prisma .landing-guiaa-hero-brandline,
+  .landing-guiaa-hero--prisma .landing-words-pullup__paw,
+  .landing-fluid-capabilities .landing-fluid-cap-lead,
+  .landing-fluid-capabilities .landing-fluid-cap-rail-item,
   .landing-reveal.is-visible .landing-petpal-stat,
   .landing-reveal.is-visible .landing-how-rail-item,
   .landing-reveal.is-visible .landing-how-rail-line,
@@ -529,5 +589,165 @@
 
   .landing-shell.landing-shell--page {
     overflow: visible;
+  }
+}
+
+/* —— Agency motion (Doctor Multimedia vocabulary × GUIAA clinical) ——
+   Counters · cascade reveals · portfolio hover zoom
+   Content stays readable; no opacity:0 traps · transform/opacity only */
+
+@keyframes landing-agency-rise {
+  from {
+    opacity: 0.88;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes landing-agency-line {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-petpal-stats .landing-petpal-stat {
+    opacity: 0.9;
+    transform: translate3d(0, 10px, 0);
+    transition:
+      opacity 0.45s var(--animate-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+      transform 0.45s var(--animate-ease, cubic-bezier(0.22, 1, 0.36, 1));
+    transition-delay: calc(var(--stat-i, 0) * 70ms);
+  }
+
+  .landing-petpal-stats.is-inview .landing-petpal-stat {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .landing-how .landing-how-intro,
+  .landing-how .landing-how-rail-item {
+    opacity: 0.92;
+    transform: translate3d(0, 12px, 0);
+    transition:
+      opacity 0.5s var(--animate-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+      transform 0.5s var(--animate-ease, cubic-bezier(0.22, 1, 0.36, 1));
+  }
+
+  .landing-how .landing-how-rail-item {
+    transition-delay: calc(80ms + var(--how-i, 0) * 90ms);
+  }
+
+  .landing-how.is-inview .landing-how-intro,
+  .landing-how.is-inview .landing-how-rail-item {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .landing-how.is-inview .landing-how-rail-line {
+    transform-origin: top center;
+    animation: landing-agency-line 0.55s var(--animate-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
+    animation-delay: 0.18s;
+  }
+
+  .landing-features-section .landing-features-head,
+  .landing-features-section .landing-feature-hero,
+  .landing-features-section .landing-feature-row,
+  .landing-features-section .landing-feature-strip-item {
+    opacity: 0.92;
+    transform: translate3d(0, 12px, 0);
+    transition:
+      opacity 0.48s var(--animate-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+      transform 0.48s var(--animate-ease, cubic-bezier(0.22, 1, 0.36, 1));
+  }
+
+  .landing-features-section .landing-feature-hero {
+    transition-delay: 60ms;
+  }
+
+  .landing-features-section .landing-feature-row:nth-child(1) {
+    transition-delay: 110ms;
+  }
+  .landing-features-section .landing-feature-row:nth-child(2) {
+    transition-delay: 160ms;
+  }
+  .landing-features-section .landing-feature-row:nth-child(3) {
+    transition-delay: 210ms;
+  }
+
+  .landing-features-section .landing-feature-strip li:nth-child(1) .landing-feature-strip-item {
+    transition-delay: 160ms;
+  }
+  .landing-features-section .landing-feature-strip li:nth-child(2) .landing-feature-strip-item {
+    transition-delay: 210ms;
+  }
+  .landing-features-section .landing-feature-strip li:nth-child(3) .landing-feature-strip-item {
+    transition-delay: 260ms;
+  }
+  .landing-features-section .landing-feature-strip li:nth-child(4) .landing-feature-strip-item {
+    transition-delay: 310ms;
+  }
+
+  .landing-features-section.is-inview .landing-features-head,
+  .landing-features-section.is-inview .landing-feature-hero,
+  .landing-features-section.is-inview .landing-feature-row,
+  .landing-features-section.is-inview .landing-feature-strip-item {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* Portfolio-style product shot: zoom suave del preview (sin blur) */
+  .landing-product-shot .landing-preview-panel,
+  .landing-product-shot .landing-product-frame-inner {
+    overflow: hidden;
+  }
+
+  .landing-product-shot .landing-preview-scaler,
+  .landing-product-shot .landing-product-panel-enter {
+    transform: scale(1);
+    transform-origin: center top;
+    transition: transform 0.55s var(--animate-ease, cubic-bezier(0.22, 1, 0.36, 1));
+  }
+
+  .landing-product-shot:hover .landing-preview-scaler,
+  .landing-product-shot:hover .landing-product-panel-enter,
+  .landing-product-shot:focus-within .landing-preview-scaler,
+  .landing-product-shot:focus-within .landing-product-panel-enter {
+    transform: scale(1.035);
+  }
+
+  .landing-product.is-inview .landing-product-copy,
+  .landing-product.is-inview .landing-product-shot {
+    animation: landing-agency-rise 0.55s var(--animate-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
+  }
+
+  .landing-product.is-inview .landing-product-shot {
+    animation-delay: 90ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-petpal-stats .landing-petpal-stat,
+  .landing-how .landing-how-intro,
+  .landing-how .landing-how-rail-item,
+  .landing-features-section .landing-features-head,
+  .landing-features-section .landing-feature-hero,
+  .landing-features-section .landing-feature-row,
+  .landing-features-section .landing-feature-strip-item {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .landing-product-shot .landing-preview-scaler,
+  .landing-product-shot .landing-product-panel-enter {
+    transform: none !important;
+    transition: none !important;
   }
 }

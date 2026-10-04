@@ -14,7 +14,6 @@ export function HoverRevealCard({
   className,
   decorative = false,
 }) {
-  const label = subtitle ? `${title}, ${subtitle}` : title;
   const classNames = cn(
     "landing-species-card group/card relative h-80 w-[13.5rem] shrink-0 cursor-pointer overflow-hidden rounded-xl bg-cover bg-center shadow-lg outline-none transition-all duration-500 ease-in-out sm:w-[15rem]",
     "focus-visible:ring-2 focus-visible:ring-[#3d9b8f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f8fafc]",
@@ -53,27 +52,25 @@ export function HoverRevealCard({
     );
   }
 
+  const accessibleName = subtitle ? `${title}, ${subtitle}` : title;
+
   if (href) {
     return (
-      <a
-        href={href}
-        onClick={onClick}
-        className={classNames}
-        role="listitem"
-        aria-label={label}
-      >
+      <div role="listitem" className={classNames}>
+        <a
+          href={href}
+          onClick={onClick}
+          className="absolute inset-0 z-20 rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3d9b8f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f8fafc]"
+        >
+          <span className="sr-only">{accessibleName}</span>
+        </a>
         {content}
-      </a>
+      </div>
     );
   }
 
   return (
-    <div
-      role="listitem"
-      tabIndex={0}
-      aria-label={label}
-      className={classNames}
-    >
+    <div role="listitem" tabIndex={0} className={classNames}>
       {content}
     </div>
   );

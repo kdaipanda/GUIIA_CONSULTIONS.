@@ -133,21 +133,21 @@ export function LandingFooter() {
             <LandingBrandTagline variant="footer" />
           </div>
 
-          <div className="landing-footer-min-social" role="list">
+          <ul className="landing-footer-min-social">
             {LANDING_SOCIAL_LINKS.map(({ id, label, href }) => (
-              <a
-                key={id}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="landing-footer-min-social-btn"
-                aria-label={label}
-                role="listitem"
-              >
-                <SocialIcon id={id} />
-              </a>
+              <li key={id}>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="landing-footer-min-social-btn"
+                  aria-label={label}
+                >
+                  <SocialIcon id={id} />
+                </a>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
 
         <div className="landing-footer-min-rule" aria-hidden />
@@ -162,7 +162,7 @@ export function LandingFooter() {
           </div>
 
           <div className="landing-footer-min-links">
-            <nav className="landing-footer-min-nav" aria-label={t("nav.main")}>
+            <nav className="landing-footer-min-nav" aria-label={t("nav.footer")}>
               {primaryNav.map((item) => (
                 <a
                   key={item.label}

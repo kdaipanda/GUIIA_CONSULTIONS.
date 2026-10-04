@@ -1,16 +1,21 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { onLandingAnchorClick, productTabHref } from "./landingScroll";
+import { useLandingInView } from "./useLandingInView";
 
 const STEPS = ["01", "02", "03"];
 
 export function LandingHowItWorks({ setView }) {
   const { t } = useTranslation("landing");
+  const { ref, inView } = useLandingInView({ threshold: 0.18 });
 
   return (
     <section
+      ref={ref}
       id="como-funciona"
-      className="landing-section landing-section-band border-y border-guiaa-brand-navy/8"
+      className={`landing-section landing-section-band landing-how border-y border-guiaa-brand-navy/8${
+        inView ? " is-inview" : ""
+      }`}
       aria-labelledby="landing-how-heading"
     >
       <div className="landing-container">
@@ -44,7 +49,11 @@ export function LandingHowItWorks({ setView }) {
 
           <ol className="landing-how-rail">
             {STEPS.map((step, index) => (
-              <li key={step} className="landing-how-rail-item">
+              <li
+                key={step}
+                className="landing-how-rail-item"
+                style={{ "--how-i": index }}
+              >
                 <span className="landing-how-rail-num">{step}</span>
                 {index < STEPS.length - 1 ? (
                   <span className="landing-how-rail-line" aria-hidden />

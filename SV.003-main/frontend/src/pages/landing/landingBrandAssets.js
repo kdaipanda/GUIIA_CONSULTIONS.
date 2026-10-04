@@ -25,6 +25,7 @@ export const LANDING_IMAGES = {
     catGinger: "/landing/pets/cat-ginger.png",
     catBlack: "/landing/pets/cat-black.png",
     exoticMacaw: "/landing/pets/exotic-macaw.png",
+    owlClinical: "/landing/pets/owl-clinical-stethoscope.png",
     speciesPerros: "/landing/pets/species-perros.jpg",
     speciesGatos: "/landing/pets/species-gatos.jpg",
     speciesConejos: "/landing/pets/species-conejos.jpg",
@@ -39,16 +40,26 @@ export const LANDING_IMAGES = {
   },
 };
 
+/**
+ * Video cinematográfico del hero (Flow “Veterinarian3”: clínica + bata + animales).
+ * Fallback local: VG1 → VG1-mobile.
+ */
+export const LANDING_HERO_VIDEO_CINEMATIC = "/landing/Veterinarian3.mp4";
+
+/** Preferir el cine del hero; si falla, usamos VG1 local. */
+export const LANDING_HERO_VIDEO_USE_CINEMATIC = true;
+
 export const LANDING_HERO_VIDEO = "/VG1.mp4";
 export const LANDING_HERO_VIDEO_MOBILE = "/VG1-mobile.mp4";
 /** Upscale 2× (2520×2160) — solo si el archivo está desplegado en /public. */
 export const LANDING_HERO_VIDEO_4K = "/VG1-4k.mp4";
 /** En producción aún no siempre está VG1-4k; no lo elegir como src primario. */
 export const LANDING_HERO_VIDEO_4K_ENABLED = false;
-export const LANDING_HERO_VIDEO_POSTER = LANDING_IMAGES.heroHub;
+export const LANDING_HERO_VIDEO_POSTER = "/landing/hero-cinematic-vet.jpg";
 
 /**
  * Fuente según viewport:
+ * - cinematic (Prisma) si está habilitado
  * - móvil / tablet estrecha → VG1-mobile
  * - escritorio → VG1
  * - 4K / ultra-wide (opcional) → VG1-4k si LANDING_HERO_VIDEO_4K_ENABLED
@@ -57,7 +68,15 @@ export function resolveLandingHeroVideoSrc({
   mobileMaxWidth = 1023,
   largeMinWidth = 1600,
 } = {}) {
-  if (typeof window === "undefined") return LANDING_HERO_VIDEO;
+  if (typeof window === "undefined") {
+    return LANDING_HERO_VIDEO_USE_CINEMATIC
+      ? LANDING_HERO_VIDEO_CINEMATIC
+      : LANDING_HERO_VIDEO;
+  }
+
+  if (LANDING_HERO_VIDEO_USE_CINEMATIC) {
+    return LANDING_HERO_VIDEO_CINEMATIC;
+  }
 
   const isNarrow = window.matchMedia(`(max-width: ${mobileMaxWidth}px)`).matches;
   if (isNarrow) return LANDING_HERO_VIDEO_MOBILE;
@@ -74,8 +93,9 @@ export function resolveLandingHeroVideoSrc({
   return LANDING_HERO_VIDEO;
 }
 
-/** Siguiente fuente si el video actual falla (4k → desktop → móvil → null). */
+/** Siguiente fuente si el video actual falla (cinematic → 4k → desktop → móvil → null). */
 export function nextLandingHeroVideoSrc(currentSrc) {
+  if (currentSrc === LANDING_HERO_VIDEO_CINEMATIC) return LANDING_HERO_VIDEO;
   if (currentSrc === LANDING_HERO_VIDEO_4K) return LANDING_HERO_VIDEO;
   if (currentSrc === LANDING_HERO_VIDEO) return LANDING_HERO_VIDEO_MOBILE;
   return null;
