@@ -811,10 +811,12 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
 
 .landing-colleague-pet {
   opacity: 1 !important;
-  max-width: 10.25rem !important;
-  max-height: 11.5rem !important;
-  bottom: -1.35rem !important;
-  right: -0.35rem !important;
+  left: auto !important;
+  right: 0.15rem !important;
+  max-width: 9.75rem !important;
+  max-height: 11rem !important;
+  bottom: -1.25rem !important;
+  object-position: bottom center !important;
   filter: drop-shadow(0 14px 18px rgba(12, 45, 77, 0.28)) !important;
 }
 
