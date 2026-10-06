@@ -267,72 +267,9 @@ html.dark .user-dropdown-item--upgrade svg {
   letter-spacing: -0.01em;
 }
 
-.header-lang-menu-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 10px;
-  border: 1px solid rgba(38, 91, 147, 0.14);
-  background: #f8fafc;
-}
-
-.header-lang-menu-btn {
-  min-height: 2.25rem;
-  min-width: 2.5rem;
-  padding: 0 0.65rem;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: #64748b;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.header-lang-menu-btn:hover {
-  color: #0c2d4d;
-  background: rgba(38, 91, 147, 0.06);
-}
-
-.header-lang-menu-btn.is-active {
-  background: #0c2d4d;
-  color: #ffffff;
-}
-
-.header-lang-menu-btn:focus-visible {
-  outline: 2px solid rgba(38, 91, 147, 0.55);
-  outline-offset: 1px;
-}
-
 [data-theme="dark"] .header-lang-menu-label,
 html.dark .header-lang-menu-label {
-  color: #94a3b8;
-}
-
-[data-theme="dark"] .header-lang-menu-toggle,
-html.dark .header-lang-menu-toggle {
-  background: rgba(20, 30, 44, 0.95);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-[data-theme="dark"] .header-lang-menu-btn,
-html.dark .header-lang-menu-btn {
-  color: #94a3b8;
-}
-
-[data-theme="dark"] .header-lang-menu-btn:hover,
-html.dark .header-lang-menu-btn:hover {
-  color: #e2e8f0;
-  background: rgba(61, 155, 143, 0.12);
-}
-
-[data-theme="dark"] .header-lang-menu-btn.is-active,
-html.dark .header-lang-menu-btn.is-active {
-  background: #3d9b8f;
-  color: #ffffff;
+  color: #b6c2d0;
 }
 
 .menu-toggle {

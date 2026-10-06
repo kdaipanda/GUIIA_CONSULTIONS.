@@ -2,10 +2,11 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { syncDocumentLocale } from "../i18n";
 import { preloadDeferredNamespaces } from "../lib/loadI18nNamespace";
+import "./languageSwitcher.css";
 
 /**
- * Compact ES | EN language toggle for landing, auth, and clinic shell.
- * variant="menu" — full-width row for account dropdown.
+ * Compact ES | EN segmented language toggle for landing, auth, and clinic shell.
+ * variant="menu" — labeled row for account dropdown.
  */
 export function LanguageSwitcher({
   className = "",
@@ -16,67 +17,26 @@ export function LanguageSwitcher({
   const current = (i18n.language || "en").startsWith("es") ? "es" : "en";
 
   const setLang = async (lng) => {
+    if (lng === current) return;
     await i18n.changeLanguage(lng);
     syncDocumentLocale(lng);
     await preloadDeferredNamespaces();
   };
 
-  if (variant === "menu") {
-    return (
-      <div className={`header-lang-menu ${className}`.trim()} role="none">
-        <span className="header-lang-menu-label" id="header-lang-label">
-          {t("language")}
-        </span>
-        <div
-          className="header-lang-menu-toggle"
-          role="group"
-          aria-labelledby="header-lang-label"
-        >
-          <button
-            type="button"
-            className={`header-lang-menu-btn${current === "es" ? " is-active" : ""}`}
-            onClick={() => setLang("es")}
-            aria-pressed={current === "es"}
-            title={t("switchToEs")}
-          >
-            ES
-          </button>
-          <button
-            type="button"
-            className={`header-lang-menu-btn${current === "en" ? " is-active" : ""}`}
-            onClick={() => setLang("en")}
-            aria-pressed={current === "en"}
-            title={t("switchToEn")}
-          >
-            EN
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const base =
-    tone === "on-dark"
-      ? "border-white/25 text-white"
-      : "border-guiaa-brand-navy/15 text-guiaa-brand-navy";
-  const active =
-    tone === "on-dark"
-      ? "bg-white/20 text-white"
-      : "bg-guiaa-brand-navy text-white";
-  const idle =
-    tone === "on-dark"
-      ? "hover:bg-white/10 text-white/85"
-      : "hover:bg-guiaa-brand-navy/5 text-guiaa-brand-navy/80";
-
-  return (
+  const switcher = (
     <div
-      className={`inline-flex items-center rounded-lg border p-0.5 text-xs font-semibold ${base} ${className}`}
+      className={`lang-switch${tone === "on-dark" ? " lang-switch--on-dark" : ""}${
+        className && variant !== "menu" ? ` ${className}` : ""
+      }`.trim()}
       role="group"
-      aria-label={t("language")}
+      aria-label={variant === "menu" ? undefined : t("language")}
+      aria-labelledby={variant === "menu" ? "header-lang-label" : undefined}
+      data-lang={current}
     >
+      <span className="lang-switch__thumb" aria-hidden />
       <button
         type="button"
-        className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-2.5 py-1.5 transition ${current === "es" ? active : idle}`}
+        className={`lang-switch__btn${current === "es" ? " is-active" : ""}`}
         onClick={() => setLang("es")}
         aria-pressed={current === "es"}
         title={t("switchToEs")}
@@ -85,7 +45,7 @@ export function LanguageSwitcher({
       </button>
       <button
         type="button"
-        className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-2.5 py-1.5 transition ${current === "en" ? active : idle}`}
+        className={`lang-switch__btn${current === "en" ? " is-active" : ""}`}
         onClick={() => setLang("en")}
         aria-pressed={current === "en"}
         title={t("switchToEn")}
@@ -94,4 +54,17 @@ export function LanguageSwitcher({
       </button>
     </div>
   );
+
+  if (variant === "menu") {
+    return (
+      <div className={`header-lang-menu ${className}`.trim()} role="none">
+        <span className="header-lang-menu-label" id="header-lang-label">
+          {t("language")}
+        </span>
+        {switcher}
+      </div>
+    );
+  }
+
+  return switcher;
 }
