@@ -2,10 +2,15 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { LANDING_PRESENTATION_YOUTUBE } from "./landingBrandAssets";
+import {
+  LANDING_PRESENTATION_POSTER,
+  LANDING_PRESENTATION_VIDEO,
+  LANDING_PRESENTATION_YOUTUBE,
+} from "./landingBrandAssets";
 
 function presentationEmbedSrc() {
   const { id, startSeconds } = LANDING_PRESENTATION_YOUTUBE;
+  if (!id) return "";
   const params = new URLSearchParams({
     autoplay: "1",
     start: String(startSeconds || 0),
@@ -21,25 +26,45 @@ function presentationEmbedSrc() {
   return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
 }
 
-export function LandingVideoModal({ open, onClose }) {
+/**
+ * @param {"launch" | "presentation"} [initialSource]
+ */
+export function LandingVideoModal({ open, onClose, initialSource = "launch" }) {
   const { t } = useTranslation("landing");
-  const [embedReady, setEmbedReady] = useState(false);
-  const embedSrc = useMemo(
-    () => (open && embedReady ? presentationEmbedSrc() : ""),
-    [open, embedReady],
-  );
+  const [source, setSource] = useState(initialSource);
+  const [mediaReady, setMediaReady] = useState(false);
   const closeRef = useRef(null);
+  const videoRef = useRef(null);
   const previouslyFocused = useRef(null);
+  const youtubeWatchUrl = LANDING_PRESENTATION_YOUTUBE?.watchUrl?.trim() || "";
+  const youtubeEmbedSrc = useMemo(
+    () => (open && mediaReady && source === "presentation" ? presentationEmbedSrc() : ""),
+    [open, mediaReady, source],
+  );
 
-  // Defer iframe mount so the open click stays responsive (INP).
+  useEffect(() => {
+    if (!open) return;
+    setSource(initialSource);
+  }, [open, initialSource]);
+
   useEffect(() => {
     if (!open) {
-      setEmbedReady(false);
+      setMediaReady(false);
       return undefined;
     }
-    const id = window.requestAnimationFrame(() => setEmbedReady(true));
+    const id = window.requestAnimationFrame(() => setMediaReady(true));
     return () => window.cancelAnimationFrame(id);
-  }, [open]);
+  }, [open, source]);
+
+  useEffect(() => {
+    if (!open || !mediaReady || source !== "launch") return undefined;
+    const video = videoRef.current;
+    if (!video) return undefined;
+    video.currentTime = 0;
+    const playPromise = video.play();
+    if (playPromise?.catch) playPromise.catch(() => {});
+    return undefined;
+  }, [open, mediaReady, source]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -62,7 +87,7 @@ export function LandingVideoModal({ open, onClose }) {
       const focusables = closeRef.current
         .closest(".landing-video-modal")
         ?.querySelectorAll(
-          'button, [href], iframe, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          'button, [href], video, iframe, input, select, textarea, [tabindex]:not([tabindex="-1"])',
         );
       if (!focusables?.length) return;
       const list = Array.from(focusables);
@@ -90,15 +115,49 @@ export function LandingVideoModal({ open, onClose }) {
 
   if (!open || typeof document === "undefined") return null;
 
+  const title =
+    source === "presentation"
+      ? t("hero.presentationTitle")
+      : t("hero.launchTitle");
+  const caption =
+    source === "presentation"
+      ? t("hero.presentationCaption")
+      : t("hero.launchCaption");
+
   return createPortal(
     <div
       className="landing-video-modal"
       role="dialog"
       aria-modal="true"
-      aria-label={t("hero.presentationTitle")}
+      aria-label={title}
       onClick={onClose}
     >
       <div className="landing-video-modal-stage" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="landing-video-modal-tabs"
+          role="tablist"
+          aria-label={t("hero.videoSourcesLabel")}
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={source === "launch"}
+            className={`landing-video-modal-tab${source === "launch" ? " is-active" : ""}`}
+            onClick={() => setSource("launch")}
+          >
+            {t("hero.playLaunch")}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={source === "presentation"}
+            className={`landing-video-modal-tab${source === "presentation" ? " is-active" : ""}`}
+            onClick={() => setSource("presentation")}
+          >
+            {t("hero.playPresentation")}
+          </button>
+        </div>
+
         <div className="landing-video-modal-panel">
           <button
             ref={closeRef}
@@ -112,11 +171,25 @@ export function LandingVideoModal({ open, onClose }) {
           </button>
 
           <div className="landing-video-modal-embed">
-            {embedSrc ? (
+            {!mediaReady ? (
+              <div className="landing-video-modal-loading" aria-hidden />
+            ) : source === "launch" ? (
+              <video
+                key="launch"
+                ref={videoRef}
+                className="landing-video-modal-player landing-video-modal-player--native"
+                src={LANDING_PRESENTATION_VIDEO}
+                poster={LANDING_PRESENTATION_POSTER}
+                controls
+                playsInline
+                preload="metadata"
+                title={t("hero.launchTitle")}
+              />
+            ) : youtubeEmbedSrc ? (
               <iframe
-                key={embedSrc}
+                key={youtubeEmbedSrc}
                 className="landing-video-modal-player landing-video-modal-player--youtube"
-                src={embedSrc}
+                src={youtubeEmbedSrc}
                 title={t("hero.presentationTitle")}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
@@ -129,15 +202,20 @@ export function LandingVideoModal({ open, onClose }) {
         </div>
 
         <p className="landing-video-modal-footnote">
-          {t("hero.presentationCaption")}{" "}
-          <a
-            className="landing-video-modal-watch-link"
-            href={LANDING_PRESENTATION_YOUTUBE.watchUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t("hero.watchOnYoutube")}
-          </a>
+          {caption}
+          {source === "presentation" && youtubeWatchUrl ? (
+            <>
+              {" "}
+              <a
+                className="landing-video-modal-watch-link"
+                href={youtubeWatchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t("hero.watchOnYoutube")}
+              </a>
+            </>
+          ) : null}
         </p>
       </div>
     </div>,

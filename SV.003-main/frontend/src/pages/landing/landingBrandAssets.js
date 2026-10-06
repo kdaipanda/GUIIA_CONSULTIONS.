@@ -41,10 +41,10 @@ export const LANDING_IMAGES = {
 };
 
 /**
- * Video cinematográfico del hero (Flow “Veterinarian3”: clínica + bata + animales).
- * Fallback local: VG1 → VG1-mobile.
+ * Video cinematográfico del hero: mezcla Veterinarian3 + guiaa-launch-raw
+ * (hook / producto / diferenciador con crossfades). Fallback: VG1.
  */
-export const LANDING_HERO_VIDEO_CINEMATIC = "/landing/Veterinarian3.mp4";
+export const LANDING_HERO_VIDEO_CINEMATIC = "/landing/guiaa-hero-mix.mp4";
 
 /** Preferir el cine del hero; si falla, usamos VG1 local. */
 export const LANDING_HERO_VIDEO_USE_CINEMATIC = true;
@@ -93,15 +93,22 @@ export function resolveLandingHeroVideoSrc({
   return LANDING_HERO_VIDEO;
 }
 
-/** Siguiente fuente si el video actual falla (cinematic → 4k → desktop → móvil → null). */
+/** Siguiente fuente si el video actual falla (mix → Veterinarian3 → VG1 → móvil → null). */
 export function nextLandingHeroVideoSrc(currentSrc) {
-  if (currentSrc === LANDING_HERO_VIDEO_CINEMATIC) return LANDING_HERO_VIDEO;
+  if (currentSrc === LANDING_HERO_VIDEO_CINEMATIC) return "/landing/Veterinarian3.mp4";
+  if (currentSrc === "/landing/Veterinarian3.mp4") return LANDING_HERO_VIDEO;
   if (currentSrc === LANDING_HERO_VIDEO_4K) return LANDING_HERO_VIDEO;
   if (currentSrc === LANDING_HERO_VIDEO) return LANDING_HERO_VIDEO_MOBILE;
   return null;
 }
 
-/** Presentación YouTube del botón "Ver presentación" (inicio en 0:39). */
+/**
+ * Video de lanzamiento local (public/landing).
+ */
+export const LANDING_PRESENTATION_VIDEO = "/landing/guiaa-launch.mp4";
+export const LANDING_PRESENTATION_POSTER = "/landing/guiaa-launch-poster.jpg";
+
+/** Presentación YouTube del producto (inicio en 0:39). */
 export const LANDING_PRESENTATION_YOUTUBE = {
   id: "cvg2wl_QuU8",
   startSeconds: 39,

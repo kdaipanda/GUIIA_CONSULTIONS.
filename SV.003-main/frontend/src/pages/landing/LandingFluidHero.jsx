@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { LandingNavbar } from "./LandingNavbar";
 import { LandingClinicalCursor } from "./LandingClinicalCursor";
 import { LandingVetAnimations } from "./LandingVetAnimations";
+import { LandingVideoModal } from "./LandingVideoModal";
 import { WordsPullUp } from "./WordsPullUp";
 import {
   LANDING_HERO_VIDEO_CINEMATIC,
@@ -116,6 +117,7 @@ export function LandingFluidHero({ setView }) {
   const reduceMotion = useReducedMotion();
   const [heroVideoSrc, setHeroVideoSrc] = useState(LANDING_HERO_VIDEO_CINEMATIC);
   const [videoFailed, setVideoFailed] = useState(false);
+  const [presentationOpen, setPresentationOpen] = useState(false);
   const videoRef = useRef(null);
   const mediaRef = useRef(null);
 
@@ -249,6 +251,18 @@ export function LandingFluidHero({ setView }) {
                       <ArrowRight size={16} />
                     </span>
                   </button>
+                  <button
+                    type="button"
+                    className="landing-guiaa-hero-cta-play"
+                    onClick={() =>
+                      requestAnimationFrame(() => setPresentationOpen(true))
+                    }
+                  >
+                    <span className="landing-guiaa-hero-cta-play-icon" aria-hidden>
+                      <Play size={14} fill="currentColor" />
+                    </span>
+                    <span>{t("hero.playVideo")}</span>
+                  </button>
                   <a href="/consulta" className="landing-guiaa-hero-cta-ghost">
                     {t("hero.ctaOwner")}
                   </a>
@@ -267,6 +281,10 @@ export function LandingFluidHero({ setView }) {
           </div>
         </div>
       </section>
+      <LandingVideoModal
+        open={presentationOpen}
+        onClose={() => setPresentationOpen(false)}
+      />
     </div>
   );
 }
