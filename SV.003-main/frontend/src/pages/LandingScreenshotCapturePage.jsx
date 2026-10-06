@@ -4,11 +4,13 @@ import {
   ConsultationSpeciesPreview,
   DashboardPreview,
 } from "./landing/LandingAppPreview";
+import "./landing/landingPreview.css";
+import "./landing/landingInteractions.css";
 
 /** Página interna para generar capturas PNG (`npm run capture:landing`). */
 export function LandingScreenshotCapturePage() {
   return (
-    <div className="landing-screenshot-capture-page bg-slate-200 p-8">
+    <div className="landing-screenshot-capture-page landing-body-wrap bg-slate-200 p-8">
       <div id="capture-consultation-species" className="landing-capture-frame mb-10">
         <ConsultationSpeciesPreview />
       </div>
