@@ -9,6 +9,9 @@ import {
   Zap,
   FlaskConical,
   FolderOpen,
+  Copy,
+  CalendarDays,
+  Check,
 } from "lucide-react";
 import "./clinicPageShared.css";
 import "./helpCenterPage.css";
@@ -46,6 +49,9 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
+import { CONSULTATION_CATEGORY_ICONS } from "../../lib/consultationCategories";
+import { formatConsultationDateShort } from "../../lib/consultationDisplay";
+import { normalizePetSex } from "../../lib/petSex";
 import {
   Select,
   SelectContent,
@@ -118,6 +124,7 @@ export function ClientsPatientsPage({
   const [saving, setSaving] = useState(false);
   const [pdfLoadingId, setPdfLoadingId] = useState(null);
   const [historyPdfLoading, setHistoryPdfLoading] = useState(false);
+  const [copiedPatientId, setCopiedPatientId] = useState(false);
 
   const applyRegistry = useCallback((data) => {
     setClients(data?.clients || []);
@@ -768,7 +775,13 @@ export function ClientsPatientsPage({
         }}
       />
 
-      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+      <Dialog
+        open={detailOpen}
+        onOpenChange={(open) => {
+          setDetailOpen(open);
+          if (!open) setCopiedPatientId(false);
+        }}
+      >
         <DialogContent
           className={clinicDialogClass(
             "clinic-dialog",
@@ -776,141 +789,238 @@ export function ClientsPatientsPage({
             "clinic-patient-detail-dialog",
           )}
         >
-          <DialogHeader className="clinic-dialog-header clinic-patient-detail-header">
-            <DialogTitle className="clinic-patient-detail-title">
-              {detail?.patient?.name}
-              {detail?.patient?.is_hospitalized || detail?.hospitalization ? (
-                <span className="clinic-pet-hosp-badge" style={{ marginLeft: 10 }}>
-                  {t("clients.hospitalizedBadge")}
-                </span>
-              ) : null}
-            </DialogTitle>
-            {detail?.patient && (
-              <p className="clinic-patient-detail-subtitle">
-                {[
-                  speciesLabel(detail.patient.species),
-                  detail.patient.breed || null,
-                  detail.patient.clients?.name
-                    ? t("clients.detailOwnerValue", { name: detail.patient.clients.name })
-                    : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
-            )}
+          <DialogHeader className="sr-only">
+            <DialogTitle>{detail?.patient?.name || t("clients.petDetailTitle")}</DialogTitle>
           </DialogHeader>
           {detail?.patient && (
             <div className="clinic-patient-detail">
-              <div className="clinic-patient-detail-meta" role="list">
-                <div className="clinic-patient-detail-field" role="listitem">
-                  <span className="clinic-patient-detail-label">{t("clients.detailOwnerLabel")}</span>
-                  <span className="clinic-patient-detail-value">
-                    {detail.patient.clients?.name || t("common.emDash")}
-                  </span>
-                </div>
-                <div className="clinic-patient-detail-field" role="listitem">
-                  <span className="clinic-patient-detail-label">{t("clients.detailSpeciesLabel")}</span>
-                  <span className="clinic-patient-detail-value">
-                    {speciesLabel(detail.patient.species)}
-                  </span>
-                </div>
-                <div className="clinic-patient-detail-field" role="listitem">
-                  <span className="clinic-patient-detail-label">{t("clients.detailBreedLabel")}</span>
-                  <span className="clinic-patient-detail-value">
-                    {detail.patient.breed || t("common.emDash")}
-                  </span>
-                </div>
-                <div className="clinic-patient-detail-field" role="listitem">
-                  <span className="clinic-patient-detail-label">{t("clients.detailRecordsLabel")}</span>
-                  <span className="clinic-patient-detail-value">
-                    {(detail.consultations?.length || 0) + (detail.medical_images?.length || 0)}
-                  </span>
-                </div>
-              </div>
+              {(() => {
+                const patient = detail.patient;
+                const speciesKey = (patient.species || "").toLowerCase();
+                const speciesIcon =
+                  CONSULTATION_CATEGORY_ICONS[speciesKey] || "🐾";
+                const sexNorm = normalizePetSex(patient.sex);
+                const sexLabel = sexNorm
+                  ? t(`clients.sex.${sexNorm}`, { defaultValue: sexNorm })
+                  : t("common.emDash");
+                const patientIdShort = patient.id
+                  ? `PET-${String(patient.id).slice(0, 8).toUpperCase()}`
+                  : t("common.emDash");
+                const lastVisit = (() => {
+                  const dates = [
+                    ...(detail.consultations || []).map((c) => c.created_at),
+                    ...(detail.medical_images || []).map((s) => s.created_at),
+                    patient.updated_at,
+                    patient.created_at,
+                  ].filter(Boolean);
+                  if (!dates.length) return null;
+                  return dates
+                    .map((d) => ({ raw: d, t: new Date(d).getTime() }))
+                    .filter((d) => !Number.isNaN(d.t))
+                    .sort((a, b) => b.t - a.t)[0]?.raw;
+                })();
+                const cdsCount = detail.consultations?.length || 0;
+                const labCount = detail.medical_images?.length || 0;
+                const copyId = async () => {
+                  try {
+                    await navigator.clipboard.writeText(String(patient.id || ""));
+                    setCopiedPatientId(true);
+                    notifySuccess(t("clients.idCopied"));
+                    window.setTimeout(() => setCopiedPatientId(false), 1600);
+                  } catch {
+                    notifyError(t("clients.idCopyError"));
+                  }
+                };
 
-              <div className="clinic-patient-detail-stats" aria-label={t("clients.detailStatsAria")}>
-                <ClinicStatPill
-                  value={detail.consultations?.length || 0}
-                  label={t("clients.statCds")}
-                />
-                <ClinicStatPill
-                  value={detail.medical_images?.length || 0}
-                  label={t("clients.statLab")}
-                />
-              </div>
+                return (
+                  <>
+                    <section className="clinic-patient-id-card" aria-label={t("clients.petIdCardAria")}>
+                      <div className="clinic-patient-id-top">
+                        <div className="clinic-patient-id-identity">
+                          <div className="clinic-patient-id-avatar" aria-hidden>
+                            {speciesIcon}
+                          </div>
+                          <div className="clinic-patient-id-identity-copy">
+                            <div className="clinic-patient-id-date-row">
+                              <CalendarDays size={14} aria-hidden />
+                              <span>{t("clients.detailLastVisit")}</span>
+                            </div>
+                            <strong className="clinic-patient-id-date-value">
+                              {lastVisit
+                                ? formatConsultationDateShort(lastVisit)
+                                : t("common.emDash")}
+                            </strong>
+                            <p className="clinic-patient-id-name">
+                              {patient.name}
+                              {patient.is_hospitalized || detail.hospitalization ? (
+                                <span className="clinic-pet-hosp-badge">
+                                  {t("clients.hospitalizedBadge")}
+                                </span>
+                              ) : null}
+                            </p>
+                            <p className="clinic-patient-id-species">
+                              {speciesLabel(patient.species)}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          className="clinic-patient-id-chip"
+                          onClick={copyId}
+                          title={t("clients.copyId")}
+                        >
+                          <span>{patientIdShort}</span>
+                          {copiedPatientId ? <Check size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
+                        </button>
+                      </div>
 
-              <div className="clinic-patient-detail-actions">
-                {onStartConsultation && (
-                  <Button
-                    type="button"
-                    className="clinic-patient-detail-cta"
-                    onClick={() => {
-                      setDetailOpen(false);
-                      onStartConsultation({
-                        patientId: detail.patient.id,
-                        clientId: detail.patient.client_id,
-                        patient: detail.patient,
-                      });
-                    }}
-                  >
-                    <Stethoscope size={16} aria-hidden /> {t("clients.startConsultation")}
-                  </Button>
-                )}
-                <div className="clinic-patient-detail-secondary">
-                  {onOpenPatientChart && (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={() => {
-                        setDetailOpen(false);
-                        onOpenPatientChart(detail.patient.id);
-                      }}
-                    >
-                      <FolderOpen size={16} aria-hidden /> {t("clients.openChart")}
-                    </Button>
-                  )}
-                  {onStartLabAnalysis && (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={() => {
-                        setDetailOpen(false);
-                        onStartLabAnalysis({
-                          patientId: detail.patient.id,
-                          clientId: detail.patient.client_id,
-                          patient: detail.patient,
-                        });
-                      }}
-                    >
-                      <FlaskConical size={16} aria-hidden /> {t("clients.interpretStudy")}
-                    </Button>
-                  )}
-                  {(detail.consultations?.length || detail.medical_images?.length) > 0 && (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      disabled={historyPdfLoading}
-                      onClick={handleDownloadHistoryPdf}
-                    >
-                      <FileDown size={16} aria-hidden />
-                      {historyPdfLoading ? t("clients.generatingPdf") : t("clients.downloadHistoryPdf")}
-                    </Button>
-                  )}
-                </div>
-              </div>
+                      <div className="clinic-patient-id-grid" role="list">
+                        <div className="clinic-patient-id-field" role="listitem">
+                          <span className="clinic-patient-id-label">{t("clients.detailOwnerLabel")}</span>
+                          <span className="clinic-patient-id-value">
+                            {patient.clients?.name || t("common.emDash")}
+                          </span>
+                        </div>
+                        <div className="clinic-patient-id-field" role="listitem">
+                          <span className="clinic-patient-id-label">{t("clients.detailSpeciesLabel")}</span>
+                          <span className="clinic-patient-id-value">
+                            {speciesLabel(patient.species)}
+                          </span>
+                        </div>
+                        <div className="clinic-patient-id-field" role="listitem">
+                          <span className="clinic-patient-id-label">{t("clients.detailBreedLabel")}</span>
+                          <span className="clinic-patient-id-value">
+                            {patient.breed || t("common.emDash")}
+                          </span>
+                        </div>
+                        <div className="clinic-patient-id-field" role="listitem">
+                          <span className="clinic-patient-id-label">{t("clients.detailSexLabel")}</span>
+                          <span className="clinic-patient-id-value">{sexLabel}</span>
+                        </div>
+                        <div className="clinic-patient-id-field" role="listitem">
+                          <span className="clinic-patient-id-label">{t("clients.detailBirthLabel")}</span>
+                          <span className="clinic-patient-id-value">
+                            {patient.birth_date
+                              ? formatConsultationDateShort(patient.birth_date)
+                              : t("common.emDash")}
+                          </span>
+                        </div>
+                        <div className="clinic-patient-id-field" role="listitem">
+                          <span className="clinic-patient-id-label">{t("clients.detailWeightLabel")}</span>
+                          <span className="clinic-patient-id-value">
+                            {patient.weight_kg != null && patient.weight_kg !== ""
+                              ? `${patient.weight_kg} kg`
+                              : t("common.emDash")}
+                          </span>
+                        </div>
+                        <div className="clinic-patient-id-field" role="listitem">
+                          <span className="clinic-patient-id-label">{t("clients.detailMicrochipLabel")}</span>
+                          <span className="clinic-patient-id-value clinic-patient-id-value--mono">
+                            {patient.microchip || t("common.emDash")}
+                          </span>
+                        </div>
+                        <div className="clinic-patient-id-field" role="listitem">
+                          <span className="clinic-patient-id-label">{t("clients.detailRecordsLabel")}</span>
+                          <span className="clinic-patient-id-value">{cdsCount + labCount}</span>
+                        </div>
+                      </div>
 
-              <div className="clinic-timeline clinic-timeline-unified clinic-patient-detail-history">
-                <h3>{t("clients.clinicalHistory")}</h3>
-                <p className="clinic-timeline-hint">{t("clients.clinicalHistoryHint")}</p>
-                <ClinicalTimelineList
-                  consultations={detail.consultations || []}
-                  medicalImages={detail.medical_images || []}
-                  onViewConsultation={onViewConsultation}
-                  onDownloadConsultationPdf={handleDownloadConsultationPdf}
-                  pdfLoadingId={pdfLoadingId}
-                  onCloseBeforeNavigate={() => setDetailOpen(false)}
-                />
-              </div>
+                      {(patient.notes || detail.hospitalization?.reason) && (
+                        <div className="clinic-patient-id-note">
+                          <span className="clinic-patient-id-label">
+                            {detail.hospitalization?.reason
+                              ? t("clients.detailHospReason")
+                              : t("clients.detailNotesLabel")}
+                          </span>
+                          <span className="clinic-patient-id-value">
+                            {detail.hospitalization?.reason || patient.notes}
+                          </span>
+                        </div>
+                      )}
+                    </section>
+
+                    <div className="clinic-patient-detail-stats" aria-label={t("clients.detailStatsAria")}>
+                      <ClinicStatPill value={cdsCount} label={t("clients.statCds")} />
+                      <ClinicStatPill value={labCount} label={t("clients.statLab")} />
+                    </div>
+
+                    <div className="clinic-patient-detail-actions">
+                      {onStartConsultation && (
+                        <Button
+                          type="button"
+                          className="clinic-patient-detail-cta"
+                          onClick={() => {
+                            setDetailOpen(false);
+                            onStartConsultation({
+                              patientId: patient.id,
+                              clientId: patient.client_id,
+                              patient,
+                            });
+                          }}
+                        >
+                          <Stethoscope size={16} aria-hidden /> {t("clients.startConsultation")}
+                        </Button>
+                      )}
+                      <div className="clinic-patient-detail-secondary">
+                        {onOpenPatientChart && (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => {
+                              setDetailOpen(false);
+                              onOpenPatientChart(patient.id);
+                            }}
+                          >
+                            <FolderOpen size={16} aria-hidden /> {t("clients.openChart")}
+                          </Button>
+                        )}
+                        {onStartLabAnalysis && (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => {
+                              setDetailOpen(false);
+                              onStartLabAnalysis({
+                                patientId: patient.id,
+                                clientId: patient.client_id,
+                                patient,
+                              });
+                            }}
+                          >
+                            <FlaskConical size={16} aria-hidden /> {t("clients.interpretStudy")}
+                          </Button>
+                        )}
+                        {(cdsCount || labCount) > 0 && (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            disabled={historyPdfLoading}
+                            onClick={handleDownloadHistoryPdf}
+                          >
+                            <FileDown size={16} aria-hidden />
+                            {historyPdfLoading
+                              ? t("clients.generatingPdf")
+                              : t("clients.downloadHistoryPdf")}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="clinic-timeline clinic-timeline-unified clinic-patient-detail-history">
+                      <h3>{t("clients.clinicalHistory")}</h3>
+                      <p className="clinic-timeline-hint">{t("clients.clinicalHistoryHint")}</p>
+                      <ClinicalTimelineList
+                        consultations={detail.consultations || []}
+                        medicalImages={detail.medical_images || []}
+                        onViewConsultation={onViewConsultation}
+                        onDownloadConsultationPdf={handleDownloadConsultationPdf}
+                        pdfLoadingId={pdfLoadingId}
+                        onCloseBeforeNavigate={() => setDetailOpen(false)}
+                      />
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           )}
         </DialogContent>
