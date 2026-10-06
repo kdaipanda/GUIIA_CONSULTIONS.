@@ -60,9 +60,6 @@ export function LandingHero({ setView }) {
               >
                 {t("hero.ctaRegister")}
               </button>
-              <a href="/consulta" className="landing-petpal-cta-secondary">
-                {t("hero.ctaOwner")}
-              </a>
               <HeroVideoControls />
             </div>
 

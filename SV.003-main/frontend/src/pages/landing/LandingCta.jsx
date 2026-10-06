@@ -28,12 +28,6 @@ export function LandingCta({ setView }) {
             >
               {t("cta.createAccount")}
             </button>
-            <a
-              href="/consulta"
-              className="landing-cta-secondary-btn landing-btn-on-dark min-h-11 inline-flex items-center justify-center"
-            >
-              {t("cta.ownerConsult")}
-            </a>
             <button
               type="button"
               onClick={() => setView("login")}

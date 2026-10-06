@@ -221,13 +221,6 @@ export function PrismaHero({
                     <ArrowRight className="h-4 w-4 text-[#39ff88]" aria-hidden />
                   </span>
                 </button>
-
-                <a
-                  href="/consulta"
-                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#c4b5fd]/45 bg-[#7c3aed]/20 px-4 text-sm font-semibold text-[#ede9fe] backdrop-blur-sm transition hover:border-[#c4b5fd]/80 hover:bg-[#7c3aed]/35"
-                >
-                  {t("hero.ctaOwner")}
-                </a>
               </motion.div>
 
               <motion.p

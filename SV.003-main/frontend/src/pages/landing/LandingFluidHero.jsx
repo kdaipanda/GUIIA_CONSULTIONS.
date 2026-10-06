@@ -263,9 +263,6 @@ export function LandingFluidHero({ setView }) {
                     </span>
                     <span>{t("hero.playVideo")}</span>
                   </button>
-                  <a href="/consulta" className="landing-guiaa-hero-cta-ghost">
-                    {t("hero.ctaOwner")}
-                  </a>
                 </motion.div>
 
                 <motion.p
