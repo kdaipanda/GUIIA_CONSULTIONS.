@@ -10,7 +10,7 @@ import { GuiaaLogoImg } from "../GuiaaBrandLockup";
 import { notifyError } from "../../lib/appToast";
 import "./signIn.css";
 
-const LOGIN_VIDEO = "/Continuation_scene_of_1080p_202602171604.mp4";
+const LOGIN_VIDEO = "/04-prueba.mp4";
 const REMEMBER_KEY = "guiaa_remember_email";
 
 function GoogleIcon() {

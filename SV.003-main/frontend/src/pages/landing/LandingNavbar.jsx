@@ -67,8 +67,17 @@ export function LandingNavbar({ setView, hero = false }) {
   useEffect(() => {
     if (!mobileOpen) return undefined;
 
-    const previousOverflow = document.body.style.overflow;
+    const scrollRoot = getAppScrollRoot();
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousRootOverflow =
+      scrollRoot && scrollRoot !== document.body ? scrollRoot.style.overflow : null;
     document.body.style.overflow = "hidden";
+    if (scrollRoot && scrollRoot !== document.body && scrollRoot !== document.documentElement) {
+      scrollRoot.style.overflow = "hidden";
+    }
+
+    const frame = document.querySelector(".landing-guiaa-hero-frame");
+    frame?.classList.add("landing-nav-mobile-open");
 
     const onKeyDown = (event) => {
       if (event.key === "Escape") setMobileOpen(false);
@@ -76,7 +85,11 @@ export function LandingNavbar({ setView, hero = false }) {
 
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+      if (scrollRoot && previousRootOverflow != null) {
+        scrollRoot.style.overflow = previousRootOverflow;
+      }
+      frame?.classList.remove("landing-nav-mobile-open");
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [mobileOpen]);
@@ -101,7 +114,7 @@ export function LandingNavbar({ setView, hero = false }) {
           : scrolled
             ? "landing-nav-scrolled border-transparent"
             : "border-guiaa-brand-navy/6 bg-white/40"
-      }`}
+      }${mobileOpen ? " is-mobile-open" : ""}`}
     >
       <div className="landing-container flex min-h-[3.75rem] items-center justify-between gap-2 py-2 sm:min-h-[4.75rem] sm:gap-4 sm:py-2.5">
         <LandingBrandLockup
@@ -183,12 +196,12 @@ export function LandingNavbar({ setView, hero = false }) {
           id="landing-nav-mobile-panel"
           className={`landing-nav-mobile-panel border-t lg:hidden ${
             hero
-              ? "border-white/15 bg-[#071622]/94"
-              : "border-guiaa-brand-navy/10 bg-white/97"
+              ? "landing-nav-mobile-panel--hero border-white/15"
+              : "landing-nav-mobile-panel--light border-guiaa-brand-navy/10"
           }`}
         >
-          <div className="landing-container py-4">
-            <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="landing-container flex h-full min-h-0 flex-col py-4">
+            <div className="mb-4 flex items-center gap-3">
               <LanguageSwitcher tone={hero ? "on-dark" : "default"} />
               <button
                 type="button"
@@ -196,7 +209,7 @@ export function LandingNavbar({ setView, hero = false }) {
                   setMobileOpen(false);
                   setView("login");
                 }}
-                className={`min-h-11 rounded-lg px-3 py-2 text-sm font-semibold ${
+                className={`ml-auto shrink-0 min-h-11 rounded-lg px-3 py-2 text-sm font-semibold ${
                   hero
                     ? "text-white hover:bg-white/10"
                     : "text-guiaa-brand-navy hover:bg-guiaa-brand-navy/5"
@@ -237,7 +250,7 @@ export function LandingNavbar({ setView, hero = false }) {
                 setMobileOpen(false);
                 setView("register");
               }}
-              className="landing-btn-primary mt-3 w-full justify-center"
+              className="landing-btn-primary mt-auto w-full justify-center"
             >
               {t("nav.register")}
             </button>
