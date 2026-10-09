@@ -7,6 +7,7 @@ import { BACKEND_URL } from "../../lib/backendUrl";
 import { DEFAULT_CREDIT_PACKAGES, getMembershipQuota } from "../../lib/membershipPlans";
 import { notifyError } from "../../lib/appToast";
 import { trackMetaInitiateCheckout } from "../../lib/metaPixel";
+import { trackGoogleAdsInitiateCheckout } from "../../lib/googleAds";
 import "./dashboardCdsBalanceCard.css";
 
 export function DashboardCdsBalanceCard({
@@ -53,6 +54,10 @@ export function DashboardCdsBalanceCard({
         packageId,
         value: creditPkg?.price,
         contentCategory: "consultation_credits",
+      });
+      trackGoogleAdsInitiateCheckout({
+        value: creditPkg?.price,
+        currency: "MXN",
       });
       window.location.href = data.checkout_url;
     } catch (error) {
