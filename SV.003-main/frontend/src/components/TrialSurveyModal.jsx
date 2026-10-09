@@ -14,6 +14,7 @@ import { getBackendUrl } from "../lib/backendUrl";
 import { getAuthHeaders } from "../lib/authHeaders";
 import { submitTrialSurvey } from "../lib/trialSurvey";
 import { trackMetaInitiateCheckout } from "../lib/metaPixel";
+import { trackGoogleAdsInitiateCheckout } from "../lib/googleAds";
 import "../styles/trialSurvey.css";
 
 export function TrialSurveyModal({
@@ -108,6 +109,7 @@ export function TrialSurveyModal({
         packageId: "premium",
         contentCategory: "membership",
       });
+      trackGoogleAdsInitiateCheckout({ currency: "MXN" });
 
       window.location.href = data.checkout_url;
     } catch (err) {

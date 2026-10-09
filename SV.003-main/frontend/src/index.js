@@ -6,9 +6,11 @@ import "./lib/loadI18nNamespace";
 import "./index.css";
 import App from "./App";
 import { initMetaPixel } from "./lib/metaPixel";
+import { initGoogleAds } from "./lib/googleAds";
 import { initNativeApp } from "./lib/nativeApp";
 
 initMetaPixel();
+initGoogleAds();
 void initNativeApp();
 
 /** Evita pantalla blanca tras deploys: chunk viejo/cacheado → recarga limpia una vez. */

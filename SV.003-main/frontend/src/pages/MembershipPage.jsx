@@ -23,6 +23,7 @@ import {
   getLocalizedInfoItems,
 } from "../lib/membershipPlans";
 import { trackMetaInitiateCheckout } from "../lib/metaPixel";
+import { trackGoogleAdsInitiateCheckout } from "../lib/googleAds";
 import { notifyError } from "../lib/appToast";
 import { useTranslation } from "react-i18next";
 import { ModuleHelpTip } from "../components/clinic/ModuleHelpTip";
@@ -297,6 +298,10 @@ export function MembershipPage({ setView }) {
         value: price,
         contentCategory: "membership",
       });
+      trackGoogleAdsInitiateCheckout({
+        value: price,
+        currency: "MXN",
+      });
       window.location.href = data.checkout_url;
     } catch (error) {
       notifyError(error.message || t("membership.errorPayment"));
@@ -336,6 +341,10 @@ export function MembershipPage({ setView }) {
         packageId,
         value: pkg?.price,
         contentCategory: "consultation_credits",
+      });
+      trackGoogleAdsInitiateCheckout({
+        value: pkg?.price,
+        currency: "MXN",
       });
       window.location.href = data.checkout_url;
     } catch (error) {

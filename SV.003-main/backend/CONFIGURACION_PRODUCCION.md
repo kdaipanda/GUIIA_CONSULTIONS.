@@ -81,6 +81,8 @@ Este endpoint te dirá específicamente si la API key de Claude está configurad
 - `STRIPE_WEBHOOK_SECRET` - Para webhooks de Stripe
 - `CORS_ALLOW_ORIGINS` - Dominios permitidos (separados por coma)
 - `META_PIXEL_ID` - ID del Meta Pixel (mismo valor que `REACT_APP_META_PIXEL_ID` en Vercel)
+- Google Ads (solo frontend/Vercel): `REACT_APP_GOOGLE_ADS_ID`, `REACT_APP_GOOGLE_ADS_REGISTRATION_LABEL`
+  (opcionales: `REACT_APP_GOOGLE_ADS_CHECKOUT_LABEL`, `REACT_APP_GOOGLE_ADS_PURCHASE_LABEL`). Ver `GOOGLE_ADS_LAUNCH_PLAN.md`
 - `META_CAPI_ACCESS_TOKEN` - Token de acceso de Meta Conversions API (solo backend, nunca en el frontend)
 - `META_CAPI_TEST_EVENT_CODE` - (opcional) Código de prueba para ver eventos en Events Manager → Test Events
 - `GUIAA_SITE_URL` - (opcional) URL pública del sitio para `event_source_url` (default: `https://guiaa.vet`)

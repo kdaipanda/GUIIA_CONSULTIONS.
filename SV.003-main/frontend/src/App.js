@@ -81,6 +81,11 @@ import {
   trackMetaCompleteRegistration,
   trackMetaInitiateCheckout,
 } from "./lib/metaPixel";
+import {
+  trackGoogleAdsLead,
+  trackGoogleAdsCompleteRegistration,
+  trackGoogleAdsInitiateCheckout,
+} from "./lib/googleAds";
 import { LATAM_COUNTRIES, countryLabel } from "./lib/latamCountries";
 import { shouldShowTrialSurvey } from "./lib/trialSurvey";
 import { TrialSurveyModal } from "./components/TrialSurveyModal";
@@ -766,6 +771,7 @@ const Router = () => {
   const handleSetView = (view) => {
     if (view === "register") {
       trackMetaLead("register_intent");
+      trackGoogleAdsLead();
     }
     if (view !== "new-consultation" && view !== "medical-images") {
       setSelectedConsultationId(null);
@@ -1304,6 +1310,7 @@ const RegisterPage = ({ setView, setCedulaFlow }) => {
       const vetData = await response.json();
       persistAuthFromResponse(vetData);
       trackMetaCompleteRegistration(vetData?.id);
+      trackGoogleAdsCompleteRegistration(vetData?.id);
       // Redirigir a flujo obligatorio de cédula (upload + verificación)
       setCedulaFlow?.({
         source: "register",
@@ -2468,6 +2475,10 @@ const Dashboard = ({ setView, openConsultation, openExpertConsultation, embedded
         packageId,
         value: creditPkg?.price,
         contentCategory: "consultation_credits",
+      });
+      trackGoogleAdsInitiateCheckout({
+        value: creditPkg?.price,
+        currency: "MXN",
       });
       window.location.href = data.checkout_url;
     } catch (error) {
