@@ -279,6 +279,156 @@ def membership_promotion_checkout_kwargs(
     return {"allow_promotion_codes": True}
 
 
+def owner_first_promo_code() -> str:
+    raw = os.getenv("OWNER_FIRST_PROMO_CODE", "PRIMERA").strip().upper()
+    cleaned = re.sub(r"[^A-Z0-9]", "", raw)
+    return cleaned or "PRIMERA"
+
+
+def owner_first_discount_mxn() -> int:
+    try:
+        value = int((os.getenv("OWNER_FIRST_DISCOUNT_MXN") or "100").strip() or "100")
+    except ValueError:
+        value = 100
+    return max(1, min(value, 198))
+
+
+def owner_first_consultation_offer(
+    already_paid: bool,
+    list_price_mxn: float = 199.0,
+) -> Optional[Dict[str, Any]]:
+    """Cupón solo para quien aún no paga una GUIAA Consulta. None si ya pagó."""
+    if already_paid:
+        return None
+    discount = min(owner_first_discount_mxn(), max(1, int(list_price_mxn) - 1))
+    return {
+        "code": owner_first_promo_code(),
+        "amount_off_mxn": discount,
+        "list_price_mxn": list_price_mxn,
+        "price_mxn": round(float(list_price_mxn) - discount, 2),
+    }
+
+
+def _metadata_sku(metadata: Any) -> str:
+    if not metadata:
+        return ""
+    if isinstance(metadata, dict):
+        return str(metadata.get("guiaa_sku") or "")
+    getter = getattr(metadata, "get", None)
+    if callable(getter):
+        return str(getter("guiaa_sku") or "")
+    return str(getattr(metadata, "guiaa_sku", "") or "")
+
+
+def _find_owner_consulta_product_id(stripe_api: Any) -> Optional[str]:
+    sku = "owner_single_consultation"
+    try:
+        found = stripe_api.Product.search(
+            query=f"metadata['guiaa_sku']:'{sku}'",
+            limit=1,
+        )
+        data = getattr(found, "data", None) or []
+        if data:
+            return data[0].id
+    except Exception as exc:
+        print(f"[WARN] Product.search GUIAA Consulta: {exc}")
+    try:
+        page = stripe_api.Product.list(active=True, limit=100)
+        for product in page.data or []:
+            if _metadata_sku(getattr(product, "metadata", None)) == sku:
+                return product.id
+    except Exception as exc:
+        print(f"[WARN] Product.list GUIAA Consulta: {exc}")
+    return None
+
+
+def _coupon_amount_mxn(coupon: Any) -> int:
+    amount_off = getattr(coupon, "amount_off", None)
+    if amount_off:
+        return int(amount_off) // 100
+    return owner_first_discount_mxn()
+
+
+def _coupon_product_id(coupon: Any) -> Optional[str]:
+    applies = getattr(coupon, "applies_to", None)
+    products = None
+    if isinstance(applies, dict):
+        products = applies.get("products")
+    elif applies is not None:
+        products = getattr(applies, "products", None)
+    if products:
+        return str(products[0])
+    return None
+
+
+def resolve_owner_first_consultation_promo(stripe_api: Any) -> Optional[Dict[str, Any]]:
+    """Crea o reutiliza el cupón PRIMERA, limitado al producto GUIAA Consulta."""
+    if stripe_api is None:
+        return None
+    code = owner_first_promo_code()
+    discount = owner_first_discount_mxn()
+    try:
+        existing_id = lookup_stripe_promotion_code_id(stripe_api, code)
+        if existing_id:
+            promo = stripe_api.PromotionCode.retrieve(existing_id)
+            coupon_ref = getattr(promo, "coupon", None)
+            if coupon_ref is None:
+                promotion = getattr(promo, "promotion", None)
+                coupon_ref = getattr(promotion, "coupon", None) if promotion else None
+            coupon_id = coupon_ref if isinstance(coupon_ref, str) else getattr(coupon_ref, "id", None)
+            coupon = stripe_api.Coupon.retrieve(coupon_id) if coupon_id else None
+            product_id = _coupon_product_id(coupon) if coupon else None
+            if not product_id:
+                product_id = _find_owner_consulta_product_id(stripe_api)
+            if not product_id:
+                return None
+            return {
+                "code": code,
+                "promotion_code_id": existing_id,
+                "product_id": product_id,
+                "amount_off_mxn": _coupon_amount_mxn(coupon) if coupon else discount,
+            }
+
+        product_id = _find_owner_consulta_product_id(stripe_api)
+        if not product_id:
+            product = stripe_api.Product.create(
+                name="GUIAA Consulta",
+                description=(
+                    "Orientación clínica informativa para el dueño de la mascota. "
+                    "No sustituye la atención de un veterinario certificado."
+                ),
+                metadata={"guiaa_sku": "owner_single_consultation"},
+            )
+            product_id = product.id
+
+        coupon = stripe_api.Coupon.create(
+            amount_off=discount * 100,
+            currency="mxn",
+            duration="once",
+            name="Primera consulta GUIAA",
+            applies_to={"products": [product_id]},
+            metadata={"guiaa_sku": "owner_first_consultation"},
+        )
+        promo = stripe_api.PromotionCode.create(
+            code=code,
+            promotion={"type": "coupon", "coupon": coupon.id},
+            metadata={"guiaa_sku": "owner_first_consultation"},
+            restrictions={
+                "minimum_amount": 19900,
+                "minimum_amount_currency": "mxn",
+            },
+        )
+        return {
+            "code": code,
+            "promotion_code_id": promo.id,
+            "product_id": product_id,
+            "amount_off_mxn": discount,
+        }
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] No se pudo preparar el cupón de primera consulta: {exc}")
+        return None
+
+
 def stripe_payment_method_types(currency: str, country_code: str) -> List[str]:
     """Métodos de pago según moneda y país del profesional."""
     methods = ["card"]
@@ -338,6 +488,14 @@ def create_stripe_checkout_session(stripe_api: Any, **session_kwargs: Any):
         return stripe_api.checkout.Session.create(**merged)
     except Exception as primary_error:
         print(f"[WARN] Checkout Stripe falló: {primary_error}")
+        if merged.get("branding_settings") and "branding" in str(primary_error).lower():
+            without_brand = {**merged}
+            without_brand.pop("branding_settings", None)
+            try:
+                print("[WARN] Reintentando checkout sin branding_settings.")
+                return stripe_api.checkout.Session.create(**without_brand)
+            except Exception as brand_error:
+                print(f"[WARN] Checkout sin branding también falló: {brand_error}")
 
         if has_discounts:
             discounts = merged.get("discounts") or []

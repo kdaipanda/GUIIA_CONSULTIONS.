@@ -46,6 +46,11 @@ def has_unlimited_consultations(email: Optional[str]) -> bool:
     return email.lower().strip() in UNLIMITED_CONSULTATIONS_EMAILS
 
 
+def has_unlimited_owner_sessions(email: Optional[str]) -> bool:
+    """Misma allowlist interna: pruebas B2C /consulta sin pagar ni descontar."""
+    return has_unlimited_consultations(email)
+
+
 FEATURE_UPGRADE_MESSAGES = {
     "inventory": "El inventario requiere membresía Profesional o Premium.",
     "billing": "Ventas y facturación requieren membresía Profesional o Premium.",

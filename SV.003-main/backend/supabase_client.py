@@ -680,6 +680,28 @@ def insert_payment_transaction(row: Dict[str, Any]) -> Tuple[Optional[Dict[str, 
         return (None, str(exc))
 
 
+def owner_has_paid_consultation(owner_id: str) -> bool:
+    """True si este dueño ya tiene un pago liquidado de GUIAA Consulta."""
+    owner = (owner_id or "").strip()
+    if not owner:
+        return False
+    client = get_supabase_client()
+    try:
+        resp = (
+            client.table("payment_transactions")
+            .select("id")
+            .eq("veterinarian_id", owner)
+            .eq("type", "owner_single_consultation")
+            .eq("payment_status", "paid")
+            .limit(1)
+            .execute()
+        )
+        return bool(resp.data)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] No se pudo verificar pago previo de GUIAA Consulta: {exc}")
+        return False
+
+
 def get_payment_transaction_by_session_id(session_id: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     """
     Obtiene una transacción de pago por session_id.

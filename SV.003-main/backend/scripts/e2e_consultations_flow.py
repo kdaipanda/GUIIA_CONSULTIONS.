@@ -157,19 +157,13 @@ def main() -> int:
         )
         check("IDOR bloqueado en detalle", code == 403, f"{code}")
 
-    # Créditos (solo si premium no unlimited - dev user is premium)
+    # El cupo se descuenta al completar el análisis, no al crear.
     code, profile_after = req("GET", "/api/auth/profile", headers=h)
     remaining_after = profile_after.get("consultations_remaining") if isinstance(profile_after, dict) else None
-    if isinstance(profile_before, dict) and profile_before.get("membership_type") == "premium":
+    if remaining_before is not None and remaining_after is not None and created_id:
         check(
-            "Premium no descuenta créditos al crear",
+            "Crear consulta no descuenta créditos",
             remaining_after == remaining_before,
-            f"{remaining_before} -> {remaining_after}",
-        )
-    elif remaining_before is not None and remaining_after is not None and created_id:
-        check(
-            "Trial/basic descuenta 1 crédito",
-            remaining_after == max(0, int(remaining_before) - 1),
             f"{remaining_before} -> {remaining_after}",
         )
 
@@ -250,8 +244,8 @@ def main() -> int:
             code, trial_profile = req("GET", "/api/auth/profile", headers=rh)
             rem_after = trial_profile.get("consultations_remaining") if isinstance(trial_profile, dict) else None
             check(
-                "Trial: descuenta 1 credito (3->2)",
-                rem_after == 2,
+                "Trial: crear no descuenta credito (3->3)",
+                rem_after == 3,
                 f"remaining={rem_after}",
             )
 

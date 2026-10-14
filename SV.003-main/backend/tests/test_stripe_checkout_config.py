@@ -16,6 +16,7 @@ from stripe_checkout_config import (  # noqa: E402
     lookup_stripe_promotion_code_id,
     membership_promotion_checkout_kwargs,
     normalize_country_code,
+    owner_first_consultation_offer,
     resolve_premium_promotion_discount,
     stripe_payment_method_types,
 )
@@ -48,6 +49,17 @@ class StripeCheckoutConfigTests(unittest.TestCase):
     def test_async_payment_pending(self):
         self.assertTrue(is_async_payment_pending("unpaid", "complete"))
         self.assertFalse(is_async_payment_pending("paid", "complete"))
+
+    def test_first_consultation_coupon_only_before_payment(self):
+        with patch.dict(
+            os.environ,
+            {"OWNER_FIRST_PROMO_CODE": "PRIMERA", "OWNER_FIRST_DISCOUNT_MXN": "100"},
+        ):
+            offer = owner_first_consultation_offer(False, 199)
+            self.assertEqual(offer["code"], "PRIMERA")
+            self.assertEqual(offer["amount_off_mxn"], 100)
+            self.assertEqual(offer["price_mxn"], 99.0)
+            self.assertIsNone(owner_first_consultation_offer(True, 199))
 
     def test_premium_membership_allows_promotion_codes(self):
         kwargs = membership_promotion_checkout_kwargs("premium")

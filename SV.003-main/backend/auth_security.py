@@ -97,6 +97,7 @@ def allow_insecure_vet_header() -> bool:
 def attach_auth_tokens(profile: Dict[str, Any]) -> Dict[str, Any]:
     """Añade access_token a la respuesta de login/registro (sin mutar el original)."""
     from password_auth import strip_sensitive_profile_fields
+    from membership_access import has_unlimited_owner_sessions
 
     data = strip_sensitive_profile_fields(profile)
     vet_id = str(data.get("id") or "")
@@ -105,6 +106,12 @@ def attach_auth_tokens(profile: Dict[str, Any]) -> Dict[str, Any]:
         data["access_token"] = create_access_token(vet_id, email)
         data["token_type"] = "bearer"
         data["expires_in"] = token_expire_seconds()
+    data["platform_admin"] = is_platform_admin_profile(data)
+    data["owner_unlimited"] = bool(
+        has_unlimited_owner_sessions(email) or data.get("platform_admin")
+    )
+    if data["owner_unlimited"]:
+        data["owner_sessions_remaining"] = 999999
     return data
 
 
@@ -303,6 +310,8 @@ def is_public_api_route(method: str, path: str) -> bool:
         ("POST", "/api/auth/register-invite/verify"),
         ("POST", "/api/auth/register-invite/resend-code"),
         ("POST", "/api/auth/verify-2fa"),
+        ("POST", "/api/owner/auth/register"),
+        ("GET", "/api/owner/packages"),
         ("POST", "/api/support/chat"),
         ("POST", "/api/payments/stripe/webhook"),
         ("GET", "/api/stripe/config"),

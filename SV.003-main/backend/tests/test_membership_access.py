@@ -13,6 +13,7 @@ from membership_access import (  # noqa: E402
     filter_categories_for_plan,
     has_active_premium_features_grant,
     has_unlimited_consultations,
+    has_unlimited_owner_sessions,
     resolve_billing_plan,
     resolve_effective_plan,
     validate_consultation_category,
@@ -177,6 +178,7 @@ class PremiumFeaturesGrant(unittest.TestCase):
 class UnlimitedConsultations(unittest.TestCase):
     def test_allowlist_only(self):
         self.assertTrue(has_unlimited_consultations("carlos.hernandez@vetmed.com"))
+        self.assertTrue(has_unlimited_owner_sessions("carlos.hernandez@vetmed.com"))
         self.assertFalse(has_unlimited_consultations("gonzalezpardoceleste@gmail.com"))
         self.assertFalse(has_unlimited_consultations("premium@guiaa.vet"))
         self.assertFalse(has_unlimited_consultations(""))

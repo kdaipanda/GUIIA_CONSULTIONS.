@@ -115,8 +115,9 @@ except ImportError:
 # IMPORTANTE: En producción, las variables del sistema tienen prioridad sobre .env
 env_file_path = os.path.join(os.path.dirname(__file__), ".env")
 if os.path.exists(env_file_path):
-    # override=False significa que las variables del sistema tienen prioridad
-    load_dotenv(dotenv_path=env_file_path, override=False)
+    # override=False: variables del sistema tienen prioridad.
+    # latin-1: tolera .env locales con bytes no UTF-8 (p. ej. Windows-1252).
+    load_dotenv(dotenv_path=env_file_path, override=False, encoding="latin-1")
 else:
     # Si no existe .env, intentar cargar desde el directorio actual
     load_dotenv(override=False)
@@ -262,8 +263,12 @@ app.add_middleware(
 
 
 from clinic_routes import clinic_router
+from owner_routes import owner_router
+from voice_guide import voice_guide_router
 
 app.include_router(clinic_router)
+app.include_router(owner_router)
+app.include_router(voice_guide_router)
 
 # Database setup - usando Supabase
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY", "").strip()
@@ -1671,6 +1676,8 @@ async def register_veterinarian(vet: VeterinarianRegister, request: Request):
         "cedula_sep_profesion": "Médico Veterinario Zootecnista" if is_dev else None,
         "cedula_skip_count": 0,  # Contador de veces que ha pospuesto la verificación
         "password_hash": password_hash,
+        "account_kind": "veterinarian",
+        "owner_sessions_remaining": 0,
     }
 
     # Guardar en Supabase
@@ -1775,6 +1782,16 @@ async def login_veterinarian(credentials: VeterinarianLogin, request: Request):
 
     email = (credentials.email or "").strip().lower()
     veterinarian = _authenticate_login_profile(credentials)
+
+    import account_access as _account_access
+
+    # Dueños B2C: sin flujo de cédula ni 2FA clínico.
+    if _account_access.is_pet_owner(veterinarian):
+        rate_limit.reset_rate_limit(request, "login", email)
+        if isinstance(veterinarian, dict):
+            veterinarian.pop("_id", None)
+            veterinarian = password_auth.strip_sensitive_profile_fields(veterinarian)
+        return auth_security.attach_auth_tokens(veterinarian)
 
     # Usuario de desarrollo: auto-verificar si no está verificado
     is_dev = is_dev_user(email)
@@ -2328,6 +2345,9 @@ def _with_team_membership(profile: Optional[Dict[str, Any]]) -> Dict[str, Any]:
             return dict(profile)
 
 
+CREDIT_POLICY_ON_ANALYSIS = "on_analysis"
+
+
 def _consultation_bill_to_id(profile: Dict[str, Any]) -> str:
     try:
         import clinic_db as _clinic_db
@@ -2458,6 +2478,11 @@ async def create_consultation(
     if err:
         raise HTTPException(status_code=500, detail=f"Error perfil: {err}")
 
+    if profile:
+        import account_access as _account_access
+
+        _account_access.require_veterinarian_account(profile)
+
     if not profile:
         if vet_id.startswith("dev-"):
             seed_profile = {
@@ -2495,7 +2520,6 @@ async def create_consultation(
         print(f"[WARN] No se pudo validar rol org en consulta: {exc}")
 
     billing_profile = _with_team_membership(profile)
-    bill_to_id = _consultation_bill_to_id(profile)
 
     # Verificar membresía o consultas de prueba (cupo del consultorio si es equipo)
     membership_type = billing_profile.get("membership_type")
@@ -2570,6 +2594,7 @@ async def create_consultation(
     payload_json = {
         "category": payload.category,
         "form_data": payload.consultation_data,
+        "credit": {"policy": CREDIT_POLICY_ON_ANALYSIS, "charged_at": None},
     }
 
     new_row = {
@@ -2608,25 +2633,13 @@ async def create_consultation(
     if err_ins:
         raise HTTPException(status_code=500, detail=f"Error guardando consulta: {err_ins}")
 
-    # Descontar 1 consulta del cupo (prueba, básica, profesional y premium).
-    # Usar update_profile (no upsert): un upsert parcial falla por NOT NULL en email.
-    # En equipo, el cupo se descuenta del dueño del consultorio.
-    new_remaining = remaining
-    if not has_unlimited:
-        new_remaining = max(0, int(remaining or 0) - 1)
-        err_prof = update_profile(
-            bill_to_id or vet_id,
-            {"consultations_remaining": new_remaining},
-        )
-        if err_prof:
-            print(f"[WARN] No se pudo actualizar remaining: {err_prof}")
-            new_remaining = remaining
-
+    # El cupo se descuenta en /analyze cuando el análisis termina bien,
+    # no al crear el borrador.
     serialized = _serialize_consultation(inserted or new_row)
     trial_survey_due = (
         not has_unlimited
         and not membership_type
-        and new_remaining <= 0
+        and remaining <= 0
         and not billing_profile.get("trial_survey_completed_at")
         and billing_profile.get("membership_source") != "organization"
     )
@@ -2840,6 +2853,8 @@ async def update_consultation_payload(
         "ambiente_manejo": ambiente_manejo,
         "notas_adicionales": notas_adicionales,
     }
+    if current_payload.get("credit") is not None:
+        updated_payload["credit"] = current_payload.get("credit")
 
     err_upd = update_consultation(
         consultation_id,
@@ -2948,6 +2963,10 @@ async def analyze_consultation(
             detail="No se pudo verificar tu membresía. La síntesis clínica CDS L5 solo está disponible para miembros Premium.",
         )
 
+    import account_access as _account_access
+
+    _account_access.require_veterinarian_account(profile)
+
     billing_profile = _with_team_membership(profile)
     user_email = profile.get("email", "")
     has_unlimited = has_unlimited_consultations(user_email) if user_email else False
@@ -2960,14 +2979,25 @@ async def analyze_consultation(
         has_unlimited=has_unlimited,
     )
     
-    # Validar que tenga consultas restantes (solo para usuarios no premium y sin consultas ilimitadas)
+    payload = consultation.get("payload") or {}
+    credit = payload.get("credit") if isinstance(payload.get("credit"), dict) else {}
+    charge_on_success = (
+        not has_unlimited
+        and credit.get("policy") == CREDIT_POLICY_ON_ANALYSIS
+        and not credit.get("charged_at")
+    )
+
+    # Consultas creadas antes de cobrar en /analyze ya descontaron al crearse
+    # mientras siguen en draft/in_progress.
     consultation_status = (consultation.get("status") or "draft").lower()
-    credit_already_used = consultation_status in ("draft", "in_progress")
+    legacy_credit_already_used = (
+        not credit.get("policy") and consultation_status in ("draft", "in_progress")
+    )
 
     if (
         not has_unlimited
         and remaining <= 0
-        and not credit_already_used
+        and not legacy_credit_already_used
     ):
         raise HTTPException(
             status_code=403,
@@ -2975,7 +3005,6 @@ async def analyze_consultation(
         )
 
     # Obtener datos de la consulta
-    payload = consultation.get("payload") or {}
     category = payload.get("category", "")
     form_data = payload.get("form_data", {})
     detalle_paciente = payload.get("detalle_paciente", "")
@@ -3010,15 +3039,35 @@ Por favor, genera un análisis clínico completo."""
             ],
         )
 
-        err_upd = update_consultation(
-            consultation_id,
-            {
-                "analysis": analysis_text,
-                "status": "completed",
-            },
-        )
+        consultation_fields = {
+            "analysis": analysis_text,
+            "status": "completed",
+        }
+        if charge_on_success:
+            consultation_fields["payload"] = {
+                **payload,
+                "credit": {
+                    **credit,
+                    "charged_at": datetime.now(timezone.utc).isoformat(),
+                },
+            }
+
+        err_upd = update_consultation(consultation_id, consultation_fields)
         if err_upd:
             raise HTTPException(status_code=500, detail=f"Error guardando análisis: {err_upd}")
+
+        # Usar update_profile (no upsert): un upsert parcial falla por NOT NULL en email.
+        # En equipo, el cupo se descuenta del dueño del consultorio.
+        if charge_on_success:
+            bill_to_id = _consultation_bill_to_id(profile) or vet_id
+            fresh_billing = _with_team_membership(get_profile(vet_id)[0] or profile)
+            current_remaining = int(fresh_billing.get("consultations_remaining") or 0)
+            err_prof = update_profile(
+                bill_to_id,
+                {"consultations_remaining": max(0, current_remaining - 1)},
+            )
+            if err_prof:
+                print(f"[WARN] No se pudo descontar consulta tras análisis: {err_prof}")
 
         profile_after, _ = get_profile(vet_id)
         return {
@@ -3141,6 +3190,10 @@ async def create_checkout_session(
             status_code=404,
             detail="Usuario no encontrado. Por favor, regístrate primero."
         )
+
+    import account_access as _account_access
+
+    _account_access.require_veterinarian_account(profile)
 
     package_key = payment_request.package or payment_request.package_id
     if not package_key:
@@ -3397,6 +3450,10 @@ async def create_consultations_checkout_session(
     veterinarian, err = get_profile(vet_id)
     if err or not veterinarian:
         raise HTTPException(status_code=404, detail="Veterinario no encontrado")
+
+    import account_access as _account_access
+
+    _account_access.require_veterinarian_account(veterinarian)
 
     quantity = int(payload.quantity or 1)
     credits = int(package["credits"]) * max(1, quantity)

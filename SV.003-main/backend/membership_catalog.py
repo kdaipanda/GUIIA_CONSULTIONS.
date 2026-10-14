@@ -100,6 +100,23 @@ CONSULTATION_CREDIT_PACKAGES = {
     },
 }
 
+# Capa B2C dueños — no mezclar con credits_10 ni membresías MVZ.
+OWNER_CONSULTATION_PACKAGES = {
+    "owner_single_consultation": {
+        "name": "Consulta para tu mascota",
+        "price": 199.00,
+        "sessions": 1,
+        "currency": "mxn",
+        "description": (
+            "Una orientación clínica informativa sobre la salud de tu mascota. "
+            "No sustituye la atención de un veterinario certificado. "
+            "Tus datos se tratan de forma confidencial."
+        ),
+    },
+}
+
+OWNER_PAYMENT_TYPE = "owner_single_consultation"
+
 def get_membership_consultations(package: dict, billing_cycle: str) -> int:
     """Consultas incluidas según ciclo de facturación (mensual o anual)."""
     cycle = (billing_cycle or "monthly").strip().lower()

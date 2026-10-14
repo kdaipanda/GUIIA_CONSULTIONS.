@@ -606,17 +606,25 @@ def ensure_organization_for_profile(
             },
             None,
         )
-    # Cuentas de equipo (sin cédula) no deben crear consultorio propio.
+    # Cuentas de equipo (sin cédula) y dueños B2C no deben crear consultorio propio.
     try:
         pref = (
             _table("profiles")
-            .select("cedula_profesional")
+            .select("cedula_profesional,account_kind")
             .eq("id", profile_id)
             .limit(1)
             .execute()
         )
-        cedula = ((pref.data or [{}])[0].get("cedula_profesional") or "").strip()
-        if not cedula:
+        row = (pref.data or [{}])[0]
+        kind = (row.get("account_kind") or "veterinarian").strip().lower()
+        if kind == "pet_owner":
+            return (
+                None,
+                "Las cuentas de dueño de mascota no tienen consultorio clínico. Usa /consulta.",
+            )
+        cedula = (row.get("cedula_profesional") or "").strip()
+        # Claves sintéticas owner:* no son cédula profesional real.
+        if not cedula or cedula.startswith("owner:"):
             return (
                 None,
                 "Esta cuenta de equipo no tiene consultorio. Pide una nueva invitación al propietario.",

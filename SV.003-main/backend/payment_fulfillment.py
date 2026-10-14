@@ -7,6 +7,8 @@ from typing import Any, Dict, Optional, Tuple
 from membership_catalog import (
     CONSULTATION_CREDIT_PACKAGES,
     MEMBERSHIP_PACKAGES,
+    OWNER_CONSULTATION_PACKAGES,
+    OWNER_PAYMENT_TYPE,
     get_membership_consultations,
 )
 from supabase_client import (
@@ -133,6 +135,60 @@ def _apply_credits(
     return (profile, err, True)
 
 
+def _apply_owner_session(
+    transaction: dict,
+    metadata: dict,
+    owner_id: str,
+) -> Tuple[Optional[dict], Optional[str], bool]:
+    """Suma owner_sessions_remaining. Nunca toca consultations_remaining (MVZ)."""
+    if transaction.get("credits_applied"):
+        profile, err = get_profile(owner_id)
+        return (profile, err, False)
+
+    profile, err = get_profile(owner_id)
+    if err or not profile:
+        return (None, err or "Dueño no encontrado", False)
+
+    package_id = (
+        transaction.get("package_id")
+        or metadata.get("package_id")
+        or OWNER_PAYMENT_TYPE
+    ).strip()
+    package = OWNER_CONSULTATION_PACKAGES.get(package_id) or {}
+    sessions = int(
+        transaction.get("credits")
+        or metadata.get("sessions")
+        or package.get("sessions")
+        or 1
+    )
+    if sessions <= 0:
+        return (None, "La transacción owner no tiene sesiones", False)
+
+    current = int(profile.get("owner_sessions_remaining") or 0)
+    new_remaining = current + sessions
+
+    err_upd = update_profile(
+        owner_id,
+        {"owner_sessions_remaining": new_remaining},
+    )
+    if err_upd:
+        return (None, err_upd, False)
+
+    err_tx = update_payment_transaction(
+        transaction.get("session_id"),
+        {
+            "credits_applied": True,
+            "credits_applied_at": datetime.now(timezone.utc).isoformat(),
+            "consultations_remaining_after": new_remaining,
+        },
+    )
+    if err_tx:
+        return (None, err_tx, False)
+
+    updated, err2 = get_profile(owner_id)
+    return (updated, err2, True)
+
+
 def fulfill_paid_transaction(
     transaction: dict,
     metadata: Optional[dict] = None,
@@ -157,4 +213,6 @@ def fulfill_paid_transaction(
         return _apply_membership(transaction, meta, veterinarian_id)
     if tx_type == "consultation_credits":
         return _apply_credits(transaction, meta, veterinarian_id)
+    if tx_type == OWNER_PAYMENT_TYPE:
+        return _apply_owner_session(transaction, meta, veterinarian_id)
     return (None, f"Tipo de transacción no soportado: {tx_type or '(vacío)'}", False)

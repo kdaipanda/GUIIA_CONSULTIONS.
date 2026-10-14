@@ -286,6 +286,10 @@ async def _resolve_org_context(vet_id: str):
     if err or not profile:
         raise HTTPException(status_code=404, detail="Veterinario no encontrado")
 
+    import account_access as _account_access
+
+    _account_access.require_veterinarian_account(profile)
+
     org_name = profile.get("nombre") or profile.get("email") or "Mi consultorio"
     ctx, err = clinic_db.ensure_organization_for_profile(vet_id, f"Consultorio {org_name}")
     if err:
