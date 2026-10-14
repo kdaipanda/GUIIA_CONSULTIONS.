@@ -22,12 +22,13 @@ from stripe_checkout_config import (
     resolve_owner_first_consultation_promo,
 )
 from supabase_client import (
+    debit_owner_session,
     get_payment_transaction_by_session_id,
     get_profile,
     get_profile_by_email,
     insert_payment_transaction,
     owner_has_paid_consultation,
-    update_profile,
+    restore_owner_session,
     upsert_profile,
 )
 
@@ -542,19 +543,31 @@ async def create_owner_consultation(
         "created_at": now,
     }
 
+    new_sessions = 999999 if unlimited else sessions
+    if not unlimited:
+        debited_sessions, debit_err = debit_owner_session(owner_id, sessions)
+        if debit_err:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error descontando sesión pagada: {debit_err}",
+            )
+        if debited_sessions is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Tu saldo cambió antes de crear la consulta. Actualiza e intenta de nuevo.",
+            )
+        new_sessions = debited_sessions
+
     inserted, err_ins = owner_db.insert_owner_consultation(new_row)
     if err_ins:
+        if not unlimited:
+            restored, restore_err = restore_owner_session(owner_id, new_sessions)
+            if restore_err or not restored:
+                print(
+                    "[ERROR] No se pudo revertir owner_sessions_remaining "
+                    f"owner={owner_id}: {restore_err or 'saldo cambió'}"
+                )
         raise HTTPException(status_code=500, detail=f"Error guardando consulta: {err_ins}")
-
-    new_sessions = sessions
-    if unlimited:
-        new_sessions = 999999
-    else:
-        new_sessions = max(0, sessions - 1)
-        err_prof = update_profile(owner_id, {"owner_sessions_remaining": new_sessions})
-        if err_prof:
-            print(f"[WARN] No se pudo descontar owner_sessions_remaining: {err_prof}")
-            new_sessions = sessions
 
     serialized = _serialize_owner_consultation(inserted or new_row)
     serialized["owner_sessions_remaining"] = new_sessions
