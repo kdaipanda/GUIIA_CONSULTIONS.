@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Shield, Trash2, CheckCircle, XCircle, RefreshCw, ExternalLink, Eye, ClipboardList, ChevronDown, ChevronUp, FileDown, MessageSquare, Inbox, Star, MessageCircle } from "lucide-react";
 import "./clinicPageShared.css";
 import "./adminPage.css";
@@ -209,6 +209,183 @@ function consultationField(consultation, key) {
   if (value === null || value === undefined || value === "") return "";
   return String(value);
 }
+
+const AdminUserRow = React.memo(function AdminUserRow({ user: u, busy, actions }) {
+  const { t } = useTranslation("clinic");
+  const cedulaStatus = (u.cedula_verification_status || "unsubmitted").toLowerCase();
+  const online = !!u.is_online;
+  return (
+    <tr>
+      <td>
+        <div className={`clinic-admin-presence${online ? " is-online" : " is-offline"}`}>
+          <span className="clinic-admin-presence-dot" aria-hidden />
+          <div className="clinic-admin-presence-text">
+            <strong>{online ? t("admin.online") : t("admin.offline")}</strong>
+            <span className="clinic-muted">{formatLastSeen(u.last_seen)}</span>
+          </div>
+        </div>
+      </td>
+      <td>{u.nombre || "—"}</td>
+      <td>{u.email || "—"}</td>
+      <td>{formatRegisteredAt(u.created_at)}</td>
+      <td>{countryLabel(u.profesional_pais || "MX")}</td>
+      <td className="clinic-mono">{u.cedula_profesional || "—"}</td>
+      <td>
+        <span className={`clinic-cedula-badge ${cedulaStatusClass(cedulaStatus)}`}>
+          {formatCedulaStatus(cedulaStatus)}
+        </span>
+        {u.cedula_sep_nombre && (
+          <div className="clinic-admin-cedula-sep clinic-muted">
+            SEP: {u.cedula_sep_nombre}
+          </div>
+        )}
+        {u.cedula_verification_error && cedulaStatus === "rejected" && (
+          <div className="clinic-admin-cedula-sep clinic-muted">
+            {u.cedula_verification_error}
+          </div>
+        )}
+      </td>
+      <td>
+        <span
+          className={`clinic-admin-plan-badge${
+            !u.membership_type ? " clinic-admin-plan-badge-trial" : ""
+          }`}
+        >
+          {formatPlanLabel(u)}
+        </span>
+        {u.membership_source === "organization" ? (
+          <div className="clinic-muted clinic-admin-team-plan-note">
+            {t("admin.teamSharedPlan")}
+          </div>
+        ) : null}
+      </td>
+      <td>
+        {u.team_shared ? (
+          <div className="clinic-admin-team-cell">
+            <span className="clinic-admin-team-badge">{t("admin.teamShared")}</span>
+            <strong>{formatOrgRole(u.org_role)}</strong>
+            <span className="clinic-muted">
+              {u.organization_name || t("admin.teamOrgFallback")}
+            </span>
+            <span className="clinic-muted">
+              {t("admin.teamMembersCount", { count: u.team_member_count || 0 })}
+            </span>
+            {u.org_role !== "owner" && (u.membership_owner_nombre || u.membership_owner_email) ? (
+              <span className="clinic-muted">
+                {t("admin.teamQuotaOwner", {
+                  name: u.membership_owner_nombre || u.membership_owner_email,
+                })}
+              </span>
+            ) : null}
+          </div>
+        ) : (
+          <span className="clinic-muted">{t("admin.teamSolo")}</span>
+        )}
+      </td>
+      <td>
+        <div
+          className="clinic-admin-consultation-usage"
+          aria-label={t("admin.consultationsAria", {
+            used: u.consultations_used ?? 0,
+            remaining: u.consultations_unlimited
+              ? t("admin.unlimited")
+              : t("admin.remainingCount", {
+                  count: u.consultations_remaining ?? 0,
+                }),
+          })}
+        >
+          <strong>
+            {t("admin.usedCount", {
+              count: u.consultations_used ?? 0,
+            })}
+          </strong>
+          <span>
+            {u.consultations_unlimited
+              ? t("admin.unlimited")
+              : t("admin.remainingCount", {
+                  count: u.consultations_remaining ?? 0,
+                })}
+          </span>
+        </div>
+      </td>
+      <td>
+        <div className="clinic-admin-row-actions">
+          {u.whatsapp_promo_url && (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => actions.openWhatsappPromo(u)}
+              title={t("admin.remindOffer")}
+            >
+              <MessageCircle size={14} aria-hidden />
+              {t("admin.waShort")}
+            </Button>
+          )}
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() => actions.openConsultationHistory(u)}
+            title={t("admin.viewHistory")}
+          >
+            <ClipboardList size={14} aria-hidden />
+            {t("admin.historyShort")}
+          </Button>
+          {u.cedula_document_url && (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => actions.openCedulaPreview(u)}
+              title={t("admin.viewLicenseDoc")}
+            >
+              <Eye size={14} aria-hidden />
+              {t("admin.viewShort")}
+            </Button>
+          )}
+          {(u.profesional_pais || "MX").toUpperCase() === "MX" && (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              disabled={busy || !u.cedula_profesional}
+              onClick={() => actions.handleVerifyCedula(u)}
+              title={t("admin.trySep")}
+            >
+              <RefreshCw size={14} aria-hidden />
+              SEP
+            </Button>
+          )}
+          {cedulaStatus !== "verified" && (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              disabled={busy}
+              onClick={() => actions.handleApproveCedula(u)}
+              title={t("admin.approveManualTitle")}
+            >
+              <CheckCircle size={14} aria-hidden />
+            </Button>
+          )}
+          {cedulaStatus !== "rejected" && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              disabled={busy}
+              onClick={() => actions.handleRejectCedula(u)}
+              title={t("admin.reject")}
+            >
+              <XCircle size={14} aria-hidden />
+            </Button>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+});
 
 export function AdminPage() {
   const { t, i18n } = useTranslation("clinic");
@@ -575,11 +752,13 @@ export function AdminPage() {
   };
 
   const openConsultationHistory = async (user) => {
-    setHistoryUser(user);
-    setHistoryConsultations([]);
-    setHistoryTotal(user.consultations_used ?? 0);
-    setHistoryTruncated(false);
-    setHistoryLoading(true);
+    startTransition(() => {
+      setHistoryUser(user);
+      setHistoryConsultations([]);
+      setHistoryTotal(user.consultations_used ?? 0);
+      setHistoryTruncated(false);
+      setHistoryLoading(true);
+    });
     try {
       const data = await fetchAdminUserConsultations(veterinarian.id, user.id, 500);
       setHistoryConsultations(data.consultations || []);
@@ -655,14 +834,16 @@ export function AdminPage() {
   };
 
   const openCedulaPreview = async (user) => {
-    setCedulaPreview(user);
-    setCedulaPreviewUrl("");
-    setCedulaPreviewKind(null);
     if (cedulaPreviewObjectUrl) {
       URL.revokeObjectURL(cedulaPreviewObjectUrl);
     }
-    setCedulaPreviewObjectUrl("");
-    setCedulaPreviewLoading(true);
+    startTransition(() => {
+      setCedulaPreview(user);
+      setCedulaPreviewUrl("");
+      setCedulaPreviewKind(null);
+      setCedulaPreviewObjectUrl("");
+      setCedulaPreviewLoading(true);
+    });
     try {
       // Siempre vía blob (API) para evitar bloqueo CSP/X-Frame de URLs externas (PDF e imagen).
       const blob = await fetchAdminUserCedulaDocumentBlob(veterinarian.id, user.id);
@@ -676,6 +857,28 @@ export function AdminPage() {
       setCedulaPreviewLoading(false);
     }
   };
+
+  // Referencias estables para que AdminUserRow (memo) no se redibuje en cada render del panel.
+  const rowActionsRef = useRef(null);
+  rowActionsRef.current = {
+    openWhatsappPromo,
+    openConsultationHistory,
+    openCedulaPreview,
+    handleVerifyCedula,
+    handleApproveCedula,
+    handleRejectCedula,
+  };
+  const rowActions = useMemo(
+    () => ({
+      openWhatsappPromo: (u) => rowActionsRef.current.openWhatsappPromo(u),
+      openConsultationHistory: (u) => rowActionsRef.current.openConsultationHistory(u),
+      openCedulaPreview: (u) => rowActionsRef.current.openCedulaPreview(u),
+      handleVerifyCedula: (u) => rowActionsRef.current.handleVerifyCedula(u),
+      handleApproveCedula: (u) => rowActionsRef.current.handleApproveCedula(u),
+      handleRejectCedula: (u) => rowActionsRef.current.handleRejectCedula(u),
+    }),
+    [],
+  );
 
   const openSupportTicket = async (ticket) => {
     setSelectedTicket(ticket);
@@ -1351,182 +1554,14 @@ export function AdminPage() {
                   </td>
                 </tr>
               ) : (
-                users.map((u) => {
-                  const busy = cedulaActingId === u.id;
-                  const cedulaStatus = (u.cedula_verification_status || "unsubmitted").toLowerCase();
-                  const online = !!u.is_online;
-                  return (
-                    <tr key={u.id}>
-                      <td>
-                        <div className={`clinic-admin-presence${online ? " is-online" : " is-offline"}`}>
-                          <span className="clinic-admin-presence-dot" aria-hidden />
-                          <div className="clinic-admin-presence-text">
-                            <strong>{online ? t("admin.online") : t("admin.offline")}</strong>
-                            <span className="clinic-muted">{formatLastSeen(u.last_seen)}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{u.nombre || "—"}</td>
-                      <td>{u.email || "—"}</td>
-                      <td>{formatRegisteredAt(u.created_at)}</td>
-                      <td>{countryLabel(u.profesional_pais || "MX")}</td>
-                      <td className="clinic-mono">{u.cedula_profesional || "—"}</td>
-                      <td>
-                        <span className={`clinic-cedula-badge ${cedulaStatusClass(cedulaStatus)}`}>
-                          {formatCedulaStatus(cedulaStatus)}
-                        </span>
-                        {u.cedula_sep_nombre && (
-                          <div className="clinic-admin-cedula-sep clinic-muted">
-                            SEP: {u.cedula_sep_nombre}
-                          </div>
-                        )}
-                        {u.cedula_verification_error && cedulaStatus === "rejected" && (
-                          <div className="clinic-admin-cedula-sep clinic-muted">
-                            {u.cedula_verification_error}
-                          </div>
-                        )}
-                      </td>
-                      <td>
-                        <span
-                          className={`clinic-admin-plan-badge${
-                            !u.membership_type ? " clinic-admin-plan-badge-trial" : ""
-                          }`}
-                        >
-                          {formatPlanLabel(u)}
-                        </span>
-                        {u.membership_source === "organization" ? (
-                          <div className="clinic-muted clinic-admin-team-plan-note">
-                            {t("admin.teamSharedPlan")}
-                          </div>
-                        ) : null}
-                      </td>
-                      <td>
-                        {u.team_shared ? (
-                          <div className="clinic-admin-team-cell">
-                            <span className="clinic-admin-team-badge">{t("admin.teamShared")}</span>
-                            <strong>{formatOrgRole(u.org_role)}</strong>
-                            <span className="clinic-muted">
-                              {u.organization_name || t("admin.teamOrgFallback")}
-                            </span>
-                            <span className="clinic-muted">
-                              {t("admin.teamMembersCount", { count: u.team_member_count || 0 })}
-                            </span>
-                            {u.org_role !== "owner" && (u.membership_owner_nombre || u.membership_owner_email) ? (
-                              <span className="clinic-muted">
-                                {t("admin.teamQuotaOwner", {
-                                  name: u.membership_owner_nombre || u.membership_owner_email,
-                                })}
-                              </span>
-                            ) : null}
-                          </div>
-                        ) : (
-                          <span className="clinic-muted">{t("admin.teamSolo")}</span>
-                        )}
-                      </td>
-                      <td>
-                        <div
-                          className="clinic-admin-consultation-usage"
-                          aria-label={t("admin.consultationsAria", {
-                            used: u.consultations_used ?? 0,
-                            remaining: u.consultations_unlimited
-                              ? t("admin.unlimited")
-                              : t("admin.remainingCount", {
-                                  count: u.consultations_remaining ?? 0,
-                                }),
-                          })}
-                        >
-                          <strong>
-                            {t("admin.usedCount", {
-                              count: u.consultations_used ?? 0,
-                            })}
-                          </strong>
-                          <span>
-                            {u.consultations_unlimited
-                              ? t("admin.unlimited")
-                              : t("admin.remainingCount", {
-                                  count: u.consultations_remaining ?? 0,
-                                })}
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="clinic-admin-row-actions">
-                          {u.whatsapp_promo_url && (
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => openWhatsappPromo(u)}
-                              title={t("admin.remindOffer")}
-                            >
-                              <MessageCircle size={14} aria-hidden />
-                              {t("admin.waShort")}
-                            </Button>
-                          )}
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => openConsultationHistory(u)}
-                            title={t("admin.viewHistory")}
-                          >
-                            <ClipboardList size={14} aria-hidden />
-                            {t("admin.historyShort")}
-                          </Button>
-                          {u.cedula_document_url && (
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => openCedulaPreview(u)}
-                              title={t("admin.viewLicenseDoc")}
-                            >
-                              <Eye size={14} aria-hidden />
-                              {t("admin.viewShort")}
-                            </Button>
-                          )}
-                          {(u.profesional_pais || "MX").toUpperCase() === "MX" && (
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="secondary"
-                              disabled={busy || !u.cedula_profesional}
-                              onClick={() => handleVerifyCedula(u)}
-                              title={t("admin.trySep")}
-                            >
-                              <RefreshCw size={14} aria-hidden />
-                              SEP
-                            </Button>
-                          )}
-                          {cedulaStatus !== "verified" && (
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="secondary"
-                              disabled={busy}
-                              onClick={() => handleApproveCedula(u)}
-                              title={t("admin.approveManualTitle")}
-                            >
-                              <CheckCircle size={14} aria-hidden />
-                            </Button>
-                          )}
-                          {cedulaStatus !== "rejected" && (
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="ghost"
-                              disabled={busy}
-                              onClick={() => handleRejectCedula(u)}
-                              title={t("admin.reject")}
-                            >
-                              <XCircle size={14} aria-hidden />
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
+                users.map((u) => (
+                  <AdminUserRow
+                    key={u.id}
+                    user={u}
+                    busy={cedulaActingId === u.id}
+                    actions={rowActions}
+                  />
+                ))
               )}
             </tbody>
           </table>
