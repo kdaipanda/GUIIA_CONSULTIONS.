@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import YesNoChips from '../ui/yes-no-chips';
 import { useSpeciesFormI18n } from '../../hooks/useSpeciesFormI18n';
+import { ESSENTIAL_CONSULTATION_FIELDS } from '../../lib/consultationEssentials';
 import { normalizePetSex } from '../../lib/petSex';
 import { FormCombobox } from "../../components/ui/combobox";
 
@@ -19,11 +20,7 @@ const GatosForm = ({ formData, setFormData }) => {
     if (sectionEl && e.target.tagName === 'H3') sectionEl.classList.toggle('collapsed');
   }, []);
 
-  const requiredFields = [
-    'fecha', 'nombre_mascota', 'especie', 'raza', 'sexo', 'edad', 'peso',
-    'vacunas', 'desparasitacion', 'esterilizado', 'habitat', 'dieta',
-    'temperatura', 'frecuencia_cardiaca', 'frecuencia_respiratoria'
-  ];
+  const requiredFields = ESSENTIAL_CONSULTATION_FIELDS;
 
   const progress = useMemo(() => {
     const filled = requiredFields.filter(f => formData[f] && formData[f] !== '').length;

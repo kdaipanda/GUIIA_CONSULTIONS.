@@ -13597,3 +13597,252 @@ html {
     padding-right: 12px;
   }
 }
+
+/* ===== Doctor Plumitas voice guide (1ª consulta Perros) ===== */
+.plumitas-voice-guide {
+  margin: 0 0 1.25rem;
+}
+
+.plumitas-voice-launch {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--guiaa-blue, #265b93) 28%, transparent);
+  border-radius: 14px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 6%, #fff) 0%,
+    color-mix(in srgb, var(--guiaa-green, #3d9b8f) 10%, #fff) 100%
+  );
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.plumitas-voice-launch:hover {
+  border-color: var(--guiaa-green, #3d9b8f);
+  box-shadow: 0 6px 18px rgba(12, 45, 77, 0.08);
+}
+
+.plumitas-voice-launch-mascot {
+  flex-shrink: 0;
+}
+
+.plumitas-voice-launch-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.plumitas-voice-launch-copy strong {
+  color: var(--guiaa-navy, #0c2d4d);
+  font-size: 0.95rem;
+}
+
+.plumitas-voice-launch-copy span {
+  color: #4b5563;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.plumitas-voice-panel {
+  border: 1px solid color-mix(in srgb, var(--guiaa-blue, #265b93) 22%, transparent);
+  border-radius: 16px;
+  padding: 1rem 1.1rem 1.1rem;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(12, 45, 77, 0.06);
+}
+
+.plumitas-voice-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.plumitas-voice-panel-titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.plumitas-voice-panel-titles strong {
+  color: var(--guiaa-navy, #0c2d4d);
+  font-size: 0.98rem;
+}
+
+.plumitas-voice-status {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.plumitas-voice-status--listening,
+.plumitas-voice-status--speaking {
+  color: var(--guiaa-green, #3d9b8f);
+  font-weight: 600;
+}
+
+.plumitas-voice-status--error {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.plumitas-voice-close {
+  border: none;
+  background: transparent;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+}
+
+.plumitas-voice-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+  margin-bottom: 0.65rem;
+}
+
+.plumitas-voice-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--guiaa-blue, #265b93), var(--guiaa-green, #3d9b8f));
+  transition: width 0.3s ease;
+}
+
+.plumitas-voice-step {
+  margin: 0 0 0.5rem;
+  font-size: 0.88rem;
+  color: #374151;
+  line-height: 1.4;
+}
+
+.plumitas-voice-message {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--guiaa-navy, #0c2d4d);
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.plumitas-voice-heard {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.plumitas-voice-error {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: #b91c1c;
+}
+
+.plumitas-voice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.35rem;
+}
+
+.plumitas-voice-listening-pulse {
+  display: inline-flex;
+  color: var(--guiaa-green, #3d9b8f);
+  animation: plumitas-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes plumitas-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+[data-theme="dark"] .plumitas-voice-launch,
+html.dark .plumitas-voice-launch {
+  background: linear-gradient(135deg, rgba(38, 91, 147, 0.25), rgba(61, 155, 143, 0.18));
+  border-color: rgba(61, 155, 143, 0.35);
+}
+
+[data-theme="dark"] .plumitas-voice-launch-copy strong,
+html.dark .plumitas-voice-launch-copy strong,
+[data-theme="dark"] .plumitas-voice-panel-titles strong,
+html.dark .plumitas-voice-panel-titles strong,
+[data-theme="dark"] .plumitas-voice-message,
+html.dark .plumitas-voice-message {
+  color: #e8eef5;
+}
+
+[data-theme="dark"] .plumitas-voice-launch-copy span,
+html.dark .plumitas-voice-launch-copy span,
+[data-theme="dark"] .plumitas-voice-step,
+html.dark .plumitas-voice-step {
+  color: #b6c2d1;
+}
+
+[data-theme="dark"] .plumitas-voice-panel,
+html.dark .plumitas-voice-panel {
+  background: rgba(15, 28, 42, 0.92);
+  border-color: rgba(61, 155, 143, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plumitas-voice-listening-pulse {
+    animation: none;
+  }
+}
+
+.voice-field-filled,
+.voice-field-filled .guiaa-combobox-trigger {
+  outline: 2px solid var(--guiaa-green, #3d9b8f) !important;
+  outline-offset: 2px;
+  transition: outline-color 0.3s ease;
+}
+
+.plumitas-voice-engine {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: 0.15rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+}
+
+.plumitas-voice-engine--openai {
+  color: #0b3d2e;
+  background: color-mix(in srgb, var(--guiaa-green, #3d9b8f) 22%, #fff);
+}
+
+.plumitas-voice-engine--browser {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+[data-theme="dark"] .plumitas-voice-engine--openai,
+html.dark .plumitas-voice-engine--openai {
+  color: #b8f0de;
+  background: rgba(61, 155, 143, 0.28);
+}
+
+[data-theme="dark"] .plumitas-voice-engine--browser,
+html.dark .plumitas-voice-engine--browser {
+  color: #c5cdd8;
+  background: rgba(255, 255, 255, 0.08);
+}

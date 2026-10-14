@@ -18,6 +18,7 @@ import {
 } from "../lib/authHeaders";
 import { fetchAdminAccess } from "../lib/clinicApi";
 import { isPlatformAdminEmail } from "../lib/platformAdmin";
+import { identifyVeterinarian, resetProductAnalytics } from "../lib/productAnalytics";
 import i18n from "../i18n";
 
 const DEV_AUTO_LOGIN = false;
@@ -71,6 +72,10 @@ export const VetProvider = ({ children }) => {
   const [authUser, setAuthUser] = useState(null);
   const [platformAdmin, setPlatformAdmin] = useState(false);
   const profileSyncedRef = useRef(false);
+
+  useEffect(() => {
+    if (veterinarian?.id) identifyVeterinarian(veterinarian);
+  }, [veterinarian]);
 
   const refreshProfile = useCallback(async () => {
     if (!veterinarian?.id) return;
@@ -264,6 +269,7 @@ export const VetProvider = ({ children }) => {
     clearCedulaFlowNonce();
     profileSyncedRef.current = false;
     setPlatformAdmin(false);
+    resetProductAnalytics();
   };
 
   const loginWithEmailPassword = async (email, password) => {

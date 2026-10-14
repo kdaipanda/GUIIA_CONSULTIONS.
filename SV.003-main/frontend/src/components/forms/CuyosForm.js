@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import YesNoChips from "../ui/yes-no-chips";
 import { useSpeciesFormI18n } from "../../hooks/useSpeciesFormI18n";
+import { ESSENTIAL_CONSULTATION_FIELDS } from '../../lib/consultationEssentials';
 import { normalizePetSex } from "../../lib/petSex";
 import ReproductiveSexHint from "./ReproductiveSexHint";
 import { FormCombobox } from "../../components/ui/combobox";
@@ -25,16 +26,7 @@ const CuyosForm = ({ formData, setFormData }) => {
   }, []);
 
   // Campos requeridos para calcular progreso
-  const requiredFields = [
-    'nombre_mascota', 'nombre_dueño', 'edad', 'sexo', 'peso', 'condicion_corporal',
-    'tipo_dieta', 'frecuencia_alimentacion', 'heno_acceso',
-    'habitat', 'temperatura_ambiente', 'socializacion_tipo',
-    'desparasitacion_interna', 'vacunacion',
-    'temperatura', 'frecuencia_cardiaca', 'frecuencia_respiratoria',
-    'apetito', 'heces', 'orina',
-    'secrecion_nasal', 'respiracion',
-    'actividad', 'postura'
-  ];
+  const requiredFields = ESSENTIAL_CONSULTATION_FIELDS;
 
   const progress = useMemo(() => {
     const filled = requiredFields.filter(field => formData[field] && formData[field] !== '').length;

@@ -110,6 +110,18 @@ export function canCreateConsultation(veterinarian, options = {}) {
   return false;
 }
 
+/**
+ * Prueba sin estrenar: aún conserva las 3 consultas. El cupo se descuenta al
+ * completar el análisis, así que sigue en 3 hasta ver el primer resultado.
+ */
+export function isAwaitingFirstTrialConsultation(veterinarian, options = {}) {
+  if (options.platformAdmin) return false;
+  if (!veterinarian) return false;
+  if (veterinarian.membership_type) return false;
+  if ((veterinarian.membership_source || "").toLowerCase() === "organization") return false;
+  return (veterinarian.consultations_remaining ?? 0) >= TRIAL_CONSULTATION_LIMIT;
+}
+
 export function isTrialExhausted(veterinarian, options = {}) {
   if (options.platformAdmin) return false;
   if (!veterinarian) return false;

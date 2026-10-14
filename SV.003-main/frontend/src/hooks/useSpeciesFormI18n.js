@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { isEssentialConsultationField } from "../lib/consultationEssentials";
 
 /**
  * Helpers for species consultation form labels (namespace: speciesForms).
@@ -6,7 +7,10 @@ import { useTranslation } from "react-i18next";
 export function useSpeciesFormI18n(speciesKey = "perros") {
   const { t } = useTranslation("speciesForms");
 
-  const field = (id) => t(`fields.${id}`, { defaultValue: id });
+  const field = (id) => {
+    const label = String(t(`fields.${id}`, { defaultValue: id })).replace(/\s*\*\s*$/, "");
+    return isEssentialConsultationField(id) ? `${label} *` : label;
+  };
   const placeholder = (id) => t(`placeholders.${id}`, { defaultValue: "" });
   const section = (id) => t(`sections.${id}`, { defaultValue: id });
   const category = (id) => t(`categories.${id}`, { defaultValue: id });

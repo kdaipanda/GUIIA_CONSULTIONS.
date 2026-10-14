@@ -796,6 +796,7 @@
     "l5PremiumWithPlan": "La síntesis clínica CDS L5 solo está disponible para miembros Premium. Tu plan actual es: {{plan}}. Por favor, actualiza tu membresía para acceder a esta función.",
     "noMembership": "Sin membresía",
     "createError": "Error al crear la consulta",
+    "missingEssentials": "Para continuar completa: {{fields}}. Los demás campos son opcionales.",
     "updateError": "Error actualizando consulta: {{status}}",
     "petDataSavedExpert": "Datos de la mascota guardados. Puedes continuar con el motivo de consulta o volver más tarde para completar campos faltantes.",
     "selectSpeciesRequired": "Selecciona la especie de la mascota para continuar."
@@ -1845,6 +1846,46 @@
         "title": "Membresía, soporte y atajos",
         "body": "Administra tu plan en Membresía. Usa el chat de soporte (esquina inferior) para dudas de la plataforma. Pulsa Ctrl+K (o ⌘K) para buscar cualquier módulo al instante."
       }
+    }
+  },
+  "voiceGuide": {
+    "launchTitle": "Doctor Plumitas te guía",
+    "launchSubtitle": "Llena tu primera consulta por voz, campo a campo",
+    "panelAria": "Guía por voz Doctor Plumitas",
+    "panelTitle": "Guía por voz — Doctor Plumitas",
+    "close": "Cerrar guía de voz",
+    "start": "Empezar con Plumitas",
+    "answer": "Responder",
+    "skip": "Omitir campo",
+    "stop": "Detener",
+    "restart": "Reiniciar guía",
+    "ready": "Listo para comenzar",
+    "complete": "Datos principales completados",
+    "done": "¡Listo! Revisa el formulario y continúa al motivo de consulta.",
+    "retry": "No te entendí. Intenta de nuevo.",
+    "stopped": "Guía en pausa.",
+    "listeningHint": "Te escucho… habla ahora",
+    "processingHint": "Interpretando tu respuesta…",
+    "youSaid": "Escuché",
+    "stepOf": "Paso {{current}}/{{total}}: {{field}}",
+    "statusIdle": "En espera",
+    "statusLoading": "Cargando guía…",
+    "statusSpeaking": "Plumitas hablando…",
+    "statusListening": "Escuchando…",
+    "statusProcessing": "Procesando…",
+    "statusDone": "Completado",
+    "statusError": "Error",
+    "ttsOpenAi": "Voz ChatGPT activa",
+    "ttsBrowser": "Voz del navegador",
+    "ttsOpenAiHint": "Usando gpt-4o-mini-tts (OpenAI) con personalidad Doctor Plumitas",
+    "ttsBrowserHint": "Para voz más viva, configura OPENAI_API_KEY en el backend y reinicia el servidor",
+    "errors": {
+      "load": "No se pudo cargar la guía de voz",
+      "listen": "Error al escuchar el micrófono",
+      "emptyTranscript": "No capturé tu respuesta. Toca Responder e intenta de nuevo.",
+      "requiredField": "Este campo es obligatorio. Responde con el micrófono para continuar.",
+      "requiredFieldSpeak": "Este campo es obligatorio. Responde con claridad para poder guardarlo.",
+      "noSpeechApi": "Tu navegador no soporta voz. Usa Chrome o Edge en escritorio."
     }
   }
 }

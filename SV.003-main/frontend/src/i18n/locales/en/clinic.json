@@ -796,6 +796,7 @@
     "l5PremiumWithPlan": "CDS L5 clinical synthesis is available only to Premium members. Your current plan is: {{plan}}. Please upgrade your membership to access this feature.",
     "noMembership": "No membership",
     "createError": "Could not create the consultation",
+    "missingEssentials": "To continue, fill in: {{fields}}. All other fields are optional.",
     "updateError": "Error updating consultation: {{status}}",
     "petDataSavedExpert": "Pet details saved. You can continue with the chief complaint or return later to complete missing fields.",
     "selectSpeciesRequired": "Select the pet's species to continue."
@@ -1845,6 +1846,46 @@
         "title": "Membership, support & shortcuts",
         "body": "Manage your plan in Membership. Use the support chat (bottom corner) for platform questions. Press Ctrl+K (or ⌘K) to search any module instantly."
       }
+    }
+  },
+  "voiceGuide": {
+    "launchTitle": "Doctor Plumitas guides you",
+    "launchSubtitle": "Fill your first consultation by voice, field by field",
+    "panelAria": "Doctor Plumitas voice guide",
+    "panelTitle": "Voice guide — Doctor Plumitas",
+    "close": "Close voice guide",
+    "start": "Start with Plumitas",
+    "answer": "Answer",
+    "skip": "Skip field",
+    "stop": "Stop",
+    "restart": "Restart guide",
+    "ready": "Ready to begin",
+    "complete": "Main fields completed",
+    "done": "All set! Review the form and continue to the reason for visit.",
+    "retry": "I didn't catch that. Please try again.",
+    "stopped": "Guide paused.",
+    "listeningHint": "Listening… speak now",
+    "processingHint": "Interpreting your answer…",
+    "youSaid": "I heard",
+    "stepOf": "Step {{current}}/{{total}}: {{field}}",
+    "statusIdle": "Waiting",
+    "statusLoading": "Loading guide…",
+    "statusSpeaking": "Plumitas speaking…",
+    "statusListening": "Listening…",
+    "statusProcessing": "Processing…",
+    "statusDone": "Done",
+    "statusError": "Error",
+    "ttsOpenAi": "ChatGPT voice on",
+    "ttsBrowser": "Browser voice",
+    "ttsOpenAiHint": "Using gpt-4o-mini-tts (OpenAI) with Doctor Plumitas personality",
+    "ttsBrowserHint": "For a livelier voice, set OPENAI_API_KEY on the backend and restart the server",
+    "errors": {
+      "load": "Could not load the voice guide",
+      "listen": "Microphone listening error",
+      "emptyTranscript": "I didn't catch your answer. Tap Answer and try again.",
+      "requiredField": "This field is required. Answer with the mic to continue.",
+      "requiredFieldSpeak": "This field is required. Please answer clearly so I can save it.",
+      "noSpeechApi": "Your browser does not support speech. Use Chrome or Edge on desktop."
     }
   }
 }

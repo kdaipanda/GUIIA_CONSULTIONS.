@@ -112,5 +112,24 @@
     "tax": "VAT ({{rate}}%)",
     "notes": "Notes",
     "disclaimer": "Internal document — not a tax invoice (CFDI)."
+  },
+  "ownerConsulta": {
+    "subtitle": "GUIAA Consulta",
+    "folio": "Reference",
+    "date": "Date",
+    "owner": "Owner",
+    "pet": "Pet",
+    "species": "Species",
+    "breed": "Breed",
+    "sex": "Sex",
+    "age": "Age",
+    "weight": "Weight",
+    "sectionPet": "Pet details",
+    "sectionReason": "Reason for consult",
+    "sectionGuidance": "Informational clinical guidance",
+    "disclaimer": "This informational clinical guidance does not replace care from a licensed veterinarian. It is not an official diagnosis or a prescription.",
+    "footer": "GUIAA Consulta  ·  guiaa.vet",
+    "page": "Page {{current}} of {{total}}",
+    "invalid": "There is no consult ready to download."
   }
 }

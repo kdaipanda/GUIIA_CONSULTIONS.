@@ -112,5 +112,24 @@
     "tax": "IVA ({{rate}}%)",
     "notes": "Notas",
     "disclaimer": "Documento interno — no sustituye CFDI."
+  },
+  "ownerConsulta": {
+    "subtitle": "GUIAA Consulta",
+    "folio": "Folio",
+    "date": "Fecha",
+    "owner": "Dueño",
+    "pet": "Mascota",
+    "species": "Especie",
+    "breed": "Raza",
+    "sex": "Sexo",
+    "age": "Edad",
+    "weight": "Peso",
+    "sectionPet": "Datos de la mascota",
+    "sectionReason": "Motivo de consulta",
+    "sectionGuidance": "Orientación clínica informativa",
+    "disclaimer": "Esta orientación clínica informativa no sustituye la atención de un médico veterinario certificado. No es un diagnóstico oficial ni una prescripción.",
+    "footer": "GUIAA Consulta  ·  guiaa.vet",
+    "page": "Página {{current}} de {{total}}",
+    "invalid": "No hay una consulta lista para descargar."
   }
 }

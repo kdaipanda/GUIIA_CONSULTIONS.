@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import YesNoChips from '../ui/yes-no-chips';
 import { useSpeciesFormI18n } from '../../hooks/useSpeciesFormI18n';
+import { ESSENTIAL_CONSULTATION_FIELDS } from '../../lib/consultationEssentials';
 import { normalizePetSex } from '../../lib/petSex';
 import { FormCombobox } from "../../components/ui/combobox";
 
@@ -11,7 +12,8 @@ const PerrosForm = ({ formData, setFormData }) => {
   const [activeSection, setActiveSection] = useState('perros-info-basica');
 
   const handleChange = (fieldName, value) => {
-    setFormData({ ...formData, [fieldName]: value });
+    // Functional update: evita pisar valores escritos por la guía de voz
+    setFormData((prev) => ({ ...prev, [fieldName]: value }));
   };
 
   const toggleSection = useCallback((e) => {
@@ -21,11 +23,7 @@ const PerrosForm = ({ formData, setFormData }) => {
     }
   }, []);
 
-  const requiredFields = [
-    'fecha', 'nombre_mascota', 'especie', 'raza', 'sexo', 'edad', 'peso',
-    'vacunas', 'desparasitacion', 'esterilizado', 'habitat', 'dieta',
-    'temperatura', 'frecuencia_cardiaca', 'frecuencia_respiratoria'
-  ];
+  const requiredFields = ESSENTIAL_CONSULTATION_FIELDS;
 
   const progress = useMemo(() => {
     const filled = requiredFields.filter(f => formData[f] && formData[f] !== '').length;
@@ -127,6 +125,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <input
               type="text"
               required
+              data-voice-field="nombre_mascota"
               value={formData.nombre_mascota || ''}
               onChange={(e) => handleChange('nombre_mascota', e.target.value)}
               placeholder={placeholder('nombre_mascota')}
@@ -140,6 +139,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <input
               type="text"
               required
+              data-voice-field="nombre_dueño"
               value={formData.nombre_dueño || ''}
               onChange={(e) => handleChange('nombre_dueño', e.target.value)}
               placeholder={placeholder('nombre_dueño')}
@@ -153,6 +153,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <input
               type="text"
               required
+              data-voice-field="raza"
               value={formData.raza || ''}
               onChange={(e) => handleChange('raza', e.target.value)}
               placeholder={placeholder('raza_perro')}
@@ -176,6 +177,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <input
               type="text"
               required
+              data-voice-field="edad"
               value={formData.edad || ''}
               onChange={(e) => handleChange('edad', e.target.value)}
               placeholder={placeholder('edad')}
@@ -187,6 +189,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <input
               type="text"
               required
+              data-voice-field="peso"
               value={formData.peso || ''}
               onChange={(e) => handleChange('peso', e.target.value)}
               placeholder={placeholder('peso')}
@@ -216,6 +219,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <label>{field('sexo')}</label>
             <FormCombobox
               required
+              data-voice-field="sexo"
               value={sexo || ''}
               onChange={(e) => handleChange('sexo', e.target.value)}
             >
@@ -229,6 +233,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <label>{field('estado_reproductivo')}</label>
             <FormCombobox
               required
+              data-voice-field="estado_reproductivo"
               value={formData.estado_reproductivo || ''}
               onChange={(e) => handleChange('estado_reproductivo', e.target.value)}
             >
@@ -248,6 +253,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <label>{field('vacunas_vigentes')}</label>
             <FormCombobox
               required
+              data-voice-field="vacunas_vigentes"
               value={formData.vacunas_vigentes || ''}
               onChange={(e) => handleChange('vacunas_vigentes', e.target.value)}
             >
@@ -275,6 +281,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <label>{field('desparasitacion_interna')}</label>
             <FormCombobox
               required
+              data-voice-field="desparasitacion_interna"
               value={formData.desparasitacion_interna || ''}
               onChange={(e) => handleChange('desparasitacion_interna', e.target.value)}
             >
@@ -302,6 +309,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <label>{field('desparasitacion_externa')}</label>
             <FormCombobox
               required
+              data-voice-field="desparasitacion_externa"
               value={formData.desparasitacion_externa || ''}
               onChange={(e) => handleChange('desparasitacion_externa', e.target.value)}
             >
@@ -339,6 +347,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <label>{field('cirugias_previas')}</label>
             <FormCombobox
               required
+              data-voice-field="cirugias_previas"
               value={formData.cirugias_previas || ''}
               onChange={(e) => handleChange('cirugias_previas', e.target.value)}
             >
@@ -371,6 +380,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <label>{field('habitat')}</label>
             <FormCombobox
               required
+              data-voice-field="habitat"
               value={formData.habitat || ''}
               onChange={(e) => handleChange('habitat', e.target.value)}
             >
@@ -385,6 +395,7 @@ const PerrosForm = ({ formData, setFormData }) => {
             <input
               type="text"
               required
+              data-voice-field="zona_geografica"
               value={formData.zona_geografica || ''}
               onChange={(e) => handleChange('zona_geografica', e.target.value)}
               placeholder={placeholder('zona')}

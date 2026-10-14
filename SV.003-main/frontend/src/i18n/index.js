@@ -8,6 +8,7 @@ import enAuth from "./locales/en/auth.json";
 import enLegal from "./locales/en/legal.json";
 import enClinic from "./locales/en/clinic.json";
 import enHelp from "./locales/en/help.json";
+import enOwner from "./locales/en/owner.json";
 
 import esCommon from "./locales/es/common.json";
 import esLanding from "./locales/es/landing.json";
@@ -15,12 +16,13 @@ import esAuth from "./locales/es/auth.json";
 import esLegal from "./locales/es/legal.json";
 import esClinic from "./locales/es/clinic.json";
 import esHelp from "./locales/es/help.json";
+import esOwner from "./locales/es/owner.json";
 
 export const SUPPORTED_LOCALES = ["en", "es"];
 export const LOCALE_STORAGE_KEY = "guiaa_locale";
 
 /** Namespaces incluidos en el bundle inicial (el resto se cargan bajo demanda). */
-export const CORE_I18N_NAMESPACES = ["common", "landing", "auth", "legal", "clinic", "help"];
+export const CORE_I18N_NAMESPACES = ["common", "landing", "auth", "legal", "clinic", "help", "owner"];
 export const DEFERRED_I18N_NAMESPACES = ["speciesForms", "pdf"];
 
 void i18n
@@ -35,6 +37,7 @@ void i18n
         legal: enLegal,
         clinic: enClinic,
         help: enHelp,
+        owner: enOwner,
       },
       es: {
         common: esCommon,
@@ -43,6 +46,7 @@ void i18n
         legal: esLegal,
         clinic: esClinic,
         help: esHelp,
+        owner: esOwner,
       },
     },
     fallbackLng: "en",

@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState, useCallback, useRef } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   PawPrint,
@@ -30,7 +30,11 @@ import { hasCompletedPlatformOnboarding } from "../lib/platformOnboarding";
 import { OPEN_PLATFORM_ONBOARDING_EVENT } from "../lib/helpCenter";
 import { ClinicMobileNavDrawer } from "./ClinicMobileNavDrawer";
 import { PageEnter } from "../components/motion/PageEnter";
-import { canAccessFeature, MEMBERSHIP_FEATURES } from "../lib/membershipAccess";
+import {
+  canAccessFeature,
+  isAwaitingFirstTrialConsultation,
+  MEMBERSHIP_FEATURES,
+} from "../lib/membershipAccess";
 import { isPlatformAdminEmail } from "../lib/platformAdmin";
 import { useTranslation } from "react-i18next";
 import { warmClinicAppData } from "../lib/prefetchClinicApp";
@@ -85,6 +89,7 @@ const NAV_ITEM_DEFS = [
 export function ClinicShell({ children, setView }) {
   const { t } = useTranslation("clinic");
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { veterinarian, platformAdmin } = useVet();
   const { organization, loading: orgLoading, role } = useClinic();
   const [adminSupportOpen, setAdminSupportOpen] = useState(0);
@@ -196,16 +201,23 @@ export function ClinicShell({ children, setView }) {
     warmClinicAppData(veterinarian.id, { platformAdmin });
   }, [veterinarian?.id, platformAdmin]);
 
+  const awaitingFirstConsultation = isAwaitingFirstTrialConsultation(veterinarian, {
+    platformAdmin,
+  });
+  const onConsultationRoute = pathname.startsWith("/app/consultas");
+
   useEffect(() => {
     if (!veterinarian?.id || orgLoading) return undefined;
     if (hasCompletedPlatformOnboarding(veterinarian.id)) return undefined;
+    // El tour no compite con la primera consulta de prueba.
+    if (awaitingFirstConsultation || onConsultationRoute) return undefined;
 
     const timer = window.setTimeout(() => {
       setShowOnboarding(true);
     }, 600);
 
     return () => window.clearTimeout(timer);
-  }, [veterinarian?.id, orgLoading]);
+  }, [veterinarian?.id, orgLoading, awaitingFirstConsultation, onConsultationRoute]);
 
   useEffect(() => {
     const onOpenTour = () => setShowOnboarding(true);

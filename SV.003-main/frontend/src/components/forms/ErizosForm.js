@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import YesNoChips from '../ui/yes-no-chips';
 import { useSpeciesFormI18n } from '../../hooks/useSpeciesFormI18n';
+import { ESSENTIAL_CONSULTATION_FIELDS } from '../../lib/consultationEssentials';
 import { normalizePetSex } from '../../lib/petSex';
 import ReproductiveSexHint from './ReproductiveSexHint';
 import { FormCombobox } from "../../components/ui/combobox";
@@ -19,11 +20,7 @@ const ErizosForm = ({ formData, setFormData }) => {
     if (section && e.target.tagName === 'H3') section.classList.toggle('collapsed');
   }, []);
 
-  const requiredFields = [
-    'nombre_mascota', 'nombre_dueño', 'edad', 'sexo', 'peso', 'condicion_corporal',
-    'desparasitacion_interna', 'tipo_dieta', 'habitat', 'temperatura_ambiente',
-    'secrecion_nasal', 'respiracion', 'apetito', 'heces', 'puas'
-  ];
+  const requiredFields = ESSENTIAL_CONSULTATION_FIELDS;
 
   const progress = useMemo(() => {
     const filled = requiredFields.filter(field => formData[field] && formData[field] !== '').length;
