@@ -17,9 +17,25 @@ except Exception:  # noqa: BLE001
 OWNER_INSTRUCTIONS_FILE = os.path.join(
     os.path.dirname(__file__), "instrucciones_dueno_mascota.txt"
 )
+ANTHROPIC_MODEL_DEFAULT = "claude-sonnet-4-6"
+DEPRECATED_ANTHROPIC_MODELS = {
+    "claude-sonnet-4-20250514": ANTHROPIC_MODEL_DEFAULT,
+    "claude-3-5-sonnet-20241022": ANTHROPIC_MODEL_DEFAULT,
+    "claude-3-5-sonnet-latest": ANTHROPIC_MODEL_DEFAULT,
+}
 
 _owner_client: Any = None
 _owner_prompt_cache: Optional[Tuple[float, str]] = None
+
+
+def resolve_owner_anthropic_model(raw: Optional[str] = None) -> str:
+    model = (raw if raw is not None else os.getenv("ANTHROPIC_MODEL") or "").strip()
+    model = model or ANTHROPIC_MODEL_DEFAULT
+    mapped = DEPRECATED_ANTHROPIC_MODELS.get(model)
+    if mapped:
+        print(f"[WARN] OWNER Anthropic model '{model}' está obsoleto; usando '{mapped}'.")
+        return mapped
+    return model
 
 
 def load_owner_system_instructions() -> str:
@@ -84,7 +100,7 @@ async def send_owner_llm_message(user_text: str) -> str:
     System prompt: SOLO instrucciones_dueno_mascota.txt (nunca el prompt MVZ).
     """
     system_prompt = load_owner_system_instructions()
-    model = (os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-4-20250514").strip()
+    model = resolve_owner_anthropic_model()
     max_tokens = int(os.getenv("ANTHROPIC_MAX_TOKENS") or "4096")
     client = _get_owner_client()
 
