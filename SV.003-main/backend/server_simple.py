@@ -79,7 +79,9 @@ from starlette.responses import Response
 from pydantic import BaseModel, Field
 from supabase_client import (
     SupabaseConfigError,
+    claim_consultation_for_analysis,
     count_consultations_by_user,
+    debit_consultation_credit,
     get_consultation_by_id,
     get_payment_transaction_by_session_id,
     get_profile,
@@ -95,6 +97,7 @@ from supabase_client import (
     list_medical_images,
     list_medical_images_for_consultation,
     list_profiles,
+    restore_consultation_credit,
     update_consultation,
     update_payment_transaction,
     update_profile,
@@ -2357,6 +2360,27 @@ def _consultation_bill_to_id(profile: Dict[str, Any]) -> str:
         return str(profile.get("id") or "")
 
 
+def _claim_analysis_credit(
+    bill_to_id: str,
+    expected_remaining: int,
+) -> Tuple[Optional[int], Optional[str]]:
+    """Reserva un cupo CDS con compare-and-set para evitar dobles consumos."""
+    if expected_remaining <= 0:
+        return (
+            None,
+            "No tienes consultas disponibles. Por favor, suscríbete a un plan de membresía para continuar.",
+        )
+    new_remaining, err = debit_consultation_credit(bill_to_id, expected_remaining)
+    if err:
+        return (None, f"Error descontando consulta: {err}")
+    if new_remaining is None:
+        return (
+            None,
+            "Tu cupo cambió mientras se generaba el análisis. Actualiza e intenta de nuevo.",
+        )
+    return (new_remaining, None)
+
+
 # ============================================
 # ANIMAL CATEGORIES
 # ============================================
@@ -2994,6 +3018,12 @@ async def analyze_consultation(
         not credit.get("policy") and consultation_status in ("draft", "in_progress")
     )
 
+    if charge_on_success and consultation_status == "analyzing":
+        raise HTTPException(
+            status_code=409,
+            detail="Esta consulta ya está siendo analizada. Actualiza e intenta de nuevo.",
+        )
+
     if (
         not has_unlimited
         and remaining <= 0
@@ -3029,7 +3059,28 @@ async def analyze_consultation(
 
 Por favor, genera un análisis clínico completo."""
 
+    analysis_claimed = False
+    previous_status = consultation_status
     try:
+        if charge_on_success:
+            analysis_claimed, claim_err = claim_consultation_for_analysis(
+                consultation_id,
+                previous_status,
+            )
+            if claim_err:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Error reservando consulta para análisis: {claim_err}",
+                )
+            if not analysis_claimed:
+                refreshed, _ = get_consultation_by_id(consultation_id)
+                if refreshed and (refreshed.get("status") or "").lower() == "completed":
+                    return {"analysis": _coerce_analysis_text(refreshed.get("analysis"))}
+                raise HTTPException(
+                    status_code=409,
+                    detail="Esta consulta ya está siendo analizada. Actualiza e intenta de nuevo.",
+                )
+
         analysis_text = await send_llm_message(
             [
                 {
@@ -3043,7 +3094,20 @@ Por favor, genera un análisis clínico completo."""
             "analysis": analysis_text,
             "status": "completed",
         }
+        debited_remaining = None
+        bill_to_id = None
         if charge_on_success:
+            bill_to_id = _consultation_bill_to_id(profile) or vet_id
+            fresh_billing = _with_team_membership(get_profile(vet_id)[0] or profile)
+            current_remaining = int(fresh_billing.get("consultations_remaining") or 0)
+            debited_remaining, debit_err = _claim_analysis_credit(
+                bill_to_id,
+                current_remaining,
+            )
+            if debit_err:
+                status_code = 500 if debit_err.startswith("Error descontando") else 409
+                raise HTTPException(status_code=status_code, detail=debit_err)
+
             consultation_fields["payload"] = {
                 **payload,
                 "credit": {
@@ -3054,20 +3118,17 @@ Por favor, genera un análisis clínico completo."""
 
         err_upd = update_consultation(consultation_id, consultation_fields)
         if err_upd:
+            if charge_on_success and bill_to_id and debited_remaining is not None:
+                restored, restore_err = restore_consultation_credit(
+                    bill_to_id,
+                    debited_remaining,
+                )
+                if restore_err or not restored:
+                    print(
+                        "[ERROR] No se pudo revertir consultations_remaining "
+                        f"profile={bill_to_id}: {restore_err or 'saldo cambió'}"
+                    )
             raise HTTPException(status_code=500, detail=f"Error guardando análisis: {err_upd}")
-
-        # Usar update_profile (no upsert): un upsert parcial falla por NOT NULL en email.
-        # En equipo, el cupo se descuenta del dueño del consultorio.
-        if charge_on_success:
-            bill_to_id = _consultation_bill_to_id(profile) or vet_id
-            fresh_billing = _with_team_membership(get_profile(vet_id)[0] or profile)
-            current_remaining = int(fresh_billing.get("consultations_remaining") or 0)
-            err_prof = update_profile(
-                bill_to_id,
-                {"consultations_remaining": max(0, current_remaining - 1)},
-            )
-            if err_prof:
-                print(f"[WARN] No se pudo descontar consulta tras análisis: {err_prof}")
 
         profile_after, _ = get_profile(vet_id)
         return {
@@ -3078,10 +3139,20 @@ Por favor, genera un análisis clínico completo."""
         }
 
     except ValueError as e:
+        if analysis_claimed:
+            update_consultation(consultation_id, {"status": previous_status})
         raise HTTPException(status_code=400, detail=str(e))
     except RuntimeError as e:
+        if analysis_claimed:
+            update_consultation(consultation_id, {"status": previous_status})
         raise HTTPException(status_code=502, detail=str(e))
+    except HTTPException as e:
+        if analysis_claimed:
+            update_consultation(consultation_id, {"status": previous_status})
+        raise
     except Exception as e:
+        if analysis_claimed:
+            update_consultation(consultation_id, {"status": previous_status})
         import traceback
         print(f"[ERROR] analyze_consultation: {str(e)}")
         print(traceback.format_exc())

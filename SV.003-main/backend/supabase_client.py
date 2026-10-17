@@ -187,6 +187,107 @@ def update_profile(profile_id: str, fields: Dict[str, Any]) -> Optional[str]:
         return format_supabase_error(str(exc))
 
 
+_PROFILE_COUNTER_FIELDS = {"consultations_remaining", "owner_sessions_remaining"}
+
+
+def decrement_profile_counter(
+    profile_id: str,
+    field_name: str,
+    expected_remaining: int,
+) -> Tuple[Optional[int], Optional[str]]:
+    """Descuenta un contador de perfil solo si sigue en el valor esperado."""
+    if field_name not in _PROFILE_COUNTER_FIELDS:
+        return (None, f"Campo de contador no permitido: {field_name}")
+    if expected_remaining <= 0:
+        return (None, None)
+
+    client = get_supabase_client()
+    next_remaining = expected_remaining - 1
+    try:
+        resp = (
+            client.table("profiles")
+            .update({field_name: next_remaining})
+            .eq("id", profile_id)
+            .eq(field_name, expected_remaining)
+            .execute()
+        )
+        if not resp.data:
+            return (None, None)
+        return (int((resp.data[0] or {}).get(field_name) or 0), None)
+    except Exception as exc:  # noqa: BLE001
+        return (None, format_supabase_error(str(exc)))
+
+
+def restore_profile_counter(
+    profile_id: str,
+    field_name: str,
+    expected_remaining_after_debit: int,
+) -> Tuple[bool, Optional[str]]:
+    """Revierte un débito reciente sin pisar cambios concurrentes posteriores."""
+    if field_name not in _PROFILE_COUNTER_FIELDS:
+        return (False, f"Campo de contador no permitido: {field_name}")
+    if expected_remaining_after_debit < 0:
+        return (False, None)
+
+    client = get_supabase_client()
+    restored_remaining = expected_remaining_after_debit + 1
+    try:
+        resp = (
+            client.table("profiles")
+            .update({field_name: restored_remaining})
+            .eq("id", profile_id)
+            .eq(field_name, expected_remaining_after_debit)
+            .execute()
+        )
+        return (bool(resp.data), None)
+    except Exception as exc:  # noqa: BLE001
+        return (False, format_supabase_error(str(exc)))
+
+
+def debit_consultation_credit(
+    profile_id: str,
+    expected_remaining: int,
+) -> Tuple[Optional[int], Optional[str]]:
+    return decrement_profile_counter(
+        profile_id,
+        "consultations_remaining",
+        expected_remaining,
+    )
+
+
+def restore_consultation_credit(
+    profile_id: str,
+    expected_remaining_after_debit: int,
+) -> Tuple[bool, Optional[str]]:
+    return restore_profile_counter(
+        profile_id,
+        "consultations_remaining",
+        expected_remaining_after_debit,
+    )
+
+
+def debit_owner_session(
+    profile_id: str,
+    expected_remaining: int,
+) -> Tuple[Optional[int], Optional[str]]:
+    return decrement_profile_counter(
+        profile_id,
+        "owner_sessions_remaining",
+        expected_remaining,
+    )
+
+
+def restore_owner_session(
+    profile_id: str,
+    expected_remaining_after_debit: int,
+) -> Tuple[bool, Optional[str]]:
+    return restore_profile_counter(
+        profile_id,
+        "owner_sessions_remaining",
+        expected_remaining_after_debit,
+    )
+
+
 def format_supabase_error(err: str) -> str:
     """Traduce errores típicos de PostgREST/Supabase a mensajes accionables."""
     raw = (err or "").strip()
@@ -250,6 +351,30 @@ def update_consultation(consultation_id: str, fields: Dict[str, Any]) -> Optiona
         return None
     except Exception as exc:  # noqa: BLE001
         return str(exc)
+
+
+def claim_consultation_for_analysis(
+    consultation_id: str,
+    expected_status: str,
+) -> Tuple[bool, Optional[str]]:
+    """Marca una consulta como en análisis solo si nadie la tomó antes."""
+    client = get_supabase_client()
+    try:
+        resp = (
+            client.table("consultations")
+            .update(
+                {
+                    "status": "analyzing",
+                    "updated_at": datetime.now(timezone.utc).isoformat(),
+                }
+            )
+            .eq("id", consultation_id)
+            .eq("status", expected_status)
+            .execute()
+        )
+        return (bool(resp.data), None)
+    except Exception as exc:  # noqa: BLE001
+        return (False, str(exc))
 
 
 def count_consultations_by_user(user_id: str) -> Tuple[int, Optional[str]]:
