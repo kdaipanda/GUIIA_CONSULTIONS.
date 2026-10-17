@@ -1516,6 +1516,7 @@
     "planTrial": "Prueba",
     "planTrialNoPlan": "Prueba (sin plan)",
     "planNone": "Sin plan",
+    "planExpired": "Vencida el {{date}}",
     "cedulaUnsubmitted": "Sin enviar",
     "cedulaPending": "En revisión",
     "cedulaVerified": "Verificada",

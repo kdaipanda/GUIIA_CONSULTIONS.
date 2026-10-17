@@ -130,6 +130,13 @@
   color: #b45309;
 }
 
+.clinic-admin-plan-expired {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
 .clinic-admin-metrics-charts {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

@@ -50,6 +50,7 @@ import { countryLabel } from "../../lib/latamCountries";
 import i18n from "../../i18n";
 import { AdminMetricsSection } from "../../components/clinic/AdminMetricsSection";
 import { FormCombobox } from "../../components/ui/combobox";
+import { isMembershipExpired } from "../../lib/membershipAccess";
 
 const PLAN_FILTER_IDS = ["all", "trial", "paid"];
 const PRESENCE_FILTER_IDS = ["all", "online", "offline"];
@@ -253,6 +254,13 @@ const AdminUserRow = React.memo(function AdminUserRow({ user: u, busy, actions }
         >
           {formatPlanLabel(u)}
         </span>
+        {isMembershipExpired(u) ? (
+          <div className="clinic-admin-plan-expired">
+            {t("admin.planExpired", {
+              date: new Date(u.membership_expires).toLocaleDateString(i18n.language),
+            })}
+          </div>
+        ) : null}
         {u.membership_source === "organization" ? (
           <div className="clinic-muted clinic-admin-team-plan-note">
             {t("admin.teamSharedPlan")}

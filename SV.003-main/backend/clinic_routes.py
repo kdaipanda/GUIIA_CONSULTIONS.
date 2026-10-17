@@ -2138,6 +2138,11 @@ async def admin_list_users(
             "nombre": profile.get("nombre"),
             "telefono": profile.get("telefono"),
             "membership_type": membership,
+            "membership_expires": (
+                None
+                if team.get("membership_source") == "organization"
+                else profile.get("membership_expires")
+            ),
             "consultations_remaining": remaining,
             "consultations_used": consultation_counts.get(str(profile.get("id") or ""), 0),
             "consultations_unlimited": has_unlimited_consultations(profile.get("email")),

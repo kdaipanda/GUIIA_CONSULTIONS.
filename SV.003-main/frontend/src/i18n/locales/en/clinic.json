@@ -1516,6 +1516,7 @@
     "planTrial": "Trial",
     "planTrialNoPlan": "Trial (no plan)",
     "planNone": "No plan",
+    "planExpired": "Expired {{date}}",
     "cedulaUnsubmitted": "Not submitted",
     "cedulaPending": "Under review",
     "cedulaVerified": "Verified",
