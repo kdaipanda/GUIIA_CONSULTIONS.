@@ -20,10 +20,12 @@ import auth_security  # noqa: E402
 @pytest.fixture(autouse=True)
 def _reset_request_context():
     auth_security.set_request_vet_id(None)
-    auth_security._cedula_flow_store.clear()
+    if hasattr(auth_security, "_cedula_flow_store"):
+        auth_security._cedula_flow_store.clear()
     yield
     auth_security.set_request_vet_id(None)
-    auth_security._cedula_flow_store.clear()
+    if hasattr(auth_security, "_cedula_flow_store"):
+        auth_security._cedula_flow_store.clear()
 
 
 def test_resolve_authenticated_vet_id_uses_jwt_sub():
@@ -53,3 +55,18 @@ def test_checkout_status_not_public():
     assert auth_security.is_public_api_route(
         "GET", "/api/payments/checkout/status/cs_test_123"
     ) is False
+
+
+def test_default_platform_admin_email_is_reserved(monkeypatch):
+    monkeypatch.delenv("PLATFORM_ADMIN_EMAILS", raising=False)
+    assert auth_security.is_reserved_platform_admin_email("Carlos.Hernandez@VetMed.com")
+
+
+def test_configured_platform_admin_email_is_reserved(monkeypatch):
+    monkeypatch.setenv("PLATFORM_ADMIN_EMAILS", "ops@example.com, admin@example.com")
+    assert auth_security.is_reserved_platform_admin_email("ADMIN@example.com")
+
+
+def test_non_admin_email_is_not_reserved_when_db_check_fails(monkeypatch):
+    monkeypatch.setenv("PLATFORM_ADMIN_EMAILS", "ops@example.com")
+    assert auth_security.is_reserved_platform_admin_email("vet@example.com") is False
