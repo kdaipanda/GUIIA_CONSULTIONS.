@@ -1,0 +1,4 @@
+date,city,colonia,clinic_name,address,maps_url,phone,best_window,contact_name,priority,notes
+2026-07-24,CDMX,Del Valle,Ejemplo Vet Del Valle,Av. Insurgentes Sur 123,https://maps.google.com/?q=veterinaria,55XXXXXXXX,11:00-13:00,,A,Primera visita
+2026-07-24,CDMX,Del Valle,,,,,,,A,
+2026-07-24,CDMX,Narvarte,,,,,,,B,
