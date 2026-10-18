@@ -12,11 +12,12 @@ import os
 import re
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
 import auth_security
+import rate_limit
 
 voice_guide_router = APIRouter(prefix="/api/voice-guide", tags=["voice-guide"])
 
@@ -241,6 +242,32 @@ def _field_by_id(category: str, field_id: str) -> Optional[Dict[str, Any]]:
         if item["id"] == field_id:
             return item
     return None
+
+
+def _check_voice_rate_limits(
+    request: Request,
+    scope: str,
+    user_id: str,
+    *,
+    user_max_attempts: int,
+    ip_max_attempts: int,
+    window_seconds: int = 600,
+) -> None:
+    """Protect paid LLM/TTS backends from authenticated quota exhaustion."""
+    rate_limit.check_rate_limit(
+        request,
+        f"voice_guide_{scope}_user",
+        user_id,
+        max_attempts=user_max_attempts,
+        window_seconds=window_seconds,
+    )
+    rate_limit.check_rate_limit(
+        request,
+        f"voice_guide_{scope}_ip",
+        "",
+        max_attempts=ip_max_attempts,
+        window_seconds=window_seconds,
+    )
 
 
 def _next_field(category: str, field_id: str) -> Optional[Dict[str, Any]]:
@@ -595,9 +622,17 @@ async def get_script(
 @voice_guide_router.post("/extract")
 async def extract_field(
     body: ExtractRequest,
+    request: Request,
     x_veterinarian_id: Optional[str] = Header(default=None),
 ):
-    auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
+    _check_voice_rate_limits(
+        request,
+        "extract",
+        vet_id,
+        user_max_attempts=80,
+        ip_max_attempts=160,
+    )
     cat = (body.category or "perros").strip().lower()
     field = _field_by_id(cat, body.field_id)
     if not field:
@@ -649,9 +684,17 @@ async def extract_field(
 @voice_guide_router.post("/speak")
 async def speak(
     body: SpeakRequest,
+    request: Request,
     x_veterinarian_id: Optional[str] = Header(default=None),
 ):
-    auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
+    vet_id = auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
+    _check_voice_rate_limits(
+        request,
+        "speak",
+        vet_id,
+        user_max_attempts=40,
+        ip_max_attempts=80,
+    )
     audio, err = await synthesize_speech(body.text, body.language, body.voice)
     if not audio:
         raise HTTPException(
