@@ -39,6 +39,28 @@ except Exception:  # noqa: BLE001
 owner_router = APIRouter(prefix="/api/owner", tags=["owner-b2c"])
 
 
+def _is_production_environment() -> bool:
+    env = (os.getenv("ENVIRONMENT") or os.getenv("NODE_ENV") or "").strip().lower()
+    return env in {"production", "prod"} or bool(
+        os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("RENDER")
+    )
+
+
+def _stripe_checkout_ready() -> bool:
+    return bool(
+        stripe_mod and (os.getenv("STRIPE_API_KEY") or os.getenv("STRIPE_SECRET_KEY"))
+    )
+
+
+def _owner_simulated_payments_allowed() -> bool:
+    raw = os.getenv("ALLOW_SIMULATED_OWNER_PAYMENTS", "").strip().lower()
+    if raw in {"0", "false", "no", "off"}:
+        return False
+    if raw in {"1", "true", "yes", "on"}:
+        return True
+    return not _is_production_environment()
+
+
 def _require_owner_id(x_veterinarian_id: Optional[str] = None) -> str:
     return auth_security.resolve_authenticated_vet_id(x_veterinarian_id)
 
@@ -267,7 +289,6 @@ async def create_owner_checkout(
     if not package:
         raise HTTPException(status_code=404, detail="Paquete no encontrado")
 
-    stripe_key = os.getenv("STRIPE_API_KEY") or os.getenv("STRIPE_SECRET_KEY")
     amount = float(package["price"])
     sessions = int(package["sessions"])
     session_id = f"sim_owner_{uuid.uuid4()}"
@@ -285,8 +306,10 @@ async def create_owner_checkout(
     }
 
     origin = (payload.origin_url or "").rstrip("/")
-    if stripe_mod and stripe_key:
-        stripe_mod.api_key = stripe_key
+    if _stripe_checkout_ready():
+        stripe_mod.api_key = os.getenv("STRIPE_API_KEY") or os.getenv(
+            "STRIPE_SECRET_KEY"
+        )
         try:
             success_url = f"{origin}/consulta/pago-ok?session_id={{CHECKOUT_SESSION_ID}}"
             cancel_url = f"{origin}/consulta/pagar"
@@ -343,6 +366,12 @@ async def create_owner_checkout(
                 status_code=500, detail=f"Error creando sesión Stripe: {exc}"
             ) from exc
 
+    if not _owner_simulated_payments_allowed():
+        raise HTTPException(
+            status_code=503,
+            detail="Stripe no está configurado para pagos de GUIAA Consulta.",
+        )
+
     _, err = insert_payment_transaction(transaction_data)
     if err:
         raise HTTPException(status_code=500, detail=f"Error guardando transacción: {err}")
@@ -379,12 +408,21 @@ async def owner_checkout_status(
             detail="Esta sesión no es un pago de consulta para dueños",
         )
 
-    stripe_key = os.getenv("STRIPE_API_KEY") or os.getenv("STRIPE_SECRET_KEY")
     status_value = transaction.get("status", "open")
     payment_status = transaction.get("payment_status", "unpaid")
+    is_stripe_transaction = bool(transaction.get("stripe")) or str(
+        session_id
+    ).startswith("cs_")
 
-    if stripe_mod and stripe_key and str(session_id).startswith("cs_"):
-        stripe_mod.api_key = stripe_key
+    if is_stripe_transaction:
+        if not _stripe_checkout_ready():
+            raise HTTPException(
+                status_code=503,
+                detail="No se puede verificar el pago con Stripe en este momento.",
+            )
+        stripe_mod.api_key = os.getenv("STRIPE_API_KEY") or os.getenv(
+            "STRIPE_SECRET_KEY"
+        )
         try:
             session = stripe_mod.checkout.Session.retrieve(session_id)
             status_value = session.status
@@ -399,6 +437,11 @@ async def owner_checkout_status(
                 status_code=500, detail=f"Error verificando Stripe: {exc}"
             ) from exc
     else:
+        if not _owner_simulated_payments_allowed():
+            raise HTTPException(
+                status_code=400,
+                detail="Los pagos simulados de GUIAA Consulta no están habilitados.",
+            )
         status_value = "complete"
         payment_status = "paid"
         sync_transaction_status(
