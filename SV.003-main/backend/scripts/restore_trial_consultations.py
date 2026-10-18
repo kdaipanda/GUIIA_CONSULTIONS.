@@ -54,6 +54,19 @@ def _is_trial(profile: dict) -> bool:
     return not (profile.get("membership_type") or "").strip()
 
 
+def _current_credits(profile: dict) -> int:
+    return int(profile.get("consultations_remaining") or 0)
+
+
+def _restore_target(profile: dict) -> int:
+    """Restaurar debe ser monotónico: nunca bajar créditos ya existentes."""
+    return max(_current_credits(profile), TRIAL_CREDITS)
+
+
+def _needs_trial_restore(profile: dict) -> bool:
+    return _is_trial(profile) and _current_credits(profile) < TRIAL_CREDITS
+
+
 def _email_ok(email: str) -> bool:
     e = (email or "").strip().lower()
     if not e or "@" not in e:
@@ -69,7 +82,7 @@ def main() -> int:
     parser.add_argument(
         "--only-below-3",
         action="store_true",
-        help="Solo usuarios con menos de 3 consultas (default: todos los trial → 3)",
+        help="Compatibilidad: la restauración siempre limita a usuarios con menos de 3 consultas.",
     )
     parser.add_argument(
         "--no-email",
@@ -85,13 +98,7 @@ def main() -> int:
     args = parser.parse_args()
 
     profiles = _fetch_all_profiles()
-    candidates = [p for p in profiles if _is_trial(p)]
-    if args.only_below_3:
-        candidates = [
-            p
-            for p in candidates
-            if int(p.get("consultations_remaining") or 0) < TRIAL_CREDITS
-        ]
+    candidates = [p for p in profiles if _needs_trial_restore(p)]
 
     print(f"Perfiles totales: {len(profiles)}")
     print(f"Candidatos trial a restaurar: {len(candidates)}")
@@ -107,14 +114,15 @@ def main() -> int:
     for p in candidates:
         email = (p.get("email") or "").strip()
         name = (p.get("nombre") or "").strip() or "(sin nombre)"
-        before = int(p.get("consultations_remaining") or 0)
+        before = _current_credits(p)
+        target = _restore_target(p)
         pid = p.get("id")
-        print(f"  {email or '(sin email)'} | {name} | {before} → {TRIAL_CREDITS}")
+        print(f"  {email or '(sin email)'} | {name} | {before} → {target}")
 
         if args.dry_run:
             continue
 
-        err = update_profile(pid, {"consultations_remaining": TRIAL_CREDITS})
+        err = update_profile(pid, {"consultations_remaining": target})
         if err:
             print(f"    ERROR update: {err}")
             continue
@@ -128,7 +136,7 @@ def main() -> int:
             continue
 
         notify_err = notify_user_trial_credits_restored(
-            {**p, "consultations_remaining": TRIAL_CREDITS}
+            {**p, "consultations_remaining": target}
         )
         if notify_err:
             email_errors += 1
