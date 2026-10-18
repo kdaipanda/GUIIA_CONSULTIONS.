@@ -68,6 +68,34 @@ class SharedOrgQuota(unittest.TestCase):
         self.assertEqual(overlay["consultations_remaining"], 27)
         self.assertEqual(overlay["membership_source"], "organization")
         self.assertEqual(overlay["membership_owner_id"], "owner-1")
+        self.assertEqual(overlay["org_role"], "veterinarian")
+
+    def test_admin_without_license_cannot_create_cds(self):
+        import clinic_db
+
+        reason = clinic_db.consultation_role_block_reason(
+            {"id": "admin-1", "cedula_profesional": "  "},
+            {"role": "admin", "organization_id": "org-1"},
+        )
+        self.assertEqual(reason, clinic_db.CDS_ADMIN_LICENSE_BLOCK_MESSAGE)
+
+    def test_admin_with_license_can_create_cds(self):
+        import clinic_db
+
+        reason = clinic_db.consultation_role_block_reason(
+            {"id": "admin-1", "cedula_profesional": "1234567"},
+            {"role": "admin", "organization_id": "org-1"},
+        )
+        self.assertIsNone(reason)
+
+    def test_receptionist_cannot_create_cds(self):
+        import clinic_db
+
+        reason = clinic_db.consultation_role_block_reason(
+            {"id": "recep-1", "cedula_profesional": "1234567"},
+            {"role": "receptionist", "organization_id": "org-1"},
+        )
+        self.assertEqual(reason, clinic_db.CDS_RECEPTION_BLOCK_MESSAGE)
 
 
 if __name__ == "__main__":
