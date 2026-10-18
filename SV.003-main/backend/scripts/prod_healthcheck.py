@@ -77,7 +77,6 @@ def run_ui_smoke() -> tuple[bool, float, str]:
             encoding="utf-8",
             errors="replace",
             timeout=180,
-            shell=True,
         )
         elapsed = time.time() - started
         out = (proc.stdout or "") + (proc.stderr or "")
