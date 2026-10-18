@@ -20,10 +20,12 @@ import auth_security  # noqa: E402
 @pytest.fixture(autouse=True)
 def _reset_request_context():
     auth_security.set_request_vet_id(None)
-    auth_security._cedula_flow_store.clear()
+    if hasattr(auth_security, "_cedula_flow_store"):
+        auth_security._cedula_flow_store.clear()
     yield
     auth_security.set_request_vet_id(None)
-    auth_security._cedula_flow_store.clear()
+    if hasattr(auth_security, "_cedula_flow_store"):
+        auth_security._cedula_flow_store.clear()
 
 
 def test_resolve_authenticated_vet_id_uses_jwt_sub():
