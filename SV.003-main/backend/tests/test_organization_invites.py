@@ -44,19 +44,39 @@ class InviteRegisterPendingToken(unittest.TestCase):
         os.environ.setdefault("JWT_SECRET", "test-invite-register-secret-32chars!!")
         import auth_security
 
+        salt, code_hash = auth_security.create_invite_register_code_challenge("424242")
         token = auth_security.create_invite_register_pending_token(
             invite_id="inv-1",
             invite_token_hash="abc",
             email="member@example.com",
-            code_hash=hash_invite_email_code("424242"),
-            profile_payload={"nombre": "Ana", "email": "member@example.com"},
+            code_hash=code_hash,
+            profile_payload={
+                "nombre": "Ana",
+                "email": "member@example.com",
+                "_invite_code_salt": salt,
+            },
         )
         payload = auth_security.verify_invite_register_pending_token(token)
         self.assertEqual(payload.get("type"), "invite_register")
         self.assertEqual(payload.get("sub"), "inv-1")
         self.assertEqual(payload.get("email"), "member@example.com")
-        self.assertEqual(payload.get("code_hash"), hash_invite_email_code("424242"))
+        self.assertEqual(payload.get("code_hash"), code_hash)
+        self.assertNotEqual(payload.get("code_hash"), hash_invite_email_code("424242"))
         self.assertEqual(payload.get("profile", {}).get("nombre"), "Ana")
+        self.assertTrue(
+            auth_security.verify_invite_register_code(
+                "424242",
+                payload.get("profile", {}).get("_invite_code_salt"),
+                payload.get("code_hash"),
+            )
+        )
+        self.assertFalse(
+            auth_security.verify_invite_register_code(
+                "111111",
+                payload.get("profile", {}).get("_invite_code_salt"),
+                payload.get("code_hash"),
+            )
+        )
 
     def test_wrong_type_rejected(self):
         os.environ.setdefault("JWT_SECRET", "test-invite-register-secret-32chars!!")
@@ -124,6 +144,21 @@ class InviteRegistrationStartUnit(unittest.TestCase):
         self.assertEqual(result["email"], "ana@example.com")
         notify_mock.assert_called_once()
         self.assertEqual(notify_mock.call_args.kwargs["code"], "111222")
+
+        import auth_security
+
+        pending = auth_security.verify_invite_register_pending_token(result["nonce"])
+        self.assertNotEqual(
+            pending.get("code_hash"),
+            hash_invite_email_code("111222"),
+        )
+        self.assertTrue(
+            auth_security.verify_invite_register_code(
+                "111222",
+                pending.get("profile", {}).get("_invite_code_salt"),
+                pending.get("code_hash"),
+            )
+        )
 
 
 if __name__ == "__main__":

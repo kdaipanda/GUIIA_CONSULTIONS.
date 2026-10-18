@@ -181,7 +181,7 @@ async def start_invite_registration(
         generate_2fa_code=generate_2fa_code,
     )
 
-    code_hash = clinic_db.hash_invite_email_code(code)
+    code_salt, code_hash = auth_security.create_invite_register_code_challenge(code)
     pending_token = auth_security.create_invite_register_pending_token(
         invite_id=str(invite_id),
         invite_token_hash=str(invite_token_hash),
@@ -193,6 +193,7 @@ async def start_invite_registration(
             "role": role,
             "organization_name": invite.get("organization_name") or "",
             "invited_by": raw_row.get("invited_by"),
+            "_invite_code_salt": code_salt,
         },
     )
 
@@ -257,7 +258,8 @@ async def resend_invite_registration_code(
         raise HTTPException(status_code=400, detail="Invitación no válida")
 
     code = generate_2fa_code()
-    code_hash = clinic_db.hash_invite_email_code(code)
+    code_salt, code_hash = auth_security.create_invite_register_code_challenge(code)
+    profile_payload["_invite_code_salt"] = code_salt
     new_nonce = auth_security.create_invite_register_pending_token(
         invite_id=invite_id,
         invite_token_hash=str(row.get("token_hash") or invite_token_hash),
@@ -298,11 +300,11 @@ async def complete_invite_registration(
 ) -> Dict[str, Any]:
     pending = auth_security.verify_invite_register_pending_token(nonce)
     expected_hash = pending.get("code_hash") or ""
-    got_hash = clinic_db.hash_invite_email_code(code)
-    if not expected_hash or got_hash != expected_hash:
+    profile_payload = dict(pending.get("profile") or {})
+    code_salt = str(profile_payload.pop("_invite_code_salt", "") or "")
+    if not auth_security.verify_invite_register_code(code, code_salt, expected_hash):
         raise HTTPException(status_code=401, detail="Código inválido")
 
-    profile_payload = dict(pending.get("profile") or {})
     email = (pending.get("email") or profile_payload.get("email") or "").strip().lower()
     invite_id = str(pending.get("sub") or "")
     org_id = profile_payload.pop("organization_id", None)
