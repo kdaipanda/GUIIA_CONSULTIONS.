@@ -356,7 +356,7 @@ def _serialize_consultation_row(row: dict) -> dict:
         "status": row.get("status"),
         "created_at": row.get("created_at"),
         "updated_at": row.get("updated_at"),
-        "rating": row.get("rating"),
+        "rating": row.get("rating") if row.get("rating") is not None else payload.get("rating"),
         "nombre_mascota": form_data.get("nombre_mascota"),
         "nombre_dueño": form_data.get("nombre_dueño") or form_data.get("nombre_dueno"),
         "raza": form_data.get("raza"),

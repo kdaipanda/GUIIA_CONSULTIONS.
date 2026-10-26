@@ -2471,7 +2471,7 @@ def _serialize_consultation(row: Dict[str, Any]) -> Dict[str, Any]:
         "status": row.get("status"),
         "created_at": row.get("created_at"),
         "updated_at": row.get("updated_at"),
-        "rating": row.get("rating"),
+        "rating": row.get("rating") if row.get("rating") is not None else payload.get("rating"),
         # Campos aplanados de form_data para acceso directo
         "nombre_mascota": form_data.get("nombre_mascota"),
         "nombre_dueño": form_data.get("nombre_dueño") or form_data.get("nombre_dueno"),
@@ -3120,6 +3120,13 @@ Por favor, genera un análisis clínico completo."""
         raise HTTPException(status_code=500, detail=f"Error generando análisis: {str(e)}")
 
 
+def _column_missing_error(err: Optional[str], *columns: str) -> bool:
+    text = (err or "").lower()
+    if "does not exist" not in text and "42703" not in text:
+        return False
+    return any(col.lower() in text for col in columns)
+
+
 @app.put("/api/consultations/{consultation_id}/rating")
 async def set_consultation_rating(
     consultation_id: str,
@@ -3137,22 +3144,40 @@ async def set_consultation_rating(
     if not consultation:
         raise HTTPException(status_code=404, detail="Consulta no encontrada")
 
+    rating_value = int(payload.rating)
+    rated_at = datetime.now(timezone.utc).isoformat()
     err_upd = update_consultation(
         consultation_id,
         {
-            "rating": int(payload.rating),
-            "rated_at": datetime.now(timezone.utc).isoformat(),
+            "rating": rating_value,
+            "rated_at": rated_at,
         },
     )
-    if err_upd and "rated_at" in str(err_upd).lower():
+    if err_upd and "rated_at" in str(err_upd).lower() and not _column_missing_error(
+        err_upd, "rating"
+    ):
         err_upd = update_consultation(
             consultation_id,
-            {"rating": int(payload.rating)},
+            {"rating": rating_value},
         )
+    # Schema antiguo sin columnas rating/rated_at: guardar en payload JSON.
+    if err_upd and _column_missing_error(err_upd, "rating", "rated_at"):
+        current_payload = dict(consultation.get("payload") or {})
+        current_payload["rating"] = rating_value
+        current_payload["rated_at"] = rated_at
+        err_upd = update_consultation(
+            consultation_id,
+            {"payload": current_payload},
+        )
+        if not err_upd:
+            print(
+                "[WARN] consultations.rating ausente; calificación guardada en payload. "
+                "Aplica supabase_migrations/20261026_consultation_rating.sql"
+            )
     if err_upd:
         raise HTTPException(status_code=500, detail=f"Error guardando rating: {err_upd}")
 
-    return {"consultation_id": consultation_id, "rating": int(payload.rating)}
+    return {"consultation_id": consultation_id, "rating": rating_value}
 
 
 @app.get("/api/consultations/stats")
