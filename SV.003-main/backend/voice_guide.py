@@ -447,7 +447,6 @@ async def extract_value_with_llm(field: Dict[str, Any], transcript: str, languag
         resp = client.messages.create(
             model=model,
             max_tokens=200,
-            temperature=0,
             system=system,
             messages=[{"role": "user", "content": user}],
         )
