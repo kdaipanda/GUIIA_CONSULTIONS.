@@ -27,7 +27,6 @@ from supabase_client import (
     get_profile_by_email,
     insert_payment_transaction,
     owner_has_paid_consultation,
-    update_profile,
     upsert_profile,
 )
 
@@ -542,19 +541,33 @@ async def create_owner_consultation(
         "created_at": now,
     }
 
+    new_sessions = sessions
+    reserved_sessions: Optional[int] = None
+    if not unlimited:
+        reserved_sessions, err_reserve = owner_db.reserve_owner_session(owner_id, sessions)
+        if err_reserve:
+            status_code = (
+                409
+                if err_reserve == owner_db.OWNER_SESSION_RESERVATION_CONFLICT
+                else 500
+            )
+            raise HTTPException(status_code=status_code, detail=err_reserve)
+        new_sessions = reserved_sessions if reserved_sessions is not None else sessions
+
     inserted, err_ins = owner_db.insert_owner_consultation(new_row)
     if err_ins:
+        if not unlimited and reserved_sessions is not None:
+            restore_err = owner_db.restore_owner_session(
+                owner_id,
+                previous_sessions=sessions,
+                reserved_sessions=reserved_sessions,
+            )
+            if restore_err:
+                print(f"[ERROR] No se pudo revertir sesión owner: {restore_err}")
         raise HTTPException(status_code=500, detail=f"Error guardando consulta: {err_ins}")
 
-    new_sessions = sessions
     if unlimited:
         new_sessions = 999999
-    else:
-        new_sessions = max(0, sessions - 1)
-        err_prof = update_profile(owner_id, {"owner_sessions_remaining": new_sessions})
-        if err_prof:
-            print(f"[WARN] No se pudo descontar owner_sessions_remaining: {err_prof}")
-            new_sessions = sessions
 
     serialized = _serialize_owner_consultation(inserted or new_row)
     serialized["owner_sessions_remaining"] = new_sessions
