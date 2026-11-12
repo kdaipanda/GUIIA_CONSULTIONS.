@@ -63,7 +63,7 @@
   min-height: 2.75rem;
   border-radius: 0.65rem;
   padding: 0.5rem 0.85rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #265b93;
   transition: color 0.15s ease, background 0.15s ease;
@@ -114,7 +114,7 @@
 .auth-shell .auth-card h2 {
   margin: 0 0 0.5rem;
   color: #0c2d4d;
-  font-size: 1.5rem;
+  font-size: var(--fs-headline);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -122,7 +122,7 @@
 .auth-shell .auth-card > p {
   margin: 0 0 1.5rem;
   color: #64748b;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   line-height: 1.45;
 }
 
@@ -173,7 +173,7 @@
   margin: 1.25rem 0 0;
   padding-top: 1.25rem;
   border-top: 1px solid rgba(12, 45, 77, 0.08);
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   letter-spacing: -0.01em;
   text-transform: none;
@@ -201,7 +201,7 @@
 
 .loading-screen-shell p {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: rgba(255, 255, 255, 0.88);
 }
 

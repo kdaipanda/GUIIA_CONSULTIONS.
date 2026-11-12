@@ -57,7 +57,7 @@
   border-radius: 999px;
   background: transparent;
   color: var(--lang-idle);
-  font-size: 0.6875rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1;

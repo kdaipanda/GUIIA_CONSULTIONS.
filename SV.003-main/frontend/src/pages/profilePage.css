@@ -11,7 +11,7 @@
 
 .profile-page-loading {
   margin: 2rem 0;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   color: #475569;
 }
 
@@ -29,7 +29,7 @@
 
 .profile-page-guiaa .profile-page-header p {
   margin-top: 0.35rem;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   color: #64748b;
   line-height: 1.5;
   max-width: 36rem;
@@ -83,20 +83,20 @@
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(61, 155, 143, 0.28);
-  font-size: 1.75rem;
+  font-size: var(--fs-display);
   font-weight: 700;
 }
 
 .profile-card-guiaa-header h2 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: var(--fs-title);
   font-weight: 700;
   overflow-wrap: anywhere;
 }
 
 .profile-specialty-guiaa {
   margin: 0.25rem 0 0;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: rgba(255, 255, 255, 0.88);
 }
 
@@ -107,7 +107,7 @@
   margin-top: 0.65rem;
   padding: 0.35rem 0.7rem;
   border-radius: 8px;
-  font-size: 0.6875rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -147,7 +147,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #64748b;
 }
@@ -160,7 +160,7 @@
 .profile-detail-value {
   max-width: 55%;
   text-align: right;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #0c2d4d;
   line-height: 1.45;
@@ -177,7 +177,7 @@
 
 .profile-membership-card h3 {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: #0c2d4d;
 }
@@ -195,7 +195,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   color: #475569;
 }
 
@@ -230,7 +230,7 @@
 
 .profile-membership-progress-label {
   margin-top: 0.35rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   color: #64748b;
 }
 
@@ -255,7 +255,7 @@
   min-height: 2.75rem;
   padding: 0.7rem 1rem;
   border-radius: 12px;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
@@ -289,7 +289,7 @@
   margin-top: 0.875rem;
   padding-top: 0.875rem;
   border-top: 1px solid rgba(12, 45, 77, 0.08);
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   line-height: 1.45;
   color: #64748b;
 }

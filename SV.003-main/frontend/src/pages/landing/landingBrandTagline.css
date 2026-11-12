@@ -42,13 +42,13 @@
 }
 
 .landing-brand-tagline--footer .landing-brand-tagline-primary {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: var(--footer-ink, #0c2d4d);
 }
 
 .landing-brand-tagline--footer .landing-brand-tagline-secondary {
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 500;
   color: var(--footer-muted, #475569);
 }

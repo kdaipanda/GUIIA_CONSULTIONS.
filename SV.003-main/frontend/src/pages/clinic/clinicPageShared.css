@@ -41,18 +41,19 @@
 
 .clinic-stat-value {
   display: block;
-  font-size: 1.2rem;
+  font-size: var(--fs-title);
   font-weight: 800;
   color: var(--clinic-navy);
-  line-height: 1.1;
+  line-height: var(--lh-tight);
 }
 
 .clinic-stat-label {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: rgba(12, 45, 77, 0.5);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  line-height: var(--lh-tight);
 }
 
 .clinic-table-skeleton {
@@ -102,7 +103,7 @@
 
 .clinic-empty-guiaa p {
   margin: 0 0 14px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 
@@ -115,7 +116,7 @@
 .clinic-page-guiaa .clinic-table thead th {
   background: rgba(232, 244, 252, 0.6);
   color: var(--clinic-navy);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -124,7 +125,7 @@
   display: inline-flex;
   padding: 3px 8px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
 }
 
@@ -157,7 +158,7 @@
   min-height: 1.75rem;
   padding: 0.2rem 0.65rem;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.02em;
   color: #7a3b0a;
@@ -336,14 +337,14 @@ html.dark .clinic-patient-detail-dialog > button.absolute:hover {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-caption);
   font-weight: 650;
   letter-spacing: 0.03em;
   color: var(--pid-muted);
 }
 
 .clinic-patient-id-date-value {
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 750;
   color: var(--pid-ink);
   line-height: 1.2;
@@ -355,7 +356,7 @@ html.dark .clinic-patient-detail-dialog > button.absolute:hover {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.45rem;
-  font-size: 1.25rem;
+  font-size: var(--fs-title);
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--pid-ink) !important;
@@ -364,7 +365,7 @@ html.dark .clinic-patient-detail-dialog > button.absolute:hover {
 
 .clinic-patient-id-species {
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: var(--pid-accent);
 }
@@ -381,7 +382,7 @@ html.dark .clinic-patient-detail-dialog > button.absolute:hover {
   background: var(--pid-chip-bg);
   color: var(--pid-ink);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.04em;
   cursor: pointer;
@@ -412,7 +413,7 @@ html.dark .clinic-patient-detail-dialog > button.absolute:hover {
 }
 
 .clinic-patient-id-label {
-  font-size: 0.6875rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -420,7 +421,7 @@ html.dark .clinic-patient-detail-dialog > button.absolute:hover {
 }
 
 .clinic-patient-id-value {
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: var(--pid-ink) !important;
   line-height: 1.35;
@@ -429,7 +430,7 @@ html.dark .clinic-patient-detail-dialog > button.absolute:hover {
 
 .clinic-patient-id-value--mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   letter-spacing: 0.02em;
 }
 
@@ -612,7 +613,7 @@ html.dark .clinic-patient-detail-cta {
 
 .clinic-patient-detail-subtitle {
   margin: 0.35rem 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   color: #475569;
 }
 
@@ -625,7 +626,7 @@ html.dark .clinic-patient-detail-cta {
   border: 1px solid rgba(38, 91, 147, 0.16) !important;
   background: #fff !important;
   color: var(--clinic-navy, #0c2d4d) !important;
-  font-size: 0.875rem !important;
+  font-size: var(--fs-body-sm) !important;
   line-height: 1.35 !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
   backdrop-filter: none;
@@ -664,7 +665,7 @@ html.dark .clinic-patient-detail-cta {
 .clinic-dialog-guiaa .form-group label {
   display: block;
   margin-bottom: 0.35rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: rgba(12, 45, 77, 0.78);
   line-height: 1.35;
@@ -782,7 +783,7 @@ html.dark .clinic-dialog-guiaa [class*="DialogTitle"] {
 
 .clinic-quick-register-dialog .clinic-quick-dialog-title {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--fs-subtitle);
   font-weight: 800;
   line-height: 1.35;
   letter-spacing: -0.02em;
@@ -790,7 +791,7 @@ html.dark .clinic-dialog-guiaa [class*="DialogTitle"] {
 
 .clinic-quick-register-dialog .clinic-quick-hint {
   margin: 0.5rem 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   max-width: 28ch;
 }
@@ -851,7 +852,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-hint {
   border-radius: 8px;
   border: 1px solid rgba(38, 91, 147, 0.16);
   background: #fff;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: rgba(12, 45, 77, 0.82);
   backdrop-filter: none;
@@ -875,7 +876,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-hint {
 
 .clinic-quick-register-dialog .clinic-quick-owner-only {
   margin-top: 0.25rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-quick-register-dialog .clinic-quick-dialog-footer {
@@ -1000,7 +1001,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 
 .clinic-dialog-compact .clinic-quick-hint {
   margin: 0 0 0.5rem;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   line-height: 1.45;
 }
 
@@ -1023,7 +1024,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 
 .clinic-dialog-compact .clinic-quick-chip {
   padding: 6px 10px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .clinic-dialog-compact [class*="DialogFooter"] {
@@ -1054,7 +1055,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 
 .clinic-dialog-guiaa .clinic-form-section-label {
   margin: 4px 0 8px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1076,7 +1077,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   align-items: center;
   gap: 8px;
   margin: 0 0 12px;
-  font-size: 16px;
+  font-size: var(--fs-body);
   color: var(--clinic-navy);
 }
 
@@ -1117,7 +1118,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   margin: 0 0 16px;
   max-width: 46rem;
   color: #16324a;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   line-height: 1.5;
   text-wrap: pretty;
 }
@@ -1147,7 +1148,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   border-radius: 12px;
   background: var(--clinic-navy);
   color: #fff;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   line-height: 1;
 }
@@ -1155,7 +1156,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 .clinic-page-guiaa .clinic-team-step-title {
   margin: 3px 0 4px;
   color: var(--clinic-navy);
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   line-height: 1.3;
   text-wrap: balance;
@@ -1164,7 +1165,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 .clinic-page-guiaa .clinic-team-step-body {
   margin: 0;
   color: #16324a;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   text-wrap: pretty;
 }
@@ -1177,7 +1178,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   border: 1px solid rgba(38, 91, 147, 0.16);
   background: rgba(232, 244, 252, 0.85);
   color: #16324a;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   text-wrap: pretty;
 }
@@ -1191,14 +1192,14 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 .clinic-page-guiaa .clinic-team-add h3 {
   margin: 0 0 12px;
   color: var(--clinic-navy);
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
 .clinic-page-guiaa .clinic-team-role-hint {
   margin: 6px 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.4;
   color: #2b4458;
 }
@@ -1322,7 +1323,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 .clinic-report-empty {
   margin: 0;
   padding: 12px 0;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 
@@ -1401,7 +1402,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   padding: 0.35rem 0.25rem;
   border: none;
   background: none;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: var(--clinic-blue);
   cursor: pointer;
@@ -1420,7 +1421,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 
 .clinic-quick-hint {
   margin: 0 0 12px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-sale-mode-toggle {
@@ -1445,7 +1446,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   border-radius: 12px;
   border: 1px solid rgba(38, 91, 147, 0.18);
   background: #fff;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: var(--clinic-navy);
   cursor: pointer;
@@ -1523,14 +1524,14 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 
 .clinic-owner-card-info strong {
   display: block;
-  font-size: 15px;
+  font-size: var(--fs-body);
   color: var(--clinic-navy, #0c2d4d);
 }
 
 .clinic-owner-card-info span {
   display: block;
   margin-top: 2px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
   white-space: nowrap;
   overflow: hidden;
@@ -1561,7 +1562,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 .clinic-owner-empty {
   margin: 0;
   padding: 14px 16px 16px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 
@@ -1572,7 +1573,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 }
 
 .clinic-owner-pets-table .clinic-table thead th {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   padding-top: 10px;
   padding-bottom: 8px;
 }
@@ -1613,7 +1614,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 
 .clinic-sale-section .clinic-form-section-label {
   margin: 0 0 10px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1639,7 +1640,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
   justify-content: space-between;
   align-items: flex-start;
   gap: 10px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   padding: 5px 0;
   border-bottom: 1px dashed rgba(38, 91, 147, 0.12);
 }
@@ -1650,7 +1651,7 @@ html.dark .clinic-quick-register-dialog .clinic-quick-chip.is-active {
 
 .clinic-sale-summary-total {
   margin: 4px 0 0;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: var(--clinic-navy, #0c2d4d);
 }
 

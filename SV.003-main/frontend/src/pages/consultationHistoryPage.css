@@ -15,7 +15,7 @@
 
 .history-page-header p {
   margin: 6px 0 0;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
   max-width: 36rem;
 }
@@ -66,14 +66,14 @@
 }
 
 .history-stat-value {
-  font-size: 1.25rem;
+  font-size: var(--fs-title);
   font-weight: 800;
   color: #0c2d4d;
   line-height: 1.1;
 }
 
 .history-stat-label {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
   text-transform: none;
@@ -108,7 +108,7 @@
   border-radius: 12px;
   background: #fff;
   font: inherit;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #0c2d4d;
 }
 
@@ -156,7 +156,7 @@
   border: 1px solid rgba(38, 91, 147, 0.12);
   background: rgba(255, 255, 255, 0.7);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #64748b;
   cursor: pointer;
@@ -184,7 +184,7 @@
 
 .history-results-count {
   margin: 0 0 12px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 
@@ -224,7 +224,7 @@
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid rgba(239, 68, 68, 0.2);
   color: #b91c1c;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .history-card-skeleton {
@@ -259,14 +259,14 @@
 
 .history-empty-state h3 {
   margin: 0 0 6px;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   color: #0c2d4d;
 }
 
 .history-empty-state p {
   margin: 0 0 16px;
   color: #64748b;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 /* GUIAA header tones */
@@ -704,14 +704,14 @@ html.dark .history-search-clear:hover {
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 8px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #475569;
 }
 
 .history-detail-guiaa .clinical-linked-study-text {
   margin: 0;
   white-space: pre-wrap;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
 }
 
 .history-card--lab .history-card-header {

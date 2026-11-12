@@ -86,7 +86,7 @@
 
 .landing-body-wrap .landing-lead {
   color: #5b6b7c;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.65;
 }
 
@@ -249,7 +249,7 @@
 .landing-brand-band span {
   display: block;
   margin: 0.35rem 0 0;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   color: #64748b;
   max-width: 32rem;
@@ -399,7 +399,7 @@
   padding: 0;
   border-radius: 0;
   background: transparent;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   letter-spacing: -0.01em;
   text-transform: none;
@@ -436,7 +436,7 @@
 
 .landing-footer-v2-label {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: #0c2d4d;
 }
@@ -511,7 +511,7 @@
 
 .landing-footer-v2-social-name {
   display: block;
-  font-size: 0.8rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   line-height: 1.2;
 }
@@ -524,7 +524,7 @@
 .landing-footer-v2-social-sub {
   display: block;
   margin-top: 0.12rem;
-  font-size: 0.7rem;
+  font-size: var(--fs-caption);
   font-weight: 500;
   line-height: 1.2;
   color: rgba(12, 45, 77, 0.55);
@@ -554,7 +554,7 @@
   background: rgba(12, 45, 77, 0.03);
   padding: 0.38rem 0.8rem;
   border-radius: 0.5rem;
-  font-size: 0.78rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: rgba(12, 45, 77, 0.72);
   cursor: pointer;
@@ -634,7 +634,7 @@
   border: 1.5px solid rgba(12, 45, 77, 0.12);
   border-radius: 0.65rem;
   background: #fff;
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   color: #0c2d4d;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -662,7 +662,7 @@
   border: none;
   border-radius: 0.75rem;
   background: #3d9b8f;
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #ffffff;
   cursor: pointer;
@@ -689,7 +689,7 @@
 
 .landing-footer-v2-form-msg {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: var(--fs-caption);
 }
 
 .landing-footer-v2-form-msg--error {
@@ -718,7 +718,7 @@
 
 .landing-footer-v2-copy {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: var(--fs-caption);
   color: rgba(12, 45, 77, 0.55);
 }
 
@@ -731,7 +731,7 @@
 
 .landing-footer-v2-legal-dot {
   color: rgba(12, 45, 77, 0.28);
-  font-size: 0.8rem;
+  font-size: var(--fs-caption);
   user-select: none;
 }
 
@@ -740,7 +740,7 @@
   border: none;
   background: none;
   padding: 0;
-  font-size: 0.8rem;
+  font-size: var(--fs-caption);
   font-weight: 500;
   color: rgba(12, 45, 77, 0.62);
   text-decoration: none;
@@ -788,7 +788,7 @@
   }
 
   .landing-footer-v2-mailbox-hint {
-    font-size: 0.8rem;
+    font-size: var(--fs-caption);
   }
 
   .landing-footer-v2-social-card {

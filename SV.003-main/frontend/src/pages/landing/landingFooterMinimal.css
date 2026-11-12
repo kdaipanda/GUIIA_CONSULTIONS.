@@ -163,7 +163,7 @@
 
 .landing-footer-min-copy p {
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   color: var(--footer-muted);
   font-family: var(--landing-font-body, "Source Sans 3", system-ui, sans-serif);
@@ -193,7 +193,7 @@
 .landing-footer-min-legal a,
 .landing-footer-min-legal button {
   font-family: var(--landing-font-body, "Source Sans 3", system-ui, sans-serif);
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   letter-spacing: -0.01em;
   text-decoration: none;
@@ -221,7 +221,7 @@
 
 .landing-footer-min-legal a,
 .landing-footer-min-legal button {
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: var(--footer-muted);
 }

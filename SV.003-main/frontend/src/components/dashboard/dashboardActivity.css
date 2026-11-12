@@ -15,7 +15,7 @@
   border-radius: 999px;
   background: rgba(38, 91, 147, 0.1);
   color: #265b93;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: 700;
 }
 
@@ -32,14 +32,14 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: #0c2d4d;
 }
 
 .dashboard-activity-panel-note {
   margin: 4px 0 0;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
 }
@@ -57,7 +57,7 @@
   height: auto;
   min-height: 2.75rem;
   padding: 4px 8px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #265b93;
 }
@@ -177,7 +177,7 @@
 }
 
 .dashboard-activity-card--project .dashboard-activity-date {
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--card-muted) !important;
@@ -188,7 +188,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--card-ink-strong) !important;
 }
@@ -205,7 +205,7 @@
 }
 
 .dashboard-activity-progress-pct {
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: var(--card-ink) !important;
 }
@@ -218,7 +218,7 @@
   border-radius: 999px;
   background: var(--card-surface);
   border: 1px solid var(--card-surface-border);
-  font-size: 0.6875rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--card-ink) !important;
@@ -291,7 +291,7 @@
 
 .dashboard-activity-subtitle {
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: var(--card-muted) !important;
 }
@@ -299,7 +299,7 @@
 .dashboard-activity-preview {
   margin: 0.15rem 0 0;
   max-width: 100%;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   line-height: 1.4;
   color: var(--card-muted-soft) !important;
   display: -webkit-box;
@@ -364,7 +364,7 @@
 
 .dashboard-activity-avatar--species {
   background: var(--card-surface);
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   margin-right: -0.35rem;
 }
 
@@ -403,7 +403,7 @@
   min-height: 1.5rem;
   padding: 0.2rem 0.65rem;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: -0.01em;
 }
@@ -522,7 +522,7 @@ html.dark .dashboard-activity-skeleton--project {
 }
 
 .dashboard-activity-folio {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.02em;
   color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 55%, transparent);
@@ -536,7 +536,7 @@ html.dark .dashboard-activity-skeleton--project {
   flex-shrink: 0;
   padding: 4px 8px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
 }
 
@@ -570,7 +570,7 @@ html.dark .dashboard-activity-skeleton--project {
   justify-content: center;
   border-radius: 12px;
   background: color-mix(in srgb, var(--guiaa-blue, #265b93) 8%, transparent);
-  font-size: 22px;
+  font-size: var(--fs-title);
   line-height: 1;
 }
 
@@ -581,7 +581,7 @@ html.dark .dashboard-activity-skeleton--project {
 
 .dashboard-activity-body h3 {
   margin: 0 0 4px;
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 600;
   color: #0c2d4d;
   line-height: 1.35;
@@ -589,7 +589,7 @@ html.dark .dashboard-activity-skeleton--project {
 
 .dashboard-activity-body p {
   margin: 0 0 10px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
   display: -webkit-box;
@@ -610,7 +610,7 @@ html.dark .dashboard-activity-skeleton--project {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 55%, transparent);
   min-width: 0;
 }
@@ -658,7 +658,7 @@ html.dark .dashboard-activity-skeleton--project {
 .dashboard-activity-empty--inline p {
   margin: 0;
   max-width: 28rem;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
 }
@@ -670,7 +670,7 @@ html.dark .dashboard-activity-skeleton--project {
   border: 1px solid color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 12%, transparent);
   background: color-mix(in srgb, var(--guiaa-sky-soft, #e8f4fc) 55%, #fff);
   color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   text-align: center;
 }
@@ -683,7 +683,7 @@ html.dark .dashboard-activity-skeleton--project {
 
 .dashboard-activity-empty p {
   margin: 0 0 16px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
 }
 
@@ -739,12 +739,12 @@ html.dark .dashboard-activity-skeleton--project {
 }
 
 .dashboard-followup-text strong {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #0c2d4d;
 }
 
 .dashboard-followup-text span {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -754,7 +754,7 @@ html.dark .dashboard-activity-skeleton--project {
 
 .dashboard-followup-date {
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 55%, transparent);
 }
 
@@ -805,13 +805,13 @@ html.dark .dashboard-activity-skeleton--project {
 }
 
 .dashboard-shortcut-label {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #0c2d4d;
 }
 
 .dashboard-shortcut-card kbd {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   padding: 2px 6px;
   border-radius: 6px;
   border: 1px solid #e2e8f0;
@@ -823,7 +823,7 @@ html.dark .dashboard-activity-skeleton--project {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #b45309;
 }

@@ -15,7 +15,7 @@
 
 .clinic-inventory-page .clinic-report-kpi-label {
   display: block;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -46,7 +46,7 @@
   height: auto;
   min-height: 0;
   flex: 1;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-inventory-filter {
@@ -80,7 +80,7 @@
   margin-left: 6px;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   background: rgba(245, 158, 11, 0.18);
   color: #b45309;

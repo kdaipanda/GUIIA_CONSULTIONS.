@@ -71,7 +71,7 @@
 .guiaa-access-denied-code {
   margin: 0 0 0.55rem;
   color: var(--ad-muted);
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -90,7 +90,7 @@
   margin: 0.9rem 0 0;
   max-width: 22rem;
   color: var(--ad-muted);
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   line-height: 1.55;
 }
 
@@ -111,7 +111,7 @@
   min-height: 2.75rem;
   padding: 0.65rem 1.15rem;
   border-radius: 0.65rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   font-weight: 650;
   cursor: pointer;
   transition:

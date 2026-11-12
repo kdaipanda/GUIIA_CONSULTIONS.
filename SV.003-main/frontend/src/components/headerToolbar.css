@@ -58,7 +58,7 @@
 }
 
 .header-theme-menu-label {
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #64748b;
   letter-spacing: -0.01em;
@@ -72,7 +72,7 @@
 .header-theme-toggle--menu .header-theme-option {
   flex: 1;
   padding: 0 0.55rem;
-  font-size: 0.7rem;
+  font-size: var(--fs-caption);
 }
 
 .header-theme-toggle--menu .header-theme-option-label {
@@ -91,7 +91,7 @@
   border-radius: 999px;
   background: transparent;
   color: #7a8494;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1;
@@ -150,7 +150,7 @@
   min-width: 17px;
   height: 17px;
   padding: 0 4px;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   line-height: 1;
   border: 2px solid #ffffff;
@@ -190,7 +190,7 @@
 .user-menu-trigger--avatar .user-avatar {
   width: 2.75rem;
   height: 2.75rem;
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 700;
   letter-spacing: -0.02em;
   border-radius: 11px;
@@ -261,7 +261,7 @@ html.dark .user-dropdown-item--upgrade svg {
 }
 
 .header-lang-menu-label {
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #64748b;
   letter-spacing: -0.01em;

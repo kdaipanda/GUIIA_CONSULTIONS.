@@ -152,7 +152,7 @@
 
 .landing-petpal-kicker {
   margin: 0.65rem 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: rgba(61, 155, 143, 0.95);
@@ -185,7 +185,7 @@
 
 @media (min-width: 640px) {
   .landing-petpal-lead {
-    font-size: 1.125rem;
+    font-size: var(--fs-subtitle);
   }
 
   .landing-petpal-lead--secondary {
@@ -211,7 +211,7 @@
   border-radius: 0.75rem;
   background: #3d9b8f;
   color: #ffffff;
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   letter-spacing: -0.01em;
   box-shadow: 0 8px 24px rgba(47, 133, 122, 0.32);
@@ -231,7 +231,7 @@
   border: 1px solid rgba(12, 45, 77, 0.22);
   background: rgba(255, 255, 255, 0.72);
   color: #0c2d4d;
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   font-weight: 650;
   text-decoration: none;
   transition:
@@ -280,7 +280,7 @@
   border: 1px solid rgba(255, 255, 255, 0.28);
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   letter-spacing: -0.01em;
   backdrop-filter: none;
@@ -314,7 +314,7 @@
 .landing-petpal-cta-hint {
   display: block;
   margin-top: 0.95rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.58);
 }
@@ -441,7 +441,7 @@
 
 .landing-hero-cap-mark {
   margin: 0 0 0.45rem;
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: -0.01em;
   color: #7dd3c7;
@@ -458,7 +458,7 @@
 
 .landing-hero-capability-desc {
   margin: 0.55rem 0 0;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.55;
   color: rgba(255, 255, 255, 0.64);
   max-width: 42rem;
@@ -489,7 +489,7 @@
 
 .landing-hero-cap-more {
   margin: 1.15rem 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.55;
@@ -574,7 +574,7 @@
 
 .landing-petpal-stat-desc {
   margin-top: 0.3rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   color: #64748b;
   max-width: 28ch;
@@ -622,7 +622,7 @@
   border-radius: 999px;
   background: transparent;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 650;
   letter-spacing: -0.01em;
   cursor: pointer;
@@ -676,7 +676,7 @@
 }
 
 .landing-video-modal-close-label {
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   letter-spacing: -0.01em;
 }
@@ -724,7 +724,7 @@
 .landing-video-modal-footnote {
   margin: 0;
   padding-inline: 0.15rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   letter-spacing: -0.01em;
   color: rgba(255, 255, 255, 0.6);

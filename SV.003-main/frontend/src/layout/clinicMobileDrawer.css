@@ -41,7 +41,7 @@
 
 .clinic-mobile-drawer-title {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   letter-spacing: -0.02em;
   text-transform: none;
@@ -50,7 +50,7 @@
 
 .clinic-mobile-drawer-org {
   margin: 4px 0 0;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #0c2d4d;
 }

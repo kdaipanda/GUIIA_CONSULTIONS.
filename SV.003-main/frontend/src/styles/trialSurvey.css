@@ -32,14 +32,14 @@
 
 .trial-survey-star-label {
   text-align: center;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: var(--muted-foreground, #64748b);
   margin: 0 0 0.75rem;
 }
 
 .trial-survey-label {
   display: block;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   margin-bottom: 0.35rem;
 }
@@ -63,7 +63,7 @@
 
 .trial-survey-error {
   color: #dc2626;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   margin: 0.5rem 0 0;
 }
 
@@ -87,11 +87,11 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--primary, #0d9488) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--primary, #0d9488) 28%, transparent);
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
 }
 
 .trial-survey-promo-note {
-  font-size: 0.8rem;
+  font-size: var(--fs-caption);
   opacity: 0.85;
 }
 

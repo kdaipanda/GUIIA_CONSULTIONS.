@@ -3,7 +3,7 @@
 .clinical-md {
   color: #1e293b;
   font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   line-height: 1.7;
 }
 
@@ -31,7 +31,7 @@
 .clinical-md-h3,
 .clinical-md-h4 {
   margin-top: 1.1rem;
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   color: #0c2d4d;
 }
 

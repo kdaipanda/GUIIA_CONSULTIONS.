@@ -47,7 +47,63 @@ html.guiaa-native-app .landing-shell {
   touch-action: pan-y pinch-zoom;
 }
 
+/* Tipografía accesible en clínica (móvil / tablet / WebView) */
 @media (max-width: 1023px) {
+  .clinic-shell,
+  .clinic-page-guiaa,
+  .consultation-flow,
+  .app-main .consultation-container {
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+  }
+
+  .clinic-shell label,
+  .clinic-page-guiaa label,
+  .consultation-flow label,
+  .clinic-shell .clinic-muted,
+  .clinic-page-guiaa .clinic-muted,
+  .clinic-stat-label,
+  .clinic-shell small,
+  .clinic-page-guiaa small {
+    font-size: var(--fs-caption) !important;
+    line-height: var(--lh-tight);
+  }
+
+  .clinic-shell input,
+  .clinic-shell select,
+  .clinic-shell textarea,
+  .clinic-page-guiaa input,
+  .clinic-page-guiaa select,
+  .clinic-page-guiaa textarea,
+  .consultation-flow input,
+  .consultation-flow select,
+  .consultation-flow textarea,
+  .consultation-flow button,
+  .clinic-shell button,
+  .clinic-page-guiaa button {
+    font-size: var(--fs-body-sm) !important;
+  }
+
+  .clinic-page-guiaa .clinic-page-header h1,
+  .clinic-shell-main h1 {
+    font-size: var(--fs-headline);
+    line-height: var(--lh-tight);
+  }
+
+  .clinic-page-guiaa .clinic-page-header h2,
+  .clinic-shell-main h2,
+  .consultation-flow h2 {
+    font-size: var(--fs-title);
+    line-height: var(--lh-tight);
+  }
+
+  .clinic-page-guiaa .clinic-page-header p,
+  .clinic-shell-main p,
+  .consultation-flow p {
+    font-size: var(--fs-body-sm);
+    line-height: var(--lh-body);
+  }
+
   .clinic-shell > .header {
     padding-top: max(8px, env(safe-area-inset-top, 0px));
   }
@@ -116,14 +172,14 @@ html.guiaa-native-app .landing-shell {
   }
 
   .clinic-dashboard-page .clinic-page-header p {
-    font-size: 14px;
-    line-height: 1.45;
+    font-size: var(--fs-body-sm);
+    line-height: var(--lh-body);
     text-wrap: pretty;
     max-width: none;
   }
 
   .clinic-dashboard-greeting {
-    font-size: clamp(1.35rem, 5.8vw, 1.85rem);
+    font-size: clamp(var(--fs-title), 5.8vw, var(--fs-display));
     line-height: 1.15;
   }
 
@@ -184,6 +240,22 @@ html.guiaa-native-app .landing-shell {
 
   .clinic-shell > .header .nav-brand h1 {
     max-width: min(38vw, 160px);
-    font-size: 15px !important;
+    font-size: var(--fs-body-sm) !important;
   }
+}
+
+/* App Android: piso de lectura y targets táctiles */
+html.guiaa-native-app .clinic-shell,
+html.guiaa-native-app .consultation-flow {
+  font-size: var(--fs-body);
+}
+
+html.guiaa-native-app .clinic-shell input,
+html.guiaa-native-app .clinic-shell select,
+html.guiaa-native-app .clinic-shell textarea,
+html.guiaa-native-app .consultation-flow input,
+html.guiaa-native-app .consultation-flow select,
+html.guiaa-native-app .consultation-flow textarea {
+  font-size: max(16px, var(--fs-body-sm)) !important; /* evita zoom iOS/Android en focus */
+  min-height: 44px;
 }

@@ -47,7 +47,7 @@
 .portal-brand p {
   margin: 4px 0 0;
   color: #64748b;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
 }
 
@@ -60,7 +60,7 @@
 
 .portal-empty p {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   color: #475569;
 }
@@ -82,7 +82,7 @@
   border: 1px solid rgba(38, 91, 147, 0.18);
   background: #fff;
   color: #0c2d4d;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
 }
 
 .portal-select:focus-visible,

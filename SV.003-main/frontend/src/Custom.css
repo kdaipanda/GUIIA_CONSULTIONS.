@@ -16,7 +16,7 @@
 .memberships-header .services-badge {
   margin-bottom: 32px !important;
   padding: 10px 20px !important;
-  font-size: 15px !important;
+  font-size: var(--fs-body) !important;
   font-weight: 600 !important;
 }
 
@@ -138,7 +138,7 @@
 }
 
 .price .period {
-  font-size: 16px !important;
+  font-size: var(--fs-body) !important;
   color: #64748b !important;
   font-weight: 600 !important;
 }
@@ -150,7 +150,7 @@
 
 .membership-features .feature {
   padding: 14px 0 !important;
-  font-size: 15px !important;
+  font-size: var(--fs-body) !important;
   color: #475569 !important;
   line-height: 1.6 !important;
   border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
@@ -169,7 +169,7 @@
   color: white !important;
   padding: 8px 24px !important;
   border-radius: 50px !important;
-  font-size: 13px !important;
+  font-size: var(--fs-body-sm) !important;
   font-weight: 700 !important;
   letter-spacing: 0.5px !important;
   text-transform: uppercase !important;
@@ -221,7 +221,7 @@
 }
 
 .footer-section h4 {
-  font-size: 18px !important;
+  font-size: var(--fs-subtitle) !important;
   font-weight: 800 !important;
   margin-bottom: 24px !important;
   color: white !important;
@@ -245,7 +245,7 @@
 .footer-section p {
   color: #cbd5e1 !important;
   line-height: 1.8 !important;
-  font-size: 15px !important;
+  font-size: var(--fs-body) !important;
   margin-bottom: 20px !important;
 }
 
@@ -262,7 +262,7 @@
 .footer-section ul li a {
   color: #cbd5e1 !important;
   text-decoration: none !important;
-  font-size: 15px !important;
+  font-size: var(--fs-body) !important;
   transition: all 0.3s !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -308,7 +308,7 @@
 
 .contact-box p {
   margin-bottom: 12px !important;
-  font-size: 14px !important;
+  font-size: var(--fs-body-sm) !important;
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
@@ -344,7 +344,7 @@
   align-items: center !important;
   justify-content: center !important;
   color: #3b82f6 !important;
-  font-size: 20px !important;
+  font-size: var(--fs-title) !important;
   transition: all 0.3s !important;
   text-decoration: none !important;
 }
@@ -359,7 +359,7 @@
 
 .footer-bottom p {
   color: #94a3b8 !important;
-  font-size: 14px !important;
+  font-size: var(--fs-body-sm) !important;
   margin: 0 !important;
 }
 
@@ -387,7 +387,7 @@
   }
   
   .memberships-header p {
-    font-size: 16px !important;
+    font-size: var(--fs-body) !important;
     padding: 0 10px !important;
   }
   
@@ -419,16 +419,16 @@
   }
   
   .price .currency {
-    font-size: 20px !important;
+    font-size: var(--fs-title) !important;
   }
   
   .membership-features .feature {
-    font-size: 14px !important;
+    font-size: var(--fs-body-sm) !important;
     padding: 12px 0 !important;
   }
   
   .popular-badge {
-    font-size: 12px !important;
+    font-size: var(--fs-caption) !important;
     padding: 6px 20px !important;
   }
   
@@ -444,7 +444,7 @@
   }
   
   .footer-section h4 {
-    font-size: 16px !important;
+    font-size: var(--fs-body) !important;
     margin-bottom: 20px !important;
   }
   
@@ -454,7 +454,7 @@
   
   .footer-section p,
   .footer-section ul li a {
-    font-size: 14px !important;
+    font-size: var(--fs-body-sm) !important;
   }
   
   .contact-box {
@@ -468,7 +468,7 @@
   .social-links a {
     width: 44px !important;
     height: 44px !important;
-    font-size: 18px !important;
+    font-size: var(--fs-subtitle) !important;
   }
 }
 
@@ -487,7 +487,7 @@
   }
   
   .membership-features .feature {
-    font-size: 13px !important;
+    font-size: var(--fs-body-sm) !important;
   }
 }
 
@@ -585,7 +585,7 @@
 
 .terms-content h4 {
   color: #334155 !important;
-  font-size: 1rem !important;
+  font-size: var(--fs-body) !important;
   font-weight: 600 !important;
   margin-top: 20px !important;
   margin-bottom: 10px !important;
@@ -663,11 +663,11 @@
   
   .terms-content {
     padding: 15px !important;
-    font-size: 13px !important;
+    font-size: var(--fs-body-sm) !important;
   }
   
   .terms-content h3 {
-    font-size: 1rem !important;
+    font-size: var(--fs-body) !important;
   }
   
   .terms-content h4 {

@@ -68,14 +68,14 @@
 }
 
 .cfd-toggle-title {
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: var(--cfd-navy);
   line-height: 1.25;
 }
 
 .cfd-toggle-species {
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: var(--cfd-muted);
 }
@@ -109,7 +109,7 @@
 .cfd-section-title {
   margin: 0;
   padding: 10px 14px;
-  font-size: 0.7rem;
+  font-size: var(--fs-caption);
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -153,7 +153,7 @@
 }
 
 .cfd-field-value {
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: var(--cfd-ink);
   line-height: 1.35;
@@ -167,7 +167,7 @@
   border: 1px solid rgba(38, 91, 147, 0.12);
   background: #fff;
   color: var(--cfd-ink);
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   line-height: 1.65;
   white-space: pre-wrap;
@@ -181,7 +181,7 @@
   min-width: 2.5rem;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 800;
   letter-spacing: 0.02em;
 }

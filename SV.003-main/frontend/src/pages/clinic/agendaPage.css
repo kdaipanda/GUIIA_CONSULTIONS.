@@ -29,14 +29,14 @@
 
 .agenda-stat-value {
   display: block;
-  font-size: 1.25rem;
+  font-size: var(--fs-title);
   font-weight: 800;
   color: var(--agenda-navy);
   line-height: 1.1;
 }
 
 .agenda-stat-label {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #64748b;
   text-transform: uppercase;
@@ -70,7 +70,7 @@
   border-radius: 8px;
   background: transparent;
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #64748b;
   cursor: pointer;
@@ -170,7 +170,7 @@
 }
 
 .agenda-page-guiaa .clinic-agenda-reason {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: #64748b;
   line-height: 1.35;
   display: -webkit-box;
@@ -180,7 +180,7 @@
 }
 
 .agenda-page-guiaa .clinic-agenda-client {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: #64748b;
 }
 
@@ -216,12 +216,12 @@
 }
 
 .agenda-list-section-head strong {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: var(--agenda-navy);
 }
 
 .agenda-list-section-head span {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #64748b;
 }
 
@@ -316,14 +316,14 @@
 
 .clinic-agenda-approve-summary {
   margin: 0 0 0.35rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   color: var(--agenda-navy);
 }
 
 .clinic-agenda-approve-reason {
   margin: 0 0 0.75rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   color: rgba(12, 45, 77, 0.58);
 }

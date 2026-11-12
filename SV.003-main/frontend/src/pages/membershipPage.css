@@ -28,7 +28,7 @@
 }
 
 .membership-hero p {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   color: #64748b;
   max-width: 32rem;
   margin: 0 auto;
@@ -39,7 +39,7 @@
   margin: 0 auto 2rem;
   padding: 0 1rem;
   text-align: center;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   color: #64748b;
 }
 
@@ -50,7 +50,7 @@
   margin-top: 1rem;
   padding: 0.625rem 1.125rem;
   border-radius: 12px;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
 }
 
@@ -81,14 +81,14 @@
   margin: 0;
   max-width: 36rem;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   color: #475569;
 }
 
 .pricing-promo-hint {
   margin: 0.75rem 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   color: rgba(12, 45, 77, 0.78);
   text-align: center;
@@ -123,7 +123,7 @@
   border-radius: 12px;
   background: transparent;
   color: #64748b;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -152,7 +152,7 @@
   border-radius: 12px;
   background: #3d9b8f;
   color: #fff;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -271,7 +271,7 @@
   border: 1px solid color-mix(in srgb, #265b93 35%, white);
   background: linear-gradient(135deg, #265b93 0%, #1e4a78 100%);
   color: #fff;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -294,7 +294,7 @@
   border-radius: 999px;
   background: #3d9b8f;
   color: #fff;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -312,7 +312,7 @@
 
 .membership-page .pricing-header h3 {
   margin-bottom: 0.75rem;
-  font-size: 1.125rem;
+  font-size: var(--fs-subtitle);
   font-weight: 700;
   color: #0c2d4d;
 }
@@ -326,7 +326,7 @@
 }
 
 .membership-page .currency {
-  font-size: 1.125rem;
+  font-size: var(--fs-subtitle);
   font-weight: 700;
   color: #265b93;
 }
@@ -346,14 +346,14 @@
 .membership-page .period {
   width: 100%;
   margin-top: 0.25rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #64748b;
 }
 
 .membership-page .price-equivalent {
   margin-top: 0.35rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #2f857a;
 }
@@ -371,7 +371,7 @@
   align-items: flex-start;
   gap: 0.5rem;
   padding: 0.15rem 0;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: rgba(12, 45, 77, 0.68);
   line-height: 1.45;
@@ -391,7 +391,7 @@
   min-height: 2.75rem;
   padding: 0.75rem 1rem;
   border-radius: 12px;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   text-align: center;
   transition:
@@ -465,7 +465,7 @@
 
 .membership-page .membership-info > p {
   margin-bottom: 2rem;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   color: #64748b;
 }
 
@@ -513,13 +513,13 @@
   display: flex;
   align-items: center;
   margin-bottom: 0.35rem;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: #0c2d4d;
 }
 
 .membership-page .info-card p {
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   color: #64748b;
 }
@@ -535,14 +535,14 @@
 
 .payment-status-card h2 {
   margin-bottom: 0.75rem;
-  font-size: 1.5rem;
+  font-size: var(--fs-headline);
   font-weight: 700;
   color: #0c2d4d;
 }
 
 .payment-status-card p {
   margin-bottom: 1.5rem;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   line-height: 1.6;
   color: rgba(12, 45, 77, 0.6);
 }
@@ -587,7 +587,7 @@
 .membership-footnote {
   margin: 0 1rem 2rem;
   text-align: center;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   color: #64748b;
   line-height: 1.5;
 }
@@ -611,7 +611,7 @@
   border-radius: 12px;
   border: 1px solid rgba(12, 45, 77, 0.1);
   background: #fff;
-  font-size: 0.6875rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #475569;
 }
@@ -630,7 +630,7 @@
   margin: 1rem 0 0;
   padding-left: 1.1rem;
   text-align: left;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.55;
   color: rgba(12, 45, 77, 0.6);
 }
@@ -663,7 +663,7 @@
 
 .membership-credits-inner h2 {
   margin: 0 0 0.5rem;
-  font-size: 1.25rem;
+  font-size: var(--fs-title);
   font-weight: 800;
   color: #0c2d4d;
 }
@@ -671,7 +671,7 @@
 .membership-credits-inner > div > p:last-of-type {
   margin: 0;
   max-width: 28rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.55;
   color: #64748b;
 }
@@ -692,27 +692,27 @@
 
 .membership-credit-name {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: #0c2d4d;
 }
 
 .membership-credit-price {
   margin: 0.35rem 0 0;
-  font-size: 1.5rem;
+  font-size: var(--fs-headline);
   font-weight: 800;
   color: #2f857a;
 }
 
 .membership-credit-price span {
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #64748b;
 }
 
 .membership-credit-note {
   margin: 0.5rem 0 0.875rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   line-height: 1.45;
   color: #64748b;
 }

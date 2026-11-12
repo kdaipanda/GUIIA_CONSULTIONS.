@@ -75,7 +75,7 @@
 
 .owner-shell-sessions {
   display: none;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.02em;
   padding: 0.4rem 0.75rem;
@@ -100,7 +100,7 @@
   min-height: 2.75rem;
   border-radius: 0.65rem;
   padding: 0.5rem 0.85rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #265b93;
   background: transparent;
@@ -137,7 +137,7 @@
 
 .owner-shell-kicker {
   margin: 0 0 0.65rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -161,7 +161,7 @@
   border-radius: 0.65rem;
   color: #265b93;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   white-space: nowrap;
   transition: background 0.15s ease, color 0.15s ease;
@@ -204,7 +204,7 @@
   z-index: 1;
   padding: 1rem 1.25rem 1.5rem;
   text-align: center;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #64748b;
   line-height: 1.4;
@@ -248,7 +248,7 @@
 .owner-card .owner-lead {
   margin: 0 0 1.35rem;
   color: #64748b;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   line-height: 1.45;
 }
 
@@ -270,7 +270,7 @@
 .owner-offer-kicker {
   margin: 0;
   color: #2f857a;
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -282,7 +282,7 @@
   border: 1px dashed rgba(38, 91, 147, 0.4);
   border-radius: 999px;
   padding: 0.28rem 0.7rem;
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   font-weight: 800;
   letter-spacing: 0.14em;
 }
@@ -305,14 +305,14 @@
 .owner-offer-now small {
   margin-left: 0.3rem;
   color: #64748b;
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   letter-spacing: 0;
 }
 
 .owner-offer-was {
   color: #94a3b8;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 600;
   text-decoration: line-through;
 }
@@ -320,7 +320,7 @@
 .owner-offer-note {
   margin: 0.75rem 0 0;
   color: #475569;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.4;
 }
 
@@ -331,7 +331,7 @@
   background: #e8f4fc;
   border: 1px solid rgba(38, 91, 147, 0.18);
   border-left: 3px solid #265b93;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   color: #0c2d4d;
 }
@@ -343,7 +343,7 @@
   background: rgba(61, 155, 143, 0.1);
   border: 1px solid rgba(61, 155, 143, 0.28);
   border-left: 3px solid #3d9b8f;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   color: #0c2d4d;
 }
@@ -380,7 +380,7 @@
 .owner-form label {
   display: grid;
   gap: 0.4rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #0c2d4d;
 }
@@ -393,7 +393,7 @@
   border-radius: 0.65rem;
   border: 1px solid #e2e8f0;
   font: inherit;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 400;
   color: #0f172a;
   background: #ffffff;
@@ -419,7 +419,7 @@
   align-items: flex-start;
   gap: 0.65rem;
   font-weight: 500 !important;
-  font-size: 0.875rem !important;
+  font-size: var(--fs-body-sm) !important;
   color: #475569;
   line-height: 1.4;
 }
@@ -448,7 +448,7 @@
   padding: 0 1.15rem;
   border-radius: 0.65rem;
   font-weight: 650;
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   cursor: pointer;
   border: 1px solid transparent;
   text-decoration: none;
@@ -490,7 +490,7 @@
 
 .owner-error {
   color: #ef4444;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   margin: 0.25rem 0 0;
 }
@@ -498,7 +498,7 @@
 .owner-analysis {
   white-space: pre-wrap;
   line-height: 1.55;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   color: #0f172a;
   padding: 1rem;
   border-radius: 0.75rem;
@@ -551,7 +551,7 @@
   color: #265b93;
   border-radius: 0.7rem;
   padding: 0.55rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 800;
   letter-spacing: 0.04em;
   cursor: pointer;
@@ -569,7 +569,7 @@
 
 .owner-muted {
   color: #64748b;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   margin-top: 0.25rem;
 }
 

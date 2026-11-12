@@ -20,7 +20,7 @@
 }
 
 .consultation-mobile-context-label {
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   letter-spacing: -0.01em;
   text-transform: none;
@@ -28,7 +28,7 @@
 }
 
 .consultation-mobile-context-meta {
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: color-mix(in srgb, var(--guiaa-navy, #0c2d4d) 62%, transparent);
 }
@@ -77,13 +77,13 @@
   }
 
   .consultation-form-container .step-label {
-    font-size: 11px;
+    font-size: var(--fs-caption);
   }
 
   .consultation-form-container .step-icon-wrapper {
     width: 32px;
     height: 32px;
-    font-size: 14px;
+    font-size: var(--fs-body-sm);
   }
 
   .consultation-form-container .form-actions {
@@ -191,7 +191,7 @@
 .category-card--chip .category-label,
 .category-card--chip h4 {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #0c2d4d;
   white-space: nowrap;
@@ -286,7 +286,7 @@
 .consultation-page .sidebar-label {
   text-transform: none;
   letter-spacing: -0.01em;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #64748b;
 }
@@ -667,7 +667,7 @@ html.dark .consultation-sidebar .sidebar-progress-bar {
 
 .consultation-trial-remaining {
   margin-top: 12px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
   text-align: center;
 }

@@ -86,7 +86,7 @@ body:has(.landing-resources),
   border: 1px solid var(--res-line);
   background: rgba(255, 255, 255, 0.9);
   color: var(--res-navy);
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -125,7 +125,7 @@ body:has(.landing-resources),
 
 .landing-resources-eyebrow {
   margin: 0 0 0.5rem;
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -143,7 +143,7 @@ body:has(.landing-resources),
 .landing-resources-lead {
   margin: 0.85rem 0 0;
   color: var(--res-muted);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.55;
 }
 
@@ -167,7 +167,7 @@ body:has(.landing-resources),
   outline: 0;
   background: transparent;
   color: var(--res-ink);
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   min-width: 0;
 }
 
@@ -217,7 +217,7 @@ body:has(.landing-resources),
 
 .landing-resources-quick-card em {
   font-style: normal;
-  font-size: 0.8rem;
+  font-size: var(--fs-caption);
   color: var(--res-muted);
 }
 
@@ -265,13 +265,13 @@ body:has(.landing-resources),
 }
 
 .landing-resources-card-head strong {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   color: var(--res-navy);
 }
 
 .landing-resources-card-head em {
   font-style: normal;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: var(--res-muted);
   line-height: 1.4;
 }
@@ -297,7 +297,7 @@ body:has(.landing-resources),
   border-radius: 0.85rem;
   background: rgba(61, 155, 143, 0.08);
   color: var(--res-navy);
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
 }
 
@@ -310,7 +310,7 @@ body:has(.landing-resources),
 
 .landing-resources-card-body h3 {
   margin: 1rem 0 0.4rem;
-  font-size: 0.8rem;
+  font-size: var(--fs-caption);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--res-navy);
@@ -320,7 +320,7 @@ body:has(.landing-resources),
   margin: 0;
   padding-left: 1.15rem;
   color: var(--res-muted);
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
 }
 
@@ -352,7 +352,7 @@ body:has(.landing-resources),
 .landing-resources-cta p {
   margin: 0.35rem 0 0;
   color: var(--res-muted);
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
 }
 
 .landing-resources-cta-actions {
@@ -366,7 +366,7 @@ body:has(.landing-resources),
   min-height: 2.75rem;
   padding: 0 1.15rem;
   border-radius: 999px;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   cursor: pointer;
 }

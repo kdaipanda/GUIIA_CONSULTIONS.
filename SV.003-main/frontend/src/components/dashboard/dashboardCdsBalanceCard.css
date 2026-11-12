@@ -12,7 +12,7 @@
 
 .dash-cds-balance-head h2 {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 800;
   letter-spacing: -0.01em;
   color: var(--dash-cds-navy);
@@ -21,7 +21,7 @@
 .dash-cds-balance-head p {
   margin: 0.3rem 0 0;
   max-width: 36rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   color: var(--dash-cds-muted);
 }
@@ -67,7 +67,7 @@
 
 .dash-cds-balance-plan {
   margin: 0.3rem 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: var(--dash-cds-muted);
 }
@@ -101,7 +101,7 @@
 .dash-cds-balance-progress span {
   display: block;
   margin-top: 0.4rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   color: var(--dash-cds-muted);
 }
 
@@ -111,7 +111,7 @@
 
 .dash-cds-balance-reload {
   margin: 0 0 0.45rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;

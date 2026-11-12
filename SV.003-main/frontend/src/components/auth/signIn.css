@@ -117,7 +117,7 @@ body:has(.signin-page),
 .signin-media-brand p {
   margin: 0;
   max-width: 22rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.78);
 }
@@ -149,7 +149,7 @@ body:has(.signin-page),
   min-height: 2.5rem;
   border-radius: 0.65rem;
   padding: 0.35rem 0.65rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #265b93;
   transition: background 0.15s ease, color 0.15s ease;
@@ -180,7 +180,7 @@ body:has(.signin-page),
 
 .signin-kicker {
   margin: 0 0 0.4rem;
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -199,7 +199,7 @@ body:has(.signin-page),
 
 .signin-heading p {
   margin: 0.55rem 0 0;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   line-height: 1.5;
   color: #64748b;
 }
@@ -217,7 +217,7 @@ body:has(.signin-page),
 }
 
 .signin-field label {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #0c2d4d;
 }
@@ -272,7 +272,7 @@ body:has(.signin-page),
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #475569;
   cursor: pointer;
@@ -293,7 +293,7 @@ body:has(.signin-page),
 
 .signin-link-btn {
   margin-top: -0.15rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #265b93;
   text-align: center;
@@ -310,7 +310,7 @@ body:has(.signin-page),
   gap: 0.75rem;
   margin: 0.15rem 0;
   color: #94a3b8;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -339,7 +339,7 @@ body:has(.signin-page),
   border: 1px solid rgba(12, 45, 77, 0.14);
   background: #fff;
   padding: 0.65rem 1rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #0c2d4d;
   transition: background 0.15s ease, border-color 0.15s ease;
@@ -353,7 +353,7 @@ body:has(.signin-page),
 .signin-footer {
   margin: 1.35rem 0 0;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 

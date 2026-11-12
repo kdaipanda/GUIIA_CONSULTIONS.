@@ -21,7 +21,7 @@
   border-radius: 0.5rem;
   background: #0c2d4d;
   color: #ffffff;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   text-decoration: none;
   transform: translateY(-160%);

@@ -36,7 +36,7 @@
   background: var(--cb-bg) !important;
   padding: 0 0.85rem !important;
   font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif !important;
-  font-size: 0.875rem !important;
+  font-size: var(--fs-body-sm) !important;
   font-weight: 500 !important;
   letter-spacing: -0.011em !important;
   color: var(--cb-ink) !important;

@@ -10,7 +10,7 @@
   border-radius: 0 !important;
   background: transparent !important;
   color: #265b93 !important;
-  font-size: 0.8125rem !important;
+  font-size: var(--fs-body-sm) !important;
   font-weight: 600 !important;
   letter-spacing: -0.01em !important;
   text-transform: none !important;
@@ -194,7 +194,7 @@
 }
 
 .landing-trust-strip-item p.text-sm {
-  font-size: 0.8125rem !important;
+  font-size: var(--fs-body-sm) !important;
   font-weight: 600 !important;
 }
 
@@ -281,7 +281,7 @@
 
 .landing-usecase-tag {
   margin: 0 0 0.35rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #265b93;
 }
@@ -296,7 +296,7 @@
 
 .landing-usecase-desc {
   margin: 0.35rem 0 0;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   color: #475569;
   max-width: 36rem;
@@ -310,7 +310,7 @@
   margin: 0;
   padding-block: 1.35rem;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: #0c2d4d;
@@ -329,7 +329,7 @@
   margin-bottom: 0.75rem !important;
   border-radius: 0 !important;
   background: transparent !important;
-  font-size: 0.8125rem !important;
+  font-size: var(--fs-body-sm) !important;
   font-weight: 600 !important;
   letter-spacing: -0.01em !important;
   text-transform: none !important;
@@ -366,7 +366,7 @@
 
 .landing-feature-unique {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: -0.01em;
   color: #3d9b8f;
@@ -389,7 +389,7 @@
 /* Clinical step numbers: tipográficos */
 .landing-clinical-workflow-section .landing-clinical-step-num {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.06em;
   color: #265b93 !important;
@@ -743,7 +743,7 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
   border-radius: 0.55rem;
   background: #0c2d4d;
   color: #fff;
-  font-size: 0.7rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
@@ -760,7 +760,7 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
 
 .landing-clinical-rail-title {
   margin: 0.15rem 0 0;
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #0c2d4d;
@@ -768,7 +768,7 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
 
 .landing-clinical-rail-detail {
   margin: 0.3rem 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   color: #475569;
 }
@@ -921,7 +921,7 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
 
 .landing-footer-v2-social-name {
   color: #265b93 !important;
-  font-size: 0.875rem !important;
+  font-size: var(--fs-body-sm) !important;
 }
 
 .landing-footer-v2-social-sub {
@@ -1039,7 +1039,7 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
   }
 
   .landing-product-bullets li {
-    font-size: 0.875rem;
+    font-size: var(--fs-body-sm);
     padding-top: 0.65rem;
     padding-bottom: 0.65rem;
   }
@@ -1055,7 +1055,7 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
   position: relative;
   padding: 0.55rem 0 0.55rem 1rem;
   border-top: 1px solid rgba(12, 45, 77, 0.08);
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   color: #475569;
 }
@@ -1136,7 +1136,7 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
 
 .landing-clinical-band-link {
   flex-shrink: 0;
-  font-size: 0.78rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: #0e7490;
@@ -1177,7 +1177,7 @@ html.dark .landing-clinical-workflow-section .landing-eyebrow {
 
 .landing-clinical-band-label {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: -0.015em;
   line-height: 1.25;
@@ -1243,11 +1243,11 @@ html.dark .landing-clinical-band-item {
 
 .landing-features-head-side .landing-lead {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
 }
 
 .landing-link-quiet {
-  font-size: 0.8rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: #0e7490;
@@ -1309,7 +1309,7 @@ a.landing-feature-strip-item:hover .landing-feature-strip-title {
 }
 
 .landing-feature-strip-desc {
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   font-weight: 500;
   line-height: 1.35;
   color: #475569;

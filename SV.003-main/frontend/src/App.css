@@ -424,7 +424,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-brand h1 {
-  font-size: 20px;
+  font-size: var(--fs-title);
   font-weight: 800;
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   background-clip: text;
@@ -443,7 +443,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-brand-subtitle {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #475569;
   letter-spacing: 0.01em;
@@ -451,7 +451,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-brand-subsubtitle {
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: 500;
   color: #94a3b8;
   letter-spacing: 0.01em;
@@ -473,7 +473,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 12px;
   color: #64748b;
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   transition: all 0.2s ease;
   border: none;
   background: transparent;
@@ -491,7 +491,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-link .nav-icon {
-  font-size: 16px;
+  font-size: var(--fs-body);
 }
 
 .nav-link-logout {
@@ -507,7 +507,7 @@ h1, h2, h3, h4, h5, h6 {
   display: none;
   background: none;
   border: none;
-  font-size: 24px;
+  font-size: var(--fs-headline);
   color: #2c5f8d;
   cursor: pointer;
   padding: 8px;
@@ -551,7 +551,7 @@ h1, h2, h3, h4, h5, h6 {
   background: none;
   border: none;
   color: #4a5568;
-  font-size: 16px;
+  font-size: var(--fs-body);
   cursor: pointer;
   padding: 8px 16px;
   border-radius: 8px;
@@ -583,11 +583,11 @@ h1, h2, h3, h4, h5, h6 {
 .vet-name {
   font-weight: 600;
   color: #1e293b;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .vet-membership {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #64748b;
   text-transform: capitalize;
 }
@@ -599,7 +599,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 10px 16px;
   border-radius: 12px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
@@ -619,12 +619,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .logout-icon {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 /* User Menu Styles */
 .nav-icon {
-  font-size: 16px;
+  font-size: var(--fs-body);
   margin-right: 4px;
 }
 
@@ -656,7 +656,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   flex-shrink: 0;
   box-shadow: 0 2px 6px rgba(14, 165, 233, 0.3);
 }
@@ -667,7 +667,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .clock-time {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #0284c7;
   line-height: 1.1;
@@ -675,7 +675,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .clock-date {
-  font-size: 10px;
+  font-size: var(--fs-caption);
   color: #64748b;
   font-weight: 500;
   text-transform: capitalize;
@@ -721,7 +721,7 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 16px;
+  font-size: var(--fs-body);
   box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
 }
 
@@ -733,14 +733,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .user-name-compact {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #334155;
   line-height: 1.2;
 }
 
 .user-membership-compact {
-  font-size: 10px;
+  font-size: var(--fs-caption);
   color: #64748b;
   font-weight: 500;
   background: #f1f5f9;
@@ -750,7 +750,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dropdown-arrow {
-  font-size: 10px;
+  font-size: var(--fs-caption);
   color: #94a3b8;
   transition: transform 0.2s ease;
 }
@@ -785,7 +785,7 @@ h1, h2, h3, h4, h5, h6 {
 .user-menu-trigger--avatar .user-avatar {
   width: 40px;
   height: 40px;
-  font-size: 15px;
+  font-size: var(--fs-body);
   background: linear-gradient(135deg, #3d9b8f 0%, #265b93 100%);
   box-shadow: none;
 }
@@ -848,7 +848,7 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   box-shadow: none;
   flex-shrink: 0;
 }
@@ -863,7 +863,7 @@ h1, h2, h3, h4, h5, h6 {
 .user-dropdown-name {
   font-weight: 700;
   color: #0c2d4d;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
@@ -871,7 +871,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .user-dropdown-email {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #64748b;
   line-height: 1.25;
   white-space: nowrap;
@@ -880,7 +880,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .user-dropdown-membership {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: #265b93;
   font-weight: 600;
   text-transform: capitalize;
@@ -955,7 +955,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 999px;
   background: linear-gradient(90deg, #7ec8c0 0%, #f0b48a 100%);
   color: #0c2d4d;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1;
@@ -976,7 +976,7 @@ h1, h2, h3, h4, h5, h6 {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: -0.01em;
   color: #0c2d4d;
@@ -993,14 +993,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .user-dropdown-footer-version {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #94a3b8;
   letter-spacing: -0.01em;
 }
 
 .dropdown-icon {
-  font-size: 16px;
+  font-size: var(--fs-body);
   width: 20px;
   text-align: center;
 }
@@ -1072,7 +1072,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 14px 28px;
   border: none;
   border-radius: 16px;
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1158,7 +1158,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-large {
   padding: 16px 32px;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
 }
 
 .btn-full {
@@ -1179,7 +1179,7 @@ h1, h2, h3, h4, h5, h6 {
   border: none;
   color: #4a5568;
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--fs-body);
   padding: 8px 0;
   margin-bottom: 16px;
 }
@@ -1232,7 +1232,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .sidebar-label {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #94a3b8;
   text-transform: uppercase;
@@ -1240,7 +1240,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .sidebar-value {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #1e293b;
   text-align: right;
@@ -1325,7 +1325,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .auth-card h2 {
   color: #2c5f8d;
-  font-size: 28px;
+  font-size: var(--fs-display);
   font-weight: 800;
   margin-bottom: 8px;
   text-align: center;
@@ -1335,7 +1335,7 @@ h1, h2, h3, h4, h5, h6 {
   color: #4a5568;
   text-align: center;
   margin-bottom: 22px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .auth-branding {
@@ -1366,7 +1366,7 @@ h1, h2, h3, h4, h5, h6 {
 .auth-app-name {
   font-weight: 800;
   letter-spacing: 0.05em;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   background-clip: text;
   -webkit-background-clip: text;
@@ -1374,14 +1374,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .auth-app-subtitle {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #64748b;
   font-weight: 600;
 }
 
 .auth-tagline {
   color: #475569;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   line-height: 1.3;
   max-width: 42ch;
@@ -1390,7 +1390,7 @@ h1, h2, h3, h4, h5, h6 {
 .auth-tagline div + div {
   margin-top: 2px;
   color: #94a3b8;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: 500;
 }
 
@@ -1408,7 +1408,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .password-requirements-intro {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   color: #475569;
 }
@@ -1424,7 +1424,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .password-requirements-heading {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -1443,7 +1443,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   line-height: 1.35;
   color: #334155;
 }
@@ -1470,7 +1470,7 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
   padding-top: 8px;
   border-top: 1px dashed #cbd5e1;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   line-height: 1.45;
   color: #64748b;
 }
@@ -1478,7 +1478,7 @@ h1, h2, h3, h4, h5, h6 {
 .password-requirements-examples-label {
   display: block;
   margin-bottom: 2px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -1494,7 +1494,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 8px;
   background: #ecfdf5;
   border: 1px solid #bbf7d0;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #15803d;
 }
@@ -1607,7 +1607,7 @@ html.dark .password-requirements-examples {
 .form-group label {
   display: block;
   margin-bottom: 6px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #334155;
   line-height: 1.4;
@@ -1620,7 +1620,7 @@ html.dark .password-requirements-examples {
   padding: 12px 16px;
   border: 1.5px solid #dbe3ee;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: var(--fs-body);
   color: #1e293b;
   background: rgba(255, 255, 255, 0.92);
   min-height: 48px;
@@ -1642,7 +1642,7 @@ html.dark .password-requirements-examples {
   border: 1px solid #e2e8f0;
   background: #f8fafc;
   color: #475569;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1737,7 +1737,7 @@ html.dark .password-requirements-examples {
 }
 
 .today-title {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1745,7 +1745,7 @@ html.dark .password-requirements-examples {
 }
 
 .today-subtitle {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
 }
 
@@ -1793,14 +1793,14 @@ html.dark .password-requirements-examples {
 }
 
 .pill-label {
-  font-size: 10px;
+  font-size: var(--fs-caption);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #64748b;
 }
 
 .pill-value {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #111827;
 }
@@ -1813,7 +1813,7 @@ html.dark .password-requirements-examples {
 
 .dashboard-header p {
   color: #4a5568;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
 }
 
 .dashboard-grid {
@@ -1907,7 +1907,7 @@ html.dark .password-requirements-examples {
 }
 
 .stat-content h3 {
-  font-size: 28px;
+  font-size: var(--fs-display);
   font-weight: 700;
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   background-clip: text;
@@ -1921,13 +1921,13 @@ html.dark .password-requirements-examples {
 
 .stat-content p {
   color: #64748b;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
 }
 
 /* Indicador de tendencia */
 .trend-indicator {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   padding: 2px 6px;
   border-radius: 6px;
   font-weight: 600;
@@ -2022,14 +2022,14 @@ html.dark .password-requirements-examples {
 }
 
 .progress-text {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: #94a3b8;
   margin-top: 4px;
 }
 
 .buy-consultations-label {
   margin-top: 12px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   color: #334155;
   letter-spacing: 0.04em;
@@ -2046,7 +2046,7 @@ html.dark .password-requirements-examples {
 .buy-consultations-group .btn {
   padding: 10px 14px;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
 }
 
 @media (max-width: 520px) {
@@ -2070,7 +2070,7 @@ html.dark .password-requirements-examples {
   color: white;
   padding: 6px 12px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   white-space: nowrap;
   z-index: 10;
   animation: tooltipFade 0.2s ease;
@@ -2152,7 +2152,7 @@ html.dark .password-requirements-examples {
 }
 
 .action-card h3 {
-  font-size: 20px;
+  font-size: var(--fs-title);
   font-weight: 700;
   margin-bottom: 8px;
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
@@ -2165,7 +2165,7 @@ html.dark .password-requirements-examples {
 
 .action-card p {
   color: #64748b;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   position: relative;
   z-index: 1;
@@ -2199,19 +2199,19 @@ html.dark .password-requirements-examples {
 
 .consultation-info p {
   color: #4a5568;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   margin-bottom: 4px;
 }
 
 .consultation-info small {
   color: #a0aec0;
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .status {
   padding: 4px 12px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 500;
 }
 
@@ -2309,7 +2309,7 @@ html.dark .password-requirements-examples {
 
 /* Subtítulos de sección mejorados */
 .form-section h4 {
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: #1e293b;
   margin: 32px 0 20px;
@@ -2360,7 +2360,7 @@ html.dark .password-requirements-examples {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 
@@ -2386,19 +2386,19 @@ html.dark .password-requirements-examples {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: var(--fs-display);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .page-title-text h1 {
-  font-size: 24px;
+  font-size: var(--fs-headline);
   font-weight: 700;
   color: #1e293b;
   margin: 0 0 4px 0;
 }
 
 .page-title-text p {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
   margin: 0;
 }
@@ -2409,7 +2409,7 @@ html.dark .password-requirements-examples {
   color: #16a34a;
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -2425,7 +2425,7 @@ html.dark .password-requirements-examples {
 
 .consultation-header h1 {
   color: #2c5f8d;
-  font-size: 28px;
+  font-size: var(--fs-display);
   margin-bottom: 8px;
 }
 
@@ -2542,7 +2542,7 @@ html.dark .password-requirements-examples {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: var(--fs-title);
   color: #94a3b8;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 6px rgba(0,0,0,0.05);
@@ -2550,7 +2550,7 @@ html.dark .password-requirements-examples {
 }
 
 .step-label {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #94a3b8;
   transition: all 0.3s ease;
@@ -2582,7 +2582,7 @@ html.dark .password-requirements-examples {
 
 .step.completed .step-icon-wrapper::after {
   content: '✓';
-  font-size: 20px;
+  font-size: var(--fs-title);
   font-weight: bold;
   animation: check-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -2700,7 +2700,7 @@ html.dark .password-requirements-examples {
 
 .form-section h3 {
   color: #1e293b;
-  font-size: 22px;
+  font-size: var(--fs-title);
   font-weight: 700;
   margin-bottom: 24px;
   position: relative;
@@ -2727,7 +2727,7 @@ html.dark .password-requirements-examples {
 }
 
 .species-form > h2 {
-  font-size: 24px;
+  font-size: var(--fs-headline);
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 8px;
@@ -2789,7 +2789,7 @@ html.dark .password-requirements-examples {
 }
 
 .species-form-nav-title {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -2812,7 +2812,7 @@ html.dark .password-requirements-examples {
   border: none;
   background: #f8fafc;
   color: #1e293b;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   padding: 8px 10px;
   border-radius: 10px;
   cursor: pointer;
@@ -2825,7 +2825,7 @@ html.dark .password-requirements-examples {
 }
 
 .species-form-nav-link .nav-icon {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   margin-right: 6px;
 }
 
@@ -2871,13 +2871,13 @@ html.dark .password-requirements-examples {
 }
 
 .species-form-progress-label {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #475569;
 }
 
 .species-form-progress-percent {
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: #3b82f6;
 }
@@ -2904,7 +2904,7 @@ html.dark .password-requirements-examples {
   display: flex;
   justify-content: space-between;
   margin-top: 8px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #94a3b8;
 }
 
@@ -2931,7 +2931,7 @@ html.dark .password-requirements-examples {
 
 .species-form .form-section h3::after {
   content: '−';
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   font-weight: 400;
   color: #94a3b8;
   background: #f1f5f9;
@@ -2995,7 +2995,7 @@ html.dark .password-requirements-examples {
 
   .species-form-nav-link {
     white-space: nowrap;
-    font-size: 12px;
+    font-size: var(--fs-caption);
     padding: 6px 10px;
   }
 
@@ -3090,13 +3090,13 @@ html.dark .password-requirements-examples {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: bold;
 }
 
 .category-card h4 {
   color: #334155;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   margin: 0;
   line-height: 1.3;
@@ -3143,7 +3143,7 @@ html.dark .password-requirements-examples {
 
 .form-section-subtitle h4 {
   color: #475569;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   font-weight: 600;
   margin: 16px 0;
   padding-left: 8px;
@@ -3171,7 +3171,7 @@ html.dark .password-requirements-examples {
 
 .analysis-prompt h3 {
   color: #2c5f8d;
-  font-size: 24px;
+  font-size: var(--fs-headline);
   margin-bottom: 16px;
 }
 
@@ -3201,7 +3201,7 @@ html.dark .password-requirements-examples {
 
 .analysis-result h3 {
   color: #2c5f8d;
-  font-size: 24px;
+  font-size: var(--fs-headline);
   margin-bottom: 24px;
   text-align: center;
 }
@@ -3219,7 +3219,7 @@ html.dark .password-requirements-examples {
   line-height: 1.8;
   white-space: pre-wrap;
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .analysis-actions {
@@ -3246,7 +3246,7 @@ html.dark .password-requirements-examples {
 
 .page-header h1 {
   color: #2c5f8d;
-  font-size: 28px;
+  font-size: var(--fs-display);
 }
 
 .page-header p {
@@ -3258,7 +3258,7 @@ html.dark .password-requirements-examples {
   text-align: center;
   padding: 60px;
   color: #4a5568;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
 }
 
 .consultations-grid {
@@ -3294,7 +3294,7 @@ html.dark .password-requirements-examples {
 
 .consultation-header h3 {
   color: #1e293b;
-  font-size: 20px;
+  font-size: var(--fs-title);
   font-weight: 700;
   margin: 0;
   display: flex;
@@ -3310,7 +3310,7 @@ html.dark .password-requirements-examples {
 }
 
 .consultation-date {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
   font-weight: 600;
   background: white;
@@ -3325,7 +3325,7 @@ html.dark .password-requirements-examples {
 
 .detail-row {
   color: #475569;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   margin-bottom: 12px;
   line-height: 1.6;
   padding-left: 8px;
@@ -3375,7 +3375,7 @@ html.dark .password-requirements-examples {
 
 .detail-section h3 {
   color: #1e293b;
-  font-size: 22px;
+  font-size: var(--fs-title);
   font-weight: 800;
   margin-bottom: 24px;
   display: flex;
@@ -3390,7 +3390,7 @@ html.dark .password-requirements-examples {
   border-left: 4px solid #3b82f6;
   color: #475569;
   line-height: 1.7;
-  font-size: 15px;
+  font-size: var(--fs-body);
 }
 
 .analysis-section {
@@ -3409,7 +3409,7 @@ html.dark .password-requirements-examples {
 
 .analysis-text {
   font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 15px;
+  font-size: var(--fs-body);
   line-height: 1.8;
   color: #334155;
   white-space: pre-wrap;
@@ -3418,7 +3418,7 @@ html.dark .password-requirements-examples {
 
 .detail-section h3 {
   color: #2c5f8d;
-  font-size: 20px;
+  font-size: var(--fs-title);
   margin-bottom: 16px;
 }
 
@@ -3438,7 +3438,7 @@ html.dark .password-requirements-examples {
   color: #2d3748;
   display: block;
   margin-bottom: 4px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 /* ===== CLINICAL FILE DESIGN ===== */
@@ -3469,7 +3469,7 @@ html.dark .password-requirements-examples {
   color: white;
   padding: 10px 16px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease;
@@ -3484,7 +3484,7 @@ html.dark .password-requirements-examples {
   color: white;
   padding: 10px 20px;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 800;
   letter-spacing: 1px;
   font-family: 'Courier New', monospace;
@@ -3519,7 +3519,7 @@ html.dark .password-requirements-examples {
 
 .clinical-file-info h1 {
   color: white;
-  font-size: 28px;
+  font-size: var(--fs-display);
   font-weight: 800;
   margin: 0 0 12px 0;
 }
@@ -3533,7 +3533,7 @@ html.dark .password-requirements-examples {
 .meta-pill {
   padding: 6px 12px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
@@ -3573,7 +3573,7 @@ html.dark .password-requirements-examples {
 .status-pill {
   padding: 8px 18px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -3599,7 +3599,7 @@ html.dark .password-requirements-examples {
 
 .clinical-file-date {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
 }
 
@@ -3638,12 +3638,12 @@ html.dark .password-requirements-examples {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: var(--fs-title);
   border: 2px solid #bae6fd;
 }
 
 .clinical-section-header h2 {
-  font-size: 20px;
+  font-size: var(--fs-title);
   font-weight: 800;
   color: #1e293b;
   margin: 0;
@@ -3655,7 +3655,7 @@ html.dark .password-requirements-examples {
   color: white;
   padding: 6px 14px;
   border-radius: 20px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -3684,7 +3684,7 @@ html.dark .password-requirements-examples {
 
 .data-label {
   display: block;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -3694,7 +3694,7 @@ html.dark .password-requirements-examples {
 
 .data-value {
   display: block;
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: #1e293b;
 }
@@ -3705,7 +3705,7 @@ html.dark .password-requirements-examples {
   border-left: 6px solid #eab308;
   border-radius: 12px;
   padding: 20px 24px;
-  font-size: 15px;
+  font-size: var(--fs-body);
   line-height: 1.8;
   color: #713f12;
 }
@@ -3733,7 +3733,7 @@ html.dark .password-requirements-examples {
 
 .clinical-analysis-text {
   font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   line-height: 1.9;
   color: #334155;
   white-space: pre-wrap;
@@ -3799,7 +3799,7 @@ html.dark .password-requirements-examples {
   }
   
   .clinical-file-info h1 {
-    font-size: 22px;
+    font-size: var(--fs-title);
   }
   
   .clinical-data-grid {
@@ -3868,7 +3868,7 @@ html.dark .password-requirements-examples {
   background: rgba(255, 255, 255, 0.2);
   padding: 6px 12px;
   border-radius: 8px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 800;
   font-family: "Courier New", monospace;
   letter-spacing: 0.3px;
@@ -3884,7 +3884,7 @@ html.dark .password-requirements-examples {
   flex-shrink: 0;
   padding: 6px 12px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0;
   white-space: nowrap;
@@ -3930,7 +3930,7 @@ html.dark .password-requirements-examples {
 }
 
 .history-patient-info h3 {
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   font-weight: 800;
   margin: 0 0 8px 0;
   color: white;
@@ -3945,7 +3945,7 @@ html.dark .password-requirements-examples {
 }
 
 .history-meta-item {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: rgba(255, 255, 255, 0.92);
   background: rgba(255, 255, 255, 0.14);
   padding: 4px 10px;
@@ -3970,7 +3970,7 @@ html.dark .password-requirements-examples {
 }
 
 .consultation-rating-title {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -3996,7 +3996,7 @@ html.dark .password-requirements-examples {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: var(--fs-title);
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
   box-shadow: none;
@@ -4027,7 +4027,7 @@ html.dark .password-requirements-examples {
 
 .consultation-rating-saved {
   margin-left: 6px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 800;
   color: #166534;
   background: rgba(34, 197, 94, 0.14);
@@ -4048,7 +4048,7 @@ html.dark .password-requirements-examples {
 }
 
 .paw-static {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   line-height: 1;
   opacity: 0.35;
 }
@@ -4090,7 +4090,7 @@ html.dark .password-requirements-examples {
 }
 
 .history-info-icon {
-  font-size: 20px;
+  font-size: var(--fs-title);
   width: 36px;
   height: 36px;
   background: white;
@@ -4108,7 +4108,7 @@ html.dark .password-requirements-examples {
 }
 
 .history-info-label {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -4116,7 +4116,7 @@ html.dark .password-requirements-examples {
 }
 
 .history-info-value {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #1e293b;
 }
@@ -4130,7 +4130,7 @@ html.dark .password-requirements-examples {
 }
 
 .history-motivo-label {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   color: #a16207;
   display: block;
@@ -4138,7 +4138,7 @@ html.dark .password-requirements-examples {
 }
 
 .history-motivo-text {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   line-height: 1.65;
   color: #713f12;
   margin: 0;
@@ -4159,7 +4159,7 @@ html.dark .password-requirements-examples {
   background: rgba(37, 99, 235, 0.08);
   border: 1px solid rgba(37, 99, 235, 0.15);
   color: #1d4ed8;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   padding: 6px 12px;
   border-radius: 999px;
@@ -4185,7 +4185,7 @@ html.dark .password-requirements-examples {
 }
 
 .history-extra-label {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   letter-spacing: 0.5px;
   text-transform: uppercase;
   font-weight: 700;
@@ -4196,7 +4196,7 @@ html.dark .password-requirements-examples {
 
 .history-extra-card p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   line-height: 1.55;
   color: #0f172a;
   display: -webkit-box;
@@ -4229,7 +4229,7 @@ html.dark .password-requirements-examples {
   color: white;
   border: none;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -4243,7 +4243,7 @@ html.dark .password-requirements-examples {
 }
 
 .history-view-btn .btn-arrow {
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   transition: transform 0.2s ease;
 }
 
@@ -4280,7 +4280,7 @@ html.dark .password-requirements-examples {
   .history-avatar {
     width: 48px;
     height: 48px;
-    font-size: 24px;
+    font-size: var(--fs-headline);
   }
 
   .history-patient-info h3 {
@@ -4288,12 +4288,12 @@ html.dark .password-requirements-examples {
   }
 
   .history-card-id {
-    font-size: 10px;
+    font-size: var(--fs-caption);
     max-width: min(100%, 180px);
   }
 
   .history-status-badge {
-    font-size: 10px;
+    font-size: var(--fs-caption);
     padding: 5px 10px;
   }
 
@@ -4328,7 +4328,7 @@ html.dark .password-requirements-examples {
 }
 
 .membership-hero p {
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   color: #64748b;
   max-width: 500px;
   margin: 0 auto;
@@ -4355,7 +4355,7 @@ html.dark .password-requirements-examples {
   border-radius: 12px;
   background: transparent;
   color: #64748b;
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -4379,7 +4379,7 @@ html.dark .password-requirements-examples {
   color: white;
   padding: 4px 10px;
   border-radius: 20px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -4433,7 +4433,7 @@ html.dark .password-requirements-examples {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   padding: 8px 20px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   border-radius: 20px;
   text-transform: uppercase;
@@ -4463,7 +4463,7 @@ html.dark .password-requirements-examples {
   border-radius: 999px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -4481,7 +4481,7 @@ html.dark .password-requirements-examples {
 }
 
 .pricing-header h3 {
-  font-size: 20px;
+  font-size: var(--fs-title);
   font-weight: 600;
   color: #374151;
   margin-bottom: 16px;
@@ -4495,7 +4495,7 @@ html.dark .password-requirements-examples {
 }
 
 .currency {
-  font-size: 20px;
+  font-size: var(--fs-title);
   font-weight: 600;
   color: #10b981;
 }
@@ -4508,14 +4508,14 @@ html.dark .password-requirements-examples {
 }
 
 .period {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #6b7280;
   margin-left: 2px;
 }
 
 .price-iva {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   margin-top: 4px;
 }
@@ -4530,7 +4530,7 @@ html.dark .password-requirements-examples {
 
 .feature {
   color: #4b5563;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -4542,7 +4542,7 @@ html.dark .password-requirements-examples {
   margin: 20px auto 24px;
   margin-top: auto;
   padding: 10px 24px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   border-radius: 8px;
   transition: all 0.2s ease;
@@ -4599,7 +4599,7 @@ html.dark .password-requirements-examples {
 
 .membership-info > p {
   color: #64748b;
-  font-size: 16px;
+  font-size: var(--fs-body);
   margin-bottom: 48px;
 }
 
@@ -4649,14 +4649,14 @@ html.dark .password-requirements-examples {
 
 .info-card h3 {
   color: #1e293b;
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 700;
   margin-bottom: 8px;
 }
 
 .info-card p {
   color: #64748b;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
 }
 
@@ -4697,13 +4697,13 @@ html.dark .password-requirements-examples {
 
 .status-card h2 {
   color: #2c5f8d;
-  font-size: 28px;
+  font-size: var(--fs-display);
   margin-bottom: 16px;
 }
 
 .status-card p {
   color: #4a5568;
-  font-size: 16px;
+  font-size: var(--fs-body);
   margin-bottom: 32px;
   line-height: 1.6;
 }
@@ -4827,7 +4827,7 @@ html.dark .password-requirements-examples {
 }
 
 .profile-specialty {
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   opacity: 0.95;
   margin-bottom: 16px;
   font-weight: 400;
@@ -4844,7 +4844,7 @@ html.dark .password-requirements-examples {
   gap: 8px;
   padding: 8px 16px;
   border-radius: 24px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   backdrop-filter: blur(10px);
   border: 1.5px solid rgba(255, 255, 255, 0.3);
@@ -4870,7 +4870,7 @@ html.dark .password-requirements-examples {
 }
 
 .verification-icon {
-  font-size: 16px;
+  font-size: var(--fs-body);
   display: flex;
   align-items: center;
 }
@@ -4913,7 +4913,7 @@ html.dark .password-requirements-examples {
 }
 
 .detail-icon {
-  font-size: 20px;
+  font-size: var(--fs-title);
   width: 32px;
   height: 32px;
   display: flex;
@@ -4927,13 +4927,13 @@ html.dark .password-requirements-examples {
 .detail-label strong {
   color: #1f2937;
   font-weight: 600;
-  font-size: 15px;
+  font-size: var(--fs-body);
   letter-spacing: 0.2px;
 }
 
 .detail-value {
   color: #4b5563;
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 500;
   text-align: right;
   flex: 1;
@@ -4982,7 +4982,7 @@ html.dark .password-requirements-examples {
   }
 
   .profile-info h2 {
-    font-size: 28px;
+    font-size: var(--fs-display);
   }
 
   .profile-details {
@@ -5010,7 +5010,7 @@ html.dark .password-requirements-examples {
 
   .service-badge {
     padding: 8px 16px;
-    font-size: 13px;
+    font-size: var(--fs-body-sm);
   }
 
   .services h2 {
@@ -5120,7 +5120,7 @@ html.dark .password-requirements-examples {
 }
 
 .memberships-header p {
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   color: #64748b;
   max-width: 650px;
   margin: 0 auto;
@@ -5213,7 +5213,7 @@ html.dark .password-requirements-examples {
   color: white;
   padding: 10px 28px;
   border-radius: 25px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
@@ -5232,7 +5232,7 @@ html.dark .password-requirements-examples {
 }
 
 .membership-header h3 {
-  font-size: 28px;
+  font-size: var(--fs-display);
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 16px;
@@ -5247,7 +5247,7 @@ html.dark .password-requirements-examples {
 }
 
 .currency {
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   color: #64748b;
 }
 
@@ -5258,7 +5258,7 @@ html.dark .password-requirements-examples {
 }
 
 .period {
-  font-size: 16px;
+  font-size: var(--fs-body);
   color: #64748b;
 }
 
@@ -5269,7 +5269,7 @@ html.dark .password-requirements-examples {
 .membership-features .feature {
   padding: 12px 0;
   color: #475569;
-  font-size: 15px;
+  font-size: var(--fs-body);
   border-bottom: 1px solid #f1f5f9;
 }
 
@@ -5339,7 +5339,7 @@ html.dark .password-requirements-examples {
 }
 
 .footer-section h4 {
-  font-size: 20px;
+  font-size: var(--fs-title);
   font-weight: 800;
   margin-bottom: 28px;
   color: white;
@@ -5365,7 +5365,7 @@ html.dark .password-requirements-examples {
 }
 
 .footer-brand h3 {
-  font-size: 28px;
+  font-size: var(--fs-display);
   font-weight: 800;
   color: white;
   margin-bottom: 16px;
@@ -5385,7 +5385,7 @@ html.dark .password-requirements-examples {
 
 .footer-contact p {
   color: #cbd5e1;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   margin-bottom: 8px;
 }
 
@@ -5411,7 +5411,7 @@ html.dark .password-requirements-examples {
 .footer-section ul li a {
   color: #cbd5e1;
   text-decoration: none;
-  font-size: 15px;
+  font-size: var(--fs-body);
   transition: color 0.3s;
 }
 
@@ -5434,7 +5434,7 @@ html.dark .password-requirements-examples {
 
 .footer-bottom p {
   color: #94a3b8;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .footer-social {
@@ -5445,13 +5445,13 @@ html.dark .password-requirements-examples {
 
 .footer-social span {
   color: #94a3b8;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .social-link {
   color: #cbd5e1;
   text-decoration: none;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   transition: color 0.3s;
 }
 
@@ -5512,7 +5512,7 @@ html.dark .password-requirements-examples {
   }
   
   .hero-main p {
-    font-size: 16px;
+    font-size: var(--fs-body);
     line-height: 1.6;
   }
   
@@ -5558,7 +5558,7 @@ html.dark .password-requirements-examples {
   }
   
   .nav-brand h1 {
-    font-size: 20px;
+    font-size: var(--fs-title);
   }
   
   .logo-image:not(.logo-image-full) {
@@ -5653,12 +5653,12 @@ html.dark .password-requirements-examples {
   }
   
   .cta-content h2 {
-    font-size: 28px;
+    font-size: var(--fs-display);
     line-height: 1.2;
   }
   
   .cta-content p {
-    font-size: 16px;
+    font-size: var(--fs-body);
   }
   
   .cta-content .btn {
@@ -5678,7 +5678,7 @@ html.dark .password-requirements-examples {
   }
   
   .auth-card h2 {
-    font-size: 28px;
+    font-size: var(--fs-display);
   }
   
   .form-group {
@@ -5692,7 +5692,7 @@ html.dark .password-requirements-examples {
   
   .btn {
     padding: 14px 24px;
-    font-size: 15px;
+    font-size: var(--fs-body);
   }
 }
 
@@ -5703,7 +5703,7 @@ html.dark .password-requirements-examples {
   }
   
   .dashboard-header h1 {
-    font-size: 28px;
+    font-size: var(--fs-display);
   }
   
   .stats-grid {
@@ -5738,7 +5738,7 @@ html.dark .password-requirements-examples {
   }
   
   .form-section h3 {
-    font-size: 20px;
+    font-size: var(--fs-title);
   }
   
   .form-actions {
@@ -5755,11 +5755,11 @@ html.dark .password-requirements-examples {
 /* Extra Small Devices (iPhone SE, etc) */
 @media (max-width: 375px) {
   .hero-main h1 {
-    font-size: 28px;
+    font-size: var(--fs-display);
   }
   
   .hero-main p {
-    font-size: 15px;
+    font-size: var(--fs-body);
   }
   
   .services h2,
@@ -5772,7 +5772,7 @@ html.dark .password-requirements-examples {
   }
   
   .dashboard-header h1 {
-    font-size: 24px;
+    font-size: var(--fs-headline);
   }
 }
 
@@ -5838,7 +5838,7 @@ html.dark .password-requirements-examples {
 }
 
 .premium-required p {
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   color: #64748b;
   margin-bottom: 32px;
 }
@@ -5856,7 +5856,7 @@ html.dark .password-requirements-examples {
   right: 12px;
   background: linear-gradient(135deg, #fbbf24, #f59e0b);
   color: white;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   padding: 4px 8px;
   border-radius: 4px;
@@ -5881,7 +5881,7 @@ html.dark .password-requirements-examples {
   right: 12px;
   background: linear-gradient(135deg, #6366f1, #4f46e5);
   color: white;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   padding: 4px 8px;
   border-radius: 4px;
@@ -5909,7 +5909,7 @@ html.dark .password-requirements-examples {
 }
 
 .form-section h3 {
-  font-size: 20px;
+  font-size: var(--fs-title);
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 20px;
@@ -5948,11 +5948,11 @@ html.dark .password-requirements-examples {
 }
 
 .type-icon {
-  font-size: 28px;
+  font-size: var(--fs-display);
 }
 
 .type-option span {
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 600;
   color: #1e293b;
 }
@@ -5994,14 +5994,14 @@ html.dark .password-requirements-examples {
 }
 
 .upload-placeholder p {
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 600;
   color: #1e293b;
   margin: 0;
 }
 
 .upload-placeholder small {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 
@@ -6032,7 +6032,7 @@ html.dark .password-requirements-examples {
 }
 
 .pdf-filename {
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: #92400e;
   margin: 0 0 8px 0;
@@ -6042,7 +6042,7 @@ html.dark .password-requirements-examples {
 }
 
 .pdf-preview small {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #b45309;
   font-weight: 600;
 }
@@ -6060,13 +6060,13 @@ html.dark .password-requirements-examples {
 }
 
 .side-panel-header h3 {
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   margin: 8px 0 6px;
   color: #e5e7eb;
 }
 
 .side-panel-header p {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #9ca3af;
 }
 
@@ -6077,7 +6077,7 @@ html.dark .password-requirements-examples {
   border-radius: 999px;
   background: linear-gradient(135deg, #22c55e, #4ade80);
   color: #022c22;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -6090,7 +6090,7 @@ html.dark .password-requirements-examples {
 }
 
 .side-panel-label {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #9ca3af;
@@ -6108,13 +6108,13 @@ html.dark .password-requirements-examples {
 }
 
 .side-panel-text {
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 600;
 }
 
 .side-panel-hint {
   margin-top: 8px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #9ca3af;
 }
 
@@ -6125,12 +6125,12 @@ html.dark .password-requirements-examples {
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.7);
   border: 1px solid rgba(148, 163, 184, 0.5);
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
 }
 
 .side-panel-sub {
   margin-top: 6px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #9ca3af;
 }
 
@@ -6144,7 +6144,7 @@ html.dark .password-requirements-examples {
   align-items: center;
   padding: 6px 12px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 500;
 }
 
@@ -6179,7 +6179,7 @@ html.dark .password-requirements-examples {
 }
 
 .interpretation-result h2 {
-  font-size: 28px;
+  font-size: var(--fs-display);
   font-weight: 800;
   color: #1e293b;
   margin-bottom: 32px;
@@ -6200,7 +6200,7 @@ html.dark .password-requirements-examples {
 }
 
 .result-section h3 {
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 16px;
@@ -6212,14 +6212,14 @@ html.dark .password-requirements-examples {
 .result-content {
   color: #475569;
   line-height: 1.7;
-  font-size: 15px;
+  font-size: var(--fs-body);
 }
 
 .result-content.detailed-analysis pre {
   font-family: 'Segoe UI', system-ui, sans-serif;
   white-space: pre-wrap;
   margin: 0;
-  font-size: 15px;
+  font-size: var(--fs-body);
   line-height: 1.8;
 }
 
@@ -6251,7 +6251,7 @@ html.dark .password-requirements-examples {
 }
 
 .interpretation-history h2 {
-  font-size: 28px;
+  font-size: var(--fs-display);
   font-weight: 800;
   color: #1e293b;
   margin-bottom: 32px;
@@ -6259,7 +6259,7 @@ html.dark .password-requirements-examples {
 
 .medical-images-page .interpretation-history h2 {
   margin-bottom: 18px;
-  font-size: 24px;
+  font-size: var(--fs-headline);
 }
 
 .history-grid {
@@ -6310,7 +6310,7 @@ html.dark .password-requirements-examples {
 }
 
 .history-type {
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: #1e293b;
 }
@@ -6323,16 +6323,16 @@ html.dark .password-requirements-examples {
   border-radius: 999px;
   background: #eff6ff;
   border: 1px solid #bfdbfe;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
 }
 
 .history-date {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 
 .medical-images-page .history-date {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #475569;
   padding: 6px 10px;
   border-radius: 999px;
@@ -6342,7 +6342,7 @@ html.dark .password-requirements-examples {
 }
 
 .history-patient {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #475569;
   margin-bottom: 12px;
 }
@@ -6352,7 +6352,7 @@ html.dark .password-requirements-examples {
 }
 
 .history-preview {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
   line-height: 1.6;
   margin-bottom: 16px;
@@ -6369,7 +6369,7 @@ html.dark .password-requirements-examples {
 
 .btn-sm {
   padding: 8px 16px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
 }
 
 /* Mobile Responsive */
@@ -6427,7 +6427,7 @@ html.dark .password-requirements-examples {
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 20px;
+  font-size: var(--fs-title);
   color: #64748b;
   pointer-events: none;
 }
@@ -6437,7 +6437,7 @@ html.dark .password-requirements-examples {
   padding: 14px 48px 14px 48px;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: var(--fs-body);
   transition: all 0.3s;
   background: white;
 }
@@ -6462,7 +6462,7 @@ html.dark .password-requirements-examples {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
   transition: all 0.2s;
 }
@@ -6476,7 +6476,7 @@ html.dark .password-requirements-examples {
   text-align: center;
   padding: 16px;
   color: #64748b;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-style: italic;
 }
 
@@ -6490,7 +6490,7 @@ html.dark .password-requirements-examples {
   color: white;
   padding: 8px 16px;
   border-radius: 20px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   letter-spacing: 0.5px;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
@@ -6506,7 +6506,7 @@ html.dark .password-requirements-examples {
   color: white;
   padding: 6px 14px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.5px;
   font-family: 'Courier New', monospace;
@@ -6528,7 +6528,7 @@ html.dark .password-requirements-examples {
   }
   
   .consultation-id-badge {
-    font-size: 12px;
+    font-size: var(--fs-caption);
     padding: 6px 12px;
   }
 }
@@ -6574,7 +6574,7 @@ html.dark .password-requirements-examples {
 }
 
 .hero-greeting .greeting-icon {
-  font-size: 28px;
+  font-size: var(--fs-display);
 }
 
 .hero-divider {
@@ -6597,17 +6597,17 @@ html.dark .password-requirements-examples {
   align-items: center;
   gap: 6px;
   color: #64748b;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
 }
 
 .hero-summary-item .icon {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .hero-summary-divider {
   color: #cbd5e1;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .hero-badge {
@@ -6616,7 +6616,7 @@ html.dark .password-requirements-examples {
   gap: 4px;
   padding: 4px 10px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 600;
 }
 
@@ -6645,7 +6645,7 @@ html.dark .password-requirements-examples {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
@@ -6667,7 +6667,7 @@ html.dark .password-requirements-examples {
   background: #f8fafc;
   border-radius: 100px;
   border: 1px solid #e2e8f0;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #94a3b8;
 }
 
@@ -6681,7 +6681,7 @@ html.dark .password-requirements-examples {
   color: #475569;
   padding: 2px 7px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   font-family: inherit;
   border: 1px solid #cbd5e1;
@@ -6698,7 +6698,7 @@ html.dark .password-requirements-examples {
   border-radius: 50%;
   width: 22px;
   height: 22px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -6728,7 +6728,7 @@ html.dark .password-requirements-examples {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: var(--fs-title);
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
@@ -6748,7 +6748,7 @@ html.dark .password-requirements-examples {
 }
 
 .quick-actions h2 {
-  font-size: 24px;
+  font-size: var(--fs-headline);
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 24px;
@@ -6759,7 +6759,7 @@ html.dark .password-requirements-examples {
 
 .quick-actions h2::before {
   content: '⚡';
-  font-size: 24px;
+  font-size: var(--fs-headline);
 }
 
 .quick-actions h2::after {
@@ -6823,7 +6823,7 @@ html.dark .password-requirements-examples {
   right: 16px;
   background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
   color: white;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: 800;
   padding: 6px 12px;
   border-radius: 20px;
@@ -6841,7 +6841,7 @@ html.dark .password-requirements-examples {
   border: none;
   padding: 16px 32px;
   border-radius: 14px;
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -6896,7 +6896,7 @@ html.dark .password-requirements-examples {
 }
 
 .btn-generate-diagnosis .sparkle {
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   animation: sparkle 1.5s ease infinite;
 }
 
@@ -7011,7 +7011,7 @@ html.dark .password-requirements-examples {
 }
 
 .section-header h2 {
-  font-size: 22px;
+  font-size: var(--fs-title);
   font-weight: 700;
   color: #1e293b;
   display: flex;
@@ -7021,14 +7021,14 @@ html.dark .password-requirements-examples {
 }
 
 .section-header h2 .section-icon {
-  font-size: 22px;
+  font-size: var(--fs-title);
 }
 
 .section-header .view-all-btn {
   background: none;
   border: none;
   color: #3b82f6;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -7122,18 +7122,18 @@ html.dark .password-requirements-examples {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: var(--fs-headline);
 }
 
 .consultation-details h4 {
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 4px;
 }
 
 .consultation-details p {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
   margin-bottom: 4px;
   max-width: 300px;
@@ -7143,7 +7143,7 @@ html.dark .password-requirements-examples {
 }
 
 .consultation-details .consultation-date {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #94a3b8;
   display: flex;
   align-items: center;
@@ -7163,7 +7163,7 @@ html.dark .password-requirements-examples {
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -7194,13 +7194,13 @@ html.dark .password-requirements-examples {
 }
 
 .followup-header h3 {
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 600;
   color: #1e293b;
 }
 
 .followup-count {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   padding: 2px 8px;
   border-radius: 999px;
   background: rgba(251, 191, 36, 0.15);
@@ -7240,7 +7240,7 @@ html.dark .password-requirements-examples {
 }
 
 .followup-line {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #111827;
 }
 
@@ -7250,12 +7250,12 @@ html.dark .password-requirements-examples {
 }
 
 .followup-sub {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #6b7280;
 }
 
 .followup-date {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #9ca3af;
 }
 
@@ -7263,7 +7263,7 @@ html.dark .password-requirements-examples {
 .status-badge {
   padding: 6px 14px;
   border-radius: 20px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -7368,14 +7368,14 @@ html.dark .password-requirements-examples {
 }
 
 .empty-state h3 {
-  font-size: 20px;
+  font-size: var(--fs-title);
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 8px;
 }
 
 .empty-state p {
-  font-size: 15px;
+  font-size: var(--fs-body);
   color: #64748b;
   margin-bottom: 24px;
   max-width: 300px;
@@ -7515,7 +7515,7 @@ html.dark .password-requirements-examples {
 }
 
 .support-chat-plumitas-hint {
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: #0c2d4d;
@@ -7543,7 +7543,7 @@ html.dark .password-requirements-examples {
   border-radius: 999px;
   background: #ef4444;
   color: #fff;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   line-height: 18px;
   text-align: center;
@@ -7597,7 +7597,7 @@ html.dark .password-requirements-examples {
   background: transparent;
   min-height: 2.75rem;
   padding: 10px 6px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #64748b;
   cursor: pointer;
@@ -7619,7 +7619,7 @@ html.dark .password-requirements-examples {
   border-radius: 999px;
   background: #ef4444;
   color: #fff;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   line-height: 16px;
 }
 
@@ -7634,7 +7634,7 @@ html.dark .password-requirements-examples {
 .support-chat-tickets-empty {
   padding: 24px 16px;
   text-align: center;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
   margin: 0;
 }
@@ -7676,7 +7676,7 @@ html.dark .password-requirements-examples {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #0f172a;
 }
 
@@ -7689,12 +7689,12 @@ html.dark .password-requirements-examples {
 }
 
 .support-chat-ticket-item-meta {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: #64748b;
 }
 
 .support-chat-ticket-item-preview {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #475569;
   line-height: 1.35;
   display: -webkit-box;
@@ -7716,7 +7716,7 @@ html.dark .password-requirements-examples {
   border: none;
   background: transparent;
   color: #265b93;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   cursor: pointer;
   min-height: 2.75rem;
@@ -7733,12 +7733,12 @@ html.dark .password-requirements-examples {
 
 .support-chat-ticket-detail-head h4 {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--fs-body);
   color: #0f172a;
 }
 
 .support-chat-status {
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   padding: 4px 8px;
   border-radius: 8px;
@@ -7776,7 +7776,7 @@ html.dark .password-requirements-examples {
 .support-chat-thread-msg {
   border-radius: 10px;
   padding: 8px 10px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
 }
 
 .support-chat-thread-msg p {
@@ -7788,7 +7788,7 @@ html.dark .password-requirements-examples {
 .support-chat-thread-msg time {
   display: block;
   margin-top: 6px;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   opacity: 0.75;
 }
 
@@ -7814,7 +7814,7 @@ html.dark .password-requirements-examples {
 }
 
 .support-chat-thread-label {
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   text-transform: none;
   letter-spacing: -0.01em;
@@ -7834,7 +7834,7 @@ html.dark .password-requirements-examples {
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 8px 10px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-family: inherit;
   resize: vertical;
 }
@@ -7847,7 +7847,7 @@ html.dark .password-requirements-examples {
   color: #fff;
   min-height: 2.75rem;
   padding: 8px 14px;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   cursor: pointer;
 }
@@ -7900,7 +7900,7 @@ html.dark .password-requirements-examples {
 .support-chat-header button {
   border: none;
   background: transparent;
-  font-size: 16px;
+  font-size: var(--fs-body);
   cursor: pointer;
   color: #0c2d4d;
 }
@@ -7971,7 +7971,7 @@ html.dark .password-requirements-examples {
   max-width: 100%;
   padding: 11px 13px;
   border-radius: 16px;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   white-space: pre-wrap;
   word-break: break-word;
@@ -8036,7 +8036,7 @@ html.dark .password-requirements-examples {
   max-width: 88%;
   padding: 10px 12px;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   line-height: 1.4;
   white-space: pre-wrap;
 }
@@ -8054,7 +8054,7 @@ html.dark .password-requirements-examples {
 }
 
 .support-chat-typing {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #64748b;
 }
 
@@ -8073,7 +8073,7 @@ html.dark .password-requirements-examples {
   border: 1px solid rgba(38, 91, 147, 0.18);
   border-radius: 12px;
   padding: 10px 12px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #0c2d4d;
   background: #f8fafc;
 }
@@ -8120,7 +8120,7 @@ html.dark .password-requirements-examples {
   border: 1px dashed #94a3b8;
   background: #fff;
   color: #2563eb;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   padding: 8px 10px;
   border-radius: 8px;
@@ -8143,7 +8143,7 @@ html.dark .password-requirements-examples {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 8px 10px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-family: inherit;
 }
 
@@ -8156,7 +8156,7 @@ html.dark .password-requirements-examples {
   border: 0;
   border-radius: 8px;
   padding: 8px 12px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   cursor: pointer;
   background: #2563eb;
@@ -8170,7 +8170,7 @@ html.dark .password-requirements-examples {
 
 .support-chat-ticket-msg {
   margin: 8px 0 0;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #475569;
 }
 
@@ -8244,7 +8244,7 @@ html.dark .password-requirements-examples {
 }
 
 .support-help-item-title {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #0c2d4d;
 }
@@ -8516,14 +8516,14 @@ html.dark .support-help-tip {
 }
 
 .dashboard-page .dashboard-block-head h2 {
-  font-size: 20px;
+  font-size: var(--fs-title);
   line-height: 1.2;
   color: #1e293b;
   margin: 0;
 }
 
 .dashboard-page .dashboard-block-head p {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
   margin: 0;
 }
@@ -8889,7 +8889,7 @@ html.dark .support-help-tip {
   top: 50%;
   transform: translateY(-50%);
   color: #94a3b8;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   pointer-events: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: white;
@@ -8901,7 +8901,7 @@ html.dark .support-help-tip {
 .form-group.floating-label textarea:focus ~ label,
 .form-group.floating-label textarea:not(:placeholder-shown) ~ label {
   top: 0;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #3b82f6;
   font-weight: 600;
 }
@@ -8920,7 +8920,7 @@ html.dark .support-help-tip {
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   color: #94a3b8;
   transition: color 0.3s ease;
   pointer-events: none;
@@ -8945,7 +8945,7 @@ html.dark .support-help-tip {
   top: 50%;
   transform: translateY(-50%);
   color: #10b981;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   animation: checkmark-pop 0.3s ease;
 }
 
@@ -8964,7 +8964,7 @@ html.dark .support-help-tip {
   top: 50%;
   transform: translateY(-50%);
   color: #ef4444;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
 }
 
 @keyframes checkmark-pop {
@@ -9120,7 +9120,7 @@ html.dark .support-help-tip {
 }
 
 .form-section-title h3 {
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   font-weight: 700;
   color: #1e293b;
   margin: 0;
@@ -9134,7 +9134,7 @@ html.dark .support-help-tip {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: var(--fs-title);
 }
 
 /* 10. Progress steps mejorados */
@@ -9168,7 +9168,7 @@ html.dark .support-help-tip {
 
 .step.completed .step-icon-wrapper::before {
   content: '✓';
-  font-size: 20px;
+  font-size: var(--fs-title);
 }
 
 .step-label {
@@ -9229,7 +9229,7 @@ html.dark .support-help-tip {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #64748b;
   cursor: help;
   transition: all 0.3s ease;
@@ -9249,7 +9249,7 @@ html.dark .support-help-tip {
   color: white;
   padding: 12px 16px;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   width: max-content;
   max-width: 250px;
@@ -9330,7 +9330,7 @@ html.dark .support-help-tip {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: var(--fs-body);
 }
 
 /* 14. Chips seleccionables mejorados */
@@ -9345,7 +9345,7 @@ html.dark .support-help-tip {
   background: #f1f5f9;
   border: 2px solid transparent;
   border-radius: 100px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #475569;
   cursor: pointer;
@@ -9369,11 +9369,11 @@ html.dark .support-help-tip {
 
 .chip.selected::before {
   content: '✓';
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .chip-icon {
-  font-size: 16px;
+  font-size: var(--fs-body);
 }
 
 /* Input enhancements */
@@ -9459,14 +9459,14 @@ html.dark .support-help-tip {
 }
 
 .file-input-text {
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 4px;
 }
 
 .file-input-hint {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 
@@ -9642,7 +9642,7 @@ html.dark .support-help-tip {
 .success-confetti::after {
   content: '🎉';
   position: absolute;
-  font-size: 24px;
+  font-size: var(--fs-headline);
   animation: confettiBurst 0.8s ease forwards;
   opacity: 0;
 }
@@ -9687,7 +9687,7 @@ html.dark .support-help-tip {
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   animation: checkAppear 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -9752,7 +9752,7 @@ html.dark .support-help-tip {
   padding: 8px 16px;
   background: #f1f5f9;
   border-radius: 100px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #475569;
   transition: all 0.3s ease;
@@ -9774,7 +9774,7 @@ html.dark .support-help-tip {
   position: absolute;
   right: 12px;
   bottom: 8px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #94a3b8;
   transition: color 0.3s ease;
 }
@@ -9797,7 +9797,7 @@ html.dark .support-help-tip {
   background: #fef3c7;
   color: #b45309;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
 }
 
@@ -9819,7 +9819,7 @@ html.dark .support-help-tip {
   background: #d1fae5;
   color: #065f46;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   animation: savedAppear 0.4s ease;
 }
@@ -9869,7 +9869,7 @@ html.dark .support-help-tip {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: var(--fs-body);
   transition: all 0.3s ease;
 }
 
@@ -10100,7 +10100,7 @@ html.dark .support-help-tip {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   flex-shrink: 0;
 }
 
@@ -10109,14 +10109,14 @@ html.dark .support-help-tip {
 }
 
 .toast-title {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 2px;
 }
 
 .toast-message {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 
@@ -10132,7 +10132,7 @@ html.dark .support-help-tip {
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  font-size: 16px;
+  font-size: var(--fs-body);
 }
 
 .toast-close:hover {
@@ -10288,11 +10288,11 @@ html {
   }
   
   .hero-greeting h1 {
-    font-size: 24px;
+    font-size: var(--fs-headline);
   }
   
   .hero-greeting .greeting-icon {
-    font-size: 20px;
+    font-size: var(--fs-title);
   }
   
   .hero-summary {
@@ -10320,7 +10320,7 @@ html {
   }
   
   .quick-actions h2 {
-    font-size: 20px;
+    font-size: var(--fs-title);
   }
   
   .quick-actions .btn {
@@ -10380,7 +10380,7 @@ html {
   }
   
   .analysis-prompt h3 {
-    font-size: 20px;
+    font-size: var(--fs-title);
   }
   
   .analysis-icon {
@@ -10419,7 +10419,7 @@ html {
   }
   
   .category-card h4 {
-    font-size: 14px;
+    font-size: var(--fs-body-sm);
   }
   
   .stepper {
@@ -10435,11 +10435,11 @@ html {
   .stepper-step-number {
     width: 32px;
     height: 32px;
-    font-size: 14px;
+    font-size: var(--fs-body-sm);
   }
   
   .stepper-step-label {
-    font-size: 11px;
+    font-size: var(--fs-caption);
   }
 }
 
@@ -10545,7 +10545,7 @@ html {
   .modal-close {
     width: 44px;
     height: 44px;
-    font-size: 24px;
+    font-size: var(--fs-headline);
   }
 }
 
@@ -10556,11 +10556,11 @@ html {
   }
   
   .page-title-text h1 {
-    font-size: 24px;
+    font-size: var(--fs-headline);
   }
   
   .page-title-text p {
-    font-size: 14px;
+    font-size: var(--fs-body-sm);
   }
   
   .page-title-icon {
@@ -10584,7 +10584,7 @@ html {
   input[type="password"],
   textarea,
   select {
-    font-size: 16px; /* Previene zoom en iOS */
+    font-size: var(--fs-body); /* Previene zoom en iOS */
   }
   
   .btn {
@@ -10617,7 +10617,7 @@ html {
   }
   
   .breadcrumbs {
-    font-size: 12px;
+    font-size: var(--fs-caption);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     padding: 8px 0;
@@ -10635,11 +10635,11 @@ html {
   }
   
   .hero-greeting h1 {
-    font-size: 20px;
+    font-size: var(--fs-title);
   }
   
   .hero-greeting .greeting-icon {
-    font-size: 18px;
+    font-size: var(--fs-subtitle);
   }
   
   .category-grid {
@@ -10652,11 +10652,11 @@ html {
   }
   
   .page-title-text h1 {
-    font-size: 20px;
+    font-size: var(--fs-title);
   }
   
   .quick-actions h2 {
-    font-size: 18px;
+    font-size: var(--fs-subtitle);
   }
   
   .dashboard-header {
@@ -10731,15 +10731,15 @@ html {
   .action-card .action-icon {
     width: 48px;
     height: 48px;
-    font-size: 24px;
+    font-size: var(--fs-headline);
   }
   
   .action-card h3 {
-    font-size: 18px;
+    font-size: var(--fs-subtitle);
   }
   
   .action-card p {
-    font-size: 13px;
+    font-size: var(--fs-body-sm);
   }
   
   .stat-card {
@@ -10749,15 +10749,15 @@ html {
   .stat-card .stat-icon {
     width: 48px;
     height: 48px;
-    font-size: 20px;
+    font-size: var(--fs-title);
   }
   
   .stat-value {
-    font-size: 24px;
+    font-size: var(--fs-headline);
   }
   
   .stat-label {
-    font-size: 13px;
+    font-size: var(--fs-body-sm);
   }
   
   /* Mejorar legibilidad en móviles */
@@ -10809,7 +10809,7 @@ html {
   }
   
   .hero-greeting h1 {
-    font-size: 22px;
+    font-size: var(--fs-title);
   }
   
   .stats-cards {
@@ -10850,7 +10850,7 @@ html {
   right: 2px;
   width: 18px;
   height: 18px;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   border-width: 2px;
 }
 
@@ -10914,7 +10914,7 @@ html {
 }
 
 .clinic-shell > .header.scrolled .nav-brand h1 {
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   background: none;
   background-clip: unset;
   -webkit-background-clip: unset;
@@ -10933,7 +10933,7 @@ html {
 }
 
 .clinic-shell > .header.scrolled .nav-brand-subtitle {
-  font-size: 10px;
+  font-size: var(--fs-caption);
   line-height: 1.2;
   color: #475569 !important;
   opacity: 1;
@@ -10942,7 +10942,7 @@ html {
 }
 
 .clinic-shell > .header.scrolled .nav-brand-subsubtitle {
-  font-size: 9px;
+  font-size: var(--fs-caption);
   line-height: 1.2;
   color: #64748b !important;
   opacity: 1;
@@ -11037,12 +11037,12 @@ html {
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
   color: #166534;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .clinic-admin-actions {
@@ -11078,7 +11078,7 @@ html {
 }
 
 .clinic-admin-users-count {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-admin-users-toolbar {
@@ -11106,7 +11106,7 @@ html {
   display: inline-block;
   padding: 2px 10px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   background: #eff6ff;
   color: #1d4ed8;
@@ -11151,7 +11151,7 @@ html {
   display: inline-block;
   padding: 2px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -11178,7 +11178,7 @@ html {
 
 .clinic-admin-cedula-sep {
   margin-top: 4px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   max-width: 180px;
   line-height: 1.3;
 }
@@ -11194,7 +11194,7 @@ html {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #2563eb;
   text-decoration: none;
@@ -11336,7 +11336,7 @@ html {
 
 .clinic-admin-history-detail-label {
   display: block;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #64748b;
   margin-bottom: 2px;
@@ -11351,7 +11351,7 @@ html {
   white-space: pre-wrap;
   word-break: break-word;
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   line-height: 1.5;
   max-height: 280px;
   overflow: auto;
@@ -11359,7 +11359,7 @@ html {
 
 .clinic-admin-history-no-analysis {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
 }
 
 @media (max-width: 640px) {
@@ -11379,13 +11379,13 @@ html {
 
 .clinic-admin-history-table th,
 .clinic-admin-history-table td {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   vertical-align: top;
 }
 
 .clinic-admin-history-id {
   white-space: nowrap;
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 
 .clinic-admin-history-date {
@@ -11403,7 +11403,7 @@ html {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -11430,7 +11430,7 @@ html {
 
 .clinic-admin-support-table th,
 .clinic-admin-support-table td {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   vertical-align: top;
 }
 
@@ -11443,14 +11443,14 @@ html {
 }
 
 .clinic-admin-support-email {
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 
 .clinic-admin-support-status {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
 }
 
@@ -11486,7 +11486,7 @@ html {
 }
 
 .clinic-admin-support-select {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   padding: 6px 8px;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
@@ -11519,7 +11519,7 @@ html {
 }
 
 .clinic-admin-support-msg-meta {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: #64748b;
   margin-bottom: 6px;
 }
@@ -11529,7 +11529,7 @@ html {
   white-space: pre-wrap;
   word-break: break-word;
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
 }
 
@@ -11545,7 +11545,7 @@ html {
   border-radius: 8px;
   padding: 10px 12px;
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   resize: vertical;
 }
 
@@ -11574,7 +11574,7 @@ html {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
+  font-size: var(--fs-body);
 }
 
 .clinic-dashboard-list {
@@ -11603,7 +11603,7 @@ html {
 
 .clinic-dashboard-reason {
   margin-top: 4px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-dashboard-list-actions {
@@ -11618,7 +11618,7 @@ html {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   background: #dbeafe;
   color: #1d4ed8;
@@ -11639,7 +11639,7 @@ html {
   border-radius: 10px;
   background: #fff;
   color: #0f172a;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
@@ -11715,7 +11715,7 @@ html {
 
 .clinic-dashboard-cds-sub {
   margin: 4px 0 0;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: rgba(12, 45, 77, 0.5);
   font-weight: 400;
 }
@@ -11749,7 +11749,7 @@ html {
 }
 
 .clinic-dashboard-unified .clinic-dashboard-summary .today-title {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -11757,7 +11757,7 @@ html {
 }
 
 .clinic-dashboard-unified .clinic-dashboard-summary .today-subtitle {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 
@@ -11770,14 +11770,14 @@ html {
 }
 
 .clinic-dashboard-unified .pill-label {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #94a3b8;
 }
 
 .clinic-dashboard-unified .pill-value {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #0f172a;
 }
@@ -11817,7 +11817,7 @@ html {
   color: #2563eb;
   box-shadow: none !important;
   animation: none !important;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   margin: 0;
 }
 
@@ -11825,13 +11825,13 @@ html {
   background: none !important;
   -webkit-text-fill-color: #0f172a !important;
   color: #0f172a !important;
-  font-size: 28px;
+  font-size: var(--fs-display);
   font-weight: 800;
   line-height: 1.1;
 }
 
 .clinic-dashboard-unified .stat-card.clinic-report-kpi .stat-content p {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
   font-weight: 600;
   margin: 0;
@@ -11844,7 +11844,7 @@ html {
 }
 
 .clinic-dashboard-unified .stat-card.clinic-report-kpi .stat-trend {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #94a3b8;
   margin-top: 4px;
 }
@@ -11911,7 +11911,7 @@ html {
 .clinic-dashboard-unified .action-card.clinic-dashboard-quick-btn h3 {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 14px !important;
+  font-size: var(--fs-body-sm) !important;
   font-weight: 600 !important;
   margin: 0 !important;
   line-height: 1.25 !important;
@@ -11933,7 +11933,7 @@ html {
   margin-left: auto;
   flex-shrink: 0;
   align-self: center;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   padding: 3px 8px;
   border-radius: 999px;
   line-height: 1.2;
@@ -11946,7 +11946,7 @@ html {
 
 .clinic-dashboard-unified .dashboard-block-head p {
   margin: 0 0 14px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 
@@ -11958,7 +11958,7 @@ html {
 
 .clinic-dashboard-unified .tabs-trigger {
   border-radius: 8px 8px 0 0;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #64748b;
 }
@@ -11992,7 +11992,7 @@ html {
 
 .clinic-dashboard-unified .consultation-info h4 {
   color: #0f172a;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-dashboard-unified .keyboard-hints {
@@ -12000,7 +12000,7 @@ html {
   border-radius: 8px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
 }
 
@@ -12059,7 +12059,7 @@ html {
 
 .dashboard-embedded-title {
   margin: 0;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   font-weight: 700;
   color: #0f172a;
 }
@@ -12080,7 +12080,7 @@ html {
 
 .clinic-requests-panel h3 {
   margin: 0 0 12px;
-  font-size: 15px;
+  font-size: var(--fs-body);
 }
 
 .clinic-requests-list {
@@ -12157,19 +12157,19 @@ html {
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-inventory-history-item time {
   display: block;
   margin-top: 4px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 
 .clinic-badge-warning {
   display: inline-block;
   margin-left: 6px;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   padding: 1px 6px;
   border-radius: 999px;
@@ -12200,7 +12200,7 @@ html {
 .clinic-invoice-detail-list {
   margin: 12px 0 0;
   padding-left: 18px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-checkbox-row {
@@ -12208,7 +12208,7 @@ html {
   align-items: flex-start;
   gap: 10px;
   margin: 12px 0;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #475569;
   cursor: pointer;
 }
@@ -12255,7 +12255,7 @@ html {
 
 .clinic-sidebar-title {
   display: block;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   text-transform: none;
   letter-spacing: -0.01em;
@@ -12264,7 +12264,7 @@ html {
 
 .clinic-sidebar-org {
   display: block;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #1e293b;
   margin-top: 4px;
@@ -12284,7 +12284,7 @@ html {
   min-height: 2.75rem;
   padding: 10px 12px;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   text-decoration: none;
   transition: filter 0.15s ease, box-shadow 0.15s ease;
@@ -12328,7 +12328,7 @@ html {
   margin-left: auto;
   padding: 2px 8px;
   border-radius: 8px;
-  font-size: 0.6875rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: -0.01em;
   text-transform: none;
@@ -12371,7 +12371,7 @@ html {
   border-radius: 999px;
   background: #ef4444;
   color: #fff;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   line-height: 18px;
   text-align: center;
@@ -12408,7 +12408,7 @@ html {
 .clinic-page-header p {
   margin: 0;
   color: #64748b;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-toolbar {
@@ -12452,7 +12452,7 @@ html {
 .clinic-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-table th,
@@ -12463,7 +12463,7 @@ html {
 }
 
 .clinic-table th {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: #64748b;
@@ -12519,7 +12519,7 @@ html {
 
 .clinic-dialog-subtitle {
   margin: 6px 0 0;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #64748b;
   font-weight: 400;
   line-height: 1.4;
@@ -12551,7 +12551,7 @@ html {
 
 .clinic-form-section-label {
   margin: 4px 0 10px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -12604,7 +12604,7 @@ html {
 
 .clinic-report-subtitle {
   margin: 16px 0 8px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #64748b;
 }
@@ -12645,7 +12645,7 @@ html {
 }
 
 .clinic-report-kpi-label {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: #64748b;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -12654,7 +12654,7 @@ html {
 }
 
 .clinic-report-kpi-value {
-  font-size: 28px;
+  font-size: var(--fs-display);
   font-weight: 800;
   color: #0c2d4d;
   line-height: 1.1;
@@ -12662,7 +12662,7 @@ html {
 
 .clinic-report-kpi-hint {
   margin-top: 4px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #64748b;
 }
 
@@ -12690,7 +12690,7 @@ html {
   align-items: center;
   gap: 8px;
   margin: 0 0 14px;
-  font-size: 16px;
+  font-size: var(--fs-body);
   color: #0c2d4d;
 }
 
@@ -12706,7 +12706,7 @@ html {
   justify-content: space-between;
   padding: 10px 0;
   border-bottom: 1px solid #f1f5f9;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #334155;
 }
 
@@ -12716,7 +12716,7 @@ html {
 
 .clinic-report-note {
   margin: 12px 0 0;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #64748b;
 }
 
@@ -12743,7 +12743,7 @@ html {
 
 .clinic-tools-card-head h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: var(--fs-subtitle);
   color: #0f172a;
 }
 
@@ -12763,7 +12763,7 @@ html {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #166534;
 }
 
@@ -12827,7 +12827,7 @@ html {
 }
 
 .clinic-agenda-range {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #334155;
   min-width: 140px;
@@ -12860,7 +12860,7 @@ html {
   justify-content: space-between;
   padding: 10px 12px;
   border-bottom: 1px solid #f1f5f9;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-agenda-day-body {
@@ -12872,7 +12872,7 @@ html {
 }
 
 .clinic-agenda-empty {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #94a3b8;
   text-align: center;
   padding: 16px 8px;
@@ -12903,19 +12903,19 @@ html {
 }
 
 .clinic-agenda-time {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   color: #1e40af;
 }
 
 .clinic-agenda-patient {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #0f172a;
 }
 
 .clinic-agenda-status {
-  font-size: 10px;
+  font-size: var(--fs-caption);
   color: #64748b;
 }
 
@@ -12928,7 +12928,7 @@ html {
 
 .clinic-detail-grid p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-detail-actions {
@@ -12940,7 +12940,7 @@ html {
 
 .clinic-timeline h3 {
   margin: 0 0 12px;
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: #0f172a;
 }
@@ -12970,13 +12970,13 @@ html {
 }
 
 .clinic-timeline-folio {
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #1e40af;
 }
 
 .clinic-timeline-status {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 999px;
@@ -12996,20 +12996,20 @@ html {
 
 .clinic-timeline-date {
   margin: 0 0 6px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #64748b;
 }
 
 .clinic-timeline-motivo {
   margin: 0 0 6px;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #0f172a;
   line-height: 1.4;
 }
 
 .clinic-timeline-analysis {
   margin: 0 0 8px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #475569;
   line-height: 1.45;
 }
@@ -13030,7 +13030,7 @@ html {
 
 .clinic-timeline-unified .clinic-timeline-hint {
   margin: 0 0 12px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   line-height: 1.45;
   color: #475569;
   text-align: left;
@@ -13039,7 +13039,7 @@ html {
 
 .clinic-timeline-summary {
   margin-top: 4px !important;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #475569;
   text-align: left;
   padding: 0;
@@ -13049,7 +13049,7 @@ html {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -13075,20 +13075,20 @@ html {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   color: #5b21b6;
 }
 
 .clinic-timeline-linked-date {
   margin-left: 8px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #64748b;
 }
 
 .clinic-timeline-linked-analysis {
   margin: 4px 0 0;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: #475569;
   line-height: 1.4;
 }
@@ -13110,7 +13110,7 @@ html {
   padding: 12px 16px;
   border: none;
   background: transparent;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #0c4a6e;
   cursor: pointer;
@@ -13119,7 +13119,7 @@ html {
 
 .patient-antecedents-body {
   padding: 0 16px 16px;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
   color: #334155;
 }
 
@@ -13146,7 +13146,7 @@ html {
 
 .patient-antecedents-analysis {
   color: #475569;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   line-height: 1.45;
 }
 
@@ -13342,7 +13342,7 @@ html {
     border: 1px solid rgba(38, 91, 147, 0.28);
     background: #0c2d4d;
     color: #ffffff;
-    font-size: 14px;
+    font-size: var(--fs-body-sm);
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
@@ -13354,7 +13354,7 @@ html {
     min-width: 0;
     margin: 0;
     padding: 0 2px;
-    font-size: 13px;
+    font-size: var(--fs-body-sm);
     font-weight: 600;
     line-height: 1.3;
     color: #0c2d4d;
@@ -13402,7 +13402,7 @@ html {
   }
 
   .clinic-page-header h1 {
-    font-size: 22px;
+    font-size: var(--fs-title);
   }
 
   .clinic-page-header .btn,
@@ -13434,7 +13434,7 @@ html {
   .clinic-table th,
   .clinic-table td {
     padding: 10px 12px;
-    font-size: 13px;
+    font-size: var(--fs-body-sm);
   }
 
   .clinic-agenda-nav {
@@ -13576,11 +13576,11 @@ html {
 
   .clinic-sidebar-link {
     padding: 12px 14px;
-    font-size: 15px;
+    font-size: var(--fs-body);
   }
 
   .clinic-page-header h1 {
-    font-size: 20px;
+    font-size: var(--fs-title);
   }
 
   .support-chat-panel {

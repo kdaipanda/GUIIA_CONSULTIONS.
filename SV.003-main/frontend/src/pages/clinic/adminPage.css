@@ -22,7 +22,7 @@
 
 .clinic-admin-kpi-sub {
   margin-top: 4px;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   line-height: 1.3;
 }
 
@@ -63,7 +63,7 @@
 }
 
 .clinic-admin-presence-text strong {
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: var(--admin-navy);
 }
@@ -74,7 +74,7 @@
 }
 
 .clinic-admin-presence-text .clinic-muted {
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
 }
 
 .clinic-admin-metrics {
@@ -103,21 +103,21 @@
   align-items: center;
   gap: 0.4rem;
   margin: 0 0 0.85rem;
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: var(--admin-navy);
 }
 
 .clinic-admin-metrics-block h4 {
   margin: 0 0 0.5rem;
-  font-size: 0.8rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #475569;
 }
 
 .clinic-admin-metric-change {
   margin-top: 0.25rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #64748b;
 }
@@ -132,7 +132,7 @@
 
 .clinic-admin-plan-expired {
   margin-top: 0.25rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #b91c1c;
 }
@@ -190,7 +190,7 @@
   justify-content: space-between;
   gap: 0.75rem;
   align-items: baseline;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   padding: 0.35rem 0;
   border-bottom: 1px solid rgba(38, 91, 147, 0.08);
 }
@@ -206,7 +206,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: var(--admin-blue);
   text-decoration: none;
@@ -234,7 +234,7 @@
 
 .clinic-admin-metrics-empty {
   margin: 0.5rem 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-admin-whatsapp-promo .clinic-admin-users-head h2 {
@@ -295,13 +295,13 @@
 
 .clinic-admin-consultation-usage strong {
   color: var(--admin-navy);
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.25;
 }
 
 .clinic-admin-consultation-usage span {
   color: #52657a;
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   line-height: 1.25;
 }
 
@@ -313,7 +313,7 @@
   display: inline-flex;
   padding: 3px 8px;
   border-radius: 12px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 600;
 }
 
@@ -353,13 +353,13 @@
 
 .clinic-admin-lead-detail p {
   margin: 0 0 0.5rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-admin-trial-survey-stars {
   color: #f59e0b;
   letter-spacing: 0.05em;
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
 }
 
 .clinic-admin-skeleton-block {
@@ -369,7 +369,7 @@
 .clinic-admin-loading-hint {
   margin: 12px 0 0;
   text-align: center;
-  font-size: 13px;
+  font-size: var(--fs-body-sm);
 }
 
 .clinic-admin-cedula-preview-meta {
@@ -488,7 +488,7 @@
   }
 
   .clinic-admin-cedula-preview-dialog [class*="DialogTitle"] {
-    font-size: 1rem;
+    font-size: var(--fs-body);
     padding-right: 1.75rem;
     text-align: left;
   }

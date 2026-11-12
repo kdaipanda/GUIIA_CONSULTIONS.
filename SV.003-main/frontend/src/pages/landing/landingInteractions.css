@@ -558,7 +558,7 @@
     width: 100%;
     justify-content: center;
     min-height: 2.75rem;
-    font-size: 0.875rem;
+    font-size: var(--fs-body-sm);
   }
 
   .landing-device-mockup,
@@ -607,7 +607,7 @@
 
 .landing-colleagues-disclaimer {
   margin-top: 1rem;
-  font-size: 0.7rem;
+  font-size: var(--fs-caption);
   color: #64748b;
   text-align: center;
 }

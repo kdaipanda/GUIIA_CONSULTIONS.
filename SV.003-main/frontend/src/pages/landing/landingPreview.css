@@ -123,7 +123,7 @@
 
 .landing-app-preview-page .page-title-text p {
   margin: 0.15rem 0 0;
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   line-height: 1.35;
   color: #475569;
 }
@@ -169,7 +169,7 @@
 
 .landing-app-preview-page .form-section h3 {
   margin: 0 0 0.75rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   letter-spacing: -0.015em;
   color: #0c2d4d;
@@ -194,7 +194,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 0.35rem;
-  font-size: 1.25rem;
+  font-size: var(--fs-title);
   background: rgba(38, 91, 147, 0.1);
   border: 1px solid rgba(38, 91, 147, 0.18);
 }
@@ -253,7 +253,7 @@
 .landing-app-preview-page .form-group label {
   display: block;
   margin-bottom: 0.3rem;
-  font-size: 0.7rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: #265b93;
@@ -267,7 +267,7 @@
   border-radius: 0.45rem;
   background: #f8fafc;
   color: #0f172a;
-  font-size: 0.85rem;
+  font-size: var(--fs-body-sm);
   box-shadow: none;
 }
 
@@ -356,7 +356,7 @@
 }
 
 .landing-preview-step-num {
-  font-size: 0.75rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -366,7 +366,7 @@
 /* Species chips */
 .landing-preview-species-eyebrow {
   margin: 0 0 0.75rem;
-  font-size: 0.7rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: #265b93;
@@ -497,7 +497,7 @@
 
 .landing-app-preview-page .sidebar-value {
   margin-top: 0;
-  font-size: 0.85rem;
+  font-size: var(--fs-body-sm);
   font-weight: 650;
   color: #0c2d4d;
   text-align: left;
@@ -554,7 +554,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.45rem 0.65rem;
-  font-size: 0.8rem;
+  font-size: var(--fs-caption);
   color: #475569;
 }
 
@@ -571,7 +571,7 @@
 }
 
 .landing-preview-plan-label {
-  font-size: 0.78rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: #265b93;
@@ -590,7 +590,7 @@
   border: 1px solid rgba(12, 45, 77, 0.1);
   border-radius: 0.45rem;
   background: #ffffff;
-  font-size: 0.78rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: #0c2d4d;
@@ -665,7 +665,7 @@
 .landing-preview-vitals-grid strong {
   display: block;
   margin-top: 0.15rem;
-  font-size: 0.78rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #0c2d4d;
@@ -685,7 +685,7 @@
   border-radius: 0.4rem;
   background: rgba(14, 116, 144, 0.06);
   border: 1px solid rgba(14, 116, 144, 0.14);
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: #0c2d4d;
@@ -735,7 +735,7 @@
   align-items: center;
   padding: 0.35rem 0;
   border-top: 1px solid rgba(12, 45, 77, 0.06);
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
 }
 
 .landing-preview-recent-list li:first-child {

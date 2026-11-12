@@ -1,0 +1,96 @@
+/**
+ * Escala tipográfica GUIAA (dp → rem).
+ *
+ * En Android/WebView, 1dp ≈ 1 CSS px a densidad de referencia.
+ * Usamos rem para respetar el tamaño de fuente del sistema (accesibilidad).
+ *
+ * Escala Material-compatible (sp/dp):
+ *   12 caption · 14 body-sm · 16 body · 18 subtitle · 20 title · 24 headline · 28 display
+ */
+:root {
+  --dp: 1px;
+  --fs-caption: calc(12 * var(--dp)); /* 12dp */
+  --fs-body-sm: calc(14 * var(--dp)); /* 14dp */
+  --fs-body: calc(16 * var(--dp)); /* 16dp — mínimo cómodo para lectura */
+  --fs-subtitle: calc(18 * var(--dp)); /* 18dp */
+  --fs-title: calc(20 * var(--dp)); /* 20dp */
+  --fs-headline: calc(24 * var(--dp)); /* 24dp */
+  --fs-display: calc(28 * var(--dp)); /* 28dp */
+
+  /* Alias semánticos */
+  --fs-label: var(--fs-caption);
+  --fs-helper: var(--fs-caption);
+  --fs-input: var(--fs-body-sm);
+  --fs-button: var(--fs-body-sm);
+  --fs-nav: var(--fs-body-sm);
+  --fs-section: var(--fs-title);
+  --fs-page: var(--fs-headline);
+
+  --lh-tight: 1.25;
+  --lh-body: 1.5;
+  --lh-relaxed: 1.65;
+}
+
+/* rem anclado a 16px: 1rem = 16dp. Respeta zoom/tamaño del SO. */
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+/* En app nativa / móvil: subir un poco el piso de lectura */
+@media (max-width: 1023px) {
+  :root {
+    --fs-caption: calc(13 * var(--dp));
+    --fs-body-sm: calc(15 * var(--dp));
+    --fs-body: calc(16 * var(--dp));
+    --fs-subtitle: calc(18 * var(--dp));
+    --fs-title: calc(20 * var(--dp));
+    --fs-headline: calc(24 * var(--dp));
+  }
+}
+
+html.guiaa-native-app {
+  /* Capacitor: densidad estable; el usuario puede ampliar desde Ajustes del SO */
+  --dp: 1px;
+}
+
+html.guiaa-native-app body {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+/* Utilidades tipográficas (clínica / formularios) */
+.fs-caption {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-tight);
+}
+.fs-body-sm {
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body);
+}
+.fs-body {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.fs-subtitle {
+  font-size: var(--fs-subtitle);
+  line-height: var(--lh-tight);
+}
+.fs-title {
+  font-size: var(--fs-title);
+  line-height: var(--lh-tight);
+}
+.fs-headline {
+  font-size: var(--fs-headline);
+  line-height: var(--lh-tight);
+}
+.fs-display {
+  font-size: var(--fs-display);
+  line-height: 1.15;
+}

@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import "./styles/guiaaColorSystem.css";
+@import "./styles/typeScale.css";
 @import "./styles/liquidGlass.css";
 @import "./styles/darkModeGlass.css";
 
