@@ -532,6 +532,7 @@ async def create_owner_consultation(
         "category": category,
         "form_data": form_data,
         "detalle_paciente": detalle or "Ver formulario clínico de la especie.",
+        "credit": {"policy": "on_analysis", "charged_at": None},
     }
     new_row = {
         "id": consultation_id,
@@ -546,18 +547,8 @@ async def create_owner_consultation(
     if err_ins:
         raise HTTPException(status_code=500, detail=f"Error guardando consulta: {err_ins}")
 
-    new_sessions = sessions
-    if unlimited:
-        new_sessions = 999999
-    else:
-        new_sessions = max(0, sessions - 1)
-        err_prof = update_profile(owner_id, {"owner_sessions_remaining": new_sessions})
-        if err_prof:
-            print(f"[WARN] No se pudo descontar owner_sessions_remaining: {err_prof}")
-            new_sessions = sessions
-
     serialized = _serialize_owner_consultation(inserted or new_row)
-    serialized["owner_sessions_remaining"] = new_sessions
+    serialized["owner_sessions_remaining"] = 999999 if unlimited else sessions
     serialized["owner_unlimited"] = unlimited
     return serialized
 
@@ -569,7 +560,7 @@ async def analyze_owner_consultation(
 ):
     """Análisis orientativo para dueño — motor LLM con prompt B2C (no CDS Premium)."""
     owner_id = _require_owner_id(x_veterinarian_id)
-    await _require_owner_profile(owner_id)
+    profile = await _require_owner_profile(owner_id)
 
     row, err = owner_db.get_owner_consultation(consultation_id)
     if err:
@@ -585,6 +576,23 @@ async def analyze_owner_consultation(
         }
 
     payload = row.get("payload") or {}
+    credit = dict(payload.get("credit") or {})
+    charge_on_success = (
+        (credit.get("policy") or "").strip() == "on_analysis"
+        and not credit.get("charged_at")
+        and not account_access.has_unlimited_owner_access(profile)
+    )
+    if charge_on_success:
+        fresh_profile, profile_err = get_profile(owner_id)
+        if profile_err:
+            raise HTTPException(status_code=500, detail=f"Error perfil: {profile_err}")
+        sessions = int((fresh_profile or {}).get("owner_sessions_remaining") or 0)
+        if sessions <= 0:
+            raise HTTPException(
+                status_code=403,
+                detail="No tienes sesiones pagadas. Compra una consulta antes de continuar.",
+            )
+
     form_data = payload.get("form_data") or {}
     category = payload.get("category") or form_data.get("especie") or "mascota"
 
@@ -626,6 +634,36 @@ Prioriza urgencias reales con nota crítica breve si aplica."""
         ) from exc
 
     now = datetime.now(timezone.utc).isoformat()
+    debited_sessions_before = None
+    if charge_on_success:
+        latest_profile, profile_err = get_profile(owner_id)
+        if profile_err:
+            raise HTTPException(status_code=500, detail=f"Error perfil: {profile_err}")
+        current_sessions = int((latest_profile or {}).get("owner_sessions_remaining") or 0)
+        if current_sessions <= 0:
+            raise HTTPException(
+                status_code=403,
+                detail="No tienes sesiones pagadas. Compra una consulta antes de continuar.",
+            )
+        debited_sessions_before = current_sessions
+        err_prof = update_profile(
+            owner_id,
+            {"owner_sessions_remaining": max(0, current_sessions - 1)},
+        )
+        if err_prof:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error descontando sesión pagada: {err_prof}",
+            )
+        payload = {
+            **payload,
+            "credit": {
+                **credit,
+                "policy": "on_analysis",
+                "charged_at": now,
+            },
+        }
+
     err_upd = owner_db.update_owner_consultation(
         consultation_id,
         {
@@ -633,9 +671,20 @@ Prioriza urgencias reales con nota crítica breve si aplica."""
             "status": "completed",
             "completed_at": now,
             "updated_at": now,
+            "payload": payload,
         },
     )
     if err_upd:
+        if debited_sessions_before is not None:
+            refund_err = update_profile(
+                owner_id,
+                {"owner_sessions_remaining": debited_sessions_before},
+            )
+            if refund_err:
+                print(
+                    "[ERROR] No se pudo restaurar owner_sessions_remaining "
+                    f"tras fallo guardando análisis {consultation_id}: {refund_err}"
+                )
         raise HTTPException(status_code=500, detail=f"Error guardando análisis: {err_upd}")
 
     refreshed, _ = owner_db.get_owner_consultation(consultation_id)
