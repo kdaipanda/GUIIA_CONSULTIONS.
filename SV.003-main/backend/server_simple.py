@@ -3099,7 +3099,23 @@ Por favor, genera un análisis clínico completo."""
                 {"consultations_remaining": max(0, current_remaining - 1)},
             )
             if err_prof:
-                print(f"[WARN] No se pudo descontar consulta tras análisis: {err_prof}")
+                rollback_err = update_consultation(
+                    consultation_id,
+                    {
+                        "analysis": consultation.get("analysis"),
+                        "status": consultation_status,
+                        "payload": payload,
+                    },
+                )
+                if rollback_err:
+                    print(
+                        "[WARN] No se pudo revertir análisis tras fallo de débito: "
+                        f"{rollback_err}"
+                    )
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Error descontando consulta: {err_prof}",
+                )
 
         profile_after, _ = get_profile(vet_id)
         return {
@@ -3109,6 +3125,8 @@ Por favor, genera un análisis clínico completo."""
             ),
         }
 
+    except HTTPException:
+        raise
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except RuntimeError as e:
