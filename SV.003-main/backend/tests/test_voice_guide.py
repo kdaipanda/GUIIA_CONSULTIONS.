@@ -1,8 +1,13 @@
 """Tests unitarios — extracción regla-based guía de voz Plumitas."""
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+
+import voice_guide
 from voice_guide import (
     PERROS_GUIDE_FIELDS,
     extract_value_rule_based,
     _field_by_id,
+    voice_guide_router,
 )
 
 
@@ -55,3 +60,34 @@ def test_repro_status():
 def test_habitat_maps_to_enum():
     assert extract_value_rule_based(_field("habitat"), "vive en casa")["value"] == "INTERIOR"
     assert extract_value_rule_based(_field("habitat"), "en el patio")["value"] == "EXTERIOR"
+
+
+def test_speak_endpoint_rate_limits_before_tts(monkeypatch):
+    app = FastAPI()
+    app.include_router(voice_guide_router)
+    calls = []
+
+    monkeypatch.setattr(
+        voice_guide.auth_security,
+        "resolve_authenticated_vet_id",
+        lambda _header=None: "vet-123",
+    )
+
+    def fake_check_rate_limit(request, scope, identifier="", *, max_attempts=None, window_seconds=None):
+        calls.append((scope, identifier, max_attempts, window_seconds))
+        if scope == "voice_guide_speak_user":
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=429, detail="limited")
+
+    monkeypatch.setattr(voice_guide.rate_limit, "check_rate_limit", fake_check_rate_limit)
+
+    async def fail_tts(*args, **kwargs):
+        raise AssertionError("TTS should not run after rate limiting")
+
+    monkeypatch.setattr(voice_guide, "synthesize_speech", fail_tts)
+
+    response = TestClient(app).post("/api/voice-guide/speak", json={"text": "hola"})
+
+    assert response.status_code == 429
+    assert calls == [("voice_guide_speak_user", "vet-123", 40, 600)]
