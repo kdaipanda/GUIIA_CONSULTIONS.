@@ -38,13 +38,12 @@ export function getAuthHeaders(veterinarianId, extra = {}) {
   const { skipContentType, ...headerFields } = extra;
   const headers = { ...headerFields };
   const token = getAccessToken();
-  if (token) {
+  const flowNonce = getCedulaFlowNonce();
+  // Flujo cédula: nunca mezclar Bearer viejo con nonce (bloqueaba /api/cedula/skip).
+  if (flowNonce) {
+    headers["x-cedula-flow-nonce"] = flowNonce;
+  } else if (token) {
     headers.Authorization = `Bearer ${token}`;
-  } else {
-    const flowNonce = getCedulaFlowNonce();
-    if (flowNonce) {
-      headers["x-cedula-flow-nonce"] = flowNonce;
-    }
   }
   if (veterinarianId) {
     headers["x-veterinarian-id"] = veterinarianId;
@@ -65,13 +64,13 @@ export function persistAuthFromResponse(data) {
     cedula_flow_expires_in,
     ...profile
   } = data;
-  if (access_token) {
-    storeAccessToken(access_token);
-    clearCedulaFlowNonce();
-  }
+  // Mutuamente excluyentes: sesión normal vs. flujo de cédula.
   if (cedula_flow_nonce) {
     storeCedulaFlowNonce(cedula_flow_nonce);
     clearAccessToken();
+  } else if (access_token) {
+    storeAccessToken(access_token);
+    clearCedulaFlowNonce();
   }
   const hasProfileFields =
     profile.id || profile.email || profile.veterinarian_id || profile.status;

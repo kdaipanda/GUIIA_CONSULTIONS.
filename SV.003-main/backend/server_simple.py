@@ -213,17 +213,23 @@ async def security_middleware(request: Request, call_next):
     if path.startswith("/api/") and not auth_security.is_public_api_route(
         request.method, path
     ):
+        auth_error = None
         try:
             vet_id = auth_security.authenticate_http_request(request)
         except HTTPException as exc:
-            return JSONResponse(
-                status_code=exc.status_code,
-                content={"detail": exc.detail},
-            )
+            # En /api/cedula/* un Bearer viejo/inválido no debe impedir el nonce de flujo.
+            auth_error = exc
+            vet_id = None
+
         if not vet_id and not auth_security.allow_insecure_vet_header():
             flow_vet_id = auth_security.try_authenticate_cedula_flow_request(request)
             if flow_vet_id:
                 vet_id = flow_vet_id
+            elif auth_error is not None:
+                return JSONResponse(
+                    status_code=auth_error.status_code,
+                    content={"detail": auth_error.detail},
+                )
             else:
                 return JSONResponse(
                     status_code=401,
@@ -2964,12 +2970,12 @@ async def update_consultation_observations(
 
     payload = cons.get("payload") or {}
     payload["detalle_paciente"] = observations.detalle_paciente
+    # No enviar updated_at: la tabla consultations en prod no tiene esa columna (PGRST204).
     err_upd = update_consultation(
         consultation_id,
         {
             "payload": payload,
             "status": "in_progress",
-            "updated_at": datetime.now(timezone.utc).isoformat(),
         },
     )
     if err_upd:
