@@ -2978,6 +2978,29 @@ async def update_consultation_observations(
     return {"message": "Observaciones guardadas"}
 
 
+def _payload_with_charged_credit(
+    latest_payload: Any,
+    fallback_payload: Any,
+    fallback_credit: Any,
+    charged_at: str,
+) -> Dict[str, Any]:
+    """Marca el crédito cobrado preservando el payload más reciente de la consulta."""
+    base_payload = latest_payload if isinstance(latest_payload, dict) else None
+    if base_payload is None:
+        base_payload = fallback_payload if isinstance(fallback_payload, dict) else {}
+    payload_copy = dict(base_payload)
+
+    credit = payload_copy.get("credit")
+    if not isinstance(credit, dict):
+        credit = fallback_credit if isinstance(fallback_credit, dict) else {}
+
+    payload_copy["credit"] = {
+        **credit,
+        "charged_at": charged_at,
+    }
+    return payload_copy
+
+
 @app.post("/api/consultations/{consultation_id}/analyze")
 async def analyze_consultation(
     consultation_id: str,
@@ -3076,13 +3099,20 @@ Por favor, genera un análisis clínico completo."""
             "status": "completed",
         }
         if charge_on_success:
-            consultation_fields["payload"] = {
-                **payload,
-                "credit": {
-                    **credit,
-                    "charged_at": datetime.now(timezone.utc).isoformat(),
-                },
-            }
+            latest_consultation, err_latest = get_consultation_by_id(consultation_id)
+            if err_latest:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Error consultando consulta actualizada: {err_latest}",
+                )
+            charged_at = datetime.now(timezone.utc).isoformat()
+            latest_payload = (latest_consultation or {}).get("payload")
+            consultation_fields["payload"] = _payload_with_charged_credit(
+                latest_payload,
+                payload,
+                credit,
+                charged_at,
+            )
 
         err_upd = update_consultation(consultation_id, consultation_fields)
         if err_upd:
