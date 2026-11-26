@@ -675,7 +675,7 @@ def notify_user_cedula_upload_reminder(profile: dict) -> None:
 
 
 def notify_user_trial_credits_restored(profile: dict) -> Optional[str]:
-    """Avisa que se restauraron las 3 consultas de prueba."""
+    """Recuerda las 3 consultas de prueba y las funciones nuevas del consultorio (sin copy de IA)."""
     user_email = (profile.get("email") or "").strip()
     if not user_email:
         return "Sin email"
@@ -684,38 +684,70 @@ def notify_user_trial_credits_restored(profile: dict) -> Optional[str]:
     credits = int(profile.get("consultations_remaining") or 3)
     app_url = _frontend_url()
     login_url = f"{app_url}/login"
+    dashboard_url = f"{app_url}/app/dashboard"
     support_email = DEFAULT_SUPPORT_NOTIFY_EMAIL
 
-    email_subject = "[GUIAA] Te regalamos de nuevo 3 consultas de prueba"
+    email_subject = "[GUIAA] Tus 3 consultas de prueba te esperan — novedades del consultorio"
     text = (
         f"Hola {user_name},\n\n"
-        f"Queremos que pruebes GUIAA sin fricción: te restauramos "
-        f"{credits} consultas de prueba en tu cuenta.\n\n"
-        f"Email de tu cuenta: {user_email}\n"
+        f"Te dejamos listas {credits} consultas de prueba en tu cuenta de GUIAA "
+        f"para que las uses en casos reales de tu consultorio.\n\n"
+        f"Cuenta: {user_email}\n"
         f"Consultas disponibles: {credits}\n\n"
-        f"Entra y úsalas cuando quieras en una consulta real:\n{login_url}\n\n"
+        f"Además, ya puedes aprovechar estas funciones del software:\n"
+        f"- Agenda con citas y solicitudes de pacientes\n"
+        f"- Dueños, mascotas y expediente clínico\n"
+        f"- Inventario y alertas de stock bajo\n"
+        f"- Ventas del consultorio\n"
+        f"- Reportes clínicos\n"
+        f"- Historial de consultas clínicas\n"
+        f"- Formularios multiespecie\n"
+        f"- Laboratorio / estudios\n"
+        f"- Herramientas clínicas y centro de ayuda\n"
+        f"- Acceso desde celular (web y app)\n\n"
+        f"Entra aquí y prueba una consulta hoy:\n{login_url}\n"
+        f"Panel del consultorio:\n{dashboard_url}\n\n"
         f"Si tienes dudas, escríbenos a {support_email}.\n\n"
         f"— Equipo GUIAA\n"
     )
     html = f"""
-    <h2>🎁 Tus 3 consultas de prueba están de vuelta</h2>
-    <p>Hola {user_name},</p>
-    <p>
-      Queremos que pruebes <strong>GUIAA</strong> sin fricción: te restauramos
-      <strong>{credits} consultas de prueba</strong> en tu cuenta.
-    </p>
-    <ul>
-      <li><strong>Email:</strong> {user_email}</li>
-      <li><strong>Consultas disponibles:</strong> {credits}</li>
-    </ul>
-    <p>
-      Úsalas en una consulta clínica real cuando quieras.
-      <a href="{login_url}">Iniciar sesión en GUIAA</a>
-    </p>
-    <p style="color:#64748b;font-size:12px;">
-      ¿Dudas? Escríbenos a <a href="mailto:{support_email}">{support_email}</a>
-    </p>
-    <p style="color:#64748b;font-size:12px;">— Equipo GUIAA</p>
+    <div style="font-family:Segoe UI,Arial,sans-serif;color:#0c2d4d;line-height:1.5;max-width:560px;">
+      <h2 style="margin:0 0 12px;color:#0c2d4d;">Tus consultas de prueba están listas</h2>
+      <p style="margin:0 0 12px;">Hola {user_name},</p>
+      <p style="margin:0 0 16px;">
+        Te dejamos <strong>{credits} consultas de prueba</strong> en tu cuenta de
+        <strong>GUIAA</strong> para que las uses en casos reales de tu consultorio.
+      </p>
+      <ul style="margin:0 0 16px;padding-left:18px;">
+        <li><strong>Email:</strong> {user_email}</li>
+        <li><strong>Consultas disponibles:</strong> {credits}</li>
+      </ul>
+      <h3 style="margin:0 0 8px;font-size:16px;color:#265B93;">Novedades del software</h3>
+      <ul style="margin:0 0 20px;padding-left:18px;">
+        <li>Agenda con citas y solicitudes de pacientes</li>
+        <li>Dueños, mascotas y expediente clínico</li>
+        <li>Inventario y alertas de stock bajo</li>
+        <li>Ventas del consultorio</li>
+        <li>Reportes clínicos</li>
+        <li>Historial de consultas clínicas</li>
+        <li>Formularios multiespecie</li>
+        <li>Laboratorio / estudios</li>
+        <li>Herramientas clínicas y centro de ayuda</li>
+        <li>Acceso desde celular (web y app)</li>
+      </ul>
+      <p style="margin:0 0 8px;">
+        <a href="{login_url}" style="display:inline-block;background:#3d9b8f;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:600;">
+          Iniciar sesión y usar mis pruebas
+        </a>
+      </p>
+      <p style="margin:0 0 16px;font-size:13px;">
+        <a href="{dashboard_url}" style="color:#265B93;">Abrir el panel del consultorio</a>
+      </p>
+      <p style="color:#64748b;font-size:12px;margin:0;">
+        ¿Dudas? Escríbenos a <a href="mailto:{support_email}">{support_email}</a>
+      </p>
+      <p style="color:#64748b;font-size:12px;margin:8px 0 0;">— Equipo GUIAA</p>
+    </div>
     """
 
     err = send_email([user_email], email_subject, html, text)

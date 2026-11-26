@@ -24,7 +24,15 @@ from email_notifications import notify_user_trial_credits_restored, is_email_con
 from supabase_client import get_supabase_client, update_profile  # noqa: E402
 
 TRIAL_CREDITS = 3
-SKIP_EMAIL_SUFFIXES = (".invalid", ".local", "example.com", "test.com")
+SKIP_EMAIL_SUFFIXES = (
+    ".invalid",
+    ".local",
+    "example.com",
+    "test.com",
+    "guiaa.test",
+)
+# Dominios claramente inválidos / typos conocidos
+SKIP_EMAIL_EXACT_SUFFIXES = ("gmail.como",)
 
 
 def _fetch_all_profiles() -> list[dict]:
@@ -36,7 +44,7 @@ def _fetch_all_profiles() -> list[dict]:
             client.table("profiles")
             .select(
                 "id,email,nombre,membership_type,consultations_remaining,"
-                "cedula_verification_status,created_at"
+                "cedula_verification_status,account_kind,created_at"
             )
             .order("created_at", desc=False)
             .range(offset, offset + 999)
@@ -54,11 +62,20 @@ def _is_trial(profile: dict) -> bool:
     return not (profile.get("membership_type") or "").strip()
 
 
+def _is_veterinarian(profile: dict) -> bool:
+    kind = (profile.get("account_kind") or "veterinarian").strip().lower()
+    return kind in ("", "veterinarian")
+
+
 def _email_ok(email: str) -> bool:
     e = (email or "").strip().lower()
     if not e or "@" not in e:
         return False
-    return not any(e.endswith(suf) for suf in SKIP_EMAIL_SUFFIXES)
+    if any(e.endswith(suf) for suf in SKIP_EMAIL_SUFFIXES):
+        return False
+    if any(e.endswith(suf) for suf in SKIP_EMAIL_EXACT_SUFFIXES):
+        return False
+    return True
 
 
 def main() -> int:
@@ -85,7 +102,7 @@ def main() -> int:
     args = parser.parse_args()
 
     profiles = _fetch_all_profiles()
-    candidates = [p for p in profiles if _is_trial(p)]
+    candidates = [p for p in profiles if _is_trial(p) and _is_veterinarian(p)]
     if args.only_below_3:
         candidates = [
             p
@@ -94,7 +111,7 @@ def main() -> int:
         ]
 
     print(f"Perfiles totales: {len(profiles)}")
-    print(f"Candidatos trial a restaurar: {len(candidates)}")
+    print(f"Candidatos trial MVZ a restaurar: {len(candidates)}")
     print(f"Email configurado: {is_email_configured()}")
     print(f"Modo: {'DRY-RUN' if args.dry_run else 'EXECUTE'}")
     print()
@@ -109,7 +126,7 @@ def main() -> int:
         name = (p.get("nombre") or "").strip() or "(sin nombre)"
         before = int(p.get("consultations_remaining") or 0)
         pid = p.get("id")
-        print(f"  {email or '(sin email)'} | {name} | {before} → {TRIAL_CREDITS}")
+        print(f"  {email or '(sin email)'} | {name} | {before} -> {TRIAL_CREDITS}")
 
         if args.dry_run:
             continue
