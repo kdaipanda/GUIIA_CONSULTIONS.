@@ -101,8 +101,11 @@ export function canCreateConsultation(veterinarian, options = {}) {
   if (options.orgRole === "receptionist") return false;
   if (!veterinarian) return false;
 
-  const membershipType = veterinarian.membership_type?.toLowerCase();
-  const remaining = veterinarian.consultations_remaining ?? 0;
+  // Perfil incompleto/stub: no bloquear en UI; el API valida el cupo real.
+  if (veterinarian.consultations_remaining == null) return true;
+
+  const membershipType = veterinarian.membership_type?.toLowerCase() || null;
+  const remaining = Number(veterinarian.consultations_remaining ?? 0);
 
   // Cupo real: incluso Premium comercial descuenta; no tratar grant como ilimitado.
   if (membershipType && remaining > 0) return true;
@@ -127,7 +130,9 @@ export function isTrialExhausted(veterinarian, options = {}) {
   if (!veterinarian) return false;
   if (veterinarian.membership_source === "organization") return false;
   if (veterinarian.membership_type) return false;
-  return (veterinarian.consultations_remaining ?? 0) <= 0;
+  // Sin cupo hidratado todavía: no marcar agotado (evita falsos positivos del stub).
+  if (veterinarian.consultations_remaining == null) return false;
+  return Number(veterinarian.consultations_remaining) <= 0;
 }
 
 /**

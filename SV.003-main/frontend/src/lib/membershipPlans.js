@@ -213,6 +213,21 @@ export function getConsultationsLabel(planKey, pkg, billingCycle = "monthly") {
 
 export function getMembershipQuota(veterinarian, packages = DEFAULT_PACKAGES) {
   if (!veterinarian?.membership_type) {
+    // Cupo aún no hidratado: no marcar trial agotado (stub de auth).
+    if (veterinarian?.consultations_remaining == null) {
+      return {
+        planKey: "trial",
+        status: planT("quotaTrialPeriod"),
+        planName: planT("planNames.trial"),
+        consultations: TRIAL_CONSULTATION_LIMIT,
+        maxConsultations: TRIAL_CONSULTATION_LIMIT,
+        progress: 0,
+        color: "green",
+        speciesScope: "premium",
+        unlimited: false,
+        trialExhausted: false,
+      };
+    }
     const remaining = veterinarian?.consultations_remaining ?? 0;
     if (remaining > 0) {
       return {

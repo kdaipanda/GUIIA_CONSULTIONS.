@@ -34,16 +34,29 @@ export const useVet = () => {
 };
 
 function buildSupabaseVetStub(user) {
+  // Stub mínimo hasta /api/auth/profile. Nunca inventar membership_type:
+  // "basic" + sin cupo bloqueaba Nueva consulta (canCreateConsultation → false).
   return {
     id: user.id,
     nombre: user.email?.split("@")[0] || "usuario",
     email: user.email,
-    membership_type: "basic",
+    membership_type: null,
+    consultations_remaining: null,
   };
+}
+
+function isIncompleteAuthStub(profile) {
+  if (!profile?.id) return true;
+  if (profile.cedula_profesional) return false;
+  if (profile.consultations_remaining != null) return false;
+  if (profile.membership_source === "organization") return false;
+  if (profile.membership_type && profile.membership_type !== "basic") return false;
+  return !profile.especialidad;
 }
 
 function shouldKeepExistingProfile(prev, user) {
   if (!prev?.id) return false;
+  if (isIncompleteAuthStub(prev)) return false;
   if (getAccessToken()) return true;
   if (prev.membership_type && prev.membership_type !== "basic") return true;
   if (prev.membership_source === "organization") return true;
